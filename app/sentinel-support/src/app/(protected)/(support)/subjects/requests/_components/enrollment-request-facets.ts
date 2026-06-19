@@ -6,6 +6,7 @@ type EnrollmentRequestFacetsArgs = {
     departments: Array<{ id: string; name: string }>;
     courses: Array<{ id: string; title: string }>;
     sections: Array<{ id: string; name: string }>;
+    institutionOptions?: Array<{ label: string; value: string }>;
 };
 
 /**
@@ -15,8 +16,19 @@ export function buildEnrollmentRequestFacets({
     departments,
     courses,
     sections,
+    institutionOptions = [],
 }: EnrollmentRequestFacetsArgs): DataTableFacet[] {
-    return [
+    const facets: DataTableFacet[] = [];
+
+    if (institutionOptions.length > 0) {
+        facets.push({
+            columnKey: 'institution',
+            title: 'Institution',
+            options: institutionOptions,
+        });
+    }
+
+    facets.push(
         {
             columnKey: 'status',
             title: 'Status',
@@ -50,5 +62,7 @@ export function buildEnrollmentRequestFacets({
                 value: section.id,
             })),
         },
-    ];
+    );
+
+    return facets;
 }

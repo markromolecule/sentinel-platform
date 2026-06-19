@@ -2,10 +2,8 @@ import { createRoute } from '@hono/zod-openapi';
 import { type AppRouteHandler } from '../../../../types/hono';
 import { TelemetryStorageService } from '../storage.service';
 import { getTelemetryIncidentSchema } from '../storage.dto';
-import {
-    assertAssessmentAccess,
-    resolveAssessmentInstitutionId,
-} from '../../../examination/assessment/assessment-access';
+import { resolveAssessmentInstitutionId } from '../../../examination/assessment/assessment-access';
+import { requireActivePermission } from '../../../../lib/permissions';
 
 export const getTelemetryIncidentRoute = createRoute({
     method: 'get',
@@ -30,21 +28,30 @@ export const getTelemetryIncidentRouteHandler: AppRouteHandler<
     typeof getTelemetryIncidentRoute
 > = async (c) => {
     const supabaseUser = c.get('supabaseUser') as any;
-    const role = supabaseUser?.user_metadata?.role;
+    const role = c.get('role') || supabaseUser?.user_metadata?.role;
     const institutionId = c.get('institutionId');
+    const user = c.get('user');
     const { incidentId } = c.req.valid('param');
 
-    assertAssessmentAccess(role);
+    requireActivePermission(c, 'incidents:view');
 
     const scopedInstitutionId = resolveAssessmentInstitutionId({
         role,
         contextInstitutionId: institutionId,
     });
 
+    const userScope = {
+        role,
+        userId: user.id,
+        departmentId: user?.user_profiles?.department_id ?? null,
+        courseId: user?.user_profiles?.course_id ?? null,
+    };
+
     const incident = await TelemetryStorageService.getIncidentById(
         c.get('dbClient'),
         incidentId,
         scopedInstitutionId,
+        userScope,
     );
 
     return c.json(

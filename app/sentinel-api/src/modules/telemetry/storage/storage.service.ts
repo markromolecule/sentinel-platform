@@ -8,6 +8,7 @@ import {
 import { IncidentPersistenceService } from './services/incident-persistence.service';
 import { IncidentQueryService } from './services/incident-query.service';
 import { IncidentReviewService } from './services/incident-review.service';
+import { type UserQueryScope } from './data/query-scoping';
 
 /**
  * TelemetryStorageService acts as a facade for incident-related operations,
@@ -35,8 +36,9 @@ export class TelemetryStorageService {
         db: DbClient,
         filters: GetTelemetryIncidentsQuery,
         scopedInstitutionId?: string,
+        userScope?: UserQueryScope,
     ): Promise<TelemetryIncidentRecord[]> {
-        return IncidentQueryService.getIncidents(db, filters, scopedInstitutionId);
+        return IncidentQueryService.getIncidents(db, filters, scopedInstitutionId, userScope);
     }
 
     /**
@@ -46,8 +48,9 @@ export class TelemetryStorageService {
         db: DbClient,
         incidentId: string,
         scopedInstitutionId?: string,
+        userScope?: UserQueryScope,
     ): Promise<TelemetryIncidentRecord> {
-        return IncidentQueryService.getIncidentById(db, incidentId, scopedInstitutionId);
+        return IncidentQueryService.getIncidentById(db, incidentId, scopedInstitutionId, userScope);
     }
 
     /**
@@ -59,6 +62,7 @@ export class TelemetryStorageService {
         updates: UpdateTelemetryIncidentBody,
         reviewerUserId: string,
         scopedInstitutionId?: string,
+        userScope?: UserQueryScope,
     ): Promise<TelemetryIncidentRecord> {
         return IncidentReviewService.updateIncidentReview(
             db,
@@ -66,6 +70,7 @@ export class TelemetryStorageService {
             updates,
             reviewerUserId,
             scopedInstitutionId,
+            userScope,
         );
     }
 }

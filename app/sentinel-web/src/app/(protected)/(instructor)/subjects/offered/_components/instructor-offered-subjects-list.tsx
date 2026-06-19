@@ -42,6 +42,9 @@ export function InstructorOfferedSubjectsList({
             searchPlaceholder="Search offered subjects..."
             isLoading={isLoading}
             facets={offeredSubjectsFacets}
+            initialColumnVisibility={{
+                subjectCode: false,
+            }}
             emptyContent={<InstructorOfferedSubjectsEmptyState searchTerm={searchTerm} />}
         />
     );

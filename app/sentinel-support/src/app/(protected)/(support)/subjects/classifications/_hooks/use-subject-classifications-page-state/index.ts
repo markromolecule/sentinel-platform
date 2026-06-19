@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import {
     isPermissionDeniedError,
     useActivePermissions,
@@ -10,7 +10,7 @@ import {
     useDeleteSubjectClassificationMutation,
 } from '@sentinel/hooks';
 import { SubjectClassification } from '@sentinel/shared/types';
-import { useInstitutionFacet } from '@/hooks';
+import { useAcademicScope, useInstitutionFacet } from '@/hooks';
 
 /**
  * Custom hook to manage all page-level state, data fetching, filtering,
@@ -18,6 +18,7 @@ import { useInstitutionFacet } from '@/hooks';
  */
 export function useSubjectClassificationsPageState() {
     const { hasPermission } = useActivePermissions();
+    const { institutionId, isLoading: isScopeLoading } = useAcademicScope();
     const [searchTerm, setSearchTerm] = useState('');
     const [dialogOpen, setDialogOpen] = useState(false);
     const [selectedClassification, setSelectedClassification] =
@@ -31,6 +32,17 @@ export function useSubjectClassificationsPageState() {
     const [selectedTypes, setSelectedTypes] = useState<Set<string>>(new Set());
     const [selectedOrigins, setSelectedOrigins] = useState<Set<string>>(new Set());
 
+    const [hasInitializedScope, setHasInitializedScope] = useState(false);
+
+    useEffect(() => {
+        if (!isScopeLoading && !hasInitializedScope) {
+            if (institutionId) {
+                setSelectedInstitutions(new Set([institutionId]));
+            }
+            setHasInitializedScope(true);
+        }
+    }, [institutionId, isScopeLoading, hasInitializedScope]);
+
     const activeInstitutionId =
         selectedInstitutions.size > 0 ? Array.from(selectedInstitutions)[0] : undefined;
 
@@ -38,10 +50,12 @@ export function useSubjectClassificationsPageState() {
     const { data: institutions = [] } = useInstitutionsQuery();
     const {
         data: classifications = [],
-        isLoading,
+        isLoading: isClassificationsLoading,
         isError,
         error,
     } = useSubjectClassificationsQuery(debouncedSearch || undefined, activeInstitutionId);
+
+    const isLoading = isClassificationsLoading || !hasInitializedScope;
 
     // Mutations
     const deleteClassification = useDeleteSubjectClassificationMutation();

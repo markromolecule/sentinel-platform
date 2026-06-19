@@ -12,6 +12,15 @@ vi.mock('@sentinel/hooks', () => ({
     useDeleteSubjectMutation: vi.fn(() => ({ mutate: vi.fn() })),
 }));
 
+const mockUseAcademicScope = vi.fn(() => ({
+    institutionId: '',
+    isLoading: false,
+}));
+
+vi.mock('@/hooks', () => ({
+    useAcademicScope: () => mockUseAcademicScope(),
+}));
+
 describe('useSubjectsPageState', () => {
     beforeEach(() => {
         vi.clearAllMocks();
@@ -46,5 +55,15 @@ describe('useSubjectsPageState', () => {
             result.current.setSelectedInstitutionId(undefined);
         });
         expect(result.current.selectedInstitutionId).toBeUndefined();
+    });
+
+    it('sets default selectedInstitutionId to user institution ID when loaded', () => {
+        mockUseAcademicScope.mockReturnValue({
+            institutionId: '123-inst',
+            isLoading: false,
+        });
+
+        const { result } = renderHook(() => useSubjectsPageState());
+        expect(result.current.selectedInstitutionId).toBe('123-inst');
     });
 });

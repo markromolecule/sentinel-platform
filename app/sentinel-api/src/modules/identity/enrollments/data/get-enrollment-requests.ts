@@ -158,10 +158,21 @@ export const getEnrollmentRequestsData = async ({
     }
 
     if (institutionId) {
+        const scope = await dbClient
+            .selectFrom('institutions')
+            .select(['parent_institution_id'])
+            .where('id', '=', institutionId)
+            .executeTakeFirst();
+        
+        const allowedInstIds = [institutionId];
+        if (scope?.parent_institution_id) {
+            allowedInstIds.push(scope.parent_institution_id);
+        }
+
         query = query.where((eb) =>
             eb.or([
-                eb('subject_offerings.institution_id', '=', institutionId),
-                eb('class_groups.institution_id', '=', institutionId),
+                eb('subject_offerings.institution_id', 'in', allowedInstIds),
+                eb('class_groups.institution_id', 'in', allowedInstIds),
             ]),
         );
     }

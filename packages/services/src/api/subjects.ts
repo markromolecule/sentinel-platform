@@ -218,10 +218,12 @@ export async function getEnrollmentRequests(
     apiClient: ApiClientType,
     status?: 'PENDING' | 'APPROVED' | 'REJECTED',
     search?: string,
+    institutionId?: string,
 ): Promise<EnrollmentRequest[]> {
     const params = new URLSearchParams();
     if (status) params.append('status', status);
     if (search) params.append('search', search);
+    if (institutionId) params.append('institutionId', institutionId);
 
     const queryString = params.toString();
     const url = queryString ? `/enrollments/requests?${queryString}` : '/enrollments/requests';

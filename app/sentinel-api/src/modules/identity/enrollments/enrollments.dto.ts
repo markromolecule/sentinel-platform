@@ -66,6 +66,11 @@ export const getEnrollmentRequestsSchema = {
             .string()
             .optional()
             .openapi({ description: 'Search term for subject code or title' }),
+        institutionId: z
+            .string()
+            .uuid()
+            .optional()
+            .openapi({ description: 'Filter by institution ID' }),
     }),
     response: z.object({
         message: z.string(),

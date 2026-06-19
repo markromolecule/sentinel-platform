@@ -5,6 +5,7 @@ import {
     assertAssessmentAccess,
     resolveAssessmentActorRole,
 } from '../../assessment/assessment-access';
+import { requireActivePermission } from '../../../../lib/permissions';
 import {
     examIdParams,
     getExamIncidentsQuerySchema,
@@ -41,6 +42,8 @@ export const getExamIncidentsRouteHandler: AppRouteHandler<typeof getExamInciden
     const supabaseUser = c.get('supabaseUser') as any;
     const user = c.get('user');
 
+    requireActivePermission(c, 'incidents:view');
+
     const resolvedRole = await resolveAssessmentActorRole({
         dbClient: c.get('dbClient'),
         userId: user?.id,
@@ -49,10 +52,18 @@ export const getExamIncidentsRouteHandler: AppRouteHandler<typeof getExamInciden
 
     assertAssessmentAccess(resolvedRole);
 
+    const userScope = {
+        role: resolvedRole || '',
+        userId: user?.id,
+        departmentId: user?.user_profiles?.department_id ?? null,
+        courseId: user?.user_profiles?.course_id ?? null,
+    };
+
     const { data, total } = await IncidentsService.getExamIncidentsData({
         dbClient: c.get('dbClient'),
         examId: id,
         filters,
+        userScope,
     });
 
     const limit = filters.limit ?? 30;

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { ColumnFiltersState } from '@tanstack/react-table';
 import {
     DataTable,
@@ -82,6 +82,15 @@ export function SubjectsView() {
     const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>(
         selectedInstitutionId ? [{ id: 'institution', value: [selectedInstitutionId] }] : [],
     );
+
+    const [hasInitializedFilters, setHasInitializedFilters] = useState(false);
+
+    useEffect(() => {
+        if (selectedInstitutionId && !hasInitializedFilters) {
+            setColumnFilters([{ id: 'institution', value: [selectedInstitutionId] }]);
+            setHasInitializedFilters(true);
+        }
+    }, [selectedInstitutionId, hasInitializedFilters]);
 
     const isViewDenied = isPermissionDeniedError(error, 'subjects:view');
 

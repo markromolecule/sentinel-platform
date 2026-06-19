@@ -1,6 +1,7 @@
 import { type DbClient } from '@sentinel/db';
 import { type TelemetryIncidentRecord, type GetTelemetryIncidentsQuery } from '../storage.dto';
 import { getIncidentsFromDb, getIncidentByIdFromDb } from '../data/get-incidents';
+import { type UserQueryScope } from '../data/query-scoping';
 
 export class IncidentQueryService {
     /**
@@ -10,8 +11,9 @@ export class IncidentQueryService {
         db: DbClient,
         filters: GetTelemetryIncidentsQuery,
         scopedInstitutionId?: string,
+        userScope?: UserQueryScope,
     ): Promise<TelemetryIncidentRecord[]> {
-        return getIncidentsFromDb(db, filters, scopedInstitutionId);
+        return getIncidentsFromDb(db, filters, scopedInstitutionId, userScope);
     }
 
     /**
@@ -21,7 +23,8 @@ export class IncidentQueryService {
         db: DbClient,
         incidentId: string,
         scopedInstitutionId?: string,
+        userScope?: UserQueryScope,
     ): Promise<TelemetryIncidentRecord> {
-        return getIncidentByIdFromDb(db, incidentId, scopedInstitutionId);
+        return getIncidentByIdFromDb(db, incidentId, scopedInstitutionId, userScope);
     }
 }

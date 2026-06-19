@@ -3,13 +3,14 @@ import { HTTPException } from 'hono/http-exception';
 import { sql } from 'kysely';
 import { type TelemetryIncidentRecord, type GetTelemetryIncidentsQuery } from '../storage.dto';
 import { mapTelemetryIncidentRow } from '../mappers/query-incident.mapper';
+import { type UserQueryScope, applyIncidentQueryScoping } from './query-scoping';
 
 const DEFAULT_INCIDENT_LIMIT = 100;
 
 /**
  * Builds the base incident query with all necessary joins and selections.
  */
-export function buildIncidentQuery(db: DbClient, scopedInstitutionId?: string) {
+export function buildIncidentQuery(db: DbClient, scopedInstitutionId?: string, userScope?: UserQueryScope) {
     let query = db
         .selectFrom('flagged_incidents as fi')
         .leftJoin('exam_attempts as ea', 'ea.attempt_id', 'fi.attempt_id')
@@ -47,6 +48,10 @@ export function buildIncidentQuery(db: DbClient, scopedInstitutionId?: string) {
         query = query.where('e.institution_id', '=', scopedInstitutionId);
     }
 
+    if (userScope) {
+        query = applyIncidentQueryScoping(query, userScope);
+    }
+
     return query;
 }
 
@@ -57,8 +62,9 @@ export async function getIncidentsFromDb(
     db: DbClient,
     filters: GetTelemetryIncidentsQuery,
     scopedInstitutionId?: string,
+    userScope?: UserQueryScope,
 ): Promise<TelemetryIncidentRecord[]> {
-    let query = buildIncidentQuery(db, scopedInstitutionId);
+    let query = buildIncidentQuery(db, scopedInstitutionId, userScope);
 
     if (filters.attemptId) {
         query = query.where('fi.attempt_id', '=', filters.attemptId);
@@ -107,8 +113,9 @@ export async function getIncidentByIdFromDb(
     db: DbClient,
     incidentId: string,
     scopedInstitutionId?: string,
+    userScope?: UserQueryScope,
 ): Promise<TelemetryIncidentRecord> {
-    const incident = await buildIncidentQuery(db, scopedInstitutionId)
+    const incident = await buildIncidentQuery(db, scopedInstitutionId, userScope)
         .where('fi.incident_id', '=', incidentId)
         .executeTakeFirst();
 

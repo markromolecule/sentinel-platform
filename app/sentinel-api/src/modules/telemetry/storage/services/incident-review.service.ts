@@ -1,7 +1,8 @@
 import { type DbClient } from '@sentinel/db';
 import { type TelemetryIncidentRecord, type UpdateTelemetryIncidentBody } from '../storage.dto';
 import { IncidentQueryService } from './incident-query.service';
-
+import { type UserQueryScope } from '../data/query-scoping';
+import { LogsService } from '../../../general/logs/logs.service';
 export class IncidentReviewService {
     static async updateIncidentReview(
         db: DbClient,
@@ -9,9 +10,10 @@ export class IncidentReviewService {
         updates: UpdateTelemetryIncidentBody,
         reviewerUserId: string,
         scopedInstitutionId?: string,
+        userScope?: UserQueryScope,
     ): Promise<TelemetryIncidentRecord> {
         // Ensure incident exists and is accessible
-        await IncidentQueryService.getIncidentById(db, incidentId, scopedInstitutionId);
+        await IncidentQueryService.getIncidentById(db, incidentId, scopedInstitutionId, userScope);
 
         const updateValues: {
             status?: string | null;
@@ -55,6 +57,7 @@ export class IncidentReviewService {
             db,
             incidentId,
             scopedInstitutionId,
+            userScope,
         );
 
         // Telemetry logging
@@ -64,7 +67,6 @@ export class IncidentReviewService {
                 (result as any).institutionId ||
                 (result as any).institution_id;
             if (instId) {
-                const { LogsService } = await import('../../../general/logs/logs.service');
                 await LogsService.createLog(db, {
                     userId: reviewerUserId,
                     action: 'telemetry.incident_reviewed',
