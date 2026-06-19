@@ -51,11 +51,11 @@ export function KpiCarouselWidget({ cards = [] }: KpiCarouselWidgetProps) {
                                                 className={cn(
                                                     'mr-1.5 flex items-center font-semibold',
                                                     card.trend === 'up' &&
-                                                        'text-green-600 dark:text-green-500',
+                                                    'text-green-600 dark:text-green-500',
                                                     card.trend === 'down' &&
-                                                        'text-red-600 dark:text-red-500',
+                                                    'text-red-600 dark:text-red-500',
                                                     card.trend === 'neutral' &&
-                                                        'text-muted-foreground',
+                                                    'text-muted-foreground',
                                                 )}
                                             >
                                                 {card.trend === 'up' && (

@@ -188,8 +188,9 @@ export const CORE_ADMIN_PAGE_CAPABILITIES: Record<CoreAdminPageId, CoreAdminPage
     },
     analytics: {
         id: 'analytics',
-        title: 'Reports & Analytics',
+        title: 'Insights',
         primaryPath: '/analytics',
+
         aliases: ['/analytics'],
         allowedRoles: ['admin', 'superadmin'],
         requiredViewPermissions: [],

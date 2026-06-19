@@ -26,7 +26,9 @@ vi.mock('@sentinel/hooks', () => ({
     useSectionsQuery: () => ({ data: [] }),
     useAnnouncementsQuery: () => ({ data: null, isLoading: false }),
     useProfileQuery: vi.fn(),
+    useStudentWhitelistQuery: () => ({ data: [], isLoading: false }),
 }));
+
 
 vi.mock('@dnd-kit/core', () => ({
     DndContext: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
@@ -79,7 +81,9 @@ vi.mock('@/app/(protected)/dashboard/_components', () => ({
     RecentInstitutionsWidget: () => <div>RecentInstitutionsWidget</div>,
     SystemActivityWidget: () => <div>SystemActivityWidget</div>,
     SystemHealth: () => <div>SystemHealth</div>,
+    SupportShortcutsWidget: () => <div>SupportShortcutsWidget</div>,
 }));
+
 
 import { useUser } from '@/hooks/use-user';
 import { useProfileQuery } from '@sentinel/hooks';

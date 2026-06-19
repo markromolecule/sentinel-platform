@@ -138,10 +138,11 @@ const CORE_ADMIN_NAV_DEFINITIONS: Array<{
         items: [
             {
                 pageId: 'analytics',
-                title: 'Reports & Analytics',
+                title: 'Insights',
                 url: '/analytics',
                 icon: BarChart3,
             },
+
             {
                 pageId: 'logs',
                 title: 'System Logs',

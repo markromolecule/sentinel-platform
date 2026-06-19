@@ -99,7 +99,7 @@ describe('CoreAdminSidebar', () => {
                     showSeparator: true,
                     items: [
                         {
-                            title: 'Reports & Analytics',
+                            title: 'Insights',
                             url: '/analytics',
                             icon: () => null,
                         },
@@ -110,7 +110,8 @@ describe('CoreAdminSidebar', () => {
 
         render(<CoreAdminSidebar />);
 
-        expect(screen.getByText('Reports & Analytics:collapsed')).toBeTruthy();
+        expect(screen.getByText('Insights:collapsed')).toBeTruthy();
+
     });
 
     it('renders the Academic Setup item and its sub-items when visible', () => {

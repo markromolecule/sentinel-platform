@@ -103,10 +103,11 @@ export const CONFIGURATION_ITEMS: SidebarItem[] = [
 
 export const ANALYTICS_ITEMS: SidebarItem[] = [
     {
-        title: 'Reports & Analytics',
+        title: 'Insights',
         url: '/analytics',
         icon: BarChart3,
     },
+
     {
         title: 'System Logs',
         url: '/logs',

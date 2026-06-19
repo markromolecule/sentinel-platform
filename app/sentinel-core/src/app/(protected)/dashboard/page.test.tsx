@@ -12,6 +12,10 @@ vi.mock('@/hooks/use-user', () => ({
     useUser: vi.fn(),
 }));
 
+vi.mock('@/hooks/use-academic-scope', () => ({
+    useAcademicScope: vi.fn(),
+}));
+
 vi.mock('@/app/(protected)/dashboard/_stores/use-dashboard-layout-store', () => ({
     useDashboardLayoutStore: vi.fn((selector) =>
         selector({
@@ -24,12 +28,15 @@ vi.mock('@/app/(protected)/dashboard/_stores/use-dashboard-layout-store', () => 
 vi.mock('@sentinel/hooks', () => ({
     useInstitutionsQuery: () => ({ data: [] }),
     useDepartmentsQuery: () => ({ data: [] }),
-    useCoursesQuery: () => ({ data: [] }),
+    useCoursesQuery: vi.fn(() => ({ data: [], isLoading: false })),
     useRoomsQuery: () => ({ data: [] }),
     useSubjectsQuery: () => ({ data: [] }),
-    useSectionsQuery: () => ({ data: [] }),
+    useSectionsQuery: vi.fn(() => ({ data: [], isLoading: false })),
     useAnnouncementsQuery: () => ({ data: null, isLoading: false }),
     useProfileQuery: vi.fn(),
+    useUsersQuery: vi.fn(() => ({ data: [], isLoading: false })),
+    useClassroomsQuery: vi.fn(() => ({ data: [], isLoading: false })),
+    useStudentWhitelistQuery: vi.fn(() => ({ data: [], isLoading: false })),
 }));
 
 vi.mock('@dnd-kit/core', () => ({
@@ -55,6 +62,7 @@ vi.mock('@sentinel/ui', async () => {
         PageHeader: ({ title }: { title: string }) => <h1>{title}</h1>,
         Calendar: () => <div data-testid="calendar" />,
         Separator: () => <hr />,
+        Spinner: () => <div role="status">Loading...</div>,
     };
 });
 
@@ -79,23 +87,26 @@ vi.mock('@/app/(protected)/dashboard/_components', () => ({
     ),
     DashboardWidgetWrapper: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
     FlaggedIncidentsWidget: () => <div>FlaggedIncidentsWidget</div>,
-    KpiCarouselWidget: () => <div>KpiCarouselWidget</div>,
+    KpiCarouselWidget: () => <div data-testid="kpi-carousel">KpiCarouselWidget</div>,
     RecentInstitutionsWidget: () => <div>RecentInstitutionsWidget</div>,
     SuperadminStatsCards: () => <div>SuperadminStatsCards</div>,
     SystemActivityWidget: () => <div>SystemActivityWidget</div>,
     SystemHealth: () => <div>SystemHealth</div>,
+    AdminShortcutsWidget: () => <div data-testid="admin-shortcuts">AdminShortcutsWidget</div>,
 }));
 
 import { useUser } from '@/hooks/use-user';
+import { useAcademicScope } from '@/hooks/use-academic-scope';
 import { useProfileQuery } from '@sentinel/hooks';
 
 const mockUseUser = vi.mocked(useUser);
+const mockUseAcademicScope = vi.mocked(useAcademicScope);
 const mockUseProfileQuery = vi.mocked(useProfileQuery);
 
 import DashboardPage from './page';
 
 describe('DashboardPage', () => {
-    it('renders DashboardGreeting for the superadmin role', () => {
+    it('renders DashboardGreeting and scoped widgets for the superadmin role', () => {
         mockUseUser.mockReturnValue({
             data: {
                 role: 'superadmin',
@@ -108,14 +119,25 @@ describe('DashboardPage', () => {
             profile: { firstName: 'Joseph', lastName: 'Cruz', email: 'j@test.com' },
             isLoading: false,
         } as unknown as ReturnType<typeof useProfileQuery>);
+        mockUseAcademicScope.mockReturnValue({
+            role: 'superadmin',
+            isSuperadmin: true,
+            isAdmin: false,
+            assignedDepartmentId: 'dept-123',
+            assignedCourseId: '',
+            institutionId: 'inst-123',
+            isLoading: false,
+        } as any);
 
         render(<DashboardPage />);
 
         expect(screen.getByTestId('dashboard-greeting')).toBeDefined();
         expect(screen.getByTestId('dashboard-shell')).toBeDefined();
+        expect(screen.getByTestId('kpi-carousel')).toBeDefined();
+        expect(screen.getByTestId('admin-shortcuts')).toBeDefined();
     });
 
-    it('renders DashboardGreeting for the admin role', () => {
+    it('renders DashboardGreeting and scoped widgets for the admin role', () => {
         mockUseUser.mockReturnValue({
             data: {
                 role: 'admin',
@@ -128,11 +150,22 @@ describe('DashboardPage', () => {
             profile: { firstName: 'Admin', lastName: 'User', email: 'admin@test.com' },
             isLoading: false,
         } as unknown as ReturnType<typeof useProfileQuery>);
+        mockUseAcademicScope.mockReturnValue({
+            role: 'admin',
+            isSuperadmin: false,
+            isAdmin: true,
+            assignedDepartmentId: '',
+            assignedCourseId: 'course-123',
+            institutionId: 'inst-123',
+            isLoading: false,
+        } as any);
 
         render(<DashboardPage />);
 
         expect(screen.getByTestId('dashboard-greeting')).toBeDefined();
         expect(screen.getByTestId('dashboard-shell')).toBeDefined();
+        expect(screen.getByTestId('kpi-carousel')).toBeDefined();
+        expect(screen.getByTestId('admin-shortcuts')).toBeDefined();
     });
 
     it('renders a loading message while user data is loading', () => {
@@ -144,6 +177,9 @@ describe('DashboardPage', () => {
             profile: undefined,
             isLoading: false,
         } as unknown as ReturnType<typeof useProfileQuery>);
+        mockUseAcademicScope.mockReturnValue({
+            isLoading: false,
+        } as any);
 
         render(<DashboardPage />);
         expect(screen.getByRole('status')).toBeDefined();
@@ -158,6 +194,26 @@ describe('DashboardPage', () => {
             profile: undefined,
             isLoading: true,
         } as unknown as ReturnType<typeof useProfileQuery>);
+        mockUseAcademicScope.mockReturnValue({
+            isLoading: false,
+        } as any);
+
+        render(<DashboardPage />);
+        expect(screen.getByRole('status')).toBeDefined();
+    });
+
+    it('renders a loading message while academic scope is loading', () => {
+        mockUseUser.mockReturnValue({
+            data: { role: 'admin' },
+            isLoading: false,
+        } as unknown as ReturnType<typeof useUser>);
+        mockUseProfileQuery.mockReturnValue({
+            profile: { firstName: 'Admin', lastName: 'User' },
+            isLoading: false,
+        } as any);
+        mockUseAcademicScope.mockReturnValue({
+            isLoading: true,
+        } as any);
 
         render(<DashboardPage />);
         expect(screen.getByRole('status')).toBeDefined();
