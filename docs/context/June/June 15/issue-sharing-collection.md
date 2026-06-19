@@ -1,9 +1,9 @@
 # Issue
 
-- It returns an error code [404] when the user tries to shared their collection. 
+- It returns an error code [404] when the user tries to shared their collection.
 
 - curl 'http://localhost:3001/question-bank/collections/52e8b1d9-e738-4f6e-a191-7db7448476e6/shares' \
-  -H 'Accept: */*' \
+  -H 'Accept: _/_' \
   -H 'Accept-Language: en-US,en;q=0.9' \
   -H 'Cache-Control: no-cache' \
   -H 'Connection: keep-alive' \
@@ -24,10 +24,12 @@
 # Implement
 
 ## Problem
+
 Questions that belong to a [collection] are currently still visible in the [question bank] of users who have no access to that collection.
 
 ## Expected Behavior
-A [question] included in a [collection] should be hidden from a [user]'s [question bank] 
+
+A [question] included in a [collection] should be hidden from a [user]'s [question bank]
 if ALL of the following are true:
 
 1. The user is not assigned to the collection

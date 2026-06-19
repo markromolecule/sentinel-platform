@@ -33,7 +33,11 @@ export function applyQuestionVisibility(query: VisibilityQuery, userId: string):
                         'qbcq.collection_id',
                     )
                     .select('qbcq.question_bank_question_id')
-                    .whereRef('qbcq.question_bank_question_id', '=', 'qbq.question_bank_question_id')
+                    .whereRef(
+                        'qbcq.question_bank_question_id',
+                        '=',
+                        'qbq.question_bank_question_id',
+                    )
                     .where((collectionEb) =>
                         collectionEb.or([
                             collectionEb('qbc.is_public', '=', true),

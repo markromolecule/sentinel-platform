@@ -1,5 +1,9 @@
 import { describe, it, expect } from 'vitest';
-import { getQuestionsQuerySchema, questionRecordSchema, updateQuestionBodySchema } from './question-schema';
+import {
+    getQuestionsQuerySchema,
+    questionRecordSchema,
+    updateQuestionBodySchema,
+} from './question-schema';
 import { questionInputSchema } from './assessment-schema';
 import { generateQuestionPreviewConfigSchema } from '../gemini/gemini-schema';
 

@@ -4,9 +4,9 @@
 
 - When the [creator] / [owner] of the [exam] has a [draft] / [published] [exam] and they set it on [private], the other users for e.g
 
-administrators (admin or superadmin) creates an exam -> sets it as private -> the instructors still seeing the private exam. 
+administrators (admin or superadmin) creates an exam -> sets it as private -> the instructors still seeing the private exam.
 
-moreover, when the creator updates the [exam] to public, the [exam] on the instructors side is not reflecting on their side. 
+moreover, when the creator updates the [exam] to public, the [exam] on the instructors side is not reflecting on their side.
 
 take note that it has separate codebase
 sentinel-core

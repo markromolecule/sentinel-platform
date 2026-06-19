@@ -16,6 +16,7 @@ import {
     useRoomsQuery,
     useUsersQuery,
     useCreateExamSectionAssignmentsBatchMutation,
+    useProfileQuery,
 } from '@sentinel/hooks';
 import { type ClassroomSummary, type Room } from '@sentinel/shared/types';
 import { type User, type CreateExamSectionAssignmentPayload } from '@sentinel/services';
@@ -25,6 +26,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 
 import { type AssignmentRow } from './types';
 import { RowInstructorCombobox } from './row-instructor-combobox';
+import { RowClassroomCombobox } from './row-classroom-combobox';
 
 export interface NewAssignmentsBuilderProps {
     examId: string;
@@ -41,6 +43,7 @@ export function NewAssignmentsBuilder({
     onSuccess,
     onCancel,
 }: NewAssignmentsBuilderProps) {
+    const { profile } = useProfileQuery();
     const [rows, setRows] = React.useState<AssignmentRow[]>([
         {
             localId: Math.random().toString(),
@@ -51,15 +54,25 @@ export function NewAssignmentsBuilder({
         },
     ]);
 
-    const { data: classrooms = [], isLoading: isClassroomsLoading } = useClassroomsQuery();
+    const { data: classrooms = [], isLoading: isClassroomsLoading } = useClassroomsQuery({
+        institutionId: profile?.institutionId || undefined,
+        subjectId: subjectId || undefined,
+    });
     const { data: rooms = [], isLoading: isRoomsLoading } = useRoomsQuery();
     const { data: users = [], isLoading: isUsersLoading } = useUsersQuery({ role: 'instructor' });
 
     const filteredClassrooms = React.useMemo(() => {
-        if (!subjectId) return classrooms as ClassroomSummary[];
-        return (classrooms as ClassroomSummary[]).filter(
-            (c) => c.subjectId === subjectId,
-        );
+        const subjectMatchedClassrooms = !subjectId
+            ? []
+            : (classrooms as ClassroomSummary[]).filter(
+                  (classroom) => classroom.subjectId === subjectId,
+              );
+
+        if (subjectMatchedClassrooms.length > 0) {
+            return subjectMatchedClassrooms;
+        }
+
+        return classrooms as ClassroomSummary[];
     }, [classrooms, subjectId]);
 
     const createMutation = useCreateExamSectionAssignmentsBatchMutation({
@@ -136,10 +149,13 @@ export function NewAssignmentsBuilder({
     const selectedSectionIdsInRows = rows.map((r) => r.sectionId).filter((id) => id !== 'none');
 
     // Check if any section is selected more than once in the builder
-    const hasDuplicatesInRows = selectedSectionIdsInRows.length !== new Set(selectedSectionIdsInRows).size;
+    const hasDuplicatesInRows =
+        selectedSectionIdsInRows.length !== new Set(selectedSectionIdsInRows).size;
 
     // Check if any selected section is already assigned
-    const hasConflictsWithExisting = selectedSectionIdsInRows.some((id) => assignedSectionIds.has(id));
+    const hasConflictsWithExisting = selectedSectionIdsInRows.some((id) =>
+        assignedSectionIds.has(id),
+    );
 
     const isPending = createMutation.isPending;
     const isValid =
@@ -175,16 +191,17 @@ export function NewAssignmentsBuilder({
     return (
         <div className="space-y-4">
             {(hasDuplicatesInRows || hasConflictsWithExisting) && (
-                <div className="flex items-center gap-2 text-amber-600 bg-amber-50 dark:bg-amber-950/20 dark:text-amber-400 p-3 rounded-lg border border-amber-200 dark:border-amber-900/50 text-sm">
+                <div className="flex items-center gap-2 rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-600 dark:border-amber-900/50 dark:bg-amber-950/20 dark:text-amber-400">
                     <AlertCircle className="h-4 w-4 shrink-0" />
                     <span>
                         {hasDuplicatesInRows && 'Duplicate classroom selections detected. '}
-                        {hasConflictsWithExisting && 'Some selected classrooms (sections) are already assigned.'}
+                        {hasConflictsWithExisting &&
+                            'Some selected classrooms (sections) are already assigned.'}
                     </span>
                 </div>
             )}
 
-            <div className="space-y-3 max-h-[50vh] overflow-y-auto pr-1">
+            <div className="max-h-[50vh] space-y-3 overflow-y-auto pr-1">
                 <AnimatePresence initial={false}>
                     {rows.map((row) => (
                         <motion.div
@@ -193,7 +210,7 @@ export function NewAssignmentsBuilder({
                             animate={{ opacity: 1, y: 0 }}
                             exit={{ opacity: 0, height: 0, marginBottom: 0 }}
                             transition={{ duration: 0.2 }}
-                            className="relative grid grid-cols-1 md:grid-cols-12 gap-3 items-end p-4 border rounded-lg bg-zinc-50/50 dark:bg-zinc-950/20 pr-12"
+                            className="relative grid grid-cols-1 items-end gap-3 rounded-lg border bg-zinc-50/50 p-4 pr-12 md:grid-cols-12 dark:bg-zinc-950/20"
                         >
                             {/* Classroom Select */}
                             <div className="space-y-1.5 md:col-span-5">
@@ -201,32 +218,19 @@ export function NewAssignmentsBuilder({
                                     Classroom (Required)
                                 </Label>
                                 {isClassroomsLoading ? (
-                                    <div className="h-10 border rounded-md flex items-center px-3 bg-white dark:bg-zinc-950">
-                                        <Loader2 className="h-3 w-3 animate-spin mr-1.5 text-zinc-500" />
+                                    <div className="flex h-10 items-center rounded-md border bg-white px-3 dark:bg-zinc-950">
+                                        <Loader2 className="mr-1.5 h-3 w-3 animate-spin text-zinc-500" />
                                         <span className="text-xs text-zinc-500">Loading...</span>
                                     </div>
                                 ) : (
-                                    <Select
+                                    <RowClassroomCombobox
                                         value={row.classroomId}
                                         onValueChange={(val) =>
                                             handleClassroomChange(row.localId, val)
                                         }
+                                        classrooms={filteredClassrooms}
                                         disabled={isPending}
-                                    >
-                                        <SelectTrigger className="bg-white dark:bg-zinc-950">
-                                            <SelectValue placeholder="Select classroom" />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            <SelectItem value="none" disabled>
-                                                Select classroom
-                                            </SelectItem>
-                                            {filteredClassrooms.map((cls) => (
-                                                <SelectItem key={cls.id} value={cls.id}>
-                                                    {cls.className || cls.scopeSummary.sectionLabel}
-                                                </SelectItem>
-                                            ))}
-                                        </SelectContent>
-                                    </Select>
+                                    />
                                 )}
                             </div>
 
@@ -236,8 +240,8 @@ export function NewAssignmentsBuilder({
                                     Room (Optional)
                                 </Label>
                                 {isRoomsLoading ? (
-                                    <div className="h-10 border rounded-md flex items-center px-3 bg-white dark:bg-zinc-950">
-                                        <Loader2 className="h-3 w-3 animate-spin mr-1.5 text-zinc-500" />
+                                    <div className="flex h-10 items-center rounded-md border bg-white px-3 dark:bg-zinc-950">
+                                        <Loader2 className="mr-1.5 h-3 w-3 animate-spin text-zinc-500" />
                                         <span className="text-xs text-zinc-500">Loading...</span>
                                     </div>
                                 ) : (
@@ -255,13 +259,13 @@ export function NewAssignmentsBuilder({
                                             <SelectItem value="none">No room</SelectItem>
                                             {activeRooms.map((room) => (
                                                 <SelectItem key={room.id} value={room.id}>
-                                                    <div className="flex items-center justify-between w-full gap-2">
+                                                    <div className="flex w-full items-center justify-between gap-2">
                                                         <span>
                                                             {room.name} ({room.room_number})
                                                         </span>
                                                         <span
                                                             className={cn(
-                                                                'ml-2 rounded-xs border px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider',
+                                                                'ml-2 rounded-xs border px-1.5 py-0.5 text-[10px] font-semibold tracking-wider uppercase',
                                                                 room.status === 'AVAILABLE'
                                                                     ? 'border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-900/50 dark:bg-emerald-950/20 dark:text-emerald-400'
                                                                     : 'border-amber-200 bg-amber-50 text-amber-700 dark:border-amber-900/50 dark:bg-amber-950/20 dark:text-amber-400',
@@ -285,8 +289,8 @@ export function NewAssignmentsBuilder({
                                     Instructor (Optional)
                                 </Label>
                                 {isUsersLoading ? (
-                                    <div className="h-10 border rounded-md flex items-center px-3 bg-white dark:bg-zinc-950">
-                                        <Loader2 className="h-3 w-3 animate-spin mr-1.5 text-zinc-500" />
+                                    <div className="flex h-10 items-center rounded-md border bg-white px-3 dark:bg-zinc-950">
+                                        <Loader2 className="mr-1.5 h-3 w-3 animate-spin text-zinc-500" />
                                         <span className="text-xs text-zinc-500">Loading...</span>
                                     </div>
                                 ) : (
@@ -302,12 +306,12 @@ export function NewAssignmentsBuilder({
                             </div>
 
                             {/* Remove Button */}
-                            <div className="md:col-span-1 flex justify-center">
+                            <div className="flex justify-center md:col-span-1">
                                 <Button
                                     type="button"
                                     variant="ghost"
                                     size="icon"
-                                    className="text-red-500 hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-950/30 h-10 w-10 flex items-center justify-center"
+                                    className="flex h-10 w-10 items-center justify-center text-red-500 hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-950/30"
                                     onClick={() => handleRemoveRow(row.localId)}
                                     disabled={rows.length === 1 || isPending}
                                 >
@@ -319,7 +323,7 @@ export function NewAssignmentsBuilder({
                 </AnimatePresence>
             </div>
 
-            <div className="flex flex-col sm:flex-row gap-3 pt-4 justify-between border-t mt-4">
+            <div className="mt-4 flex flex-col justify-between gap-3 border-t pt-4 sm:flex-row">
                 <Button
                     type="button"
                     variant="outline"
@@ -332,7 +336,7 @@ export function NewAssignmentsBuilder({
                     Add Classroom Row
                 </Button>
 
-                <div className="flex gap-2 w-full sm:w-auto">
+                <div className="flex w-full gap-2 sm:w-auto">
                     <Button
                         type="button"
                         variant="ghost"
@@ -348,7 +352,7 @@ export function NewAssignmentsBuilder({
                         size="sm"
                         onClick={handleSubmit}
                         disabled={!isValid || isPending}
-                        className="w-full sm:w-auto bg-[#323d8f] text-white hover:bg-[#323d8f]/90 font-semibold"
+                        className="w-full bg-[#323d8f] font-semibold text-white hover:bg-[#323d8f]/90 sm:w-auto"
                     >
                         {isPending && <Loader2 className="mr-1.5 h-4 w-4 animate-spin" />}
                         Save Assignments

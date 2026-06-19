@@ -12,9 +12,16 @@ function createQuery(result: unknown) {
     return query;
 }
 
-function createDbClient(collectionResult: unknown, shareResult: unknown) {
+function createDbClient(
+    collectionResult: unknown,
+    shareResult: unknown,
+    userProfileResult?: unknown,
+) {
     const collectionQuery = createQuery(collectionResult);
     const shareQuery = createQuery(shareResult);
+    const userProfileQuery = createQuery(
+        userProfileResult !== undefined ? userProfileResult : { institution_id: 'inst-1' },
+    );
 
     return {
         selectFrom: vi.fn((table: string) => {
@@ -26,6 +33,10 @@ function createDbClient(collectionResult: unknown, shareResult: unknown) {
                 return shareQuery;
             }
 
+            if (table === 'user_profiles') {
+                return userProfileQuery;
+            }
+
             throw new Error(`Unexpected table: ${table}`);
         }),
     } as any;
@@ -33,10 +44,7 @@ function createDbClient(collectionResult: unknown, shareResult: unknown) {
 
 describe('assertCollectionAccess', () => {
     it('allows the creator to perform any action', async () => {
-        const dbClient = createDbClient(
-            { created_by: 'user-1', is_public: false },
-            null,
-        );
+        const dbClient = createDbClient({ created_by: 'user-1', is_public: false }, null);
 
         await expect(
             assertCollectionAccess({
@@ -49,10 +57,7 @@ describe('assertCollectionAccess', () => {
     });
 
     it('rejects non-creators from deleting or sharing', async () => {
-        const dbClient = createDbClient(
-            { created_by: 'user-2', is_public: false },
-            null,
-        );
+        const dbClient = createDbClient({ created_by: 'user-2', is_public: false }, null);
 
         await expect(
             assertCollectionAccess({
@@ -80,9 +85,9 @@ describe('assertCollectionAccess', () => {
         ).resolves.toBeUndefined();
     });
 
-    it('allows public users to view but not edit collections', async () => {
+    it('allows public users within same institution to view but not edit collections', async () => {
         const dbClient = createDbClient(
-            { created_by: 'user-2', is_public: true },
+            { created_by: 'user-2', is_public: true, institution_id: 'inst-1' },
             null,
         );
 
@@ -101,6 +106,22 @@ describe('assertCollectionAccess', () => {
                 collectionId: 'collection-1',
                 userId: 'user-1',
                 action: 'edit',
+            }),
+        ).rejects.toBeInstanceOf(HTTPException);
+    });
+
+    it('rejects public users from different institution', async () => {
+        const dbClient = createDbClient(
+            { created_by: 'user-2', is_public: true, institution_id: 'inst-2' },
+            null,
+        );
+
+        await expect(
+            assertCollectionAccess({
+                dbClient,
+                collectionId: 'collection-1',
+                userId: 'user-1',
+                action: 'view',
             }),
         ).rejects.toBeInstanceOf(HTTPException);
     });

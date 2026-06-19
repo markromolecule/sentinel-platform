@@ -39,7 +39,9 @@ export async function createExam(
         getExamQuestionColumnSupport(dbClient),
     ]);
     const assignmentInstitutionId = institutionId ?? body.institutionId ?? undefined;
-    const hasSectionTargets = Boolean(body.sectionId || (body.sectionIds && body.sectionIds.length > 0));
+    const hasSectionTargets = Boolean(
+        body.sectionId || (body.sectionIds && body.sectionIds.length > 0),
+    );
     const assignmentTargets = body.classroomId
         ? await resolveInstructorExamAssignmentTargets({
               dbClient,
@@ -49,7 +51,7 @@ export async function createExam(
               sectionIds: body.sectionIds,
               role,
           })
-        : (body.subjectId && !hasSectionTargets)
+        : body.subjectId && !hasSectionTargets
           ? {
                 classroomAssignment: {
                     classGroupId: null as any,

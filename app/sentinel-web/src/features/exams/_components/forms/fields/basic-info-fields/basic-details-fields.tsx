@@ -69,13 +69,13 @@ export function BasicDetailsFields({ control }: ExamFormFieldProps) {
                 control={control}
                 name="isPublic"
                 render={({ field }) => (
-                    <FormItem className="flex flex-row items-center justify-between gap-4 space-y-0 rounded-lg border border-border/60 bg-muted/5 p-3.5">
+                    <FormItem className="border-border/60 bg-muted/5 flex flex-row items-center justify-between gap-4 space-y-0 rounded-lg border p-3.5">
                         <div className="space-y-0.5">
                             <FormLabel className={labelClassName}>
                                 <Globe className="h-4 w-4 text-[#323d8f]/60" />
                                 Public Exam
                             </FormLabel>
-                            <FormDescription className="text-xs text-muted-foreground">
+                            <FormDescription className="text-muted-foreground text-xs">
                                 Allow other proctors and admins to view and import questions from
                                 this exam.
                             </FormDescription>

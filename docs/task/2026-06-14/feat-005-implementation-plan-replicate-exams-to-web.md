@@ -9,12 +9,16 @@
 > Applies to how we replicate the assign page components in `sentinel-web`.
 
 ### Option A — Full Replicated Components (Recommended)
+
 Copy the `types.ts`, `row-instructor-combobox.tsx`, `new-assignments-builder.tsx`, `add-exam-section-assignment-dialog.tsx`, and `exam-section-assignment-list.tsx` from `sentinel-core` to `sentinel-web`, and refactor `assignment-content.tsx` to mount them.
-* **Tradeoff:** Ensures exact parity between the two apps and preserves all features, but requires copying a few layout files. Since both apps consume the same packages (`@sentinel/hooks`, `@sentinel/ui`), all copied components will immediately compile and run.
+
+- **Tradeoff:** Ensures exact parity between the two apps and preserves all features, but requires copying a few layout files. Since both apps consume the same packages (`@sentinel/hooks`, `@sentinel/ui`), all copied components will immediately compile and run.
 
 ### Option B — Shared Component Package extraction
+
 Move the exam assign components from `sentinel-core` to `packages/ui` or a shared feature workspace.
-* **Tradeoff:** Cleanest DRY approach, but adds significant configuration overhead for routing/hooks imports within packages, which currently contains mostly presentation-only components.
+
+- **Tradeoff:** Cleanest DRY approach, but adds significant configuration overhead for routing/hooks imports within packages, which currently contains mostly presentation-only components.
 
 **Selected Option: Option A** is selected to avoid leaking routing and query hooks logic into the presentation-focused `packages/ui` workspace while ensuring feature parity between core and web workspaces.
 
@@ -71,36 +75,38 @@ Move the exam assign components from `sentinel-core` to `packages/ui` or a share
 
 **Migration required:** No.
 
-- [x] Create [types.ts](file:///Applications/XAMPP/xamppfiles/htdocs/sentinel/app/sentinel-web/src/app/(protected)/(instructor)/exams/assign/_components/types.ts) **[NEW]**:
+- [x] Create [types.ts](<file:///Applications/XAMPP/xamppfiles/htdocs/sentinel/app/sentinel-web/src/app/(protected)/(instructor)/exams/assign/_components/types.ts>) **[NEW]**:
     - Port the `AssignmentRow` interface.
-- [x] Create [row-instructor-combobox.tsx](file:///Applications/XAMPP/xamppfiles/htdocs/sentinel/app/sentinel-web/src/app/(protected)/(instructor)/exams/assign/_components/row-instructor-combobox.tsx) **[NEW]**:
+- [x] Create [row-instructor-combobox.tsx](<file:///Applications/XAMPP/xamppfiles/htdocs/sentinel/app/sentinel-web/src/app/(protected)/(instructor)/exams/assign/_components/row-instructor-combobox.tsx>) **[NEW]**:
     - Port the instructor search and combobox element.
-- [x] Create [new-assignments-builder.tsx](file:///Applications/XAMPP/xamppfiles/htdocs/sentinel/app/sentinel-web/src/app/(protected)/(instructor)/exams/assign/_components/new-assignments-builder.tsx) **[NEW]**:
+- [x] Create [new-assignments-builder.tsx](<file:///Applications/XAMPP/xamppfiles/htdocs/sentinel/app/sentinel-web/src/app/(protected)/(instructor)/exams/assign/_components/new-assignments-builder.tsx>) **[NEW]**:
     - Port the multi-row assignment layout and batch mutation triggers.
-- [x] Create [add-exam-section-assignment-dialog.tsx](file:///Applications/XAMPP/xamppfiles/htdocs/sentinel/app/sentinel-web/src/app/(protected)/(instructor)/exams/assign/_components/add-exam-section-assignment-dialog.tsx) **[NEW]**:
+- [x] Create [add-exam-section-assignment-dialog.tsx](<file:///Applications/XAMPP/xamppfiles/htdocs/sentinel/app/sentinel-web/src/app/(protected)/(instructor)/exams/assign/_components/add-exam-section-assignment-dialog.tsx>) **[NEW]**:
     - Port the dialog wrapper.
-- [x] Create [exam-section-assignment-list.tsx](file:///Applications/XAMPP/xamppfiles/htdocs/sentinel/app/sentinel-web/src/app/(protected)/(instructor)/exams/assign/_components/exam-section-assignment-list.tsx) **[NEW]**:
+- [x] Create [exam-section-assignment-list.tsx](<file:///Applications/XAMPP/xamppfiles/htdocs/sentinel/app/sentinel-web/src/app/(protected)/(instructor)/exams/assign/_components/exam-section-assignment-list.tsx>) **[NEW]**:
     - Port the data table listing classroom/room/instructor assignments.
-- [x] Modify [assignment-content.tsx](file:///Applications/XAMPP/xamppfiles/htdocs/sentinel/app/sentinel-web/src/app/(protected)/(instructor)/exams/assign/_components/assignment-content.tsx):
+- [x] Modify [assignment-content.tsx](<file:///Applications/XAMPP/xamppfiles/htdocs/sentinel/app/sentinel-web/src/app/(protected)/(instructor)/exams/assign/_components/assignment-content.tsx>):
     - Replace the old list layout with the exam selection dropdown header and management sub-components.
-- [x] Delete [assignment-table.tsx](file:///Applications/XAMPP/xamppfiles/htdocs/sentinel/app/sentinel-web/src/app/(protected)/(instructor)/exams/assign/_components/assignment-table.tsx) **[DELETE]** and [columns.tsx](file:///Applications/XAMPP/xamppfiles/htdocs/sentinel/app/sentinel-web/src/app/(protected)/(instructor)/exams/assign/_components/columns.tsx) **[DELETE]**.
-- [x] Create co-located component tests in [exam-section-assignment-list.test.tsx](file:///Applications/XAMPP/xamppfiles/htdocs/sentinel/app/sentinel-web/src/app/(protected)/(instructor)/exams/assign/_components/exam-section-assignment-list.test.tsx) **[NEW]** to assert correct lists load and actions function.
+- [x] Delete [assignment-table.tsx](<file:///Applications/XAMPP/xamppfiles/htdocs/sentinel/app/sentinel-web/src/app/(protected)/(instructor)/exams/assign/_components/assignment-table.tsx>) **[DELETE]** and [columns.tsx](<file:///Applications/XAMPP/xamppfiles/htdocs/sentinel/app/sentinel-web/src/app/(protected)/(instructor)/exams/assign/_components/columns.tsx>) **[DELETE]**.
+- [x] Create co-located component tests in [exam-section-assignment-list.test.tsx](<file:///Applications/XAMPP/xamppfiles/htdocs/sentinel/app/sentinel-web/src/app/(protected)/(instructor)/exams/assign/_components/exam-section-assignment-list.test.tsx>) **[NEW]** to assert correct lists load and actions function.
 
 ---
 
 ## Verification Plan
 
 ### Automated Tests
+
 - Run tests in `sentinel-web`:
-  ```bash
-  pnpm --dir app/sentinel-web test
-  ```
+    ```bash
+    pnpm --dir app/sentinel-web test
+    ```
 - Run formatting and linting:
-  ```bash
-  pnpm format:check && pnpm lint
-  ```
+    ```bash
+    pnpm format:check && pnpm lint
+    ```
 
 ### Manual Verification
+
 1. Navigate to `/exams` in `sentinel-web` and verify that exam cards display correct visibility badges, comma-separated assigned rooms/instructors (or `–` when empty), and creator names.
 2. Open the edit dialog on an exam and verify that the "Public Exam" switch exists and updates the setting.
 3. Click "Share / Assign" on an exam or navigate to `/exams/assign` to verify that you can select an exam, see its assigned classrooms, and add new ones via the batch assignments builder dialog.

@@ -8,6 +8,7 @@ import {
     useClassroomsQuery,
     useRoomsQuery,
     useUsersQuery,
+    useProfileQuery,
 } from '@sentinel/hooks';
 
 vi.mock('@sentinel/hooks', () => ({
@@ -31,21 +32,19 @@ vi.mock('@sentinel/hooks', () => ({
         isLoading: false,
     })),
     useRoomsQuery: vi.fn(() => ({
-        data: [
-            { id: 'room-1', name: 'Room 101', room_number: '101', status: 'AVAILABLE' },
-        ],
+        data: [{ id: 'room-1', name: 'Room 101', room_number: '101', status: 'AVAILABLE' }],
         isLoading: false,
     })),
     useUsersQuery: vi.fn(() => ({
-        data: [
-            { id: 'user-1', firstName: 'John', lastName: 'Doe', email: 'john@sentinel.edu' },
-        ],
+        data: [{ id: 'user-1', firstName: 'John', lastName: 'Doe', email: 'john@sentinel.edu' }],
+        isLoading: false,
+    })),
+    useProfileQuery: vi.fn(() => ({
+        profile: { institutionId: 'institution-1' },
         isLoading: false,
     })),
     useUserSearch: vi.fn(() => ({
-        users: [
-            { id: 'user-1', firstName: 'John', lastName: 'Doe', email: 'john@sentinel.edu' },
-        ],
+        users: [{ id: 'user-1', firstName: 'John', lastName: 'Doe', email: 'john@sentinel.edu' }],
         isLoading: false,
         isError: false,
         error: null,
@@ -57,6 +56,18 @@ vi.mock('sonner', () => ({
         success: vi.fn(),
         error: vi.fn(),
     },
+}));
+
+vi.mock('./row-classroom-combobox', () => ({
+    RowClassroomCombobox: ({ value, onValueChange, classrooms }: any) => (
+        <div data-testid="mock-classroom-combobox" onClick={() => onValueChange?.('cls-1')}>
+            {classrooms.map((cls: any) => (
+                <div key={cls.id} data-testid={`select-item-${cls.id}`}>
+                    {cls.className}
+                </div>
+            ))}
+        </div>
+    ),
 }));
 
 vi.mock('@sentinel/ui', async (importOriginal) => {
@@ -191,15 +202,10 @@ describe('NewAssignmentsBuilder', () => {
     });
 
     it('renders the builder and handles saving multi-row assignments', async () => {
-        render(
-            <NewAssignmentsBuilder
-                examId="exam-1"
-                currentAssignments={[]}
-            />,
-        );
+        render(<NewAssignmentsBuilder examId="exam-1" currentAssignments={[]} />);
 
         expect(screen.getByText('Add Classroom Row')).toBeDefined();
-        
+
         // Renders Save button
         const saveBtn = screen.getByRole('button', { name: 'Save Assignments' });
         expect(saveBtn).toBeDefined();
@@ -238,5 +244,39 @@ describe('NewAssignmentsBuilder', () => {
         // Assert only Math classroom is rendered
         expect(screen.queryByTestId('select-item-cls-1')).not.toBeNull();
         expect(screen.queryByTestId('select-item-cls-2')).toBeNull();
+    });
+
+    it('falls back to all classrooms when no subject match exists', () => {
+        const mockClassrooms = [
+            {
+                id: 'cls-1',
+                className: 'Math 101',
+                subjectId: 'subject-math',
+                sectionId: 'sec-1',
+                scopeSummary: { sectionLabel: 'Section Alpha' },
+            },
+            {
+                id: 'cls-2',
+                className: 'History 101',
+                subjectId: 'subject-history',
+                sectionId: 'sec-2',
+                scopeSummary: { sectionLabel: 'Section Beta' },
+            },
+        ];
+        vi.mocked(useClassroomsQuery).mockReturnValue({
+            data: mockClassrooms,
+            isLoading: false,
+        } as any);
+
+        render(
+            <NewAssignmentsBuilder
+                examId="exam-1"
+                subjectId="subject-science"
+                currentAssignments={[]}
+            />,
+        );
+
+        expect(screen.queryByTestId('select-item-cls-1')).not.toBeNull();
+        expect(screen.queryByTestId('select-item-cls-2')).not.toBeNull();
     });
 });

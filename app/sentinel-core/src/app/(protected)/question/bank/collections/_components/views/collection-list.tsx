@@ -10,14 +10,14 @@ export interface CollectionListProps {
     collections: (
         | Collection
         | {
-            id: string;
-            name: string;
-            lastUpdated: string;
-            questionCount: number;
-            isPublic: boolean;
-            createdById?: string | null;
-            updatedById?: string | null;
-        }
+              id: string;
+              name: string;
+              lastUpdated: string;
+              questionCount: number;
+              isPublic: boolean;
+              createdById?: string | null;
+              updatedById?: string | null;
+          }
     )[];
     view: ViewMode;
     onOpen: (id: string) => void;

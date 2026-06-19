@@ -597,6 +597,11 @@ export type exam_sections = {
     updated_at: Timestamp | null;
     description: string | null;
 };
+export type exam_shares = {
+    exam_id: string;
+    user_id: string;
+    created_at: Generated<Timestamp | null>;
+};
 export type exams = {
     exam_id: Generated<string>;
     title: string;
@@ -1327,6 +1332,7 @@ export type DB = {
     exam_questions: exam_questions;
     exam_section_assignments: exam_section_assignments;
     exam_sections: exam_sections;
+    exam_shares: exam_shares;
     exams: exams;
     flagged_incidents: flagged_incidents;
     institution_naming_conventions: institution_naming_conventions;

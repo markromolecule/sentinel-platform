@@ -89,8 +89,6 @@ describe('useExamCard', () => {
         );
 
         expect(result.current.canManageExam).toBe(false);
-        expect(result.current.primaryActions.map((action) => action.label)).toEqual([
-            'Export PDF',
-        ]);
+        expect(result.current.primaryActions.map((action) => action.label)).toEqual(['Export PDF']);
     });
 });

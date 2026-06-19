@@ -2,14 +2,7 @@
 
 import { useState, Suspense } from 'react';
 import { ExamCreateDialog, ExamsViewToggle } from '@/features/exams';
-import {
-    PageHeader,
-    Tabs,
-    TabsContent,
-    Button,
-    Separator,
-    Spinner,
-} from '@sentinel/ui';
+import { PageHeader, Tabs, TabsContent, Button, Separator, Spinner } from '@sentinel/ui';
 import { Plus } from 'lucide-react';
 
 import { useExamsDashboard } from './_hooks/use-exams-dashboard';

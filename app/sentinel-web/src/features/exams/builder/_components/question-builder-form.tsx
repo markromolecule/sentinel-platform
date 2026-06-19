@@ -214,7 +214,11 @@ export function QuestionBuilderForm({
                             <ArrowLeft className="h-4 w-4" /> Cancel
                         </Button>
                         {onDuplicate ? (
-                            <Button variant="outline" disabled={!isComplete} onClick={handleDuplicate}>
+                            <Button
+                                variant="outline"
+                                disabled={!isComplete}
+                                onClick={handleDuplicate}
+                            >
                                 <Copy className="h-4 w-4" /> Duplicate
                             </Button>
                         ) : null}
@@ -228,8 +232,14 @@ export function QuestionBuilderForm({
             {builderMode ? <Separator /> : null}
 
             <div className="grid gap-8 xl:grid-cols-2 xl:items-stretch">
-                <div className="min-w-0 h-full flex flex-col gap-6">
-                    <section className={builderMode ? 'space-y-6' : 'border-border/60 bg-background space-y-6 rounded-2xl border p-6 shadow-sm'}>
+                <div className="flex h-full min-w-0 flex-col gap-6">
+                    <section
+                        className={
+                            builderMode
+                                ? 'space-y-6'
+                                : 'border-border/60 bg-background space-y-6 rounded-2xl border p-6 shadow-sm'
+                        }
+                    >
                         <div className="grid gap-3">
                             <Label className="text-sm font-medium">Question Prompt</Label>
                             <Textarea
@@ -321,10 +331,16 @@ export function QuestionBuilderForm({
                         )}
 
                         {(type === 'IDENTIFICATION' || type === 'ENUMERATION') && (
-                            <IdentificationForm type={type} content={content} onChange={setContent} />
+                            <IdentificationForm
+                                type={type}
+                                content={content}
+                                onChange={setContent}
+                            />
                         )}
 
-                        {type === 'MATCHING' && <MatchingForm content={content} onChange={setContent} />}
+                        {type === 'MATCHING' && (
+                            <MatchingForm content={content} onChange={setContent} />
+                        )}
 
                         {type === 'FILL_BLANK' && (
                             <FillBlankForm content={content} onChange={setContent} />
@@ -334,35 +350,42 @@ export function QuestionBuilderForm({
                     </section>
                 </div>
 
-                <aside className="min-w-0 h-full flex flex-col">
-                    <section className={builderMode ? 'h-full space-y-4' : 'border-border/60 bg-background rounded-2xl border p-6 shadow-sm'}>
-                        <Collapsible defaultOpen={hasPassage} className="space-y-4 h-full">
-                                <div className="flex items-center justify-between gap-3">
-                                    <div className="space-y-1">
-                                        <Label className="text-sm font-medium">Passage</Label>
-                                        <p className="text-muted-foreground text-xs">
-                                            Keep the passage and the question side by side while you edit.
-                                        </p>
-                                    </div>
-                                    <div className="flex flex-wrap items-center gap-2">
-                                        <Button
-                                            variant="outline"
-                                            size="sm"
-                                            type="button"
-                                            onClick={() => setIsPassagePreviewOpen(true)}
-                                            disabled={!passagePreview}
-                                        >
-                                            <Eye className="h-4 w-4" />
-                                            Preview passage
-                                        </Button>
-                                        <CollapsibleTrigger asChild>
-                                            <Button variant="ghost" size="sm" type="button">
-                                                {hasPassage ? 'Hide' : 'Add'} passage
-                                            </Button>
-                                        </CollapsibleTrigger>
-                                    </div>
+                <aside className="flex h-full min-w-0 flex-col">
+                    <section
+                        className={
+                            builderMode
+                                ? 'h-full space-y-4'
+                                : 'border-border/60 bg-background rounded-2xl border p-6 shadow-sm'
+                        }
+                    >
+                        <Collapsible defaultOpen={hasPassage} className="h-full space-y-4">
+                            <div className="flex items-center justify-between gap-3">
+                                <div className="space-y-1">
+                                    <Label className="text-sm font-medium">Passage</Label>
+                                    <p className="text-muted-foreground text-xs">
+                                        Keep the passage and the question side by side while you
+                                        edit.
+                                    </p>
                                 </div>
-                            <CollapsibleContent className="space-y-4 h-full">
+                                <div className="flex flex-wrap items-center gap-2">
+                                    <Button
+                                        variant="outline"
+                                        size="sm"
+                                        type="button"
+                                        onClick={() => setIsPassagePreviewOpen(true)}
+                                        disabled={!passagePreview}
+                                    >
+                                        <Eye className="h-4 w-4" />
+                                        Preview passage
+                                    </Button>
+                                    <CollapsibleTrigger asChild>
+                                        <Button variant="ghost" size="sm" type="button">
+                                            {hasPassage ? 'Hide' : 'Add'} passage
+                                        </Button>
+                                    </CollapsibleTrigger>
+                                </div>
+                            </div>
+                            <CollapsibleContent className="h-full space-y-4">
                                 <div className="grid max-w-[220px] gap-3">
                                     <Label className="text-sm font-medium">Passage type</Label>
                                     <Select
@@ -396,7 +419,11 @@ export function QuestionBuilderForm({
                                     ) : (
                                         <Textarea
                                             placeholder="Write the passage text here..."
-                                            className={builderMode ? 'min-h-[540px] h-full' : 'min-h-[300px]'}
+                                            className={
+                                                builderMode
+                                                    ? 'h-full min-h-[540px]'
+                                                    : 'min-h-[300px]'
+                                            }
                                             value={passageContent}
                                             onChange={(e) => setPassageContent(e.target.value)}
                                         />
@@ -424,7 +451,7 @@ export function QuestionBuilderForm({
                     <div className="border-border/60 bg-background max-h-[70vh] overflow-auto rounded-lg border p-4">
                         {passagePreview ? (
                             <div
-                                className="text-sm leading-6 text-foreground"
+                                className="text-foreground text-sm leading-6"
                                 dangerouslySetInnerHTML={{ __html: passagePreview.html }}
                             />
                         ) : (

@@ -1,13 +1,7 @@
 import { type DbClient } from '@sentinel/db';
 import { HTTPException } from 'hono/http-exception';
 
-export type QuestionCollectionAction =
-    | 'view'
-    | 'use'
-    | 'edit'
-    | 'update'
-    | 'delete'
-    | 'share';
+export type QuestionCollectionAction = 'view' | 'use' | 'edit' | 'update' | 'delete' | 'share';
 
 /**
  * Enforces collection access rules for creator, shared, and public users.
@@ -20,7 +14,7 @@ export async function assertCollectionAccess(args: {
 }) {
     const collection = await args.dbClient
         .selectFrom('question_bank_collections')
-        .select(['created_by', 'is_public'])
+        .select(['created_by', 'is_public', 'institution_id'])
         .where('collection_id', '=', args.collectionId)
         .executeTakeFirst();
 
@@ -38,6 +32,25 @@ export async function assertCollectionAccess(args: {
         });
     }
 
+    const userProfile = await args.dbClient
+        .selectFrom('user_profiles')
+        .select('institution_id')
+        .where('user_id', '=', args.userId)
+        .executeTakeFirst();
+
+    const isSameInstitution =
+        collection.institution_id &&
+        userProfile &&
+        collection.institution_id === userProfile.institution_id;
+
+    if (
+        collection.is_public &&
+        isSameInstitution &&
+        (args.action === 'view' || args.action === 'use')
+    ) {
+        return;
+    }
+
     const isShared = await args.dbClient
         .selectFrom('question_bank_collection_shares')
         .select('user_id')
@@ -46,10 +59,6 @@ export async function assertCollectionAccess(args: {
         .executeTakeFirst();
 
     if (isShared) {
-        return;
-    }
-
-    if (collection.is_public && (args.action === 'view' || args.action === 'use')) {
         return;
     }
 

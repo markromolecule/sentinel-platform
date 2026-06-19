@@ -7,6 +7,7 @@
     - remove the "Draft — no questions added yet" on the exam card and also remove the "Draft" below the assigned instructor on the card which also applies on the sentinel-core exam-card
 
 - Implement on the exam card wherein the [share] button on the dropdown will redirect to [assignement] page and automatically selects the exam that was being [share] by the user this applies both
+
 * sentinel-core and sentinel-web
 
 - Improve the UX for the selection on the exam page for [all, published, drafts, archived] ensure to provide a better ux for the user more clean, compact, and neat ui

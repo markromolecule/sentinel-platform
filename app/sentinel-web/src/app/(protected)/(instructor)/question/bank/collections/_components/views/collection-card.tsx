@@ -84,7 +84,7 @@ export function CollectionCard({
                                 <Button
                                     variant="ghost"
                                     size="icon"
-                                    className="text-muted-foreground hover:text-foreground h-8 w-8 opacity-0 transition-opacity group-hover:opacity-100 group-focus-within:opacity-100 focus-visible:opacity-100"
+                                    className="text-muted-foreground hover:text-foreground h-8 w-8 opacity-0 transition-opacity group-focus-within:opacity-100 group-hover:opacity-100 focus-visible:opacity-100"
                                 >
                                     <MoreVertical className="h-4 w-4" />
                                 </Button>
@@ -145,7 +145,7 @@ export function CollectionCard({
                             <span className="truncate">{collection.author}</span>
                         </div>
                     ) : null}
-                
+
                     <div className="text-muted-foreground/80 flex items-center gap-1.5 text-xs">
                         <Clock className="h-3 w-3 shrink-0 opacity-70" />
                         <span>Updated {collection.lastUpdated}</span>

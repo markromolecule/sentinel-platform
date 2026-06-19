@@ -4,7 +4,7 @@
 
 Three bugs / gaps to resolve:
 
-1. **Exam visibility bug** — When an admin/superadmin creates an exam and sets it to **private**, instructors who are *not* the creator and *not* assigned via `exam_section_assignments` or `proctor_assignments` can still see it. Also, when the creator updates a private exam to **public**, the change does not reflect on the instructor's view.
+1. **Exam visibility bug** — When an admin/superadmin creates an exam and sets it to **private**, instructors who are _not_ the creator and _not_ assigned via `exam_section_assignments` or `proctor_assignments` can still see it. Also, when the creator updates a private exam to **public**, the change does not reflect on the instructor's view.
 
 2. **Exam card inconsistency** — The exam card in `sentinel-web` (`ExamCardBody`) does not match the layout of `sentinel-core` (grid vs. inline, open-question for draft display).
 
@@ -22,7 +22,7 @@ Current instructor predicate in `app/sentinel-api/src/modules/examination/exams/
 if (instructorUserId) {
     query = query.where((eb) =>
         eb.or([
-            eb('e.is_public', '=', true),          // ← shows ALL public exams, regardless of institution
+            eb('e.is_public', '=', true), // ← shows ALL public exams, regardless of institution
             eb('e.created_by', '=', instructorUserId),
             eb.exists(/* exam_section_assignments */),
             eb.exists(/* proctor_assignments */),
@@ -36,12 +36,12 @@ More critically: the predicate is applied only when the caller is an instructor 
 
 ### Exam Card Differences
 
-| Field             | `sentinel-core` `ExamCardBody` | `sentinel-web` `ExamCardBody`            |
-|-------------------|-------------------------------|------------------------------------------|
-| Layout            | `grid grid-cols-2` (2-col)    | Mixed inline + `pl-5.5` offsets          |
-| End datetime      | Grid col 1                    | After instructor row                     |
-| Instructor        | Grid col 2                    | `pl-5.5` offset row                      |
-| Draft open-qs     | Explicit creator/draft text   | No explicit draft/open-question label    |
+| Field         | `sentinel-core` `ExamCardBody` | `sentinel-web` `ExamCardBody`         |
+| ------------- | ------------------------------ | ------------------------------------- |
+| Layout        | `grid grid-cols-2` (2-col)     | Mixed inline + `pl-5.5` offsets       |
+| End datetime  | Grid col 1                     | After instructor row                  |
+| Instructor    | Grid col 2                     | `pl-5.5` offset row                   |
+| Draft open-qs | Explicit creator/draft text    | No explicit draft/open-question label |
 
 ### Messaging Realtime
 
@@ -54,16 +54,19 @@ More critically: the predicate is applied only when the caller is an instructor 
 ## Viable Options (per 1-3-1 Rule)
 
 ### Option A — Patch the existing predicate (simple / fast)
+
 Add `institution_id` scoping to the `is_public = true` arm and add unit tests.
 
 **Tradeoff**: Minimal change, fast to ship, but doesn't address edge cases like instructors whose `institutionId` resolves differently.
 
 ### Option B — Introduce a dedicated `getInstructorExams` query (robust / scalable)
+
 Create a new data-access function that encapsulates instructor-specific visibility rules: `is_public AND institution_id = :institutionId` OR `created_by = :instructorId` OR section-assigned OR proctor-assigned.
 
 **Tradeoff**: More files but explicit visibility contract, easier to test in isolation.
 
 ### Option C — Server-side RLS policy on `exams` table (creative)
+
 Push visibility filtering to Postgres Row-Level Security, removing it from application code entirely.
 
 **Tradeoff**: Zero application code for filtering but requires a DB migration, harder to test and iterate on.
@@ -108,12 +111,12 @@ eb.and([
 #### [NEW] [get-exams-instructor-visibility.test.ts](file:///Applications/XAMPP/xamppfiles/htdocs/sentinel/app/sentinel-api/src/modules/examination/exams/data/get-exams-instructor-visibility.test.ts)
 
 - [ ] Write tests covering:
-  - Instructor sees `is_public = true` exam from **same** institution ✓
-  - Instructor does **not** see `is_public = true` exam from **different** institution ✗
-  - Instructor sees own private exam ✓
-  - Instructor sees exam they are section-assigned to ✓
-  - Instructor does **not** see another instructor's private exam ✗
-  - Updating `is_public` from `false` → `true` surfaces the exam on next fetch ✓
+    - Instructor sees `is_public = true` exam from **same** institution ✓
+    - Instructor does **not** see `is_public = true` exam from **different** institution ✗
+    - Instructor sees own private exam ✓
+    - Instructor sees exam they are section-assigned to ✓
+    - Instructor does **not** see another instructor's private exam ✗
+    - Updating `is_public` from `false` → `true` surfaces the exam on next fetch ✓
 
 #### [MODIFY] [get-exams.test.ts](file:///Applications/XAMPP/xamppfiles/htdocs/sentinel/app/sentinel-api/src/modules/examination/exams/services/get-exams.test.ts)
 
@@ -130,12 +133,12 @@ eb.and([
 #### [MODIFY] [exam-card-body.tsx](file:///Applications/XAMPP/xamppfiles/htdocs/sentinel/app/sentinel-web/src/features/exams/_components/cards/exam-card/exam-card-body.tsx)
 
 - [x] Replace the current mixed inline + `pl-5.5` layout with `grid grid-cols-2 gap-x-3 gap-y-2` matching `sentinel-core`:
-  - Col 1, row 1: Scheduled date
-  - Col 2, row 1: Room (`assignedRoomNames`)
-  - Col 1, row 2: End datetime
-  - Col 2, row 2: Instructor (`assignedInstructorNames`)
-  - Col 1, row 3: Question count
-  - Col 2, row 3: Creator/publisher attribution
+    - Col 1, row 1: Scheduled date
+    - Col 2, row 1: Room (`assignedRoomNames`)
+    - Col 1, row 2: End datetime
+    - Col 2, row 2: Instructor (`assignedInstructorNames`)
+    - Col 1, row 3: Question count
+    - Col 2, row 3: Creator/publisher attribution
 - [x] When `exam.status === 'draft'` and `exam.questionCount === 0`, render a muted note below the subject row: `"Draft — no questions added yet"` to answer the open question about draft state for assigned instructors.
 
 #### [MODIFY] [exam-card-body.test.tsx](file:///Applications/XAMPP/xamppfiles/htdocs/sentinel/app/sentinel-web/src/features/exams/_components/cards/exam-card/exam-card-body.test.tsx)
@@ -173,7 +176,7 @@ useMessageRealtime({
 - [x] Add test: `useMessageRealtime` is called twice when a conversation is selected — once without `conversationId` and once with the selected ID.
 - [x] Add test: the per-conversation call is disabled when no conversation is selected.
 
-#### [MODIFY] [page.tsx (sentinel-core messages)](file:///Applications/XAMPP/xamppfiles/htdocs/sentinel/app/sentinel-core/src/app/(protected)/messages/page.tsx)
+#### [MODIFY] [page.tsx (sentinel-core messages)](<file:///Applications/XAMPP/xamppfiles/htdocs/sentinel/app/sentinel-core/src/app/(protected)/messages/page.tsx>)
 
 - [x] Add a second `useMessageRealtime` call scoped to `selectedConversationId` after line 31:
 
@@ -186,15 +189,15 @@ useMessageRealtime({
 });
 ```
 
-#### [MODIFY] [page.test.tsx (sentinel-core messages)](file:///Applications/XAMPP/xamppfiles/htdocs/sentinel/app/sentinel-core/src/app/(protected)/messages/page.test.tsx)
+#### [MODIFY] [page.test.tsx (sentinel-core messages)](<file:///Applications/XAMPP/xamppfiles/htdocs/sentinel/app/sentinel-core/src/app/(protected)/messages/page.test.tsx>)
 
 - [x] Add test: `useMessageRealtime` called twice — global + per-conversation.
 
-#### [MODIFY] [page.tsx (sentinel-support messages)](file:///Applications/XAMPP/xamppfiles/htdocs/sentinel/app/sentinel-support/src/app/(protected)/messages/page.tsx)
+#### [MODIFY] [page.tsx (sentinel-support messages)](<file:///Applications/XAMPP/xamppfiles/htdocs/sentinel/app/sentinel-support/src/app/(protected)/messages/page.tsx>)
 
 - [x] Same fix as sentinel-core: add a scoped per-conversation `useMessageRealtime` call.
 
-#### [MODIFY] [page.test.tsx (sentinel-support messages)](file:///Applications/XAMPP/xamppfiles/htdocs/sentinel/app/sentinel-support/src/app/(protected)/messages/page.test.tsx)
+#### [MODIFY] [page.test.tsx (sentinel-support messages)](<file:///Applications/XAMPP/xamppfiles/htdocs/sentinel/app/sentinel-support/src/app/(protected)/messages/page.test.tsx>)
 
 - [x] Add matching test for the double `useMessageRealtime` call pattern.
 
@@ -221,17 +224,17 @@ pnpm --dir app/sentinel-support test
 ### Manual Verification
 
 1. **Exam visibility**:
-   - Log in as admin → create a private exam → verify instructors from the same institution do **not** see it.
-   - Update the exam to public → verify instructors from the same institution **do** see it on next API call.
-   - Log in as instructor → verify only own / assigned / public-same-institution exams appear.
+    - Log in as admin → create a private exam → verify instructors from the same institution do **not** see it.
+    - Update the exam to public → verify instructors from the same institution **do** see it on next API call.
+    - Log in as instructor → verify only own / assigned / public-same-institution exams appear.
 
 2. **Exam card parity**:
-   - Navigate to exam list in `sentinel-web` → confirm card body uses 2-column grid layout matching `sentinel-core`.
-   - Draft exam with 0 questions → verify draft note renders.
+    - Navigate to exam list in `sentinel-web` → confirm card body uses 2-column grid layout matching `sentinel-core`.
+    - Draft exam with 0 questions → verify draft note renders.
 
 3. **Real-time messaging**:
-   - Open two browser sessions as different users in each app.
-   - Send a message → confirm it appears in the recipient's open conversation without a manual page refresh in sentinel-web, sentinel-core, and sentinel-support.
+    - Open two browser sessions as different users in each app.
+    - Send a message → confirm it appears in the recipient's open conversation without a manual page refresh in sentinel-web, sentinel-core, and sentinel-support.
 
 ---
 

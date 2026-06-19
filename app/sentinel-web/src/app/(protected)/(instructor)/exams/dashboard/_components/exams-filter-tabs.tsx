@@ -20,7 +20,7 @@ export function ExamsFilterTabs({ activeTab, counts, onValueChange }: ExamsFilte
                     key={value}
                     value={value}
                     onClick={() => onValueChange(value)}
-                    className="data-[state=active]:bg-primary/10 data-[state=active]:text-primary data-[state=active]:shadow-none text-muted-foreground hover:text-foreground min-h-7 shrink-0 rounded-full px-3 py-1.5 text-sm font-medium shadow-none transition hover:bg-black/5 focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:outline-none dark:hover:bg-white/5"
+                    className="data-[state=active]:bg-primary/10 data-[state=active]:text-primary text-muted-foreground hover:text-foreground min-h-7 shrink-0 rounded-full px-3 py-1.5 text-sm font-medium shadow-none transition hover:bg-black/5 focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:outline-none data-[state=active]:shadow-none dark:hover:bg-white/5"
                     data-state={activeTab === value ? 'active' : 'inactive'}
                 >
                     <span>{label}</span>

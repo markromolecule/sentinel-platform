@@ -52,6 +52,11 @@ export const getClassroomsSchema = {
                 .default('active')
                 .optional()
                 .openapi({ description: 'Filter classrooms by status' }),
+            subjectId: z
+                .string()
+                .uuid()
+                .optional()
+                .openapi({ description: 'Filter classrooms by subject ID' }),
         }),
     },
     response: z.object({

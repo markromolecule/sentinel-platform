@@ -41,9 +41,7 @@ describe('CollectionCard permissions', () => {
             isLoading: false,
         } as any);
 
-        render(
-            <CollectionCard collection={baseCollection} currentUserId="viewer-1" />,
-        );
+        render(<CollectionCard collection={baseCollection} currentUserId="viewer-1" />);
 
         expect(screen.queryByText('Share Collection')).toBeNull();
         expect(screen.queryByText('Delete Collection')).toBeNull();
@@ -63,9 +61,7 @@ describe('CollectionCard permissions', () => {
             isLoading: false,
         } as any);
 
-        render(
-            <CollectionCard collection={baseCollection} currentUserId="viewer-1" />,
-        );
+        render(<CollectionCard collection={baseCollection} currentUserId="viewer-1" />);
 
         expect(screen.getByText('Edit Collection')).toBeTruthy();
         expect(screen.queryByText('Share Collection')).toBeNull();
@@ -78,9 +74,7 @@ describe('CollectionCard permissions', () => {
             isLoading: false,
         } as any);
 
-        render(
-            <CollectionCard collection={baseCollection} currentUserId="creator-1" />,
-        );
+        render(<CollectionCard collection={baseCollection} currentUserId="creator-1" />);
 
         expect(screen.getByText('Share Collection')).toBeTruthy();
         expect(screen.getByText('Delete Collection')).toBeTruthy();

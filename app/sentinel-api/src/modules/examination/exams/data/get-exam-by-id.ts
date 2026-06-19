@@ -91,7 +91,9 @@ export async function getExamByIdData({
                             .as('combined_instructors'),
                     )
                     .select(
-                        sql<string[]>`coalesce(json_agg(combined_instructors.instructor_id), '[]'::json)`.as(
+                        sql<
+                            string[]
+                        >`coalesce(json_agg(combined_instructors.instructor_id), '[]'::json)`.as(
                             'instructor_ids',
                         ),
                     )

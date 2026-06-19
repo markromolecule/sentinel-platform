@@ -5,30 +5,36 @@ import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } 
 const pushMock = vi.fn();
 const updateQuestionMock = vi.fn();
 const transformMock = vi.fn();
-const EditQuestionViewMock = vi.fn((props: {
-    editingIndex: number;
-    editingQuestion: { type: string };
-    onBack: () => void;
-    onUpdate: (id: string, updates: Record<string, unknown>) => void;
-}) => (
-    <div data-testid="edit-question-view" data-index={props.editingIndex} data-type={props.editingQuestion.type}>
-        <button type="button" onClick={props.onBack}>
-            Back
-        </button>
-        <button
-            type="button"
-            onClick={() =>
-                props.onUpdate('question-1', {
-                    content: { prompt: 'Updated prompt' },
-                    difficulty: 'EASY',
-                    points: 3,
-                })
-            }
+const EditQuestionViewMock = vi.fn(
+    (props: {
+        editingIndex: number;
+        editingQuestion: { type: string };
+        onBack: () => void;
+        onUpdate: (id: string, updates: Record<string, unknown>) => void;
+    }) => (
+        <div
+            data-testid="edit-question-view"
+            data-index={props.editingIndex}
+            data-type={props.editingQuestion.type}
         >
-            Save
-        </button>
-    </div>
-));
+            <button type="button" onClick={props.onBack}>
+                Back
+            </button>
+            <button
+                type="button"
+                onClick={() =>
+                    props.onUpdate('question-1', {
+                        content: { prompt: 'Updated prompt' },
+                        difficulty: 'EASY',
+                        points: 3,
+                    })
+                }
+            >
+                Save
+            </button>
+        </div>
+    ),
+);
 
 vi.mock('next/navigation', () => ({
     useParams: () => ({ editingIndex: '1' }),
@@ -46,16 +52,19 @@ vi.mock('@sentinel/hooks', () => ({
     useStableValue: (factory: () => unknown) => factory(),
 }));
 
-vi.mock('@/app/(protected)/(instructor)/question/bank/_components/dialogs/import-modal/_hooks/use-ai-import-store', () => ({
-    useAiImportStore: () => ({
-        previewData: {
-            questions: [{ id: 'question-1' }, { id: 'question-2' }],
-        },
-        isGenerating: false,
-        hasHydrated: true,
-        updateQuestion: updateQuestionMock,
+vi.mock(
+    '@/app/(protected)/(instructor)/question/bank/_components/dialogs/import-modal/_hooks/use-ai-import-store',
+    () => ({
+        useAiImportStore: () => ({
+            previewData: {
+                questions: [{ id: 'question-1' }, { id: 'question-2' }],
+            },
+            isGenerating: false,
+            hasHydrated: true,
+            updateQuestion: updateQuestionMock,
+        }),
     }),
-}));
+);
 
 vi.mock(
     '@/app/(protected)/(instructor)/question/bank/import/preview/_hooks/use-preview-manager/_utils',

@@ -142,8 +142,7 @@ export function PassageEditor({
         },
         editorProps: {
             attributes: {
-                class:
-                    'min-h-[220px] rounded-md border border-border/60 bg-background px-4 py-3 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
+                class: 'min-h-[220px] rounded-md border border-border/60 bg-background px-4 py-3 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
             },
         },
     });
@@ -167,11 +166,7 @@ export function PassageEditor({
         const href = linkUrl.trim();
 
         if (editor.state.selection.empty) {
-            editor
-                .chain()
-                .focus()
-                .insertContent(buildLinkedTextNode(href))
-                .run();
+            editor.chain().focus().insertContent(buildLinkedTextNode(href)).run();
         } else {
             editor.chain().focus().extendMarkRange('link').setLink({ href }).run();
         }
@@ -207,9 +202,7 @@ export function PassageEditor({
             const inferredAlt = getPassageImageAltText(file.name);
             insertImage(uploadedUrl, inferredAlt);
         } catch (error) {
-            setImageUploadError(
-                error instanceof Error ? error.message : 'Failed to upload image.',
-            );
+            setImageUploadError(error instanceof Error ? error.message : 'Failed to upload image.');
         } finally {
             setIsUploadingImage(false);
         }
@@ -218,7 +211,7 @@ export function PassageEditor({
     if (!editor) {
         return (
             <div className={cn('space-y-3', className)}>
-                <div className="rounded-md border border-dashed border-border/60 px-4 py-6 text-sm text-muted-foreground">
+                <div className="border-border/60 text-muted-foreground rounded-md border border-dashed px-4 py-6 text-sm">
                     Loading passage editor...
                 </div>
             </div>
@@ -314,10 +307,10 @@ export function PassageEditor({
                 </ToolbarButton>
             </div>
 
-            <div className="grid gap-3 rounded-md border border-border/60 bg-muted/20 p-3">
+            <div className="border-border/60 bg-muted/20 grid gap-3 rounded-md border p-3">
                 <div className="grid gap-2 sm:grid-cols-[1fr_auto]">
                     <div className="grid gap-2">
-                        <Label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                        <Label className="text-muted-foreground text-xs font-semibold tracking-wide uppercase">
                             Link URL
                         </Label>
                         <Input
@@ -341,7 +334,7 @@ export function PassageEditor({
                 </div>
 
                 <div className="grid gap-2 sm:grid-cols-[1fr_auto]">
-                    <div className="flex items-end text-xs text-muted-foreground">
+                    <div className="text-muted-foreground flex items-end text-xs">
                         Upload a local image to Supabase storage and insert it into the passage.
                     </div>
                     <div className="flex items-end">
@@ -367,16 +360,16 @@ export function PassageEditor({
                 />
 
                 {imageUploadError ? (
-                    <p className="text-xs text-destructive">{imageUploadError}</p>
+                    <p className="text-destructive text-xs">{imageUploadError}</p>
                 ) : null}
             </div>
 
             <div className="min-h-[220px] flex-1">
                 <EditorContent editor={editor} />
             </div>
-            <p className="text-xs text-muted-foreground">
-                Uploaded images use the file name as alt text. Code blocks use the shared
-                lowlight syntax-highlighting config.
+            <p className="text-muted-foreground text-xs">
+                Uploaded images use the file name as alt text. Code blocks use the shared lowlight
+                syntax-highlighting config.
             </p>
         </div>
     );

@@ -32,6 +32,8 @@ export async function getQuestionCollectionQuestionsData({
             'qbq.points',
             'qbq.tags',
             'qbq.content',
+            'qbq.passage_content',
+            'qbq.passage_type',
             'qbq.created_at',
             'qbq.updated_at',
             'qbq.created_by',

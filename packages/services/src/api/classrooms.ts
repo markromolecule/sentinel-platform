@@ -162,16 +162,31 @@ function mapClassroomDetail(classroom: ApiClassroomDetail): ClassroomDetail {
     };
 }
 
+/**
+ * Fetches the list of classrooms from the API, scoped by optional filters.
+ *
+ * @param apiClient - The API client function.
+ * @param query - A query string for searching or an object containing search, departmentId, status, institutionId, and subjectId.
+ * @returns A promise resolving to an array of ClassroomSummary.
+ */
 export async function getClassrooms(
     apiClient: ApiClientType,
     query?:
         | string
-        | { search?: string; departmentId?: string; status?: 'active' | 'archived' | 'all' },
+        | {
+              search?: string;
+              departmentId?: string;
+              status?: 'active' | 'archived' | 'all';
+              institutionId?: string;
+              subjectId?: string;
+          },
 ): Promise<ClassroomSummary[]> {
     const searchParams = new URLSearchParams();
     const search = typeof query === 'string' ? query : query?.search;
     const departmentId = typeof query === 'string' ? undefined : query?.departmentId;
     const status = typeof query === 'string' ? undefined : query?.status;
+    const institutionId = typeof query === 'string' ? undefined : query?.institutionId;
+    const subjectId = typeof query === 'string' ? undefined : query?.subjectId;
 
     if (search) {
         searchParams.append('search', search);
@@ -183,6 +198,14 @@ export async function getClassrooms(
 
     if (status) {
         searchParams.append('status', status);
+    }
+
+    if (institutionId) {
+        searchParams.append('institutionId', institutionId);
+    }
+
+    if (subjectId) {
+        searchParams.append('subjectId', subjectId);
     }
 
     const queryString = searchParams.toString();

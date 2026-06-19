@@ -14,6 +14,14 @@ vi.mock('@sentinel/hooks', () => ({
     useExamsQuery: vi.fn(() => ({ data: [], isLoading: false })),
 }));
 
+vi.mock('./basic-info-fields/subject-search-combobox', () => ({
+    SubjectSearchCombobox: ({ value, onValueChange }: any) => (
+        <div data-testid="mock-subject-search-combobox" onClick={() => onValueChange?.('sub-1')}>
+            Mock Subject Combobox
+        </div>
+    ),
+}));
+
 vi.mock('@sentinel/ui', async (importOriginal) => {
     const actual = (await importOriginal()) as any;
     return {
@@ -70,4 +78,3 @@ describe('BasicInfoFields and ScheduleFields', () => {
         expect(screen.getByText('Ends At')).toBeDefined();
     });
 });
-

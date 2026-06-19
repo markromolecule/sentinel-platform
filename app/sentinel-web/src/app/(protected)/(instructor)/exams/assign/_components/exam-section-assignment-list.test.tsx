@@ -7,6 +7,7 @@ import {
     useDeleteExamSectionAssignmentMutation,
     useCreateExamSectionAssignmentsBatchMutation,
     useClassroomsQuery,
+    useProfileQuery,
 } from '@sentinel/hooks';
 
 vi.mock('@sentinel/hooks', () => ({
@@ -32,21 +33,19 @@ vi.mock('@sentinel/hooks', () => ({
         isLoading: false,
     })),
     useRoomsQuery: vi.fn(() => ({
-        data: [
-            { id: 'room-1', name: 'Room 101', room_number: '101', status: 'AVAILABLE' },
-        ],
+        data: [{ id: 'room-1', name: 'Room 101', room_number: '101', status: 'AVAILABLE' }],
         isLoading: false,
     })),
     useUsersQuery: vi.fn(() => ({
-        data: [
-            { id: 'user-1', firstName: 'John', lastName: 'Doe', email: 'john@sentinel.edu' },
-        ],
+        data: [{ id: 'user-1', firstName: 'John', lastName: 'Doe', email: 'john@sentinel.edu' }],
+        isLoading: false,
+    })),
+    useProfileQuery: vi.fn(() => ({
+        profile: { institutionId: 'institution-1' },
         isLoading: false,
     })),
     useUserSearch: vi.fn(() => ({
-        users: [
-            { id: 'user-1', firstName: 'John', lastName: 'Doe', email: 'john@sentinel.edu' },
-        ],
+        users: [{ id: 'user-1', firstName: 'John', lastName: 'Doe', email: 'john@sentinel.edu' }],
         isLoading: false,
         isError: false,
         error: null,
@@ -113,9 +112,11 @@ describe('ExamSectionAssignmentList', () => {
         render(
             <ExamSectionAssignmentList
                 examId="exam-1"
-                assignments={mockAssignments as unknown as Parameters<
-                    typeof ExamSectionAssignmentList
-                >[0]['assignments']}
+                assignments={
+                    mockAssignments as unknown as Parameters<
+                        typeof ExamSectionAssignmentList
+                    >[0]['assignments']
+                }
                 isLoading={false}
                 onAssignClick={mockOnAssignClick}
             />,
@@ -147,9 +148,11 @@ describe('ExamSectionAssignmentList', () => {
         render(
             <ExamSectionAssignmentList
                 examId="exam-1"
-                assignments={mockAssignments as unknown as Parameters<
-                    typeof ExamSectionAssignmentList
-                >[0]['assignments']}
+                assignments={
+                    mockAssignments as unknown as Parameters<
+                        typeof ExamSectionAssignmentList
+                    >[0]['assignments']
+                }
                 isLoading={false}
                 onAssignClick={mockOnAssignClick}
             />,
@@ -222,5 +225,40 @@ describe('NewAssignmentsBuilder', () => {
 
         expect(screen.queryByTestId('select-item-cls-1')).not.toBeNull();
         expect(screen.queryByTestId('select-item-cls-2')).toBeNull();
+    });
+
+    it('falls back to all classrooms when no subject match exists', () => {
+        const mockClassrooms = [
+            {
+                id: 'cls-1',
+                className: 'Math 101',
+                subjectId: 'subject-math',
+                sectionId: 'sec-1',
+                scopeSummary: { sectionLabel: 'Section Alpha' },
+            },
+            {
+                id: 'cls-2',
+                className: 'History 101',
+                subjectId: 'subject-history',
+                sectionId: 'sec-2',
+                scopeSummary: { sectionLabel: 'Section Beta' },
+            },
+        ];
+
+        vi.mocked(useClassroomsQuery).mockReturnValue({
+            data: mockClassrooms,
+            isLoading: false,
+        } as unknown as ReturnType<typeof useClassroomsQuery>);
+
+        render(
+            <NewAssignmentsBuilder
+                examId="exam-1"
+                subjectId="subject-science"
+                currentAssignments={[]}
+            />,
+        );
+
+        expect(screen.queryByTestId('select-item-cls-1')).not.toBeNull();
+        expect(screen.queryByTestId('select-item-cls-2')).not.toBeNull();
     });
 });

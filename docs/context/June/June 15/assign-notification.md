@@ -1,6 +1,6 @@
 # Goal
 
-- To implement a notification if someone assigns you on 
+- To implement a notification if someone assigns you on
     - Exam
     - Collection
 

@@ -174,8 +174,7 @@ export class QuestionService {
                 body.sourceEvidence === undefined ? current.source_evidence : body.sourceEvidence,
             passageContent:
                 body.passageContent === undefined ? current.passage_content : body.passageContent,
-            passageType:
-                body.passageType === undefined ? current.passage_type : body.passageType,
+            passageType: body.passageType === undefined ? current.passage_type : body.passageType,
         });
 
         const updated = await updateQuestionData({

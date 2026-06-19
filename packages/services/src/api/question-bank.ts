@@ -230,7 +230,12 @@ export async function getQuestionBankCollectionShares(
     id: string,
 ): Promise<QuestionBankCollectionShareRecord[]> {
     const response: ApiResponse<
-        { user_id: string; first_name: string | null; last_name: string | null; email: string | null }[]
+        {
+            user_id: string;
+            first_name: string | null;
+            last_name: string | null;
+            email: string | null;
+        }[]
     > = await apiClient(`/question-bank/collections/${id}/shares`);
 
     return response.data.map(mapShareRecord);
@@ -250,7 +255,12 @@ export async function shareQuestionBankCollection(
     },
 ): Promise<QuestionBankCollectionShareRecord[]> {
     const response: ApiResponse<
-        { user_id: string; first_name: string | null; last_name: string | null; email: string | null }[]
+        {
+            user_id: string;
+            first_name: string | null;
+            last_name: string | null;
+            email: string | null;
+        }[]
     > = await apiClient(`/question-bank/collections/${id}/shares`, {
         method: 'POST',
         headers: {

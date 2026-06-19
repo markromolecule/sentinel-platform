@@ -19,9 +19,9 @@ function buildEditFormValues(exam: ProctorExam): ExamCreateFormValues {
         toDateTimeLocal(exam.endDateTime) ||
         (startDateTime
             ? getEndDateTimeFromDuration(
-                startDateTime,
-                exam.duration || DEFAULT_EXAM_DURATION_MINUTES,
-            )
+                  startDateTime,
+                  exam.duration || DEFAULT_EXAM_DURATION_MINUTES,
+              )
             : '');
 
     return {

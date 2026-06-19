@@ -26,14 +26,14 @@ The collection is discoverable and accessible by all users.
 
 ## Permission Matrix
 
-| Action         | Creator | Shared / Assigned | Other Users (Public) |
-|----------------|:-------:|:-----------------:|:--------------------:|
-| View           | ✅      | ✅                | ✅ *(public only)*   |
-| Use            | ✅      | ✅                | ✅ *(public only)*   |
-| Edit           | ✅      | ✅                | ❌                   |
-| Update         | ✅      | ✅                 | ❌                   |
-| Delete         | ✅      | ❌                | ❌                   |
-| Share          | ✅      | ❌                | ❌                   |
+| Action | Creator | Shared / Assigned | Other Users (Public) |
+| ------ | :-----: | :---------------: | :------------------: |
+| View   |   ✅    |        ✅         |  ✅ _(public only)_  |
+| Use    |   ✅    |        ✅         |  ✅ _(public only)_  |
+| Edit   |   ✅    |        ✅         |          ❌          |
+| Update |   ✅    |        ✅         |          ❌          |
+| Delete |   ✅    |        ❌         |          ❌          |
+| Share  |   ✅    |        ❌         |          ❌          |
 
 ---
 

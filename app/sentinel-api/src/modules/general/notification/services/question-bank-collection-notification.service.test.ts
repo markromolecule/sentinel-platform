@@ -19,8 +19,8 @@ describe('QuestionBankCollectionNotificationService', () => {
         const mockNotif = { id: 'notif-1' } as any;
         vi.mocked(NotificationService.createNotification).mockResolvedValue(mockNotif);
 
-        const result = await QuestionBankCollectionNotificationService.notifyQuestionBankCollectionAssigned(
-            {
+        const result =
+            await QuestionBankCollectionNotificationService.notifyQuestionBankCollectionAssigned({
                 dbClient,
                 recipientUserId: 'recipient-1',
                 actorUserId: 'actor-1',
@@ -28,8 +28,7 @@ describe('QuestionBankCollectionNotificationService', () => {
                 collectionId: 'collection-1',
                 collectionLabel: 'Physics Practice Set',
                 assignerName: 'Jordan Instructor',
-            },
-        );
+            });
 
         expect(NotificationService.createNotification).toHaveBeenCalledWith({
             dbClient,

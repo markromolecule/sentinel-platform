@@ -1,12 +1,6 @@
 'use client';
 
-import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogHeader,
-    DialogTitle,
-} from '@sentinel/ui';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@sentinel/ui';
 import { type ExamSectionAssignmentRecord } from '@sentinel/services';
 import { NewAssignmentsBuilder } from './new-assignments-builder';
 
@@ -39,7 +33,7 @@ export function AddExamSectionAssignmentDialog({
                 }
             }}
         >
-            <DialogContent className="max-h-[90vh] sm:max-w-4xl md:max-w-5xl overflow-y-auto bg-white dark:bg-zinc-900">
+            <DialogContent className="max-h-[90vh] overflow-y-auto bg-white sm:max-w-4xl md:max-w-5xl dark:bg-zinc-900">
                 <DialogHeader>
                     <DialogTitle className="text-lg font-bold">Assign Classrooms</DialogTitle>
                     <DialogDescription>

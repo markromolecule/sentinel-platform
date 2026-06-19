@@ -267,6 +267,7 @@ export type GetExamsParams = {
     status?: ExamStatus;
     subjectId?: string;
     classroomId?: string;
+    institutionId?: string;
 };
 
 export type CreateExamPayload = {

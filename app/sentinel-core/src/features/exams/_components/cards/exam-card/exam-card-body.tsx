@@ -41,10 +41,10 @@ export function ExamCardBody({ exam }: ExamCardBodyProps) {
         exam.status?.toLowerCase() === 'draft'
             ? null
             : exam.publishedByName
-            ? `Published by ${exam.publishedByName}`
-            : exam.createdByName
-            ? `Created by ${exam.createdByName}`
-            : null;
+              ? `Published by ${exam.publishedByName}`
+              : exam.createdByName
+                ? `Created by ${exam.createdByName}`
+                : null;
 
     return (
         <CardContent className="px-4">

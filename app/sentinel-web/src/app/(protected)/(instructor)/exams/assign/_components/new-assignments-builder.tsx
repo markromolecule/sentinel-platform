@@ -16,6 +16,7 @@ import {
     useRoomsQuery,
     useUsersQuery,
     useCreateExamSectionAssignmentsBatchMutation,
+    useProfileQuery,
 } from '@sentinel/hooks';
 import { type ClassroomSummary, type Room } from '@sentinel/shared/types';
 import {
@@ -62,16 +63,27 @@ export function NewAssignmentsBuilder({
     onSuccess,
     onCancel,
 }: NewAssignmentsBuilderProps) {
+    const { profile } = useProfileQuery();
     const [rows, setRows] = React.useState<AssignmentRow[]>(() => [createAssignmentRow()]);
 
-    const { data: classrooms = [], isLoading: isClassroomsLoading } = useClassroomsQuery();
+    const { data: classrooms = [], isLoading: isClassroomsLoading } = useClassroomsQuery({
+        institutionId: profile?.institutionId || undefined,
+    });
     const { data: rooms = [], isLoading: isRoomsLoading } = useRoomsQuery();
     const { data: users = [], isLoading: isUsersLoading } = useUsersQuery({ role: 'instructor' });
 
     const filteredClassrooms = React.useMemo(() => {
-        if (!subjectId) return classrooms as ClassroomSummary[];
+        const subjectMatchedClassrooms = !subjectId
+            ? []
+            : (classrooms as ClassroomSummary[]).filter(
+                  (classroom) => classroom.subjectId === subjectId,
+              );
 
-        return (classrooms as ClassroomSummary[]).filter((classroom) => classroom.subjectId === subjectId);
+        if (subjectMatchedClassrooms.length > 0) {
+            return subjectMatchedClassrooms;
+        }
+
+        return classrooms as ClassroomSummary[];
     }, [classrooms, subjectId]);
 
     const createMutation = useCreateExamSectionAssignmentsBatchMutation({
@@ -97,7 +109,9 @@ export function NewAssignmentsBuilder({
     };
 
     const handleClassroomChange = (localId: string, classroomId: string) => {
-        const classroom = (classrooms as ClassroomSummary[]).find((entry) => entry.id === classroomId);
+        const classroom = (classrooms as ClassroomSummary[]).find(
+            (entry) => entry.id === classroomId,
+        );
         setRows(
             rows.map((row) => {
                 if (row.localId === localId) {
@@ -129,12 +143,16 @@ export function NewAssignmentsBuilder({
         );
     };
 
-    const assignedSectionIds = new Set(currentAssignments.map((assignment) => assignment.sectionId));
+    const assignedSectionIds = new Set(
+        currentAssignments.map((assignment) => assignment.sectionId),
+    );
     const selectedSectionIdsInRows = rows.map((row) => row.sectionId).filter((id) => id !== 'none');
 
     const hasDuplicatesInRows =
         selectedSectionIdsInRows.length !== new Set(selectedSectionIdsInRows).size;
-    const hasConflictsWithExisting = selectedSectionIdsInRows.some((id) => assignedSectionIds.has(id));
+    const hasConflictsWithExisting = selectedSectionIdsInRows.some((id) =>
+        assignedSectionIds.has(id),
+    );
 
     const isPending = createMutation.isPending;
     const isValid =
@@ -177,7 +195,8 @@ export function NewAssignmentsBuilder({
                     <AlertCircle className="h-4 w-4 shrink-0" />
                     <span>
                         {hasDuplicatesInRows && 'Duplicate classroom selections detected. '}
-                        {hasConflictsWithExisting && 'Some selected classrooms (sections) are already assigned.'}
+                        {hasConflictsWithExisting &&
+                            'Some selected classrooms (sections) are already assigned.'}
                     </span>
                 </div>
             )}
@@ -191,7 +210,7 @@ export function NewAssignmentsBuilder({
                             animate={{ opacity: 1, y: 0 }}
                             exit={{ opacity: 0, height: 0, marginBottom: 0 }}
                             transition={{ duration: 0.2 }}
-                            className="relative grid grid-cols-1 items-end gap-3 rounded-lg border bg-zinc-50/50 p-4 pr-12 dark:bg-zinc-950/20 md:grid-cols-12"
+                            className="relative grid grid-cols-1 items-end gap-3 rounded-lg border bg-zinc-50/50 p-4 pr-12 md:grid-cols-12 dark:bg-zinc-950/20"
                         >
                             <div className="space-y-1.5 md:col-span-5">
                                 <Label className="text-xs font-semibold text-zinc-500">
@@ -205,7 +224,9 @@ export function NewAssignmentsBuilder({
                                 ) : (
                                     <Select
                                         value={row.classroomId}
-                                        onValueChange={(val) => handleClassroomChange(row.localId, val)}
+                                        onValueChange={(val) =>
+                                            handleClassroomChange(row.localId, val)
+                                        }
                                         disabled={isPending}
                                     >
                                         <SelectTrigger className="bg-white dark:bg-zinc-950">
@@ -217,7 +238,8 @@ export function NewAssignmentsBuilder({
                                             </SelectItem>
                                             {filteredClassrooms.map((classroom) => (
                                                 <SelectItem key={classroom.id} value={classroom.id}>
-                                                    {classroom.className || classroom.scopeSummary.sectionLabel}
+                                                    {classroom.className ||
+                                                        classroom.scopeSummary.sectionLabel}
                                                 </SelectItem>
                                             ))}
                                         </SelectContent>
@@ -237,7 +259,9 @@ export function NewAssignmentsBuilder({
                                 ) : (
                                     <Select
                                         value={row.roomId}
-                                        onValueChange={(val) => handleFieldChange(row.localId, 'roomId', val)}
+                                        onValueChange={(val) =>
+                                            handleFieldChange(row.localId, 'roomId', val)
+                                        }
                                         disabled={isPending}
                                     >
                                         <SelectTrigger className="bg-white dark:bg-zinc-950">
@@ -253,13 +277,15 @@ export function NewAssignmentsBuilder({
                                                         </span>
                                                         <span
                                                             className={cn(
-                                                                'ml-2 rounded-xs border px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider',
+                                                                'ml-2 rounded-xs border px-1.5 py-0.5 text-[10px] font-semibold tracking-wider uppercase',
                                                                 room.status === 'AVAILABLE'
                                                                     ? 'border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-900/50 dark:bg-emerald-950/20 dark:text-emerald-400'
                                                                     : 'border-amber-200 bg-amber-50 text-amber-700 dark:border-amber-900/50 dark:bg-amber-950/20 dark:text-amber-400',
                                                             )}
                                                         >
-                                                            {room.status === 'AVAILABLE' ? 'Available' : 'Assigned'}
+                                                            {room.status === 'AVAILABLE'
+                                                                ? 'Available'
+                                                                : 'Assigned'}
                                                         </span>
                                                     </div>
                                                 </SelectItem>
@@ -314,7 +340,12 @@ export function NewAssignmentsBuilder({
                 </Button>
                 <div className="flex gap-2">
                     {onCancel ? (
-                        <Button type="button" variant="outline" onClick={onCancel} disabled={isPending}>
+                        <Button
+                            type="button"
+                            variant="outline"
+                            onClick={onCancel}
+                            disabled={isPending}
+                        >
                             Cancel
                         </Button>
                     ) : null}

@@ -11,19 +11,21 @@ Fix the exam dashboard cards and list items so that **Room**, **Section**, and *
 The current exam card (`exam-card-body.tsx`) and list item (`exam-list-item.tsx`) display room data via `exam.room` — a field on the unified `Exam` type that maps to the exam record's **own** `room_id` column. The Create Exam dialog no longer includes a room picker (the room option was intentionally removed), so that column is always null for new exams. However the card still renders "No room" even when rooms are properly assigned through `exam_section_assignments`.
 
 The `exam_section_assignments` table is the correct source of truth:
+
 - Each row links an exam → section → optional room → optional instructor.
 - One exam can have **many** rows (one per section).
 - So one exam may have multiple rooms **and** multiple instructors.
 
 The dashboard `useExamsQuery` returns a flat `ExamSummary` that does **not** include section-assignment data. To display assignment metadata on cards we have two options:
 
-| Option | Trade-offs |
-|---|---|
-| **A – Enrich `GET /exams` with aggregated assignment data** | Single network call; requires backend change (new subqueries); keeps all display logic in one place. |
-| **B – Fetch `useExamSectionAssignmentsQuery` per card** | Many extra API calls (N+1); bad for performance with many exams. |
-| **C – Add aggregated fields to `ExamSummary` via correlated subqueries** | Best UX; minimal extra payload; single query. **Recommended.** |
+| Option                                                                   | Trade-offs                                                                                           |
+| ------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------- |
+| **A – Enrich `GET /exams` with aggregated assignment data**              | Single network call; requires backend change (new subqueries); keeps all display logic in one place. |
+| **B – Fetch `useExamSectionAssignmentsQuery` per card**                  | Many extra API calls (N+1); bad for performance with many exams.                                     |
+| **C – Add aggregated fields to `ExamSummary` via correlated subqueries** | Best UX; minimal extra payload; single query. **Recommended.**                                       |
 
 **Decision: Option C** — add two aggregated arrays to `ExamSummary`:
+
 - `assignedRoomNames: string[]` — rooms from assignment rows
 - `assignedInstructorNames: string[]` — instructors from assignment rows
 
@@ -35,6 +37,7 @@ Sections are already handled via the existing `sectionNames` / `assignedSectionN
 
 > [!IMPORTANT]
 > **Review required:** Should the card fall back to `exam.room` (legacy field) when `assignedRoomNames` is empty, or always show `–` for new exams without an assignment?
+>
 > - **Recommended:** always show `–` when `assignedRoomNames` is empty (the old `room_id` column is no longer populated for new exams).
 
 > [!NOTE]
@@ -97,10 +100,10 @@ Add two correlated subqueries inside `getExamsData()` `select` array:
 - [x] Add `assigned_room_names?: string[] | null` to `RawExamRecord` type
 - [x] Add `assigned_instructor_names?: string[] | null` to `RawExamRecord` type
 - [x] Map both in `mapExamSummaryResponse()`:
-  ```ts
-  assignedRoomNames: parseJsonArray(record.assigned_room_names),
-  assignedInstructorNames: parseJsonArray(record.assigned_instructor_names),
-  ```
+    ```ts
+    assignedRoomNames: parseJsonArray(record.assigned_room_names),
+    assignedInstructorNames: parseJsonArray(record.assigned_instructor_names),
+    ```
 
 ---
 
@@ -121,11 +124,11 @@ Add two correlated subqueries inside `getExamsData()` `select` array:
 #### Tests for Phase 1
 
 - [x] Update `app/sentinel-api/src/modules/examination/exams/data/get-exams.test.ts`:
-  - Assert `assigned_room_names` is `[]` when no assignments exist
-  - Assert `assigned_room_names` contains room names when assignments with rooms exist
+    - Assert `assigned_room_names` is `[]` when no assignments exist
+    - Assert `assigned_room_names` contains room names when assignments with rooms exist
 - [x] Update `app/sentinel-api/src/modules/examination/exams/services/map-exam-response.test.ts`:
-  - Assert `assignedRoomNames` maps correctly from raw record
-  - Assert `assignedInstructorNames` maps correctly from raw record
+    - Assert `assignedRoomNames` maps correctly from raw record
+    - Assert `assignedInstructorNames` maps correctly from raw record
 
 ---
 
@@ -138,17 +141,17 @@ Add two correlated subqueries inside `getExamsData()` `select` array:
 #### [MODIFY] [exam-card-body.tsx](file:///Applications/XAMPP/xamppfiles/htdocs/sentinel/app/sentinel-core/src/features/exams/_components/cards/exam-card/exam-card-body.tsx)
 
 - [x] Replace `exam.room` location display with:
-  ```tsx
-  {exam.assignedRoomNames?.length
-      ? exam.assignedRoomNames.join(', ')
-      : '–'}
-  ```
+    ```tsx
+    {
+        exam.assignedRoomNames?.length ? exam.assignedRoomNames.join(', ') : '–';
+    }
+    ```
 - [x] Add an **Instructor** row (with a `User` icon) in the grid below the location row:
-  ```tsx
-  {exam.assignedInstructorNames?.length
-      ? exam.assignedInstructorNames.join(', ')
-      : '–'}
-  ```
+    ```tsx
+    {
+        exam.assignedInstructorNames?.length ? exam.assignedInstructorNames.join(', ') : '–';
+    }
+    ```
 - [x] Verify section display: `exam.sectionNames?.join(' • ')` already handles multiple sections — confirm it is rendered even when `exam.section` is null (assignment-sourced exams)
 
 ---
@@ -164,9 +167,9 @@ Add two correlated subqueries inside `getExamsData()` `select` array:
 #### Tests for Phase 2
 
 - [x] Add/update test in `exam-section-assignment-list.test.tsx` or create `exam-card-body.test.tsx`:
-  - Render with `assignedRoomNames: []` → show `–` for room
-  - Render with `assignedRoomNames: ['ROOM101', 'ROOM201']` → show `ROOM101, ROOM201`
-  - Render with `assignedInstructorNames: ['Juan dela Cruz']` → show instructor name
+    - Render with `assignedRoomNames: []` → show `–` for room
+    - Render with `assignedRoomNames: ['ROOM101', 'ROOM201']` → show `ROOM101, ROOM201`
+    - Render with `assignedInstructorNames: ['Juan dela Cruz']` → show instructor name
 
 ---
 
@@ -178,9 +181,9 @@ Add two correlated subqueries inside `getExamsData()` `select` array:
 - [x] Run `pnpm --dir app/sentinel-core test` — all tests pass
 - [x] Run `pnpm lint` — no errors
 - [x] Manually verify:
-  - New exam (no assignment) → card shows `–` for Room and Instructor, sections show normally
-  - Exam assigned to 2 sections with different rooms and instructors → card shows both rooms comma-separated, both instructors comma-separated
-  - List view shows same data
+    - New exam (no assignment) → card shows `–` for Room and Instructor, sections show normally
+    - Exam assigned to 2 sections with different rooms and instructors → card shows both rooms comma-separated, both instructors comma-separated
+    - List view shows same data
 
 ---
 
@@ -205,13 +208,13 @@ pnpm lint
 
 ## Files Touched Summary
 
-| File | Type | Change |
-|---|---|---|
-| `app/sentinel-api/src/modules/examination/exams/data/get-exams.ts` | MODIFY | Add room + instructor correlated subqueries |
-| `app/sentinel-api/src/modules/examination/exams/services/map-exam-response.ts` | MODIFY | Add to `RawExamRecord`, map in `mapExamSummaryResponse` |
-| `packages/shared/src/schema/exams/exam-schema.ts` | MODIFY | Add `assignedRoomNames`, `assignedInstructorNames` to schema |
-| `packages/shared/src/types/exams/exam.ts` | MODIFY | Add fields to `Exam` type |
-| `app/sentinel-core/src/features/exams/_components/cards/exam-card/exam-card-body.tsx` | MODIFY | Fix room display, add instructor row |
-| `app/sentinel-core/src/features/exams/_components/cards/exam-list-item.tsx` | MODIFY | Fix room display, add instructor display |
-| `app/sentinel-api/src/modules/examination/exams/data/get-exams.test.ts` | MODIFY | Add assignment data assertions |
-| `app/sentinel-api/src/modules/examination/exams/services/map-exam-response.test.ts` | MODIFY | Add mapping assertions |
+| File                                                                                  | Type   | Change                                                       |
+| ------------------------------------------------------------------------------------- | ------ | ------------------------------------------------------------ |
+| `app/sentinel-api/src/modules/examination/exams/data/get-exams.ts`                    | MODIFY | Add room + instructor correlated subqueries                  |
+| `app/sentinel-api/src/modules/examination/exams/services/map-exam-response.ts`        | MODIFY | Add to `RawExamRecord`, map in `mapExamSummaryResponse`      |
+| `packages/shared/src/schema/exams/exam-schema.ts`                                     | MODIFY | Add `assignedRoomNames`, `assignedInstructorNames` to schema |
+| `packages/shared/src/types/exams/exam.ts`                                             | MODIFY | Add fields to `Exam` type                                    |
+| `app/sentinel-core/src/features/exams/_components/cards/exam-card/exam-card-body.tsx` | MODIFY | Fix room display, add instructor row                         |
+| `app/sentinel-core/src/features/exams/_components/cards/exam-list-item.tsx`           | MODIFY | Fix room display, add instructor display                     |
+| `app/sentinel-api/src/modules/examination/exams/data/get-exams.test.ts`               | MODIFY | Add assignment data assertions                               |
+| `app/sentinel-api/src/modules/examination/exams/services/map-exam-response.test.ts`   | MODIFY | Add mapping assertions                                       |

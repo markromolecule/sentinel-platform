@@ -103,7 +103,9 @@ export function QuestionSectionCard({
                                     <Input
                                         aria-label={`${section.title} title`}
                                         value={section.title}
-                                        onChange={(event) => onSectionTitleChange(event.target.value)}
+                                        onChange={(event) =>
+                                            onSectionTitleChange(event.target.value)
+                                        }
                                         className="bg-background h-11 text-base font-semibold shadow-none"
                                     />
                                 </div>
@@ -151,7 +153,7 @@ export function QuestionSectionCard({
                                 <p className="text-muted-foreground text-[10px] font-semibold tracking-[0.2em] uppercase">
                                     Section instruction
                                 </p>
-                                <p className="text-sm leading-relaxed text-foreground/80">
+                                <p className="text-foreground/80 text-sm leading-relaxed">
                                     {hasInstruction
                                         ? section.description
                                         : 'No instruction added yet. Use plain text to guide students through this section.'}
@@ -168,8 +170,8 @@ export function QuestionSectionCard({
                                 {isInstructionEditorOpen
                                     ? 'Hide Editor'
                                     : hasInstruction
-                                        ? 'Edit Instruction'
-                                        : 'Add Instruction'}
+                                      ? 'Edit Instruction'
+                                      : 'Add Instruction'}
                             </Button>
                         </div>
 

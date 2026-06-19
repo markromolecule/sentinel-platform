@@ -13,12 +13,14 @@
 > **Note:** "the icon on the sidebar layout of the exam page" refers to the icon row inside `ExamsWorkspaceShell`. Both apps share an identical shell layout.
 
 #### [MODIFY] exams-workspace-shell.tsx (sentinel-web)
+
 `app/sentinel-web/src/app/(protected)/(instructor)/exams/_components/layout/exams-workspace-shell.tsx`
 
 - [x] Remove any icon import rendered adjacent to the "Exams" `<h1>` heading inside `ExamsWorkspaceShell` — keep only the text heading.
 - [x] Write test at `exams-workspace-shell.test.tsx` verifying the heading renders without an SVG/icon element.
 
 #### [MODIFY] exams-workspace-shell.tsx (sentinel-core)
+
 `app/sentinel-core/src/app/(protected)/exams/_components/layout/exams-workspace-shell.tsx`
 
 - [x] Apply the same icon-removal change.
@@ -33,6 +35,7 @@
 **Goal:** Exam cards in both apps no longer show `"Draft — no questions added yet"` in the card body or `"Draft"` / `"Draft by <name>"` in the attribution row beneath the assigned instructor.
 
 #### [MODIFY] exam-card-body.tsx (sentinel-web)
+
 `app/sentinel-web/src/features/exams/_components/cards/exam-card/exam-card-body.tsx`
 
 - [x] Remove the `showDraftNote` variable (line 53) and its conditional `<div>` block (lines 74–80) that renders `"Draft — no questions added yet"`.
@@ -40,18 +43,21 @@
 - [x] Update `exam-card-body.test.tsx` — add a test confirming no `"Draft"` or `"Draft — no questions"` text appears for a draft exam card.
 
 #### [MODIFY] exam-card-body.tsx (sentinel-core)
+
 `app/sentinel-core/src/features/exams/_components/cards/exam-card/exam-card-body.tsx`
 
 - [x] Remove the `isDraft` / `creatorOrPublisherText` draft arm from the card body.
 - [x] Update `exam-card-body.test.tsx` (sentinel-core) to confirm draft attribution text is hidden.
 
 #### [MODIFY] exam-list-item.tsx (sentinel-web)
+
 `app/sentinel-web/src/features/exams/_components/cards/exam-list-item.tsx`
 
 - [x] Remove the `getExamAttribution` draft arm so attribution is suppressed for draft exams; show published-by/created-by only for non-draft exams.
 - [x] Add a unit test in `exam-list-item.test.tsx` verifying that a draft exam does not render any attribution text.
 
 #### [MODIFY] exam-list-item.tsx (sentinel-core)
+
 `app/sentinel-core/src/features/exams/_components/cards/exam-list-item.tsx`
 
 - [x] Remove the `isDraft` / `creatorOrPublisherText` draft arm.
@@ -68,24 +74,28 @@
 The `assignment-content.tsx` in both apps already reads `searchParams.get('examId')` to pre-select the exam — no changes needed there.
 
 #### [MODIFY] exam-card-header.tsx (sentinel-web)
+
 `app/sentinel-web/src/features/exams/_components/cards/exam-card/exam-card-header.tsx`
 
 - [x] Update `handleShare` to navigate to `` `/exams/assign?examId=${exam.id}` `` instead of plain `/exams/assign`.
 - [x] Write / update `exam-card-header.test.tsx` to assert the router push call includes the `examId` query param.
 
 #### [MODIFY] exam-card-header.tsx (sentinel-core)
+
 `app/sentinel-core/src/features/exams/_components/cards/exam-card/exam-card-header.tsx`
 
 - [x] Apply the same `examId` query param to `handleShare`.
 - [x] Add / update a test asserting `examId` is passed.
 
 #### [MODIFY] exam-list-item.tsx (sentinel-web)
+
 `app/sentinel-web/src/features/exams/_components/cards/exam-list-item.tsx`
 
-- [x] The list item's dropdown currently has no Share entry; add a `Share / Assign` `<DropdownMenuItem>` that calls `` router.push(`/exams/assign?examId=${exam.id}`) ``.
+- [x] The list item's dropdown currently has no Share entry; add a `Share / Assign` `<DropdownMenuItem>` that calls ``router.push(`/exams/assign?examId=${exam.id}`)``.
 - [x] Extend `exam-list-item.test.tsx` to verify the share menu item renders and triggers the correct route.
 
 #### [MODIFY] exam-list-item.tsx (sentinel-core)
+
 `app/sentinel-core/src/features/exams/_components/cards/exam-list-item.tsx`
 
 - [x] Apply the same Share menu item with `examId` query param.
@@ -100,6 +110,7 @@ The `assignment-content.tsx` in both apps already reads `searchParams.get('examI
 **Goal:** The All / Published / Drafts / Archived tab selector is visually cleaner, more compact, and consistently styled in both apps.
 
 #### [NEW] exams-filter-tabs.tsx (sentinel-web)
+
 `app/sentinel-web/src/app/(protected)/(instructor)/exams/dashboard/_components/exams-filter-tabs.tsx`
 
 - [x] Extract the `<TabsList>` / `<TabsTrigger>` block from `dashboard/page.tsx` into a standalone `<ExamsFilterTabs>` component.
@@ -107,17 +118,20 @@ The `assignment-content.tsx` in both apps already reads `searchParams.get('examI
 - [x] Write `exams-filter-tabs.test.tsx` verifying all four tab values render and `onValueChange` fires correctly.
 
 #### [MODIFY] dashboard/page.tsx (sentinel-web)
+
 `app/sentinel-web/src/app/(protected)/(instructor)/exams/dashboard/page.tsx`
 
 - [x] Replace the inline `<TabsList>` block with `<ExamsFilterTabs>`.
 
 #### [NEW] exams-filter-tabs.tsx (sentinel-core)
+
 `app/sentinel-core/src/app/(protected)/exams/dashboard/_components/exams-filter-tabs.tsx`
 
 - [x] Apply the same component extraction and pill-style refinement.
 - [x] Write `exams-filter-tabs.test.tsx`.
 
 #### [MODIFY] dashboard/page.tsx (sentinel-core)
+
 `app/sentinel-core/src/app/(protected)/exams/dashboard/page.tsx`
 
 - [x] Replace the inline `<TabsList>` block with `<ExamsFilterTabs>`.
@@ -131,13 +145,15 @@ The `assignment-content.tsx` in both apps already reads `searchParams.get('examI
 **Goal:** In `sentinel-web`'s instructor sidebar, add a visible `<SidebarSeparator>` between the Students item and the Exams / Question Bank group.
 
 #### [MODIFY] constants/index.ts (sentinel-web sidebar)
+
 `app/sentinel-web/src/components/sidebar/instructor/constants/index.ts`
 
 - [x] Split `managementItems` into two separate arrays:
-  - `studentManagementItems` — Subjects, Classrooms, Students
-  - `examManagementItems` — Exams, Question Bank
+    - `studentManagementItems` — Subjects, Classrooms, Students
+    - `examManagementItems` — Exams, Question Bank
 
 #### [MODIFY] instructor-sidebar.tsx (sentinel-web)
+
 `app/sentinel-web/src/components/sidebar/instructor/instructor-sidebar.tsx`
 
 - [x] Update `sections` array to render `studentManagementItems` (with `showSeparator: true`) followed by a new `examManagementItems` section (with `showSeparator: true`), so a `<SidebarSeparator>` appears between Students and Exams.
@@ -161,12 +177,14 @@ The `assignment-content.tsx` in both apps already reads `searchParams.get('examI
 ## Verification Plan
 
 ### Automated Tests
+
 ```bash
 pnpm --dir app/sentinel-web test
 pnpm --dir app/sentinel-core test
 ```
 
 ### Manual Verification
+
 1. Navigate to `/exams` in sentinel-web; confirm no `"Draft…"` text appears on draft exam cards.
 2. Open "Share / Assign" dropdown on an exam card; confirm redirect lands on `/exams/assign?examId=<correct-id>` and the selector pre-selects the exam.
 3. Confirm Exams tab filter looks compact and clean.

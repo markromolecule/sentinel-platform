@@ -61,7 +61,13 @@ describe('InstructorSidebar', () => {
         const examsLink = screen.getByRole('link', { name: 'Exams' });
         const separatorBetweenGroups = separators[1];
 
-        expect(studentsLink.compareDocumentPosition(separatorBetweenGroups) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
-        expect(separatorBetweenGroups.compareDocumentPosition(examsLink) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+        expect(
+            studentsLink.compareDocumentPosition(separatorBetweenGroups) &
+                Node.DOCUMENT_POSITION_FOLLOWING,
+        ).toBeTruthy();
+        expect(
+            separatorBetweenGroups.compareDocumentPosition(examsLink) &
+                Node.DOCUMENT_POSITION_FOLLOWING,
+        ).toBeTruthy();
     });
 });

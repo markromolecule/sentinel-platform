@@ -24,6 +24,10 @@ vi.mock('../../api-provider', () => ({
     useApi: vi.fn(() => ({ mockClient: true })),
 }));
 
+vi.mock('../../auth-provider', () => ({
+    useAuth: vi.fn(() => ({ user: { id: 'user-1' } })),
+}));
+
 vi.mock('../_shared/use-authenticated-query-enabled', () => ({
     useAuthenticatedQueryEnabled: vi.fn(() => true),
 }));
@@ -37,6 +41,7 @@ describe('useClassroomsQuery', () => {
 
         expect(query.queryKey).toEqual([
             ...CLASSROOM_QUERY_KEYS.all,
+            'user-1',
             {
                 search: 'physics',
                 departmentId: 'department-1',
@@ -59,6 +64,7 @@ describe('useClassroomsQuery', () => {
 
         expect(query.queryKey).toEqual([
             ...CLASSROOM_QUERY_KEYS.all,
+            'user-1',
             {
                 search: 'chemistry',
                 departmentId: undefined,
@@ -82,6 +88,7 @@ describe('useClassroomsQuery', () => {
 
         expect(query.queryKey).toEqual([
             ...CLASSROOM_QUERY_KEYS.all,
+            'user-1',
             {
                 search: undefined,
                 departmentId: undefined,
@@ -94,6 +101,58 @@ describe('useClassroomsQuery', () => {
                 search: undefined,
                 departmentId: undefined,
                 status: 'archived',
+            },
+        );
+    });
+
+    it('includes institution scope when provided', () => {
+        const query = useClassroomsQuery({
+            institutionId: 'institution-1',
+        }) as any;
+
+        expect(query.queryKey).toEqual([
+            ...CLASSROOM_QUERY_KEYS.all,
+            'user-1',
+            {
+                search: undefined,
+                departmentId: undefined,
+                status: 'active',
+                institutionId: 'institution-1',
+            },
+        ]);
+        expect(getClassrooms).toHaveBeenCalledWith(
+            { mockClient: true },
+            {
+                search: undefined,
+                departmentId: undefined,
+                status: 'active',
+                institutionId: 'institution-1',
+            },
+        );
+    });
+
+    it('includes subject ID filter when provided', () => {
+        const query = useClassroomsQuery({
+            subjectId: 'subject-123',
+        }) as any;
+
+        expect(query.queryKey).toEqual([
+            ...CLASSROOM_QUERY_KEYS.all,
+            'user-1',
+            {
+                search: undefined,
+                departmentId: undefined,
+                status: 'active',
+                subjectId: 'subject-123',
+            },
+        ]);
+        expect(getClassrooms).toHaveBeenCalledWith(
+            { mockClient: true },
+            {
+                search: undefined,
+                departmentId: undefined,
+                status: 'active',
+                subjectId: 'subject-123',
             },
         );
     });

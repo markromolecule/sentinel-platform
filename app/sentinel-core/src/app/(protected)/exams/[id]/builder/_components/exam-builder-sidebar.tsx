@@ -124,15 +124,7 @@ function SectionHeading({ title }: { title: string }) {
     return <h3 className="text-sm font-semibold tracking-tight text-[#323d8f]">{title}</h3>;
 }
 
-function SidebarInfoRow({
-    label,
-    value,
-    icon,
-}: {
-    label: string;
-    value: string;
-    icon: ReactNode;
-}) {
+function SidebarInfoRow({ label, value, icon }: { label: string; value: string; icon: ReactNode }) {
     return (
         <div className="grid grid-cols-[16px_minmax(0,1fr)] items-start gap-3 py-1.5">
             <div className="pt-0.5 text-[#323d8f]">{icon}</div>

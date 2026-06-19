@@ -17,17 +17,17 @@ Three related access-control and UX fixes for the examination module:
 **Option A — Enforce in Service Layer (Recommended)**
 Add an `assertExamOwnership(examId, userId)` guard in `delete-exam.ts` and `update-exam.ts` services that fetches the existing record's `created_by` and throws `HTTP 403` if the caller is not the owner (unless the caller is `superadmin`/`admin`).
 
-- *Tradeoff*: Surgical; aligns with the existing pattern of `assertExamConfigurationMutable()` guards, but requires a DB read.
+- _Tradeoff_: Surgical; aligns with the existing pattern of `assertExamConfigurationMutable()` guards, but requires a DB read.
 
 **Option B — Enforce in Controller Layer**
 Re-fetch the exam in each controller and compare `created_by` against `user.id` before delegating to the service.
 
-- *Tradeoff*: Keeps services pure but duplicates DB fetches; breaks separation of concerns.
+- _Tradeoff_: Keeps services pure but duplicates DB fetches; breaks separation of concerns.
 
 **Option C — Enforce via DB WHERE clause**
 Add `WHERE created_by = $userId` to the `updateExamData` and `deleteExamData` queries, causing a no-op with a 404 instead of a 403.
 
-- *Tradeoff*: Simple, but provides poor error UX; admin bypass requires query-branching.
+- _Tradeoff_: Simple, but provides poor error UX; admin bypass requires query-branching.
 
 **Best option: A** — mirrors `requireExamRecord` / `assertExamConfigurationMutable` patterns already in the service layer, provides explicit HTTP 403 error messages, and trivially skips for `superadmin`/`admin` roles.
 
@@ -38,17 +38,17 @@ Add `WHERE created_by = $userId` to the `updateExamData` and `deleteExamData` qu
 **Option A — `AlertDialog` in `exam-section-assignment-list.tsx` (Recommended)**
 Introduce a `DeleteAssignmentDialog` component collocated in the assign `_components/` folder and wire it to the existing `handleDelete` flow.
 
-- *Tradeoff*: Consistent with the rest of the codebase (see `exam-card-delete-alert.tsx`, `delete-announcement-dialog.tsx`); requires minimal state management.
+- _Tradeoff_: Consistent with the rest of the codebase (see `exam-card-delete-alert.tsx`, `delete-announcement-dialog.tsx`); requires minimal state management.
 
 **Option B — Reuse `ExamCardDeleteAlert`**
 Move `ExamCardDeleteAlert` to a shared location and consume it here.
 
-- *Tradeoff*: Reduces duplication but couples two unrelated features, and the message copy is wrong for assignments.
+- _Tradeoff_: Reduces duplication but couples two unrelated features, and the message copy is wrong for assignments.
 
 **Option C — shadcn/Radix `AlertDialog` inline**
 Render the `AlertDialog` inline in the column definition.
 
-- *Tradeoff*: Dirty — column defs should not own dialog state.
+- _Tradeoff_: Dirty — column defs should not own dialog state.
 
 **Best option: A** — purpose-specific component with the correct copy, consistent with project conventions.
 
@@ -182,14 +182,16 @@ pnpm --dir app/sentinel-api test
 ```
 
 New test file:
+
 - `app/sentinel-api/src/modules/examination/exams/services/assert-exam-ownership.test.ts`
-  - Owner passes the guard.
-  - Non-owner instructor throws `HTTP 403`.
-  - `admin` role bypasses the check.
-  - `superadmin` role bypasses the check.
-  - `null` / `undefined` `created_by` throws `HTTP 403`.
+    - Owner passes the guard.
+    - Non-owner instructor throws `HTTP 403`.
+    - `admin` role bypasses the check.
+    - `superadmin` role bypasses the check.
+    - `null` / `undefined` `created_by` throws `HTTP 403`.
 
 Existing tests that must still pass:
+
 - `get-exams.test.ts` / `get-exams-instructor-visibility.test.ts`
 - `create-exam-assignment.controller.test.ts`
 - `exam-section-assignment-list.test.tsx`

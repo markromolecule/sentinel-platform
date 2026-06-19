@@ -38,6 +38,10 @@ function buildQueryString(params?: GetExamsParams) {
         searchParams.set('classroomId', params.classroomId);
     }
 
+    if (params.institutionId) {
+        searchParams.set('institutionId', params.institutionId);
+    }
+
     const query = searchParams.toString();
     return query ? `?${query}` : '';
 }

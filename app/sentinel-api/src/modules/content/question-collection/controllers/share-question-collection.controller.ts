@@ -52,12 +52,7 @@ export const getQuestionCollectionSharesRouteHandler: AppRouteHandler<
         .selectFrom('question_bank_collection_shares as qcs')
         .innerJoin('user_profiles as up', 'up.user_id', 'qcs.user_id')
         .innerJoin('auth.users as u', 'u.id', 'qcs.user_id')
-        .select([
-            'qcs.user_id',
-            'up.first_name',
-            'up.last_name',
-            'u.email',
-        ])
+        .select(['qcs.user_id', 'up.first_name', 'up.last_name', 'u.email'])
         .where('qcs.collection_id', '=', id)
         .orderBy('up.last_name', 'asc')
         .orderBy('up.first_name', 'asc')
@@ -137,19 +132,22 @@ export const shareQuestionCollectionRouteHandler: AppRouteHandler<
             : institutionId === null
               ? uniqueUserIds
               : (
-                  await dbClient
-                      .selectFrom('user_profiles')
-                      .select('user_id')
-                      .where('institution_id', '=', institutionId)
-                      .where('user_id', 'in', uniqueUserIds)
-                      .execute()
-              ).map((record) => record.user_id);
+                    await dbClient
+                        .selectFrom('user_profiles')
+                        .select('user_id')
+                        .where('institution_id', '=', institutionId)
+                        .where('user_id', 'in', uniqueUserIds)
+                        .execute()
+                ).map((record) => record.user_id);
 
     const previousShareSet = new Set(existingShares.map((share) => share.user_id));
     const addedUserIds = filteredUserIds.filter((userId) => !previousShareSet.has(userId));
 
     await executeTransaction(async (trx) => {
-        await trx.deleteFrom('question_bank_collection_shares').where('collection_id', '=', id).execute();
+        await trx
+            .deleteFrom('question_bank_collection_shares')
+            .where('collection_id', '=', id)
+            .execute();
 
         if (filteredUserIds.length > 0) {
             await trx
@@ -159,7 +157,7 @@ export const shareQuestionCollectionRouteHandler: AppRouteHandler<
                         collection_id: id,
                         user_id: userId,
                     })),
-            )
+                )
                 .execute();
         }
     });
@@ -168,21 +166,15 @@ export const shareQuestionCollectionRouteHandler: AppRouteHandler<
         .selectFrom('question_bank_collection_shares as qcs')
         .innerJoin('user_profiles as up', 'up.user_id', 'qcs.user_id')
         .innerJoin('auth.users as u', 'u.id', 'qcs.user_id')
-        .select([
-            'qcs.user_id',
-            'up.first_name',
-            'up.last_name',
-            'u.email',
-        ])
+        .select(['qcs.user_id', 'up.first_name', 'up.last_name', 'u.email'])
         .where('qcs.collection_id', '=', id)
         .orderBy('up.last_name', 'asc')
         .orderBy('up.first_name', 'asc')
         .execute();
 
     const assignerName =
-        [user.user_profiles?.first_name, user.user_profiles?.last_name]
-            .filter(Boolean)
-            .join(' ') || 'Someone';
+        [user.user_profiles?.first_name, user.user_profiles?.last_name].filter(Boolean).join(' ') ||
+        'Someone';
 
     for (const recipientUserId of addedUserIds) {
         await QuestionBankCollectionNotificationService.notifyQuestionBankCollectionAssigned({

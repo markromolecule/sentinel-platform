@@ -48,9 +48,12 @@ vi.mock('../_components/dialogs/edit-collection-dialog', () => ({
     EditCollectionDialog: () => null,
 }));
 
-vi.mock('@/app/(protected)/(instructor)/question/bank/_components/views/questions-empty-state', () => ({
-    QuestionsEmptyState: () => null,
-}));
+vi.mock(
+    '@/app/(protected)/(instructor)/question/bank/_components/views/questions-empty-state',
+    () => ({
+        QuestionsEmptyState: () => null,
+    }),
+);
 
 describe('Collection questions page', () => {
     let Page: typeof import('./page').default;
