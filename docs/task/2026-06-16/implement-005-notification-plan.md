@@ -1,9 +1,11 @@
 # Assign Notifications and Question Visibility
 
 ## Summary
+
 Implement assignment notifications for exams and question collections, then enforce viewer-scoped question visibility in the question bank and TOS matrix so private, unshared collections from other users stay hidden while self-created and shared questions remain visible.
 
 ## Key Changes
+
 - Add additive notification contract support for collection assignments in the shared notification schema.
 - Emit a collection-assignment notification when a collection share adds a new user; removing a user from the share list revokes access but does not notify.
 - Keep the existing exam-assignment notification path intact and regression-tested.
@@ -11,6 +13,7 @@ Implement assignment notifications for exams and question collections, then enfo
 - No new environment variables and no Prisma migration are required.
 
 ### Phase 1: Collection Assignment Notifications
+
 **Goal:** Notify only newly added collection assignees after a successful share update.
 
 - [x] Update `packages/shared/src/schema/notifications/notification-schema.ts` to add a collection-assignment notification action type and collection resource type.
@@ -20,6 +23,7 @@ Implement assignment notifications for exams and question collections, then enfo
 - Migration required: No.
 
 ### Phase 2: Exam Assignment Regression Guard
+
 **Goal:** Preserve the existing exam assignment notification behavior while locking it down with tests.
 
 - [x] Verify that `app/sentinel-api/src/modules/examination/assign/services/create-exam-assignment.ts` and `app/sentinel-api/src/modules/examination/assign/services/respond-to-exam-assignment.ts` still invoke `app/sentinel-api/src/modules/general/notification/services/exam-notification.service.ts`.
@@ -27,6 +31,7 @@ Implement assignment notifications for exams and question collections, then enfo
 - Migration required: No.
 
 ### Phase 3: Viewer-Scoped Question Visibility
+
 **Goal:** Hide questions from private, unshared collections of other users in both the question bank and TOS matrix.
 
 - [x] Add a shared visibility helper in `app/sentinel-api/src/modules/content/question/data/question-visibility.ts` and apply it from `app/sentinel-api/src/modules/content/question/data/get-questions.ts` and `app/sentinel-api/src/modules/content/question-bank/data/get-tos-matrix.ts`.
@@ -36,6 +41,7 @@ Implement assignment notifications for exams and question collections, then enfo
 - Migration required: No.
 
 ## Test Plan
+
 - Run `pnpm --dir app/sentinel-api test` after implementation.
 - Add focused Vitest coverage for the new collection notification service and the share controller diff logic.
 - Add focused Vitest coverage for the exam assignment notification regression path.
@@ -43,6 +49,7 @@ Implement assignment notifications for exams and question collections, then enfo
 - Add UI regression coverage only if the new collection notification needs a special consumer-side presentation beyond the existing default notification rendering.
 
 ## Assumptions
+
 - “Unassign” means removing a user from the collection share list; no separate unassign endpoint is needed.
 - Collection-assignment notifications can use the existing generic notification rendering path without a new inbox category.
 - The TOS matrix should reflect the same visibility rules as the question bank list, not institution-wide totals.

@@ -55,8 +55,8 @@ export function DeleteAssignmentDialog({
                 <AlertDialogHeader>
                     <AlertDialogTitle>Remove Assignment?</AlertDialogTitle>
                     <AlertDialogDescription>
-                        This will remove the exam assignment for &quot;{classroomName}&quot;.
-                        The classroom will no longer be linked to this exam.
+                        This will remove the exam assignment for &quot;{classroomName}&quot;. The
+                        classroom will no longer be linked to this exam.
                     </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
@@ -67,7 +67,7 @@ export function DeleteAssignmentDialog({
                             handleConfirm();
                         }}
                         disabled={mutation.isPending}
-                        className="bg-destructive text-white hover:bg-destructive/90"
+                        className="bg-destructive hover:bg-destructive/90 text-white"
                     >
                         {mutation.isPending ? 'Removing...' : 'Remove'}
                     </AlertDialogAction>

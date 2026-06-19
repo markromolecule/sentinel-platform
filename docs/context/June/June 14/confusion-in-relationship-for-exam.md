@@ -50,6 +50,7 @@ model exam_section_assignments {
 ```
 
 This means **one exam → many `exam_section_assignments`**, each representing:
+
 ```
 1 exam → instructor A → section A → room A
        → instructor B → section B → room B
@@ -61,18 +62,19 @@ This means **one exam → many `exam_section_assignments`**, each representing:
 **Entry component:** `app/sentinel-core/src/app/(protected)/exams/assign/_components/assignment-content.tsx`
 
 The page currently:
+
 1. Shows a dropdown to pick an active exam (`useExamsQuery`)
 2. Lists existing `exam_section_assignments` for the selected exam (`useExamSectionAssignmentsQuery`)
 3. Opens `AddExamSectionAssignmentDialog` to add a new assignment (section + optional room + optional instructor + optional schedule)
 
 **Key files:**
 
-| File | Role |
-|---|---|
-| `assignment-content.tsx` | Page shell — exam selector + assignment list card |
+| File                                     | Role                                                                                                   |
+| ---------------------------------------- | ------------------------------------------------------------------------------------------------------ |
+| `assignment-content.tsx`                 | Page shell — exam selector + assignment list card                                                      |
 | `add-exam-section-assignment-dialog.tsx` | Dialog: select section, room, instructor, scheduledAt → calls `useCreateExamSectionAssignmentMutation` |
-| `exam-section-assignment-list.tsx` | Renders existing assignments; supports delete via `useDeleteExamSectionAssignmentMutation` |
-| `assignment-table.tsx` / `columns.tsx` | Table column definitions for the assignment list |
+| `exam-section-assignment-list.tsx`       | Renders existing assignments; supports delete via `useDeleteExamSectionAssignmentMutation`             |
+| `assignment-table.tsx` / `columns.tsx`   | Table column definitions for the assignment list                                                       |
 
 ### sentinel-core: Exam Creation Dialog
 
@@ -91,6 +93,7 @@ This is the root of the conflict.
 Remove `section`, `room`, and `instructor` fields from the exam **create/edit** dialog in `sentinel-core` (and equivalently in `sentinel-web` if present).
 
 Exams should only carry intrinsic properties:
+
 - `title`, `description`, `subject_id`, `duration_minutes`, `passing_score`
 - `difficulty`, `status`, `exam_category`, `scheduled_date`, `end_date_time`
 - `exam_configurations`
@@ -98,6 +101,7 @@ Exams should only carry intrinsic properties:
 ### Phase 2 — Improve the assignment page UX
 
 The current UX forces the user to:
+
 1. Select the exam from a dropdown (full page reload / URL update)
 2. Click "Assign Section" to open a dialog
 3. Fill the dialog, submit, dialog closes
@@ -120,6 +124,7 @@ Once all UIs route through `exam_section_assignments`, the `section_id`, `room_i
 ## API Contract (Reference)
 
 ### Create assignment
+
 ```
 POST /exams/:examId/section-assignments
 Body: CreateExamSectionAssignmentPayload {
@@ -131,12 +136,14 @@ Body: CreateExamSectionAssignmentPayload {
 ```
 
 ### List assignments
+
 ```
 GET /exams/:examId/section-assignments
 Returns: ExamSectionAssignmentRecord[]
 ```
 
 ### Delete assignment
+
 ```
 DELETE /exams/:examId/section-assignments/:assignmentId
 ```
@@ -147,12 +154,12 @@ Hooks: `useCreateExamSectionAssignmentMutation`, `useExamSectionAssignmentsQuery
 
 ## Affected Modules
 
-| App | Path | Action |
-|---|---|---|
-| `sentinel-core` | `exams/_components/` (exam dialog) | Remove section/room/instructor fields |
-| `sentinel-core` | `exams/assign/_components/` | Improve UX — inline multi-row assignment |
-| `sentinel-web` | `src/features/exams/_components/` | Mirror the same dialog cleanup |
-| `packages/db` | `prisma/schema.prisma` | (Phase 3) Drop legacy `exams.section_id`, `exams.room_id` scalar columns |
+| App             | Path                               | Action                                                                   |
+| --------------- | ---------------------------------- | ------------------------------------------------------------------------ |
+| `sentinel-core` | `exams/_components/` (exam dialog) | Remove section/room/instructor fields                                    |
+| `sentinel-core` | `exams/assign/_components/`        | Improve UX — inline multi-row assignment                                 |
+| `sentinel-web`  | `src/features/exams/_components/`  | Mirror the same dialog cleanup                                           |
+| `packages/db`   | `prisma/schema.prisma`             | (Phase 3) Drop legacy `exams.section_id`, `exams.room_id` scalar columns |
 
 ---
 

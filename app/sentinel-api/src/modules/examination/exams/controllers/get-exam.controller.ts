@@ -55,11 +55,22 @@ export const getExamRouteHandler: AppRouteHandler<typeof getExamRoute> = async (
         }),
     );
 
+    const isShared = user?.id
+        ? await c
+              .get('dbClient')
+              .selectFrom('exam_shares')
+              .select('user_id')
+              .where('exam_id', '=', id)
+              .where('user_id', '=', user.id)
+              .executeTakeFirst()
+        : null;
+
     if (
         role === 'instructor' &&
         examAccessRecord.is_public === false &&
         user?.id !== examAccessRecord.created_by &&
-        !examAccessRecord.assigned_instructor_ids?.includes(user?.id)
+        !examAccessRecord.assigned_instructor_ids?.includes(user?.id) &&
+        !isShared
     ) {
         throw new HTTPException(404, {
             message: 'Exam not found.',

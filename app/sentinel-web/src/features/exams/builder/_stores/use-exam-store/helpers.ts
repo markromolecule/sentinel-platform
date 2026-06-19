@@ -1,8 +1,5 @@
 import type { SaveBuilderWorkspacePayload } from '@sentinel/services';
-import type {
-    ExamQuestion,
-    ExamQuestionSection,
-} from '@sentinel/shared/types';
+import type { ExamQuestion, ExamQuestionSection } from '@sentinel/shared/types';
 import type { ExamStoreState } from './types';
 import {
     DEFAULT_EXAM_SETTINGS,
@@ -18,7 +15,7 @@ export const generateSectionId = (): string => crypto.randomUUID();
 
 /**
  * Creates a default question section with the given index and optional title.
- * 
+ *
  * @param index - The order index for the section.
  * @param title - The optional title for the section.
  * @returns A question section object.
@@ -36,7 +33,7 @@ export const createQuestionSection = (
 
 /**
  * Calculates the end date and time of an exam session based on its start time and duration.
- * 
+ *
  * @param startDateTime - The ISO start date-time string.
  * @param durationMinutes - The exam duration in minutes.
  * @param fallbackEndDateTime - The fallback end date-time string.
@@ -69,7 +66,7 @@ export const getEndDateTime = (
 
 /**
  * Normalizes the exam structure by sorting and validating section IDs for questions.
- * 
+ *
  * @param questions - The raw list of exam questions.
  * @param questionSections - The raw list of sections.
  * @returns An object containing normalized question sections and normalized questions.
@@ -131,7 +128,7 @@ export function normalizeExamStructure(
 
 /**
  * Checks if a string value is a valid UUID.
- * 
+ *
  * @param value - The value to test.
  * @returns True if the value is a valid UUID.
  */
@@ -141,7 +138,7 @@ export function isUuid(value?: string | null): boolean {
 
 /**
  * Generates the default state object for the exam store.
- * 
+ *
  * @returns Default store state object.
  */
 export function createDefaultState(): ExamStoreState {
@@ -170,7 +167,7 @@ export function createDefaultState(): ExamStoreState {
 
 /**
  * Prepares the payload for saving the builder workspace by normalising sections, section maps, and questions.
- * 
+ *
  * @param state - The current Zustand store state.
  * @returns The structured workspace payload.
  */

@@ -10,6 +10,14 @@ import {
     updateExamStatusRoute,
     updateExamStatusRouteHandler,
 } from './controllers/update-exam-status.controller';
+import {
+    getExamSharesRoute,
+    getExamSharesRouteHandler,
+    shareExamRoute,
+    shareExamRouteHandler,
+    unshareExamRoute,
+    unshareExamRouteHandler,
+} from './controllers/exam-sharing.controller';
 import { registerMonitoringRoutes } from '../monitoring/monitoring.routes';
 import { registerReportingRoutes } from '../reporting/reporting.routes';
 import { registerRuntimeAccessRoutes } from '../runtime-access/runtime-access.routes';
@@ -37,6 +45,9 @@ examsRoutes
     .openapi(createExamRoute, createExamRouteHandler)
     .openapi(updateExamRoute, updateExamRouteHandler)
     .openapi(deleteExamRoute, deleteExamRouteHandler)
-    .openapi(updateExamStatusRoute, updateExamStatusRouteHandler);
+    .openapi(updateExamStatusRoute, updateExamStatusRouteHandler)
+    .openapi(getExamSharesRoute, getExamSharesRouteHandler)
+    .openapi(shareExamRoute, shareExamRouteHandler)
+    .openapi(unshareExamRoute, unshareExamRouteHandler);
 
 export default examsRoutes;

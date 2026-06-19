@@ -33,7 +33,11 @@ function buildExam(overrides: Record<string, unknown> = {}) {
 
 describe('ExamCardBody', () => {
     it('shows dash for room when assignedRoomNames is empty', () => {
-        render(<ExamCardBody exam={buildExam({ assignedRoomNames: [], assignedInstructorNames: [] })} />);
+        render(
+            <ExamCardBody
+                exam={buildExam({ assignedRoomNames: [], assignedInstructorNames: [] })}
+            />,
+        );
         // Both room and instructor will show '–'; getAllByTitle confirms at least 2 dash elements
         const dashSpans = screen.getAllByTitle('–');
         expect(dashSpans.length).toBeGreaterThanOrEqual(2);
@@ -47,20 +51,12 @@ describe('ExamCardBody', () => {
     });
 
     it('shows comma-separated rooms when multiple rooms assigned', () => {
-        render(
-            <ExamCardBody
-                exam={buildExam({ assignedRoomNames: ['ROOM101', 'ROOM201'] })}
-            />,
-        );
+        render(<ExamCardBody exam={buildExam({ assignedRoomNames: ['ROOM101', 'ROOM201'] })} />);
         expect(screen.getByText('ROOM101, ROOM201')).toBeDefined();
     });
 
     it('shows single room name without comma when one room assigned', () => {
-        render(
-            <ExamCardBody
-                exam={buildExam({ assignedRoomNames: ['LAB101'] })}
-            />,
-        );
+        render(<ExamCardBody exam={buildExam({ assignedRoomNames: ['LAB101'] })} />);
         expect(screen.getByText('LAB101')).toBeDefined();
     });
 
@@ -82,20 +78,12 @@ describe('ExamCardBody', () => {
     });
 
     it('shows single instructor name when one instructor assigned', () => {
-        render(
-            <ExamCardBody
-                exam={buildExam({ assignedInstructorNames: ['Juan dela Cruz'] })}
-            />,
-        );
+        render(<ExamCardBody exam={buildExam({ assignedInstructorNames: ['Juan dela Cruz'] })} />);
         expect(screen.getByText('Juan dela Cruz')).toBeDefined();
     });
 
     it('shows sectionNames joined with bullet when provided', () => {
-        render(
-            <ExamCardBody
-                exam={buildExam({ sectionNames: ['CS401', 'CS402'] })}
-            />,
-        );
+        render(<ExamCardBody exam={buildExam({ sectionNames: ['CS401', 'CS402'] })} />);
         expect(screen.getByText('CS401 • CS402')).toBeDefined();
     });
 

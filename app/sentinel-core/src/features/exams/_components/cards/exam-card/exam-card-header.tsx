@@ -38,7 +38,7 @@ export function ExamCardHeader({
     return (
         <CardHeader className="gap-2 px-4 pb-0">
             <div className="flex items-start justify-between gap-3">
-                <div className="flex items-center gap-1.5 flex-wrap">
+                <div className="flex flex-wrap items-center gap-1.5">
                     <Badge
                         variant="outline"
                         className={`text-[10px] tracking-wider uppercase ${statusClass}`}
@@ -48,7 +48,7 @@ export function ExamCardHeader({
                     {exam.isPublic ? (
                         <Badge
                             variant="outline"
-                            className="text-[10px] tracking-wider uppercase bg-emerald-500/10 text-emerald-700 border-emerald-500/20 hover:bg-emerald-500/10 flex items-center gap-1 font-medium dark:text-emerald-400"
+                            className="flex items-center gap-1 border-emerald-500/20 bg-emerald-500/10 text-[10px] font-medium tracking-wider text-emerald-700 uppercase hover:bg-emerald-500/10 dark:text-emerald-400"
                         >
                             <Globe className="h-3 w-3" />
                             Public
@@ -56,7 +56,7 @@ export function ExamCardHeader({
                     ) : (
                         <Badge
                             variant="outline"
-                            className="text-[10px] tracking-wider uppercase bg-zinc-500/10 text-zinc-700 border-zinc-500/20 hover:bg-zinc-500/10 flex items-center gap-1 font-medium dark:text-zinc-400"
+                            className="flex items-center gap-1 border-zinc-500/20 bg-zinc-500/10 text-[10px] font-medium tracking-wider text-zinc-700 uppercase hover:bg-zinc-500/10 dark:text-zinc-400"
                         >
                             <Lock className="h-3 w-3" />
                             Private

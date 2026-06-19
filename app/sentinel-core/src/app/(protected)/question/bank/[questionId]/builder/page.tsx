@@ -3,7 +3,13 @@
 import { useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { Loader2 } from 'lucide-react';
-import { useCreateQuestionMutation, useQuestionQuery, useQuestionTypesQuery, useStableValue, useUpdateQuestionMutation } from '@sentinel/hooks';
+import {
+    useCreateQuestionMutation,
+    useQuestionQuery,
+    useQuestionTypesQuery,
+    useStableValue,
+    useUpdateQuestionMutation,
+} from '@sentinel/hooks';
 import { QuestionBuilderForm } from '@/features/exams';
 import type { QuestionBuilderPayload } from '@/features/exams/builder/_components/_types';
 import { mapQuestionRecordToExamQuestion } from '@/features/questions/_utils/question-record';
@@ -74,7 +80,7 @@ export default function QuestionBankBuilderPage() {
     if (isQuestionLoading || isQuestionTypesLoading || !initialData || !questionTypeDefinition) {
         return (
             <div className="flex min-h-[60vh] flex-col items-center justify-center gap-3">
-                <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+                <Loader2 className="text-muted-foreground h-8 w-8 animate-spin" />
                 <p className="text-muted-foreground text-sm">Loading question builder...</p>
             </div>
         );

@@ -171,7 +171,9 @@ export async function getExamsData({
                 eb
                     .selectFrom('exam_section_assignments as esa_i_ids')
                     .select(
-                        sql<string[]>`coalesce(json_agg(distinct esa_i_ids.instructor_id), '[]'::json)`.as(
+                        sql<
+                            string[]
+                        >`coalesce(json_agg(distinct esa_i_ids.instructor_id), '[]'::json)`.as(
                             'assigned_instructor_ids',
                         ),
                     )
@@ -240,6 +242,13 @@ export async function getExamsData({
                         .select('pa_filter.exam_id')
                         .whereRef('pa_filter.exam_id', '=', 'e.exam_id')
                         .where('pa_filter.instructor_id', '=', instructorUserId),
+                ),
+                eb.exists(
+                    eb
+                        .selectFrom('exam_shares as es_filter')
+                        .select('es_filter.exam_id')
+                        .whereRef('es_filter.exam_id', '=', 'e.exam_id')
+                        .where('es_filter.user_id', '=', instructorUserId),
                 ),
             ]),
         );

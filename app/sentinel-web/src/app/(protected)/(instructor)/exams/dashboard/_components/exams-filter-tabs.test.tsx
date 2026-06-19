@@ -6,16 +6,8 @@ import type { ExamTabKey } from '../_constants';
 
 vi.mock('@sentinel/ui', () => ({
     TabsList: ({ children }: { children: ReactNode }) => <div>{children}</div>,
-    TabsTrigger: ({
-        children,
-        onClick,
-    }: {
-        children: ReactNode;
-        onClick?: () => void;
-    }) => (
-        <button onClick={onClick}>
-            {children}
-        </button>
+    TabsTrigger: ({ children, onClick }: { children: ReactNode; onClick?: () => void }) => (
+        <button onClick={onClick}>{children}</button>
     ),
 }));
 
@@ -29,7 +21,9 @@ describe('ExamsFilterTabs', () => {
             archived: 1,
         };
 
-        render(<ExamsFilterTabs activeTab="published" counts={counts} onValueChange={onValueChange} />);
+        render(
+            <ExamsFilterTabs activeTab="published" counts={counts} onValueChange={onValueChange} />,
+        );
 
         expect(screen.getByRole('button', { name: /All/ })).toBeTruthy();
         expect(screen.getByRole('button', { name: /Published/ })).toBeTruthy();

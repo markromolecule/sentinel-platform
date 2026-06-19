@@ -42,7 +42,7 @@ export type EnrollmentFileColumn =
 export type EnrollmentFileResult = {
     success: boolean;
     data: Omit<Student, 'id' | 'enrolledAt' | 'userId' | 'role' | 'studentNo'> &
-    { studentNo: string }[]; // Adjusting for specific upload shape
+        { studentNo: string }[]; // Adjusting for specific upload shape
     errors: string[];
     detectedColumns: EnrollmentFileColumn[];
 };

@@ -32,5 +32,7 @@ export const createExamSectionAssignmentBatchBodySchema = z.object({
 
 export type ExamSectionAssignment = z.infer<typeof examSectionAssignmentSchema>;
 export type CreateExamSectionAssignmentBody = z.infer<typeof createExamSectionAssignmentBodySchema>;
-export type CreateExamSectionAssignmentBatchBody = z.infer<typeof createExamSectionAssignmentBatchBodySchema>;
+export type CreateExamSectionAssignmentBatchBody = z.infer<
+    typeof createExamSectionAssignmentBatchBodySchema
+>;
 export type UpdateExamSectionAssignmentBody = z.infer<typeof updateExamSectionAssignmentBodySchema>;

@@ -43,7 +43,10 @@ export function useShareQuestionBankCollectionMutation(
                     queryKey: QUESTION_BANK_COLLECTION_QUERY_KEYS.details(variables.id),
                 }),
                 queryClient.invalidateQueries({
-                    queryKey: [...QUESTION_BANK_COLLECTION_QUERY_KEYS.details(variables.id), 'shares'],
+                    queryKey: [
+                        ...QUESTION_BANK_COLLECTION_QUERY_KEYS.details(variables.id),
+                        'shares',
+                    ],
                 }),
             ]);
             (args.onSuccess as any)?.(data, variables, context);

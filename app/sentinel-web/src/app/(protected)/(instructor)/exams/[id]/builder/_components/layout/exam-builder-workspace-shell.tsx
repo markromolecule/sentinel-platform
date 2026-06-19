@@ -15,10 +15,7 @@ type ExamBuilderWorkspaceShellProps = {
  *
  * @param props - ExamBuilderWorkspaceShellProps containing sidebar and children content.
  */
-export function ExamBuilderWorkspaceShell({
-    sidebar,
-    children,
-}: ExamBuilderWorkspaceShellProps) {
+export function ExamBuilderWorkspaceShell({ sidebar, children }: ExamBuilderWorkspaceShellProps) {
     return (
         <div className="relative min-h-[calc(100vh-64px)]">
             {sidebar ? (

@@ -50,7 +50,7 @@ export function ExamCardHeader({
                     {exam.isPublic ? (
                         <Badge
                             variant="outline"
-                            className="flex items-center gap-1 border-emerald-500/20 bg-emerald-500/10 text-[10px] font-medium uppercase tracking-wider text-emerald-700 hover:bg-emerald-500/10 dark:text-emerald-400"
+                            className="flex items-center gap-1 border-emerald-500/20 bg-emerald-500/10 text-[10px] font-medium tracking-wider text-emerald-700 uppercase hover:bg-emerald-500/10 dark:text-emerald-400"
                         >
                             <Globe className="h-3 w-3" />
                             Public
@@ -58,7 +58,7 @@ export function ExamCardHeader({
                     ) : (
                         <Badge
                             variant="outline"
-                            className="flex items-center gap-1 border-zinc-500/20 bg-zinc-500/10 text-[10px] font-medium uppercase tracking-wider text-zinc-700 hover:bg-zinc-500/10 dark:text-zinc-400"
+                            className="flex items-center gap-1 border-zinc-500/20 bg-zinc-500/10 text-[10px] font-medium tracking-wider text-zinc-700 uppercase hover:bg-zinc-500/10 dark:text-zinc-400"
                         >
                             <Lock className="h-3 w-3" />
                             Private

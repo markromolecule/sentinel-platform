@@ -5,33 +5,35 @@ import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } 
 const pushMock = vi.fn();
 const updateQuestionMock = vi.fn();
 const createQuestionMock = vi.fn();
-const QuestionBuilderFormMock = vi.fn((props: {
-    type: string;
-    onBack: () => void;
-    onUpdate: (id: string, updates: Record<string, unknown>) => void;
-}) => (
-    <div data-testid="question-builder-form" data-type={props.type}>
-        <button type="button" onClick={props.onBack}>
-            Cancel
-        </button>
-        <button
-            type="button"
-            onClick={() =>
-                props.onUpdate('question-1', {
-                    type: 'MULTIPLE_CHOICE',
-                    content: { prompt: 'Updated prompt' },
-                    difficulty: 'EASY',
-                    points: 3,
-                    tags: [],
-                    passageContent: null,
-                    passageType: 'plain',
-                })
-            }
-        >
-            Save
-        </button>
-    </div>
-));
+const QuestionBuilderFormMock = vi.fn(
+    (props: {
+        type: string;
+        onBack: () => void;
+        onUpdate: (id: string, updates: Record<string, unknown>) => void;
+    }) => (
+        <div data-testid="question-builder-form" data-type={props.type}>
+            <button type="button" onClick={props.onBack}>
+                Cancel
+            </button>
+            <button
+                type="button"
+                onClick={() =>
+                    props.onUpdate('question-1', {
+                        type: 'MULTIPLE_CHOICE',
+                        content: { prompt: 'Updated prompt' },
+                        difficulty: 'EASY',
+                        points: 3,
+                        tags: [],
+                        passageContent: null,
+                        passageType: 'plain',
+                    })
+                }
+            >
+                Save
+            </button>
+        </div>
+    ),
+);
 
 vi.mock('next/navigation', () => ({
     useParams: () => ({ questionId: 'question-1' }),

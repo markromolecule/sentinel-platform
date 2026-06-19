@@ -108,9 +108,10 @@ export function useCollectionManagement() {
                 isPublic: collection.isPublic,
                 createdById: collection.createdById,
                 updatedById: collection.updatedById,
-                author: collection.creatorFirstName && collection.creatorLastName
-                    ? `${collection.creatorFirstName} ${collection.creatorLastName}`
-                    : null,
+                author:
+                    collection.creatorFirstName && collection.creatorLastName
+                        ? `${collection.creatorFirstName} ${collection.creatorLastName}`
+                        : null,
             })),
         [collections],
     );

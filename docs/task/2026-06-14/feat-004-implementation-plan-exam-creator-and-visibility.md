@@ -7,25 +7,30 @@ This implementation plan outlines the steps to add creator/publisher names and v
 ### Viable Options
 
 #### Option 1: Fast & Simple (Metadata Only)
+
 - Add `is_public` and `published_by` to the `exams` table.
 - Retrieve creator and publisher names in `getExamsData` using basic joins.
 - Render text labels and static badges on the UI.
-- *Tradeoff*: Simple to build, but lacks fine-grained access checks, leaving private exams accessible via raw API requests.
+- _Tradeoff_: Simple to build, but lacks fine-grained access checks, leaving private exams accessible via raw API requests.
 
 #### Option 2: Robust & Secure (Advanced Indexing, Access Control, and Filters) - **RECOMMENDED**
+
 - Add `is_public` (default `false`) and `published_by` (nullable UUID) to the `exams` table with index and foreign key constraints.
 - Integrate full visibility checks in authorization layer (GET `/exams` query predicates) to prevent unauthorized users from viewing private exams.
 - Implement UI toggles for public/private, and show clean, color-coded badges and styled creator/publisher metadata.
-- *Tradeoff*: Requires schema migration and endpoint filter updates, but ensures complete privacy and type-safety.
+- _Tradeoff_: Requires schema migration and endpoint filter updates, but ensures complete privacy and type-safety.
 
 #### Option 3: Templated Library Sharing (Dedicated Shared Catalog)
+
 - Create a separate table/relation representing a shared public catalog of templates. Publishing an exam as public copies it to this template table.
-- *Tradeoff*: Keeps the main `exams` table clean, but introduces data duplication and significant complexity to maintain sync.
+- _Tradeoff_: Keeps the main `exams` table clean, but introduces data duplication and significant complexity to maintain sync.
 
 ### Selected Option: Option 2 (Robust & Secure)
+
 This option ensures that exam visibility settings are fully enforced at the database and API authorization levels, preventing privacy leakage while maintaining the monorepo's database design patterns.
 
 #### Concrete Next Steps
+
 1. Add `is_public` and `published_by` to `packages/db/prisma/schema.prisma` and run a migration.
 2. Update `@sentinel/shared` schemas and types to incorporate the new fields.
 3. Update Kysely query predicates in the backend to select creator/publisher names and filter by visibility.
@@ -37,6 +42,7 @@ This option ensures that exam visibility settings are fully enforced at the data
 ## User Review Required
 
 > [!IMPORTANT]
+>
 > - **Database Migration**: This change introduces a schema migration to add `is_public` (boolean, default: false) and `published_by` (UUID, nullable, foreign key to `users`) fields on the `exams` table.
 > - **Visibility Authorization**: Once applied, exams marked as "Private" (default) will only be viewable by their creator, assigned instructors, or administrators.
 
@@ -45,6 +51,7 @@ This option ensures that exam visibility settings are fully enforced at the data
 ## Proposed Changes
 
 ### Phase 1: Database Migration & Schema Types
+
 **Goal:** Update database schema and shared type definitions to support visibility and creator/publisher name fields.
 
 - [x] Add `is_public` and `published_by` fields (along with relationships) in `packages/db/prisma/schema.prisma`
@@ -55,6 +62,7 @@ This option ensures that exam visibility settings are fully enforced at the data
 - [x] Update `Exam` type definition in [exam.ts](file:///Applications/XAMPP/xamppfiles/htdocs/sentinel/packages/shared/src/types/exams/exam.ts)
 
 ### Phase 2: API Backend Service Layer
+
 **Goal:** Implement data retrieval, mapping, and mutation persistence for visibility and creator/publisher properties.
 
 - [x] Retrieve `created_by_name` and `published_by_name` by joining `user_profiles` inside `getExamsData` in [get-exams.ts](file:///Applications/XAMPP/xamppfiles/htdocs/sentinel/app/sentinel-api/src/modules/examination/exams/data/get-exams.ts)
@@ -65,6 +73,7 @@ This option ensures that exam visibility settings are fully enforced at the data
 - [x] Write Vitest assertions in [get-exams.test.ts](file:///Applications/XAMPP/xamppfiles/htdocs/sentinel/app/sentinel-api/src/modules/examination/exams/data/get-exams.test.ts) and [map-exam-response.test.ts](file:///Applications/XAMPP/xamppfiles/htdocs/sentinel/app/sentinel-api/src/modules/examination/exams/services/map-exam-response.test.ts)
 
 ### Phase 3: Frontend User Interface
+
 **Goal:** Build public/private controls and display visibility/creator/publisher details on cards and lists.
 
 - [x] Add the `isPublic` Switch toggle to `BasicDetailsFields` in [basic-details-fields.tsx](file:///Applications/XAMPP/xamppfiles/htdocs/sentinel/app/sentinel-core/src/features/exams/_components/forms/fields/basic-info-fields/basic-details-fields.tsx)
@@ -78,19 +87,21 @@ This option ensures that exam visibility settings are fully enforced at the data
 ## Verification Plan
 
 ### Automated Tests
+
 - Run migration script:
-  ```bash
-  pnpm db:migrate
-  ```
+    ```bash
+    pnpm db:migrate
+    ```
 - Run Vitest backend tests:
-  ```bash
-  pnpm --dir app/sentinel-api test get-exams.test.ts map-exam-response.test.ts
-  ```
+    ```bash
+    pnpm --dir app/sentinel-api test get-exams.test.ts map-exam-response.test.ts
+    ```
 - Run Vitest frontend tests:
-  ```bash
-  pnpm --dir app/sentinel-core test exam-card-body.test.tsx
-  ```
+    ```bash
+    pnpm --dir app/sentinel-core test exam-card-body.test.tsx
+    ```
 
 ### Manual Verification
+
 - Verify visibility toggle behaves correctly when creating/updating exams.
 - Ensure only authorized instructors can see private exams in the main dashboard workspace.

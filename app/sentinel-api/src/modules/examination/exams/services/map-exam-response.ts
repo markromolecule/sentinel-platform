@@ -200,7 +200,7 @@ export function mapExamSummaryResponse(
         totalScore: record.attempt_total_score != null ? Number(record.attempt_total_score) : null,
         percentage:
             record.attempt_status?.toUpperCase() === 'COMPLETED' ||
-                record.attempt_completed_at != null
+            record.attempt_completed_at != null
                 ? computePercentage(record.attempt_score, record.attempt_total_score)
                 : computeProgressPercentage(record.attempt_answered_count, record.question_count),
         timeSpentMinutes: record.attempt_time_spent_minutes ?? null,
@@ -213,13 +213,13 @@ export function mapExamSummaryResponse(
         incidentCount: studentView
             ? (record.attempt_incident_count ?? 0)
             : record.incident_count != null
-                ? Number(record.incident_count)
-                : 0,
+              ? Number(record.incident_count)
+              : 0,
         studentsCount: studentView
             ? 0
             : record.students_count != null
-                ? Number(record.students_count)
-                : 0,
+              ? Number(record.students_count)
+              : 0,
         runtimeAccess: options?.runtimeAccess,
         examCategory: (record.exam_category as any) ?? null,
         isPublic: record.is_public ?? false,

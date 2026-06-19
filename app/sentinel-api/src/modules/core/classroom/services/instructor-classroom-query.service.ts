@@ -12,6 +12,19 @@ import {
 } from './classroom-access-query.service';
 import { getClassroomStudents } from './classroom-students-query.service';
 
+/**
+ * Retrieves accessible classrooms for an instructor (or admin) with optional query filtering.
+ *
+ * @param dbClient - The database client instance.
+ * @param options.userId - The authenticated user's ID.
+ * @param options.institutionId - The authenticated user's institution ID.
+ * @param options.search - Optional text search filter.
+ * @param options.departmentId - Optional department ID filter.
+ * @param options.userRole - Optional role of the user.
+ * @param options.status - Optional status filter (active, archived, all).
+ * @param options.subjectId - Optional subject ID filter.
+ * @returns A promise resolving to the list of classrooms.
+ */
 export async function getInstructorClassrooms(
     dbClient: DbClient,
     {
@@ -21,11 +34,13 @@ export async function getInstructorClassrooms(
         departmentId,
         userRole,
         status,
+        subjectId,
     }: ClassroomScope & {
         search?: string;
         departmentId?: string;
         userRole?: string;
         status?: 'active' | 'archived' | 'all';
+        subjectId?: string;
     },
 ) {
     const classGroupColumnSupport = await getClassGroupColumnSupport(dbClient);
@@ -45,6 +60,10 @@ export async function getInstructorClassrooms(
             { status },
         )
     ).where('cg.class_name', 'is not', null);
+
+    if (subjectId) {
+        query = query.where('cg.subject_id', '=', subjectId);
+    }
 
     if (departmentId) {
         query = query.where('sec.department_id', '=', departmentId);

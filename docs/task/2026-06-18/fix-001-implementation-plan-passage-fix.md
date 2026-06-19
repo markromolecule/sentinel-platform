@@ -5,14 +5,17 @@
 ## Solution Options
 
 ### Option 1: Minimal UI patch
+
 - Patch the passage editor to make uploaded images and link insertion work again, then keep the existing dialog-based edit flow and only update the broken controls.
 - Tradeoff: fastest to ship, but it leaves the current dialog complexity and route fragmentation in place.
 
 ### Option 2: Route-first builder migration
+
 - Keep the passage editor fixes, then move question editing from dialogs to dedicated builder routes for question bank, collection, and import-preview edit flows.
 - Tradeoff: more files and route work up front, but it aligns all edit paths with the existing exam builder pattern and reduces duplicate UI state.
 
 ### Option 3: Shared editor shell refactor
+
 - Build a reusable question-editing shell that both the exam builder and question bank/collection flows consume, and refactor the passage editor controls into the same shared surface.
 - Tradeoff: strongest long-term consolidation, but it is the largest change and risks widening the scope beyond the immediate bug fix.
 
@@ -21,11 +24,13 @@
 **Best option: Option 2, Route-first builder migration.**
 
 Why:
+
 - It directly solves the reported problems without introducing a larger architecture change.
 - It reuses the existing builder editor and keeps the implementation aligned across `sentinel-web` and `sentinel-core`.
 - It is easier to reason about than the current dialog-based edit flow and lowers the chance of image or passage state getting lost between modal lifecycle changes.
 
 Concrete next steps:
+
 1. Fix passage image upload and link behavior in `packages/ui/src/components/passage-editor.tsx`.
 2. Correct the passage image storage path and validate the upload service in `app/sentinel-api/src/modules/infrastructure/passage-images/passage-images.service.ts`.
 3. Replace question edit dialogs with builder routes for question bank, collection, and import-preview edit flows in both apps.

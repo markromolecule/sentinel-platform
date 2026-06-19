@@ -1,13 +1,7 @@
 'use client';
 
 import * as React from 'react';
-import {
-    Dialog,
-    DialogContent,
-    DialogHeader,
-    DialogTitle,
-    DialogDescription,
-} from '@sentinel/ui';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@sentinel/ui';
 import { NewAssignmentsBuilder } from './new-assignments-builder';
 
 export interface AddExamSectionAssignmentDialogProps {
@@ -29,7 +23,7 @@ export function AddExamSectionAssignmentDialog({
 }: AddExamSectionAssignmentDialogProps) {
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="sm:max-w-4xl md:max-w-5xl max-h-[90vh] overflow-y-auto bg-white dark:bg-zinc-900">
+            <DialogContent className="max-h-[90vh] overflow-y-auto bg-white sm:max-w-4xl md:max-w-5xl dark:bg-zinc-900">
                 <DialogHeader>
                     <DialogTitle className="text-lg font-bold">Assign Classrooms</DialogTitle>
                     <DialogDescription>

@@ -58,7 +58,7 @@ export function InstructorAssignmentContent() {
                 <div className="flex w-full shrink-0 flex-col gap-1.5 md:w-80">
                     <Label
                         htmlFor="exam-selector"
-                        className="text-xs font-semibold uppercase tracking-wider text-zinc-500"
+                        className="text-xs font-semibold tracking-wider text-zinc-500 uppercase"
                     >
                         Active Examination
                     </Label>

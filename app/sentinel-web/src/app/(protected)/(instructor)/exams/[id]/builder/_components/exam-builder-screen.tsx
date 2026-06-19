@@ -20,10 +20,10 @@ export function ExamBuilderScreen() {
             <ExamBuilderWorkspaceShell
                 sidebar={
                     <div className="space-y-4">
-                        <div className="h-5 w-32 animate-pulse rounded bg-muted" />
+                        <div className="bg-muted h-5 w-32 animate-pulse rounded" />
                         <div className="space-y-3">
-                            <div className="h-24 animate-pulse rounded-2xl bg-muted/60" />
-                            <div className="h-24 animate-pulse rounded-2xl bg-muted/60" />
+                            <div className="bg-muted/60 h-24 animate-pulse rounded-2xl" />
+                            <div className="bg-muted/60 h-24 animate-pulse rounded-2xl" />
                         </div>
                     </div>
                 }

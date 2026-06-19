@@ -3,10 +3,7 @@
 import * as React from 'react';
 import { Button, DataTable, Spinner } from '@sentinel/ui';
 import { Trash2, MapPin, User, Plus } from 'lucide-react';
-import {
-    useDeleteExamSectionAssignmentMutation,
-    useClassroomsQuery,
-} from '@sentinel/hooks';
+import { useDeleteExamSectionAssignmentMutation, useClassroomsQuery } from '@sentinel/hooks';
 import { type ClassroomSummary } from '@sentinel/shared/types';
 import { type ExamSectionAssignmentRecord } from '@sentinel/services';
 import { toast } from 'sonner';
@@ -115,7 +112,8 @@ export function ExamSectionAssignmentList({
 
             return {
                 ...assignment,
-                resolvedName: classroom?.className || assignment.sectionName || 'Unassigned classroom',
+                resolvedName:
+                    classroom?.className || assignment.sectionName || 'Unassigned classroom',
             };
         });
     }, [assignments, classrooms]);
@@ -165,10 +163,13 @@ export function ExamSectionAssignmentList({
                     </div>
                     <h3 className="mt-4 text-lg font-semibold">No Classrooms Assigned</h3>
                     <p className="text-muted-foreground mt-2 max-w-sm text-sm">
-                        This exam hasn&apos;t been assigned to any classrooms yet. Assign a classroom
-                        to make the exam available.
+                        This exam hasn&apos;t been assigned to any classrooms yet. Assign a
+                        classroom to make the exam available.
                     </p>
-                    <Button onClick={onAssignClick} className="mt-4 bg-[#323d8f] hover:bg-[#323d8f]/90">
+                    <Button
+                        onClick={onAssignClick}
+                        className="mt-4 bg-[#323d8f] hover:bg-[#323d8f]/90"
+                    >
                         Assign Classroom
                     </Button>
                 </div>

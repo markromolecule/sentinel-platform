@@ -89,13 +89,7 @@ vi.mock('@sentinel/ui', () => ({
         <div data-testid="dialog-content">{children}</div>
     ),
     DialogTitle: ({ children }: { children: React.ReactNode }) => <h2>{children}</h2>,
-    PageHeader: ({
-        title,
-        description,
-    }: {
-        title: string;
-        description: string;
-    }) => (
+    PageHeader: ({ title, description }: { title: string; description: string }) => (
         <header>
             <h1>{title}</h1>
             <p>{description}</p>
@@ -137,11 +131,7 @@ vi.mock('../tables/questions-table', () => ({
 }));
 
 vi.mock('./questions-empty-state', () => ({
-    QuestionsEmptyState: ({
-        onCreate,
-    }: {
-        onCreate: () => void;
-    }) => (
+    QuestionsEmptyState: ({ onCreate }: { onCreate: () => void }) => (
         <button type="button" onClick={onCreate}>
             Create Question
         </button>

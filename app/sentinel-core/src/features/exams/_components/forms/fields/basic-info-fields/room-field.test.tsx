@@ -7,9 +7,9 @@ import { RoomField } from './room-field';
 import { buildRoomOptionGroups } from './room-field.utils';
 
 class ResizeObserverMock {
-    observe() { }
-    unobserve() { }
-    disconnect() { }
+    observe() {}
+    unobserve() {}
+    disconnect() {}
 }
 
 window.HTMLElement.prototype.scrollIntoView = () => undefined;

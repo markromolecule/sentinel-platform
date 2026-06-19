@@ -177,7 +177,9 @@ async function main() {
     const args = parseArgs(process.argv.slice(2));
 
     if (args.help === true) {
-        console.log('Usage: pnpm --dir app/sentinel-api exec tsx -r dotenv/config scripts/backfill-passage-content.ts [--apply] [--limit N]');
+        console.log(
+            'Usage: pnpm --dir app/sentinel-api exec tsx -r dotenv/config scripts/backfill-passage-content.ts [--apply] [--limit N]',
+        );
         console.log('Default mode is dry-run. Use --apply to update rows.');
         return;
     }

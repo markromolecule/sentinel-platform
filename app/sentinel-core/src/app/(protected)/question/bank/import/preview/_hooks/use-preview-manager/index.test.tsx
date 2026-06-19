@@ -25,9 +25,12 @@ vi.mock('@sentinel/hooks', () => ({
     useStableValue: (factory: () => unknown) => factory(),
 }));
 
-vi.mock('@/app/(protected)/question/bank/_components/dialogs/import-modal/_hooks/use-ai-import-store', () => ({
-    useAiImportStore: () => mocks.previewState,
-}));
+vi.mock(
+    '@/app/(protected)/question/bank/_components/dialogs/import-modal/_hooks/use-ai-import-store',
+    () => ({
+        useAiImportStore: () => mocks.previewState,
+    }),
+);
 
 vi.mock('./use-preview-pagination', () => ({
     usePreviewPagination: () => ({

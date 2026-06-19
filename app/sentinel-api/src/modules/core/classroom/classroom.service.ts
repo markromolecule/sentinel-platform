@@ -30,6 +30,19 @@ import { ClassroomAssignmentDashboardService } from './services/classroom-assign
 import { LogsService } from '../../general/logs/logs.service';
 
 export class ClassroomService {
+    /**
+     * Retrieves configured classrooms matching the query criteria, scoped to the user's role and institution.
+     *
+     * @param dbClient - The database client instance.
+     * @param options.userId - The authenticated user's ID.
+     * @param options.institutionId - The authenticated user's institution ID.
+     * @param options.search - Optional search term matching class name or scope.
+     * @param options.departmentId - Optional department ID filter.
+     * @param options.userRole - Optional role of the user (e.g., instructor, admin).
+     * @param options.status - Optional status filter (active, archived, all).
+     * @param options.subjectId - Optional subject ID filter.
+     * @returns A promise resolving to the list of classrooms.
+     */
     static async getClassrooms(
         dbClient: DbClient,
         {
@@ -39,6 +52,7 @@ export class ClassroomService {
             departmentId,
             userRole,
             status,
+            subjectId,
         }: {
             userId: string;
             institutionId: string;
@@ -46,6 +60,7 @@ export class ClassroomService {
             departmentId?: string;
             userRole?: string;
             status?: 'active' | 'archived' | 'all';
+            subjectId?: string;
         },
     ) {
         return await getInstructorClassrooms(dbClient, {
@@ -55,6 +70,7 @@ export class ClassroomService {
             departmentId,
             userRole,
             status,
+            subjectId,
         });
     }
 

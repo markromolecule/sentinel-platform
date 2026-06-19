@@ -45,9 +45,9 @@ export const uploadPassageImageRoute = createRoute({
     },
 });
 
-export const uploadPassageImageRouteHandler: AppRouteHandler<typeof uploadPassageImageRoute> = async (
-    c,
-) => {
+export const uploadPassageImageRouteHandler: AppRouteHandler<
+    typeof uploadPassageImageRoute
+> = async (c) => {
     const supabaseUser = c.get('supabaseUser') as any;
     assertAssessmentAccess(c);
 
@@ -63,7 +63,10 @@ export const uploadPassageImageRouteHandler: AppRouteHandler<typeof uploadPassag
         });
     }
 
-    const uploadedImage = await uploadPassageImage(file as File, supabaseUser?.sub ?? c.get('user')?.id);
+    const uploadedImage = await uploadPassageImage(
+        file as File,
+        supabaseUser?.sub ?? c.get('user')?.id,
+    );
 
     return c.json({
         message: 'Image uploaded successfully',

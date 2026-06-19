@@ -154,4 +154,19 @@ describe('getInstructorClassrooms', () => {
             { status: 'archived' },
         );
     });
+
+    it('adds the subject filter when a subjectId is provided', async () => {
+        const queryBuilder = createQueryBuilder();
+        vi.mocked(buildAccessibleClassroomsQuery).mockResolvedValue(queryBuilder);
+
+        const result = await getInstructorClassrooms({} as any, {
+            userId: 'user-1',
+            institutionId: 'institution-1',
+            subjectId: 'subject-123',
+        });
+
+        expect(result).toHaveLength(1);
+        expect(queryBuilder.where).toHaveBeenCalledWith('cg.class_name', 'is not', null);
+        expect(queryBuilder.where).toHaveBeenCalledWith('cg.subject_id', '=', 'subject-123');
+    });
 });

@@ -54,7 +54,7 @@ export function InstructorAssignmentContent() {
                 title="Select Examination"
                 description="Choose an exam from the list to view and manage its active section assignments."
             >
-                <div className="flex w-full md:w-80 flex-col gap-1.5 shrink-0">
+                <div className="flex w-full shrink-0 flex-col gap-1.5 md:w-80">
                     <Label
                         htmlFor="exam-selector"
                         className="text-xs font-semibold tracking-wider text-zinc-500 uppercase"
@@ -67,10 +67,7 @@ export function InstructorAssignmentContent() {
                             <span className="text-sm text-zinc-500">Loading exams...</span>
                         </div>
                     ) : (
-                        <Select
-                            value={currentExamId || 'none'}
-                            onValueChange={handleExamChange}
-                        >
+                        <Select value={currentExamId || 'none'} onValueChange={handleExamChange}>
                             <SelectTrigger id="exam-selector" className="w-full">
                                 <SelectValue placeholder="Select an exam to manage..." />
                             </SelectTrigger>
@@ -117,8 +114,8 @@ export function InstructorAssignmentContent() {
                         No Exam Selected
                     </h3>
                     <p className="text-muted-foreground mt-2 max-w-sm text-sm">
-                        Please select an examination from the dropdown menu above to begin
-                        managing its classroom and proctor assignments.
+                        Please select an examination from the dropdown menu above to begin managing
+                        its classroom and proctor assignments.
                     </p>
                 </div>
             )}

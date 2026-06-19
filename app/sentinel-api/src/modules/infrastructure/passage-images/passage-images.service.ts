@@ -39,7 +39,10 @@ function resolveExtension(file: File) {
 /**
  * Uploads a passage image to the configured bucket and returns the public URL metadata.
  */
-export async function uploadPassageImage(file: File, userId: string): Promise<UploadedPassageImage> {
+export async function uploadPassageImage(
+    file: File,
+    userId: string,
+): Promise<UploadedPassageImage> {
     if (!file || typeof file.arrayBuffer !== 'function') {
         throw new HTTPException(400, {
             message: 'A valid image file is required.',

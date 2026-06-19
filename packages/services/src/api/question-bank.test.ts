@@ -1,8 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import {
-    getQuestionBankCollectionShares,
-    shareQuestionBankCollection,
-} from './question-bank';
+import { getQuestionBankCollectionShares, shareQuestionBankCollection } from './question-bank';
 
 describe('question bank api client services', () => {
     it('fetches collection shares and maps the response shape', async () => {

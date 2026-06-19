@@ -115,15 +115,14 @@ export function RowInstructorCombobox({
                     setDisplayValue(searchTerm);
                 }}
             />
-            <ComboboxContent className="w-full min-w-[240px] bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-md shadow-md">
+            <ComboboxContent className="w-full min-w-[240px] rounded-md border border-zinc-200 bg-white shadow-md dark:border-zinc-800 dark:bg-zinc-950">
                 <ComboboxList className="max-h-60 overflow-y-auto p-1">
                     <ComboboxItem value="none">
                         <span className="text-zinc-500 italic">No instructor</span>
                     </ComboboxItem>
                     {filteredUsers.map((user) => {
                         const name =
-                            [user.firstName, user.lastName].filter(Boolean).join(' ') ||
-                            user.email;
+                            [user.firstName, user.lastName].filter(Boolean).join(' ') || user.email;
                         return (
                             <ComboboxItem key={user.id} value={user.id}>
                                 <div className="flex flex-col text-left">

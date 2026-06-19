@@ -5,9 +5,7 @@ import { ExamBuilderWorkspaceShell } from './exam-builder-workspace-shell';
 describe('ExamBuilderWorkspaceShell', () => {
     it('renders the desktop shell heading and surfaces sidebar content', () => {
         render(
-            <ExamBuilderWorkspaceShell
-                sidebar={<div data-testid="sidebar-content">Sidebar</div>}
-            >
+            <ExamBuilderWorkspaceShell sidebar={<div data-testid="sidebar-content">Sidebar</div>}>
                 <div data-testid="workspace-content">Workspace</div>
             </ExamBuilderWorkspaceShell>,
         );

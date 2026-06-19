@@ -3,10 +3,7 @@ import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 
 const pushMock = vi.fn();
-const QuestionBuilderFormMock = vi.fn((props: {
-    type: string;
-    onBack: () => void;
-}) => (
+const QuestionBuilderFormMock = vi.fn((props: { type: string; onBack: () => void }) => (
     <div data-testid="question-builder-form" data-type={props.type}>
         <button type="button" onClick={props.onBack}>
             Cancel
@@ -92,9 +89,7 @@ describe('Collection builder route', () => {
     it('renders the selected collection question and supports back navigation', () => {
         render(<Page />);
 
-        expect(screen.getByTestId('question-builder-form').getAttribute('data-type')).toBe(
-            'ESSAY',
-        );
+        expect(screen.getByTestId('question-builder-form').getAttribute('data-type')).toBe('ESSAY');
         fireEvent.click(screen.getByRole('button', { name: /cancel/i }));
         expect(pushMock).toHaveBeenCalledWith('/question/bank/collections/collection-1');
     });

@@ -70,6 +70,39 @@ export const deleteExamSchema = {
     }),
 };
 
+export const shareExamSchema = {
+    params: Schema.examIdParamsSchema,
+    body: z.object({
+        userIds: z.array(z.string().uuid()).default([]),
+    }),
+    response: z.object({
+        message: z.string(),
+        data: z.array(
+            z.object({
+                user_id: z.string().uuid(),
+                first_name: z.string().nullable(),
+                last_name: z.string().nullable(),
+                email: z.string().email().nullable(),
+            }),
+        ),
+    }),
+};
+
+export const getExamSharesSchema = {
+    params: Schema.examIdParamsSchema,
+    response: z.object({
+        message: z.string(),
+        data: z.array(
+            z.object({
+                user_id: z.string().uuid(),
+                first_name: z.string().nullable(),
+                last_name: z.string().nullable(),
+                email: z.string().email().nullable(),
+            }),
+        ),
+    }),
+};
+
 export type GetExamsQuery = z.infer<typeof getExamsSchema.request.query>;
 export type GetExamByIdParams = z.infer<typeof getExamByIdSchema.params>;
 export type CreateExamBody = z.infer<typeof createExamSchema.body>;
@@ -77,5 +110,6 @@ export type UpdateExamParams = z.infer<typeof updateExamSchema.params>;
 export type UpdateExamBody = z.infer<typeof updateExamSchema.body>;
 export type UpdateExamStatusBody = z.infer<typeof updateExamStatusSchema.body>;
 export type DeleteExamParams = z.infer<typeof deleteExamSchema.params>;
+export type ShareExamBody = z.infer<typeof shareExamSchema.body>;
 export type ExamSummary = z.infer<typeof examSummarySchema>;
 export type ExamDetail = z.infer<typeof examDetailSchema>;

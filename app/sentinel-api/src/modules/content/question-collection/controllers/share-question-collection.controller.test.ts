@@ -24,11 +24,14 @@ vi.mock('@sentinel/db', async () => {
     };
 });
 
-vi.mock('../../../general/notification/services/question-bank-collection-notification.service', () => ({
-    QuestionBankCollectionNotificationService: {
-        notifyQuestionBankCollectionAssigned: vi.fn(),
-    },
-}));
+vi.mock(
+    '../../../general/notification/services/question-bank-collection-notification.service',
+    () => ({
+        QuestionBankCollectionNotificationService: {
+            notifyQuestionBankCollectionAssigned: vi.fn(),
+        },
+    }),
+);
 
 function createQuery(result: unknown) {
     const query: any = {
@@ -220,7 +223,9 @@ describe('share question collection controller', () => {
             action: 'share',
         });
         expect(executeTransaction).toHaveBeenCalled();
-        expect(QuestionBankCollectionNotificationService.notifyQuestionBankCollectionAssigned).toHaveBeenCalledTimes(1);
+        expect(
+            QuestionBankCollectionNotificationService.notifyQuestionBankCollectionAssigned,
+        ).toHaveBeenCalledTimes(1);
         expect(
             QuestionBankCollectionNotificationService.notifyQuestionBankCollectionAssigned,
         ).toHaveBeenCalledWith({
@@ -245,10 +250,7 @@ describe('share question collection controller', () => {
                 name: 'Physics Practice Set',
             },
         ]);
-        const existingSharesQuery = createQuery([
-            { user_id: 'user-1' },
-            { user_id: 'user-2' },
-        ]);
+        const existingSharesQuery = createQuery([{ user_id: 'user-1' }, { user_id: 'user-2' }]);
         const deleteQuery = createQuery([]);
         const insertQuery = createQuery([]);
         const filteredUsers = [
@@ -317,7 +319,9 @@ describe('share question collection controller', () => {
 
         const result = await shareQuestionCollectionRouteHandler(c, vi.fn());
 
-        expect(QuestionBankCollectionNotificationService.notifyQuestionBankCollectionAssigned).not.toHaveBeenCalled();
+        expect(
+            QuestionBankCollectionNotificationService.notifyQuestionBankCollectionAssigned,
+        ).not.toHaveBeenCalled();
         expect(result).toEqual({
             message: 'Collection shared successfully',
             data: sharedUsers,
@@ -331,10 +335,7 @@ describe('share question collection controller', () => {
                 name: 'Physics Practice Set',
             },
         ]);
-        const existingSharesQuery = createQuery([
-            { user_id: 'user-1' },
-            { user_id: 'user-2' },
-        ]);
+        const existingSharesQuery = createQuery([{ user_id: 'user-1' }, { user_id: 'user-2' }]);
         const deleteQuery = createQuery([]);
         let qcsCallCount = 0;
         mockTrx = {
@@ -372,7 +373,9 @@ describe('share question collection controller', () => {
         const result = await shareQuestionCollectionRouteHandler(c, vi.fn());
 
         expect(mockDbClient.selectFrom).not.toHaveBeenCalledWith('user_profiles');
-        expect(QuestionBankCollectionNotificationService.notifyQuestionBankCollectionAssigned).not.toHaveBeenCalled();
+        expect(
+            QuestionBankCollectionNotificationService.notifyQuestionBankCollectionAssigned,
+        ).not.toHaveBeenCalled();
         expect(result).toEqual({
             message: 'Collection shared successfully',
             data: [],
@@ -420,6 +423,8 @@ describe('share question collection controller', () => {
         await expect(shareQuestionCollectionRouteHandler(c, vi.fn())).rejects.toThrow(
             'transaction failed',
         );
-        expect(QuestionBankCollectionNotificationService.notifyQuestionBankCollectionAssigned).not.toHaveBeenCalled();
+        expect(
+            QuestionBankCollectionNotificationService.notifyQuestionBankCollectionAssigned,
+        ).not.toHaveBeenCalled();
     });
 });

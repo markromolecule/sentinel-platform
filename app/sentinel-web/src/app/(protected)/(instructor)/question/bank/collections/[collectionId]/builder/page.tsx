@@ -100,7 +100,9 @@ export default function CollectionQuestionBuilderPage() {
     };
 
     const handleCreate = async (payload: QuestionBuilderPayload) => {
-        const createdQuestion = await createQuestionMutation.mutateAsync(buildQuestionPayload(payload));
+        const createdQuestion = await createQuestionMutation.mutateAsync(
+            buildQuestionPayload(payload),
+        );
         await addQuestionsToCollectionMutation.mutateAsync({
             id: collectionId,
             payload: { questionIds: [createdQuestion.id] },
@@ -109,7 +111,9 @@ export default function CollectionQuestionBuilderPage() {
     };
 
     const handleDuplicate = async (payload: QuestionBuilderPayload) => {
-        const createdQuestion = await createQuestionMutation.mutateAsync(buildQuestionPayload(payload));
+        const createdQuestion = await createQuestionMutation.mutateAsync(
+            buildQuestionPayload(payload),
+        );
         await addQuestionsToCollectionMutation.mutateAsync({
             id: collectionId,
             payload: { questionIds: [createdQuestion.id] },
@@ -127,7 +131,7 @@ export default function CollectionQuestionBuilderPage() {
     ) {
         return (
             <div className="flex min-h-[60vh] flex-col items-center justify-center gap-3">
-                <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+                <Loader2 className="text-muted-foreground h-8 w-8 animate-spin" />
                 <p className="text-muted-foreground text-sm">Loading question builder...</p>
             </div>
         );

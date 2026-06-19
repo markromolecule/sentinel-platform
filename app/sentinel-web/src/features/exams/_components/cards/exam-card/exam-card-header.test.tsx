@@ -61,7 +61,7 @@ describe('ExamCardHeader', () => {
 
     it('shows the public badge when the exam is public', () => {
         render(
-        <ExamCardHeader
+            <ExamCardHeader
                 exam={buildExam({ isPublic: true })}
                 statusClass="border-amber-200 bg-amber-50 text-amber-700"
                 showActions
@@ -75,7 +75,7 @@ describe('ExamCardHeader', () => {
 
     it('shows the private badge when the exam is not public', () => {
         render(
-        <ExamCardHeader
+            <ExamCardHeader
                 exam={buildExam({ isPublic: false })}
                 statusClass="border-amber-200 bg-amber-50 text-amber-700"
                 showActions
@@ -89,7 +89,7 @@ describe('ExamCardHeader', () => {
 
     it('navigates to the assignment page with the exam id when sharing', () => {
         render(
-        <ExamCardHeader
+            <ExamCardHeader
                 exam={buildExam({ isPublic: true })}
                 statusClass="border-amber-200 bg-amber-50 text-amber-700"
                 showActions
