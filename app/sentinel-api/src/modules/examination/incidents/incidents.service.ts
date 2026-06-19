@@ -1,5 +1,7 @@
 import { type DbClient } from '@sentinel/db';
+import { HTTPException } from 'hono/http-exception';
 import { sql } from 'kysely';
+import { type UserQueryScope, applyIncidentQueryScoping } from '../../telemetry/storage/data/query-scoping';
 import {
     type GetExamIncidentsQuery,
     type IncidentLogItem,
@@ -20,10 +22,12 @@ export class IncidentsService {
         dbClient,
         examId,
         filters,
+        userScope,
     }: {
         dbClient: DbClient;
         examId: string;
         filters: GetExamIncidentsQuery;
+        userScope?: UserQueryScope;
     }): Promise<{ data: IncidentLogItem[]; total: number }> {
         const { sectionId, studentId, severity, type, status, page, limit } = filters;
 
@@ -84,6 +88,10 @@ export class IncidentsService {
             ])
             .where('ea.exam_id', '=', examId);
 
+        if (userScope) {
+            query = applyIncidentQueryScoping(query, userScope);
+        }
+
         // Apply filters
         if (sectionId) {
             query = query.where('cg.section_id', '=', sectionId);
@@ -113,9 +121,6 @@ export class IncidentsService {
             query = query.where('fi.status', '=', status);
         }
 
-        // Distinct distinct on incident_id to prevent duplicates from multiple class group enrollments
-        // Wait, Kysely distinctOn is postgres only, but we are running on Postgres. Let's make sure we distinctOn incident_id.
-        // Or we can order by incident_id first, or group. Actually, a simple distinctOn is perfect:
         query = query.distinctOn('fi.incident_id');
 
         // To get total count, we wrap this base query or count it
@@ -140,13 +145,13 @@ export class IncidentsService {
             const elapsedSeconds =
                 row.timestamp && row.attempt_started_at
                     ? Math.max(
-                          0,
-                          Math.floor(
-                              (new Date(row.timestamp).getTime() -
-                                  new Date(row.attempt_started_at).getTime()) /
-                                  1000,
-                          ),
-                      )
+                        0,
+                        Math.floor(
+                            (new Date(row.timestamp).getTime() -
+                                new Date(row.attempt_started_at).getTime()) /
+                            1000,
+                        ),
+                    )
                     : 0;
 
             return {
@@ -198,13 +203,38 @@ export class IncidentsService {
         dbClient,
         reviewerUserId,
         payload,
+        examId,
+        userScope,
     }: {
         dbClient: DbClient;
         reviewerUserId: string;
         payload: ReviewExamIncidentsBody;
+        examId: string;
+        userScope?: UserQueryScope;
     }): Promise<{ updatedCount: number; updatedAt: Date }> {
         const { incidentIds, status, reviewNotes } = payload;
         const updatedAt = new Date();
+
+        let allowedQuery = dbClient
+            .selectFrom('flagged_incidents as fi')
+            .innerJoin('exam_attempts as ea', 'ea.attempt_id', 'fi.attempt_id')
+            .innerJoin('exams as e', 'e.exam_id', 'ea.exam_id')
+            .select('fi.incident_id')
+            .where('ea.exam_id', '=', examId)
+            .where('fi.incident_id', 'in', incidentIds);
+
+        if (userScope) {
+            allowedQuery = applyIncidentQueryScoping(allowedQuery, userScope);
+        }
+
+        const allowedRows = await allowedQuery.execute();
+        const allowedIds = allowedRows.map((r) => r.incident_id);
+
+        if (allowedIds.length === 0) {
+            throw new HTTPException(404, {
+                message: 'Exam incidents not found or access denied.',
+            });
+        }
 
         const result = await dbClient
             .updateTable('flagged_incidents')
@@ -214,10 +244,10 @@ export class IncidentsService {
                 reviewed_by: reviewerUserId,
                 reviewed_at: updatedAt,
             })
-            .where('incident_id', 'in', incidentIds)
+            .where('incident_id', 'in', allowedIds)
             .executeTakeFirst();
 
-        const updatedCount = Number(result.numUpdatedRows ?? incidentIds.length);
+        const updatedCount = Number(result.numUpdatedRows ?? allowedIds.length);
 
         // Optional audit logging
         try {

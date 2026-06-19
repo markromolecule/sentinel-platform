@@ -18,8 +18,14 @@ vi.mock('@sentinel/hooks', () => ({
     isPermissionDeniedError: vi.fn(() => false),
 }));
 
+const mockUseAcademicScope = vi.fn(() => ({
+    institutionId: '',
+    isLoading: false,
+}));
+
 vi.mock('@/hooks', () => ({
     useInstitutionFacet: vi.fn(() => []),
+    useAcademicScope: () => mockUseAcademicScope(),
 }));
 
 describe('useSubjectClassificationsPageState', () => {
@@ -91,5 +97,16 @@ describe('useSubjectClassificationsPageState', () => {
         expect(result.current.typeCounts.get('CORE')).toBe(1);
         expect(result.current.originCounts.get('LOCAL')).toBe(1);
         expect(result.current.originCounts.get('INHERITED')).toBe(1);
+    });
+
+    it('sets default institution filter to user institution ID when loaded', () => {
+        mockUseAcademicScope.mockReturnValue({
+            institutionId: 'inst-123',
+            isLoading: false,
+        });
+
+        const { result } = renderHook(() => useSubjectClassificationsPageState());
+        expect(result.current.selectedInstitutions.has('inst-123')).toBe(true);
+        expect(result.current.isFiltered).toBe(true);
     });
 });

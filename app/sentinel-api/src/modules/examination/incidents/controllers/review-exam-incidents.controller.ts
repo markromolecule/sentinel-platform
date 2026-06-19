@@ -4,6 +4,7 @@ import {
     assertAssessmentAccess,
     resolveAssessmentActorRole,
 } from '../../assessment/assessment-access';
+import { requireActivePermission } from '../../../../lib/permissions';
 import {
     examIdParams,
     reviewExamIncidentsBodySchema,
@@ -46,6 +47,8 @@ export const reviewExamIncidentsRouteHandler: AppRouteHandler<
     const supabaseUser = c.get('supabaseUser') as any;
     const user = c.get('user');
 
+    requireActivePermission(c, 'incidents:review');
+
     const resolvedRole = await resolveAssessmentActorRole({
         dbClient: c.get('dbClient'),
         userId: user?.id,
@@ -56,10 +59,19 @@ export const reviewExamIncidentsRouteHandler: AppRouteHandler<
 
     const reviewerUserId = user?.id || '';
 
+    const userScope = {
+        role: resolvedRole || '',
+        userId: user?.id,
+        departmentId: user?.user_profiles?.department_id ?? null,
+        courseId: user?.user_profiles?.course_id ?? null,
+    };
+
     const { updatedCount, updatedAt } = await IncidentsService.reviewExamIncidentsData({
         dbClient: c.get('dbClient'),
         reviewerUserId,
         payload: body,
+        examId: id,
+        userScope,
     });
 
     return c.json({

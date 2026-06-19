@@ -1167,6 +1167,9 @@ export const SYSTEM_ROLE_BLUEPRINTS: Record<string, SystemRoleBlueprint> = {
             'announcement:create',
             'announcement:update',
             'announcement:delete',
+            'incidents:view',
+            'incidents:review',
+            'incidents:export',
         ],
     },
     admin: {
@@ -1237,6 +1240,9 @@ export const SYSTEM_ROLE_BLUEPRINTS: Record<string, SystemRoleBlueprint> = {
             'announcement:delete',
             'reports:view',
             'reports:export',
+            'incidents:view',
+            'incidents:review',
+            'incidents:export',
         ],
     },
     proctor: {
@@ -1286,6 +1292,9 @@ export const SYSTEM_ROLE_BLUEPRINTS: Record<string, SystemRoleBlueprint> = {
             'messages:create',
             'calendar:view',
             'announcement:view',
+            'incidents:view',
+            'incidents:review',
+            'incidents:export',
         ],
     },
     student: {

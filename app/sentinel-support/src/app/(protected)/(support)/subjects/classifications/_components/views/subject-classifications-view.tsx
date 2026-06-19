@@ -139,7 +139,13 @@ export function SubjectClassificationsView() {
                         ) : null}
                     </div>
 
-                    {filteredClassifications.length === 0 && !isLoading ? (
+                    {isLoading ? (
+                        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3 animate-pulse">
+                            {Array.from({ length: 3 }).map((_, index) => (
+                                <div key={index} className="h-[210px] rounded-lg border border-border/40 bg-muted/20" />
+                            ))}
+                        </div>
+                    ) : filteredClassifications.length === 0 ? (
                         emptyState
                     ) : (
                         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
@@ -150,8 +156,8 @@ export function SubjectClassificationsView() {
                                     institutionName={
                                         institutionNameById.get(
                                             classification.originInstitutionId ??
-                                                classification.institution_id ??
-                                                '',
+                                            classification.institution_id ??
+                                            '',
                                         ) ?? null
                                     }
                                     canOffer={canOffer}
@@ -190,10 +196,10 @@ export function SubjectClassificationsView() {
                 institutionName={
                     selectedOfferingClassification
                         ? (institutionNameById.get(
-                              selectedOfferingClassification.originInstitutionId ??
-                                  selectedOfferingClassification.institution_id ??
-                                  '',
-                          ) ?? null)
+                            selectedOfferingClassification.originInstitutionId ??
+                            selectedOfferingClassification.institution_id ??
+                            '',
+                        ) ?? null)
                         : null
                 }
             />

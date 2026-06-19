@@ -48,7 +48,7 @@ export const getEnrollmentRequestsRouteHandler: AppRouteHandler<
         const user = c.get('user');
         const userId = user?.id;
 
-        const { status, search } = c.req.valid('query');
+        const { status, search, institutionId: requestedInstitutionId } = c.req.valid('query');
 
         // If instructor, only show their own requests
         const targetUserId = role === 'instructor' ? userId : undefined;
@@ -58,7 +58,9 @@ export const getEnrollmentRequestsRouteHandler: AppRouteHandler<
             requesterDepartmentId: user?.user_profiles?.department_id ?? null,
             requesterCourseId: user?.user_profiles?.course_id ?? null,
         });
-        const queryScope = resolveAcademicQueryScope(scope);
+        const queryScope = resolveAcademicQueryScope(scope, {
+            requestedInstitutionId,
+        });
 
         const data = await EnrollmentService.getEnrollmentRequests(c.get('dbClient'), {
             status,

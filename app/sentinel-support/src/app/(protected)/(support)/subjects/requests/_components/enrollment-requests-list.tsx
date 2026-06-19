@@ -1,7 +1,5 @@
-'use client';
-
-import { useState } from 'react';
-import { type RowSelectionState } from '@tanstack/react-table';
+import { useState, useEffect } from 'react';
+import { type RowSelectionState, type ColumnFiltersState } from '@tanstack/react-table';
 import { DataTable } from '@sentinel/ui';
 import {
     AlertDialog,
@@ -14,12 +12,13 @@ import {
     AlertDialogTitle,
     Button,
 } from '@sentinel/ui';
-import { type EnrollmentRequest } from '@sentinel/shared/types';
+import { type EnrollmentRequest, type Institution } from '@sentinel/shared/types';
 import {
     useActivePermissions,
     useDeleteEnrollmentRequestsMutation,
     useStableValue,
 } from '@sentinel/hooks';
+import { useInstitutionFacet, useDataTableFilterSync } from '@/hooks';
 import { Loader2, Trash2 } from 'lucide-react';
 import { requestColumns } from './columns';
 import { buildEnrollmentRequestFacets } from './enrollment-request-facets';
@@ -30,6 +29,9 @@ type EnrollmentRequestsListProps = {
     departments: Array<{ id: string; name: string }>;
     courses: Array<{ id: string; title: string }>;
     sections: Array<{ id: string; name: string }>;
+    institutions: Institution[];
+    selectedInstitutionId?: string;
+    setSelectedInstitutionId: (id?: string) => void;
     isLoading?: boolean;
 };
 
@@ -41,12 +43,40 @@ export function EnrollmentRequestsList({
     departments,
     courses,
     sections,
+    institutions,
+    selectedInstitutionId,
+    setSelectedInstitutionId,
     isLoading = false,
 }: EnrollmentRequestsListProps) {
     const { hasPermission } = useActivePermissions();
     const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
     const [deleteOpen, setDeleteOpen] = useState(false);
     const canDeleteRequests = hasPermission('subject_offerings:approve');
+
+    const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>(
+        selectedInstitutionId ? [{ id: 'institution', value: [selectedInstitutionId] }] : [],
+    );
+
+    const [hasInitializedFilters, setHasInitializedFilters] = useState(false);
+
+    useEffect(() => {
+        if (selectedInstitutionId && !hasInitializedFilters) {
+            setColumnFilters([{ id: 'institution', value: [selectedInstitutionId] }]);
+            setHasInitializedFilters(true);
+        }
+    }, [selectedInstitutionId, hasInitializedFilters]);
+
+    const institutionOptions = useInstitutionFacet({ institutions });
+
+    useDataTableFilterSync({
+        columnFilters,
+        syncKeys: ['institution'],
+        onFilterChange: (key, value) => {
+            if (key === 'institution') {
+                setSelectedInstitutionId(value);
+            }
+        },
+    });
 
     const selectedRequests = useStableValue(
         () => requests.filter((_, index) => rowSelection[String(index)]),
@@ -68,8 +98,8 @@ export function EnrollmentRequestsList({
     });
 
     const facets = useStableValue(
-        () => buildEnrollmentRequestFacets({ departments, courses, sections }),
-        [courses, departments, sections],
+        () => buildEnrollmentRequestFacets({ departments, courses, sections, institutionOptions }),
+        [courses, departments, sections, institutionOptions],
     );
 
     const toolbarActions = useStableValue(
@@ -105,6 +135,8 @@ export function EnrollmentRequestsList({
                 isLoading={isLoading}
                 rowSelection={rowSelection}
                 onRowSelectionChange={setRowSelection}
+                columnFilters={columnFilters}
+                onColumnFiltersChange={setColumnFilters}
                 toolbarActions={toolbarActions}
                 emptyContent={<EnrollmentRequestsEmptyState />}
             />
