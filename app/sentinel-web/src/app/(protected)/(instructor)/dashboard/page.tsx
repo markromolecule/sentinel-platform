@@ -5,16 +5,17 @@ import {
     DashboardShell,
     DashboardGreeting,
     DashboardStats,
-    RecentExams,
-    RecentStudents,
-    QuickActions,
+    ExamsActivityOverview,
+    QuickAccess,
 } from '@/app/(protected)/(instructor)/dashboard/_components';
 import { Separator, Spinner } from '@sentinel/ui';
 import { useProfileQuery } from '@sentinel/hooks';
 
 export default function ProctorDashboardPage() {
-    const { profile, isLoading } = useProfileQuery();
-    const { stats, recentExams, recentStudents } = useProctorDashboard();
+    const { profile, isLoading: isLoadingProfile } = useProfileQuery();
+    const { stats, recentExams, isLoading: isLoadingDashboard } = useProctorDashboard();
+
+    const isLoading = isLoadingProfile || isLoadingDashboard;
 
     if (isLoading) {
         return (
@@ -38,16 +39,19 @@ export default function ProctorDashboardPage() {
                 {/* Stats Grid */}
                 <DashboardStats stats={stats} />
 
-                <div className="grid grid-cols-1 gap-6 xl:grid-cols-3">
+                <div className="grid grid-cols-1 gap-6 xl:grid-cols-[2fr_auto_1fr] xl:gap-8">
                     {/* Main Content - Left Column */}
-                    <div className="space-y-6 xl:col-span-2">
-                        <RecentExams exams={recentExams} />
-                        <RecentStudents students={recentStudents} />
+                    <div className="space-y-6">
+                        <ExamsActivityOverview exams={recentExams} />
                     </div>
+
+                    {/* Separator */}
+                    <Separator orientation="horizontal" className="xl:hidden" />
+                    <Separator orientation="vertical" className="hidden xl:block" />
 
                     {/* Sidebar - Right Column */}
                     <div className="space-y-6">
-                        <QuickActions />
+                        <QuickAccess />
                     </div>
                 </div>
             </div>

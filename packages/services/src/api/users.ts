@@ -227,3 +227,37 @@ export async function deleteUsers(apiClient: ApiClientType, ids: string[]): Prom
         body: JSON.stringify({ ids }),
     });
 }
+
+export interface ApiInstructorDashboardData {
+    stats: {
+        totalStudents: number;
+        totalClassrooms: number;
+        totalSubjects: number;
+        examsCreated: number;
+    };
+    recentExams: {
+        exam_id: string;
+        title: string;
+        status: string;
+        scheduled_date: string | null;
+        duration_minutes: number;
+        question_count: number | null;
+        subject_title: string | null;
+        subject_code: string | null;
+        attempts_count: number;
+        incidents_count: number;
+    }[];
+}
+
+/**
+ * Fetch instructor dashboard metrics and recent exams.
+ * @param apiClient API Client instance
+ */
+export async function getInstructorDashboard(
+    apiClient: ApiClientType,
+): Promise<ApiInstructorDashboardData> {
+    const response: ApiResponse<ApiInstructorDashboardData> = await apiClient(
+        '/users/instructor-dashboard',
+    );
+    return response.data;
+}

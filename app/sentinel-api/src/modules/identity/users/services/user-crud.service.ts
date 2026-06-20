@@ -7,6 +7,7 @@ import {
     getStudentEnrollmentDetailDataForAdmin,
 } from '../data/get-instructor-student-enrollment-detail';
 import { getInstructorStudentEnrollmentsData } from '../data/get-instructor-student-enrollments';
+import { getInstructorDashboardData } from '../data/get-instructor-dashboard-data';
 import { getUserData } from '../data/get-user';
 import { getUsersData } from '../data/get-users';
 import { updateUserData } from '../data/update-user';
@@ -41,6 +42,18 @@ export class UserCrudService {
             roleFilter,
             roleFilters,
             includeInstitutionUsers,
+        });
+    }
+
+    static async getInstructorDashboard(
+        dbClient: DbClient,
+        requesterUserId: string,
+        institutionId?: string,
+    ) {
+        return await getInstructorDashboardData({
+            dbClient,
+            requesterUserId,
+            institutionId,
         });
     }
 

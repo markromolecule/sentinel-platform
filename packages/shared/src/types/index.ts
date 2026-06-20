@@ -175,6 +175,7 @@ export interface Student extends User {
     term: string;
     subject: string;
     yearLevel?: string;
+    enrollmentIds?: string;
     departmentId?: string | null;
     institutionId?: string | null;
     createdBy?: Date | string | null;

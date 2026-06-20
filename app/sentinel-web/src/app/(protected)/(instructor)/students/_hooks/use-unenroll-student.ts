@@ -12,6 +12,7 @@ export function useUnenrollStudent() {
         onSuccess: () => {
             toast.success('Student removed successfully');
             queryClient.invalidateQueries({ queryKey: ['instructor-students'] });
+            queryClient.invalidateQueries({ queryKey: ['instructor-student-enrollment-detail'] });
         },
         onError: (error: Error) => {
             toast.error(error.message || 'Failed to remove student');

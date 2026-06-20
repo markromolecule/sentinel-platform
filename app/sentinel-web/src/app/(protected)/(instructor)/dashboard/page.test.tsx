@@ -12,7 +12,7 @@ vi.mock('@/app/(protected)/(instructor)/dashboard/_hooks/use-proctor-dashboard',
     useProctorDashboard: () => ({
         stats: [],
         recentExams: [],
-        recentStudents: [],
+        isLoading: false,
     }),
 }));
 
@@ -39,9 +39,8 @@ vi.mock('@/app/(protected)/(instructor)/dashboard/_components', () => ({
         <div data-testid="dashboard-greeting">Hello {fullName}</div>
     ),
     DashboardStats: () => <div data-testid="dashboard-stats">Stats</div>,
-    RecentExams: () => <div data-testid="recent-exams">Recent Exams</div>,
-    RecentStudents: () => <div data-testid="recent-students">Recent Students</div>,
-    QuickActions: () => <div data-testid="quick-actions">Quick Actions</div>,
+    ExamsActivityOverview: () => <div data-testid="exams-activity-overview">Exams Activity</div>,
+    QuickAccess: () => <div data-testid="quick-access">Quick Access</div>,
 }));
 
 import { useProfileQuery } from '@sentinel/hooks';
@@ -70,9 +69,8 @@ describe('ProctorDashboardPage', () => {
         expect(screen.getByTestId('dashboard-greeting')).toBeDefined();
         expect(screen.getByText('Hello Jane Doe')).toBeDefined();
         expect(screen.getByTestId('dashboard-stats')).toBeDefined();
-        expect(screen.getByTestId('recent-exams')).toBeDefined();
-        expect(screen.getByTestId('recent-students')).toBeDefined();
-        expect(screen.getByTestId('quick-actions')).toBeDefined();
+        expect(screen.getByTestId('exams-activity-overview')).toBeDefined();
+        expect(screen.getByTestId('quick-access')).toBeDefined();
     });
 
     it('falls back to email when name is not available', () => {

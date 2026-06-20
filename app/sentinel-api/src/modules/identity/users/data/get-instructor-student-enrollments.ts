@@ -9,7 +9,7 @@ type GetInstructorStudentEnrollmentsArgs = {
 };
 
 type InstructorStudentEnrollmentRecord = {
-    enrollment_id: string;
+    enrollment_ids: string | null;
     user_id: string | null;
     first_name: string | null;
     last_name: string | null;
@@ -50,7 +50,7 @@ function mapInstructorStudentEnrollment(record: InstructorStudentEnrollmentRecor
         : false;
 
     return {
-        id: record.enrollment_id,
+        id: record.user_id ?? '',
         user_id: record.user_id,
         userId: record.user_id,
         firstName: record.first_name ?? '',
@@ -67,6 +67,7 @@ function mapInstructorStudentEnrollment(record: InstructorStudentEnrollmentRecor
         section: record.section_name ?? '—',
         term: record.term_name ?? '—',
         yearLevel: formatYearLevel(record.year_level),
+        enrollmentIds: record.enrollment_ids ?? '',
         status: isOnline ? 'active' : 'offline',
         created_at: null,
         updated_at: null,
@@ -95,7 +96,7 @@ export async function getInstructorStudentEnrollmentsData({
         .leftJoin('departments as dep', 'dep.department_id', 's.department_id')
         .leftJoin('institutions as i', 'i.id', 'up.institution_id')
         .select([
-            'e.enrollment_id',
+            sql<string | null>`STRING_AGG(DISTINCT e.enrollment_id::text, ', ')`.as('enrollment_ids'),
             'up.user_id',
             'up.first_name',
             'up.last_name',
@@ -106,13 +107,25 @@ export async function getInstructorStudentEnrollmentsData({
             'dep.department_code as department_code',
             'up.institution_id',
             'i.name as institution_name',
-            'sub.subject_title as subject_name',
-            'sec.section_name as section_name',
-            sql<string | null>`CONCAT(t.academic_year, ' - ', t.semester)`.as('term_name'),
-            'sec.year_level',
+            sql<string | null>`STRING_AGG(DISTINCT sub.subject_title, ', ')`.as('subject_name'),
+            sql<string | null>`STRING_AGG(DISTINCT sec.section_name, ', ')`.as('section_name'),
+            sql<string | null>`STRING_AGG(DISTINCT CONCAT(t.academic_year, ' - ', t.semester), ', ')`.as('term_name'),
+            sql<number | null>`MAX(sec.year_level)`.as('year_level'),
         ])
         .where('cr.user_id', '=', requesterUserId)
-        .where('role_scope.role_name', '=', 'instructor');
+        .where('role_scope.role_name', '=', 'instructor')
+        .groupBy([
+            'up.user_id',
+            'up.first_name',
+            'up.last_name',
+            'u.email',
+            's.student_number',
+            'up.status',
+            'up.last_seen_at',
+            'dep.department_code',
+            'up.institution_id',
+            'i.name',
+        ]);
 
     if (institutionId) {
         query = query.where('up.institution_id', '=', institutionId);
@@ -134,8 +147,6 @@ export async function getInstructorStudentEnrollmentsData({
     const records = (await query
         .orderBy('up.last_name', 'asc')
         .orderBy('up.first_name', 'asc')
-        .orderBy('sub.subject_title', 'asc')
-        .orderBy('sec.section_name', 'asc')
         .execute()) as InstructorStudentEnrollmentRecord[];
 
     return records.map(mapInstructorStudentEnrollment);

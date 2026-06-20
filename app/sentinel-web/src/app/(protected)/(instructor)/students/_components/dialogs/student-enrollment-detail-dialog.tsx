@@ -12,6 +12,8 @@ import {
     Separator,
 } from '@sentinel/ui';
 import { type Student } from '@sentinel/shared/types';
+import { useUnenrollStudent } from '@/app/(protected)/(instructor)/students/_hooks/use-unenroll-student';
+import { Trash2 } from 'lucide-react';
 
 type StudentEnrollmentDetail = {
     id: string;
@@ -33,6 +35,8 @@ export function StudentEnrollmentDetailDialog({
     onOpenChangeAction,
     student,
 }: StudentEnrollmentDetailDialogProps) {
+    const { mutate: unenroll, isPending: isRemoving } = useUnenrollStudent();
+
     const {
         data = [],
         isLoading,
@@ -101,7 +105,27 @@ export function StudentEnrollmentDetailDialog({
                                     key={enrollment.id}
                                     className="space-y-2 rounded-lg border p-4 text-sm"
                                 >
-                                    <div className="font-medium">{enrollment.subject}</div>
+                                    <div className="flex items-center justify-between">
+                                        <div className="font-medium">{enrollment.subject}</div>
+                                        <Button
+                                            variant="ghost"
+                                            size="sm"
+                                            className="h-8 text-destructive hover:bg-destructive/10 hover:text-destructive"
+                                            onClick={() => {
+                                                if (
+                                                    window.confirm(
+                                                        `Are you sure you want to remove ${student.firstName} ${student.lastName} from the subject "${enrollment.subject}"?`
+                                                    )
+                                                ) {
+                                                    unenroll(enrollment.id);
+                                                }
+                                            }}
+                                            disabled={isRemoving}
+                                        >
+                                            <Trash2 className="mr-1.5 h-4 w-4" />
+                                            Remove
+                                        </Button>
+                                    </div>
                                     <div className="grid gap-2 text-sm sm:grid-cols-2">
                                         <div>
                                             <span className="text-muted-foreground">
