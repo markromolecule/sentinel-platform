@@ -89,16 +89,4 @@ describe('IdentityWorkspaceShell Component', () => {
         const nav = screen.getAllByTestId('identity-nav')[0];
         expect(nav.getAttribute('data-active-section')).toBe('instructors');
     });
-
-    it('derives activeSection as permissions on /permissions', () => {
-        mockUsePathname.mockReturnValue('/permissions');
-        render(
-            <IdentityWorkspaceShell role="superadmin">
-                <div>Content</div>
-            </IdentityWorkspaceShell>,
-        );
-
-        const nav = screen.getAllByTestId('identity-nav')[0];
-        expect(nav.getAttribute('data-active-section')).toBe('permissions');
-    });
 });

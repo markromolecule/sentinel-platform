@@ -7,10 +7,10 @@ describe('IdentityNav Component', () => {
         cleanup();
     });
 
-    const superadminSections: IdentitySection[] = ['administrators', 'whitelist', 'permissions'];
+    const superadminSections: IdentitySection[] = ['administrators', 'whitelist'];
     const adminSections: IdentitySection[] = ['students', 'instructors', 'student-whitelist'];
 
-    it('renders all three navigation items correctly for superadmin', () => {
+    it('renders all two navigation items correctly for superadmin', () => {
         render(<IdentityNav activeSection="administrators" role="superadmin" />);
 
         // Check group heading
@@ -19,7 +19,7 @@ describe('IdentityNav Component', () => {
         // Check links
         expect(screen.getByRole('link', { name: 'Administrators' })).toBeTruthy();
         expect(screen.getByRole('link', { name: 'Whitelist' })).toBeTruthy();
-        expect(screen.getByRole('link', { name: 'Permissions' })).toBeTruthy();
+        expect(screen.queryByRole('link', { name: 'Permissions' })).toBeNull();
     });
 
     it('renders all three navigation items correctly for admin', () => {
@@ -42,13 +42,11 @@ describe('IdentityNav Component', () => {
             const links = {
                 administrators: screen.getByRole('link', { name: 'Administrators' }),
                 whitelist: screen.getByRole('link', { name: 'Whitelist' }),
-                permissions: screen.getByRole('link', { name: 'Permissions' }),
             };
 
             // Assert links have correct routing href
             expect(links.administrators.getAttribute('href')).toBe('/administrators');
             expect(links.whitelist.getAttribute('href')).toBe('/administrators/whitelist');
-            expect(links.permissions.getAttribute('href')).toBe('/permissions');
 
             // Check active/inactive CSS classes
             Object.entries(links).forEach(([section, element]) => {

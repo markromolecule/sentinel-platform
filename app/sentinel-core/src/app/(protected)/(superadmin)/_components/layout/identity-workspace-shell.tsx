@@ -28,8 +28,6 @@ export function IdentityWorkspaceShell({ children, role }: IdentityWorkspaceShel
         activeSection = 'instructors';
     } else if (pathname.startsWith('/administrators/whitelist')) {
         activeSection = role === 'admin' ? 'student-whitelist' : 'whitelist';
-    } else if (pathname.startsWith('/permissions')) {
-        activeSection = 'permissions';
     }
 
     return (
