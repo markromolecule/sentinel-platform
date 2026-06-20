@@ -33,6 +33,41 @@ import {
 } from './services/subject-offering-payload.service';
 import { SubjectClassificationService } from '../subject-classification/subject-classification.service';
 
+type PaginationMetadata = {
+    page: number;
+    limit: number;
+    total: number;
+    hasMore: boolean;
+};
+
+type PaginatedResult<T> = {
+    items: T[];
+    pagination: PaginationMetadata;
+};
+
+function paginateItems<T>(
+    items: T[],
+    page?: number,
+    limit?: number,
+): T[] | PaginatedResult<T> {
+    if (page === undefined || limit === undefined) {
+        return items;
+    }
+
+    const offset = (page - 1) * limit;
+    const paginatedItems = items.slice(offset, offset + limit);
+
+    return {
+        items: paginatedItems,
+        pagination: {
+            page,
+            limit,
+            total: items.length,
+            hasMore: offset + paginatedItems.length < items.length,
+        },
+    };
+}
+
 type BulkSubjectOfferingPayload = {
     subject_classification_id: string;
     term_id: string;
@@ -201,6 +236,8 @@ export class SubjectOfferingsService {
             termId?: string;
             visibility?: 'default' | 'requestable';
             instructorDepartmentId?: string;
+            page?: number;
+            limit?: number;
         },
     ) {
         const subjectOfferingTablesSupported = await supportsSubjectOfferingTables(dbClient);
@@ -230,10 +267,14 @@ export class SubjectOfferingsService {
                     }),
             });
 
-            return rawSubjectOfferings.map(mapSubjectOfferingResponse);
+            return paginateItems(
+                rawSubjectOfferings.map(mapSubjectOfferingResponse),
+                args.page,
+                args.limit,
+            );
         } catch (error) {
             if (isMissingSubjectOfferingTableError(error)) {
-                return [];
+                return paginateItems([], args.page, args.limit);
             }
 
             throw error;

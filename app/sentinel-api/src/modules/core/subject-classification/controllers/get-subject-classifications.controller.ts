@@ -33,22 +33,35 @@ export const getSubjectClassificationsRouteHandler: AppRouteHandler<
     try {
         requireActivePermission(c, 'subjects:view', 'Forbidden. Missing subjects:view permission.');
         const role = c.get('role');
-        const { search, institutionId: requestedInstitutionId } = c.req.valid('query');
+        const {
+            search,
+            institutionId: requestedInstitutionId,
+            page,
+            limit,
+        } = c.req.valid('query');
 
         const institutionId = ['support', 'superadmin'].includes(role)
             ? (requestedInstitutionId ?? undefined)
             : c.get('institutionId');
 
-        const classifications = await SubjectClassificationService.getSubjectClassifications(
+        const classificationResult = await SubjectClassificationService.getSubjectClassifications(
             c.get('dbClient'),
             institutionId || undefined,
             search,
+            page,
+            limit,
         );
+        const classifications = Array.isArray(classificationResult)
+            ? classificationResult
+            : classificationResult.items;
 
         return c.json(
             {
                 message: 'Subject classifications retrieved successfully',
                 data: classifications.map(toSubjectClassificationResponse),
+                ...(Array.isArray(classificationResult)
+                    ? {}
+                    : { pagination: classificationResult.pagination }),
             },
             200,
         );

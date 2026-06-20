@@ -1,6 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { type PaginationState } from '@tanstack/react-table';
 import {
     isPermissionDeniedError,
     useActivePermissions,
@@ -23,9 +24,19 @@ import { useAcademicScope } from '@/hooks/use-academic-scope';
 export function SubjectsView() {
     const [searchTerm, setSearchTerm] = useState('');
     const [offerSubjectOpen, setOfferSubjectOpen] = useState(false);
+    const [pagination, setPagination] = useState<PaginationState>({
+        pageIndex: 0,
+        pageSize: 10,
+    });
     const debouncedSearch = useDebounce(searchTerm, 500);
     const { role, institutionId } = useAcademicScope();
     const { hasPermission } = useActivePermissions();
+
+    useEffect(() => {
+        setPagination((current) =>
+            current.pageIndex === 0 ? current : { ...current, pageIndex: 0 },
+        );
+    }, [debouncedSearch, institutionId]);
 
     const isCatalogManager = role === 'superadmin';
     const canCreateSubject = hasPermission('subjects:create');
@@ -34,14 +45,22 @@ export function SubjectsView() {
     const canBulkDeleteSubjects = isCatalogManager && canDeleteSubjects;
 
     const {
-        data: subjects = [],
+        data: subjectsResponse,
         isLoading,
         isError,
         error,
     } = useSubjectsQuery({
         search: debouncedSearch || undefined,
         institutionId: institutionId || undefined,
+        page: pagination.pageIndex + 1,
+        limit: pagination.pageSize,
     });
+
+    const subjects = subjectsResponse?.items ?? [];
+    const totalCount = subjectsResponse?.pagination?.total ?? 0;
+    const pageCount = subjectsResponse?.pagination
+        ? Math.max(1, Math.ceil(totalCount / pagination.pageSize))
+        : 1;
 
     const isViewDenied = isPermissionDeniedError(error, 'subjects:view');
 
@@ -80,6 +99,11 @@ export function SubjectsView() {
                 canCreateSubjects={isCatalogManager && canCreateSubject}
                 canDeleteSubjects={canBulkDeleteSubjects}
                 facets={facets}
+                pagination={pagination}
+                onPaginationChange={setPagination}
+                pageCount={pageCount}
+                totalCount={totalCount}
+                manualPagination
             />
 
             {isLoading && subjects.length === 0 && (

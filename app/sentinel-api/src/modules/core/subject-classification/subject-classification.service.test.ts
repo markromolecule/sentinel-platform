@@ -3,6 +3,7 @@ import { SubjectClassificationService } from './subject-classification.service';
 import { createSubjectClassificationData } from './data/create-subject-classification';
 import { deleteSubjectClassificationData } from './data/delete-subject-classification';
 import { getSubjectClassificationByIdData } from './data/get-subject-classification-by-id';
+import { getSubjectClassificationsData } from './data/get-subject-classifications';
 import { ActivityNotificationService } from '../../general/notification/services/activity-notification.service';
 
 vi.mock('@sentinel/db', async () => {
@@ -30,6 +31,14 @@ vi.mock('./data/get-subject-classification-by-id', () => ({
     getSubjectClassificationByIdData: vi.fn(),
 }));
 
+vi.mock('./data/get-subject-classifications', () => ({
+    getSubjectClassificationsData: vi.fn(),
+}));
+
+vi.mock('./helper/subject-classification-mapper', () => ({
+    mapClassificationRecord: vi.fn((record) => record),
+}));
+
 vi.mock('./data/assert-subjects-in-scope', () => ({
     assertSubjectsInScopeData: vi.fn(),
 }));
@@ -48,6 +57,11 @@ vi.mock('../../general/notification/services/activity-notification.service', () 
         notifySubjectClassificationUpdated: vi.fn(),
         notifySubjectClassificationDeleted: vi.fn(),
     },
+}));
+
+vi.mock('../subjects/helper/subject-offering-compat', () => ({
+    supportsSubjectClassificationTables: vi.fn().mockResolvedValue(true),
+    isMissingSubjectOfferingColumnError: vi.fn().mockReturnValue(false),
 }));
 
 describe('SubjectClassificationService notifications', () => {
@@ -143,5 +157,62 @@ describe('SubjectClassificationService notifications', () => {
                 classificationLabel: 'Computer Science Core',
             },
         );
+    });
+});
+
+describe('SubjectClassificationService pagination', () => {
+    const dbClient = {} as any;
+
+    beforeEach(() => {
+        vi.clearAllMocks();
+    });
+
+    it('returns paginated classifications and metadata when page and limit are provided', async () => {
+        vi.mocked(getSubjectClassificationsData).mockResolvedValue([
+            {
+                subject_classification_id: 'classification-1',
+                name: 'Alpha',
+                classification_type: 'GENERAL',
+                description: null,
+                institution_id: 'institution-1',
+                subjects: [],
+                course_ids: [],
+                subject_count: 0,
+            },
+            {
+                subject_classification_id: 'classification-2',
+                name: 'Beta',
+                classification_type: 'CORE',
+                description: null,
+                institution_id: 'institution-1',
+                subjects: [],
+                course_ids: [],
+                subject_count: 0,
+            },
+        ] as any);
+
+        const result = await SubjectClassificationService.getSubjectClassifications(
+            dbClient,
+            undefined,
+            'science',
+            1,
+            1,
+        );
+
+        expect(result).toMatchObject({
+            items: [
+                {
+                    subject_classification_id: 'classification-1',
+                    name: 'Alpha',
+                    classification_type: 'GENERAL',
+                },
+            ],
+            pagination: {
+                page: 1,
+                limit: 1,
+                total: 2,
+                hasMore: true,
+            },
+        });
     });
 });

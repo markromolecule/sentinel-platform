@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
+import { type PaginationState } from '@tanstack/react-table';
 import {
     isPermissionDeniedError,
     useActivePermissions,
@@ -25,6 +26,10 @@ export function useSubjectClassificationsPageState() {
         useState<SubjectClassification | null>(null);
     const [selectedOfferingClassification, setSelectedOfferingClassification] =
         useState<SubjectClassification | null>(null);
+    const [pagination, setPagination] = useState<PaginationState>({
+        pageIndex: 0,
+        pageSize: 10,
+    });
     const debouncedSearch = useDebounce(searchTerm, 400);
 
     // Facet States
@@ -46,14 +51,31 @@ export function useSubjectClassificationsPageState() {
     const activeInstitutionId =
         selectedInstitutions.size > 0 ? Array.from(selectedInstitutions)[0] : undefined;
 
+    useEffect(() => {
+        setPagination((current) =>
+            current.pageIndex === 0 ? current : { ...current, pageIndex: 0 },
+        );
+    }, [debouncedSearch, activeInstitutionId]);
+
     // Data Fetching
     const { data: institutions = [] } = useInstitutionsQuery();
     const {
-        data: classifications = [],
+        data: classificationsResponse,
         isLoading: isClassificationsLoading,
         isError,
         error,
-    } = useSubjectClassificationsQuery(debouncedSearch || undefined, activeInstitutionId);
+    } = useSubjectClassificationsQuery(
+        debouncedSearch || undefined,
+        activeInstitutionId,
+        pagination.pageIndex + 1,
+        pagination.pageSize,
+    );
+
+    const classifications = classificationsResponse?.items ?? [];
+    const totalCount = classificationsResponse?.pagination?.total ?? 0;
+    const pageCount = classificationsResponse?.pagination
+        ? Math.max(1, Math.ceil(totalCount / pagination.pageSize))
+        : 1;
 
     const isLoading = isClassificationsLoading || !hasInitializedScope;
 
@@ -211,6 +233,10 @@ export function useSubjectClassificationsPageState() {
         // Data Query
         institutions,
         classifications,
+        totalCount,
+        pageCount,
+        pagination,
+        setPagination,
         filteredClassifications,
         isLoading,
         isError,

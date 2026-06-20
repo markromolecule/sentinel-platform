@@ -32,6 +32,10 @@ export function SubjectsView() {
         setSearchTerm,
         selectedInstitutionId,
         setSelectedInstitutionId,
+        pagination,
+        setPagination,
+        totalCount,
+        pageCount,
         formOpen,
         setFormOpen,
         form,
@@ -151,6 +155,11 @@ export function SubjectsView() {
                         searchPlaceholder="Search subjects..."
                         facets={facets}
                         isLoading={isLoading}
+                        manualPagination
+                        pagination={pagination}
+                        onPaginationChange={setPagination}
+                        pageCount={pageCount}
+                        totalCount={totalCount}
                         initialColumnVisibility={{ institution: false }}
                         rowSelection={rowSelection}
                         onRowSelectionChange={setRowSelection}

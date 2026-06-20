@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { DataTable, type DataTableFacet } from '@sentinel/ui';
-import { type ColumnDef, type RowSelectionState } from '@tanstack/react-table';
+import { type ColumnDef, type PaginationState, type RowSelectionState } from '@tanstack/react-table';
 import { type MasterSubject } from '@sentinel/shared/types';
 import { useDeleteSelectedSubjectsMutation, useStableValue } from '@sentinel/hooks';
 import {
@@ -27,6 +27,11 @@ type SubjectsListProps = {
     canCreateSubjects?: boolean;
     canDeleteSubjects?: boolean;
     facets?: DataTableFacet[];
+    pagination?: PaginationState;
+    onPaginationChange?: (pagination: PaginationState) => void;
+    pageCount?: number;
+    totalCount?: number;
+    manualPagination?: boolean;
 };
 
 export function SubjectsList({
@@ -38,6 +43,11 @@ export function SubjectsList({
     canCreateSubjects = true,
     canDeleteSubjects = true,
     facets,
+    pagination,
+    onPaginationChange,
+    pageCount,
+    totalCount,
+    manualPagination = false,
 }: SubjectsListProps) {
     const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
     const [deleteOpen, setDeleteOpen] = useState(false);
@@ -83,6 +93,11 @@ export function SubjectsList({
                 onSearchChange={onSearchChange}
                 searchPlaceholder="Search subjects..."
                 isLoading={isLoading}
+                pagination={pagination}
+                onPaginationChange={onPaginationChange}
+                pageCount={pageCount}
+                totalCount={totalCount}
+                manualPagination={manualPagination}
                 rowSelection={rowSelection}
                 onRowSelectionChange={setRowSelection}
                 toolbarActions={toolbarActions}

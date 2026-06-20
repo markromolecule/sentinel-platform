@@ -46,11 +46,27 @@ export const getSubjectClassificationsSchema = {
         query: z.object({
             search: z.string().optional().openapi({ description: 'Search term' }),
             institutionId: z.string().uuid().optional().openapi({ description: 'Institution ID' }),
+            page: z.coerce.number().int().min(1).optional().openapi({
+                description: 'Page index to fetch.',
+                example: 1,
+            }),
+            limit: z.coerce.number().int().min(1).max(100).optional().openapi({
+                description: 'Number of items per page.',
+                example: 10,
+            }),
         }),
     },
     response: z.object({
         message: z.string(),
         data: z.array(subjectClassificationSchemaOpenApi),
+        pagination: z
+            .object({
+                page: z.number().int(),
+                limit: z.number().int(),
+                total: z.number().int(),
+                hasMore: z.boolean(),
+            })
+            .optional(),
     }),
 };
 

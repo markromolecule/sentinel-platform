@@ -30,6 +30,10 @@ export function OfferedView() {
         setSearchTerm,
         selectedInstitutionId,
         setSelectedInstitutionId,
+        pagination,
+        setPagination,
+        totalCount,
+        pageCount,
         institutions,
         offerings,
         isLoading,
@@ -124,6 +128,11 @@ export function OfferedView() {
                         searchPlaceholder="Search offered subjects..."
                         facets={facets}
                         isLoading={isLoading}
+                        manualPagination
+                        pagination={pagination}
+                        onPaginationChange={setPagination}
+                        pageCount={pageCount}
+                        totalCount={totalCount}
                         initialColumnVisibility={{ institution: false, origin: false }}
                         rowSelection={rowSelection}
                         onRowSelectionChange={setRowSelection}

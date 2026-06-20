@@ -13,6 +13,7 @@ import type {
     SubjectOfferingSection,
 } from '@sentinel/shared/types';
 import type { ApiClientType } from '../api-client';
+import type { PaginatedApiResponse } from './pagination';
 
 interface ApiSubjectOffering {
     subject_offering_id: string;
@@ -66,6 +67,12 @@ interface ApiSubjectOffering {
 interface ApiResponse<T> {
     message: string;
     data: T;
+    pagination?: {
+        page: number;
+        limit: number;
+        total: number;
+        hasMore: boolean;
+    };
 }
 
 interface ApiSkippedSubjectOffering {
@@ -94,6 +101,8 @@ type SubjectOfferingQueryParams = {
     termId?: string;
     institutionId?: string;
     visibility?: 'default' | 'requestable';
+    page?: number;
+    limit?: number;
 };
 
 function mapDepartments(
@@ -216,6 +225,14 @@ function buildQueryString(params?: SubjectOfferingQueryParams) {
         searchParams.set('visibility', params.visibility);
     }
 
+    if (params.page !== undefined) {
+        searchParams.set('page', String(params.page));
+    }
+
+    if (params.limit !== undefined) {
+        searchParams.set('limit', String(params.limit));
+    }
+
     const query = searchParams.toString();
     return query ? `?${query}` : '';
 }
@@ -223,12 +240,15 @@ function buildQueryString(params?: SubjectOfferingQueryParams) {
 export async function getSubjectOfferings(
     apiClient: ApiClientType,
     params?: SubjectOfferingQueryParams,
-): Promise<SubjectOffering[]> {
+): Promise<PaginatedApiResponse<SubjectOffering>> {
     const response: ApiResponse<ApiSubjectOffering[]> = await apiClient(
         `/subject-offerings${buildQueryString(params)}`,
     );
 
-    return response.data.map(mapSubjectOffering);
+    return {
+        items: response.data.map(mapSubjectOffering),
+        pagination: response.pagination,
+    };
 }
 
 export async function createSubjectOffering(

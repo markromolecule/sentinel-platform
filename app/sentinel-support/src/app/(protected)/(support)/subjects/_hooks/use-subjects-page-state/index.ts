@@ -10,6 +10,7 @@ import {
 } from '@sentinel/hooks';
 import { MasterSubject } from '@sentinel/shared/types';
 import { useEffect, useMemo, useState } from 'react';
+import { type PaginationState } from '@tanstack/react-table';
 import { useAcademicScope } from '@/hooks';
 import { EMPTY_SUBJECT_FORM, SubjectFormState, getSubjectId } from './_types';
 
@@ -23,6 +24,10 @@ export function useSubjectsPageState() {
     const [form, setForm] = useState<SubjectFormState>(EMPTY_SUBJECT_FORM);
     const [subjectToRevert, setSubjectToRevert] = useState<MasterSubject | null>(null);
     const [hasInitializedScope, setHasInitializedScope] = useState(false);
+    const [pagination, setPagination] = useState<PaginationState>({
+        pageIndex: 0,
+        pageSize: 10,
+    });
 
     useEffect(() => {
         if (!isScopeLoading && !hasInitializedScope) {
@@ -35,6 +40,12 @@ export function useSubjectsPageState() {
 
     const debouncedSearch = useDebounce(searchTerm, 500);
 
+    useEffect(() => {
+        setPagination((current) =>
+            current.pageIndex === 0 ? current : { ...current, pageIndex: 0 },
+        );
+    }, [debouncedSearch, selectedInstitutionId]);
+
     const { data: institutions = [] } = useInstitutionsQuery();
     const selectedInstitution = institutions.find(
         (institution) => institution.id === selectedInstitutionId,
@@ -42,14 +53,22 @@ export function useSubjectsPageState() {
     const parentInstitutionId = selectedInstitution?.parentInstitutionId ?? '';
 
     const {
-        data: subjects = [],
+        data: subjectsResponse,
         isLoading: isSubjectsLoading,
         isError,
         error,
     } = useSubjectsQuery({
         search: debouncedSearch,
         institutionId: selectedInstitutionId || undefined,
+        page: pagination.pageIndex + 1,
+        limit: pagination.pageSize,
     });
+
+    const subjects = subjectsResponse?.items ?? [];
+    const totalCount = subjectsResponse?.pagination?.total ?? 0;
+    const pageCount = subjectsResponse?.pagination
+        ? Math.max(1, Math.ceil(totalCount / pagination.pageSize))
+        : 1;
 
     const isLoading = isSubjectsLoading || !hasInitializedScope;
 
@@ -167,6 +186,10 @@ export function useSubjectsPageState() {
         setSubjectToRevert,
         institutions,
         subjects,
+        totalCount,
+        pageCount,
+        pagination,
+        setPagination,
         isLoading,
         isError,
         error,
