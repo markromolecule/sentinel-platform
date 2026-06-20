@@ -5,7 +5,6 @@ import type { CoreRole } from '@/lib/auth/core-role';
 export type IdentitySection =
     | 'administrators'
     | 'whitelist'
-    | 'permissions'
     | 'students'
     | 'instructors'
     | 'student-whitelist';
@@ -16,7 +15,6 @@ const IDENTITY_NAV_GROUPS = [
         items: [
             { id: 'administrators', label: 'Administrators', href: '/administrators' },
             { id: 'whitelist', label: 'Whitelist', href: '/administrators/whitelist' },
-            { id: 'permissions', label: 'Permissions', href: '/permissions' },
         ],
     },
 ];
