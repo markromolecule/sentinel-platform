@@ -1,53 +1,55 @@
-import { Users, FileText, CalendarDays, MessageSquare } from 'lucide-react';
-import {
-    MOCK_DASHBOARD_STATS,
-    MOCK_PROCTOR_EXAMS,
-    MOCK_PROCTOR_STUDENTS as MOCK_STUDENTS,
-} from '@sentinel/shared/constants';
+import { Users, FileText, BookOpen, School } from 'lucide-react';
+import { useInstructorDashboardQuery } from '@sentinel/hooks';
 import { DashboardStat } from '@sentinel/shared/types';
 
+/**
+ * Custom hook to fetch and map instructor dashboard metrics.
+ *
+ * @returns Dashboard stats, recent exams, loading status, and error states
+ */
 export function useProctorDashboard() {
-    const recentExams = MOCK_PROCTOR_EXAMS.slice(0, 3);
-    const recentStudents = MOCK_STUDENTS.slice(0, 5);
+    const { data, isLoading, isError, error } = useInstructorDashboardQuery();
 
     const stats: DashboardStat[] = [
         {
             label: 'Total Students',
-            value: MOCK_DASHBOARD_STATS.totalStudents,
+            value: data?.stats.totalStudents ?? 0,
             icon: Users,
             color: 'text-blue-600',
             bgColor: 'bg-blue-50',
             href: '/students',
         },
         {
-            label: 'Active Exams',
-            value: MOCK_DASHBOARD_STATS.activeExams,
-            icon: FileText,
+            label: 'Total Classrooms',
+            value: data?.stats.totalClassrooms ?? 0,
+            icon: School,
             color: 'text-emerald-600',
             bgColor: 'bg-emerald-50',
-            href: '/exams',
+            href: '/classrooms',
         },
         {
-            label: 'Exams Today',
-            value: MOCK_DASHBOARD_STATS.examsToday,
-            icon: CalendarDays,
+            label: 'Enrolled Subjects',
+            value: data?.stats.totalSubjects ?? 0,
+            icon: BookOpen,
             color: 'text-amber-600',
             bgColor: 'bg-amber-50',
-            href: '/exams',
+            href: '/subjects',
         },
         {
-            label: 'Unread Messages',
-            value: MOCK_DASHBOARD_STATS.unreadMessages,
-            icon: MessageSquare,
+            label: 'Exams Created',
+            value: data?.stats.examsCreated ?? 0,
+            icon: FileText,
             color: 'text-purple-600',
             bgColor: 'bg-purple-50',
-            href: '/messages',
+            href: '/exams',
         },
     ];
 
     return {
         stats,
-        recentExams,
-        recentStudents,
+        recentExams: data?.recentExams ?? [],
+        isLoading,
+        isError,
+        error,
     };
 }

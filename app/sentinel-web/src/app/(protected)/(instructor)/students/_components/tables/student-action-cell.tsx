@@ -12,6 +12,7 @@ import { Eye, Mail, MoreHorizontal, Trash2 } from 'lucide-react';
 import { type Student } from '@sentinel/shared/types';
 import { StudentEnrollmentDetailDialog } from '@/app/(protected)/(instructor)/students/_components/dialogs/student-enrollment-detail-dialog';
 import { useUnenrollStudent } from '@/app/(protected)/(instructor)/students/_hooks/use-unenroll-student';
+import { toast } from 'sonner';
 import {
     AlertDialog,
     AlertDialogAction,
@@ -32,8 +33,14 @@ export function StudentActionCell({ student }: StudentActionCellProps) {
     const [confirmRemoveOpen, setConfirmRemoveOpen] = useState(false);
     const { mutate: unenroll, isPending: isRemoving } = useUnenrollStudent();
 
+    const enrollmentIds = student.enrollmentIds
+        ? student.enrollmentIds.split(',').map((id) => id.trim()).filter(Boolean)
+        : [];
+    const isMultiEnrollment = enrollmentIds.length > 1;
+    const targetEnrollmentId = enrollmentIds[0] || student.id;
+
     const handleRemove = () => {
-        unenroll(student.id);
+        unenroll(targetEnrollmentId);
         setConfirmRemoveOpen(false);
     };
 
@@ -59,7 +66,15 @@ export function StudentActionCell({ student }: StudentActionCellProps) {
                         <DropdownMenuItem
                             variant="destructive"
                             className="cursor-pointer"
-                            onClick={() => setConfirmRemoveOpen(true)}
+                            onClick={() => {
+                                if (isMultiEnrollment) {
+                                    toast.info(
+                                        "This student is enrolled in multiple subjects. Please use the 'View' action to remove them from a specific subject."
+                                    );
+                                } else {
+                                    setConfirmRemoveOpen(true);
+                                }
+                            }}
                             disabled={isRemoving}
                         >
                             <Trash2 className="mr-2 h-4 w-4" />

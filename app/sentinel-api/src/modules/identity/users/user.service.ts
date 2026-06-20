@@ -37,6 +37,18 @@ export class UserService {
         );
     }
 
+    static async getInstructorDashboard(
+        dbClient: DbClient,
+        requesterUserId: string,
+        institutionId?: string,
+    ) {
+        return await UserCrudService.getInstructorDashboard(
+            dbClient,
+            requesterUserId,
+            institutionId,
+        );
+    }
+
     static async getInstructorStudentEnrollments(
         dbClient: DbClient,
         institutionId: string | undefined,

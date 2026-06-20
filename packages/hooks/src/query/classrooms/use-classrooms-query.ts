@@ -11,6 +11,7 @@ export type UseClassroomsQueryArgs = {
     status?: 'active' | 'archived' | 'all';
     institutionId?: string;
     subjectId?: string;
+    enabled?: boolean;
 };
 
 function normalizeClassroomQueryArgs(args?: string | UseClassroomsQueryArgs) {
@@ -20,6 +21,7 @@ function normalizeClassroomQueryArgs(args?: string | UseClassroomsQueryArgs) {
             departmentId: undefined,
             status: 'active' as const,
             subjectId: undefined,
+            enabled: undefined,
         };
     }
 
@@ -29,6 +31,7 @@ function normalizeClassroomQueryArgs(args?: string | UseClassroomsQueryArgs) {
         status: args?.status ?? 'active',
         institutionId: args?.institutionId,
         subjectId: args?.subjectId,
+        enabled: args?.enabled,
     };
 }
 
@@ -47,6 +50,7 @@ export function useClassroomsQuery(args?: string | UseClassroomsQueryArgs) {
     return useQuery({
         queryKey: [...CLASSROOM_QUERY_KEYS.all, user?.id ?? 'anonymous', normalizedArgs],
         queryFn: () => getClassrooms(apiClient, normalizedArgs),
-        enabled: isAuthenticatedQueryEnabled,
+        enabled: isAuthenticatedQueryEnabled && (normalizedArgs.enabled ?? true),
     });
 }
+

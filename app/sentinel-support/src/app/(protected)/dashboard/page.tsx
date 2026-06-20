@@ -8,7 +8,9 @@ import {
     FlaggedIncidentsWidget,
     KpiCarouselWidget,
     SystemHealth,
+    SupportShortcutsWidget,
 } from '@/app/(protected)/dashboard/_components';
+
 import { useUser } from '@/hooks/use-user';
 import {
     useInstitutionsQuery,
@@ -18,6 +20,7 @@ import {
     useSubjectsQuery,
     useSectionsQuery,
     useProfileQuery,
+    useStudentWhitelistQuery,
 } from '@sentinel/hooks';
 import { MOCK_RECENT_ACTIVITY, MOCK_SYSTEM_STATS } from '@sentinel/shared/constants';
 import { PageHeader, Separator, Spinner } from '@sentinel/ui';
@@ -32,6 +35,7 @@ export default function DashboardPage() {
     const { data: rooms = [] } = useRoomsQuery();
     const { data: subjects = [] } = useSubjectsQuery();
     const { data: sections = [] } = useSectionsQuery();
+    const { data: whitelist = [] } = useStudentWhitelistQuery();
 
     if (isUserLoading || isProfileLoading) {
         return (
@@ -80,7 +84,14 @@ export default function DashboardPage() {
             value: sections.length,
             description: 'Class sections',
         },
+        {
+            id: 'whitelist',
+            label: 'Whitelist Accounts',
+            value: whitelist.length,
+            description: 'Whitelisted student accounts',
+        },
     ];
+
 
     if (role === 'support') {
         const profileName = profile
@@ -93,8 +104,12 @@ export default function DashboardPage() {
             <DashboardShell>
                 <DashboardGreeting fullName={displayName} />
                 <Separator className="my-6" />
-                <div className="space-y-4">
+                <div className="flex flex-col gap-8">
+                    {/* KPI Cards Overview */}
                     <KpiCarouselWidget cards={supportKpiCards} />
+
+                    {/* Operational Shortcuts */}
+                    <SupportShortcutsWidget />
                 </div>
             </DashboardShell>
         );

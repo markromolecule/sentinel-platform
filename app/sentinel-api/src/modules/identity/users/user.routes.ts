@@ -13,6 +13,10 @@ import {
     getInstructorStudentEnrollmentsRouteHandler,
 } from './controllers/get-instructor-student-enrollments.controller';
 import {
+    getInstructorDashboardRoute,
+    getInstructorDashboardRouteHandler,
+} from './controllers/get-instructor-dashboard.controller';
+import {
     getStudentEnrollmentDetailRoute,
     getStudentEnrollmentDetailRouteHandler,
 } from './controllers/get-student-enrollment-detail.controller';
@@ -31,6 +35,7 @@ usersRoutes.use('*', authMiddleware);
 usersRoutes
     .openapi(createUserRoute, createUserRouteHandler)
     .openapi(getUsersRoute, getUsersRouteHandler)
+    .openapi(getInstructorDashboardRoute, getInstructorDashboardRouteHandler)
     .openapi(getInstructorStudentEnrollmentsRoute, getInstructorStudentEnrollmentsRouteHandler)
     .openapi(
         getInstructorStudentEnrollmentDetailRoute,

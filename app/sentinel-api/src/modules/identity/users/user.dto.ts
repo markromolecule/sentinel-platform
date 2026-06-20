@@ -118,6 +118,7 @@ export const instructorStudentEnrollmentSchemaOpenApi = z
         section: z.string(),
         term: z.string(),
         yearLevel: z.string(),
+        enrollmentIds: z.string().optional().nullable(),
         status: z.enum(['active', 'offline']),
         created_at: z.null(),
         updated_at: z.null(),
@@ -264,3 +265,35 @@ export const deleteUsersSchema = {
 
 export type DeleteUsersBody = z.infer<typeof deleteUsersSchema.body>;
 export type DeleteUsersResponse = z.infer<typeof deleteUsersSchema.response>;
+
+export const instructorDashboardSchema = {
+    response: z.object({
+        message: z.string(),
+        data: z.object({
+            stats: z.object({
+                totalStudents: z.number(),
+                totalClassrooms: z.number(),
+                totalSubjects: z.number(),
+                examsCreated: z.number(),
+            }),
+            recentExams: z.array(
+                z.object({
+                    exam_id: z.string().uuid(),
+                    title: z.string(),
+                    status: z.string(),
+                    scheduled_date: z.string().nullable(),
+                    duration_minutes: z.number(),
+                    question_count: z.number().nullable(),
+                    subject_title: z.string().nullable(),
+                    subject_code: z.string().nullable(),
+                    attempts_count: z.number(),
+                    incidents_count: z.number(),
+                })
+            ),
+        }),
+    }),
+};
+
+export type GetInstructorDashboardResponse = z.infer<
+    typeof instructorDashboardSchema.response
+>;
