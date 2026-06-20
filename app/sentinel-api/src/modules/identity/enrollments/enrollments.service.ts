@@ -291,4 +291,44 @@ export class EnrollmentService {
 
         return result;
     }
+
+    /**
+     * Unenrolls multiple students by deleting their enrollment records and logging telemetry.
+     *
+     * @param dbClient - Database client
+     * @param enrollmentIds - Array of enrollment IDs to delete
+     */
+    static async bulkUnenrollStudents(dbClient: DbClient, enrollmentIds: string[]): Promise<void> {
+        const enrollments = await dbClient
+            .selectFrom('enrollments as e')
+            .innerJoin('class_groups as cg', 'cg.class_group_id', 'e.class_group_id')
+            .select(['cg.institution_id', 'e.student_id', 'e.enrollment_id'])
+            .where('e.enrollment_id', 'in', enrollmentIds)
+            .execute();
+
+        await dbClient
+            .deleteFrom('enrollments')
+            .where('enrollment_id', 'in', enrollmentIds)
+            .execute();
+
+        for (const enrollment of enrollments) {
+            if (enrollment.institution_id) {
+                try {
+                    await LogsService.createLog(dbClient, {
+                        userId: '00000000-0000-0000-0000-000000000000',
+                        action: 'enrollment.deleted',
+                        resourceType: 'enrollment',
+                        resourceId: enrollment.enrollment_id,
+                        activeInstitutionId: enrollment.institution_id,
+                        details: {
+                            enrollmentId: enrollment.enrollment_id,
+                            studentId: enrollment.student_id,
+                        },
+                    });
+                } catch (logErr) {
+                    console.error('Failed to log enrollment.deleted:', logErr);
+                }
+            }
+        }
+    }
 }

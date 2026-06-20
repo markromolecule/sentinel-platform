@@ -7,7 +7,6 @@ afterEach(() => {
     cleanup();
 });
 
-
 describe('AdminShortcutsWidget', () => {
     it('renders all shortcuts correctly with titles', () => {
         render(<AdminShortcutsWidget />);

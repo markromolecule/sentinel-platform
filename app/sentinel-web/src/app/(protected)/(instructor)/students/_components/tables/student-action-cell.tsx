@@ -34,7 +34,10 @@ export function StudentActionCell({ student }: StudentActionCellProps) {
     const { mutate: unenroll, isPending: isRemoving } = useUnenrollStudent();
 
     const enrollmentIds = student.enrollmentIds
-        ? student.enrollmentIds.split(',').map((id) => id.trim()).filter(Boolean)
+        ? student.enrollmentIds
+              .split(',')
+              .map((id) => id.trim())
+              .filter(Boolean)
         : [];
     const isMultiEnrollment = enrollmentIds.length > 1;
     const targetEnrollmentId = enrollmentIds[0] || student.id;
@@ -69,7 +72,7 @@ export function StudentActionCell({ student }: StudentActionCellProps) {
                             onClick={() => {
                                 if (isMultiEnrollment) {
                                     toast.info(
-                                        "This student is enrolled in multiple subjects. Please use the 'View' action to remove them from a specific subject."
+                                        "This student is enrolled in multiple subjects. Please use the 'View' action to remove them from a specific subject.",
                                     );
                                 } else {
                                     setConfirmRemoveOpen(true);

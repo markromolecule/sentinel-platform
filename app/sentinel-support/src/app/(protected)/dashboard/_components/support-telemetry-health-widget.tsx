@@ -11,7 +11,8 @@ import { Badge, Card, CardContent, CardHeader, Spinner } from '@sentinel/ui';
 export function SupportTelemetryHealthWidget() {
     const { data: health, isLoading, isRefetching, refetch } = useTelemetryHealthQuery();
 
-    const isHealthy = health?.status?.toLowerCase() === 'healthy' || health?.status?.toLowerCase() === 'ok';
+    const isHealthy =
+        health?.status?.toLowerCase() === 'healthy' || health?.status?.toLowerCase() === 'ok';
 
     return (
         <Card className="border border-slate-100 shadow-xs dark:border-slate-800">
@@ -27,16 +28,16 @@ export function SupportTelemetryHealthWidget() {
                         {health && (
                             <Badge
                                 variant={isHealthy ? 'outline' : 'destructive'}
-                                className={`flex items-center gap-1.5 px-2 py-0.5 text-xs font-semibold ${isHealthy
+                                className={`flex items-center gap-1.5 px-2 py-0.5 text-xs font-semibold ${
+                                    isHealthy
                                         ? 'border-green-200 bg-green-50 text-green-700 dark:border-green-900/30 dark:bg-green-950/20 dark:text-green-400'
                                         : ''
-                                    }`}
+                                }`}
                             >
                                 <span
-                                    className={`h-1.5 w-1.5 rounded-full ${isHealthy
-                                            ? 'bg-green-500 animate-pulse'
-                                            : 'bg-red-500'
-                                        }`}
+                                    className={`h-1.5 w-1.5 rounded-full ${
+                                        isHealthy ? 'animate-pulse bg-green-500' : 'bg-red-500'
+                                    }`}
                                 />
                                 {health.status || 'Unknown'}
                             </Badge>
@@ -67,7 +68,7 @@ export function SupportTelemetryHealthWidget() {
                 ) : (
                     <div className="space-y-4">
                         {/* Mode and Ingestion details */}
-                        <div className="flex items-center justify-between rounded-lg bg-slate-50/50 px-3 py-2 text-xs border border-slate-100/50 dark:bg-slate-900/20 dark:border-slate-800/40">
+                        <div className="flex items-center justify-between rounded-lg border border-slate-100/50 bg-slate-50/50 px-3 py-2 text-xs dark:border-slate-800/40 dark:bg-slate-900/20">
                             <span className="font-medium text-slate-500">Ingestion Mode</span>
                             <span className="font-semibold text-slate-700 uppercase dark:text-slate-300">
                                 {health.ingestion.mode || 'N/A'}
@@ -77,7 +78,7 @@ export function SupportTelemetryHealthWidget() {
                         {/* Queue Counts Grid */}
                         <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
                             <div className="rounded-xl border border-slate-100 bg-slate-50/30 p-3 text-center dark:border-slate-800/60 dark:bg-slate-900/10">
-                                <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                                <p className="text-[10px] font-bold tracking-wider text-slate-400 uppercase">
                                     Active
                                 </p>
                                 <p className="mt-1 text-xl font-extrabold text-blue-600 dark:text-blue-400">
@@ -85,7 +86,7 @@ export function SupportTelemetryHealthWidget() {
                                 </p>
                             </div>
                             <div className="rounded-xl border border-slate-100 bg-slate-50/30 p-3 text-center dark:border-slate-800/60 dark:bg-slate-900/10">
-                                <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                                <p className="text-[10px] font-bold tracking-wider text-slate-400 uppercase">
                                     Waiting
                                 </p>
                                 <p className="mt-1 text-xl font-extrabold text-amber-600 dark:text-amber-400">
@@ -93,7 +94,7 @@ export function SupportTelemetryHealthWidget() {
                                 </p>
                             </div>
                             <div className="rounded-xl border border-slate-100 bg-slate-50/30 p-3 text-center dark:border-slate-800/60 dark:bg-slate-900/10">
-                                <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                                <p className="text-[10px] font-bold tracking-wider text-slate-400 uppercase">
                                     Completed
                                 </p>
                                 <p className="mt-1 text-xl font-extrabold text-green-600 dark:text-green-400">
@@ -101,7 +102,7 @@ export function SupportTelemetryHealthWidget() {
                                 </p>
                             </div>
                             <div className="rounded-xl border border-slate-100 bg-slate-50/30 p-3 text-center dark:border-slate-800/60 dark:bg-slate-900/10">
-                                <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                                <p className="text-[10px] font-bold tracking-wider text-slate-400 uppercase">
                                     Failed
                                 </p>
                                 <p className="mt-1 text-xl font-extrabold text-red-600 dark:text-red-400">
@@ -111,9 +112,19 @@ export function SupportTelemetryHealthWidget() {
                         </div>
 
                         {health.ingestion.buffered !== undefined && (
-                            <div className="flex items-center justify-between text-[11px] text-slate-400 px-1">
-                                <span>Buffer Name: <strong className="text-slate-500 dark:text-slate-300 font-medium">{health.ingestion.bufferName || 'None'}</strong></span>
-                                <span>Buffered events: <strong className="text-slate-500 dark:text-slate-300 font-semibold">{health.ingestion.buffered}</strong></span>
+                            <div className="flex items-center justify-between px-1 text-[11px] text-slate-400">
+                                <span>
+                                    Buffer Name:{' '}
+                                    <strong className="font-medium text-slate-500 dark:text-slate-300">
+                                        {health.ingestion.bufferName || 'None'}
+                                    </strong>
+                                </span>
+                                <span>
+                                    Buffered events:{' '}
+                                    <strong className="font-semibold text-slate-500 dark:text-slate-300">
+                                        {health.ingestion.buffered}
+                                    </strong>
+                                </span>
                             </div>
                         )}
                     </div>

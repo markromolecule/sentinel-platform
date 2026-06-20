@@ -288,12 +288,10 @@ export const instructorDashboardSchema = {
                     subject_code: z.string().nullable(),
                     attempts_count: z.number(),
                     incidents_count: z.number(),
-                })
+                }),
             ),
         }),
     }),
 };
 
-export type GetInstructorDashboardResponse = z.infer<
-    typeof instructorDashboardSchema.response
->;
+export type GetInstructorDashboardResponse = z.infer<typeof instructorDashboardSchema.response>;

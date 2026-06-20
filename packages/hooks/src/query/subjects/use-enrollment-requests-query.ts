@@ -12,7 +12,12 @@ export function useEnrollmentRequestsQuery(
     const apiClient = useApi();
     const isAuthenticatedQueryEnabled = useAuthenticatedQueryEnabled();
     return useQuery({
-        queryKey: [...SUBJECT_QUERY_KEYS.all, 'requests', status || 'ALL', { search, institutionId }],
+        queryKey: [
+            ...SUBJECT_QUERY_KEYS.all,
+            'requests',
+            status || 'ALL',
+            { search, institutionId },
+        ],
         queryFn: () => getEnrollmentRequests(apiClient, status, search, institutionId),
         enabled: isAuthenticatedQueryEnabled,
         refetchInterval: 5000,

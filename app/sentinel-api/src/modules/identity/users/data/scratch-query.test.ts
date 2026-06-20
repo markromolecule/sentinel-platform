@@ -18,7 +18,12 @@ describe('Diagnostic Database Queries', () => {
         const requesterUserId = user.user_id;
         const institutionId = user.institution_id || undefined;
 
-        console.log('Calling getInstructorDashboardData for user:', requesterUserId, 'institution:', institutionId);
+        console.log(
+            'Calling getInstructorDashboardData for user:',
+            requesterUserId,
+            'institution:',
+            institutionId,
+        );
         const result = await getInstructorDashboardData({
             dbClient,
             requesterUserId,

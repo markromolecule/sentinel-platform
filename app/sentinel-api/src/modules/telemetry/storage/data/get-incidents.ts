@@ -10,7 +10,11 @@ const DEFAULT_INCIDENT_LIMIT = 100;
 /**
  * Builds the base incident query with all necessary joins and selections.
  */
-export function buildIncidentQuery(db: DbClient, scopedInstitutionId?: string, userScope?: UserQueryScope) {
+export function buildIncidentQuery(
+    db: DbClient,
+    scopedInstitutionId?: string,
+    userScope?: UserQueryScope,
+) {
     let query = db
         .selectFrom('flagged_incidents as fi')
         .leftJoin('exam_attempts as ea', 'ea.attempt_id', 'fi.attempt_id')

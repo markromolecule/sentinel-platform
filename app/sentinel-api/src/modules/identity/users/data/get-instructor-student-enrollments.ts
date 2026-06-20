@@ -96,7 +96,9 @@ export async function getInstructorStudentEnrollmentsData({
         .leftJoin('departments as dep', 'dep.department_id', 's.department_id')
         .leftJoin('institutions as i', 'i.id', 'up.institution_id')
         .select([
-            sql<string | null>`STRING_AGG(DISTINCT e.enrollment_id::text, ', ')`.as('enrollment_ids'),
+            sql<string | null>`STRING_AGG(DISTINCT e.enrollment_id::text, ', ')`.as(
+                'enrollment_ids',
+            ),
             'up.user_id',
             'up.first_name',
             'up.last_name',
@@ -109,7 +111,11 @@ export async function getInstructorStudentEnrollmentsData({
             'i.name as institution_name',
             sql<string | null>`STRING_AGG(DISTINCT sub.subject_title, ', ')`.as('subject_name'),
             sql<string | null>`STRING_AGG(DISTINCT sec.section_name, ', ')`.as('section_name'),
-            sql<string | null>`STRING_AGG(DISTINCT CONCAT(t.academic_year, ' - ', t.semester), ', ')`.as('term_name'),
+            sql<
+                string | null
+            >`STRING_AGG(DISTINCT CONCAT(t.academic_year, ' - ', t.semester), ', ')`.as(
+                'term_name',
+            ),
             sql<number | null>`MAX(sec.year_level)`.as('year_level'),
         ])
         .where('cr.user_id', '=', requesterUserId)

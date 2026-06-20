@@ -92,7 +92,6 @@ export default function DashboardPage() {
         },
     ];
 
-
     if (role === 'support') {
         const profileName = profile
             ? [profile.firstName, profile.lastName].filter(Boolean).join(' ').trim()

@@ -81,19 +81,21 @@ export function AdminShortcutsWidget() {
                         <Link
                             key={shortcut.title}
                             href={shortcut.url}
-                            className="group flex items-start gap-4 rounded-2xl border border-slate-100/80 bg-slate-50/50 p-5 shadow-xs transition-all duration-300 hover:-translate-y-0.5 hover:border-blue-200/60 hover:bg-slate-50 dark:border-slate-800/80 dark:bg-slate-900/30 dark:hover:border-slate-700/60 dark:hover:bg-slate-900/50 hover:shadow-sm"
+                            className="group flex items-start gap-4 rounded-2xl border border-slate-100/80 bg-slate-50/50 p-5 shadow-xs transition-all duration-300 hover:-translate-y-0.5 hover:border-blue-200/60 hover:bg-slate-50 hover:shadow-sm dark:border-slate-800/80 dark:bg-slate-900/30 dark:hover:border-slate-700/60 dark:hover:bg-slate-900/50"
                         >
-                            <div className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-xl transition-all duration-300 group-hover:scale-110 group-hover:rotate-3 ${shortcut.colorClass} shadow-xs`}>
+                            <div
+                                className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-xl transition-all duration-300 group-hover:scale-110 group-hover:rotate-3 ${shortcut.colorClass} shadow-xs`}
+                            >
                                 <Icon className="h-6 w-6" />
                             </div>
-                            <div className="flex-1 min-w-0">
+                            <div className="min-w-0 flex-1">
                                 <div className="flex items-center gap-1.5">
-                                    <h4 className="text-sm font-semibold text-slate-800 transition-colors group-hover:text-primary dark:text-slate-200">
+                                    <h4 className="group-hover:text-primary text-sm font-semibold text-slate-800 transition-colors dark:text-slate-200">
                                         {shortcut.title}
                                     </h4>
-                                    <ArrowRight className="h-3.5 w-3.5 text-primary opacity-0 -translate-x-2 transition-all duration-300 group-hover:opacity-100 group-hover:translate-x-0" />
+                                    <ArrowRight className="text-primary h-3.5 w-3.5 -translate-x-2 opacity-0 transition-all duration-300 group-hover:translate-x-0 group-hover:opacity-100" />
                                 </div>
-                                <p className="text-xs mt-1 text-slate-500 dark:text-slate-400 leading-normal">
+                                <p className="mt-1 text-xs leading-normal text-slate-500 dark:text-slate-400">
                                     {shortcut.description}
                                 </p>
                             </div>

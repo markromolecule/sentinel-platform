@@ -71,6 +71,10 @@ export function assertAssessmentReadAccess(roleOrContext?: any) {
         'get' in roleOrContext &&
         typeof roleOrContext.get === 'function'
     ) {
+        const role = roleOrContext.get('role');
+        if (role === 'student') {
+            return;
+        }
         requireActivePermission(
             roleOrContext,
             'assessments:view',

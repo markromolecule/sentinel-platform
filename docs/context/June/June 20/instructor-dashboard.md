@@ -13,11 +13,11 @@
     2. Grading
     3. Incident Logs
     4. Messages
-    
 - Remove the [recent students] card
 - Think of a better components change the [recent exams] cards now
 
 For design:
+
 - Clean, Modular
 - Avoid wrapping to card / provide better ux
 - Improve the visibility

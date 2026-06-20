@@ -2,7 +2,7 @@
 
 import { ColumnDef } from '@tanstack/react-table';
 import { Student } from '@sentinel/shared/types';
-import { DataTableColumnHeader } from '@sentinel/ui';
+import { DataTableColumnHeader, Checkbox } from '@sentinel/ui';
 import { StatusBadge } from '@/components/common/displays/status-badge';
 import { StudentActionCell } from './student-action-cell';
 
@@ -24,6 +24,30 @@ function getCondensedSubject(subject: string) {
 }
 
 export const columns: ColumnDef<Student>[] = [
+    {
+        id: 'select',
+        header: ({ table }) => (
+            <Checkbox
+                checked={
+                    table.getIsAllPageRowsSelected() ||
+                    (table.getIsSomePageRowsSelected() && 'indeterminate')
+                }
+                onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
+                aria-label="Select all"
+                className="ml-4 translate-y-[2px]"
+            />
+        ),
+        cell: ({ row }) => (
+            <Checkbox
+                checked={row.getIsSelected()}
+                onCheckedChange={(value) => row.toggleSelected(!!value)}
+                aria-label="Select row"
+                className="ml-4 translate-y-[2px]"
+            />
+        ),
+        enableSorting: false,
+        enableHiding: false,
+    },
     {
         accessorKey: 'name',
         header: ({ column }) => <DataTableColumnHeader column={column} title="Student" />,

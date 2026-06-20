@@ -7,8 +7,14 @@ export class HistoryService {
         dbClient: DbClient,
         studentUserId: string,
         institutionId?: string,
+        filters?: {
+            page?: number;
+            limit?: number;
+            status?: 'turned_in' | 'past_due';
+            search?: string;
+        },
     ) {
-        return await getStudentExamHistory(dbClient, studentUserId, institutionId);
+        return await getStudentExamHistory(dbClient, studentUserId, institutionId, filters);
     }
 
     static async getStudentHistoryDetail(

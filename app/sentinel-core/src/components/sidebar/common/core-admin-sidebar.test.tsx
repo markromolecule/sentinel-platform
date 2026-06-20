@@ -111,7 +111,6 @@ describe('CoreAdminSidebar', () => {
         render(<CoreAdminSidebar />);
 
         expect(screen.getByText('Insights:collapsed')).toBeTruthy();
-
     });
 
     it('renders the Academic Setup item and its sub-items when visible', () => {

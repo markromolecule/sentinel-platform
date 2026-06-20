@@ -84,11 +84,11 @@ export function SupportActivityFeedWidget() {
                             return (
                                 <div
                                     key={log.logId}
-                                    className="hover:bg-slate-50/40 flex flex-col gap-1.5 p-4 text-xs transition-colors dark:hover:bg-slate-900/10"
+                                    className="flex flex-col gap-1.5 p-4 text-xs transition-colors hover:bg-slate-50/40 dark:hover:bg-slate-900/10"
                                 >
                                     <div className="flex items-center justify-between gap-4">
                                         <div className="flex items-center gap-2">
-                                            <div className="bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300 flex h-5 w-5 items-center justify-center rounded-full">
+                                            <div className="flex h-5 w-5 items-center justify-center rounded-full bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300">
                                                 <User className="h-3 w-3" />
                                             </div>
                                             <span className="font-semibold text-slate-700 dark:text-slate-300">
@@ -106,7 +106,7 @@ export function SupportActivityFeedWidget() {
                                         {log.resourceType && (
                                             <Badge
                                                 variant="outline"
-                                                className="border-slate-200/60 bg-slate-50/40 text-[9px] px-1 py-0 font-mono font-medium lowercase text-slate-500 dark:border-slate-800 dark:bg-slate-900/30"
+                                                className="border-slate-200/60 bg-slate-50/40 px-1 py-0 font-mono text-[9px] font-medium text-slate-500 lowercase dark:border-slate-800 dark:bg-slate-900/30"
                                             >
                                                 {log.resourceType}
                                             </Badge>

@@ -12,4 +12,3 @@ export * from '@/app/(protected)/dashboard/_components/chart-group-panel';
 export * from '@/app/(protected)/dashboard/_components/dashboard-widget-wrapper';
 export * from '@/app/(protected)/dashboard/_components/system-activity-widget';
 export * from '@/app/(protected)/dashboard/_components/admin-shortcuts-widget';
-

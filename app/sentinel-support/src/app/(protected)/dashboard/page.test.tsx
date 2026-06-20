@@ -29,7 +29,6 @@ vi.mock('@sentinel/hooks', () => ({
     useStudentWhitelistQuery: () => ({ data: [], isLoading: false }),
 }));
 
-
 vi.mock('@dnd-kit/core', () => ({
     DndContext: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
     PointerSensor: class {},
@@ -83,7 +82,6 @@ vi.mock('@/app/(protected)/dashboard/_components', () => ({
     SystemHealth: () => <div>SystemHealth</div>,
     SupportShortcutsWidget: () => <div>SupportShortcutsWidget</div>,
 }));
-
 
 import { useUser } from '@/hooks/use-user';
 import { useProfileQuery } from '@sentinel/hooks';

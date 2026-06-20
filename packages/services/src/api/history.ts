@@ -59,9 +59,43 @@ function mapExamHistory(apiItem: ApiExamHistorySummary | ApiExamHistoryDetail): 
     };
 }
 
-export async function getExamHistory(apiClient: ApiClientType): Promise<ExamHistory[]> {
-    const response: ApiResponse<ApiExamHistorySummary[]> = await apiClient('/history');
-    return response.data.map(mapExamHistory);
+export interface GetExamHistoryParams {
+    page?: number;
+    limit?: number;
+    status?: 'turned_in' | 'past_due';
+    search?: string;
+}
+
+export interface GetExamHistoryResponse {
+    items: ExamHistory[];
+    pagination: {
+        page: number;
+        limit: number;
+        total: number;
+        hasMore: boolean;
+    };
+}
+
+export async function getExamHistory(
+    apiClient: ApiClientType,
+    params?: GetExamHistoryParams,
+): Promise<GetExamHistoryResponse> {
+    const queryParams = new URLSearchParams();
+    if (params?.page !== undefined) queryParams.set('page', params.page.toString());
+    if (params?.limit !== undefined) queryParams.set('limit', params.limit.toString());
+    if (params?.status !== undefined) queryParams.set('status', params.status);
+    if (params?.search !== undefined) queryParams.set('search', params.search);
+
+    const queryString = queryParams.toString() ? `?${queryParams.toString()}` : '';
+
+    const response: ApiResponse<ApiExamHistorySummary[]> & {
+        pagination: { page: number; limit: number; total: number; hasMore: boolean };
+    } = await apiClient(`/history${queryString}`);
+
+    return {
+        items: response.data.map(mapExamHistory),
+        pagination: response.pagination,
+    };
 }
 
 export async function getExamHistoryDetail(

@@ -10,7 +10,10 @@ export function useExamHistoryQuery() {
 
     return useQuery({
         queryKey: EXAM_QUERY_KEYS.history(),
-        queryFn: () => getExamHistory(apiClient),
+        queryFn: async () => {
+            const result = await getExamHistory(apiClient);
+            return result.items;
+        },
         enabled: isAuthenticatedQueryEnabled,
     });
 }

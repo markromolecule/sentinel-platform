@@ -1,7 +1,10 @@
 import { type DbClient } from '@sentinel/db';
 import { HTTPException } from 'hono/http-exception';
 import { sql } from 'kysely';
-import { type UserQueryScope, applyIncidentQueryScoping } from '../../telemetry/storage/data/query-scoping';
+import {
+    type UserQueryScope,
+    applyIncidentQueryScoping,
+} from '../../telemetry/storage/data/query-scoping';
 import {
     type GetExamIncidentsQuery,
     type IncidentLogItem,
@@ -145,13 +148,13 @@ export class IncidentsService {
             const elapsedSeconds =
                 row.timestamp && row.attempt_started_at
                     ? Math.max(
-                        0,
-                        Math.floor(
-                            (new Date(row.timestamp).getTime() -
-                                new Date(row.attempt_started_at).getTime()) /
-                            1000,
-                        ),
-                    )
+                          0,
+                          Math.floor(
+                              (new Date(row.timestamp).getTime() -
+                                  new Date(row.attempt_started_at).getTime()) /
+                                  1000,
+                          ),
+                      )
                     : 0;
 
             return {

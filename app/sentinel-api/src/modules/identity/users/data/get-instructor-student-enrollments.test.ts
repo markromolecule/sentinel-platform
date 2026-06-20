@@ -44,9 +44,9 @@ describe('getInstructorStudentEnrollmentsData', () => {
         // Should group by student profile fields
         expect(compiledQuery.sql).toContain('group by "up"."user_id"');
         // Should aggregate enrollment IDs
-        expect(compiledQuery.sql).toContain('STRING_AGG(DISTINCT e.enrollment_id::text, \', \')');
+        expect(compiledQuery.sql).toContain("STRING_AGG(DISTINCT e.enrollment_id::text, ', ')");
         // Should aggregate subjects
-        expect(compiledQuery.sql).toContain('STRING_AGG(DISTINCT sub.subject_title, \', \')');
+        expect(compiledQuery.sql).toContain("STRING_AGG(DISTINCT sub.subject_title, ', ')");
         // Should filter by instructor user ID
         expect(compiledQuery.sql).toContain('"cr"."user_id" = $1');
     });

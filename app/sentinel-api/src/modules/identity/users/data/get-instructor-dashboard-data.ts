@@ -74,18 +74,20 @@ export async function getInstructorDashboardData({
             'sub.subject_title as subject_title',
             'sub.subject_code as subject_code',
             // Subquery for attempts count
-            (eb) => eb
-                .selectFrom('exam_attempts as ea')
-                .select((eb) => eb.fn.count('ea.attempt_id').as('count'))
-                .whereRef('ea.exam_id', '=', 'ex.exam_id')
-                .as('attempts_count'),
+            (eb) =>
+                eb
+                    .selectFrom('exam_attempts as ea')
+                    .select((eb) => eb.fn.count('ea.attempt_id').as('count'))
+                    .whereRef('ea.exam_id', '=', 'ex.exam_id')
+                    .as('attempts_count'),
             // Subquery for flagged incidents count
-            (eb) => eb
-                .selectFrom('flagged_incidents as fi')
-                .innerJoin('exam_attempts as ea', 'ea.attempt_id', 'fi.attempt_id')
-                .select((eb) => eb.fn.count('fi.incident_id').as('count'))
-                .whereRef('ea.exam_id', '=', 'ex.exam_id')
-                .as('incidents_count'),
+            (eb) =>
+                eb
+                    .selectFrom('flagged_incidents as fi')
+                    .innerJoin('exam_attempts as ea', 'ea.attempt_id', 'fi.attempt_id')
+                    .select((eb) => eb.fn.count('fi.incident_id').as('count'))
+                    .whereRef('ea.exam_id', '=', 'ex.exam_id')
+                    .as('incidents_count'),
         ])
         .where('ex.created_by', '=', requesterUserId);
 
@@ -93,10 +95,7 @@ export async function getInstructorDashboardData({
         recentExamsQuery = recentExamsQuery.where('ex.institution_id', '=', institutionId);
     }
 
-    const recentExams = await recentExamsQuery
-        .orderBy('ex.created_at', 'desc')
-        .limit(5)
-        .execute();
+    const recentExams = await recentExamsQuery.orderBy('ex.created_at', 'desc').limit(5).execute();
 
     return {
         stats: {
