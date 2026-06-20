@@ -20,7 +20,6 @@ import {
 } from '@sentinel/ui';
 import { MOCK_NOTIFICATIONS } from '@sentinel/shared/constants';
 import { format, formatDistanceToNow } from 'date-fns';
-import { UserSearchBar } from '@/components/common/user-search-bar';
 
 export default function StudentHeader() {
     const pathname = usePathname();
@@ -88,7 +87,6 @@ export default function StudentHeader() {
                             </Link>
                         ))}
                     </nav>
-                    <UserSearchBar redirectPath="/student/message" />
                 </div>
 
                 {/* Actions & Profile */}

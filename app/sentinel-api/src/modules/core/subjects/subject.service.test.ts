@@ -100,3 +100,72 @@ describe('SubjectService notifications', () => {
         });
     });
 });
+
+describe('SubjectService pagination', () => {
+    const dbClient = {} as any;
+
+    beforeEach(() => {
+        vi.clearAllMocks();
+    });
+
+    it('returns the full subject list when pagination is omitted', async () => {
+        vi.mocked(SubjectCrudService.getSubjects).mockResolvedValue([
+            {
+                subject_id: 'subject-1',
+                subject_code: 'CS101',
+            },
+            {
+                subject_id: 'subject-2',
+                subject_code: 'CS102',
+            },
+        ] as any);
+
+        const result = await SubjectService.getSubjects(
+            dbClient,
+            'institution-1',
+            'computing',
+        );
+
+        expect(SubjectCrudService.getSubjects).toHaveBeenCalledWith(
+            dbClient,
+            'institution-1',
+            'computing',
+        );
+        expect(result).toEqual([
+            {
+                subject_id: 'subject-1',
+                subject_code: 'CS101',
+            },
+            {
+                subject_id: 'subject-2',
+                subject_code: 'CS102',
+            },
+        ]);
+    });
+
+    it('returns paginated subjects and metadata when page and limit are provided', async () => {
+        vi.mocked(SubjectCrudService.getSubjects).mockResolvedValue([
+            { subject_id: 'subject-1', subject_code: 'CS101' },
+            { subject_id: 'subject-2', subject_code: 'CS102' },
+            { subject_id: 'subject-3', subject_code: 'CS103' },
+        ] as any);
+
+        const result = await SubjectService.getSubjects(
+            dbClient,
+            'institution-1',
+            'computing',
+            2,
+            1,
+        );
+
+        expect(result).toEqual({
+            items: [{ subject_id: 'subject-2', subject_code: 'CS102' }],
+            pagination: {
+                page: 2,
+                limit: 1,
+                total: 3,
+                hasMore: true,
+            },
+        });
+    });
+});

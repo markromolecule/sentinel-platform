@@ -31,7 +31,10 @@ describe('useSubjectsPageState', () => {
             ],
         });
         (useSubjectsQuery as any).mockReturnValue({
-            data: [],
+            data: {
+                items: [],
+                pagination: { page: 1, limit: 10, total: 0, hasMore: false },
+            },
             isLoading: false,
             isError: false,
             error: null,

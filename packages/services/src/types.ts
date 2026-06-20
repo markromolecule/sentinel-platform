@@ -1,6 +1,12 @@
 export interface ApiResponse<T> {
     message: string;
     data: T;
+    pagination?: {
+        page: number;
+        limit: number;
+        total: number;
+        hasMore: boolean;
+    };
 }
 
 export interface ApiDepartment {

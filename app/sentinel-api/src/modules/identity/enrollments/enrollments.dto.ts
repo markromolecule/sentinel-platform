@@ -259,3 +259,19 @@ export const deleteEnrollmentSchema = {
 
 export type DeleteEnrollmentParams = z.infer<typeof deleteEnrollmentSchema.params>;
 export type DeleteEnrollmentResponse = z.infer<typeof deleteEnrollmentSchema.response>;
+
+export const bulkDeleteEnrollmentSchema = {
+    body: z.object({
+        enrollmentIds: z
+            .array(z.string().uuid())
+            .min(1)
+            .openapi({ description: 'The enrollment_ids to delete' }),
+    }),
+    response: z.object({
+        message: z.string(),
+        data: z.null(),
+    }),
+};
+
+export type BulkDeleteEnrollmentBody = z.infer<typeof bulkDeleteEnrollmentSchema.body>;
+export type BulkDeleteEnrollmentResponse = z.infer<typeof bulkDeleteEnrollmentSchema.response>;

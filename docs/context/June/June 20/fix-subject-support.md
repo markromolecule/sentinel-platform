@@ -1,8 +1,8 @@
 # Goal
 
-* sentinel-support
+- sentinel-support
 
-- Ensure that the support fetch only the [subjects] under the [institution] and the [institution / branch] of the specific user
+* Ensure that the support fetch only the [subjects] under the [institution] and the [institution / branch] of the specific user
 
 for e.g
 

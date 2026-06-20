@@ -64,7 +64,12 @@ export const getSubjectsRouteHandler: AppRouteHandler<typeof getSubjectsRoute> =
         requireActivePermission(c, 'subjects:view', 'Forbidden. Missing subjects:view permission.');
         const role = c.get('role');
 
-        const { search, institutionId: requestedInstitutionId } = c.req.valid('query');
+        const {
+            search,
+            institutionId: requestedInstitutionId,
+            page,
+            limit,
+        } = c.req.valid('query');
         const institutionId = c.get('institutionId');
 
         const scope = buildRequesterAcademicScope({
@@ -78,13 +83,16 @@ export const getSubjectsRouteHandler: AppRouteHandler<typeof getSubjectsRoute> =
             requestedInstitutionId,
         });
 
-        const rawSubjects = await SubjectService.getSubjects(
+        const subjectResult = await SubjectService.getSubjects(
             c.get('dbClient'),
             queryScope.institutionId || undefined,
             search,
+            page,
+            limit,
         );
+        const subjects = Array.isArray(subjectResult) ? subjectResult : subjectResult.items;
 
-        const subjects = rawSubjects.map((subject: any) => ({
+        const mappedSubjects = subjects.map((subject: any) => ({
             subject_id: subject.subject_id,
             subject_code: subject.subject_code,
             subject_title: subject.subject_title,
@@ -115,7 +123,8 @@ export const getSubjectsRouteHandler: AppRouteHandler<typeof getSubjectsRoute> =
         return c.json(
             {
                 message: 'Subjects retrieved successfully',
-                data: subjects,
+                data: mappedSubjects,
+                ...(Array.isArray(subjectResult) ? {} : { pagination: subjectResult.pagination }),
             },
             200,
         );

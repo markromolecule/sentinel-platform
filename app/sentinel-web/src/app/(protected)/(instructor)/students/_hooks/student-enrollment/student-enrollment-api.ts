@@ -67,3 +67,18 @@ export async function unenrollStudent(enrollmentId: string): Promise<void> {
         method: 'DELETE',
     });
 }
+
+/**
+ * Sends a request to bulk unenroll students.
+ *
+ * @param enrollmentIds - List of enrollment IDs to unenroll
+ */
+export async function bulkUnenrollStudents(enrollmentIds: string[]): Promise<void> {
+    await apiClient('/enrollments/bulk', {
+        method: 'DELETE',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ enrollmentIds }),
+    });
+}

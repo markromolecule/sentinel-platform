@@ -38,24 +38,27 @@ describe('useSubjectClassificationsPageState', () => {
             data: [{ id: 'inst-1', name: 'Institution 1' }],
         });
         (useSubjectClassificationsQuery as any).mockReturnValue({
-            data: [
-                {
-                    id: 'class-1',
-                    name: 'Math Class',
-                    type: 'GENERAL',
-                    inheritanceStatus: 'LOCAL',
-                    subjectCount: 2,
-                    subjects: [],
-                },
-                {
-                    id: 'class-2',
-                    name: 'Science Class',
-                    type: 'CORE',
-                    inheritanceStatus: 'INHERITED',
-                    subjectCount: 1,
-                    subjects: [],
-                },
-            ],
+            data: {
+                items: [
+                    {
+                        id: 'class-1',
+                        name: 'Math Class',
+                        type: 'GENERAL',
+                        inheritanceStatus: 'LOCAL',
+                        subjectCount: 2,
+                        subjects: [],
+                    },
+                    {
+                        id: 'class-2',
+                        name: 'Science Class',
+                        type: 'CORE',
+                        inheritanceStatus: 'INHERITED',
+                        subjectCount: 1,
+                        subjects: [],
+                    },
+                ],
+                pagination: { page: 1, limit: 10, total: 2, hasMore: false },
+            },
             isLoading: false,
             isError: false,
             error: null,

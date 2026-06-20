@@ -5,7 +5,10 @@ import SharedSubjectsPage from './page';
 vi.mock('@sentinel/hooks', () => ({
     useDebounce: (value: string) => value,
     useSubjectsQuery: () => ({
-        data: [{ id: '1', code: 'CS101', title: 'Intro to CS', units: 3 }],
+        data: {
+            items: [{ id: '1', code: 'CS101', title: 'Intro to CS', units: 3 }],
+            pagination: { page: 1, limit: 10, total: 1, hasMore: false },
+        },
         isLoading: false,
         isError: false,
         error: null,

@@ -72,11 +72,27 @@ export const getSubjectOfferingsSchema = {
             term_id: z.string().uuid().optional(),
             institutionId: z.string().uuid().optional(),
             visibility: z.enum(['default', 'requestable']).optional(),
+            page: z.coerce.number().int().min(1).optional().openapi({
+                description: 'Page index to fetch.',
+                example: 1,
+            }),
+            limit: z.coerce.number().int().min(1).max(100).optional().openapi({
+                description: 'Number of items per page.',
+                example: 10,
+            }),
         }),
     },
     response: z.object({
         message: z.string(),
         data: z.array(subjectOfferingSchemaOpenApi),
+        pagination: z
+            .object({
+                page: z.number().int(),
+                limit: z.number().int(),
+                total: z.number().int(),
+                hasMore: z.boolean(),
+            })
+            .optional(),
     }),
 };
 

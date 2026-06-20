@@ -10,6 +10,7 @@ import type {
 } from '@sentinel/shared';
 import type { ApiClientType } from '../api-client';
 import type { ApiResponse } from '../types';
+import type { PaginatedApiResponse } from './pagination';
 
 interface ApiSubject {
     subject_id: string;
@@ -108,16 +109,23 @@ export async function getSubjects(
     params: {
         search?: string;
         institutionId?: string;
+        page?: number;
+        limit?: number;
     } = {},
-): Promise<MasterSubject[]> {
+): Promise<PaginatedApiResponse<MasterSubject>> {
     const queryParams = new URLSearchParams();
     if (params.search) queryParams.append('search', params.search);
     if (params.institutionId) queryParams.append('institutionId', params.institutionId);
+    if (params.page !== undefined) queryParams.append('page', String(params.page));
+    if (params.limit !== undefined) queryParams.append('limit', String(params.limit));
 
     const queryString = queryParams.toString();
     const url = queryString ? `/subjects?${queryString}` : '/subjects';
     const response: ApiResponse<ApiSubject[]> = await apiClient(url);
-    return response.data.map(mapSubject);
+    return {
+        items: response.data.map(mapSubject),
+        pagination: response.pagination,
+    };
 }
 
 export async function createSubject(

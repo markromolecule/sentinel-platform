@@ -16,6 +16,41 @@ type UpdateSubjectPayload = Partial<SubjectCorePayload> & {
     updated_by?: string;
 };
 
+type PaginationMetadata = {
+    page: number;
+    limit: number;
+    total: number;
+    hasMore: boolean;
+};
+
+type PaginatedResult<T> = {
+    items: T[];
+    pagination: PaginationMetadata;
+};
+
+function paginateItems<T>(
+    items: T[],
+    page?: number,
+    limit?: number,
+): T[] | PaginatedResult<T> {
+    if (page === undefined || limit === undefined) {
+        return items;
+    }
+
+    const offset = (page - 1) * limit;
+    const paginatedItems = items.slice(offset, offset + limit);
+
+    return {
+        items: paginatedItems,
+        pagination: {
+            page,
+            limit,
+            total: items.length,
+            hasMore: offset + paginatedItems.length < items.length,
+        },
+    };
+}
+
 export class SubjectService {
     private static buildSubjectLabel(subject: {
         subject_code?: string | null;
@@ -28,8 +63,16 @@ export class SubjectService {
         return subject.subject_title || subject.subject_code || 'Subject';
     }
 
-    static async getSubjects(dbClient: DbClient, institutionId?: string, search?: string) {
-        return await SubjectCrudService.getSubjects(dbClient, institutionId, search);
+    static async getSubjects(
+        dbClient: DbClient,
+        institutionId?: string,
+        search?: string,
+        page?: number,
+        limit?: number,
+    ) {
+        const subjects = await SubjectCrudService.getSubjects(dbClient, institutionId, search);
+
+        return paginateItems(subjects, page, limit);
     }
 
     static async createSubject(dbClient: DbClient, data: CreateSubjectPayload) {

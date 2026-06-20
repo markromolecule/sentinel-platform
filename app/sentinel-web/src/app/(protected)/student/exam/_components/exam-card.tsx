@@ -9,12 +9,31 @@ import { cn } from '@sentinel/ui';
 import { StudentExamCardProps as ExamCardProps } from '@sentinel/shared/types';
 
 export function ExamCard({ exam }: ExamCardProps) {
-    const actionLabel =
-        exam.status === 'in-progress'
-            ? 'Resume Exam'
-            : exam.status === 'completed'
-              ? 'Review Flow'
-              : 'Open Exam';
+    const isCompleted = exam.status === 'completed' || exam.status === 'turned_in';
+    const isInProgress = exam.status === 'in-progress';
+    const isAvailable = exam.status === 'available';
+    const isUpcoming = exam.status === 'upcoming' || exam.status === 'scheduled';
+    const isPastDue = exam.status === 'past_due' || exam.status === 'archived';
+
+    const actionLabel = isInProgress
+        ? 'Resume Exam'
+        : isCompleted
+          ? 'Review Flow'
+          : isUpcoming
+            ? 'Upcoming'
+            : exam.status === 'archived'
+              ? 'Archived'
+              : isPastDue
+                ? 'Past Due'
+                : 'Open Exam';
+
+    const actionHref = isCompleted
+        ? exam.attemptId
+            ? `/student/history/details?attemptId=${exam.attemptId}`
+            : `/student/history/details?examId=${exam.id}`
+        : `/student/exam/${exam.id}/instruction`;
+
+    const isActive = isCompleted || isInProgress || isAvailable;
 
     return (
         <Card className="hover:border-primary/50 group flex flex-col overflow-hidden rounded-none transition-all duration-300 hover:shadow-lg">
@@ -39,14 +58,20 @@ export function ExamCard({ exam }: ExamCardProps) {
                             'shrink-0 rounded-none border-none px-2 py-0.5 text-[10px] font-bold tracking-wider uppercase shadow-none',
                             exam.status === 'available'
                                 ? 'bg-primary text-primary-foreground'
-                                : exam.status === 'upcoming'
+                                : exam.status === 'upcoming' || exam.status === 'scheduled'
                                   ? 'bg-amber-500 text-white'
                                   : exam.status === 'in-progress'
                                     ? 'bg-secondary text-secondary-foreground'
-                                    : 'bg-muted text-muted-foreground',
+                                    : exam.status === 'turned_in'
+                                      ? 'bg-green-500 text-white'
+                                      : 'bg-muted text-muted-foreground',
                         )}
                     >
-                        {exam.status}
+                        {exam.status === 'turned_in'
+                            ? 'turned in'
+                            : exam.status === 'past_due'
+                              ? 'past due'
+                              : exam.status}
                     </Badge>
                 </div>
 
@@ -66,22 +91,22 @@ export function ExamCard({ exam }: ExamCardProps) {
                     </div>
 
                     <div className="shrink-0">
-                        {exam.status === 'upcoming' ? (
+                        {!isActive ? (
                             <Button
                                 className="h-8 rounded-none px-4 text-xs font-bold uppercase"
                                 variant="outline"
                                 disabled
                             >
-                                Upcoming
+                                {actionLabel}
                             </Button>
                         ) : (
-                            <Link href={`/student/exam/${exam.id}/instruction`}>
+                            <Link href={actionHref}>
                                 <Button
                                     className="h-8 rounded-none px-4 text-xs font-bold uppercase"
                                     variant={
-                                        exam.status === 'in-progress'
+                                        isInProgress
                                             ? 'secondary'
-                                            : exam.status === 'completed'
+                                            : isCompleted
                                               ? 'outline'
                                               : 'default'
                                     }

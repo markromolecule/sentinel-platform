@@ -163,7 +163,7 @@ export const getEnrollmentRequestsData = async ({
             .select(['parent_institution_id'])
             .where('id', '=', institutionId)
             .executeTakeFirst();
-        
+
         const allowedInstIds = [institutionId];
         if (scope?.parent_institution_id) {
             allowedInstIds.push(scope.parent_institution_id);

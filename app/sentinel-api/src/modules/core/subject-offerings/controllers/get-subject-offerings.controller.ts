@@ -45,6 +45,8 @@ export const getSubjectOfferingsRouteHandler: AppRouteHandler<
             term_id,
             institutionId: requestedInstitutionId,
             visibility,
+            page,
+            limit,
         } = c.req.valid('query');
         const requesterRole = c.get('role');
         const instructorDepartmentId = c.get('user').user_profiles?.department_id ?? null;
@@ -81,13 +83,19 @@ export const getSubjectOfferingsRouteHandler: AppRouteHandler<
                 termId: term_id,
                 visibility,
                 instructorDepartmentId: instructorDepartmentId ?? undefined,
+                page,
+                limit,
             },
         );
+        const offerings = Array.isArray(subjectOfferings)
+            ? subjectOfferings
+            : subjectOfferings.items;
 
         return c.json(
             {
                 message: 'Subject offerings retrieved successfully',
-                data: subjectOfferings,
+                data: offerings,
+                ...(Array.isArray(subjectOfferings) ? {} : { pagination: subjectOfferings.pagination }),
             },
             200,
         );

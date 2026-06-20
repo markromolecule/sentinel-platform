@@ -14,4 +14,3 @@ export * from '@/app/(protected)/dashboard/_components/system-activity-widget';
 export * from '@/app/(protected)/dashboard/_components/support-shortcuts-widget';
 export * from '@/app/(protected)/dashboard/_components/support-telemetry-health-widget';
 export * from '@/app/(protected)/dashboard/_components/support-activity-feed-widget';
-

@@ -56,8 +56,8 @@ export function DayDetailsSheet({
     return (
         <>
             <Sheet open={isOpen} onOpenChange={onOpenChange}>
-                <SheetContent className="overflow-y-auto">
-                    <SheetHeader className="mb-8">
+                <SheetContent className="overflow-y-auto p-6">
+                    <SheetHeader className="mb-6 p-0">
                         <SheetTitle className="flex items-center gap-2">
                             <CalendarIcon className="text-primary h-5 w-5" />
                             {selectedDate ? format(selectedDate, 'MMMM d, yyyy') : ''}
@@ -86,6 +86,12 @@ export function DayDetailsSheet({
                                                 'border-l-4 border-l-amber-500 bg-gradient-to-r from-amber-500/10 to-transparent',
                                             event.type === 'note' &&
                                                 'border-l-4 border-l-blue-500 bg-gradient-to-r from-blue-500/10 to-transparent',
+                                            event.type === 'holiday' &&
+                                                'border-l-4 border-l-emerald-500 bg-gradient-to-r from-emerald-500/10 to-transparent',
+                                            event.type === 'announcement' &&
+                                                'border-l-4 border-l-purple-500 bg-gradient-to-r from-purple-500/10 to-transparent',
+                                            event.type === 'maintenance' &&
+                                                'border-l-4 border-l-rose-500 bg-gradient-to-r from-rose-500/10 to-transparent',
                                         )}
                                     >
                                         <div className="mb-2 flex items-start justify-between">
@@ -95,6 +101,38 @@ export function DayDetailsSheet({
                                                         <Clock className="h-4 w-4" />
                                                         <span className="text-xs font-bold tracking-wider uppercase">
                                                             Exam
+                                                        </span>
+                                                    </div>
+                                                )}
+                                                {event.type === 'note' && (
+                                                    <div className="mb-1 flex items-center gap-2 text-blue-600 dark:text-blue-500">
+                                                        <Clock className="h-4 w-4" />
+                                                        <span className="text-xs font-bold tracking-wider uppercase">
+                                                            Note
+                                                        </span>
+                                                    </div>
+                                                )}
+                                                {event.type === 'holiday' && (
+                                                    <div className="mb-1 flex items-center gap-2 text-emerald-600 dark:text-emerald-500">
+                                                        <Clock className="h-4 w-4" />
+                                                        <span className="text-xs font-bold tracking-wider uppercase">
+                                                            Holiday
+                                                        </span>
+                                                    </div>
+                                                )}
+                                                {event.type === 'announcement' && (
+                                                    <div className="mb-1 flex items-center gap-2 text-purple-600 dark:text-purple-500">
+                                                        <Clock className="h-4 w-4" />
+                                                        <span className="text-xs font-bold tracking-wider uppercase">
+                                                            Announcement
+                                                        </span>
+                                                    </div>
+                                                )}
+                                                {event.type === 'maintenance' && (
+                                                    <div className="mb-1 flex items-center gap-2 text-rose-600 dark:text-rose-500">
+                                                        <Clock className="h-4 w-4" />
+                                                        <span className="text-xs font-bold tracking-wider uppercase">
+                                                            Maintenance
                                                         </span>
                                                     </div>
                                                 )}
@@ -109,7 +147,7 @@ export function DayDetailsSheet({
                                                     <Button
                                                         variant="ghost"
                                                         size="icon"
-                                                        className="text-muted-foreground hover:text-destructive -mt-2 -mr-2 h-8 w-8 opacity-0 transition-opacity group-hover:opacity-100"
+                                                        className="text-muted-foreground hover:text-destructive -mt-2 -mr-2 h-8 w-8 opacity-100 transition-opacity group-hover:opacity-100 sm:opacity-0"
                                                         onClick={() =>
                                                             handleRequestDelete(
                                                                 event.id,

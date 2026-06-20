@@ -21,7 +21,9 @@ import { EnrollmentRequestsList } from './_components/enrollment-requests-list';
  */
 export default function SupportEnrollmentRequestsPage() {
     const { institutionId, isLoading: isScopeLoading } = useAcademicScope();
-    const [selectedInstitutionId, setSelectedInstitutionId] = useState<string | undefined>(undefined);
+    const [selectedInstitutionId, setSelectedInstitutionId] = useState<string | undefined>(
+        undefined,
+    );
     const [hasInitializedScope, setHasInitializedScope] = useState(false);
 
     useEffect(() => {

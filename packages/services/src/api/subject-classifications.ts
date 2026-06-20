@@ -1,6 +1,7 @@
 import type { SubjectClassificationFormValues } from '@sentinel/shared/schema';
 import type { SubjectClassification } from '@sentinel/shared/types';
 import type { ApiClientType } from '../api-client';
+import type { PaginatedApiResponse } from './pagination';
 
 interface ApiSubjectClassification {
     id: string;
@@ -33,6 +34,12 @@ interface ApiSubjectClassification {
 interface ApiResponse<T> {
     message: string;
     data: T;
+    pagination?: {
+        page: number;
+        limit: number;
+        total: number;
+        hasMore: boolean;
+    };
 }
 
 function mapSubjectClassification(
@@ -67,7 +74,9 @@ export async function getSubjectClassifications(
     apiClient: ApiClientType,
     search?: string,
     institutionId?: string,
-): Promise<SubjectClassification[]> {
+    page?: number,
+    limit?: number,
+): Promise<PaginatedApiResponse<SubjectClassification>> {
     const params = new URLSearchParams();
 
     if (search) {
@@ -78,11 +87,22 @@ export async function getSubjectClassifications(
         params.set('institutionId', institutionId);
     }
 
+    if (page !== undefined) {
+        params.set('page', String(page));
+    }
+
+    if (limit !== undefined) {
+        params.set('limit', String(limit));
+    }
+
     const url = params.size
         ? `/subjects/classifications?${params.toString()}`
         : '/subjects/classifications';
     const response: ApiResponse<ApiSubjectClassification[]> = await apiClient(url);
-    return response.data.map(mapSubjectClassification);
+    return {
+        items: response.data.map(mapSubjectClassification),
+        pagination: response.pagination,
+    };
 }
 
 export async function getSubjectClassification(

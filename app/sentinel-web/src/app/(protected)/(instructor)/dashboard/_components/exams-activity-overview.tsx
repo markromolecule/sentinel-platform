@@ -63,7 +63,12 @@ export function ExamsActivityOverview({ exams }: ExamsActivityOverviewProps) {
                 <h2 className="text-foreground text-lg font-semibold tracking-tight">
                     Exams Activity
                 </h2>
-                <Button asChild variant="ghost" size="sm" className="text-[#323d8f] hover:bg-[#323d8f]/5">
+                <Button
+                    asChild
+                    variant="ghost"
+                    size="sm"
+                    className="text-[#323d8f] hover:bg-[#323d8f]/5"
+                >
                     <Link href="/exams">
                         View All
                         <ArrowRight className="ml-1 h-4 w-4" />
@@ -71,11 +76,11 @@ export function ExamsActivityOverview({ exams }: ExamsActivityOverviewProps) {
                 </Button>
             </div>
 
-            <div className="divide-y divide-border/30 rounded-2xl border border-border/40 bg-background/50 backdrop-blur-sm shadow-sm overflow-hidden">
+            <div className="divide-border/30 border-border/40 bg-background/50 divide-y overflow-hidden rounded-2xl border shadow-sm backdrop-blur-sm">
                 {exams.map((exam) => (
                     <div
                         key={exam.exam_id}
-                        className="group flex flex-col justify-between gap-4 p-4 transition-all duration-300 hover:bg-muted/30 sm:flex-row sm:items-center"
+                        className="group hover:bg-muted/30 flex flex-col justify-between gap-4 p-4 transition-all duration-300 sm:flex-row sm:items-center"
                     >
                         <div className="space-y-2">
                             {/* Exam details */}
@@ -84,14 +89,15 @@ export function ExamsActivityOverview({ exams }: ExamsActivityOverviewProps) {
                                     {exam.title}
                                 </h3>
                                 <p className="text-muted-foreground text-xs">
-                                    {exam.subject_title || 'No subject'} ({exam.subject_code || 'N/A'})
+                                    {exam.subject_title || 'No subject'} (
+                                    {exam.subject_code || 'N/A'})
                                 </p>
                             </div>
 
                             {/* Scheduling, duration info */}
-                            <div className="flex flex-wrap gap-x-4 gap-y-1 text-muted-foreground text-xs">
+                            <div className="text-muted-foreground flex flex-wrap gap-x-4 gap-y-1 text-xs">
                                 <span className="flex items-center gap-1.5">
-                                    <Calendar className="h-3.5 w-3.5 text-muted-foreground/75" />
+                                    <Calendar className="text-muted-foreground/75 h-3.5 w-3.5" />
                                     {formatDate(exam.scheduled_date)}
                                 </span>
                                 <span>•</span>
@@ -106,7 +112,7 @@ export function ExamsActivityOverview({ exams }: ExamsActivityOverviewProps) {
                         </div>
 
                         {/* Status, stats and quick action button */}
-                        <div className="flex items-center flex-wrap gap-3 sm:justify-end">
+                        <div className="flex flex-wrap items-center gap-3 sm:justify-end">
                             {/* Status badge */}
                             <span
                                 className={`rounded-full border px-2 py-0.5 text-xs font-semibold tracking-tight ${getStatusStyles(
@@ -117,14 +123,14 @@ export function ExamsActivityOverview({ exams }: ExamsActivityOverviewProps) {
                             </span>
 
                             {/* Student Attempts Count */}
-                            <div className="flex items-center gap-1.5 border border-border/20 bg-background rounded-full px-2.5 py-0.5 text-xs font-medium text-muted-foreground shadow-sm">
-                                <Users2 className="h-3.5 w-3.5 text-muted-foreground/70" />
+                            <div className="border-border/20 bg-background text-muted-foreground flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-medium shadow-sm">
+                                <Users2 className="text-muted-foreground/70 h-3.5 w-3.5" />
                                 <span>{exam.attempts_count} attempts</span>
                             </div>
 
                             {/* Flagged Incidents Count */}
                             <div
-                                className={`flex items-center gap-1.5 border rounded-full px-2.5 py-0.5 text-xs font-semibold shadow-sm ${getIncidentBadgeStyles(
+                                className={`flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-semibold shadow-sm ${getIncidentBadgeStyles(
                                     exam.incidents_count,
                                 )}`}
                             >
@@ -142,8 +148,10 @@ export function ExamsActivityOverview({ exams }: ExamsActivityOverviewProps) {
                 {exams.length === 0 && (
                     <div className="flex flex-col items-center justify-center py-12 text-center">
                         <p className="text-muted-foreground text-sm font-medium">No exams found</p>
-                        <p className="text-muted-foreground text-xs mt-1">Create an exam to get started</p>
-                        <Button asChild className="mt-4 bg-[#323d8f] hover:bg-[#323d8f]/90 h-9">
+                        <p className="text-muted-foreground mt-1 text-xs">
+                            Create an exam to get started
+                        </p>
+                        <Button asChild className="mt-4 h-9 bg-[#323d8f] hover:bg-[#323d8f]/90">
                             <Link href="/exams">Create Exam</Link>
                         </Button>
                     </div>

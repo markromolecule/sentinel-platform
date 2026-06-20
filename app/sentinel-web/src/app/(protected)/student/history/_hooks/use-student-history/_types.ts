@@ -10,4 +10,7 @@ export interface UseStudentHistoryReturn {
     groupedHistory: DateGroup<ExamHistory>[];
     hasItems: boolean;
     isLoading: boolean;
+    fetchNextPage: () => void;
+    hasNextPage: boolean;
+    isFetchingNextPage: boolean;
 }

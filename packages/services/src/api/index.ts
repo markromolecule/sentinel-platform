@@ -8,6 +8,7 @@ export * from './classrooms';
 export * from './subjects';
 export * from './subject-classifications';
 export * from './subject-offerings';
+export * from './pagination';
 export * from './exams';
 export * from './history';
 export * from './grading';

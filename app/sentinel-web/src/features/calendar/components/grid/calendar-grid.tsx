@@ -63,14 +63,35 @@ export function CalendarGrid({
                                     </div>
 
                                     <div className="space-y-1">
-                                        {dayEvents.slice(0, 3).map((event) => (
-                                            <div
-                                                key={event.id}
-                                                className="bg-primary/10 text-primary border-primary/20 truncate rounded border px-1.5 py-0.5 text-[10px] font-medium"
-                                            >
-                                                {event.title}
-                                            </div>
-                                        ))}
+                                        {dayEvents.slice(0, 3).map((event) => {
+                                            const getEventStyles = (type: string) => {
+                                                switch (type) {
+                                                    case 'exam':
+                                                        return 'bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-500/20';
+                                                    case 'note':
+                                                        return 'bg-blue-500/10 text-blue-700 dark:text-blue-400 border-blue-500/20';
+                                                    case 'holiday':
+                                                        return 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-500/20';
+                                                    case 'announcement':
+                                                        return 'bg-purple-500/10 text-purple-700 dark:text-purple-400 border-purple-500/20';
+                                                    case 'maintenance':
+                                                        return 'bg-rose-500/10 text-rose-700 dark:text-rose-400 border-rose-500/20';
+                                                    default:
+                                                        return 'bg-primary/10 text-primary border-primary/20';
+                                                }
+                                            };
+                                            return (
+                                                <div
+                                                    key={event.id}
+                                                    className={cn(
+                                                        'truncate rounded border px-1.5 py-0.5 text-[10px] font-medium transition-all',
+                                                        getEventStyles(event.type),
+                                                    )}
+                                                >
+                                                    {event.title}
+                                                </div>
+                                            );
+                                        })}
                                         {dayEvents.length > 3 && (
                                             <div className="text-muted-foreground pl-1 text-[10px]">
                                                 +{dayEvents.length - 3} more

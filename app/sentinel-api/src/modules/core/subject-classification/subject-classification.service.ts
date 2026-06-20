@@ -29,6 +29,41 @@ import {
 } from '../inheritance/inheritance-resolver.helper';
 import { ActivityNotificationService } from '../../general/notification/services/activity-notification.service';
 
+type PaginationMetadata = {
+    page: number;
+    limit: number;
+    total: number;
+    hasMore: boolean;
+};
+
+type PaginatedResult<T> = {
+    items: T[];
+    pagination: PaginationMetadata;
+};
+
+function paginateItems<T>(
+    items: T[],
+    page?: number,
+    limit?: number,
+): T[] | PaginatedResult<T> {
+    if (page === undefined || limit === undefined) {
+        return items;
+    }
+
+    const offset = (page - 1) * limit;
+    const paginatedItems = items.slice(offset, offset + limit);
+
+    return {
+        items: paginatedItems,
+        pagination: {
+            page,
+            limit,
+            total: items.length,
+            hasMore: offset + paginatedItems.length < items.length,
+        },
+    };
+}
+
 export class SubjectClassificationService {
     static duplicateCode = DUPLICATE_SUBJECT_CLASSIFICATION_ERROR;
     static invalidPayloadCode = INVALID_SUBJECT_CLASSIFICATION_PAYLOAD;
@@ -60,6 +95,8 @@ export class SubjectClassificationService {
         dbClient: DbClient,
         institutionId?: string,
         search?: string,
+        page?: number,
+        limit?: number,
     ) {
         const supportsTables = await supportsSubjectClassificationTables(dbClient);
 
@@ -82,7 +119,7 @@ export class SubjectClassificationService {
                     ),
                 );
 
-                return branchScopedRecords
+                const records = branchScopedRecords
                     .flatMap((records) =>
                         decorateWithOriginMetadata(records, {
                             idKey: 'subject_classification_id',
@@ -93,6 +130,8 @@ export class SubjectClassificationService {
                         String(left.name ?? '').localeCompare(String(right.name ?? '')),
                     )
                     .map(mapClassificationRecord);
+
+                return paginateItems(records, page, limit);
             }
 
             const records = await loadEffectiveRows<any>({
@@ -108,13 +147,13 @@ export class SubjectClassificationService {
                     }),
             });
 
-            return records.map(mapClassificationRecord);
+            return paginateItems(records.map(mapClassificationRecord), page, limit);
         } catch (error) {
             if (!isMissingSubjectOfferingColumnError(error)) {
                 throw error;
             }
 
-            return [];
+            return paginateItems([], page, limit);
         }
     }
 

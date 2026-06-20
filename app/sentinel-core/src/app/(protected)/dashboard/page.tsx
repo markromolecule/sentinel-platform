@@ -97,39 +97,39 @@ export default function DashboardPage() {
 
     const kpiCards = isSuperadmin
         ? [
-            {
-                id: 'students',
-                label: 'Students',
-                value: students.filter((s) => s.departmentId === assignedDepartmentId).length,
-                description: 'Total students in department',
-            },
-            {
-                id: 'classrooms',
-                label: 'Classrooms',
-                value: classrooms.filter((c) => c.departmentId === assignedDepartmentId).length,
-                description: 'Active classrooms in department',
-            },
-            {
-                id: 'sections',
-                label: 'Sections',
-                value: sections.filter((s) => s.departmentId === assignedDepartmentId).length,
-                description: 'Class sections in department',
-            },
-            {
-                id: 'programs',
-                label: 'Programs',
-                value: courses.filter((c) => c.departmentId === assignedDepartmentId).length,
-                description: 'Academic programs in department',
-            },
-            {
-                id: 'whitelist',
-                label: 'Whitelist Accounts',
-                value: whitelist.filter((w) => w.departmentId === assignedDepartmentId).length,
-                description: 'Total whitelisted students in department',
-            },
-        ]
+              {
+                  id: 'students',
+                  label: 'Students',
+                  value: students.filter((s) => s.departmentId === assignedDepartmentId).length,
+                  description: 'Total students in department',
+              },
+              {
+                  id: 'classrooms',
+                  label: 'Classrooms',
+                  value: classrooms.filter((c) => c.departmentId === assignedDepartmentId).length,
+                  description: 'Active classrooms in department',
+              },
+              {
+                  id: 'sections',
+                  label: 'Sections',
+                  value: sections.filter((s) => s.departmentId === assignedDepartmentId).length,
+                  description: 'Class sections in department',
+              },
+              {
+                  id: 'programs',
+                  label: 'Programs',
+                  value: courses.filter((c) => c.departmentId === assignedDepartmentId).length,
+                  description: 'Academic programs in department',
+              },
+              {
+                  id: 'whitelist',
+                  label: 'Whitelist Accounts',
+                  value: whitelist.filter((w) => w.departmentId === assignedDepartmentId).length,
+                  description: 'Total whitelisted students in department',
+              },
+          ]
         : isAdmin
-            ? [
+          ? [
                 {
                     id: 'students',
                     label: 'Students',
@@ -149,8 +149,7 @@ export default function DashboardPage() {
                     description: 'Total whitelisted students in program',
                 },
             ]
-            : [];
-
+          : [];
 
     return (
         <DashboardShell>

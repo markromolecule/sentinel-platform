@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { useExamHistoryQuery, useExamsQuery } from '@sentinel/hooks';
+import { useInfiniteExamHistoryQuery, useExamsQuery } from '@sentinel/hooks';
 import { useStableValue } from '@sentinel/hooks';
 import { HistoryFilterStatus, ExamHistory } from '@sentinel/shared/types';
 import { groupItemsByDate } from '@/app/(protected)/student/_lib/student-exam-listing';
@@ -29,8 +29,28 @@ export function useStudentHistory(): UseStudentHistoryReturn {
         }
     };
 
-    const { data: history = [], isLoading: isHistoryLoading } = useExamHistoryQuery();
+    const {
+        data: historyData,
+        isLoading: isHistoryLoading,
+        fetchNextPage,
+        hasNextPage = false,
+        isFetchingNextPage = false,
+    } = useInfiniteExamHistoryQuery(
+        statusFilter !== 'available'
+            ? {
+                  status: statusFilter,
+                  search: searchQuery || undefined,
+                  limit: 10,
+              }
+            : undefined,
+    );
+
     const { data: exams = [], isLoading: isExamsLoading } = useExamsQuery();
+
+    const history = useMemo(() => {
+        if (!historyData) return [];
+        return historyData.pages.flatMap((page) => page.items);
+    }, [historyData]);
 
     const filteredHistory = useStableValue(() => {
         if (statusFilter === 'available') {
@@ -40,7 +60,10 @@ export function useStudentHistory(): UseStudentHistoryReturn {
                         exam.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
                         exam.subject.toLowerCase().includes(searchQuery.toLowerCase());
                     return (
-                        matchesSearch && (exam.status === 'upcoming' || exam.status === 'available')
+                        matchesSearch &&
+                        (exam.status === 'upcoming' ||
+                            exam.status === 'available' ||
+                            exam.status === 'in-progress')
                     );
                 })
                 .map((exam) => ({
@@ -56,13 +79,7 @@ export function useStudentHistory(): UseStudentHistoryReturn {
                 }));
         }
 
-        return history.filter((item) => {
-            const matchesSearch =
-                item.examTitle.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                item.subject.toLowerCase().includes(searchQuery.toLowerCase());
-            const matchesStatus = item.status === statusFilter;
-            return matchesSearch && matchesStatus;
-        });
+        return history;
     }, [history, exams, searchQuery, statusFilter]);
 
     const groupedHistory = useStableValue(() => {
@@ -84,5 +101,8 @@ export function useStudentHistory(): UseStudentHistoryReturn {
         groupedHistory,
         hasItems: filteredHistory.length > 0,
         isLoading: isHistoryLoading || isExamsLoading,
+        fetchNextPage,
+        hasNextPage,
+        isFetchingNextPage,
     };
 }

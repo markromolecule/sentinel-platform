@@ -30,6 +30,7 @@ export default function StudentCalendarPage() {
     const [noteDesc, setNoteDesc] = useState('');
     const [startTime, setStartTime] = useState('');
     const [endTime, setEndTime] = useState('');
+    const [timeError, setTimeError] = useState('');
 
     // Calendar state helper hook
     const {
@@ -104,11 +105,26 @@ export default function StudentCalendarPage() {
         setNoteDesc('');
         setStartTime('');
         setEndTime('');
+        setTimeError('');
         setIsAddNoteOpen(true);
     };
 
     const handleSaveNote = () => {
         if (!selectedDate || !noteTitle) return;
+
+        if (startTime && endTime) {
+            const [startH, startM] = startTime.split(':').map(Number);
+            const [endH, endM] = endTime.split(':').map(Number);
+            const startVal = startH * 60 + startM;
+            const endVal = endH * 60 + endM;
+
+            if (endVal < startVal) {
+                setTimeError('End time cannot be before start time.');
+                return;
+            }
+        }
+
+        setTimeError('');
 
         createNote({
             title: noteTitle,
@@ -124,7 +140,7 @@ export default function StudentCalendarPage() {
     };
 
     return (
-        <div className="mx-auto max-w-[1600px] space-y-6 pb-24 md:pb-20" data-lenis-prevent>
+        <div className="animate-in fade-in slide-in-from-bottom-4 flex flex-col gap-5 py-5 duration-500" data-lenis-prevent>
             {/* Header */}
             <div className="flex flex-col justify-between gap-4 py-4 md:flex-row md:items-center">
                 <div>
@@ -191,9 +207,9 @@ export default function StudentCalendarPage() {
                     </DialogHeader>
 
                     <div className="grid gap-4 py-4">
-                        {isCreateError && (
+                        {(isCreateError || timeError) && (
                             <div className="bg-destructive/10 border-destructive/20 text-destructive animate-shake rounded-lg border p-3 text-xs font-semibold">
-                                {createError?.message ||
+                                {timeError || createError?.message ||
                                     'Failed to save note. Please check your inputs.'}
                             </div>
                         )}

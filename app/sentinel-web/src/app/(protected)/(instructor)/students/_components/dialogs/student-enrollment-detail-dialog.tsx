@@ -110,11 +110,11 @@ export function StudentEnrollmentDetailDialog({
                                         <Button
                                             variant="ghost"
                                             size="sm"
-                                            className="h-8 text-destructive hover:bg-destructive/10 hover:text-destructive"
+                                            className="text-destructive hover:bg-destructive/10 hover:text-destructive h-8"
                                             onClick={() => {
                                                 if (
                                                     window.confirm(
-                                                        `Are you sure you want to remove ${student.firstName} ${student.lastName} from the subject "${enrollment.subject}"?`
+                                                        `Are you sure you want to remove ${student.firstName} ${student.lastName} from the subject "${enrollment.subject}"?`,
                                                     )
                                                 ) {
                                                     unenroll(enrollment.id);

@@ -54,9 +54,11 @@ export function QuickAccess() {
                         <Link
                             key={action.title}
                             href={action.href}
-                            className={`flex items-center gap-4 rounded-xl border border-border/40 bg-background/50 p-4 transition-all duration-300 ${action.hoverBg} hover:scale-[1.01] hover:border-border/80`}
+                            className={`border-border/40 bg-background/50 flex items-center gap-4 rounded-xl border p-4 transition-all duration-300 ${action.hoverBg} hover:border-border/80 hover:scale-[1.01]`}
                         >
-                            <div className={`rounded-xl bg-background p-3 shadow-sm border border-border/20 ${action.color}`}>
+                            <div
+                                className={`bg-background border-border/20 rounded-xl border p-3 shadow-sm ${action.color}`}
+                            >
                                 <Icon className="h-5 w-5" />
                             </div>
                             <div className="text-left">

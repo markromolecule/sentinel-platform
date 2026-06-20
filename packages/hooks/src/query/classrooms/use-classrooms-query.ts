@@ -53,4 +53,3 @@ export function useClassroomsQuery(args?: string | UseClassroomsQueryArgs) {
         enabled: isAuthenticatedQueryEnabled && (normalizedArgs.enabled ?? true),
     });
 }
-

@@ -25,10 +25,11 @@ import {
 describe('assessment access', () => {
     const mockDb = {} as DbClient;
 
-    const createMockContext = (permissions: Set<string>) =>
+    const createMockContext = (permissions: Set<string>, role?: string) =>
         ({
             get: (key: string) => {
                 if (key === 'activePermissionKeys') return permissions;
+                if (key === 'role') return role || null;
                 return null;
             },
         }) as any;
@@ -112,6 +113,11 @@ describe('assessment access', () => {
     describe('dynamic RBAC assertAssessmentReadAccess', () => {
         it('allows access if assessments:view permission is active', () => {
             const ctx = createMockContext(new Set(['assessments:view']));
+            expect(() => assertAssessmentReadAccess(ctx)).not.toThrow();
+        });
+
+        it('allows access if role is student, bypassing missing assessments:view permission', () => {
+            const ctx = createMockContext(new Set(['something:else']), 'student');
             expect(() => assertAssessmentReadAccess(ctx)).not.toThrow();
         });
 
