@@ -5,6 +5,7 @@ import {
     useActivePermissions,
     useDebounce,
     useSubjectClassificationsQuery,
+    useServerPagination,
 } from '@sentinel/hooks';
 import { Button, PermissionDeniedState } from '@sentinel/ui';
 import { Plus } from 'lucide-react';
@@ -16,6 +17,7 @@ import {
 import { useSubjectClassificationsManagement } from '../_hooks/use-subject-classifications-management';
 import { useAcademicScope } from '@/hooks/use-academic-scope';
 import { SubjectPageShell } from '../_components/layout';
+import { useState } from 'react';
 
 /**
  * SubjectClassificationPage renders the subject classifications page for sentinel-core,
@@ -38,13 +40,28 @@ export default function SubjectClassificationPage() {
     } = useSubjectClassificationsManagement();
 
     const debouncedSearch = useDebounce(searchTerm, 400);
+    const { pagination, setPagination } = useServerPagination([debouncedSearch, institutionId]);
 
     const {
-        data: classifications = [],
+        data: classificationsResponse,
         isLoading,
         isError,
         error,
-    } = useSubjectClassificationsQuery(debouncedSearch || undefined, institutionId || undefined);
+    } = useSubjectClassificationsQuery(
+        debouncedSearch || undefined,
+        institutionId || undefined,
+        pagination.pageIndex + 1,
+        pagination.pageSize,
+    );
+    const classifications = Array.isArray(classificationsResponse)
+        ? classificationsResponse
+        : classificationsResponse?.items ?? [];
+    const totalCount = Array.isArray(classificationsResponse)
+        ? classificationsResponse.length
+        : classificationsResponse?.pagination?.total ?? 0;
+    const pageCount = Array.isArray(classificationsResponse)
+        ? 1
+        : classificationsResponse?.pagination?.totalPages ?? 1;
 
     const isViewDenied = isPermissionDeniedError(error, 'subjects:view');
     const canCreateClassification = hasPermission('subjects:create');
@@ -87,6 +104,10 @@ export default function SubjectClassificationPage() {
                         onCreate={handleCreateOpen}
                         canOffer={canOfferSubject}
                         canDelete={canDeleteClassification}
+                        pagination={pagination}
+                        onPaginationChange={setPagination}
+                        pageCount={pageCount}
+                        totalCount={totalCount}
                     />
 
                     {isError ? (

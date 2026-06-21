@@ -5,6 +5,7 @@ import {
     useDepartmentsQuery,
     isPermissionDeniedError,
     useActivePermissions,
+    useServerPagination,
 } from '@sentinel/hooks';
 import { useState } from 'react';
 import { AddDepartmentDialog, BulkCreateDepartmentsDialog, DepartmentsList } from './_components';
@@ -15,21 +16,34 @@ export default function CoreDepartmentsPage() {
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedInstitutionId, setSelectedInstitutionId] = useState<string | undefined>('');
     const debouncedSearch = useDebounce(searchTerm, 500);
+    const { pagination, setPagination } = useServerPagination([debouncedSearch, selectedInstitutionId]);
 
     const { hasPermission } = useActivePermissions();
     const canImportDepartments = hasPermission('departments:import');
     const canCreateDepartment = hasPermission('departments:create');
 
     const {
-        data: departments = [],
+        data: departmentsResponse,
         isLoading,
         isError,
         error,
     } = useDepartmentsQuery({
         search: debouncedSearch,
         institutionId: selectedInstitutionId || undefined,
+        page: pagination.pageIndex + 1,
+        limit: pagination.pageSize,
     });
     const isViewDenied = isPermissionDeniedError(error, 'departments:view');
+    const departments = Array.isArray(departmentsResponse)
+        ? departmentsResponse
+        : departmentsResponse?.items ?? [];
+    const totalCount = Array.isArray(departmentsResponse)
+        ? departmentsResponse.length
+        : departmentsResponse?.pagination?.total ?? 0;
+    const pageCount = Array.isArray(departmentsResponse)
+        ? 1
+        : departmentsResponse?.pagination?.totalPages ?? 1;
+
 
     const actions = !isViewDenied ? (
         <div className="flex items-center gap-2">
@@ -59,6 +73,11 @@ export default function CoreDepartmentsPage() {
                         isLoading={isLoading}
                         selectedInstitutionId={selectedInstitutionId}
                         onInstitutionChange={setSelectedInstitutionId}
+                        pagination={pagination}
+                        onPaginationChange={setPagination}
+                        pageCount={pageCount}
+                        totalCount={totalCount}
+                        manualPagination
                     />
                     {isLoading && departments.length === 0 && (
                         <div className="bg-background/80 absolute inset-x-0 top-[60px] bottom-0 z-10 flex items-center justify-center rounded-md">

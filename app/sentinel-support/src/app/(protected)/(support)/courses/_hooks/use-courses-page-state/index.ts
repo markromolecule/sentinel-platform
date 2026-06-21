@@ -7,6 +7,7 @@ import {
     useDeleteCoursesMutation,
     useDepartmentsQuery,
     useInstitutionsQuery,
+    useServerPagination,
 } from '@sentinel/hooks';
 import { Course } from '@sentinel/shared/types';
 import { useMemo, useState } from 'react';
@@ -24,6 +25,7 @@ export function useCoursesPageState() {
     const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
 
     const debouncedSearch = useDebounce(searchTerm, 500);
+    const { pagination, setPagination } = useServerPagination([debouncedSearch]);
 
     const { data: institutions = [] } = useInstitutionsQuery();
     const selectedInstitution = institutions.find(
@@ -32,14 +34,20 @@ export function useCoursesPageState() {
     const parentInstitutionId = selectedInstitution?.parentInstitutionId ?? '';
 
     const {
-        data: courses = [],
+        data: coursesResponse,
         isLoading,
         isError,
         error,
     } = useCoursesQuery({
         search: debouncedSearch,
         institutionId: selectedInstitutionId || undefined,
+        page: pagination.pageIndex + 1,
+        limit: pagination.pageSize,
     });
+
+    const courses = coursesResponse?.items ?? [];
+    const pageCount = coursesResponse?.pagination?.totalPages ?? 1;
+    const totalCount = coursesResponse?.pagination?.total ?? 0;
 
     const { data: parentCourses = [] } = useCoursesQuery({
         search: '',
@@ -139,5 +147,9 @@ export function useCoursesPageState() {
         deleteCoursesMutation,
         selectedIds,
         handleBulkDelete,
+        pagination,
+        setPagination,
+        pageCount,
+        totalCount,
     };
 }

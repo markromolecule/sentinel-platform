@@ -1,6 +1,6 @@
 'use client';
 
-import { ColumnDef } from '@tanstack/react-table';
+import { ColumnDef, type PaginationState } from '@tanstack/react-table';
 import { DataTable } from '@sentinel/ui';
 import { Button } from '@sentinel/ui';
 import { StatusBadge } from '@/components/common/status-badge';
@@ -10,6 +10,9 @@ import { AnalyticsReport } from '@sentinel/services';
 
 export interface AnalyticsReportsListProps {
     reports: AnalyticsReport[];
+    pagination?: PaginationState;
+    onPaginationChange?: (pagination: PaginationState) => void;
+    pageCount?: number;
 }
 
 const columns: ColumnDef<AnalyticsReport>[] = [
@@ -87,7 +90,12 @@ const columns: ColumnDef<AnalyticsReport>[] = [
     },
 ];
 
-export function AnalyticsReportsList({ reports }: AnalyticsReportsListProps) {
+export function AnalyticsReportsList({
+    reports,
+    pagination,
+    onPaginationChange,
+    pageCount,
+}: AnalyticsReportsListProps) {
     const facets = [
         {
             columnKey: 'type',
@@ -111,7 +119,16 @@ export function AnalyticsReportsList({ reports }: AnalyticsReportsListProps) {
 
     return (
         <section className="space-y-4">
-            <DataTable columns={columns} data={reports} searchKey="title" facets={facets} />
+            <DataTable
+                columns={columns}
+                data={reports}
+                searchKey="title"
+                facets={facets}
+                pagination={pagination}
+                onPaginationChange={onPaginationChange}
+                pageCount={pageCount}
+                manualPagination={!!pagination}
+            />
         </section>
     );
 }

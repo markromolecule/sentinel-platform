@@ -1,19 +1,15 @@
 'use client';
 
 import { useState } from 'react';
-import { useAuthLogsQuery } from '@sentinel/hooks';
+import { useAuthLogsQuery, useServerPagination } from '@sentinel/hooks';
 import { AuditLogTable } from './audit-log-table';
-import { PaginationState } from '@tanstack/react-table';
 
 /**
  * AuthLogTable displays a paginated table of system authentication logs.
  * It manages its own state and fetches data using the useAuthLogsQuery hook.
  */
 export function AuthLogTable() {
-    const [pagination, setPagination] = useState<PaginationState>({
-        pageIndex: 0,
-        pageSize: 10,
-    });
+    const { pagination, setPagination } = useServerPagination();
 
     const { data, isLoading, isError, error } = useAuthLogsQuery({
         params: {

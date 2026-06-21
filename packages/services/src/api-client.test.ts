@@ -1,0 +1,73 @@
+import { afterEach, describe, expect, it, vi } from 'vitest';
+import { createApiClient } from './api-client';
+
+describe('createApiClient', () => {
+    afterEach(() => {
+        vi.restoreAllMocks();
+    });
+
+    it('rewrites limit query parameters to pageSize before fetching', async () => {
+        const fetchMock = vi.fn().mockResolvedValue({
+            ok: true,
+            status: 200,
+            statusText: 'OK',
+            headers: {
+                get: () => 'application/json',
+            },
+            json: async () => ({ data: [] }),
+        });
+
+        vi.stubGlobal('fetch', fetchMock);
+
+        const apiClient = createApiClient({ baseUrl: 'https://example.test' });
+
+        await apiClient('/rooms?search=lab&limit=25&page=2');
+
+        expect(fetchMock).toHaveBeenCalledWith(
+            'https://example.test/rooms?search=lab&page=2&pageSize=25',
+            expect.objectContaining({
+                headers: expect.any(Headers),
+            }),
+        );
+    });
+
+    it('adds a limit alias when a JSON response includes pagination.pageSize', async () => {
+        const jsonResponse = {
+            items: [{ id: 'room-1' }],
+            pagination: {
+                page: 2,
+                pageSize: 25,
+                total: 100,
+                totalPages: 4,
+                hasMore: true,
+            },
+        };
+
+        const fetchMock = vi.fn().mockResolvedValue({
+            ok: true,
+            status: 200,
+            statusText: 'OK',
+            headers: {
+                get: () => 'application/json; charset=utf-8',
+            },
+            json: async () => jsonResponse,
+        });
+
+        vi.stubGlobal('fetch', fetchMock);
+
+        const apiClient = createApiClient();
+        const response = await apiClient('/rooms?page=2&pageSize=25');
+
+        expect(response).toEqual({
+            items: [{ id: 'room-1' }],
+            pagination: {
+                page: 2,
+                pageSize: 25,
+                limit: 25,
+                total: 100,
+                totalPages: 4,
+                hasMore: true,
+            },
+        });
+    });
+});

@@ -1,6 +1,7 @@
 import { useCoursesQuery, useDepartmentsQuery } from '@sentinel/hooks';
 import { type Subject } from '@sentinel/shared/types';
 import { type ColumnDef } from '@tanstack/react-table';
+import { type PaginationState } from '@tanstack/react-table';
 import { columns as defaultColumns } from '@/app/(protected)/(instructor)/subjects/_components/tables/columns';
 import { SubjectsTable } from '@/app/(protected)/(instructor)/subjects/_components/tables/subjects-table';
 
@@ -9,6 +10,11 @@ type SubjectsListProps = {
     columns?: () => ColumnDef<Subject>[];
     searchTerm?: string;
     onSearchChange?: (value: string) => void;
+    pagination?: PaginationState;
+    onPaginationChange?: (pagination: PaginationState) => void;
+    pageCount?: number;
+    totalCount?: number;
+    manualPagination?: boolean;
 };
 
 export function SubjectsList({
@@ -16,6 +22,11 @@ export function SubjectsList({
     columns = defaultColumns,
     searchTerm,
     onSearchChange,
+    pagination,
+    onPaginationChange,
+    pageCount,
+    totalCount,
+    manualPagination = false,
 }: SubjectsListProps) {
     const { data: departments = [] } = useDepartmentsQuery();
     const { data: courses = [] } = useCoursesQuery();
@@ -50,6 +61,11 @@ export function SubjectsList({
             searchValue={searchTerm}
             onSearchChange={onSearchChange}
             facets={facets}
+            pagination={pagination}
+            onPaginationChange={onPaginationChange}
+            pageCount={pageCount}
+            totalCount={totalCount}
+            manualPagination={manualPagination}
         />
     );
 }

@@ -29,7 +29,7 @@ import { DepartmentsEmptyState } from './departments-empty-state';
 import { useState } from 'react';
 import { Trash2 } from 'lucide-react';
 import { useInstitutionFacet, useDataTableFilterSync } from '@/hooks';
-import { ColumnFiltersState } from '@tanstack/react-table';
+import { ColumnFiltersState, type PaginationState } from '@tanstack/react-table';
 
 // interface for the departments list
 interface DepartmentsListProps {
@@ -39,6 +39,11 @@ interface DepartmentsListProps {
     isLoading?: boolean;
     selectedInstitutionId?: string;
     onInstitutionChange?: (id: string | undefined) => void;
+    pagination?: PaginationState;
+    onPaginationChange?: (pagination: PaginationState) => void;
+    pageCount?: number;
+    totalCount?: number;
+    manualPagination?: boolean;
 }
 
 export function DepartmentsList({
@@ -48,6 +53,11 @@ export function DepartmentsList({
     isLoading = false,
     selectedInstitutionId,
     onInstitutionChange,
+    pagination,
+    onPaginationChange,
+    pageCount,
+    totalCount,
+    manualPagination,
 }: DepartmentsListProps) {
     const { data: institutions = [] } = useInstitutionsQuery();
     const [rowSelection, setRowSelection] = useState({});
@@ -129,6 +139,11 @@ export function DepartmentsList({
                 emptyContent={<DepartmentsEmptyState searchTerm={searchTerm} />}
                 rowSelection={rowSelection}
                 onRowSelectionChange={setRowSelection}
+                pagination={pagination}
+                onPaginationChange={onPaginationChange}
+                pageCount={pageCount}
+                totalCount={totalCount}
+                manualPagination={manualPagination}
                 toolbarActions={
                     selectedIds.length > 0 ? (
                         <Button

@@ -6,7 +6,10 @@ import {
     useDepartmentsQuery,
     useCoursesQuery,
     useSectionsQuery,
+    useServerPagination,
 } from '@sentinel/hooks';
+import { useState } from 'react';
+import { type PaginationState } from '@tanstack/react-table';
 import { PermissionDeniedState } from '@sentinel/ui';
 import { EnrollmentRequestsList } from '../_components/requests/enrollment-requests-list';
 import { SubjectPageShell } from '../_components/layout';
@@ -16,12 +19,16 @@ import { SubjectPageShell } from '../_components/layout';
  * wrapped in the SubjectPageShell layout.
  */
 export default function SharedEnrollmentRequestsPage() {
+    const { pagination, setPagination } = useServerPagination();
     const {
-        data: requests = [],
+        data: requestsResponse,
         isLoading,
         isError,
         error: requestsError,
-    } = useEnrollmentRequestsQuery();
+    } = useEnrollmentRequestsQuery({
+        page: pagination.pageIndex + 1,
+        limit: pagination.pageSize,
+    });
     const { data: departments = [], error: departmentsError } = useDepartmentsQuery();
     const { data: courses = [], error: coursesError } = useCoursesQuery();
     const { data: sections = [], error: sectionsError } = useSectionsQuery();
@@ -32,6 +39,15 @@ export default function SharedEnrollmentRequestsPage() {
         sectionsError,
     ]);
     const isViewDenied = Boolean(deniedError);
+    const requests = Array.isArray(requestsResponse)
+        ? requestsResponse
+        : requestsResponse?.items ?? [];
+    const totalCount = Array.isArray(requestsResponse)
+        ? requestsResponse.length
+        : requestsResponse?.pagination?.total ?? 0;
+    const pageCount = Array.isArray(requestsResponse)
+        ? 1
+        : requestsResponse?.pagination?.totalPages ?? 1;
 
     return (
         <SubjectPageShell
@@ -57,6 +73,11 @@ export default function SharedEnrollmentRequestsPage() {
                             courses={courses}
                             sections={sections}
                             isLoading={isLoading}
+                            pagination={pagination}
+                            onPaginationChange={setPagination}
+                            pageCount={pageCount}
+                            totalCount={totalCount}
+                            manualPagination
                         />
                     )}
                 </div>

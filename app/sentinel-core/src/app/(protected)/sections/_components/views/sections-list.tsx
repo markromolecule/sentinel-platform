@@ -27,6 +27,7 @@ import { columns } from '@/app/(protected)/sections/_components/tables/columns';
 import { SectionsEmptyState } from './sections-empty-state';
 import { buildSectionsFacets } from './sections-facets';
 import { useState } from 'react';
+import { type PaginationState } from '@tanstack/react-table';
 import { Trash2 } from 'lucide-react';
 
 interface SectionsListProps {
@@ -34,6 +35,11 @@ interface SectionsListProps {
     searchTerm?: string;
     onSearchChange?: (value: string) => void;
     isLoading?: boolean;
+    pagination?: PaginationState;
+    onPaginationChange?: (pagination: PaginationState) => void;
+    pageCount?: number;
+    totalCount?: number;
+    manualPagination?: boolean;
 }
 
 export function SectionsList({
@@ -41,6 +47,11 @@ export function SectionsList({
     searchTerm,
     onSearchChange,
     isLoading = false,
+    pagination,
+    onPaginationChange,
+    pageCount,
+    totalCount,
+    manualPagination = false,
 }: SectionsListProps) {
     const { data: departments = [] } = useDepartmentsQuery();
     const { data: courses = [] } = useCoursesQuery();
@@ -88,6 +99,11 @@ export function SectionsList({
                 searchPlaceholder="Search sections..."
                 facets={facets}
                 isLoading={isLoading}
+                pagination={pagination}
+                onPaginationChange={onPaginationChange}
+                pageCount={pageCount}
+                totalCount={totalCount}
+                manualPagination={manualPagination}
                 emptyContent={<SectionsEmptyState searchTerm={searchTerm} />}
                 rowSelection={rowSelection}
                 onRowSelectionChange={setRowSelection}

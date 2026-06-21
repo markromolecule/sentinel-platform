@@ -27,6 +27,62 @@ export class ApiError extends Error {
     }
 }
 
+function mapEndpointQueryParams(endpoint: string): string {
+    const queryStartIndex = endpoint.indexOf('?');
+
+    if (queryStartIndex === -1) {
+        return endpoint;
+    }
+
+    const pathname = endpoint.slice(0, queryStartIndex);
+    const searchParams = new URLSearchParams(endpoint.slice(queryStartIndex + 1));
+    const limit = searchParams.get('limit');
+
+    if (limit !== null) {
+        searchParams.delete('limit');
+        searchParams.set('pageSize', limit);
+    }
+
+    const queryString = searchParams.toString();
+    return queryString ? `${pathname}?${queryString}` : pathname;
+}
+
+function mapPaginationMetadata<T>(payload: T): T {
+    if (typeof payload !== 'object' || payload === null) {
+        return payload;
+    }
+
+    if (!('pagination' in payload)) {
+        return payload;
+    }
+
+    const pagination = (payload as { pagination?: unknown }).pagination;
+
+    if (
+        typeof pagination !== 'object' ||
+        pagination === null ||
+        !('pageSize' in pagination) ||
+        'limit' in pagination
+    ) {
+        return payload;
+    }
+
+    return {
+        ...(payload as Record<string, unknown>),
+        pagination: {
+            ...(pagination as Record<string, unknown>),
+            limit: (pagination as { pageSize: unknown }).pageSize,
+        },
+    } as T;
+}
+
+/**
+ * Creates a fetch wrapper that normalizes pagination query and response shapes.
+ *
+ * Request queries using `limit` are rewritten to `pageSize` so the backend can
+ * keep a single pagination contract, while JSON responses with `pagination.pageSize`
+ * gain a compatible `pagination.limit` property for frontend consumers.
+ */
 export const createApiClient = (defaultOptions: ApiClientOptions = {}) => {
     const {
         baseUrl: defaultBaseUrl,
@@ -49,7 +105,9 @@ export const createApiClient = (defaultOptions: ApiClientOptions = {}) => {
             }
         }
 
-        const response = await fetch(`${finalBaseUrl}${endpoint}`, {
+        const mappedEndpoint = mapEndpointQueryParams(endpoint);
+
+        const response = await fetch(`${finalBaseUrl}${mappedEndpoint}`, {
             ...defaultRequestOptions,
             ...requestOptions,
             headers,
@@ -91,7 +149,8 @@ export const createApiClient = (defaultOptions: ApiClientOptions = {}) => {
 
         const contentType = response.headers.get('content-type');
         if (contentType && contentType.includes('application/json')) {
-            return response.json();
+            const json = await response.json();
+            return mapPaginationMetadata(json);
         }
 
         return response.text();

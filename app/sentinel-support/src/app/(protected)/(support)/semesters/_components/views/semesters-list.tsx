@@ -23,6 +23,7 @@ import {
 import { columns } from '@/app/(protected)/(support)/semesters/_components/tables/columns';
 import { SemestersEmptyState } from '@/app/(protected)/(support)/semesters/_components/views/semesters-empty-state';
 import { SEMESTER_OPTIONS } from '@/app/(protected)/(support)/semesters/_components/dialogs/constants';
+import { type PaginationState } from '@tanstack/react-table';
 import { useState } from 'react';
 import { Trash2 } from 'lucide-react';
 
@@ -31,6 +32,11 @@ interface SemestersListProps {
     searchTerm?: string;
     onSearchChange?: (value: string) => void;
     isLoading?: boolean;
+    pagination?: PaginationState;
+    onPaginationChange?: (pagination: PaginationState) => void;
+    pageCount?: number;
+    totalCount?: number;
+    manualPagination?: boolean;
 }
 
 export function SemestersList({
@@ -38,6 +44,11 @@ export function SemestersList({
     searchTerm,
     onSearchChange,
     isLoading = false,
+    pagination,
+    onPaginationChange,
+    pageCount,
+    totalCount,
+    manualPagination,
 }: SemestersListProps) {
     const { data: institutions = [] } = useInstitutionsQuery();
     const [rowSelection, setRowSelection] = useState({});
@@ -121,6 +132,11 @@ export function SemestersList({
                 emptyContent={<SemestersEmptyState searchTerm={searchTerm} />}
                 rowSelection={rowSelection}
                 onRowSelectionChange={setRowSelection}
+                pagination={pagination}
+                onPaginationChange={onPaginationChange}
+                pageCount={pageCount}
+                totalCount={totalCount}
+                manualPagination={manualPagination}
                 toolbarActions={
                     selectedIds.length > 0 ? (
                         <Button

@@ -57,6 +57,10 @@ export function SectionsView() {
         createSectionMutation,
         updateSectionMutation,
         deleteSectionMutation,
+        pagination,
+        setPagination,
+        pageCount,
+        totalCount,
     } = useSectionsPageState();
 
     const [rowSelection, setRowSelection] = useState({});
@@ -168,6 +172,11 @@ export function SectionsView() {
                         isLoading={isLoading}
                         rowSelection={rowSelection}
                         onRowSelectionChange={setRowSelection}
+                        pagination={pagination}
+                        onPaginationChange={setPagination}
+                        pageCount={pageCount}
+                        totalCount={totalCount}
+                        manualPagination={true}
                         toolbarActions={
                             selectedIds.length > 0 ? (
                                 <Button

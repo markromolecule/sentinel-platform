@@ -107,8 +107,12 @@ function buildQuery(params: GetStudentWhitelistParams = {}) {
     const searchParams = new URLSearchParams();
 
     Object.entries(params).forEach(([key, value]) => {
-        if (value) {
-            searchParams.set(key, value);
+        if (value !== undefined && value !== null && value !== '') {
+            if (key === 'limit') {
+                searchParams.set('pageSize', String(value));
+            } else {
+                searchParams.set(key, String(value));
+            }
         }
     });
 
@@ -159,7 +163,18 @@ export async function getStudentWhitelist(
         `/student-whitelist${buildQuery(params)}`,
     );
     const items = response.data.map(mapStudentWhitelistRecord);
-    return response.pagination ? { items, pagination: response.pagination } : items;
+    if (response.pagination) {
+        return {
+            items,
+            pagination: {
+                page: response.pagination.page,
+                limit: (response.pagination as any).pageSize ?? response.pagination.limit ?? 20,
+                total: response.pagination.total,
+                hasMore: response.pagination.hasMore,
+            },
+        };
+    }
+    return items;
 }
 
 export async function createStudentWhitelist(

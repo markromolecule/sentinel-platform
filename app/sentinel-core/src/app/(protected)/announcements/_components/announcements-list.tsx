@@ -3,7 +3,7 @@
 import { DataTable, type DataTableFacet } from '@sentinel/ui';
 import { columns } from './columns';
 import { Announcement } from '@sentinel/services';
-import { ColumnFiltersState } from '@tanstack/react-table';
+import { ColumnFiltersState, type PaginationState } from '@tanstack/react-table';
 
 const announcementsFacets = [
     {
@@ -25,6 +25,9 @@ interface AnnouncementsListProps {
     onSearchChange?: (value: string) => void;
     columnFilters?: ColumnFiltersState;
     onColumnFiltersChange?: (filters: ColumnFiltersState) => void;
+    pagination: PaginationState;
+    onPaginationChange: (pagination: PaginationState) => void;
+    pageCount: number;
 }
 
 export function AnnouncementsList({
@@ -35,6 +38,9 @@ export function AnnouncementsList({
     onSearchChange,
     columnFilters,
     onColumnFiltersChange,
+    pagination,
+    onPaginationChange,
+    pageCount,
 }: AnnouncementsListProps) {
     return (
         <DataTable
@@ -48,6 +54,10 @@ export function AnnouncementsList({
             onColumnFiltersChange={onColumnFiltersChange}
             facets={announcementsFacets}
             meta={{ onEdit, onDelete }}
+            pagination={pagination}
+            onPaginationChange={onPaginationChange}
+            pageCount={pageCount}
+            manualPagination
         />
     );
 }

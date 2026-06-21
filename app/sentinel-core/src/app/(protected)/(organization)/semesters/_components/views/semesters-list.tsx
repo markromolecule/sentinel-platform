@@ -24,6 +24,7 @@ import { columns } from '../tables/columns';
 import { SemestersEmptyState } from './semesters-empty-state';
 import { SEMESTER_OPTIONS } from '../dialogs/constants';
 import { useState } from 'react';
+import { type PaginationState } from '@tanstack/react-table';
 import { Trash2 } from 'lucide-react';
 
 interface SemestersListProps {
@@ -31,6 +32,11 @@ interface SemestersListProps {
     searchTerm?: string;
     onSearchChange?: (value: string) => void;
     isLoading?: boolean;
+    pagination?: PaginationState;
+    onPaginationChange?: (pagination: PaginationState) => void;
+    pageCount?: number;
+    totalCount?: number;
+    manualPagination?: boolean;
 }
 
 export function SemestersList({
@@ -38,6 +44,11 @@ export function SemestersList({
     searchTerm,
     onSearchChange,
     isLoading = false,
+    pagination,
+    onPaginationChange,
+    pageCount,
+    totalCount,
+    manualPagination = false,
 }: SemestersListProps) {
     const { data: institutions = [] } = useInstitutionsQuery();
     const [rowSelection, setRowSelection] = useState({});
@@ -118,6 +129,11 @@ export function SemestersList({
                 onSearchChange={onSearchChange}
                 searchPlaceholder="Search institution, academic year, or semester..."
                 isLoading={isLoading}
+                pagination={pagination}
+                onPaginationChange={onPaginationChange}
+                pageCount={pageCount}
+                totalCount={totalCount}
+                manualPagination={manualPagination}
                 emptyContent={<SemestersEmptyState searchTerm={searchTerm} />}
                 rowSelection={rowSelection}
                 onRowSelectionChange={setRowSelection}

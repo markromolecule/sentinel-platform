@@ -1,6 +1,6 @@
 'use client';
 
-import { useDebounce, useDepartmentsQuery, isPermissionDeniedError } from '@sentinel/hooks';
+import { useDebounce, useDepartmentsQuery, isPermissionDeniedError, useServerPagination } from '@sentinel/hooks';
 import { useState } from 'react';
 import {
     AddDepartmentDialog,
@@ -14,15 +14,24 @@ export default function SupportDepartmentsPage() {
     const [selectedInstitutionId, setSelectedInstitutionId] = useState<string | undefined>('');
     const debouncedSearch = useDebounce(searchTerm, 500);
 
+    const { pagination, setPagination } = useServerPagination([debouncedSearch]);
+
     const {
-        data: departments = [],
+        data: departmentsResponse,
         isLoading,
         isError,
         error,
     } = useDepartmentsQuery({
         search: debouncedSearch,
         institutionId: selectedInstitutionId || undefined,
+        page: pagination.pageIndex + 1,
+        limit: pagination.pageSize,
     });
+
+    const departments = departmentsResponse?.items ?? [];
+    const pageCount = departmentsResponse?.pagination?.totalPages ?? 1;
+    const totalCount = departmentsResponse?.pagination?.total ?? 0;
+
     const isViewDenied = isPermissionDeniedError(error, 'departments:view');
 
     return (
@@ -51,6 +60,11 @@ export default function SupportDepartmentsPage() {
                         isLoading={isLoading}
                         selectedInstitutionId={selectedInstitutionId}
                         onInstitutionChange={setSelectedInstitutionId}
+                        pagination={pagination}
+                        onPaginationChange={setPagination}
+                        pageCount={pageCount}
+                        totalCount={totalCount}
+                        manualPagination={true}
                     />
                     {isLoading && departments.length === 0 && (
                         <div className="bg-background/80 absolute inset-x-0 top-[60px] bottom-0 z-10 flex items-center justify-center rounded-md">

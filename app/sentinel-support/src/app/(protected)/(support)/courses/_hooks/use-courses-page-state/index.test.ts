@@ -14,6 +14,10 @@ vi.mock('@sentinel/hooks', () => ({
         mutate: vi.fn(),
     })),
     useDepartmentsQuery: vi.fn(() => ({ data: [] })),
+    useServerPagination: vi.fn((watchDeps, initialState = { pageIndex: 0, pageSize: 10 }) => {
+        const [pagination, setPagination] = require('react').useState(initialState);
+        return { pagination, setPagination };
+    }),
 }));
 
 describe('useCoursesPageState', () => {
@@ -25,11 +29,31 @@ describe('useCoursesPageState', () => {
                 { id: '2', name: 'Inst 2', parentInstitutionId: '1' },
             ],
         });
-        (useCoursesQuery as any).mockReturnValue({
-            data: [],
-            isLoading: false,
-            isError: false,
-            error: null,
+        (useCoursesQuery as any).mockImplementation((args: any) => {
+            if (args && args.page !== undefined && args.limit !== undefined) {
+                return {
+                    data: {
+                        items: [
+                            { id: 'course-1', title: 'Course 1', code: 'C1' }
+                        ],
+                        pagination: {
+                            total: 15,
+                            page: 1,
+                            pageSize: 10,
+                            totalPages: 2,
+                        }
+                    },
+                    isLoading: false,
+                    isError: false,
+                    error: null,
+                };
+            }
+            return {
+                data: [],
+                isLoading: false,
+                isError: false,
+                error: null,
+            };
         });
     });
 
@@ -37,6 +61,15 @@ describe('useCoursesPageState', () => {
         const { result } = renderHook(() => useCoursesPageState());
         expect(result.current.searchTerm).toBe('');
         expect(result.current.selectedInstitutionId).toBeUndefined();
+        expect(result.current.pagination).toEqual({
+            pageIndex: 0,
+            pageSize: 10,
+        });
+        expect(result.current.courses).toEqual([
+            { id: 'course-1', title: 'Course 1', code: 'C1' }
+        ]);
+        expect(result.current.pageCount).toBe(2);
+        expect(result.current.totalCount).toBe(15);
     });
 
     it('updates searchTerm', () => {

@@ -8,6 +8,7 @@ import {
     useDeleteQuestionBankCollectionMutation,
     useQuestionBankCollectionsQuery,
     useStableValue,
+    useServerPagination,
 } from '@sentinel/hooks';
 import { toast } from 'sonner';
 import { formatDistanceToNow } from 'date-fns';
@@ -41,7 +42,20 @@ export function useCollectionManagement() {
     const [isImportModalOpen, setIsImportModalOpen] = useState(false);
     const [draftCollectionName, setDraftCollectionName] = useState('');
     const [hasDraftCollection, setHasDraftCollection] = useState(false);
-    const [currentPage, setCurrentPage] = useState(1);
+    
+    const { pagination, setPagination } = useServerPagination([], {
+        pageIndex: 0,
+        pageSize: COLLECTIONS_PER_PAGE,
+    });
+    
+    const currentPage = pagination.pageIndex + 1;
+    const setCurrentPage = (page: number) => {
+        setPagination((current) => ({
+            ...current,
+            pageIndex: page - 1,
+        }));
+    };
+
     const [collectionIdToDelete, setCollectionIdToDelete] = useState<string | null>(null);
 
     const { data, isLoading } = useQuestionBankCollectionsQuery({

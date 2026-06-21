@@ -7,6 +7,7 @@ import { FileBarChart } from 'lucide-react';
 import { AnalyticsPageShell } from '../_components/layout';
 import { useAcademicScope } from '@/hooks/use-academic-scope';
 import { useAnalyticsReportsQuery, useGenerateAnalyticsReportMutation } from '@/data';
+import { useServerPagination } from '@sentinel/hooks';
 
 /**
  * ReportsAnalyticsPage displays historically generated analytical reports
@@ -15,14 +16,25 @@ import { useAnalyticsReportsQuery, useGenerateAnalyticsReportMutation } from '@/
 export default function ReportsAnalyticsPage() {
     const { institutionId, isLoading: isScopeLoading } = useAcademicScope();
 
+    const { pagination, setPagination } = useServerPagination([institutionId]);
+
     // Live backend queries with institution scoping
     const { data: reportsData, isLoading: isReportsLoading } = useAnalyticsReportsQuery({
-        payload: { institution_id: institutionId || undefined },
+        payload: {
+            institution_id: institutionId || undefined,
+            page: pagination.pageIndex + 1,
+            limit: pagination.pageSize,
+        },
         enabled: !isScopeLoading,
     });
 
     // Report generation mutation
     const { mutate: generateReport } = useGenerateAnalyticsReportMutation();
+
+    const pageCount = Math.max(
+        1,
+        Math.ceil((reportsData?.total_records ?? 0) / pagination.pageSize),
+    );
 
     return (
         <AnalyticsPageShell
@@ -47,7 +59,12 @@ export default function ReportsAnalyticsPage() {
             {isScopeLoading || isReportsLoading ? (
                 <Skeleton className="h-[400px] w-full rounded-xl" />
             ) : (
-                <AnalyticsReportsList reports={reportsData?.records || []} />
+                <AnalyticsReportsList
+                    reports={reportsData?.records || []}
+                    pagination={pagination}
+                    onPaginationChange={setPagination}
+                    pageCount={pageCount}
+                />
             )}
         </AnalyticsPageShell>
     );

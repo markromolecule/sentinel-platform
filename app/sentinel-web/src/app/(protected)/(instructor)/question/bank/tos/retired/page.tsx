@@ -9,6 +9,7 @@ import {
     useUpdateQuestionMutation,
     useDeleteQuestionMutation,
     useStableValue,
+    useServerPagination,
 } from '@sentinel/hooks';
 import type { ColumnFiltersState, ColumnFilter } from '@tanstack/react-table';
 import type { QuestionType, QuestionDifficulty } from '@sentinel/shared/types';
@@ -21,12 +22,9 @@ export default function RetiredQuestionsPage() {
     const router = useRouter();
     const [searchQuery, setSearchQueryState] = useState('');
     const [columnFilters, setColumnFiltersState] = useState<ColumnFiltersState>([]);
-    const [pagination, setPaginationState] = useState({
-        pageIndex: 0,
-        pageSize: 10,
-    });
 
     const deferredSearchQuery = useDeferredValue(searchQuery);
+    const { pagination, setPagination } = useServerPagination([deferredSearchQuery, columnFilters]);
 
     const typeFilter = useStableValue(
         () =>
@@ -91,16 +89,10 @@ export default function RetiredQuestionsPage() {
 
     const setSearchQuery = (value: string) => {
         setSearchQueryState(value);
-        setPaginationState((current) => ({ ...current, pageIndex: 0 }));
-    };
-
-    const setPagination = (nextPagination: { pageIndex: number; pageSize: number }) => {
-        setPaginationState(nextPagination);
     };
 
     const setColumnFilters = (nextFilters: ColumnFiltersState) => {
         setColumnFiltersState(nextFilters);
-        setPaginationState((current) => ({ ...current, pageIndex: 0 }));
     };
 
     const questions = questionsPage?.items ?? [];

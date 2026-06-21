@@ -1,6 +1,6 @@
 'use client';
 
-import { useDebounce, useSemestersQuery, isPermissionDeniedError } from '@sentinel/hooks';
+import { useDebounce, useSemestersQuery, isPermissionDeniedError, useServerPagination } from '@sentinel/hooks';
 import { useState } from 'react';
 import {
     AddSemesterDialog,
@@ -12,12 +12,23 @@ export default function SupportSemestersPage() {
     const [searchTerm, setSearchTerm] = useState('');
     const debouncedSearch = useDebounce(searchTerm, 500);
 
+    const { pagination, setPagination } = useServerPagination([debouncedSearch]);
+
     const {
-        data: semesters = [],
+        data: semestersResponse,
         isLoading,
         isError,
         error,
-    } = useSemestersQuery({ search: debouncedSearch });
+    } = useSemestersQuery({
+        search: debouncedSearch,
+        page: pagination.pageIndex + 1,
+        limit: pagination.pageSize,
+    });
+
+    const semesters = semestersResponse?.items ?? [];
+    const pageCount = semestersResponse?.pagination?.totalPages ?? 1;
+    const totalCount = semestersResponse?.pagination?.total ?? 0;
+
     const isViewDenied = isPermissionDeniedError(error, 'semesters:view');
 
     return (
@@ -39,6 +50,11 @@ export default function SupportSemestersPage() {
                         searchTerm={searchTerm}
                         onSearchChange={setSearchTerm}
                         isLoading={isLoading}
+                        pagination={pagination}
+                        onPaginationChange={setPagination}
+                        pageCount={pageCount}
+                        totalCount={totalCount}
+                        manualPagination={true}
                     />
 
                     {isLoading && semesters.length === 0 && (

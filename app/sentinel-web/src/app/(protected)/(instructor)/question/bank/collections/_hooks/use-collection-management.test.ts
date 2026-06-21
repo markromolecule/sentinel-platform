@@ -14,6 +14,10 @@ vi.mock('@sentinel/hooks', () => ({
     useDeleteQuestionBankCollectionMutation: vi.fn(),
     useQuestionBankCollectionsQuery: vi.fn(),
     useStableValue: (fn: () => any) => fn(),
+    useServerPagination: vi.fn((watchDeps, initialState = { pageIndex: 0, pageSize: 10 }) => {
+        const [pagination, setPagination] = require('react').useState(initialState);
+        return { pagination, setPagination };
+    }),
 }));
 
 const mockPush = vi.fn();

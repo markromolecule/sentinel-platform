@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { ColumnFiltersState } from '@tanstack/react-table';
+import { ColumnFiltersState, type PaginationState } from '@tanstack/react-table';
 import { useDeleteSelectedStudentWhitelistMutation } from '@sentinel/hooks';
 import {
     DataTable,
@@ -30,6 +30,10 @@ interface WhitelistListProps {
     }[];
     columnFilters?: ColumnFiltersState;
     onColumnFiltersChange?: React.Dispatch<React.SetStateAction<ColumnFiltersState>>;
+    pagination?: PaginationState;
+    onPaginationChange?: (pagination: PaginationState) => void;
+    pageCount?: number;
+    totalCount?: number;
 }
 
 /**
@@ -44,6 +48,10 @@ export function WhitelistList({
     facets = [],
     columnFilters = [],
     onColumnFiltersChange,
+    pagination,
+    onPaginationChange,
+    pageCount,
+    totalCount,
 }: WhitelistListProps) {
     const [rowSelection, setRowSelection] = useState<Record<string, boolean>>({});
     const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
@@ -85,6 +93,11 @@ export function WhitelistList({
                 onColumnFiltersChange={onColumnFiltersChange}
                 rowSelection={rowSelection}
                 onRowSelectionChange={setRowSelection}
+                manualPagination={true}
+                pagination={pagination}
+                onPaginationChange={onPaginationChange}
+                pageCount={pageCount}
+                totalCount={totalCount}
                 toolbarActions={
                     hasSelectedRows ? (
                         <Button

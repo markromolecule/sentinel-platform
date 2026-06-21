@@ -1,19 +1,15 @@
 'use client';
 
 import { useState } from 'react';
-import { useSystemLogsQuery } from '@sentinel/hooks';
+import { useSystemLogsQuery, useServerPagination } from '@sentinel/hooks';
 import { AuditLogTable } from './audit-log-table';
-import { PaginationState } from '@tanstack/react-table';
 
 /**
  * SystemLogTable displays a paginated table of internal system logs.
  * It manages its own state and fetches data using the useSystemLogsQuery hook.
  */
 export function SystemLogTable() {
-    const [pagination, setPagination] = useState<PaginationState>({
-        pageIndex: 0,
-        pageSize: 10,
-    });
+    const { pagination, setPagination } = useServerPagination();
 
     const { data, isLoading, isError, error } = useSystemLogsQuery({
         params: {

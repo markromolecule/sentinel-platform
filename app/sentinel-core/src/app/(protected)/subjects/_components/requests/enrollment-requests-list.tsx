@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { type RowSelectionState } from '@tanstack/react-table';
+import { type PaginationState } from '@tanstack/react-table';
 import { DataTable } from '@sentinel/ui';
 import {
     AlertDialog,
@@ -31,6 +32,11 @@ type EnrollmentRequestsListProps = {
     courses: Array<{ id: string; title: string }>;
     sections: Array<{ id: string; name: string }>;
     isLoading?: boolean;
+    pagination?: PaginationState;
+    onPaginationChange?: (pagination: PaginationState) => void;
+    pageCount?: number;
+    totalCount?: number;
+    manualPagination?: boolean;
 };
 
 export function EnrollmentRequestsList({
@@ -39,6 +45,11 @@ export function EnrollmentRequestsList({
     courses,
     sections,
     isLoading = false,
+    pagination,
+    onPaginationChange,
+    pageCount,
+    totalCount,
+    manualPagination = false,
 }: EnrollmentRequestsListProps) {
     const { hasPermission } = useActivePermissions();
     const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
@@ -104,6 +115,11 @@ export function EnrollmentRequestsList({
                 onRowSelectionChange={setRowSelection}
                 toolbarActions={toolbarActions}
                 emptyContent={<EnrollmentRequestsEmptyState />}
+                pagination={pagination}
+                onPaginationChange={onPaginationChange}
+                pageCount={pageCount}
+                totalCount={totalCount}
+                manualPagination={manualPagination}
             />
 
             {canDeleteRequests ? (

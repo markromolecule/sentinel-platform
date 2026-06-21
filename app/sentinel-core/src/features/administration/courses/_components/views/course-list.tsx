@@ -24,6 +24,7 @@ import {
     AlertDialogTitle,
 } from '@sentinel/ui';
 import { type Course } from '@sentinel/shared/types';
+import { type PaginationState } from '@tanstack/react-table';
 import { columns } from '../tables/columns';
 import { CoursesEmptyState } from './courses-empty-state';
 import { buildCourseFacets } from './course-facets';
@@ -36,6 +37,11 @@ interface CourseListProps {
     searchTerm?: string;
     onSearchChange?: (value: string) => void;
     isLoading?: boolean;
+    pagination?: PaginationState;
+    onPaginationChange?: (pagination: PaginationState) => void;
+    pageCount?: number;
+    totalCount?: number;
+    manualPagination?: boolean;
 }
 
 /**
@@ -46,6 +52,11 @@ export function CourseList({
     searchTerm,
     onSearchChange,
     isLoading = false,
+    pagination,
+    onPaginationChange,
+    pageCount,
+    totalCount,
+    manualPagination = false,
 }: CourseListProps) {
     const { data: departments = [] } = useDepartmentsQuery();
     const { hasPermission } = useActivePermissions();
@@ -94,6 +105,11 @@ export function CourseList({
                 onSearchChange={onSearchChange}
                 searchPlaceholder="Search courses..."
                 isLoading={isLoading}
+                pagination={pagination}
+                onPaginationChange={onPaginationChange}
+                pageCount={pageCount}
+                totalCount={totalCount}
+                manualPagination={manualPagination}
                 emptyContent={<CoursesEmptyState searchTerm={searchTerm} />}
                 rowSelection={rowSelection}
                 onRowSelectionChange={setRowSelection}
