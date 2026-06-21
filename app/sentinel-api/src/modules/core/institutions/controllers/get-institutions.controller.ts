@@ -37,17 +37,10 @@ export const getInstitutionsRouteHandler: AppRouteHandler<typeof getInstitutions
             'Forbidden. Missing institutions:view permission.',
         );
 
-        const { search, parentInstitutionId, institutionKind } = c.req.valid('query');
+        const { search, parentInstitutionId, institutionKind, page, pageSize } = c.req.valid('query');
         const role = c.get('role');
         const requesterInstitutionId = c.get('institutionId');
-
-        const rawInstitutions = await InstitutionService.getInstitutions(c.get('dbClient'), {
-            search,
-            parentInstitutionId,
-            institutionKind,
-        });
-
-        let institutions = rawInstitutions;
+        let allowedIds: string[] | undefined;
 
         if (role !== 'support' && requesterInstitutionId) {
             const db = c.get('dbClient');
@@ -58,9 +51,9 @@ export const getInstitutionsRouteHandler: AppRouteHandler<typeof getInstitutions
                 .executeTakeFirst();
 
             if (!userInst) {
-                institutions = [];
+                allowedIds = [];
             } else {
-                const allowedIds = [userInst.id];
+                allowedIds = [userInst.id];
                 if (userInst.parent_institution_id) {
                     allowedIds.push(userInst.parent_institution_id);
                 } else {
@@ -71,15 +64,33 @@ export const getInstitutionsRouteHandler: AppRouteHandler<typeof getInstitutions
                         .execute();
                     allowedIds.push(...branches.map((b) => b.id));
                 }
-                institutions = rawInstitutions.filter((inst) => allowedIds.includes(inst.id));
             }
         }
 
-        return c.json(
+        const institutions = await InstitutionService.getInstitutions(
+            c.get('dbClient'),
             {
-                message: 'Institutions fetched successfully',
-                data: institutions,
+                search,
+                parentInstitutionId,
+                institutionKind,
+                allowedIds,
             },
+            page,
+            pageSize,
+        );
+        const data = Array.isArray(institutions) ? institutions : institutions.items;
+
+        return c.json(
+            Array.isArray(institutions)
+                ? {
+                      message: 'Institutions fetched successfully',
+                      data,
+                  }
+                : {
+                      message: 'Institutions fetched successfully',
+                      data,
+                      pagination: institutions.pagination,
+                  },
             200,
         );
     } catch (error: any) {

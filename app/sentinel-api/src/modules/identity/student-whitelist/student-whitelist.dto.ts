@@ -1,4 +1,5 @@
 import { z } from '@hono/zod-openapi';
+import { paginationMetadataSchema, paginationQuerySchema } from '../../../lib/pagination';
 import {
     bulkImportStudentWhitelistSchema as bulkImportStudentWhitelistBodySchema,
     createStudentWhitelistSchema as createStudentWhitelistBodySchema,
@@ -23,6 +24,7 @@ export const getStudentWhitelistSchema = {
     response: z.object({
         message: z.string(),
         data: z.array(studentWhitelistSchemaOpenApi),
+        pagination: paginationMetadataSchema.optional(),
     }),
 };
 

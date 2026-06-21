@@ -19,6 +19,8 @@ export type GetStudentWhitelistArgs = StudentWhitelistRequesterContext & {
     courseId?: string;
     status?: 'ACTIVE' | 'INACTIVE' | 'ARCHIVED';
     search?: string;
+    page?: number;
+    pageSize?: number;
 };
 
 export type CreateStudentWhitelistArgs = StudentWhitelistRequesterContext & {

@@ -1,5 +1,6 @@
 import { type DbClient } from '@sentinel/db';
 import { getEnrollmentRequestsData } from '../data/get-enrollment-requests';
+import { paginateItems } from '../../../../lib/pagination';
 
 export type GetEnrollmentRequestsServiceArgs = {
     dbClient: DbClient;
@@ -9,6 +10,8 @@ export type GetEnrollmentRequestsServiceArgs = {
     departmentId?: string;
     courseId?: string;
     search?: string;
+    page?: number;
+    pageSize?: number;
 };
 
 /**
@@ -19,9 +22,12 @@ export type GetEnrollmentRequestsServiceArgs = {
  */
 export async function getEnrollmentRequestsService({
     dbClient,
+    page,
+    pageSize,
     ...filters
 }: GetEnrollmentRequestsServiceArgs) {
-    return getEnrollmentRequestsData({ dbClient, ...filters });
+    const requests = await getEnrollmentRequestsData({ dbClient, ...filters });
+    return paginateItems(requests, page, pageSize);
 }
 
 export type GetEnrollmentRequestsServiceResponse = Awaited<

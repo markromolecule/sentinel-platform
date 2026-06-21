@@ -46,6 +46,11 @@ export const QUESTION_BANK_COLLECTION_QUERY_KEYS = {
     details: (id: string) => ['question-bank', 'collections', id] as const,
 };
 
+export const QUESTION_COLLECTION_QUERY_KEYS = {
+    all: ['question-collection', 'collections'] as const,
+    details: (id: string) => ['question-collection', 'collections', id] as const,
+};
+
 export const EXAM_DIFFICULTY_OPTIONS = [
     { label: 'Easy', value: 'EASY' },
     { label: 'Medium', value: 'MEDIUM' },

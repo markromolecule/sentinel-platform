@@ -17,6 +17,8 @@ export class SectionService {
         scope?: {
             departmentId?: string;
             courseId?: string;
+            page?: number;
+            pageSize?: number;
         },
     ) {
         return getSectionsService({ dbClient, institutionId, search, scope });

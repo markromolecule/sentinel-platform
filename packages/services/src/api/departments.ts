@@ -1,5 +1,6 @@
 import { Department, DepartmentInput } from '@sentinel/shared/types';
 import type { ApiClientType } from '../api-client';
+import type { PaginatedApiResponse } from './pagination';
 
 // Backend returns snake_case format
 interface ApiDepartment {
@@ -26,6 +27,7 @@ interface ApiDepartment {
 interface ApiResponse<T> {
     message: string;
     data: T;
+    pagination?: PaginatedApiResponse<unknown>['pagination'];
 }
 
 // map the api response to the department type
@@ -54,20 +56,43 @@ function mapDepartment(apiDept: ApiDepartment): Department {
 // get all departments
 export async function getDepartments(
     apiClient: ApiClientType,
+    params?: {
+        search?: string;
+        institutionId?: string;
+        page?: number;
+        limit?: number;
+    },
+): Promise<Department[]>;
+export async function getDepartments(
+    apiClient: ApiClientType,
     params: {
         search?: string;
         institutionId?: string;
+        page?: number;
+        limit?: number;
+    } & ({ page: number; limit: number } | { page?: undefined; limit?: undefined }),
+): Promise<PaginatedApiResponse<Department>>;
+export async function getDepartments(
+    apiClient: ApiClientType,
+    params: {
+        search?: string;
+        institutionId?: string;
+        page?: number;
+        limit?: number;
     } = {},
-): Promise<Department[]> {
+): Promise<Department[] | PaginatedApiResponse<Department>> {
     const queryParams = new URLSearchParams();
     if (params.search) queryParams.append('search', params.search);
     if (params.institutionId) queryParams.append('institutionId', params.institutionId);
+    if (params.page !== undefined) queryParams.append('page', String(params.page));
+    if (params.limit !== undefined) queryParams.append('limit', String(params.limit));
 
     const queryString = queryParams.toString();
     const url = queryString ? `/departments?${queryString}` : '/departments';
 
     const response: ApiResponse<ApiDepartment[]> = await apiClient(url);
-    return response.data.map(mapDepartment);
+    const items = response.data.map(mapDepartment);
+    return response.pagination ? { items, pagination: response.pagination } : items;
 }
 
 // create a department

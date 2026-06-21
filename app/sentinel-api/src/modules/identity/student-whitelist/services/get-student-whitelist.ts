@@ -3,6 +3,7 @@ import { getStudentWhitelistData } from '../data/get-student-whitelist';
 import { resolveStudentWhitelistQueryScope } from '../helpers/resolve-student-whitelist-scope';
 import { verifyRequesterPermissions } from '../helpers/verify-requester-permissions';
 import type { GetStudentWhitelistArgs } from '../student-whitelist.types';
+import { paginateItems } from '../../../../lib/pagination';
 
 export async function getStudentWhitelist(
     dbClient: DbClient,
@@ -16,6 +17,8 @@ export async function getStudentWhitelist(
         courseId,
         status,
         search,
+        page,
+        pageSize,
     }: GetStudentWhitelistArgs,
 ) {
     verifyRequesterPermissions({
@@ -33,7 +36,7 @@ export async function getStudentWhitelist(
         courseId,
     });
 
-    return await getStudentWhitelistData({
+    const records = await getStudentWhitelistData({
         dbClient,
         institutionId: whitelistScope.institutionId,
         departmentId: whitelistScope.departmentId,
@@ -41,4 +44,6 @@ export async function getStudentWhitelist(
         status,
         search,
     });
+
+    return paginateItems(records, page, pageSize);
 }

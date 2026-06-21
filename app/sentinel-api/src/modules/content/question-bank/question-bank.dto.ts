@@ -16,7 +16,7 @@ export const getQuestionBankCollectionsSchema = {
     },
     response: z.object({
         message: z.string(),
-        data: z.array(questionBankCollectionSchema),
+        data: Schema.questionBankCollectionPageSchema,
     }),
 };
 
@@ -88,3 +88,6 @@ export type DeleteQuestionBankCollectionParams = z.infer<
 >;
 export type QuestionBankCollection = z.infer<typeof questionBankCollectionSchema>;
 export type QuestionBankCollectionDetail = z.infer<typeof questionBankCollectionDetailSchema>;
+export type QuestionBankCollectionPageRecord = z.infer<
+    typeof Schema.questionBankCollectionPageSchema
+>;

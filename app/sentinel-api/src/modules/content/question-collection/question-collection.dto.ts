@@ -16,7 +16,7 @@ export const getQuestionCollectionsSchema = {
     },
     response: z.object({
         message: z.string(),
-        data: z.array(questionCollectionSchema),
+        data: Schema.questionCollectionPageSchema,
     }),
 };
 
@@ -114,3 +114,4 @@ export type ShareQuestionCollectionBody = z.infer<typeof shareQuestionCollection
 export type DeleteQuestionCollectionParams = z.infer<typeof deleteQuestionCollectionSchema.params>;
 export type QuestionCollection = z.infer<typeof questionCollectionSchema>;
 export type QuestionCollectionDetail = z.infer<typeof questionCollectionDetailSchema>;
+export type QuestionCollectionPageRecord = z.infer<typeof Schema.questionCollectionPageSchema>;

@@ -3,6 +3,7 @@ import { HTTPException } from 'hono/http-exception';
 import { getInstitutionsData } from '../data/get-institutions';
 import { getInstitutionByIdData } from '../data/get-institution-by-id';
 import { formatInstitution, type InstitutionKind } from './institution-formatter.service';
+import { paginateItems } from '../../../../lib/pagination';
 
 /**
  * Retrieves all institutions matching the given filter criteria.
@@ -17,10 +18,16 @@ export async function getInstitutions(
         search?: string;
         parentInstitutionId?: string;
         institutionKind?: InstitutionKind;
+        allowedIds?: string[];
     } = {},
+    page?: number,
+    pageSize?: number,
 ) {
     const rawInstitutions = await getInstitutionsData({ dbClient, ...filters });
-    return rawInstitutions.map((inst: any) => formatInstitution(inst));
+    const scopedInstitutions = filters.allowedIds
+        ? rawInstitutions.filter((institution: any) => filters.allowedIds?.includes(institution.id))
+        : rawInstitutions;
+    return paginateItems(scopedInstitutions.map((inst: any) => formatInstitution(inst)), page, pageSize);
 }
 
 /**

@@ -24,6 +24,9 @@ function createQuery(result: unknown[] = []) {
         groupBy: vi.fn(() => query),
         orderBy: vi.fn(() => query),
         execute: vi.fn(async () => result),
+        executeTakeFirst: vi.fn(async () => ({ count: result.length })),
+        limit: vi.fn(() => query),
+        offset: vi.fn(() => query),
     };
 
     return query;
@@ -110,15 +113,22 @@ describe('getQuestionCollectionsRouteHandler', () => {
 
         expect(result).toEqual({
             message: 'Collections fetched successfully',
-            data: [
-                expect.objectContaining({
-                    id: 'collection-1',
-                    name: 'Private collection',
-                    isPublic: false,
-                    createdById: 'creator-1',
-                    updatedById: 'creator-1',
-                }),
-            ],
+            data: {
+                items: [
+                    expect.objectContaining({
+                        id: 'collection-1',
+                        name: 'Private collection',
+                        isPublic: false,
+                        createdById: 'creator-1',
+                        updatedById: 'creator-1',
+                    }),
+                ],
+                page: 1,
+                pageSize: 20,
+                total: 1,
+                totalPages: 1,
+                hasMore: false,
+            },
         });
     });
 });

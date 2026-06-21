@@ -1,6 +1,7 @@
 import { z } from '@hono/zod-openapi';
 import { Schema } from '@sentinel/shared';
 import { inheritanceSchemaObject } from '../inheritance/inheritance.dto';
+import { paginationMetadataSchema, paginationQuerySchema } from '../../../lib/pagination';
 
 // Pull the shared base schema
 const { sectionSchema: sectionBodySchema } = Schema;
@@ -97,11 +98,13 @@ export const getSectionsSchema = {
                 .optional()
                 .openapi({ description: 'Filter by institution ID' }),
             courseId: z.string().uuid().optional().openapi({ description: 'Filter by course ID' }),
+            ...paginationQuerySchema.shape,
         }),
     },
     response: z.object({
         message: z.string(),
         data: z.array(sectionSchemaOpenApi),
+        pagination: paginationMetadataSchema.optional(),
     }),
 };
 

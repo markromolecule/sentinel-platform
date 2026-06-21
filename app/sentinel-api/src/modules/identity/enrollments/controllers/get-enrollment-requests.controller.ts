@@ -48,7 +48,8 @@ export const getEnrollmentRequestsRouteHandler: AppRouteHandler<
         const user = c.get('user');
         const userId = user?.id;
 
-        const { status, search, institutionId: requestedInstitutionId } = c.req.valid('query');
+        const { status, search, institutionId: requestedInstitutionId, page, limit } =
+            c.req.valid('query');
 
         // If instructor, only show their own requests
         const targetUserId = role === 'instructor' ? userId : undefined;
@@ -69,13 +70,22 @@ export const getEnrollmentRequestsRouteHandler: AppRouteHandler<
             institutionId: queryScope.institutionId,
             departmentId: role === 'instructor' ? undefined : queryScope.departmentId,
             courseId: role === 'instructor' ? undefined : queryScope.courseId,
+            page,
+            limit,
         });
+        const responseData = Array.isArray(data) ? data : data.items;
 
         return c.json(
-            {
-                message: 'Enrollment requests fetched successfully',
-                data: data as any,
-            },
+            Array.isArray(data)
+                ? {
+                      message: 'Enrollment requests fetched successfully',
+                      data: responseData,
+                  }
+                : {
+                      message: 'Enrollment requests fetched successfully',
+                      data: responseData,
+                      pagination: data.pagination,
+                  },
             200,
         );
     } catch (error: any) {

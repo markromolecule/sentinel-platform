@@ -30,6 +30,8 @@ export const getStudentWhitelistQuerySchema = z.object({
     department_id: z.string().uuid().optional(),
     course_id: z.string().uuid().optional(),
     status: studentWhitelistStatusSchema.optional(),
+    page: z.coerce.number().int().min(1).optional(),
+    pageSize: z.coerce.number().int().min(1).max(100).optional(),
 });
 
 export const createStudentWhitelistSchema = z.object({

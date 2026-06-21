@@ -15,7 +15,12 @@ vi.mock('./create-room.controller', () => ({
 
 vi.mock('./get-rooms.controller', () => ({
     getRoomsRoute: { method: 'get', path: '/' },
-    getRoomsRouteHandler: async (c: any) => c.json([]),
+    getRoomsRouteHandler: async (c: any) =>
+        c.json({
+            message: 'Rooms fetched successfully',
+            data: [],
+            pagination: { page: 3, limit: 1, total: 1, hasMore: false },
+        }),
 }));
 
 vi.mock('./update-room.controller', () => ({
@@ -100,5 +105,20 @@ describe('Rooms Route Access', () => {
             body: JSON.stringify({ name: 'Room 101', capacity: 30 }),
         });
         expect(res.status).toBe(403);
+    });
+
+    it('returns pagination metadata when page and limit are provided', async () => {
+        const app = makeAppWithContext('support', ['rooms:view']);
+        const res = await app.request('/rooms?page=3&limit=1', { method: 'GET' });
+
+        expect(res.status).toBe(200);
+        const body = await res.json();
+        expect(body.pagination).toEqual({
+            page: 3,
+            limit: 1,
+            total: 1,
+            hasMore: false,
+        });
+        expect(body.data).toEqual([]);
     });
 });

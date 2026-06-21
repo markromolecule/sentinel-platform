@@ -6,6 +6,7 @@ import {
     StudentWhitelistInput,
     StudentWhitelistStatus,
 } from '@sentinel/shared/types';
+import type { PaginatedApiResponse } from './pagination';
 
 interface ApiStudentWhitelist {
     whitelist_id: string;
@@ -32,6 +33,7 @@ interface ApiStudentWhitelist {
 interface ApiResponse<T> {
     message: string;
     data: T;
+    pagination?: PaginatedApiResponse<unknown>['pagination'];
 }
 
 interface ApiStudentWhitelistBulkImportFailure {
@@ -60,6 +62,8 @@ export interface GetStudentWhitelistParams {
     department_id?: string;
     course_id?: string;
     status?: StudentWhitelistStatus;
+    page?: number;
+    limit?: number;
 }
 
 export interface StudentWhitelistPurgeInput {
@@ -140,13 +144,21 @@ function mapStudentWhitelistPurgeResult(
 
 export async function getStudentWhitelist(
     apiClient: ApiClientType,
+    params?: GetStudentWhitelistParams,
+): Promise<StudentWhitelist[]>;
+export async function getStudentWhitelist(
+    apiClient: ApiClientType,
+    params: GetStudentWhitelistParams & ({ page: number; limit: number } | { page?: undefined; limit?: undefined }),
+): Promise<PaginatedApiResponse<StudentWhitelist>>;
+export async function getStudentWhitelist(
+    apiClient: ApiClientType,
     params: GetStudentWhitelistParams = {},
-): Promise<StudentWhitelist[]> {
+): Promise<StudentWhitelist[] | PaginatedApiResponse<StudentWhitelist>> {
     const response: ApiResponse<ApiStudentWhitelist[]> = await apiClient(
         `/student-whitelist${buildQuery(params)}`,
     );
-
-    return response.data.map(mapStudentWhitelistRecord);
+    const items = response.data.map(mapStudentWhitelistRecord);
+    return response.pagination ? { items, pagination: response.pagination } : items;
 }
 
 export async function createStudentWhitelist(

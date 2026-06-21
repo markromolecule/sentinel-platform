@@ -28,6 +28,17 @@ export const questionCollectionDetailSchema = questionCollectionSchema.extend({
 export const getQuestionCollectionsQuerySchema = z.object({
     search: z.string().optional(),
     institutionId: z.string().uuid().optional(),
+    page: z.coerce.number().int().min(1).default(1),
+    pageSize: z.coerce.number().int().min(1).max(100).default(20),
+});
+
+export const questionCollectionPageSchema = z.object({
+    items: z.array(questionCollectionSchema),
+    page: z.number().int().min(1),
+    pageSize: z.number().int().min(1),
+    total: z.number().int().min(0),
+    totalPages: z.number().int().min(0),
+    hasMore: z.boolean(),
 });
 
 export const questionCollectionIdParamsSchema = z.object({

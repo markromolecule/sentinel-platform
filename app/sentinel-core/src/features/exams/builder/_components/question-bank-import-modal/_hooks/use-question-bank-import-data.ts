@@ -15,8 +15,9 @@ export function useQuestionBankImportData(
     selectedQuestionType: QuestionType | 'all',
 ) {
     const deferredSearchQuery = useDeferredValue(searchQuery.trim());
-    const { data: collections = [], isLoading: isCollectionsLoading } =
+    const { data, isLoading: isCollectionsLoading } =
         useQuestionBankCollectionsQuery();
+    const collections = data?.items ?? [];
     const { data: questionTypes = [], isLoading: isQuestionTypesLoading } = useQuestionTypesQuery();
     const questionQuery = useInfiniteQuestionsQuery({
         search: deferredSearchQuery || undefined,
@@ -31,7 +32,7 @@ export function useQuestionBankImportData(
             selectedCollectionId === ALL_COLLECTIONS_ID
                 ? null
                 : (collections.find((collection) => collection.id === selectedCollectionId) ??
-                  null),
+                    null),
         [collections, selectedCollectionId],
     );
 

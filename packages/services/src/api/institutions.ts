@@ -4,6 +4,7 @@ import {
     InstitutionNamingConventions,
 } from '@sentinel/shared/types';
 import type { ApiClientType } from '../api-client';
+import type { PaginatedApiResponse } from './pagination';
 
 // Backend returns camelCase format
 interface ApiInstitution {
@@ -23,6 +24,7 @@ interface ApiInstitution {
 interface ApiResponse<T> {
     message: string;
     data: T;
+    pagination?: PaginatedApiResponse<unknown>['pagination'];
 }
 
 // map the api response to the institution type
@@ -77,15 +79,37 @@ export async function saveInstitutionNamingConventions(
 // get all institutions
 export async function getInstitutions(
     apiClient: ApiClientType,
+    params?: {
+        search?: string;
+        page?: number;
+        limit?: number;
+    },
+): Promise<Institution[]>;
+export async function getInstitutions(
+    apiClient: ApiClientType,
     params: {
         search?: string;
+        page?: number;
+        limit?: number;
+    } & ({ page: number; limit: number } | { page?: undefined; limit?: undefined }),
+): Promise<PaginatedApiResponse<Institution>>;
+export async function getInstitutions(
+    apiClient: ApiClientType,
+    params: {
+        search?: string;
+        page?: number;
+        limit?: number;
     } = {},
-): Promise<Institution[]> {
-    const url = params.search
-        ? `/institutions?search=${encodeURIComponent(params.search)}`
-        : '/institutions';
+): Promise<Institution[] | PaginatedApiResponse<Institution>> {
+    const queryParams = new URLSearchParams();
+    if (params.search) queryParams.append('search', params.search);
+    if (params.page !== undefined) queryParams.append('page', String(params.page));
+    if (params.limit !== undefined) queryParams.append('limit', String(params.limit));
+    const queryString = queryParams.toString();
+    const url = queryString ? `/institutions?${queryString}` : '/institutions';
     const response: ApiResponse<ApiInstitution[]> = await apiClient(url);
-    return response.data.map(mapInstitution);
+    const items = response.data.map(mapInstitution);
+    return response.pagination ? { items, pagination: response.pagination } : items;
 }
 
 // create an institution

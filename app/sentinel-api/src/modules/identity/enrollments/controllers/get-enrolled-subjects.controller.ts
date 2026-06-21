@@ -49,19 +49,28 @@ export const getEnrolledSubjectsRouteHandler: AppRouteHandler<
             );
         }
 
-        const { search } = c.req.valid('query');
+        const { search, page, limit } = c.req.valid('query');
 
         const enrolledData = await EnrollmentService.getEnrolledSubjects(
             c.get('dbClient'),
             userId,
             search,
+            page,
+            limit,
         );
+        const data = Array.isArray(enrolledData) ? enrolledData : enrolledData.items;
 
         return c.json(
-            {
-                message: 'Enrolled subjects retrieved successfully',
-                data: enrolledData,
-            },
+            Array.isArray(enrolledData)
+                ? {
+                      message: 'Enrolled subjects retrieved successfully',
+                      data,
+                  }
+                : {
+                      message: 'Enrolled subjects retrieved successfully',
+                      data,
+                      pagination: enrolledData.pagination,
+                  },
             200,
         );
     } catch (error: any) {

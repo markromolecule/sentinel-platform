@@ -115,15 +115,27 @@ describe('Institutions Route Access', () => {
     });
 
     it('filters institution list for non-support scoped roles based on hierarchy', async () => {
-        vi.mocked(InstitutionService.getInstitutions).mockResolvedValueOnce([
-            { id: 'institution-1', name: 'MIT', parent_institution_id: null },
-            {
-                id: 'institution-branch-1',
-                name: 'MIT Branch',
-                parent_institution_id: 'institution-1',
-            },
-            { id: 'unauthorized-institution', name: 'Stanford', parent_institution_id: null },
-        ] as any);
+        vi.mocked(InstitutionService.getInstitutions).mockImplementation(async (_db, filters) => {
+            const items = [
+                { id: 'institution-1', name: 'MIT', parent_institution_id: null },
+                {
+                    id: 'institution-branch-1',
+                    name: 'MIT Branch',
+                    parent_institution_id: 'institution-1',
+                },
+                {
+                    id: 'unauthorized-institution',
+                    name: 'Stanford',
+                    parent_institution_id: null,
+                },
+            ] as any[];
+
+            if (filters?.allowedIds) {
+                return items.filter((institution) => filters.allowedIds?.includes(institution.id));
+            }
+
+            return items;
+        });
 
         const mockUserInstBuilder = {
             select: vi.fn().mockReturnThis(),
@@ -167,5 +179,25 @@ describe('Institutions Route Access', () => {
         expect(returnedIds).toContain('institution-1');
         expect(returnedIds).toContain('institution-branch-1');
         expect(returnedIds).not.toContain('unauthorized-institution');
+    });
+
+    it('returns pagination metadata when page and limit are provided', async () => {
+        vi.mocked(InstitutionService.getInstitutions).mockResolvedValueOnce({
+            items: [{ id: 'institution-1', name: 'MIT' }],
+            pagination: { page: 2, limit: 1, total: 3, hasMore: true },
+        } as any);
+
+        const app = makeAppWithContext('support', ['institutions:view']);
+        const res = await app.request('/institutions?page=2&limit=1', { method: 'GET' });
+
+        expect(res.status).toBe(200);
+        const body = await res.json();
+        expect(body.data).toHaveLength(1);
+        expect(body.pagination).toEqual({
+            page: 2,
+            limit: 1,
+            total: 3,
+            hasMore: true,
+        });
     });
 });

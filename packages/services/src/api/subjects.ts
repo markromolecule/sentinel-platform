@@ -196,12 +196,33 @@ export async function deleteSelectedSubjects(
 export async function getEnrolledSubjects(
     apiClient: ApiClientType,
     search?: string,
-): Promise<EnrolledSubjectData[]> {
-    const url = search
-        ? `/enrollments/enrolled?search=${encodeURIComponent(search)}`
-        : '/enrollments/enrolled';
+): Promise<EnrolledSubjectData[]>;
+export async function getEnrolledSubjects(
+    apiClient: ApiClientType,
+    params: {
+        search?: string;
+        page?: number;
+        limit?: number;
+    },
+): Promise<PaginatedApiResponse<EnrolledSubjectData>>;
+export async function getEnrolledSubjects(
+    apiClient: ApiClientType,
+    searchOrParams?: string | { search?: string; page?: number; limit?: number },
+): Promise<EnrolledSubjectData[] | PaginatedApiResponse<EnrolledSubjectData>> {
+    const params =
+        typeof searchOrParams === 'string'
+            ? { search: searchOrParams }
+            : searchOrParams ?? {};
+    const queryParams = new URLSearchParams();
+    if (params.search) queryParams.append('search', params.search);
+    if (params.page !== undefined) queryParams.append('page', String(params.page));
+    if (params.limit !== undefined) queryParams.append('limit', String(params.limit));
+
+    const queryString = queryParams.toString();
+    const url = queryString ? `/enrollments/enrolled?${queryString}` : '/enrollments/enrolled';
     const response: ApiResponse<EnrolledSubjectData[]> = await apiClient(url);
-    return response.data;
+    const items = response.data;
+    return response.pagination ? { items, pagination: response.pagination } : items;
 }
 
 export async function enrollInstructorSubject(
@@ -227,16 +248,45 @@ export async function getEnrollmentRequests(
     status?: 'PENDING' | 'APPROVED' | 'REJECTED',
     search?: string,
     institutionId?: string,
-): Promise<EnrollmentRequest[]> {
-    const params = new URLSearchParams();
-    if (status) params.append('status', status);
-    if (search) params.append('search', search);
-    if (institutionId) params.append('institutionId', institutionId);
+): Promise<EnrollmentRequest[]>;
+export async function getEnrollmentRequests(
+    apiClient: ApiClientType,
+    params: {
+        status?: 'PENDING' | 'APPROVED' | 'REJECTED';
+        search?: string;
+        institutionId?: string;
+        page?: number;
+        limit?: number;
+    },
+): Promise<PaginatedApiResponse<EnrollmentRequest>>;
+export async function getEnrollmentRequests(
+    apiClient: ApiClientType,
+    statusOrParams?: 'PENDING' | 'APPROVED' | 'REJECTED' | {
+        status?: 'PENDING' | 'APPROVED' | 'REJECTED';
+        search?: string;
+        institutionId?: string;
+        page?: number;
+        limit?: number;
+    },
+    search?: string,
+    institutionId?: string,
+): Promise<EnrollmentRequest[] | PaginatedApiResponse<EnrollmentRequest>> {
+    const params =
+        typeof statusOrParams === 'string' || statusOrParams === undefined
+            ? { status: statusOrParams, search, institutionId }
+            : statusOrParams ?? {};
+    const queryParams = new URLSearchParams();
+    if (params.status) queryParams.append('status', params.status);
+    if (params.search) queryParams.append('search', params.search);
+    if (params.institutionId) queryParams.append('institutionId', params.institutionId);
+    if (params.page !== undefined) queryParams.append('page', String(params.page));
+    if (params.limit !== undefined) queryParams.append('limit', String(params.limit));
 
-    const queryString = params.toString();
+    const queryString = queryParams.toString();
     const url = queryString ? `/enrollments/requests?${queryString}` : '/enrollments/requests';
     const response: ApiResponse<EnrollmentRequest[]> = await apiClient(url);
-    return response.data;
+    const items = response.data;
+    return response.pagination ? { items, pagination: response.pagination } : items;
 }
 
 export async function approveEnrollmentRequest(

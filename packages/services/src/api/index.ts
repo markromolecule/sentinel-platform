@@ -16,6 +16,7 @@ export * from './builder';
 export * from './questions';
 export * from './question-types';
 export * from './question-bank';
+export * from './question-collection';
 export * from './tos-matrix';
 export * from './users';
 export * from './access-control';

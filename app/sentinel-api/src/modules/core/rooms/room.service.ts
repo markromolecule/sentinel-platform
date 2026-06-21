@@ -18,8 +18,14 @@ export class RoomService {
     /**
      * @deprecated Use getRoomsService directly
      */
-    static async getRooms(dbClient: DbClient, institutionId?: string, search?: string) {
-        return getRoomsService({ dbClient, institutionId, search });
+    static async getRooms(
+        dbClient: DbClient,
+        institutionId?: string,
+        search?: string,
+        page?: number,
+        pageSize?: number,
+    ) {
+        return getRoomsService({ dbClient, institutionId, search, page, pageSize });
     }
 
     /**

@@ -1,5 +1,6 @@
 import { Room, RoomInput, RoomStatus } from '@sentinel/shared/types';
 import type { ApiClientType } from '../api-client';
+import type { PaginatedApiResponse } from './pagination';
 
 // Backend returns snake_case format
 interface ApiRoom {
@@ -29,6 +30,7 @@ interface ApiRoom {
 interface ApiResponse<T> {
     message: string;
     data: T;
+    pagination?: PaginatedApiResponse<unknown>['pagination'];
 }
 
 // map the api response to the room type
@@ -57,21 +59,41 @@ function mapRoom(apiRoom: ApiRoom): Room {
     };
 }
 
-// get all rooms
 export async function getRooms(
     apiClient: ApiClientType,
     search?: string,
     institutionId?: string,
-): Promise<Room[]> {
-    const params = new URLSearchParams();
-    if (search) params.append('search', search);
-    if (institutionId) params.append('institutionId', institutionId);
+): Promise<Room[]>;
+export async function getRooms(
+    apiClient: ApiClientType,
+    params: {
+        search?: string;
+        institutionId?: string;
+        page?: number;
+        limit?: number;
+    },
+): Promise<PaginatedApiResponse<Room>>;
+export async function getRooms(
+    apiClient: ApiClientType,
+    searchOrParams?: string | { search?: string; institutionId?: string; page?: number; limit?: number },
+    institutionId?: string,
+): Promise<Room[] | PaginatedApiResponse<Room>> {
+    const params =
+        typeof searchOrParams === 'string'
+            ? { search: searchOrParams, institutionId }
+            : searchOrParams ?? {};
+    const queryParams = new URLSearchParams();
+    if (params.search) queryParams.append('search', params.search);
+    if (params.institutionId) queryParams.append('institutionId', params.institutionId);
+    if (params.page !== undefined) queryParams.append('page', String(params.page));
+    if (params.limit !== undefined) queryParams.append('limit', String(params.limit));
 
-    const queryString = params.toString();
+    const queryString = queryParams.toString();
     const url = queryString ? `/rooms?${queryString}` : '/rooms';
 
     const response: ApiResponse<ApiRoom[]> = await apiClient(url);
-    return response.data.map(mapRoom);
+    const items = response.data.map(mapRoom);
+    return response.pagination ? { items, pagination: response.pagination } : items;
 }
 
 // create a room
