@@ -1,5 +1,6 @@
 import { z } from '@hono/zod-openapi';
 import { Schema } from '@sentinel/shared';
+import { paginationMetadataSchema, paginationQuerySchema } from '../../../lib/pagination';
 
 const {
     institutionNamingConventionSchema: institutionNamingConventionBodySchema,
@@ -69,11 +70,13 @@ export const getInstitutionsSchema = {
             search: z.string().optional().openapi({ description: 'Search term' }),
             parentInstitutionId: z.string().uuid().optional(),
             institutionKind: z.enum(['STANDALONE', 'PARENT', 'CHILD']).optional(),
+            ...paginationQuerySchema.shape,
         }),
     },
     response: z.object({
         message: z.string(),
         data: z.array(institutionSchemaOpenApi),
+        pagination: paginationMetadataSchema.optional(),
     }),
 };
 

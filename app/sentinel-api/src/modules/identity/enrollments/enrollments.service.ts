@@ -26,8 +26,14 @@ export class EnrollmentService {
     /**
      * @deprecated Use getEnrolledSubjectsService directly
      */
-    static async getEnrolledSubjects(dbClient: DbClient, userId: string, search?: string) {
-        return getEnrolledSubjectsService({ dbClient, userId, search });
+    static async getEnrolledSubjects(
+        dbClient: DbClient,
+        userId: string,
+        search?: string,
+        page?: number,
+        limit?: number,
+    ) {
+        return getEnrolledSubjectsService({ dbClient, userId, search, page, limit });
     }
 
     /**
@@ -54,6 +60,8 @@ export class EnrollmentService {
             departmentId?: string;
             courseId?: string;
             search?: string;
+            page?: number;
+            limit?: number;
         } = {},
     ) {
         return getEnrollmentRequestsService({ dbClient, ...args });

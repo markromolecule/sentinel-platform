@@ -1,6 +1,7 @@
 import { type DbClient } from '@sentinel/db';
 import { getSectionsData } from '../data/get-sections';
 import { loadEffectiveRows } from '../../inheritance/effective-row-loader';
+import { paginateItems } from '../../../../lib/pagination';
 
 export type GetSectionsServiceArgs = {
     dbClient: DbClient;
@@ -9,6 +10,8 @@ export type GetSectionsServiceArgs = {
     scope?: {
         departmentId?: string;
         courseId?: string;
+        page?: number;
+        pageSize?: number;
     };
 };
 
@@ -36,42 +39,50 @@ export async function getSectionsService({
             }),
     });
 
-    return rawSections.map((section: any) => ({
-        institution_id: section.institution_id,
-        section_id: section.section_id,
-        section_name: section.section_name,
-        department_id: section.department_id,
-        course_id: section.course_id,
-        year_level: section.year_level,
-        source_record_id: section.sourceRecordId,
-        inheritance_status: section.inheritanceStatus,
-        origin_institution_id: section.originInstitutionId,
-        effective_institution_id: section.effectiveInstitutionId,
-        is_local: section.isLocal,
-        is_inherited: section.isInherited,
-        is_overridden: section.isOverridden,
-        is_hidden: section.isHidden,
-        isLocal: section.isLocal,
-        isInherited: section.isInherited,
-        isOverridden: section.isOverridden,
-        isHidden: section.isHidden,
-        created_at: section.created_at,
-        created_by: section.creator_first_name
-            ? `${section.creator_first_name} ${section.creator_last_name}`
-            : section.created_by,
-        updated_at: section.updated_at,
-        updated_by: section.updater_first_name
-            ? `${section.updater_first_name} ${section.updater_last_name}`
-            : section.updated_by,
-        institution_name: section.institution_name,
-        institutionName: section.institution_name,
-        course_title: section.course_title,
-        courseTitle: section.course_title,
-        course_code: section.course_code,
-        courseCode: section.course_code,
-        department_name: section.department_name,
-        departmentName: section.department_name,
-    }));
+    const scopedSections = scope?.courseId
+        ? rawSections.filter((section: any) => section.course_id === scope.courseId)
+        : rawSections;
+
+    return paginateItems(
+        scopedSections.map((section: any) => ({
+            institution_id: section.institution_id,
+            section_id: section.section_id,
+            section_name: section.section_name,
+            department_id: section.department_id,
+            course_id: section.course_id,
+            year_level: section.year_level,
+            source_record_id: section.sourceRecordId,
+            inheritance_status: section.inheritanceStatus,
+            origin_institution_id: section.originInstitutionId,
+            effective_institution_id: section.effectiveInstitutionId,
+            is_local: section.isLocal,
+            is_inherited: section.isInherited,
+            is_overridden: section.isOverridden,
+            is_hidden: section.isHidden,
+            isLocal: section.isLocal,
+            isInherited: section.isInherited,
+            isOverridden: section.isOverridden,
+            isHidden: section.isHidden,
+            created_at: section.created_at,
+            created_by: section.creator_first_name
+                ? `${section.creator_first_name} ${section.creator_last_name}`
+                : section.created_by,
+            updated_at: section.updated_at,
+            updated_by: section.updater_first_name
+                ? `${section.updater_first_name} ${section.updater_last_name}`
+                : section.updated_by,
+            institution_name: section.institution_name,
+            institutionName: section.institution_name,
+            course_title: section.course_title,
+            courseTitle: section.course_title,
+            course_code: section.course_code,
+            courseCode: section.course_code,
+            department_name: section.department_name,
+            departmentName: section.department_name,
+        })),
+        scope?.page,
+        scope?.pageSize,
+    );
 }
 
 export type GetSectionsServiceResponse = Awaited<ReturnType<typeof getSectionsService>>;

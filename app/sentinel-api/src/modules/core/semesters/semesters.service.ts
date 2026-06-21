@@ -10,8 +10,14 @@ export class SemesterService {
     /**
      * @deprecated Use getSemestersService directly
      */
-    static async getSemesters(dbClient: DbClient, institutionId?: string, search?: string) {
-        return getSemestersService({ dbClient, institutionId, search });
+    static async getSemesters(
+        dbClient: DbClient,
+        institutionId?: string,
+        search?: string,
+        page?: number,
+        limit?: number,
+    ) {
+        return getSemestersService({ dbClient, institutionId, search, page, limit });
     }
 
     /**

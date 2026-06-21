@@ -2,6 +2,7 @@ import { type DbClient } from '@sentinel/db';
 import type {
     CreateQuestionCollectionBody,
     GetQuestionCollectionsQuery,
+    QuestionCollectionPageRecord,
     UpdateQuestionCollectionBody,
 } from './question-collection.dto';
 import { addQuestionsToCollection } from './services/add-questions-to-collection.service';
@@ -18,7 +19,7 @@ export class QuestionCollectionService {
         filters: GetQuestionCollectionsQuery,
         userId: string,
         institutionId?: string,
-    ) {
+    ): Promise<QuestionCollectionPageRecord> {
         return await getQuestionCollections(dbClient, filters, userId, institutionId);
     }
 

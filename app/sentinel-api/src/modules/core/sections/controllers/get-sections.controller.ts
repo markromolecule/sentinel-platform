@@ -46,6 +46,8 @@ export const getSectionsRouteHandler: AppRouteHandler<typeof getSectionsRoute> =
             search,
             institutionId: queryInstitutionId,
             courseId: queryCourseId,
+            page,
+            pageSize,
         } = c.req.valid('query');
 
         const scope = buildRequesterAcademicScope({
@@ -66,14 +68,22 @@ export const getSectionsRouteHandler: AppRouteHandler<typeof getSectionsRoute> =
             {
                 departmentId: queryScope.departmentId,
                 courseId: queryCourseId || queryScope.courseId,
+                page,
+                pageSize,
             },
         );
-
+        const data = Array.isArray(sections) ? sections : sections.items;
         return c.json(
-            {
-                message: 'Sections fetched successfully',
-                data: sections,
-            },
+            Array.isArray(sections)
+                ? {
+                    message: 'Sections fetched successfully',
+                    data,
+                }
+                : {
+                    message: 'Sections fetched successfully',
+                    data,
+                    pagination: sections.pagination,
+                },
             200,
         );
     } catch (error: any) {

@@ -32,6 +32,9 @@ function formatCollectionUpdatedAt(updatedAt: string | Date | null) {
     return formatDistanceToNow(parsedDate, { addSuffix: true });
 }
 
+/**
+ * Coordinates the paginated question bank collections view state and actions.
+ */
 export function useCollectionManagement() {
     const router = useRouter();
     const [view, setView] = useState<ViewMode>('grid');
@@ -41,7 +44,11 @@ export function useCollectionManagement() {
     const [currentPage, setCurrentPage] = useState(1);
     const [collectionIdToDelete, setCollectionIdToDelete] = useState<string | null>(null);
 
-    const { data: collections = [], isLoading } = useQuestionBankCollectionsQuery();
+    const { data, isLoading } = useQuestionBankCollectionsQuery({
+        page: currentPage,
+        pageSize: COLLECTIONS_PER_PAGE,
+    });
+    const collections = data?.items ?? [];
     const createCollectionMutation = useCreateQuestionBankCollectionMutation();
     const deleteCollectionMutation = useDeleteQuestionBankCollectionMutation();
 
@@ -116,29 +123,28 @@ export function useCollectionManagement() {
         [collections],
     );
 
-    const collectionsWithDraft = useStableValue(() => {
-        if (!hasDraftCollection) return mappedCollections;
-        return [
-            {
-                id: '__draft__',
-                name: draftCollectionName,
-                lastUpdated: '',
-                questionCount: 0,
-                isPublic: false,
-                createdById: null,
-                updatedById: null,
-            },
-            ...mappedCollections,
-        ];
-    }, [draftCollectionName, hasDraftCollection, mappedCollections]);
-
-    const totalPages = Math.max(1, Math.ceil(collectionsWithDraft.length / COLLECTIONS_PER_PAGE));
-    const safeCurrentPage = Math.min(currentPage, totalPages);
-
     const paginatedCollections = useStableValue(() => {
-        const start = (safeCurrentPage - 1) * COLLECTIONS_PER_PAGE;
-        return collectionsWithDraft.slice(start, start + COLLECTIONS_PER_PAGE);
-    }, [collectionsWithDraft, safeCurrentPage]);
+        if (hasDraftCollection && currentPage === 1) {
+            return [
+                {
+                    id: '__draft__',
+                    name: draftCollectionName,
+                    description: null,
+                    lastUpdated: '',
+                    questionCount: 0,
+                    isPublic: false,
+                    createdById: null,
+                    updatedById: null,
+                    author: null,
+                },
+                ...mappedCollections,
+            ];
+        }
+        return mappedCollections;
+    }, [draftCollectionName, hasDraftCollection, mappedCollections, currentPage]);
+
+    const totalPages = Math.max(1, data?.totalPages ?? 1);
+    const safeCurrentPage = Math.min(currentPage, totalPages);
 
     return {
         // State

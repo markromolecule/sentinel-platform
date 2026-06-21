@@ -3,11 +3,14 @@ import { getSemestersData } from '../data/get-semesters';
 import { getInstitutionKindData } from '../data/get-institution-kind';
 import { loadEffectiveRows } from '../../inheritance/effective-row-loader';
 import { mapSemesterResponse } from './map-semester-response';
+import { paginateItems } from '../../../../lib/pagination';
 
 export type GetSemestersServiceArgs = {
     dbClient: DbClient;
     institutionId?: string;
     search?: string;
+    page?: number;
+    pageSize?: number;
 };
 
 /**
@@ -24,6 +27,8 @@ export async function getSemestersService({
     dbClient,
     institutionId,
     search,
+    page,
+    pageSize,
 }: GetSemestersServiceArgs) {
     let effectiveInstitutionId = institutionId;
 
@@ -42,7 +47,7 @@ export async function getSemestersService({
             getSemestersData({ dbClient, institutionId: scopeInstitutionId, search }),
     });
 
-    return rawSemesters.map(mapSemesterResponse);
+    return paginateItems(rawSemesters.map(mapSemesterResponse), page, pageSize);
 }
 
 export type GetSemestersServiceResponse = Awaited<ReturnType<typeof getSemestersService>>;

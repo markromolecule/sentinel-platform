@@ -39,6 +39,8 @@ export const getCoursesRouteHandler: AppRouteHandler<typeof getCoursesRoute> = a
             search,
             institutionId: queryInstitutionId,
             departmentId: queryDepartmentId,
+            page,
+            pageSize,
         } = c.req.valid('query');
 
         requireActivePermission(c, 'courses:view', 'Forbidden. Missing courses:view permission.');
@@ -64,14 +66,23 @@ export const getCoursesRouteHandler: AppRouteHandler<typeof getCoursesRoute> = a
             {
                 departmentId: queryScope.departmentId,
                 courseId: queryScope.courseId,
+                page,
+                pageSize,
             },
         );
+        const data = Array.isArray(courses) ? courses : courses.items;
 
         return c.json(
-            {
-                message: 'Courses fetched successfully',
-                data: courses as any,
-            },
+            Array.isArray(courses)
+                ? {
+                      message: 'Courses fetched successfully',
+                      data,
+                  }
+                : {
+                      message: 'Courses fetched successfully',
+                      data,
+                      pagination: courses.pagination,
+                  },
             200,
         );
     } catch (error: any) {

@@ -118,4 +118,24 @@ describe('Departments Route Access', () => {
         });
         expect(postResBlocked.status).toBe(403);
     });
+
+    it('returns pagination metadata when page and limit are provided', async () => {
+        vi.mocked(DepartmentService.getDepartments).mockResolvedValueOnce({
+            items: [{ department_id: 'dept-1', department_name: 'CS' }],
+            pagination: { page: 1, limit: 1, total: 2, hasMore: true },
+        } as any);
+
+        const app = makeAppWithContext('support', ['departments:view']);
+        const res = await app.request('/departments?page=1&limit=1', { method: 'GET' });
+
+        expect(res.status).toBe(200);
+        const body = await res.json();
+        expect(body.data).toHaveLength(1);
+        expect(body.pagination).toEqual({
+            page: 1,
+            limit: 1,
+            total: 2,
+            hasMore: true,
+        });
+    });
 });

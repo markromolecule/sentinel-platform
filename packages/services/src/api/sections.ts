@@ -1,6 +1,7 @@
 import { Section } from '@sentinel/shared/types';
 import { SectionFormValues } from '@sentinel/shared/schema';
 import type { ApiClientType } from '../api-client';
+import type { PaginatedApiResponse } from './pagination';
 
 // Backend returns snake_case format
 interface ApiSection {
@@ -32,6 +33,7 @@ interface ApiSection {
 interface ApiResponse<T> {
     message: string;
     data: T;
+    pagination?: PaginatedApiResponse<unknown>['pagination'];
 }
 
 // map the api response to the Section type
@@ -65,22 +67,47 @@ function mapSection(apiSec: ApiSection): Section {
 // get all sections
 export async function getSections(
     apiClient: ApiClientType,
+    params?: {
+        search?: string;
+        institutionId?: string;
+        courseId?: string;
+        page?: number;
+        limit?: number;
+    },
+): Promise<Section[]>;
+export async function getSections(
+    apiClient: ApiClientType,
     params: {
         search?: string;
         institutionId?: string;
         courseId?: string;
+        page?: number;
+        limit?: number;
+    } & ({ page: number; limit: number } | { page?: undefined; limit?: undefined }),
+): Promise<PaginatedApiResponse<Section>>;
+export async function getSections(
+    apiClient: ApiClientType,
+    params: {
+        search?: string;
+        institutionId?: string;
+        courseId?: string;
+        page?: number;
+        limit?: number;
     } = {},
-): Promise<Section[]> {
+): Promise<Section[] | PaginatedApiResponse<Section>> {
     const queryParams = new URLSearchParams();
     if (params.search) queryParams.append('search', params.search);
     if (params.institutionId) queryParams.append('institutionId', params.institutionId);
     if (params.courseId) queryParams.append('courseId', params.courseId);
+    if (params.page !== undefined) queryParams.append('page', String(params.page));
+    if (params.limit !== undefined) queryParams.append('limit', String(params.limit));
 
     const queryString = queryParams.toString();
     const url = queryString ? `/sections?${queryString}` : '/sections';
 
     const response: ApiResponse<ApiSection[]> = await apiClient(url);
-    return response.data.map(mapSection);
+    const items = response.data.map(mapSection);
+    return response.pagination ? { items, pagination: response.pagination } : items;
 }
 
 // create a section

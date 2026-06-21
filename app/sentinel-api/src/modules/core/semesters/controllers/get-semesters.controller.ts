@@ -38,7 +38,7 @@ export const getSemestersRouteHandler: AppRouteHandler<typeof getSemestersRoute>
         const role = supabaseUser?.user_metadata?.role;
         const institutionId = c.get('institutionId');
 
-        const { search, institutionId: queryInstitutionId } = c.req.valid('query');
+        const { search, institutionId: queryInstitutionId, page, pageSize } = c.req.valid('query');
 
         // Use institutionId from query if support, otherwise use from context, but allow global view if no query param is provided
         const finalInstitutionId =
@@ -48,13 +48,21 @@ export const getSemestersRouteHandler: AppRouteHandler<typeof getSemestersRoute>
             c.get('dbClient'),
             finalInstitutionId as string | undefined,
             search,
+            page,
+            pageSize,
         );
-
+        const data = Array.isArray(semesters) ? semesters : semesters.items;
         return c.json(
-            {
-                message: 'Semesters fetched successfully',
-                data: semesters,
-            },
+            Array.isArray(semesters)
+                ? {
+                      message: 'Semesters fetched successfully',
+                      data,
+                  }
+                : {
+                      message: 'Semesters fetched successfully',
+                      data,
+                      pagination: semesters.pagination,
+                  },
             200,
         );
     } catch (error: any) {

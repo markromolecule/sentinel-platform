@@ -25,29 +25,36 @@ import { mapQuestionBankCollectionResponse } from './services/map-question-bank-
 import type {
     CreateQuestionBankCollectionBody,
     GetQuestionBankCollectionsQuery,
+    QuestionBankCollectionPageRecord,
     UpdateQuestionBankCollectionBody,
 } from './question-bank.dto';
 
 export class QuestionBankService {
+    /**
+     * Returns the visible question bank collections as a paginated envelope.
+     */
     static async getCollections(
         dbClient: DbClient,
         filters: GetQuestionBankCollectionsQuery,
         institutionId?: string,
         userId?: string,
-    ) {
-        const records = await getQuestionBankCollectionsData({
+    ): Promise<QuestionBankCollectionPageRecord> {
+        const page = await getQuestionBankCollectionsData({
             dbClient,
             institutionId,
             filters,
             userId: userId ?? '',
         });
 
-        return records.map((record) =>
-            mapQuestionBankCollectionResponse({
-                record,
-                questionIds: [],
-            }),
-        );
+        return {
+            ...page,
+            items: page.items.map((record) =>
+                mapQuestionBankCollectionResponse({
+                    record,
+                    questionIds: [],
+                }),
+            ),
+        };
     }
 
     static async getCollectionById(

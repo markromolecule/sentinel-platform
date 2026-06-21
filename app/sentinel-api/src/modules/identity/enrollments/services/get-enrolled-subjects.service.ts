@@ -1,10 +1,13 @@
 import { type DbClient } from '@sentinel/db';
 import { getEnrolledSubjectsData } from '../data/get-enrolled-subjects';
+import { paginateItems } from '../../../../lib/pagination';
 
 export type GetEnrolledSubjectsServiceArgs = {
     dbClient: DbClient;
     userId: string;
     search?: string;
+    page?: number;
+    pageSize?: number;
 };
 
 /**
@@ -18,8 +21,11 @@ export async function getEnrolledSubjectsService({
     dbClient,
     userId,
     search,
+    page,
+    pageSize,
 }: GetEnrolledSubjectsServiceArgs) {
-    return getEnrolledSubjectsData({ dbClient, userId, search });
+    const subjects = await getEnrolledSubjectsData({ dbClient, userId, search });
+    return paginateItems(subjects, page, pageSize);
 }
 
 export type GetEnrolledSubjectsServiceResponse = Awaited<

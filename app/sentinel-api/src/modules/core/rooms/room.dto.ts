@@ -1,6 +1,7 @@
 import { z } from '@hono/zod-openapi';
 import { Schema } from '@sentinel/shared';
 import { inheritanceSchemaObject } from '../inheritance/inheritance.dto';
+import { paginationMetadataSchema, paginationQuerySchema } from '../../../lib/pagination';
 
 // Pull the shared base schema — single source of truth for field shapes & constraints
 const { roomSchema: roomBodySchema } = Schema;
@@ -49,11 +50,13 @@ export const getRoomsSchema = {
                 .uuid()
                 .optional()
                 .openapi({ description: 'Filter by institution ID' }),
+            ...paginationQuerySchema.shape,
         }),
     },
     response: z.object({
         message: z.string(),
         data: z.array(roomSchemaOpenApi),
+        pagination: paginationMetadataSchema.optional(),
     }),
 };
 

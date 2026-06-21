@@ -1,5 +1,12 @@
-import { Semester, SemesterInput, ApiResponse } from '@sentinel/shared/types';
+import { Semester, SemesterInput } from '@sentinel/shared/types';
 import type { ApiClientType } from '../api-client';
+import type { PaginatedApiResponse } from './pagination';
+
+interface ApiResponse<T> {
+    message: string;
+    data: T;
+    pagination?: PaginatedApiResponse<unknown>['pagination'];
+}
 
 // Backend returns snake_case format
 interface ApiSemester {
@@ -50,20 +57,43 @@ function mapSemester(apiSem: ApiSemester): Semester {
 // get all semesters
 export async function getSemesters(
     apiClient: ApiClientType,
+    params?: {
+        search?: string;
+        institutionId?: string;
+        page?: number;
+        limit?: number;
+    },
+): Promise<Semester[]>;
+export async function getSemesters(
+    apiClient: ApiClientType,
     params: {
         search?: string;
         institutionId?: string;
+        page?: number;
+        limit?: number;
+    } & ({ page: number; limit: number } | { page?: undefined; limit?: undefined }),
+): Promise<PaginatedApiResponse<Semester>>;
+export async function getSemesters(
+    apiClient: ApiClientType,
+    params: {
+        search?: string;
+        institutionId?: string;
+        page?: number;
+        limit?: number;
     } = {},
-): Promise<Semester[]> {
+): Promise<Semester[] | PaginatedApiResponse<Semester>> {
     const queryParams = new URLSearchParams();
     if (params.search) queryParams.append('search', params.search);
     if (params.institutionId) queryParams.append('institutionId', params.institutionId);
+    if (params.page !== undefined) queryParams.append('page', String(params.page));
+    if (params.limit !== undefined) queryParams.append('limit', String(params.limit));
 
     const queryString = queryParams.toString();
     const url = queryString ? `/semesters?${queryString}` : '/semesters';
 
     const response: ApiResponse<ApiSemester[]> = await apiClient(url);
-    return response.data?.map(mapSemester) || [];
+    const items = response.data?.map(mapSemester) || [];
+    return response.pagination ? { items, pagination: response.pagination } : items;
 }
 
 // create a semester

@@ -1,5 +1,6 @@
 import { z } from '@hono/zod-openapi';
 import { Schema } from '@sentinel/shared';
+import { paginationMetadataSchema, paginationQuerySchema } from '../../../lib/pagination';
 
 const {
     instructorSubjectRequestSchema: enrollBodySchema,
@@ -45,10 +46,12 @@ export const getEnrolledSubjectsSchema = {
             .string()
             .optional()
             .openapi({ description: 'Search term for subject code or title' }),
+        ...paginationQuerySchema.shape,
     }),
     response: z.object({
         message: z.string(),
         data: z.array(instructorEnrolledSubjectSchema).openapi('InstructorEnrolledSubject'),
+        pagination: paginationMetadataSchema.optional(),
     }),
 };
 
@@ -71,10 +74,12 @@ export const getEnrollmentRequestsSchema = {
             .uuid()
             .optional()
             .openapi({ description: 'Filter by institution ID' }),
+        ...paginationQuerySchema.shape,
     }),
     response: z.object({
         message: z.string(),
         data: z.array(enrollmentRequestSchema).openapi('EnrollmentRequest'),
+        pagination: paginationMetadataSchema.optional(),
     }),
 };
 

@@ -1,6 +1,7 @@
 import { z } from '@hono/zod-openapi';
 import { Schema } from '@sentinel/shared';
 import { inheritanceSchemaObject } from '../inheritance/inheritance.dto';
+import { paginationMetadataSchema, paginationQuerySchema } from '../../../lib/pagination';
 
 // Pull the shared base schema — single source of truth for field shapes & constraints
 // Aliased to avoid conflict with the local response schema below
@@ -41,11 +42,13 @@ export const getDepartmentsSchema = {
                 .uuid()
                 .optional()
                 .openapi({ description: 'Filter by institution ID' }),
+            ...paginationQuerySchema.shape,
         }),
     },
     response: z.object({
         message: z.string(),
         data: z.array(departmentSchemaOpenApi),
+        pagination: paginationMetadataSchema.optional(),
     }),
 };
 

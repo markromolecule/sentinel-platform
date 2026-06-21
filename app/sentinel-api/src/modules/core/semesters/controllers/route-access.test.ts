@@ -111,4 +111,24 @@ describe('Semesters Route Access', () => {
         });
         expect(res.status).toBe(403);
     });
+
+    it('returns pagination metadata when page and limit are provided', async () => {
+        vi.mocked(SemesterService.getSemesters).mockResolvedValueOnce({
+            items: [{ term_id: 'term-1', academic_year: '2026', semester: '1st' }],
+            pagination: { page: 2, limit: 1, total: 4, hasMore: true },
+        } as any);
+
+        const app = makeAppWithContext('support', ['semesters:view']);
+        const res = await app.request('/semesters?page=2&limit=1', { method: 'GET' });
+
+        expect(res.status).toBe(200);
+        const body = await res.json();
+        expect(body.data).toHaveLength(1);
+        expect(body.pagination).toEqual({
+            page: 2,
+            limit: 1,
+            total: 4,
+            hasMore: true,
+        });
+    });
 });

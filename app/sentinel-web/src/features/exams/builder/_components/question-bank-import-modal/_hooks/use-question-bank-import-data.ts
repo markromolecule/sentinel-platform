@@ -9,14 +9,18 @@ import {
 import type { QuestionType } from '@sentinel/shared/types';
 import { ALL_COLLECTIONS_ID } from '../constants';
 
+/**
+ * Loads import modal data using the paginated question bank collections response.
+ */
 export function useQuestionBankImportData(
     selectedCollectionId: string,
     searchQuery: string,
     selectedQuestionType: QuestionType | 'all',
 ) {
     const deferredSearchQuery = useDeferredValue(searchQuery.trim());
-    const { data: collections = [], isLoading: isCollectionsLoading } =
+    const { data, isLoading: isCollectionsLoading } =
         useQuestionBankCollectionsQuery();
+    const collections = data?.items ?? [];
     const { data: questionTypes = [], isLoading: isQuestionTypesLoading } = useQuestionTypesQuery();
     const questionQuery = useInfiniteQuestionsQuery({
         search: deferredSearchQuery || undefined,

@@ -25,6 +25,15 @@ export interface QuestionBankCollectionRecord {
     creatorLastName?: string | null;
 }
 
+export interface QuestionBankCollectionPageRecord {
+    items: QuestionBankCollectionRecord[];
+    page: number;
+    pageSize: number;
+    total: number;
+    totalPages: number;
+    hasMore: boolean;
+}
+
 export interface QuestionBankCollectionDetailRecord extends QuestionBankCollectionRecord {
     questions: QuestionRecord[];
 }
@@ -43,6 +52,8 @@ export interface ShareQuestionBankCollectionPayload {
 export interface GetQuestionBankCollectionsParams {
     search?: string;
     institutionId?: string;
+    page?: number;
+    pageSize?: number;
 }
 
 export interface CreateQuestionBankCollectionPayload {
@@ -83,15 +94,26 @@ function buildQueryString(params?: GetQuestionBankCollectionsParams) {
         searchParams.set('institutionId', params.institutionId);
     }
 
+    if (params.page !== undefined) {
+        searchParams.set('page', params.page.toString());
+    }
+
+    if (params.pageSize !== undefined) {
+        searchParams.set('pageSize', params.pageSize.toString());
+    }
+
     const queryString = searchParams.toString();
     return queryString ? `?${queryString}` : '';
 }
 
+/**
+ * Fetches question bank collections with server-side pagination metadata.
+ */
 export async function getQuestionBankCollections(
     apiClient: ApiClientType,
     params?: GetQuestionBankCollectionsParams,
-): Promise<QuestionBankCollectionRecord[]> {
-    const response: ApiResponse<QuestionBankCollectionRecord[]> = await apiClient(
+): Promise<QuestionBankCollectionPageRecord> {
+    const response: ApiResponse<QuestionBankCollectionPageRecord> = await apiClient(
         `/question-bank/collections${buildQueryString(params)}`,
     );
 

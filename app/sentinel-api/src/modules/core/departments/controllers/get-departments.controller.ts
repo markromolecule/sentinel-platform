@@ -54,7 +54,7 @@ export const getDepartmentsRouteHandler: AppRouteHandler<typeof getDepartmentsRo
             );
         }
 
-        const { search, institutionId: queryInstitutionId } = c.req.valid('query');
+        const { search, institutionId: queryInstitutionId, page, pageSize } = c.req.valid('query');
         const scope = buildRequesterAcademicScope({
             requesterRole: role,
             requesterInstitutionId: institutionId,
@@ -69,19 +69,23 @@ export const getDepartmentsRouteHandler: AppRouteHandler<typeof getDepartmentsRo
             c.get('dbClient'),
             queryScope.institutionId,
             search,
+            queryScope.departmentId,
+            page,
+            pageSize,
         );
-
-        const filteredDepartments = queryScope.departmentId
-            ? departments.filter(
-                  (department) => department.department_id === queryScope.departmentId,
-              )
-            : departments;
+        const data = Array.isArray(departments) ? departments : departments.items;
 
         return c.json(
-            {
-                message: 'Departments fetched successfully',
-                data: filteredDepartments,
-            },
+            Array.isArray(departments)
+                ? {
+                      message: 'Departments fetched successfully',
+                      data,
+                  }
+                : {
+                      message: 'Departments fetched successfully',
+                      data,
+                      pagination: departments.pagination,
+                  },
             200,
         );
     } catch (error: any) {

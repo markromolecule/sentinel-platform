@@ -51,13 +51,22 @@ export const getStudentWhitelistRouteHandler: AppRouteHandler<
             courseId: query.course_id,
             status: query.status,
             search: query.search,
+            page: query.page,
+            pageSize: query.pageSize,
         });
+        const data = Array.isArray(records) ? records : records.items;
 
         return c.json(
-            {
-                message: 'Student whitelist fetched successfully',
-                data: records,
-            },
+            Array.isArray(records)
+                ? {
+                      message: 'Student whitelist fetched successfully',
+                      data,
+                  }
+                : {
+                      message: 'Student whitelist fetched successfully',
+                      data,
+                      pagination: records.pagination,
+                  },
             200,
         );
     } catch (error: any) {

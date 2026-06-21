@@ -1,6 +1,7 @@
 import { Course, CourseInput } from '@sentinel/shared/types';
 import type { ApiClientType } from '../api-client';
 import { CourseFormValues } from '@sentinel/shared/schema';
+import type { PaginatedApiResponse } from './pagination';
 
 // Backend returns snake_case format
 interface ApiCourse {
@@ -31,6 +32,7 @@ interface ApiCourse {
 interface ApiResponse<T> {
     message: string;
     data: T;
+    pagination?: PaginatedApiResponse<unknown>['pagination'];
 }
 
 // map the api response to the course type
@@ -69,22 +71,47 @@ type CourseQueryParams = {
 // get all courses
 export async function getCourses(
     apiClient: ApiClientType,
+    params?: {
+        search?: string;
+        institutionId?: string;
+        departmentId?: string;
+        page?: number;
+        limit?: number;
+    },
+): Promise<Course[]>;
+export async function getCourses(
+    apiClient: ApiClientType,
     params: {
         search?: string;
         institutionId?: string;
         departmentId?: string;
+        page?: number;
+        limit?: number;
+    } & ({ page: number; limit: number } | { page?: undefined; limit?: undefined }),
+): Promise<PaginatedApiResponse<Course>>;
+export async function getCourses(
+    apiClient: ApiClientType,
+    params: {
+        search?: string;
+        institutionId?: string;
+        departmentId?: string;
+        page?: number;
+        limit?: number;
     } = {},
-): Promise<Course[]> {
+): Promise<Course[] | PaginatedApiResponse<Course>> {
     const queryParams = new URLSearchParams();
     if (params.search) queryParams.append('search', params.search);
     if (params.institutionId) queryParams.append('institutionId', params.institutionId);
     if (params.departmentId) queryParams.append('departmentId', params.departmentId);
+    if (params.page !== undefined) queryParams.append('page', String(params.page));
+    if (params.limit !== undefined) queryParams.append('limit', String(params.limit));
 
     const queryString = queryParams.toString();
     const url = queryString ? `/courses?${queryString}` : '/courses';
 
     const response: ApiResponse<ApiCourse[]> = await apiClient(url);
-    return response.data.map(mapCourse);
+    const items = response.data.map(mapCourse);
+    return response.pagination ? { items, pagination: response.pagination } : items;
 }
 
 // create a course
