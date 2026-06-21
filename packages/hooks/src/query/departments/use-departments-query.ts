@@ -40,7 +40,9 @@ export function useDepartmentsQuery(params: UseDepartmentsQueryArgs = {}) {
                 page: params.page,
                 limit: params.limit,
             });
-            return hasPagination ? (response as unknown as PaginatedApiResponse<Department>) : response;
+            return hasPagination
+                ? (response as unknown as PaginatedApiResponse<Department>)
+                : response;
         },
         enabled: isAuthenticatedQueryEnabled && (params.enabled ?? true),
     });

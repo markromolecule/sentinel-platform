@@ -51,7 +51,9 @@ export async function updateQuestionService({
         sourceFileName:
             body.sourceFileName === undefined ? current.source_file_name : body.sourceFileName,
         sourcePageNumber:
-            body.sourcePageNumber === undefined ? current.source_page_number : body.sourcePageNumber,
+            body.sourcePageNumber === undefined
+                ? current.source_page_number
+                : body.sourcePageNumber,
         sourceEvidence:
             body.sourceEvidence === undefined ? current.source_evidence : body.sourceEvidence,
         passageContent:

@@ -76,14 +76,14 @@ export const getSectionsRouteHandler: AppRouteHandler<typeof getSectionsRoute> =
         return c.json(
             Array.isArray(sections)
                 ? {
-                    message: 'Sections fetched successfully',
-                    data,
-                }
+                      message: 'Sections fetched successfully',
+                      data,
+                  }
                 : {
-                    message: 'Sections fetched successfully',
-                    data,
-                    pagination: sections.pagination,
-                },
+                      message: 'Sections fetched successfully',
+                      data,
+                      pagination: sections.pagination,
+                  },
             200,
         );
     } catch (error: any) {

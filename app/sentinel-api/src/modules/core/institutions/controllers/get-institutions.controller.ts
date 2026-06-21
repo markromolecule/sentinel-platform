@@ -37,7 +37,8 @@ export const getInstitutionsRouteHandler: AppRouteHandler<typeof getInstitutions
             'Forbidden. Missing institutions:view permission.',
         );
 
-        const { search, parentInstitutionId, institutionKind, page, pageSize } = c.req.valid('query');
+        const { search, parentInstitutionId, institutionKind, page, pageSize } =
+            c.req.valid('query');
         const role = c.get('role');
         const requesterInstitutionId = c.get('institutionId');
         let allowedIds: string[] | undefined;

@@ -27,7 +27,11 @@ export async function getInstitutions(
     const scopedInstitutions = filters.allowedIds
         ? rawInstitutions.filter((institution: any) => filters.allowedIds?.includes(institution.id))
         : rawInstitutions;
-    return paginateItems(scopedInstitutions.map((inst: any) => formatInstitution(inst)), page, pageSize);
+    return paginateItems(
+        scopedInstitutions.map((inst: any) => formatInstitution(inst)),
+        page,
+        pageSize,
+    );
 }
 
 /**

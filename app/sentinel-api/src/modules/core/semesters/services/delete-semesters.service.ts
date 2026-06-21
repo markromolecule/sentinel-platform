@@ -61,8 +61,7 @@ export async function deleteSemestersService({
             (code === 'P2010' && message.includes('23503'))
         ) {
             throw new HTTPException(409, {
-                message:
-                    'Cannot delete one or more semesters because they are currently in use.',
+                message: 'Cannot delete one or more semesters because they are currently in use.',
             });
         }
         throw error;

@@ -5,18 +5,14 @@ import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } 
 const pushMock = vi.fn();
 const updateQuestionMock = vi.fn();
 const transformMock = vi.fn();
-const EditQuestionViewMock = vi.fn(
+const QuestionBuilderFormMock = vi.fn(
     (props: {
-        editingIndex: number;
-        editingQuestion: { type: string };
+        type: string;
+        initialData: { type: string };
         onBack: () => void;
         onUpdate: (id: string, updates: Record<string, unknown>) => void;
     }) => (
-        <div
-            data-testid="edit-question-view"
-            data-index={props.editingIndex}
-            data-type={props.editingQuestion.type}
-        >
+        <div data-testid="question-builder-form" data-type={props.type}>
             <button type="button" onClick={props.onBack}>
                 Back
             </button>
@@ -50,6 +46,10 @@ vi.mock('sonner', () => ({
 
 vi.mock('@sentinel/hooks', () => ({
     useStableValue: (factory: () => unknown) => factory(),
+    useQuestionTypesQuery: () => ({
+        data: [{ value: 'ESSAY', label: 'Essay' }],
+        isLoading: false,
+    }),
 }));
 
 vi.mock(
@@ -86,20 +86,17 @@ vi.mock(
     }),
 );
 
-vi.mock(
-    '@/app/(protected)/(instructor)/question/bank/import/preview/_components/views/edit-question-view',
-    () => ({
-        EditQuestionView: (props: unknown) =>
-            EditQuestionViewMock(
-                props as {
-                    editingIndex: number;
-                    editingQuestion: { type: string };
-                    onBack: () => void;
-                    onUpdate: (id: string, updates: Record<string, unknown>) => void;
-                },
-            ),
-    }),
-);
+vi.mock('@/features/exams', () => ({
+    QuestionBuilderForm: (props: unknown) =>
+        QuestionBuilderFormMock(
+            props as {
+                type: string;
+                initialData: { type: string };
+                onBack: () => void;
+                onUpdate: (id: string, updates: Record<string, unknown>) => void;
+            },
+        ),
+}));
 
 vi.mock(
     '@/app/(protected)/(instructor)/question/bank/import/preview/_components/layout/preview-loading-state',
@@ -119,7 +116,7 @@ describe('Import preview builder route', () => {
         pushMock.mockReset();
         updateQuestionMock.mockReset();
         transformMock.mockClear();
-        EditQuestionViewMock.mockClear();
+        QuestionBuilderFormMock.mockClear();
     });
 
     afterEach(() => {
@@ -127,14 +124,14 @@ describe('Import preview builder route', () => {
     });
 
     afterAll(() => {
-        EditQuestionViewMock.mockReset();
+        QuestionBuilderFormMock.mockReset();
     });
 
     it('loads the selected preview question and supports back/save flow', () => {
         render(<Page />);
 
         expect(transformMock).toHaveBeenCalledWith(1, expect.any(Object));
-        expect(screen.getByTestId('edit-question-view').getAttribute('data-type')).toBe('ESSAY');
+        expect(screen.getByTestId('question-builder-form').getAttribute('data-type')).toBe('ESSAY');
 
         fireEvent.click(screen.getByRole('button', { name: /save/i }));
         expect(updateQuestionMock).toHaveBeenCalledWith(1, {

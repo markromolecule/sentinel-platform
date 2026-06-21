@@ -23,11 +23,7 @@ export function buildCourseLabel(
 /**
  * Fetches a minimal course summary by ID, optionally scoped to an institution.
  */
-export async function getCourseSummaryById(
-    dbClient: DbClient,
-    id: string,
-    institutionId?: string,
-) {
+export async function getCourseSummaryById(dbClient: DbClient, id: string, institutionId?: string) {
     let query = dbClient
         .selectFrom('courses')
         .select(['course_id', 'code', 'title', 'institution_id'])

@@ -6,7 +6,10 @@ export const DEPARTMENT_INHERITANCE_CONFIG = {
     copyColumns: ['department_name', 'department_code', 'created_by', 'updated_by'],
 };
 
-export function buildDepartmentLabel(name: string | null | undefined, code: string | null | undefined) {
+export function buildDepartmentLabel(
+    name: string | null | undefined,
+    code: string | null | undefined,
+) {
     if (code && name) {
         return `${code} - ${name}`;
     }

@@ -1,8 +1,6 @@
 import { type DbClient } from '@sentinel/db';
 import { updateSectionData } from '../data/update-section';
-import {
-    upsertInheritedOverride,
-} from '../../inheritance/inheritable-write-helper';
+import { upsertInheritedOverride } from '../../inheritance/inheritable-write-helper';
 import { ActivityNotificationService } from '../../../general/notification/services/activity-notification.service';
 import { SECTION_INHERITANCE_CONFIG } from './_utils';
 

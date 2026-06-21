@@ -210,9 +210,7 @@ export async function getEnrolledSubjects(
     searchOrParams?: string | { search?: string; page?: number; limit?: number },
 ): Promise<EnrolledSubjectData[] | PaginatedApiResponse<EnrolledSubjectData>> {
     const params =
-        typeof searchOrParams === 'string'
-            ? { search: searchOrParams }
-            : searchOrParams ?? {};
+        typeof searchOrParams === 'string' ? { search: searchOrParams } : (searchOrParams ?? {});
     const queryParams = new URLSearchParams();
     if (params.search) queryParams.append('search', params.search);
     if (params.page !== undefined) queryParams.append('page', String(params.page));
@@ -261,20 +259,24 @@ export async function getEnrollmentRequests(
 ): Promise<PaginatedApiResponse<EnrollmentRequest>>;
 export async function getEnrollmentRequests(
     apiClient: ApiClientType,
-    statusOrParams?: 'PENDING' | 'APPROVED' | 'REJECTED' | {
-        status?: 'PENDING' | 'APPROVED' | 'REJECTED';
-        search?: string;
-        institutionId?: string;
-        page?: number;
-        limit?: number;
-    },
+    statusOrParams?:
+        | 'PENDING'
+        | 'APPROVED'
+        | 'REJECTED'
+        | {
+              status?: 'PENDING' | 'APPROVED' | 'REJECTED';
+              search?: string;
+              institutionId?: string;
+              page?: number;
+              limit?: number;
+          },
     search?: string,
     institutionId?: string,
 ): Promise<EnrollmentRequest[] | PaginatedApiResponse<EnrollmentRequest>> {
     const params =
         typeof statusOrParams === 'string' || statusOrParams === undefined
             ? { status: statusOrParams, search, institutionId }
-            : statusOrParams ?? {};
+            : (statusOrParams ?? {});
     const queryParams = new URLSearchParams();
     if (params.status) queryParams.append('status', params.status);
     if (params.search) queryParams.append('search', params.search);

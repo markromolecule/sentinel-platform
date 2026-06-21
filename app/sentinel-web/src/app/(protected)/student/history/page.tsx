@@ -86,7 +86,9 @@ function HistoryPageContent() {
                             ref={observerTargetRef}
                             className="text-muted-foreground flex items-center justify-center py-4 text-xs font-semibold"
                         >
-                            {isFetchingNextPage ? 'Loading more history...' : 'Scroll down to load more'}
+                            {isFetchingNextPage
+                                ? 'Loading more history...'
+                                : 'Scroll down to load more'}
                         </div>
                     )}
                 </>

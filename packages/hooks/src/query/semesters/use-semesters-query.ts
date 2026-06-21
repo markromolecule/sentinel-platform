@@ -40,7 +40,9 @@ export function useSemestersQuery(params: UseSemestersQueryArgs = {}) {
                 page: params.page,
                 limit: params.limit,
             });
-            return hasPagination ? (response as unknown as PaginatedApiResponse<Semester>) : response;
+            return hasPagination
+                ? (response as unknown as PaginatedApiResponse<Semester>)
+                : response;
         },
         enabled: isAuthenticatedQueryEnabled && (params.enabled ?? true),
     });

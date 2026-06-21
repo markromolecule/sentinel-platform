@@ -69,9 +69,7 @@ describe('getQuestionBankCollectionsData', () => {
         const dataQuery = createDataQuery(rows);
 
         const dbClient = {
-            selectFrom: vi.fn()
-                .mockReturnValueOnce(countQuery)
-                .mockReturnValueOnce(dataQuery),
+            selectFrom: vi.fn().mockReturnValueOnce(countQuery).mockReturnValueOnce(dataQuery),
         } as any;
 
         const result = await getQuestionBankCollectionsData({
@@ -81,14 +79,8 @@ describe('getQuestionBankCollectionsData', () => {
             filters: { page: 2, pageSize: 2 } as any,
         });
 
-        expect(dbClient.selectFrom).toHaveBeenNthCalledWith(
-            1,
-            'question_bank_collections as qbc',
-        );
-        expect(dbClient.selectFrom).toHaveBeenNthCalledWith(
-            2,
-            'question_bank_collections as qbc',
-        );
+        expect(dbClient.selectFrom).toHaveBeenNthCalledWith(1, 'question_bank_collections as qbc');
+        expect(dbClient.selectFrom).toHaveBeenNthCalledWith(2, 'question_bank_collections as qbc');
         expect(countQuery.executeTakeFirst).toHaveBeenCalledTimes(1);
         expect(dataQuery.limit).toHaveBeenCalledWith(2);
         expect(dataQuery.offset).toHaveBeenCalledWith(2);
@@ -106,9 +98,7 @@ describe('getQuestionBankCollectionsData', () => {
         const countQuery = createCountQuery({ count: '0' });
         const dataQuery = createDataQuery([]);
         const dbClient = {
-            selectFrom: vi.fn()
-                .mockReturnValueOnce(countQuery)
-                .mockReturnValueOnce(dataQuery),
+            selectFrom: vi.fn().mockReturnValueOnce(countQuery).mockReturnValueOnce(dataQuery),
         } as any;
 
         const result = await getQuestionBankCollectionsData({

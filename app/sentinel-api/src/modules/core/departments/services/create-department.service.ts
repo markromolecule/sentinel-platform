@@ -46,10 +46,7 @@ export async function createDepartmentService({
             },
         });
 
-        const institutionName = await getInstitutionName(
-            dbClient,
-            rawDepartment.institution_id,
-        );
+        const institutionName = await getInstitutionName(dbClient, rawDepartment.institution_id);
         const department = {
             institution_id: rawDepartment.institution_id,
             institution_name: institutionName,
@@ -93,8 +90,7 @@ export async function createDepartmentService({
             (code === 'P2010' && message.includes('23505'))
         ) {
             throw new HTTPException(409, {
-                message:
-                    'Department already exists with this name in the selected institution.',
+                message: 'Department already exists with this name in the selected institution.',
             });
         }
         throw error;

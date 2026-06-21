@@ -95,7 +95,9 @@ export const getSubjectOfferingsRouteHandler: AppRouteHandler<
             {
                 message: 'Subject offerings retrieved successfully',
                 data: offerings,
-                ...(Array.isArray(subjectOfferings) ? {} : { pagination: subjectOfferings.pagination }),
+                ...(Array.isArray(subjectOfferings)
+                    ? {}
+                    : { pagination: subjectOfferings.pagination }),
             },
             200,
         );

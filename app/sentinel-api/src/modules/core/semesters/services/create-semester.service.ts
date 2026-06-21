@@ -43,7 +43,10 @@ export async function createSemesterService({
         });
     }
 
-    const institution = await getInstitutionKindData({ dbClient, institutionId: targetInstitutionId });
+    const institution = await getInstitutionKindData({
+        dbClient,
+        institutionId: targetInstitutionId,
+    });
 
     if (institution?.institution_kind === 'CHILD') {
         throw new HTTPException(403, {

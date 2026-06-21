@@ -69,9 +69,7 @@ describe('getQuestionCollectionsData', () => {
         const dataQuery = createDataQuery(rows);
 
         const dbClient = {
-            selectFrom: vi.fn()
-                .mockReturnValueOnce(countQuery)
-                .mockReturnValueOnce(dataQuery),
+            selectFrom: vi.fn().mockReturnValueOnce(countQuery).mockReturnValueOnce(dataQuery),
         } as any;
 
         const result = await getQuestionCollectionsData({
@@ -98,9 +96,7 @@ describe('getQuestionCollectionsData', () => {
         const countQuery = createCountQuery({ count: '0' });
         const dataQuery = createDataQuery([]);
         const dbClient = {
-            selectFrom: vi.fn()
-                .mockReturnValueOnce(countQuery)
-                .mockReturnValueOnce(dataQuery),
+            selectFrom: vi.fn().mockReturnValueOnce(countQuery).mockReturnValueOnce(dataQuery),
         } as any;
 
         const result = await getQuestionCollectionsData({

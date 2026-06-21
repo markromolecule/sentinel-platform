@@ -1,9 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import type { UseQueryResult } from '@tanstack/react-query';
-import {
-    getSubjectClassifications,
-    type PaginatedApiResponse,
-} from '@sentinel/services';
+import { getSubjectClassifications, type PaginatedApiResponse } from '@sentinel/services';
 import { useApi } from '../../api-provider';
 import { SUBJECT_CLASSIFICATION_QUERY_KEYS } from '@sentinel/shared/constants';
 import { useAuthenticatedQueryEnabled } from '../_shared/use-authenticated-query-enabled';

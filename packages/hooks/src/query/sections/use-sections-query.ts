@@ -43,7 +43,9 @@ export function useSectionsQuery(params: UseSectionsQueryArgs = {}) {
                 page: params.page,
                 limit: params.limit,
             });
-            return hasPagination ? (response as unknown as PaginatedApiResponse<Section>) : response;
+            return hasPagination
+                ? (response as unknown as PaginatedApiResponse<Section>)
+                : response;
         },
         enabled: isAuthenticatedQueryEnabled && (params.enabled ?? true),
     });

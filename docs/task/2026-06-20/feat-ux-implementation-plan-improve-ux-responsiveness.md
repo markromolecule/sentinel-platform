@@ -7,10 +7,12 @@ Improve the UX and responsiveness of the Student History and Calendar pages by a
 ### Viable Options
 
 #### Option 1: Basic Layout Styling & In-Memory Client-side Pagination (Simple/Fast)
+
 - **Description**: Adjust wrapper margins on both pages to align left and right layouts. Retain the existing `useExamHistoryQuery` hook fetching all items, but perform client-side slicing and append a scroll listener to simulate lazy rendering of elements.
 - **Tradeoff**: Extremely quick to implement with zero backend changes, but does not address potential database and network loading overhead for accounts with large exam history logs.
 
 #### Option 2: Backend-supported Infinite Scroll with Layout Alignment & Coordinate Calendar Event Themes (Robust/Scalable) [RECOMMENDED]
+
 - **Description**:
     - **Backend**: Update the `/history` endpoint to accept `page`, `limit`, `status`, and `search` query parameters, returning a standardized paginated response using in-memory filter slicing over Kysely results to preserve exact status resolution logic.
     - **Frontend**: Add `useInfiniteExamHistoryQuery` hook in `packages/hooks` utilizing TanStack's `useInfiniteQuery`. Integrate this into `useStudentHistory` and set up an `IntersectionObserver` scroll listener in the history page.
@@ -18,6 +20,7 @@ Improve the UX and responsiveness of the Student History and Calendar pages by a
 - **Tradeoff**: Requires changes across backend, packages, and web frontend layers, but ensures production-grade performance and excellent UX.
 
 #### Option 3: Virtualized History List & Split Calendar Sidebar Desktop View (Creative)
+
 - **Description**: Implement list virtualization (via react-window) for rendering infinite student history items. For the calendar, build a side panel detailing events alongside the calendar grid on desktop screen sizes (split layout), allowing drag-and-drop or immediate note management.
 - **Tradeoff**: Introduces unnecessary dependency overhead, violates component single-responsibility, and exceeds current design boundaries.
 
@@ -37,6 +40,7 @@ We choose **Option 2** because it correctly addresses the performance and scale 
 ## Proposed Changes
 
 ### Phase 1: Backend Pagination Support
+
 **Goal**: Expose paginated endpoints with search and status filtering for student exam history.
 
 - [ ] Modify `getExamHistoryRoute` and schema in `app/sentinel-api/src/modules/examination/history/history.dto.ts` to accept optional `page`, `limit`, `status`, and `search` query parameters, and return pagination metadata.
@@ -50,6 +54,7 @@ We choose **Option 2** because it correctly addresses the performance and scale 
 ---
 
 ### Phase 2: Frontend Hooks & Services
+
 **Goal**: Expose an infinite query hook for fetching paginated exam history records.
 
 - [ ] Modify `getExamHistory` service in `packages/services/src/api/history.ts` to accept optional page, limit, status, and search parameters, returning both the array of items and pagination metadata.
@@ -63,6 +68,7 @@ We choose **Option 2** because it correctly addresses the performance and scale 
 ---
 
 ### Phase 3: Student History Page Layout & Infinite Scroll
+
 **Goal**: Align page layout margins and implement scroll-to-load infinite pagination on the student history page.
 
 - [ ] Modify `useStudentHistory` in `app/sentinel-web/src/app/(protected)/student/history/_hooks/use-student-history/index.ts` to call `useInfiniteExamHistoryQuery` instead of `useExamHistoryQuery`, forwarding search and tab status to the query.
@@ -75,6 +81,7 @@ We choose **Option 2** because it correctly addresses the performance and scale 
 ---
 
 ### Phase 4: Student Calendar Layout & Usability
+
 **Goal**: Align page layout margins and improve UX/color-coding on the student calendar page.
 
 - [ ] Modify `StudentCalendarPage` in `app/sentinel-web/src/app/(protected)/student/calendar/page.tsx` to remove custom max width and padding, replacing them with classes matching classroom details layout, and add start/end time validation logic to notes creation.
@@ -89,15 +96,17 @@ We choose **Option 2** because it correctly addresses the performance and scale 
 ## Verification Plan
 
 ### Automated Tests
+
 - Run backend history module tests: `pnpm --dir app/sentinel-api test`
 - Run shared packages tests: `pnpm --dir packages/hooks test` and `pnpm --dir packages/services test`
 - Run frontend student history and calendar page tests: `pnpm --dir app/sentinel-web test`
 
 ### Manual Verification
+
 - Access `/student/history` in dev mode:
-  - Check left/right alignment matches `/student/classroom` and `/student/classroom/[id]`.
-  - Open Developer Tools -> Network tab, and verify that scrolling down triggers incremental requests to `/history?page=2&limit=...` and loads items lazily.
+    - Check left/right alignment matches `/student/classroom` and `/student/classroom/[id]`.
+    - Open Developer Tools -> Network tab, and verify that scrolling down triggers incremental requests to `/history?page=2&limit=...` and loads items lazily.
 - Access `/student/calendar` in dev mode:
-  - Check left/right alignment.
-  - Verify event pills in grid and details sheet display coordinate colors.
-  - Verify start/end time validation message is displayed when attempting to create a note where end time is before start time.
+    - Check left/right alignment.
+    - Verify event pills in grid and details sheet display coordinate colors.
+    - Verify start/end time validation message is displayed when attempting to create a note where end time is before start time.

@@ -80,7 +80,13 @@ export async function previewStudentEnrollmentService({
     studentNumbers,
     classGroupId,
 }: PreviewStudentEnrollmentServiceArgs) {
-    return previewStudentEnrollmentData({ dbClient, institutionId, userId, studentNumbers, classGroupId });
+    return previewStudentEnrollmentData({
+        dbClient,
+        institutionId,
+        userId,
+        studentNumbers,
+        classGroupId,
+    });
 }
 
 export type PreviewStudentEnrollmentServiceResponse = Awaited<

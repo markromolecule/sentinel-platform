@@ -38,7 +38,9 @@ export function useInstitutionsQuery(params: UseInstitutionsQueryArgs = {}) {
                 page: params.page,
                 limit: params.limit,
             });
-            return hasPagination ? (response as unknown as PaginatedApiResponse<Institution>) : response;
+            return hasPagination
+                ? (response as unknown as PaginatedApiResponse<Institution>)
+                : response;
         },
         enabled: isAuthenticatedQueryEnabled && (params.enabled ?? true),
     });

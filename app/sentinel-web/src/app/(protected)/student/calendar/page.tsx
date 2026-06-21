@@ -140,7 +140,10 @@ export default function StudentCalendarPage() {
     };
 
     return (
-        <div className="animate-in fade-in slide-in-from-bottom-4 flex flex-col gap-5 py-5 duration-500" data-lenis-prevent>
+        <div
+            className="animate-in fade-in slide-in-from-bottom-4 flex flex-col gap-5 py-5 duration-500"
+            data-lenis-prevent
+        >
             {/* Header */}
             <div className="flex flex-col justify-between gap-4 py-4 md:flex-row md:items-center">
                 <div>
@@ -209,7 +212,8 @@ export default function StudentCalendarPage() {
                     <div className="grid gap-4 py-4">
                         {(isCreateError || timeError) && (
                             <div className="bg-destructive/10 border-destructive/20 text-destructive animate-shake rounded-lg border p-3 text-xs font-semibold">
-                                {timeError || createError?.message ||
+                                {timeError ||
+                                    createError?.message ||
                                     'Failed to save note. Please check your inputs.'}
                             </div>
                         )}

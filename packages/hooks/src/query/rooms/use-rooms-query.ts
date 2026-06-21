@@ -24,17 +24,14 @@ export function useRoomsQuery(
     params: UseRoomsQueryArgs & { page: number; limit: number },
 ): UseQueryResult<PaginatedApiResponse<Room>, Error>;
 
-export function useRoomsQuery(
-    searchOrParams?: string | UseRoomsQueryArgs,
-    institutionId?: string,
-) {
+export function useRoomsQuery(searchOrParams?: string | UseRoomsQueryArgs, institutionId?: string) {
     const apiClient = useApi();
     const isAuthenticatedQueryEnabled = useAuthenticatedQueryEnabled();
 
     const params: UseRoomsQueryArgs =
         typeof searchOrParams === 'string'
             ? { search: searchOrParams, institutionId }
-            : searchOrParams ?? {};
+            : (searchOrParams ?? {});
 
     const hasPagination = params.page !== undefined && params.limit !== undefined;
 
@@ -47,12 +44,12 @@ export function useRoomsQuery(
             params.limit,
         ],
         queryFn: async () => {
-            const response = await getRooms(apiClient, {
+            const response = (await getRooms(apiClient, {
                 search: params.search,
                 institutionId: params.institutionId,
                 page: params.page,
                 limit: params.limit,
-            }) as any;
+            })) as any;
             return hasPagination ? (response as PaginatedApiResponse<Room>) : response;
         },
         enabled: isAuthenticatedQueryEnabled && (params.enabled ?? true),

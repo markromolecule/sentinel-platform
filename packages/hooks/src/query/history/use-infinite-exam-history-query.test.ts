@@ -39,9 +39,7 @@ describe('useInfiniteExamHistoryQuery', () => {
 
         const query = useInfiniteExamHistoryQuery(queryParams) as any;
 
-        expect(query.queryKey).toEqual(
-            EXAM_QUERY_KEYS.history({ infinite: true, ...queryParams }),
-        );
+        expect(query.queryKey).toEqual(EXAM_QUERY_KEYS.history({ infinite: true, ...queryParams }));
         expect(getExamHistory).toHaveBeenCalledWith(
             { mockClient: true },
             {

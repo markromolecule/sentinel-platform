@@ -33,11 +33,7 @@ export function buildSemesterLabel(
  * @param id - Term ID
  * @param institutionId - Optional institution context
  */
-export async function getSemesterSummaryById(
-    dbClient: any,
-    id: string,
-    institutionId?: string,
-) {
+export async function getSemesterSummaryById(dbClient: any, id: string, institutionId?: string) {
     let query = dbClient
         .selectFrom('terms')
         .select(['term_id', 'academic_year', 'semester', 'institution_id'])
