@@ -12,6 +12,7 @@ import {
     DataTable,
 } from '@sentinel/ui';
 import { type ColumnDef } from '@tanstack/react-table';
+import { type PaginationState } from '@tanstack/react-table';
 import { useQueryClient } from '@tanstack/react-query';
 import { type SubjectOffering } from '@sentinel/shared/types';
 import { SUBJECT_OFFERING_QUERY_KEYS, SUBJECT_QUERY_KEYS } from '@sentinel/shared/constants';
@@ -30,6 +31,11 @@ interface OfferedSubjectsListProps {
     onSearchChange?: (value: string) => void;
     isLoading?: boolean;
     canDeleteOfferings?: boolean;
+    pagination?: PaginationState;
+    onPaginationChange?: (pagination: PaginationState) => void;
+    pageCount?: number;
+    totalCount?: number;
+    manualPagination?: boolean;
 }
 
 export function OfferedSubjectsList({
@@ -39,6 +45,11 @@ export function OfferedSubjectsList({
     onSearchChange,
     isLoading = false,
     canDeleteOfferings = false,
+    pagination,
+    onPaginationChange,
+    pageCount,
+    totalCount,
+    manualPagination = false,
 }: OfferedSubjectsListProps) {
     const [rowSelection, setRowSelection] = useState<Record<string, boolean>>({});
     const [bulkDeleteOpen, setBulkDeleteOpen] = useState(false);
@@ -87,6 +98,11 @@ export function OfferedSubjectsList({
                     inheritanceStatus: false,
                     updatedAt: false,
                 }}
+                pagination={pagination}
+                onPaginationChange={onPaginationChange}
+                pageCount={pageCount}
+                totalCount={totalCount}
+                manualPagination={manualPagination}
             />
 
             {canDeleteOfferings && (

@@ -5,10 +5,11 @@ import {
     useDebounce,
     useEnrolledSubjectsQuery,
     useEnrollmentRequestsQuery,
+    useServerPagination,
     useStableValue,
     useSubjectOfferingsQuery,
 } from '@sentinel/hooks';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { PermissionDeniedState } from '@sentinel/ui';
 import { createInstructorOfferedSubjectColumns } from './_components/instructor-offered-subject-columns';
 import { InstructorOfferedSubjectsList } from './_components/instructor-offered-subjects-list';
@@ -21,15 +22,18 @@ import { SubjectPageShell } from '../_components/layout';
 export default function InstructorOfferedSubjectsPage() {
     const [searchTerm, setSearchTerm] = useState('');
     const debouncedSearch = useDebounce(searchTerm, 500);
+    const { pagination, setPagination } = useServerPagination([debouncedSearch]);
 
     const {
-        data: offerings = [],
+        data: offeringsResponse,
         isLoading,
         isError,
         error: offeringsError,
     } = useSubjectOfferingsQuery({
         search: debouncedSearch,
         visibility: 'requestable',
+        page: pagination.pageIndex + 1,
+        limit: pagination.pageSize,
     });
     const { data: enrolledSubjects = [], error: enrolledSubjectsError } =
         useEnrolledSubjectsQuery();
@@ -67,6 +71,15 @@ export default function InstructorOfferedSubjectsPage() {
             }),
         [existingRequestStatusMap],
     );
+    const offerings = Array.isArray(offeringsResponse)
+        ? offeringsResponse
+        : offeringsResponse?.items ?? [];
+    const totalCount = Array.isArray(offeringsResponse)
+        ? offeringsResponse.length
+        : offeringsResponse?.pagination?.total ?? 0;
+    const pageCount = Array.isArray(offeringsResponse)
+        ? 1
+        : offeringsResponse?.pagination?.totalPages ?? 1;
 
     return (
         <SubjectPageShell
@@ -83,6 +96,11 @@ export default function InstructorOfferedSubjectsPage() {
                         searchTerm={searchTerm}
                         onSearchChange={setSearchTerm}
                         isLoading={isLoading}
+                        pagination={pagination}
+                        onPaginationChange={setPagination}
+                        pageCount={pageCount}
+                        totalCount={totalCount}
+                        manualPagination
                     />
 
                     {isError && (

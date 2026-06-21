@@ -1,6 +1,6 @@
 'use client';
 
-import { useDebounce, useSemestersQuery, isPermissionDeniedError } from '@sentinel/hooks';
+import { useDebounce, useSemestersQuery, isPermissionDeniedError, useServerPagination } from '@sentinel/hooks';
 import { useState } from 'react';
 import { AddSemesterDialog, SemestersList } from './_components';
 import { PermissionDeniedState } from '@sentinel/ui';
@@ -9,14 +9,28 @@ import { OrganizationPageShell } from '../_components/layout';
 export default function CoreSemestersPage() {
     const [searchTerm, setSearchTerm] = useState('');
     const debouncedSearch = useDebounce(searchTerm, 500);
+    const { pagination, setPagination } = useServerPagination([debouncedSearch]);
 
     const {
-        data: semesters = [],
+        data: semestersResponse,
         isLoading,
         isError,
         error,
-    } = useSemestersQuery({ search: debouncedSearch });
+    } = useSemestersQuery({
+        search: debouncedSearch,
+        page: pagination.pageIndex + 1,
+        limit: pagination.pageSize,
+    });
     const isViewDenied = isPermissionDeniedError(error, 'semesters:view');
+    const semesters = Array.isArray(semestersResponse)
+        ? semestersResponse
+        : semestersResponse?.items ?? [];
+    const totalCount = Array.isArray(semestersResponse)
+        ? semestersResponse.length
+        : semestersResponse?.pagination?.total ?? 0;
+    const pageCount = Array.isArray(semestersResponse)
+        ? 1
+        : semestersResponse?.pagination?.totalPages ?? 1;
 
     const actions = !isViewDenied ? <AddSemesterDialog /> : undefined;
 
@@ -35,6 +49,11 @@ export default function CoreSemestersPage() {
                         searchTerm={searchTerm}
                         onSearchChange={setSearchTerm}
                         isLoading={isLoading}
+                        pagination={pagination}
+                        onPaginationChange={setPagination}
+                        pageCount={pageCount}
+                        totalCount={totalCount}
+                        manualPagination
                     />
 
                     {isLoading && semesters.length === 0 && (

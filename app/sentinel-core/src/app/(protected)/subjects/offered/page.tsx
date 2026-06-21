@@ -10,6 +10,7 @@ import {
     useStableIdMap,
     useStableValue,
     useSubjectOfferingsQuery,
+    useServerPagination,
 } from '@sentinel/hooks';
 import { useState } from 'react';
 import {
@@ -29,16 +30,19 @@ export default function SharedOfferedSubjectsPage() {
     const [searchTerm, setSearchTerm] = useState('');
     const [offerSubjectOpen, setOfferSubjectOpen] = useState(false);
     const debouncedSearch = useDebounce(searchTerm, 500);
+    const { pagination, setPagination } = useServerPagination([debouncedSearch]);
     const { hasPermission } = useActivePermissions();
     const canOfferSubject = hasPermission('subject_offerings:offer');
 
     const {
-        data: offerings = [],
+        data: offeringsResponse,
         isLoading,
         isError,
         error: offeringsError,
     } = useSubjectOfferingsQuery({
         search: debouncedSearch,
+        page: pagination.pageIndex + 1,
+        limit: pagination.pageSize,
     });
     const { data: departments = [], error: departmentsError } = useDepartmentsQuery();
     const { data: courses = [], error: coursesError } = useCoursesQuery();
@@ -59,6 +63,15 @@ export default function SharedOfferedSubjectsPage() {
     const sectionLabelMap = useStableIdMap(sections, (section) => section.name);
 
     const canDeleteOfferings = hasPermission('subject_offerings:delete');
+    const offerings = Array.isArray(offeringsResponse)
+        ? offeringsResponse
+        : offeringsResponse?.items ?? [];
+    const totalCount = Array.isArray(offeringsResponse)
+        ? offeringsResponse.length
+        : offeringsResponse?.pagination?.total ?? 0;
+    const pageCount = Array.isArray(offeringsResponse)
+        ? 1
+        : offeringsResponse?.pagination?.totalPages ?? 1;
 
     const columns = useStableValue(
         () =>
@@ -102,6 +115,11 @@ export default function SharedOfferedSubjectsPage() {
                         onSearchChange={setSearchTerm}
                         isLoading={isLoading}
                         canDeleteOfferings={canDeleteOfferings}
+                        pagination={pagination}
+                        onPaginationChange={setPagination}
+                        pageCount={pageCount}
+                        totalCount={totalCount}
+                        manualPagination
                     />
 
                     {isError && (

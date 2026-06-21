@@ -5,6 +5,7 @@ import {
     useSectionsQuery,
     isPermissionDeniedError,
     useActivePermissions,
+    useServerPagination,
 } from '@sentinel/hooks';
 import { useState } from 'react';
 import {
@@ -18,15 +19,27 @@ import { PermissionGate } from '@/features/administration/shared/permission-gate
 export default function AdminSectionsPage() {
     const [searchTerm, setSearchTerm] = useState('');
     const debouncedSearch = useDebounce(searchTerm, 500);
+    const { pagination, setPagination } = useServerPagination([debouncedSearch]);
     const { hasPermission } = useActivePermissions();
 
     const {
-        data: sections = [],
+        data: sectionsResponse,
         isLoading,
         isError,
         error,
-    } = useSectionsQuery({ search: debouncedSearch });
+    } = useSectionsQuery({
+        search: debouncedSearch,
+        page: pagination.pageIndex + 1,
+        limit: pagination.pageSize,
+    });
     const isViewDenied = isPermissionDeniedError(error, 'sections:view');
+    const sections = Array.isArray(sectionsResponse) ? sectionsResponse : sectionsResponse?.items ?? [];
+    const totalCount = Array.isArray(sectionsResponse)
+        ? sectionsResponse.length
+        : sectionsResponse?.pagination?.total ?? 0;
+    const pageCount = Array.isArray(sectionsResponse)
+        ? 1
+        : sectionsResponse?.pagination?.totalPages ?? 1;
 
     return (
         <div className="flex flex-col gap-6 p-4 md:p-6">
@@ -53,6 +66,11 @@ export default function AdminSectionsPage() {
                         searchTerm={searchTerm}
                         onSearchChange={setSearchTerm}
                         isLoading={isLoading}
+                        pagination={pagination}
+                        onPaginationChange={setPagination}
+                        pageCount={pageCount}
+                        totalCount={totalCount}
+                        manualPagination
                     />
 
                     {isLoading && sections.length === 0 && (

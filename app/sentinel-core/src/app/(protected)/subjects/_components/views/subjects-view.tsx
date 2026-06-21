@@ -1,13 +1,13 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { type PaginationState } from '@tanstack/react-table';
+import { useState } from 'react';
 import {
     isPermissionDeniedError,
     useActivePermissions,
     useDebounce,
     useStableValue,
     useSubjectsQuery,
+    useServerPagination,
 } from '@sentinel/hooks';
 import {
     createMasterColumns,
@@ -24,19 +24,10 @@ import { useAcademicScope } from '@/hooks/use-academic-scope';
 export function SubjectsView() {
     const [searchTerm, setSearchTerm] = useState('');
     const [offerSubjectOpen, setOfferSubjectOpen] = useState(false);
-    const [pagination, setPagination] = useState<PaginationState>({
-        pageIndex: 0,
-        pageSize: 10,
-    });
     const debouncedSearch = useDebounce(searchTerm, 500);
     const { role, institutionId } = useAcademicScope();
     const { hasPermission } = useActivePermissions();
-
-    useEffect(() => {
-        setPagination((current) =>
-            current.pageIndex === 0 ? current : { ...current, pageIndex: 0 },
-        );
-    }, [debouncedSearch, institutionId]);
+    const { pagination, setPagination } = useServerPagination([debouncedSearch, institutionId]);
 
     const isCatalogManager = role === 'superadmin';
     const canCreateSubject = hasPermission('subjects:create');

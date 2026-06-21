@@ -1,6 +1,6 @@
 'use client';
 
-import { useDebounce, useRoomsQuery, isPermissionDeniedError } from '@sentinel/hooks';
+import { useDebounce, useRoomsQuery, isPermissionDeniedError, useServerPagination } from '@sentinel/hooks';
 import { useState } from 'react';
 import {
     AddRoomDialog,
@@ -13,7 +13,23 @@ export default function SupportRoomsPage() {
     const [searchTerm, setSearchTerm] = useState('');
     const debouncedSearch = useDebounce(searchTerm, 500);
 
-    const { data: rooms = [], isLoading, isError, error } = useRoomsQuery(debouncedSearch);
+    const { pagination, setPagination } = useServerPagination([debouncedSearch]);
+
+    const {
+        data: roomsResponse,
+        isLoading,
+        isError,
+        error,
+    } = useRoomsQuery({
+        search: debouncedSearch,
+        page: pagination.pageIndex + 1,
+        limit: pagination.pageSize,
+    });
+
+    const rooms = roomsResponse?.items ?? [];
+    const pageCount = roomsResponse?.pagination?.totalPages ?? 1;
+    const totalCount = roomsResponse?.pagination?.total ?? 0;
+
     const isViewDenied = isPermissionDeniedError(error, 'rooms:view');
 
     return (
@@ -40,6 +56,11 @@ export default function SupportRoomsPage() {
                         searchTerm={searchTerm}
                         onSearchChange={setSearchTerm}
                         isLoading={isLoading}
+                        pagination={pagination}
+                        onPaginationChange={setPagination}
+                        pageCount={pageCount}
+                        totalCount={totalCount}
+                        manualPagination={true}
                     />
 
                     {isLoading && rooms.length === 0 && (

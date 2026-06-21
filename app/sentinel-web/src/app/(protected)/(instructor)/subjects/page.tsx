@@ -1,6 +1,6 @@
 'use client';
 
-import { isPermissionDeniedError, useDebounce } from '@sentinel/hooks';
+import { isPermissionDeniedError, useDebounce, useServerPagination } from '@sentinel/hooks';
 import { useState } from 'react';
 import { useSubjectsList } from '@/app/(protected)/(instructor)/subjects/_hooks/use-subjects-list';
 import { SubjectsList } from '@/app/(protected)/(instructor)/subjects/_components/views/subjects-list';
@@ -16,9 +16,17 @@ import { SubjectPageShell } from './_components/layout';
 export default function SubjectsPage() {
     const [searchTerm, setSearchTerm] = useState('');
     const debouncedSearch = useDebounce(searchTerm, 500);
+    const { pagination, setPagination } = useServerPagination([debouncedSearch]);
 
-    const { subjects, isLoading, isError, error } = useSubjectsList(debouncedSearch);
+    const { subjects, isLoading, isError, error, pagination: subjectsPagination } =
+        useSubjectsList({
+            search: debouncedSearch,
+            page: pagination.pageIndex + 1,
+            limit: pagination.pageSize,
+        });
     const isViewDenied = isPermissionDeniedError(error, 'subject_requests:view');
+    const totalCount = subjectsPagination?.total ?? 0;
+    const pageCount = subjectsPagination?.totalPages ?? 1;
 
     const actions = (
         <div className="flex items-center gap-2">
@@ -41,6 +49,11 @@ export default function SubjectsPage() {
                             subjects={subjects}
                             searchTerm={searchTerm}
                             onSearchChange={setSearchTerm}
+                            pagination={pagination}
+                            onPaginationChange={setPagination}
+                            pageCount={pageCount}
+                            totalCount={totalCount}
+                            manualPagination
                         />
                     ) : !isLoading && subjects.length === 0 ? (
                         <SubjectsEmptyState />

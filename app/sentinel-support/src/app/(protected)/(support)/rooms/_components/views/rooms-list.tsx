@@ -22,6 +22,7 @@ import {
 import { type Room } from '@sentinel/shared/types';
 import { columns } from '@/app/(protected)/(support)/rooms/_components/tables/columns';
 import { RoomsEmptyState } from './rooms-empty-state';
+import { type PaginationState } from '@tanstack/react-table';
 import { useState } from 'react';
 import { Trash2 } from 'lucide-react';
 
@@ -31,6 +32,11 @@ interface RoomsListProps {
     searchTerm?: string;
     onSearchChange?: (value: string) => void;
     isLoading?: boolean;
+    pagination?: PaginationState;
+    onPaginationChange?: (pagination: PaginationState) => void;
+    pageCount?: number;
+    totalCount?: number;
+    manualPagination?: boolean;
 }
 
 export function RoomsList({
@@ -38,6 +44,11 @@ export function RoomsList({
     searchTerm,
     onSearchChange,
     isLoading = false,
+    pagination,
+    onPaginationChange,
+    pageCount,
+    totalCount,
+    manualPagination,
 }: RoomsListProps) {
     const { data: institutions = [] } = useInstitutionsQuery();
     const [rowSelection, setRowSelection] = useState({});
@@ -105,6 +116,11 @@ export function RoomsList({
                 emptyContent={<RoomsEmptyState searchTerm={searchTerm} />}
                 rowSelection={rowSelection}
                 onRowSelectionChange={setRowSelection}
+                pagination={pagination}
+                onPaginationChange={onPaginationChange}
+                pageCount={pageCount}
+                totalCount={totalCount}
+                manualPagination={manualPagination}
                 toolbarActions={
                     selectedIds.length > 0 ? (
                         <Button

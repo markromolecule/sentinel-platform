@@ -1,11 +1,9 @@
 'use client';
 
-import {
-    useEnrolledSubjectsQuery,
-    useEnrollmentRequestsQuery,
-    useStableValue,
-} from '@sentinel/hooks';
+import { useEnrolledSubjectsQuery, useEnrollmentRequestsQuery, useStableValue } from '@sentinel/hooks';
 import { Subject, EnrolledSubjectData, EnrollmentRequest } from '@sentinel/shared/types';
+import type { PaginationState } from '@tanstack/react-table';
+import { type PaginatedApiResponse } from '@sentinel/services';
 import {
     buildCourseSummary,
     buildDepartmentSummary,
@@ -24,7 +22,6 @@ function joinCodes(codes?: string[] | null, fallback?: string | null) {
     return fallback || '';
 }
 
-// 1. Extract mappers to separate pure functions
 const mapEnrolledToSubject = (
     s: EnrolledSubjectData,
     approvedRequest?: EnrollmentRequest,
@@ -127,49 +124,133 @@ const mapRequestToSubject = (r: EnrollmentRequest): Subject => ({
     createdBy: r.instructor_name || '',
 });
 
-export function useSubjectsList(search?: string): {
+type UseSubjectsListArgs = {
+    search?: string;
+    page?: number;
+    limit?: number;
+};
+
+type UseSubjectsListResult = {
     subjects: Subject[];
     isLoading: boolean;
     isError: boolean;
     error: Error | null;
-} {
+    pagination?: PaginationState & {
+        total: number;
+        totalPages: number;
+        hasMore: boolean;
+    };
+};
+
+/**
+ * Fetches and merges the instructor subjects view, optionally using paginated API calls.
+ */
+export function useSubjectsList(search?: string): UseSubjectsListResult;
+export function useSubjectsList(params: UseSubjectsListArgs): UseSubjectsListResult;
+export function useSubjectsList(searchOrParams?: string | UseSubjectsListArgs): UseSubjectsListResult {
+    const params =
+        typeof searchOrParams === 'string' ? { search: searchOrParams } : (searchOrParams ?? {});
+    const hasPagination = params.page !== undefined && params.limit !== undefined;
+
     const {
         data: enrolledRaw = [],
         isLoading: isLoadingEnrolled,
         isError: isErrorEnrolled,
         error: enrolledError,
-    } = useEnrolledSubjectsQuery(search);
+    } = useEnrolledSubjectsQuery(
+        (hasPagination
+            ? {
+                search: params.search,
+                page: params.page,
+                limit: params.limit,
+            }
+            : params.search) as any,
+    );
 
     const {
         data: requestsRaw = [],
         isLoading: isLoadingRequests,
         isError: isErrorRequests,
         error: requestsError,
-    } = useEnrollmentRequestsQuery(undefined, search);
+    } = useEnrollmentRequestsQuery(
+        (hasPagination
+            ? {
+                search: params.search,
+                page: params.page,
+                limit: params.limit,
+            }
+            : undefined) as any,
+        (hasPagination ? undefined : params.search) as any,
+    );
 
-    // 2. Memoize the transformation and combination logic
+    const enrolledItems = Array.isArray(enrolledRaw)
+        ? enrolledRaw
+        : (enrolledRaw as PaginatedApiResponse<EnrolledSubjectData>).items ?? [];
+
+    const requestItems = Array.isArray(requestsRaw)
+        ? requestsRaw
+        : (requestsRaw as PaginatedApiResponse<EnrollmentRequest>).items ?? [];
+
     const subjects = useStableValue(() => {
-        if (!enrolledRaw.length && !requestsRaw.length) return [];
+        if (!enrolledItems.length && !requestItems.length) return [];
 
         const approvedRequestMap = new Map(
-            requestsRaw
+            requestItems
                 .filter((request) => request.status === 'APPROVED')
                 .map((request) => [request.subject_offering_id, request]),
         );
-        const enrolled = enrolledRaw.map((subject) =>
+        const enrolled = enrolledItems.map((subject) =>
             mapEnrolledToSubject(subject, approvedRequestMap.get(subject.subject_offering_id)),
         );
-        const validRequests = requestsRaw
+        const validRequests = requestItems
             .filter((r) => r.status !== 'APPROVED')
             .map(mapRequestToSubject);
 
         return [...enrolled, ...validRequests];
-    }, [enrolledRaw, requestsRaw]);
+    }, [enrolledItems, requestItems]);
+
+    const pagination = useStableValue(() => {
+        if (!hasPagination) {
+            return undefined;
+        }
+
+        const enrolledPagination = (!Array.isArray(enrolledRaw) ? (enrolledRaw as any).pagination : undefined) as
+            | {
+                page: number;
+                pageSize: number;
+                total: number;
+                totalPages: number;
+                hasMore: boolean;
+            }
+            | undefined;
+        const requestPagination = (!Array.isArray(requestsRaw) ? (requestsRaw as any).pagination : undefined) as
+            | {
+                page: number;
+                pageSize: number;
+                total: number;
+                totalPages: number;
+                hasMore: boolean;
+            }
+            | undefined;
+
+        const pageSize = enrolledPagination?.pageSize ?? requestPagination?.pageSize ?? params.limit ?? 10;
+        const total = (enrolledPagination?.total ?? enrolledItems.length) + (requestPagination?.total ?? requestItems.length);
+        const totalPages = Math.max(enrolledPagination?.totalPages ?? 1, requestPagination?.totalPages ?? 1);
+
+        return {
+            pageIndex: (params.page ?? 1) - 1,
+            pageSize,
+            total,
+            totalPages,
+            hasMore: enrolledPagination?.hasMore || requestPagination?.hasMore || false,
+        };
+    }, [enrolledItems.length, hasPagination, params.limit, params.page, requestItems.length, enrolledRaw, requestsRaw]);
 
     return {
         subjects,
         isLoading: isLoadingEnrolled || isLoadingRequests,
         isError: isErrorEnrolled || isErrorRequests,
         error: (enrolledError as Error | null) || (requestsError as Error | null) || null,
+        pagination,
     };
 }

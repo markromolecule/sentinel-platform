@@ -7,5 +7,6 @@ export const metadata: Metadata = {
 };
 
 export default function Page() {
+    // The feature component now owns the server-side pagination state.
     return <CoursesPage />;
 }

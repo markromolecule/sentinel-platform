@@ -5,6 +5,7 @@ import {
     useDebounce,
     useInstitutionsQuery,
     useStableValue,
+    useServerPagination,
 } from '@sentinel/hooks';
 import { useState, useMemo, Suspense } from 'react';
 import Link from 'next/link';
@@ -26,18 +27,33 @@ function SupportInstitutionsPageContent() {
     const parentId = searchParams.get('parentId');
     const [editParentOpen, setEditParentOpen] = useState(false);
 
+    const { pagination, setPagination } = useServerPagination([debouncedSearch]);
+
     const {
-        data: institutions = [],
+        data: institutionsResponse,
         isLoading,
         isError,
         error,
-    } = useInstitutionsQuery({ search: debouncedSearch });
+    } = useInstitutionsQuery({
+        search: debouncedSearch,
+        page: pagination.pageIndex + 1,
+        limit: pagination.pageSize,
+    });
+
+    const institutions = useStableValue(
+        () => institutionsResponse?.items ?? [],
+        [institutionsResponse],
+    );
+
     const visibleInstitutions = useStableValue(() => {
         if (parentId) {
             return institutions.filter((i) => i.parentInstitutionId === parentId);
         }
         return institutions.filter((i) => i.institutionKind !== 'CHILD');
     }, [institutions, parentId]);
+
+    const pageCount = institutionsResponse?.pagination?.totalPages ?? 1;
+    const totalCount = institutionsResponse?.pagination?.total ?? 0;
 
     const parentInstitution = useMemo(
         () => institutions.find((i) => i.id === parentId),
@@ -62,7 +78,7 @@ function SupportInstitutionsPageContent() {
                 }
             >
                 {!isViewDenied ? (
-                    <div className="flex flex-wrap gap-2">
+                     <div className="flex flex-wrap gap-2">
                         {parentId ? (
                             <>
                                 <Button
@@ -118,6 +134,11 @@ function SupportInstitutionsPageContent() {
                         searchTerm={searchTerm}
                         onSearchChange={setSearchTerm}
                         isLoading={isLoading}
+                        pagination={pagination}
+                        onPaginationChange={setPagination}
+                        pageCount={pageCount}
+                        totalCount={totalCount}
+                        manualPagination={true}
                     />
 
                     {isInitialLoading && (

@@ -1,9 +1,10 @@
 'use client';
 
-import { Card, SearchBar } from '@sentinel/ui';
+import { Button, Card, SearchBar } from '@sentinel/ui';
 import { type SubjectClassification } from '@sentinel/shared/types';
 import { SubjectClassificationCard } from '../cards/subject-classification-card';
 import { SubjectClassificationsEmptyState } from './subject-classifications-empty-state';
+import { type PaginationState } from '@tanstack/react-table';
 
 interface SubjectClassificationsListProps {
     classifications: SubjectClassification[];
@@ -16,6 +17,10 @@ interface SubjectClassificationsListProps {
     onCreate?: () => void;
     canOffer?: boolean;
     canDelete?: boolean;
+    pagination?: PaginationState;
+    onPaginationChange?: (pagination: PaginationState) => void;
+    pageCount?: number;
+    totalCount?: number;
 }
 
 export function SubjectClassificationsList({
@@ -29,7 +34,16 @@ export function SubjectClassificationsList({
     onCreate,
     canOffer = false,
     canDelete = false,
+    pagination,
+    onPaginationChange,
+    pageCount = 1,
+    totalCount,
 }: SubjectClassificationsListProps) {
+    const canGoPrevious = Boolean(pagination && onPaginationChange && pagination.pageIndex > 0);
+    const canGoNext = Boolean(
+        pagination && onPaginationChange && pagination.pageIndex < pageCount - 1,
+    );
+
     return (
         <div className="space-y-6">
             <div className="flex items-center justify-between gap-4">
@@ -42,7 +56,7 @@ export function SubjectClassificationsList({
                 </div>
                 {!isLoading && classifications.length > 0 && (
                     <div className="text-muted-foreground hidden text-sm font-medium md:block">
-                        Total: {classifications.length} Groups
+                        Total: {totalCount ?? classifications.length} Groups
                     </div>
                 )}
             </div>
@@ -73,6 +87,42 @@ export function SubjectClassificationsList({
                     onCreate={onCreate}
                 />
             )}
+
+            {pagination && onPaginationChange && pageCount > 1 ? (
+                <div className="flex items-center justify-between gap-3 border-t pt-4">
+                    <div className="text-muted-foreground text-sm">
+                        Page {pagination.pageIndex + 1} of {pageCount}
+                    </div>
+                    <div className="flex items-center gap-2">
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() =>
+                                onPaginationChange({
+                                    ...pagination,
+                                    pageIndex: Math.max(0, pagination.pageIndex - 1),
+                                })
+                            }
+                            disabled={!canGoPrevious}
+                        >
+                            Previous
+                        </Button>
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() =>
+                                onPaginationChange({
+                                    ...pagination,
+                                    pageIndex: Math.min(pageCount - 1, pagination.pageIndex + 1),
+                                })
+                            }
+                            disabled={!canGoNext}
+                        >
+                            Next
+                        </Button>
+                    </div>
+                </div>
+            ) : null}
         </div>
     );
 }

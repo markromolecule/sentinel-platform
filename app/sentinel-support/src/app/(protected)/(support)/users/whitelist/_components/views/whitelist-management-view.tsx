@@ -1,8 +1,6 @@
-'use client';
-
-import { useState, useMemo, useLayoutEffect } from 'react';
+import { useState, useMemo, useLayoutEffect, useEffect } from 'react';
 import { Loader2 } from 'lucide-react';
-import { ColumnFiltersState } from '@tanstack/react-table';
+import { ColumnFiltersState, type PaginationState } from '@tanstack/react-table';
 import {
     useDebounce,
     useInstitutionsQuery,
@@ -50,7 +48,18 @@ export function WhitelistManagementView({
 
     const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
 
+    const [pagination, setPagination] = useState<PaginationState>({
+        pageIndex: 0,
+        pageSize: 10,
+    });
+
     const debouncedSearch = useDebounce(search, 500);
+
+    useEffect(() => {
+        setPagination((current) =>
+            current.pageIndex === 0 ? current : { ...current, pageIndex: 0 },
+        );
+    }, [debouncedSearch, selectedInstitutionId, selectedDepartmentId, selectedCourseId]);
 
     const { data: institutions = [] } = useInstitutionsQuery();
 
@@ -81,11 +90,19 @@ export function WhitelistManagementView({
             institution_id: selectedInstitutionId,
             department_id: selectedDepartmentId,
             course_id: selectedCourseId,
+            page: pagination.pageIndex + 1,
+            limit: pagination.pageSize,
         }),
-        [debouncedSearch, selectedInstitutionId, selectedDepartmentId, selectedCourseId],
+        [debouncedSearch, selectedInstitutionId, selectedDepartmentId, selectedCourseId, pagination],
     );
 
-    const { data: records = [], isLoading, error } = useStudentWhitelistQuery(whitelistParams);
+    const { data: recordsResponse, isLoading, error } = useStudentWhitelistQuery(whitelistParams);
+
+    const records = recordsResponse?.items ?? [];
+    const totalCount = recordsResponse?.pagination?.total ?? 0;
+    const pageCount = recordsResponse?.pagination
+        ? Math.max(1, Math.ceil(totalCount / pagination.pageSize))
+        : 1;
 
     const institutionFacetOptions = useInstitutionFacet({ institutions });
 
@@ -138,6 +155,10 @@ export function WhitelistManagementView({
                 facets={facets}
                 columnFilters={columnFilters}
                 onColumnFiltersChange={setColumnFilters}
+                pagination={pagination}
+                onPaginationChange={setPagination}
+                pageCount={pageCount}
+                totalCount={totalCount}
             />
 
             {isLoading && (
@@ -169,3 +190,4 @@ export function WhitelistManagementView({
         </div>
     );
 }
+

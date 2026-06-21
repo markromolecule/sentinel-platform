@@ -1,17 +1,15 @@
 import { useDeferredValue, useState } from 'react';
 import type { ColumnFiltersState, ColumnFilter } from '@tanstack/react-table';
-import { useQuestionsQuery, useStableValue } from '@sentinel/hooks';
+import { useQuestionsQuery, useServerPagination, useStableValue } from '@sentinel/hooks';
 import type { QuestionType, QuestionDifficulty } from '@sentinel/shared/types';
 
 export function useQuestionBankFilters() {
     const [searchQuery, setSearchQueryState] = useState('');
     const [columnFilters, setColumnFiltersState] = useState<ColumnFiltersState>([]);
-    const [pagination, setPaginationState] = useState({
-        pageIndex: 0,
-        pageSize: 10,
-    });
 
     const deferredSearchQuery = useDeferredValue(searchQuery);
+
+    const { pagination, setPagination } = useServerPagination([deferredSearchQuery, columnFilters]);
 
     const typeFilter = useStableValue(
         () =>
@@ -43,16 +41,10 @@ export function useQuestionBankFilters() {
 
     const setSearchQuery = (value: string) => {
         setSearchQueryState(value);
-        setPaginationState((current) => ({ ...current, pageIndex: 0 }));
-    };
-
-    const setPagination = (nextPagination: { pageIndex: number; pageSize: number }) => {
-        setPaginationState(nextPagination);
     };
 
     const setColumnFilters = (nextFilters: ColumnFiltersState) => {
         setColumnFiltersState(nextFilters);
-        setPaginationState((current) => ({ ...current, pageIndex: 0 }));
     };
 
     return {

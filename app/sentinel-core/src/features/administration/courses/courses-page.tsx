@@ -5,6 +5,7 @@ import {
     useActivePermissions,
     useCoursesQuery,
     useDebounce,
+    useServerPagination,
 } from '@sentinel/hooks';
 import { useState } from 'react';
 import { PageHeader, PermissionDeniedState, Separator } from '@sentinel/ui';
@@ -18,18 +19,30 @@ import { useAcademicScope } from '@/hooks/use-academic-scope';
 export function CoursesPage() {
     const [searchTerm, setSearchTerm] = useState('');
     const debouncedSearch = useDebounce(searchTerm, 500);
+    const { pagination, setPagination } = useServerPagination([debouncedSearch]);
     const { isReadOnlyFor } = useAcademicScope();
     const { hasPermission } = useActivePermissions();
 
     const {
-        data: courses = [],
+        data: coursesResponse,
         isLoading,
         isError,
         error,
-    } = useCoursesQuery({ search: debouncedSearch });
+    } = useCoursesQuery({
+        search: debouncedSearch,
+        page: pagination.pageIndex + 1,
+        limit: pagination.pageSize,
+    });
     const isCourseViewDenied = isPermissionDeniedError(error, 'courses:view');
     const isCoursesReadOnly = isReadOnlyFor('courses');
     const canCreateCourse = hasPermission('courses:create') && !isCoursesReadOnly;
+    const courses = Array.isArray(coursesResponse) ? coursesResponse : coursesResponse?.items ?? [];
+    const totalCount = Array.isArray(coursesResponse)
+        ? coursesResponse.length
+        : coursesResponse?.pagination?.total ?? 0;
+    const pageCount = Array.isArray(coursesResponse)
+        ? 1
+        : coursesResponse?.pagination?.totalPages ?? 1;
 
     return (
         <div className="flex flex-col gap-6 p-4 md:p-6">
@@ -50,6 +63,11 @@ export function CoursesPage() {
                         searchTerm={searchTerm}
                         onSearchChange={setSearchTerm}
                         isLoading={isLoading}
+                        pagination={pagination}
+                        onPaginationChange={setPagination}
+                        pageCount={pageCount}
+                        totalCount={totalCount}
+                        manualPagination
                     />
 
                     {isLoading && courses.length === 0 && (

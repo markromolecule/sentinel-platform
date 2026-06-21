@@ -11,6 +11,7 @@ import {
     useInstitutionsQuery,
     useSectionsQuery,
     useUpdateSectionMutation,
+    useServerPagination,
 } from '@sentinel/hooks';
 import { sectionSchema, type SectionFormValues } from '@sentinel/shared/schema';
 import { Section } from '@sentinel/shared/types';
@@ -34,6 +35,7 @@ export function useSectionsPageState() {
         selectedInstitutionId || '',
     );
     const debouncedSearch = useDebounce(searchTerm, 500);
+    const { pagination, setPagination } = useServerPagination([debouncedSearch]);
     const { data: institutions = [] } = useInstitutionsQuery();
     const selectedInstitution = institutions.find(
         (institution) => institution.id === selectedInstitutionId,
@@ -41,14 +43,20 @@ export function useSectionsPageState() {
     const parentInstitutionId = selectedInstitution?.parentInstitutionId ?? '';
 
     const {
-        data: sections = [],
+        data: sectionsResponse,
         isLoading,
         isError,
         error,
     } = useSectionsQuery({
         search: debouncedSearch,
         institutionId: selectedInstitutionId || undefined,
+        page: pagination.pageIndex + 1,
+        limit: pagination.pageSize,
     });
+
+    const sections = sectionsResponse?.items ?? [];
+    const pageCount = sectionsResponse?.pagination?.totalPages ?? 1;
+    const totalCount = sectionsResponse?.pagination?.total ?? 0;
 
     const { data: parentSections = [] } = useSectionsQuery({
         search: '',
@@ -175,5 +183,9 @@ export function useSectionsPageState() {
         createSectionMutation,
         updateSectionMutation,
         deleteSectionMutation,
+        pagination,
+        setPagination,
+        pageCount,
+        totalCount,
     };
 }

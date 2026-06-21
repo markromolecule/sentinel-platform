@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { useAnnouncementsQuery, useDebounce } from '@sentinel/hooks';
+import { useAnnouncementsQuery, useDebounce, useServerPagination } from '@sentinel/hooks';
 import { Skeleton } from '@sentinel/ui';
 import { Announcement } from '@sentinel/services';
 import { ColumnFiltersState } from '@tanstack/react-table';
@@ -30,9 +30,11 @@ export function AnnouncementsContainer() {
             ? (selectedStatuses[0] as 'draft' | 'published' | 'unpublished')
             : undefined;
 
+    const { pagination, setPagination } = useServerPagination([debouncedSearch, status]);
+
     const { data, isLoading } = useAnnouncementsQuery({
-        page: 1,
-        limit: 20,
+        page: pagination.pageIndex + 1,
+        limit: pagination.pageSize,
         search: debouncedSearch || undefined,
         status,
     });
@@ -46,6 +48,7 @@ export function AnnouncementsContainer() {
     };
 
     const announcements = data?.data ?? [];
+    const pageCount = data?.meta?.totalPages ?? 1;
 
     return (
         <div className="space-y-4">
@@ -75,6 +78,9 @@ export function AnnouncementsContainer() {
                     onSearchChange={setSearch}
                     columnFilters={columnFilters}
                     onColumnFiltersChange={setColumnFilters}
+                    pagination={pagination}
+                    onPaginationChange={setPagination}
+                    pageCount={pageCount}
                 />
             )}
 

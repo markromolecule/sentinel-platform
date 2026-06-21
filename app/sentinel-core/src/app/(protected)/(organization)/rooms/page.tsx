@@ -1,6 +1,6 @@
 'use client';
 
-import { useDebounce, useRoomsQuery, isPermissionDeniedError } from '@sentinel/hooks';
+import { useDebounce, useRoomsQuery, isPermissionDeniedError, useServerPagination } from '@sentinel/hooks';
 import { useState } from 'react';
 import { AddRoomDialog, BulkRoomUploadDialog, RoomsList } from './_components';
 import { PermissionDeniedState } from '@sentinel/ui';
@@ -9,9 +9,21 @@ import { OrganizationPageShell } from '../_components/layout';
 export default function SupportRoomsPage() {
     const [searchTerm, setSearchTerm] = useState('');
     const debouncedSearch = useDebounce(searchTerm, 500);
+    const { pagination, setPagination } = useServerPagination([debouncedSearch]);
 
-    const { data: rooms = [], isLoading, isError, error } = useRoomsQuery(debouncedSearch);
+    const { data: roomsResponse, isLoading, isError, error } = useRoomsQuery({
+        search: debouncedSearch,
+        page: pagination.pageIndex + 1,
+        limit: pagination.pageSize,
+    });
     const isViewDenied = isPermissionDeniedError(error, 'rooms:view');
+    const rooms = Array.isArray(roomsResponse) ? roomsResponse : roomsResponse?.items ?? [];
+    const totalCount = Array.isArray(roomsResponse)
+        ? roomsResponse.length
+        : roomsResponse?.pagination?.total ?? 0;
+    const pageCount = Array.isArray(roomsResponse)
+        ? 1
+        : roomsResponse?.pagination?.totalPages ?? 1;
 
     const actions = !isViewDenied ? (
         <div className="flex items-center gap-2">
@@ -35,6 +47,11 @@ export default function SupportRoomsPage() {
                         searchTerm={searchTerm}
                         onSearchChange={setSearchTerm}
                         isLoading={isLoading}
+                        pagination={pagination}
+                        onPaginationChange={setPagination}
+                        pageCount={pageCount}
+                        totalCount={totalCount}
+                        manualPagination
                     />
 
                     {isLoading && rooms.length === 0 && (

@@ -44,6 +44,10 @@ export function CoursesView() {
         deleteCoursesMutation,
         selectedIds,
         handleBulkDelete,
+        pagination,
+        setPagination,
+        pageCount,
+        totalCount,
     } = useCoursesPageState();
 
     const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>(
@@ -117,6 +121,11 @@ export function CoursesView() {
                         isLoading={isLoading}
                         rowSelection={rowSelection}
                         onRowSelectionChange={setRowSelection}
+                        pagination={pagination}
+                        onPaginationChange={setPagination}
+                        pageCount={pageCount}
+                        totalCount={totalCount}
+                        manualPagination={true}
                         toolbarActions={
                             selectedIds.length > 0 ? (
                                 <Button

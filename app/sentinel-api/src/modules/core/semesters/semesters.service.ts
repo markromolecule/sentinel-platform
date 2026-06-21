@@ -15,9 +15,9 @@ export class SemesterService {
         institutionId?: string,
         search?: string,
         page?: number,
-        limit?: number,
+        pageSize?: number,
     ) {
-        return getSemestersService({ dbClient, institutionId, search, page, limit });
+        return getSemestersService({ dbClient, institutionId, search, page, pageSize });
     }
 
     /**

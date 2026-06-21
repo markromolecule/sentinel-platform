@@ -23,6 +23,7 @@ import { useRouter } from 'next/navigation';
 import { type Institution } from '@sentinel/shared/types';
 import { createInstitutionColumns } from '@/app/(protected)/(support)/institutions/_components/tables/columns';
 import { InstitutionsEmptyState } from './institutions-empty-state';
+import { type PaginationState } from '@tanstack/react-table';
 import { useMemo, useState } from 'react';
 import { Trash2 } from 'lucide-react';
 
@@ -32,6 +33,11 @@ interface InstitutionsListProps {
     searchTerm?: string;
     onSearchChange?: (value: string) => void;
     isLoading?: boolean;
+    pagination?: PaginationState;
+    onPaginationChange?: (pagination: PaginationState) => void;
+    pageCount?: number;
+    totalCount?: number;
+    manualPagination?: boolean;
 }
 
 export function InstitutionsList({
@@ -40,6 +46,11 @@ export function InstitutionsList({
     searchTerm,
     onSearchChange,
     isLoading = false,
+    pagination,
+    onPaginationChange,
+    pageCount,
+    totalCount,
+    manualPagination,
 }: InstitutionsListProps) {
     const [rowSelection, setRowSelection] = useState({});
     const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
@@ -91,6 +102,11 @@ export function InstitutionsList({
                 emptyContent={<InstitutionsEmptyState searchTerm={searchTerm} />}
                 rowSelection={rowSelection}
                 onRowSelectionChange={setRowSelection}
+                pagination={pagination}
+                onPaginationChange={onPaginationChange}
+                pageCount={pageCount}
+                totalCount={totalCount}
+                manualPagination={manualPagination}
                 onRowClick={(row) => {
                     if (row.institutionKind === 'PARENT') {
                         router.push(`/institutions?parentId=${row.id}`);

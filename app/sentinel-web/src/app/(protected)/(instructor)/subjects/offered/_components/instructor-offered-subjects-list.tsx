@@ -2,6 +2,7 @@
 
 import { DataTable, type DataTableFacet } from '@sentinel/ui';
 import { type ColumnDef } from '@tanstack/react-table';
+import { type PaginationState } from '@tanstack/react-table';
 import { type SubjectOffering } from '@sentinel/shared/types';
 import { InstructorOfferedSubjectsEmptyState } from './instructor-offered-subjects-empty-state';
 
@@ -24,6 +25,11 @@ interface InstructorOfferedSubjectsListProps {
     searchTerm?: string;
     onSearchChange?: (value: string) => void;
     isLoading?: boolean;
+    pagination?: PaginationState;
+    onPaginationChange?: (pagination: PaginationState) => void;
+    pageCount?: number;
+    totalCount?: number;
+    manualPagination?: boolean;
 }
 
 export function InstructorOfferedSubjectsList({
@@ -32,6 +38,11 @@ export function InstructorOfferedSubjectsList({
     searchTerm,
     onSearchChange,
     isLoading = false,
+    pagination,
+    onPaginationChange,
+    pageCount,
+    totalCount,
+    manualPagination = false,
 }: InstructorOfferedSubjectsListProps) {
     return (
         <DataTable
@@ -46,6 +57,11 @@ export function InstructorOfferedSubjectsList({
                 subjectCode: false,
             }}
             emptyContent={<InstructorOfferedSubjectsEmptyState searchTerm={searchTerm} />}
+            pagination={pagination}
+            onPaginationChange={onPaginationChange}
+            pageCount={pageCount}
+            totalCount={totalCount}
+            manualPagination={manualPagination}
         />
     );
 }
