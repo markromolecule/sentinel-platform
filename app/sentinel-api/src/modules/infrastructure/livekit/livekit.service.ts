@@ -1,4 +1,5 @@
 import { type DbClient } from '@sentinel/db';
+import { LogsService } from '../../general/logs/logs.service';
 
 export class LiveKitService {
     static async logLiveKitTokenGranted(
@@ -12,7 +13,6 @@ export class LiveKitService {
         },
     ) {
         try {
-            const { LogsService } = await import('../../../general/logs/logs.service');
             await LogsService.createLog(dbClient, {
                 userId: args.actorId,
                 action: 'infrastructure.rtc_token_granted',

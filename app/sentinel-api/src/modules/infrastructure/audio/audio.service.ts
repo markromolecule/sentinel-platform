@@ -4,7 +4,7 @@ import type {
     AudioAnomalySettingsRecord,
     AudioAnomalySettingsUpdate,
 } from '@sentinel/shared/types';
-import { audioSettingsResolverService } from './audio-resolver.service';
+import { audioSettingsResolverService } from './services/audio-resolver.service';
 import { upsertAudioSettingsData } from './data/upsert-audio-settings';
 import { AUDIO_SETTINGS_KEY } from './audio.constants';
 

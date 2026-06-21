@@ -31,9 +31,9 @@ export class EnrollmentService {
         userId: string,
         search?: string,
         page?: number,
-        limit?: number,
+        pageSize?: number,
     ) {
-        return getEnrolledSubjectsService({ dbClient, userId, search, page, limit });
+        return getEnrolledSubjectsService({ dbClient, userId, search, page, pageSize });
     }
 
     /**
@@ -61,7 +61,7 @@ export class EnrollmentService {
             courseId?: string;
             search?: string;
             page?: number;
-            limit?: number;
+            pageSize?: number;
         } = {},
     ) {
         return getEnrollmentRequestsService({ dbClient, ...args });
@@ -123,7 +123,13 @@ export class EnrollmentService {
         status?: 'PENDING' | 'APPROVED' | 'REJECTED',
         classGroupIds?: string[],
     ) {
-        return unenrollInstructorSubjectService({ dbClient, userId, subjectId, status, classGroupIds });
+        return unenrollInstructorSubjectService({
+            dbClient,
+            userId,
+            subjectId,
+            status,
+            classGroupIds,
+        });
     }
 
     /**
@@ -178,10 +184,7 @@ export class EnrollmentService {
      * @param dbClient - Database client
      * @param enrollmentIds - Array of enrollment IDs to delete
      */
-    static async bulkUnenrollStudents(
-        dbClient: DbClient,
-        enrollmentIds: string[],
-    ): Promise<void> {
+    static async bulkUnenrollStudents(dbClient: DbClient, enrollmentIds: string[]): Promise<void> {
         return bulkUnenrollStudentsService({ dbClient, enrollmentIds });
     }
 }

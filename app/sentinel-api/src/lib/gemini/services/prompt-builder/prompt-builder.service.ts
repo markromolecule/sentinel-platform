@@ -94,6 +94,7 @@ export function buildPrompt(args: {
         'Base every question strictly on the source page text. Do not invent facts that are not supported by the document.',
         'Avoid duplicate or near-duplicate questions.',
         'Each question should be classroom-ready and phrased clearly for students.',
+        'For all question types except ESSAY, all options, correct answers, accepted answers, blanks, and matching pair elements MUST be concise and MUST NOT exceed 200 characters.',
         'Add one to three concise topical tags per question when helpful.',
         'Every generated question must include "sourceFileName", "sourcePageNumber", and "sourceEvidence".',
         sourceFiles.length > 0

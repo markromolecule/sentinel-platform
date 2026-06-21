@@ -3,9 +3,9 @@
 import { useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { toast } from 'sonner';
-import { useStableValue } from '@sentinel/hooks';
+import { useStableValue, useQuestionTypesQuery } from '@sentinel/hooks';
 import type { ExamQuestion } from '@sentinel/shared/types';
-import { EditQuestionView } from '@/app/(protected)/question/bank/import/preview/_components/views/edit-question-view';
+import { QuestionBuilderForm } from '@/features/exams';
 import { PreviewLoadingState } from '@/app/(protected)/question/bank/import/preview/_components/layout/preview-loading-state';
 import { useAiImportStore } from '@/app/(protected)/question/bank/_components/dialogs/import-modal/_hooks/use-ai-import-store';
 import { transformAiQuestionToExamQuestion } from '@/app/(protected)/question/bank/import/preview/_hooks/use-preview-manager/_utils';
@@ -19,6 +19,7 @@ export default function PreviewQuestionBuilderPage() {
     const editingIndex = Number(params.editingIndex);
 
     const { previewData, isGenerating, hasHydrated, updateQuestion } = useAiImportStore();
+    const { data: questionTypes = [], isLoading: isQuestionTypesLoading } = useQuestionTypesQuery();
 
     useEffect(() => {
         if (!hasHydrated) {
@@ -61,37 +62,58 @@ export default function PreviewQuestionBuilderPage() {
         return transformAiQuestionToExamQuestion(editingIndex, previewData);
     }, [editingIndex, previewData]);
 
+    const questionTypeDefinition = useStableValue(
+        () => questionTypes.find((qt) => qt.value === editingQuestion?.type),
+        [editingQuestion?.type, questionTypes],
+    );
+
     const handleBack = () => {
         router.push('/question/bank/import/preview');
     };
 
-    const handleUpdateQuestion = (_id: string, updates: Partial<ExamQuestion>) => {
+    const handleUpdateQuestion = (_id: string, updates: any) => {
         if (!previewData || !editingQuestion) {
             return;
         }
 
-        const { content, difficulty, points } = updates;
+        const { content, difficulty, points, tags, passageContent, passageType } = updates;
 
         updateQuestion(editingIndex, {
             content: content as Record<string, unknown>,
             difficulty,
             points,
+            tags,
+            passageContent,
+            passageType,
         });
 
         toast.success('Question updated successfully');
         handleBack();
     };
 
-    if (!hasHydrated || isGenerating || !previewData || !editingQuestion) {
+    if (
+        !hasHydrated ||
+        isGenerating ||
+        !previewData ||
+        !editingQuestion ||
+        isQuestionTypesLoading ||
+        !questionTypeDefinition
+    ) {
         return <PreviewLoadingState />;
     }
 
     return (
-        <EditQuestionView
-            editingIndex={editingIndex}
-            editingQuestion={editingQuestion}
-            onBack={handleBack}
-            onUpdate={handleUpdateQuestion}
-        />
+        <div className="w-full p-4 md:p-6">
+            <QuestionBuilderForm
+                key={editingQuestion.id}
+                type={editingQuestion.type}
+                initialData={editingQuestion}
+                questionTypeDefinition={questionTypeDefinition}
+                builderMode
+                onBack={handleBack}
+                onCreate={async () => {}}
+                onUpdate={handleUpdateQuestion}
+            />
+        </div>
     );
 }

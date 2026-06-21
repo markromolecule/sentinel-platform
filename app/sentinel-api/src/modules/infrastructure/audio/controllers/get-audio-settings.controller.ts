@@ -1,7 +1,10 @@
 import { createRoute } from '@hono/zod-openapi';
 import { type AppRouteHandler } from '../../../../types/hono';
 import { AudioService } from '../audio.service';
-import { assertAudioPermission, AUDIO_PERMISSION_KEYS } from '../audio-authorization.service';
+import {
+    assertAudioPermission,
+    AUDIO_PERMISSION_KEYS,
+} from '../services/audio-authorization.service';
 import { getAudioSettingsSchema } from '../audio.dto';
 
 export const getAudioSettingsRoute = createRoute({

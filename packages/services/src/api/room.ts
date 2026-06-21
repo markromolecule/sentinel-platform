@@ -75,13 +75,15 @@ export async function getRooms(
 ): Promise<PaginatedApiResponse<Room>>;
 export async function getRooms(
     apiClient: ApiClientType,
-    searchOrParams?: string | { search?: string; institutionId?: string; page?: number; limit?: number },
+    searchOrParams?:
+        | string
+        | { search?: string; institutionId?: string; page?: number; limit?: number },
     institutionId?: string,
 ): Promise<Room[] | PaginatedApiResponse<Room>> {
     const params =
         typeof searchOrParams === 'string'
             ? { search: searchOrParams, institutionId }
-            : searchOrParams ?? {};
+            : (searchOrParams ?? {});
     const queryParams = new URLSearchParams();
     if (params.search) queryParams.append('search', params.search);
     if (params.institutionId) queryParams.append('institutionId', params.institutionId);

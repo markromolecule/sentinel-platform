@@ -1,8 +1,6 @@
 import { type DbClient } from '@sentinel/db';
 import { updateCourseData } from '../data/update-course';
-import {
-    upsertInheritedOverride,
-} from '../../inheritance/inheritable-write-helper';
+import { upsertInheritedOverride } from '../../inheritance/inheritable-write-helper';
 import { ActivityNotificationService } from '../../../general/notification/services/activity-notification.service';
 import { buildCourseLabel, COURSE_INHERITANCE_CONFIG } from './_utils';
 

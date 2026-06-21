@@ -9,16 +9,19 @@ Add server-side offset pagination to the `question-bank/collections` and `questi
 ## Options Analysis (1-3-1 Rule)
 
 ### Option A — Simple Offset Pagination (same pattern as `questions`)
+
 Extend both collection query schemas with `page`/`pageSize` fields, add a `collectionPageSchema`, implement count + data queries in the data layer, and propagate the page envelope up through service → controller → DTO. Frontend updates mirror the existing `questions` pattern.
 
 **Tradeoff:** Fast to implement and fully consistent with the existing codebase pattern; no cursor support so deep-page performance degrades at scale.
 
 ### Option B — Cursor-based Pagination
+
 Replace `page`/`pageSize` with `cursor`/`limit` params using an `updated_at` + `id` compound cursor, returning `nextCursor` instead of `totalPages`.
 
 **Tradeoff:** Scales better for large tables but is a breaking API change and requires more complex frontend integration than currently exists.
 
 ### Option C — Deferred-count Pagination (two-query with parallel execution)
+
 Run count and data queries in parallel (`Promise.all`) to reduce latency, using the same page/pageSize interface as Option A.
 
 **Tradeoff:** Slightly better latency for large datasets, but adds marginal complexity; more valuable once row counts are in the millions.
@@ -201,7 +204,7 @@ Rationale: The `questions` data layer (`get-questions.ts`) already implements se
 
 **Goal:** Update `useCollectionManagement` (and the import-modal data hook) to consume the paginated API response instead of the flat array, removing the client-side pagination slice.
 
-#### [MODIFY] [use-collection-management.ts](file:///Applications/XAMPP/xamppfiles/htdocs/sentinel/app/sentinel-web/src/app/(protected)/(instructor)/question/bank/collections/_hooks/use-collection-management.ts)
+#### [MODIFY] [use-collection-management.ts](<file:///Applications/XAMPP/xamppfiles/htdocs/sentinel/app/sentinel-web/src/app/(protected)/(instructor)/question/bank/collections/_hooks/use-collection-management.ts>)
 
 - Pass `page` / `pageSize` to `useQuestionBankCollectionsQuery`.
 - Replace client-side slice/pagination logic with server-returned `page`, `totalPages`, `items`.
@@ -224,10 +227,10 @@ Rationale: The `questions` data layer (`get-questions.ts`) already implements se
 
 ## Breaking Changes
 
-| Change | Scope |
-|--------|-------|
-| `getQuestionBankCollections` now returns `QuestionBankCollectionPageRecord` | `packages/services`, `packages/hooks`, `sentinel-web` |
-| `GET /question-bank/collections` response shape changes from `data: []` to `data: { items, page, pageSize, total, totalPages, hasMore }` | API clients |
+| Change                                                                                                                                   | Scope                                                 |
+| ---------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------- |
+| `getQuestionBankCollections` now returns `QuestionBankCollectionPageRecord`                                                              | `packages/services`, `packages/hooks`, `sentinel-web` |
+| `GET /question-bank/collections` response shape changes from `data: []` to `data: { items, page, pageSize, total, totalPages, hasMore }` | API clients                                           |
 
 ---
 

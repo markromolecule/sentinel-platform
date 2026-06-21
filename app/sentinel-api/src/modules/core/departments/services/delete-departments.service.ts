@@ -40,9 +40,7 @@ export async function deleteDepartmentsService({
                 sourceModule: 'departments',
                 sourceAction: 'bulk-delete',
                 metadata: {
-                    departmentIds: deletedDepartments.map(
-                        (department) => department.department_id,
-                    ),
+                    departmentIds: deletedDepartments.map((department) => department.department_id),
                     count: deletedDepartments.length,
                     bulk: true,
                 },
@@ -59,8 +57,7 @@ export async function deleteDepartmentsService({
             (code === 'P2010' && message.includes('23503'))
         ) {
             throw new HTTPException(409, {
-                message:
-                    'Cannot delete one or more departments because they are currently in use.',
+                message: 'Cannot delete one or more departments because they are currently in use.',
             });
         }
         throw error;

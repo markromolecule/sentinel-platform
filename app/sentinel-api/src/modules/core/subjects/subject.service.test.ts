@@ -120,11 +120,7 @@ describe('SubjectService pagination', () => {
             },
         ] as any);
 
-        const result = await SubjectService.getSubjects(
-            dbClient,
-            'institution-1',
-            'computing',
-        );
+        const result = await SubjectService.getSubjects(dbClient, 'institution-1', 'computing');
 
         expect(SubjectCrudService.getSubjects).toHaveBeenCalledWith(
             dbClient,

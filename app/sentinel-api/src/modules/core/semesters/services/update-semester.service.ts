@@ -98,7 +98,8 @@ export async function updateSemesterService({
                 institution_name: institutionName,
             });
 
-            const notificationInstitutionId = currentScopeInstitutionId ?? resolvedTargetInstitutionId;
+            const notificationInstitutionId =
+                currentScopeInstitutionId ?? resolvedTargetInstitutionId;
             if (actorUserId && notificationInstitutionId) {
                 await ActivityNotificationService.notifyGenericInstitutionActivity({
                     dbClient,
@@ -128,7 +129,11 @@ export async function updateSemesterService({
         const rawSemester = await updateSemesterData({
             dbClient,
             id,
-            values: buildUpdateSemesterValues(data, resolvedTargetInstitutionId, hasUpdatedAtColumn),
+            values: buildUpdateSemesterValues(
+                data,
+                resolvedTargetInstitutionId,
+                hasUpdatedAtColumn,
+            ),
             institutionId: currentScopeInstitutionId,
         });
 

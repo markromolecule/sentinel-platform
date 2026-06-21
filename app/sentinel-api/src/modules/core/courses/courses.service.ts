@@ -17,7 +17,7 @@ export class CourseService {
             departmentId?: string;
             courseId?: string;
             page?: number;
-            limit?: number;
+            pageSize?: number;
         },
     ) {
         return getCoursesService({ dbClient, institutionId, search, scope });

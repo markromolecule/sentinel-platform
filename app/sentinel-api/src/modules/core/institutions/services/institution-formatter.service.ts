@@ -104,8 +104,7 @@ export function mergeNamingConventionRecords(
     return {
         ...childRecord,
         room_code_format: childRecord.room_code_format ?? parentRecord.room_code_format,
-        section_code_format:
-            childRecord.section_code_format ?? parentRecord.section_code_format,
+        section_code_format: childRecord.section_code_format ?? parentRecord.section_code_format,
         naming_rules: mergeNamingRules(parentRecord.naming_rules, childRecord.naming_rules),
     };
 }

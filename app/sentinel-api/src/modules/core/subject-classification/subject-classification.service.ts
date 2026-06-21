@@ -41,11 +41,7 @@ type PaginatedResult<T> = {
     pagination: PaginationMetadata;
 };
 
-function paginateItems<T>(
-    items: T[],
-    page?: number,
-    limit?: number,
-): T[] | PaginatedResult<T> {
+function paginateItems<T>(items: T[], page?: number, limit?: number): T[] | PaginatedResult<T> {
     if (page === undefined || limit === undefined) {
         return items;
     }

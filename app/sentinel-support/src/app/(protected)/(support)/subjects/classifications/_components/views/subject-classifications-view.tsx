@@ -153,7 +153,8 @@ export function SubjectClassificationsView() {
                         </div>
                         {!isLoading && filteredClassifications.length > 0 ? (
                             <div className="text-muted-foreground hidden text-sm font-medium lg:block">
-                                Showing {filteredClassifications.length} of {totalCount} classification
+                                Showing {filteredClassifications.length} of {totalCount}{' '}
+                                classification
                                 {totalCount === 1 ? '' : 's'}
                             </div>
                         ) : null}
@@ -215,9 +216,7 @@ export function SubjectClassificationsView() {
                                         }
                                     >
                                         <SelectTrigger className="h-8 w-[80px]">
-                                            <SelectValue
-                                                placeholder={`${pagination.pageSize}`}
-                                            />
+                                            <SelectValue placeholder={`${pagination.pageSize}`} />
                                         </SelectTrigger>
                                         <SelectContent>
                                             {[10, 20, 30, 40, 50].map((pageSize) => (
@@ -264,7 +263,9 @@ export function SubjectClassificationsView() {
                                                         ),
                                                     }));
                                                 }}
-                                                aria-disabled={pagination.pageIndex >= pageCount - 1}
+                                                aria-disabled={
+                                                    pagination.pageIndex >= pageCount - 1
+                                                }
                                                 className={
                                                     pagination.pageIndex >= pageCount - 1
                                                         ? 'pointer-events-none opacity-50'

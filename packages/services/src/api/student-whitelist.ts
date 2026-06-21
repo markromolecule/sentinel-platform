@@ -148,7 +148,8 @@ export async function getStudentWhitelist(
 ): Promise<StudentWhitelist[]>;
 export async function getStudentWhitelist(
     apiClient: ApiClientType,
-    params: GetStudentWhitelistParams & ({ page: number; limit: number } | { page?: undefined; limit?: undefined }),
+    params: GetStudentWhitelistParams &
+        ({ page: number; limit: number } | { page?: undefined; limit?: undefined }),
 ): Promise<PaginatedApiResponse<StudentWhitelist>>;
 export async function getStudentWhitelist(
     apiClient: ApiClientType,

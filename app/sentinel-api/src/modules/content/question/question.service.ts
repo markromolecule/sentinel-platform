@@ -1,5 +1,9 @@
 import { type DbClient } from '@sentinel/db';
-import { type CreateQuestionBody, type GetQuestionsQuery, type UpdateQuestionBody } from './question.dto';
+import {
+    type CreateQuestionBody,
+    type GetQuestionsQuery,
+    type UpdateQuestionBody,
+} from './question.dto';
 import { getQuestionsService } from './services/get-questions.service';
 import { getQuestionByIdService } from './services/get-questions.service';
 import { createQuestionService } from './services/create-question.service';

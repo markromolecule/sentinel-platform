@@ -99,10 +99,7 @@ export async function bulkUnenrollStudentsService({
         .where('e.enrollment_id', 'in', enrollmentIds)
         .execute();
 
-    await dbClient
-        .deleteFrom('enrollments')
-        .where('enrollment_id', 'in', enrollmentIds)
-        .execute();
+    await dbClient.deleteFrom('enrollments').where('enrollment_id', 'in', enrollmentIds).execute();
 
     for (const enrollment of enrollments) {
         if (enrollment.institution_id) {

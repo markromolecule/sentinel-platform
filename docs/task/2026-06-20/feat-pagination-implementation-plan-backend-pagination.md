@@ -40,51 +40,62 @@ We choose **Option 1** because it aligns with the existing pagination pattern fo
 ### Backend (sentinel-api)
 
 #### [MODIFY] [subject.dto.ts](file:///Applications/XAMPP/xamppfiles/htdocs/sentinel/app/sentinel-api/src/modules/core/subjects/subject.dto.ts)
+
 - Add optional `page` and `limit` query parameters to `getSubjectsSchema.request.query`.
 - Update `getSubjectsSchema.response` to include an optional `pagination` field structure: `{ page: z.number(), limit: z.number(), total: z.number(), hasMore: z.boolean() }`.
 
 #### [MODIFY] [get-subjects.controller.ts](file:///Applications/XAMPP/xamppfiles/htdocs/sentinel/app/sentinel-api/src/modules/core/subjects/controllers/get-subjects.controller.ts)
+
 - Read `page` and `limit` from request query parameters.
 - Pass them to `SubjectService.getSubjects`.
 - Return the list and the pagination metadata in the response.
 
 #### [MODIFY] [subject.service.ts](file:///Applications/XAMPP/xamppfiles/htdocs/sentinel/app/sentinel-api/src/modules/core/subjects/subject.service.ts)
+
 - Update `getSubjects` method signature to accept `page?: number` and `limit?: number`.
 - Handle pagination slicing on the merged result, returning `{ items: subjects, pagination }` structure.
 
 #### [MODIFY] [subject.service.test.ts](file:///Applications/XAMPP/xamppfiles/htdocs/sentinel/app/sentinel-api/src/modules/core/subjects/subject.service.test.ts)
+
 - Add unit tests for `SubjectService.getSubjects` to verify search, institution filtering, and correct pagination metadata calculation.
 
 ---
 
 #### [MODIFY] [subject-classification.dto.ts](file:///Applications/XAMPP/xamppfiles/htdocs/sentinel/app/sentinel-api/src/modules/core/subject-classification/subject-classification.dto.ts)
+
 - Add optional `page` and `limit` query parameters to `getSubjectClassificationsSchema.request.query`.
 - Update `getSubjectClassificationsSchema.response` to include an optional `pagination` structure.
 
 #### [MODIFY] [get-subject-classifications.controller.ts](file:///Applications/XAMPP/xamppfiles/htdocs/sentinel/app/sentinel-api/src/modules/core/subject-classification/controllers/get-subject-classifications.controller.ts)
+
 - Extract optional `page` and `limit` from query.
 - Pass them to `SubjectClassificationService.getSubjectClassifications`.
 - Include the `pagination` block in the controller json response.
 
 #### [MODIFY] [subject-classification.service.ts](file:///Applications/XAMPP/xamppfiles/htdocs/sentinel/app/sentinel-api/src/modules/core/subject-classification/subject-classification.service.ts)
+
 - Update `getSubjectClassifications` method signature to accept `page?: number` and `limit?: number`.
 - Add array slicing to return a paginated object containing `items` and `pagination` details.
 
 #### [MODIFY] [subject-classification.service.test.ts](file:///Applications/XAMPP/xamppfiles/htdocs/sentinel/app/sentinel-api/src/modules/core/subject-classification/subject-classification.service.test.ts)
+
 - Add tests verifying pagination slicing and metadata structure inside classifications service.
 
 ---
 
 #### [MODIFY] [subject-offerings.dto.ts](file:///Applications/XAMPP/xamppfiles/htdocs/sentinel/app/sentinel-api/src/modules/core/subject-offerings/subject-offerings.dto.ts)
+
 - Add optional `page` and `limit` to `getSubjectOfferingsSchema.request.query`.
 - Update `getSubjectOfferingsSchema.response` to support optional `pagination` block.
 
 #### [MODIFY] [get-subject-offerings.controller.ts](file:///Applications/XAMPP/xamppfiles/htdocs/sentinel/app/sentinel-api/src/modules/core/subject-offerings/controllers/get-subject-offerings.controller.ts)
+
 - Extract `page` and `limit` query params.
 - Propagate parameters down to `SubjectOfferingsService.getSubjectOfferings`.
 - Format final json response to contain pagination details.
 
 #### [MODIFY] [subject-offerings.service.ts](file:///Applications/XAMPP/xamppfiles/htdocs/sentinel/app/sentinel-api/src/modules/core/subject-offerings/subject-offerings.service.ts)
+
 - Update `getSubjectOfferings` to support `page?: number` and `limit?: number` in parameters.
 - Perform pagination slicing in-memory on the returned list and output `{ items, pagination }`.
 
@@ -93,26 +104,32 @@ We choose **Option 1** because it aligns with the existing pagination pattern fo
 ### Shared Packages
 
 #### [MODIFY] [subjects.ts](file:///Applications/XAMPP/xamppfiles/htdocs/sentinel/packages/services/src/api/subjects.ts)
+
 - Update `getSubjects` to accept `page` and `limit` query parameters.
 - Return the wrapped `{ items: MasterSubject[], pagination }` structure.
 
 #### [MODIFY] [subject-classifications.ts](file:///Applications/XAMPP/xamppfiles/htdocs/sentinel/packages/services/src/api/subject-classifications.ts)
+
 - Update `getSubjectClassifications` to accept optional `page` and `limit`.
 - Map and return `{ items, pagination }` structure.
 
 #### [MODIFY] [subject-offerings.ts](file:///Applications/XAMPP/xamppfiles/htdocs/sentinel/packages/services/src/api/subject-offerings.ts)
+
 - Update `getSubjectOfferings` to accept `page` and `limit` query parameters.
 - Map and return `{ items, pagination }`.
 
 #### [MODIFY] [use-subjects-query.ts](file:///Applications/XAMPP/xamppfiles/htdocs/sentinel/packages/hooks/src/query/subjects/use-subjects-query.ts)
+
 - Accept `page` and `limit` in parameters.
 - In `queryFn`, call `getSubjects` and return `res.items` if `page` and `limit` are not set (for backward compatibility), otherwise return the paginated response.
 
 #### [MODIFY] [use-subject-classifications-query.ts](file:///Applications/XAMPP/xamppfiles/htdocs/sentinel/packages/hooks/src/query/subjects/use-subject-classifications-query.ts)
+
 - Add `page` and `limit` parameters.
 - In `queryFn`, conditionally return `res.items` or `res` based on parameter presence.
 
 #### [MODIFY] [use-subject-offerings-query.ts](file:///Applications/XAMPP/xamppfiles/htdocs/sentinel/packages/hooks/src/query/subject-offerings/use-subject-offerings-query.ts)
+
 - Include `page` and `limit` parameters.
 - In `queryFn`, conditionally return `res.items` or `res` based on parameter presence.
 
@@ -120,21 +137,26 @@ We choose **Option 1** because it aligns with the existing pagination pattern fo
 
 ### Frontend Views & Controllers
 
-#### [MODIFY] [subjects-view.tsx](file:///Applications/XAMPP/xamppfiles/htdocs/sentinel/app/sentinel-core/src/app/(protected)/subjects/_components/views/subjects-view.tsx)
+#### [MODIFY] [subjects-view.tsx](<file:///Applications/XAMPP/xamppfiles/htdocs/sentinel/app/sentinel-core/src/app/(protected)/subjects/_components/views/subjects-view.tsx>)
+
 - Add pagination state `const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 10 });`
 - Pass mapped pagination parameters to `useSubjectsQuery`.
 - Pass paginated states (`totalCount`, `pageCount`, `pagination`, `onPaginationChange`) to `SubjectsList`.
 
-#### [MODIFY] [subjects-list.tsx](file:///Applications/XAMPP/xamppfiles/htdocs/sentinel/app/sentinel-core/src/app/(protected)/subjects/_components/views/subjects-list.tsx)
+#### [MODIFY] [subjects-list.tsx](<file:///Applications/XAMPP/xamppfiles/htdocs/sentinel/app/sentinel-core/src/app/(protected)/subjects/_components/views/subjects-list.tsx>)
+
 - Pass down pagination props to the underlying `DataTable` component. Set `manualPagination={true}`.
 
-#### [MODIFY] [use-subjects-page-state/index.ts](file:///Applications/XAMPP/xamppfiles/htdocs/sentinel/app/sentinel-support/src/app/(protected)/(support)/subjects/_hooks/use-subjects-page-state/index.ts)
+#### [MODIFY] [use-subjects-page-state/index.ts](<file:///Applications/XAMPP/xamppfiles/htdocs/sentinel/app/sentinel-support/src/app/(protected)/(support)/subjects/_hooks/use-subjects-page-state/index.ts>)
+
 - Add pagination state management and hook parameters. Enable manual server-side pagination.
 
-#### [MODIFY] [use-subject-classifications-page-state/index.ts](file:///Applications/XAMPP/xamppfiles/htdocs/sentinel/app/sentinel-support/src/app/(protected)/(support)/subjects/classifications/_hooks/use-subject-classifications-page-state/index.ts)
+#### [MODIFY] [use-subject-classifications-page-state/index.ts](<file:///Applications/XAMPP/xamppfiles/htdocs/sentinel/app/sentinel-support/src/app/(protected)/(support)/subjects/classifications/_hooks/use-subject-classifications-page-state/index.ts>)
+
 - Implement pagination state integration for classifications.
 
-#### [MODIFY] [use-offered-page-state/index.ts](file:///Applications/XAMPP/xamppfiles/htdocs/sentinel/app/sentinel-support/src/app/(protected)/(support)/subjects/offered/_hooks/use-offered-page-state/index.ts)
+#### [MODIFY] [use-offered-page-state/index.ts](<file:///Applications/XAMPP/xamppfiles/htdocs/sentinel/app/sentinel-support/src/app/(protected)/(support)/subjects/offered/_hooks/use-offered-page-state/index.ts>)
+
 - Implement server-side pagination integration for offered subjects.
 
 ---
@@ -142,6 +164,7 @@ We choose **Option 1** because it aligns with the existing pagination pattern fo
 ## Verification Plan
 
 ### Automated Tests
+
 - Run all backend unit/integration tests:
   `pnpm --dir app/sentinel-api test`
 - Run shared hooks tests:
@@ -150,6 +173,7 @@ We choose **Option 1** because it aligns with the existing pagination pattern fo
   `pnpm --dir app/sentinel-core test`
 
 ### Manual Verification
+
 - Launch the development server `pnpm dev`.
 - Navigate to the subjects tables on Core, Support, and Instructor dashboards.
 - Verify that paging, searching, and changing rows per page works smoothly and triggers network fetches with the correct `page` and `limit` query parameters.

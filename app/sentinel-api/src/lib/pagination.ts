@@ -77,6 +77,8 @@ export function paginateItems<T>(
  * @param result - Array or paginated wrapper returned by `paginateItems`.
  * @returns True when the result contains pagination metadata.
  */
-export function isPaginatedResult<T>(result: T[] | PaginatedResult<T>): result is PaginatedResult<T> {
+export function isPaginatedResult<T>(
+    result: T[] | PaginatedResult<T>,
+): result is PaginatedResult<T> {
     return !Array.isArray(result);
 }

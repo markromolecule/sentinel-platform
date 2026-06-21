@@ -85,8 +85,7 @@ export async function deleteCourseService({
         const code = error?.code ?? error?.cause?.code;
         if (code === 'P2003' || code === '23503') {
             throw new HTTPException(409, {
-                message:
-                    'Cannot delete course because it is currently linked to other records.',
+                message: 'Cannot delete course because it is currently linked to other records.',
             });
         }
         throw error;

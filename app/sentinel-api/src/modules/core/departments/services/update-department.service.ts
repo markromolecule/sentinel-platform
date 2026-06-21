@@ -4,11 +4,7 @@ import { updateDepartmentData } from '../data/update-department';
 import { HTTPException } from 'hono/http-exception';
 import { ActivityNotificationService } from '../../../general/notification/services/activity-notification.service';
 import { upsertInheritedOverride } from '../../inheritance/inheritable-write-helper';
-import {
-    buildDepartmentLabel,
-    getInstitutionName,
-    DEPARTMENT_INHERITANCE_CONFIG,
-} from './_utils';
+import { buildDepartmentLabel, getInstitutionName, DEPARTMENT_INHERITANCE_CONFIG } from './_utils';
 
 export type UpdateDepartmentServiceArgs = {
     dbClient: DbClient;
@@ -97,10 +93,7 @@ export async function updateDepartmentService({
                     : targetInstitutionId,
         });
 
-        const institutionName = await getInstitutionName(
-            dbClient,
-            rawDepartment.institution_id,
-        );
+        const institutionName = await getInstitutionName(dbClient, rawDepartment.institution_id);
         const department = {
             institution_id: rawDepartment.institution_id,
             institution_name: institutionName,

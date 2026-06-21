@@ -156,8 +156,8 @@ This implementation plan outlines the steps required to resolve multiple fronten
 
 **Goal:** Ensure archived exams show as disabled and do not allow students to open/attempt them.
 
-- [x] Modify [exam-card.tsx](file:///Applications/XAMPP/xamppfiles/htdocs/sentinel/app/sentinel-web/src/app/(protected)/student/exam/_components/exam-card.tsx) to handle `'archived'` status.
-- [x] Add a unit test in [exam-card.test.tsx](file:///Applications/XAMPP/xamppfiles/htdocs/sentinel/app/sentinel-web/src/app/(protected)/student/exam/_components/exam-card.test.tsx).
+- [x] Modify [exam-card.tsx](<file:///Applications/XAMPP/xamppfiles/htdocs/sentinel/app/sentinel-web/src/app/(protected)/student/exam/_components/exam-card.tsx>) to handle `'archived'` status.
+- [x] Add a unit test in [exam-card.test.tsx](<file:///Applications/XAMPP/xamppfiles/htdocs/sentinel/app/sentinel-web/src/app/(protected)/student/exam/_components/exam-card.test.tsx>).
 - [x] Run `pnpm --dir app/sentinel-web test` to verify all frontend tests pass.
 
 **Migration required:** No

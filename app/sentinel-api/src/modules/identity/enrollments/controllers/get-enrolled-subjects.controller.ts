@@ -49,14 +49,14 @@ export const getEnrolledSubjectsRouteHandler: AppRouteHandler<
             );
         }
 
-        const { search, page, limit } = c.req.valid('query');
+        const { search, page, pageSize } = c.req.valid('query');
 
         const enrolledData = await EnrollmentService.getEnrolledSubjects(
             c.get('dbClient'),
             userId,
             search,
             page,
-            limit,
+            pageSize,
         );
         const data = Array.isArray(enrolledData) ? enrolledData : enrolledData.items;
 

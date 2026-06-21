@@ -5,13 +5,13 @@ import {
 } from '@sentinel/shared';
 import type { DbClient } from '@sentinel/db';
 import type { AudioAnomalySettingsRecord } from '@sentinel/shared/types';
-import { getAudioSettingsData } from './data/get-audio-settings';
+import { getAudioSettingsData } from '../data/get-audio-settings';
 import {
     AUDIO_SETTINGS_CACHE_TTL_MS,
     AUDIO_SETTINGS_CATEGORY,
     AUDIO_SETTINGS_DESCRIPTION,
     AUDIO_SETTINGS_KEY,
-} from './audio.constants';
+} from '../audio.constants';
 
 function toNullableDate(value: Date | string | null | undefined) {
     return value ?? null;

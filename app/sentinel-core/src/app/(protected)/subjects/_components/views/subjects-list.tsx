@@ -1,6 +1,10 @@
 import { useState } from 'react';
 import { DataTable, type DataTableFacet } from '@sentinel/ui';
-import { type ColumnDef, type PaginationState, type RowSelectionState } from '@tanstack/react-table';
+import {
+    type ColumnDef,
+    type PaginationState,
+    type RowSelectionState,
+} from '@tanstack/react-table';
 import { type MasterSubject } from '@sentinel/shared/types';
 import { useDeleteSelectedSubjectsMutation, useStableValue } from '@sentinel/hooks';
 import {

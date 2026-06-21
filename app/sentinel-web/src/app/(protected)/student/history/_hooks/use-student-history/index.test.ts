@@ -78,7 +78,11 @@ describe('useStudentHistory', () => {
             isLoading: false,
         } as any);
         vi.mocked(useInfiniteExamHistoryQuery).mockReturnValue({
-            data: { pages: [{ items: [], pagination: { page: 1, limit: 10, total: 0, hasMore: false } }] },
+            data: {
+                pages: [
+                    { items: [], pagination: { page: 1, limit: 10, total: 0, hasMore: false } },
+                ],
+            },
             isLoading: false,
             fetchNextPage: vi.fn(),
             hasNextPage: false,
@@ -131,7 +135,19 @@ describe('useStudentHistory', () => {
         } as any);
         const turnedInHistory = mockHistory.filter((h) => h.status === 'turned_in');
         vi.mocked(useInfiniteExamHistoryQuery).mockReturnValue({
-            data: { pages: [{ items: turnedInHistory, pagination: { page: 1, limit: 10, total: turnedInHistory.length, hasMore: false } }] },
+            data: {
+                pages: [
+                    {
+                        items: turnedInHistory,
+                        pagination: {
+                            page: 1,
+                            limit: 10,
+                            total: turnedInHistory.length,
+                            hasMore: false,
+                        },
+                    },
+                ],
+            },
             isLoading: false,
             fetchNextPage: vi.fn(),
             hasNextPage: false,
@@ -179,7 +195,19 @@ describe('useStudentHistory', () => {
         } as any);
         const pastDueHistory = mockHistory.filter((h) => h.status === 'past_due');
         vi.mocked(useInfiniteExamHistoryQuery).mockReturnValue({
-            data: { pages: [{ items: pastDueHistory, pagination: { page: 1, limit: 10, total: pastDueHistory.length, hasMore: false } }] },
+            data: {
+                pages: [
+                    {
+                        items: pastDueHistory,
+                        pagination: {
+                            page: 1,
+                            limit: 10,
+                            total: pastDueHistory.length,
+                            hasMore: false,
+                        },
+                    },
+                ],
+            },
             isLoading: false,
             fetchNextPage: vi.fn(),
             hasNextPage: false,
@@ -201,7 +229,11 @@ describe('useStudentHistory', () => {
         } as any);
         vi.mocked(useExamsQuery).mockReturnValue({ data: [], isLoading: false } as any);
         vi.mocked(useInfiniteExamHistoryQuery).mockReturnValue({
-            data: { pages: [{ items: [], pagination: { page: 1, limit: 10, total: 0, hasMore: false } }] },
+            data: {
+                pages: [
+                    { items: [], pagination: { page: 1, limit: 10, total: 0, hasMore: false } },
+                ],
+            },
             isLoading: false,
             fetchNextPage: vi.fn(),
             hasNextPage: false,

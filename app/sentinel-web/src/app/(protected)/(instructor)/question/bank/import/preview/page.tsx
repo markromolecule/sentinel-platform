@@ -2,7 +2,6 @@
 
 import { usePreviewManager } from './_hooks/use-preview-manager';
 import { PreviewLoadingState } from './_components/layout/preview-loading-state';
-import { EditQuestionView } from './_components/views/edit-question-view';
 import { PreviewListView } from './_components/views/preview-list-view';
 import { ImportSummaryDialog } from './_components/dialogs/import-summary-dialog';
 
@@ -22,14 +21,10 @@ export default function AiImportPreviewPage() {
         isDiscarding,
         hasHydrated,
         selectedQuestions,
-        editingIndex,
         currentPage,
         totalPages,
         paginatedQuestions,
-        editingQuestion,
         setCurrentPage,
-        setEditingIndex,
-        handleUpdateQuestion,
         handleToggleQuestion,
         handleToggleSelectAll,
         handleDeleteQuestion,
@@ -48,19 +43,7 @@ export default function AiImportPreviewPage() {
         return <PreviewLoadingState />;
     }
 
-    // 2. Edit View
-    if (editingIndex !== null && editingQuestion) {
-        return (
-            <EditQuestionView
-                editingIndex={editingIndex}
-                editingQuestion={editingQuestion}
-                onBack={() => setEditingIndex(null)}
-                onUpdate={handleUpdateQuestion}
-            />
-        );
-    }
-
-    // 3. List View (Default)
+    // 2. Default List View (Edit view is handled via route-based builder)
     return (
         <>
             <PreviewListView
