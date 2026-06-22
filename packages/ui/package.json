@@ -58,7 +58,7 @@
         "@tailwindcss/postcss": "^4.1.18",
         "@types/react": "^19",
         "@types/react-dom": "^19",
-        "postcss": "^8.5.8",
+        "postcss": "^8.5.10",
         "tailwindcss": "^4.1.18",
         "typescript": "^5"
     },
