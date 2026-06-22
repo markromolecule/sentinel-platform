@@ -2,6 +2,13 @@ import { render, screen } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 import { BulkImportStudentWhitelistDialog } from './bulk-import-student-whitelist-dialog';
 
+vi.mock('@sentinel/hooks', () => ({
+    useActivePermissions: () => ({
+        hasPermission: () => true,
+        isLoading: false,
+    }),
+}));
+
 vi.mock('./bulk-import/hooks/use-bulk-import-dialog-state', () => ({
     useBulkImportDialogState: () => ({
         open: false,

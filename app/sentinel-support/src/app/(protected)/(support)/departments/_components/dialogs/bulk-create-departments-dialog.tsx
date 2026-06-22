@@ -1,6 +1,6 @@
 'use client';
 
-import { useInstitutionsQuery } from '@sentinel/hooks';
+import { useInstitutionsQuery, useActivePermissions } from '@sentinel/hooks';
 import { Institution } from '@sentinel/shared/types';
 import {
     Button,
@@ -30,6 +30,7 @@ export type BulkCreateDepartmentsDialogProps = {
 export function BulkCreateDepartmentsDialog({
     defaultInstitutionId,
 }: BulkCreateDepartmentsDialogProps) {
+    const { hasPermission } = useActivePermissions();
     const [open, setOpen] = useState(false);
     const { data: institutions = [] } = useInstitutionsQuery();
     const { institutionId, setInstitutionId, input, setInput, preview, onSubmit, isPending } =
@@ -40,6 +41,11 @@ export function BulkCreateDepartmentsDialog({
             setInstitutionId(defaultInstitutionId);
         }
     }, [defaultInstitutionId, setInstitutionId]);
+
+    if (!hasPermission('departments:create')) {
+        return null;
+    }
+
 
     return (
         <Dialog open={open} onOpenChange={setOpen}>

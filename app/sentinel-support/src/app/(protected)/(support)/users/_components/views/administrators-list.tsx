@@ -1,4 +1,4 @@
-import { useDeleteUserMutation, useDeleteUsersMutation, useStableValue } from '@sentinel/hooks';
+import { useDeleteUserMutation, useDeleteUsersMutation, useStableValue, PermissionGuard } from '@sentinel/hooks';
 import { useCallback, useState, useMemo } from 'react';
 import {
     DataTable,
@@ -143,15 +143,17 @@ export function AdministratorsList({
                 onRowSelectionChange={setRowSelection}
                 toolbarActions={
                     selectedIds.length > 0 ? (
-                        <Button
-                            variant="destructive"
-                            size="sm"
-                            onClick={() => setIsBulkDeleteDialogOpen(true)}
-                            className="h-8"
-                        >
-                            <Trash2 className="mr-2 h-4 w-4" />
-                            Delete {selectedIds.length}
-                        </Button>
+                        <PermissionGuard permission="users:delete">
+                            <Button
+                                variant="destructive"
+                                size="sm"
+                                onClick={() => setIsBulkDeleteDialogOpen(true)}
+                                className="h-8"
+                            >
+                                <Trash2 className="mr-2 h-4 w-4" />
+                                Delete {selectedIds.length}
+                            </Button>
+                        </PermissionGuard>
                     ) : null
                 }
             />

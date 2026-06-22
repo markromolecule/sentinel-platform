@@ -33,7 +33,7 @@ export const getSubjectClassificationsRouteHandler: AppRouteHandler<
     try {
         requireActivePermission(c, 'subjects:view', 'Forbidden. Missing subjects:view permission.');
         const role = c.get('role');
-        const { search, institutionId: requestedInstitutionId, page, limit } = c.req.valid('query');
+        const { search, institutionId: requestedInstitutionId, page, pageSize } = c.req.valid('query');
 
         const institutionId = ['support', 'superadmin'].includes(role)
             ? (requestedInstitutionId ?? undefined)
@@ -44,7 +44,7 @@ export const getSubjectClassificationsRouteHandler: AppRouteHandler<
             institutionId || undefined,
             search,
             page,
-            limit,
+            pageSize,
         );
         const classifications = Array.isArray(classificationResult)
             ? classificationResult

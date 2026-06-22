@@ -14,6 +14,8 @@ import { User } from '@sentinel/shared/types';
 import { toast } from 'sonner';
 import type { AdministratorRole } from '@/app/(protected)/(support)/users/_lib/administrator-role-config';
 import { getAdministratorRoleConfig } from '@/app/(protected)/(support)/users/_lib/administrator-role-config';
+import { PermissionGuard } from '@sentinel/hooks';
+
 
 interface AdministratorActionsCellProps {
     administrator: User;
@@ -49,16 +51,20 @@ export function AdministratorActionsCell({
                     Copy ID
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => onEdit(administrator)}>
-                    <Edit className="mr-2 h-4 w-4" /> Edit
-                </DropdownMenuItem>
+                <PermissionGuard permission="users:update">
+                    <DropdownMenuItem onClick={() => onEdit(administrator)}>
+                        <Edit className="mr-2 h-4 w-4" /> Edit
+                    </DropdownMenuItem>
+                </PermissionGuard>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem
-                    className="text-destructive"
-                    onClick={() => onDelete(administrator)}
-                >
-                    <Trash className="mr-2 h-4 w-4" /> Delete
-                </DropdownMenuItem>
+                <PermissionGuard permission="users:delete">
+                    <DropdownMenuItem
+                        className="text-destructive"
+                        onClick={() => onDelete(administrator)}
+                    >
+                        <Trash className="mr-2 h-4 w-4" /> Delete
+                    </DropdownMenuItem>
+                </PermissionGuard>
             </DropdownMenuContent>
         </DropdownMenu>
     );

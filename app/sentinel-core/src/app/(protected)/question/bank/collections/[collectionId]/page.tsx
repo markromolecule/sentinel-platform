@@ -6,6 +6,8 @@ import {
     useQuestionBankCollectionQuery,
     useRemoveQuestionBankCollectionQuestionsMutation,
     useStableValue,
+    useActivePermissions,
+    PermissionGuard,
 } from '@sentinel/hooks';
 import { Badge, Button, PageHeader, Separator } from '@sentinel/ui';
 import { ArrowLeft, Upload } from 'lucide-react';
@@ -17,6 +19,7 @@ import { QuestionsEmptyState } from '@/app/(protected)/question/bank/_components
 import type { QuestionTableItem } from '@/app/(protected)/question/bank/_components/tables/columns';
 
 export default function CollectionQuestionsPage() {
+    const { hasPermission } = useActivePermissions();
     const router = useRouter();
     const params = useParams<{ collectionId: string }>();
     const collectionId = params.collectionId;
@@ -92,14 +95,16 @@ export default function CollectionQuestionsPage() {
                         {collectionQuestions.length} questions
                     </Badge>
                     {collection ? (
-                        <Button
-                            variant="default"
-                            onClick={() => setIsImportModalOpen(true)}
-                            className="gap-2 bg-[#323d8f] px-5 font-semibold text-white shadow-sm transition-all hover:bg-[#323d8f]/90 hover:shadow-md active:scale-95"
-                        >
-                            <Upload className="h-4 w-4" />
-                            Import / Upload
-                        </Button>
+                        <PermissionGuard permission="assessments:manage">
+                            <Button
+                                variant="default"
+                                onClick={() => setIsImportModalOpen(true)}
+                                className="gap-2 bg-[#323d8f] px-5 font-semibold text-white shadow-sm transition-all hover:bg-[#323d8f]/90 hover:shadow-md active:scale-95"
+                            >
+                                <Upload className="h-4 w-4" />
+                                Import / Upload
+                            </Button>
+                        </PermissionGuard>
                     ) : null}
                 </div>
             </PageHeader>
@@ -116,7 +121,7 @@ export default function CollectionQuestionsPage() {
                 />
             ) : (
                 <QuestionsEmptyState
-                    onImport={() => setIsImportModalOpen(true)}
+                    onImport={hasPermission('assessments:manage') ? () => setIsImportModalOpen(true) : undefined}
                     description="This collection is currently empty. Start by importing questions from a document."
                 />
             )}

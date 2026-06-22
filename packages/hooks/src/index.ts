@@ -15,3 +15,5 @@ export * from './use-message-realtime';
 export * from './use-server-pagination';
 export * from './query/_shared/permission-errors';
 export * from './query/notifications';
+export * from './permission-guard';
+

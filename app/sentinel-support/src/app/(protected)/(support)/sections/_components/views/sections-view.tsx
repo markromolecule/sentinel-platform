@@ -24,6 +24,7 @@ import {
     isPermissionDeniedError,
     useStableValue,
     useDeleteSectionsMutation,
+    PermissionGuard,
 } from '@sentinel/hooks';
 import { useInstitutionFacet, useDataTableFilterSync } from '@/hooks';
 import { Trash2 } from 'lucide-react';
@@ -139,19 +140,21 @@ export function SectionsView() {
         <div className="flex flex-col gap-6 p-4 md:p-6">
             <PageHeader title="Section Management" description="Manage template sections.">
                 {!isViewDenied && (
-                    <div className="flex items-center gap-2">
-                        <BulkCreateSectionsDialog defaultInstitutionId={selectedInstitutionId} />
-                        <Button
-                            onClick={() => {
-                                setEditingSectionId(null);
-                                form.reset();
-                                setFormOpen(true);
-                            }}
-                            className="bg-[#323d8f] hover:bg-[#323d8f]/90"
-                        >
-                            Add Section
-                        </Button>
-                    </div>
+                    <PermissionGuard permission="sections:create">
+                        <div className="flex items-center gap-2">
+                            <BulkCreateSectionsDialog defaultInstitutionId={selectedInstitutionId} />
+                            <Button
+                                onClick={() => {
+                                    setEditingSectionId(null);
+                                    form.reset();
+                                    setFormOpen(true);
+                                }}
+                                className="bg-[#323d8f] hover:bg-[#323d8f]/90"
+                            >
+                                Add Section
+                            </Button>
+                        </div>
+                    </PermissionGuard>
                 )}
             </PageHeader>
             <Separator />
@@ -179,15 +182,17 @@ export function SectionsView() {
                         manualPagination={true}
                         toolbarActions={
                             selectedIds.length > 0 ? (
-                                <Button
-                                    variant="destructive"
-                                    size="sm"
-                                    onClick={() => setIsDeleteDialogOpen(true)}
-                                    className="h-8"
-                                >
-                                    <Trash2 className="mr-2 h-4 w-4" />
-                                    Delete {selectedIds.length}
-                                </Button>
+                                <PermissionGuard permission="sections:delete">
+                                    <Button
+                                        variant="destructive"
+                                        size="sm"
+                                        onClick={() => setIsDeleteDialogOpen(true)}
+                                        className="h-8"
+                                    >
+                                        <Trash2 className="mr-2 h-4 w-4" />
+                                        Delete {selectedIds.length}
+                                    </Button>
+                                </PermissionGuard>
                             ) : null
                         }
                     />

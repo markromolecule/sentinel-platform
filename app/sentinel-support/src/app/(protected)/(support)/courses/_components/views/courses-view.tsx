@@ -10,9 +10,10 @@ import { getCourseColumns } from '@/app/(protected)/(support)/courses/_component
 import { EditCourseDialog } from '@/app/(protected)/(support)/courses/_components/dialogs/edit-course-dialog';
 import { AddCourseDialog } from '@/app/(protected)/(support)/courses/_components/dialogs/add-course-dialog';
 import { BulkDeleteCoursesDialog } from '@/app/(protected)/(support)/courses/_components/dialogs/bulk-delete-courses-dialog';
-import { isPermissionDeniedError, useStableValue } from '@sentinel/hooks';
+import { isPermissionDeniedError, useStableValue, PermissionGuard } from '@sentinel/hooks';
 import { useInstitutionFacet, useDataTableFilterSync } from '@/hooks';
 import { Trash2 } from 'lucide-react';
+
 
 export function CoursesView() {
     const {
@@ -128,15 +129,17 @@ export function CoursesView() {
                         manualPagination={true}
                         toolbarActions={
                             selectedIds.length > 0 ? (
-                                <Button
-                                    variant="destructive"
-                                    size="sm"
-                                    onClick={() => setIsDeleteDialogOpen(true)}
-                                    className="h-8"
-                                >
-                                    <Trash2 className="mr-2 h-4 w-4" />
-                                    Delete {selectedIds.length}
-                                </Button>
+                                <PermissionGuard permission="courses:delete">
+                                    <Button
+                                        variant="destructive"
+                                        size="sm"
+                                        onClick={() => setIsDeleteDialogOpen(true)}
+                                        className="h-8"
+                                    >
+                                        <Trash2 className="mr-2 h-4 w-4" />
+                                        Delete {selectedIds.length}
+                                    </Button>
+                                </PermissionGuard>
                             ) : null
                         }
                     />

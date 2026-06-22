@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { ArrowRightLeft, Edit2, Loader2, MoreHorizontal, Trash2 } from 'lucide-react';
-import { useDeleteStudentWhitelistMutation } from '@sentinel/hooks';
+import { useDeleteStudentWhitelistMutation, PermissionGuard } from '@sentinel/hooks';
 import {
     AlertDialog,
     AlertDialogAction,
@@ -56,22 +56,26 @@ export function WhitelistActionsCell({ record }: WhitelistActionsCellProps) {
                         Copy Entry ID
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem onClick={() => setEditOpen(true)}>
-                        {isSuperadmin ? (
-                            <ArrowRightLeft className="mr-2 h-4 w-4" />
-                        ) : (
-                            <Edit2 className="mr-2 h-4 w-4" />
-                        )}
-                        {isSuperadmin ? 'Reassign Program Scope' : 'Edit Entry'}
-                    </DropdownMenuItem>
-                    <DropdownMenuItem
-                        className="text-red-600 dark:text-red-400"
-                        disabled={!!record.claimedUserId}
-                        onClick={() => setDeleteOpen(true)}
-                    >
-                        <Trash2 className="mr-2 h-4 w-4" />
-                        Delete Entry
-                    </DropdownMenuItem>
+                    <PermissionGuard permission="student_whitelist:update">
+                        <DropdownMenuItem onClick={() => setEditOpen(true)}>
+                            {isSuperadmin ? (
+                                <ArrowRightLeft className="mr-2 h-4 w-4" />
+                            ) : (
+                                <Edit2 className="mr-2 h-4 w-4" />
+                            )}
+                            {isSuperadmin ? 'Reassign Program Scope' : 'Edit Entry'}
+                        </DropdownMenuItem>
+                    </PermissionGuard>
+                    <PermissionGuard permission="student_whitelist:delete">
+                        <DropdownMenuItem
+                            className="text-red-600 dark:text-red-400"
+                            disabled={!!record.claimedUserId}
+                            onClick={() => setDeleteOpen(true)}
+                        >
+                            <Trash2 className="mr-2 h-4 w-4" />
+                            Delete Entry
+                        </DropdownMenuItem>
+                    </PermissionGuard>
                 </DropdownMenuContent>
             </DropdownMenu>
 

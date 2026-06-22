@@ -14,7 +14,7 @@ export default function SharedSubjectsPage() {
     const { role } = useAcademicScope();
     const { hasPermission } = useActivePermissions();
 
-    const isCatalogManager = role === 'superadmin';
+    const isCatalogManager = role === 'superadmin' || role === 'admin';
     const canCreateSubject = hasPermission('subjects:create');
 
     const actions = (

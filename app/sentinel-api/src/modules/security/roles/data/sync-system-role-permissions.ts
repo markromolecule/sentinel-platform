@@ -27,15 +27,15 @@ export async function syncSystemRolePermissions(dbClient: DbClient) {
         dbClient
             .selectFrom('rbac_role_permissions')
             .select(['role_id'])
-            .where(
-                'role_id',
-                'in',
-                dbClient.selectFrom('roles').select('role_id').where('role_name', 'in', roleNames),
+            .where('role_id', 'in', (eb) =>
+                eb.selectFrom('roles').select('role_id').where('role_name', 'in', roleNames)
             )
             .execute(),
     ]);
 
-    // Insert any new system blueprint mappings; duplicates will be ignored by doNothing() on conflict
+    if (existingRolePermissionRows.length > 0) {
+        return;
+    }
 
     const roleIdByName = new Map(roles.map((role) => [role.role_name, role.role_id]));
     const permissionIdByKey = new Map(

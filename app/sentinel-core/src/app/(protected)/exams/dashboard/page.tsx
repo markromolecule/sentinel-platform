@@ -4,6 +4,8 @@ import { useState, Suspense } from 'react';
 import { ExamCreateDialog, ExamsViewToggle } from '@/features/exams';
 import { PageHeader, Tabs, TabsContent, Button, Separator, Spinner } from '@sentinel/ui';
 import { Plus } from 'lucide-react';
+import { PermissionGuard } from '@sentinel/hooks';
+
 
 import { useExamsDashboard } from './_hooks/use-exams-dashboard';
 import { TAB_CONFIG, type ExamTabKey } from './_constants';
@@ -51,10 +53,12 @@ function ExamsDashboardContent() {
                 title="Exams"
                 description="Create, organize, and monitor your examinations in one place."
             >
-                <Button onClick={() => setIsCreateOpen(true)} className="w-full sm:w-auto">
-                    <Plus className="h-4 w-4" /> Create Exam
-                </Button>
-                <ExamCreateDialog open={isCreateOpen} onOpenChange={setIsCreateOpen} />
+                <PermissionGuard permission="assessments:manage">
+                    <Button onClick={() => setIsCreateOpen(true)} className="w-full sm:w-auto">
+                        <Plus className="h-4 w-4" /> Create Exam
+                    </Button>
+                    <ExamCreateDialog open={isCreateOpen} onOpenChange={setIsCreateOpen} />
+                </PermissionGuard>
             </PageHeader>
 
             <Separator />

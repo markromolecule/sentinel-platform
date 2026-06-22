@@ -209,8 +209,9 @@ describe('SubjectClassificationService pagination', () => {
             ],
             pagination: {
                 page: 1,
-                limit: 1,
+                pageSize: 1,
                 total: 2,
+                totalPages: 2,
                 hasMore: true,
             },
         });

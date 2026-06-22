@@ -19,6 +19,8 @@ import {
     getAdministratorRoleConfig,
     type AdministratorRole,
 } from '@/app/(protected)/(support)/users/_lib/administrator-role-config';
+import { useActivePermissions } from '@sentinel/hooks';
+
 
 interface AddSuperAdminDialogProps {
     role: AdministratorRole;
@@ -33,6 +35,12 @@ export function AddSuperAdminDialog({ role, triggerLabel }: AddSuperAdminDialogP
         onSuccess: () => setOpen(false),
     });
     const isSubmitting = isPending || form.formState.isSubmitting;
+    const { hasPermission } = useActivePermissions();
+
+    const permission = role === 'superadmin' ? 'users:create_superadmin' : role === 'support' ? 'users:create_staff' : 'users:create_admin';
+    if (!hasPermission(permission)) {
+        return null;
+    }
 
     return (
         <Dialog open={open} onOpenChange={setOpen}>

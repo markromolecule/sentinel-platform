@@ -22,6 +22,7 @@ interface QuestionPreviewSheetProps {
     onEdit?: (question: QuestionTableItem) => void;
     onDuplicate?: (question: QuestionTableItem) => void;
     onDelete?: (question: QuestionTableItem) => void | Promise<void>;
+    readOnly?: boolean;
 }
 
 export function QuestionPreviewSheet({
@@ -31,6 +32,7 @@ export function QuestionPreviewSheet({
     onEdit,
     onDuplicate,
     onDelete,
+    readOnly = false,
 }: QuestionPreviewSheetProps) {
     const {
         timeAgo,
@@ -101,31 +103,33 @@ export function QuestionPreviewSheet({
                     />
                 </div>
 
-                <QuestionActions
-                    onEdit={() => {
-                        if (!question) {
-                            return;
-                        }
+                {!readOnly && (
+                    <QuestionActions
+                        onEdit={() => {
+                            if (!question) {
+                                return;
+                            }
 
-                        onOpenChange(false);
-                        onEdit?.(question);
-                    }}
-                    onDuplicate={() => {
-                        if (!question) {
-                            return;
-                        }
+                            onOpenChange(false);
+                            onEdit?.(question);
+                        }}
+                        onDuplicate={() => {
+                            if (!question) {
+                                return;
+                            }
 
-                        void onDuplicate?.(question);
-                    }}
-                    onDelete={() => {
-                        if (!question) {
-                            return;
-                        }
+                            void onDuplicate?.(question);
+                        }}
+                        onDelete={() => {
+                            if (!question) {
+                                return;
+                            }
 
-                        onOpenChange(false);
-                        void onDelete?.(question);
-                    }}
-                />
+                            onOpenChange(false);
+                            void onDelete?.(question);
+                        }}
+                    />
+                )}
             </SheetContent>
         </Sheet>
     );

@@ -19,6 +19,7 @@ vi.mock('@sentinel/hooks', () => ({
         mutate: vi.fn(),
         isPending: false,
     })),
+    PermissionGuard: ({ children }: any) => <>{children}</>,
 }));
 
 describe('CoursesView Component', () => {

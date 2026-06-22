@@ -2,6 +2,13 @@ import { render, screen } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 import { AddStudentWhitelistDialog } from './add-student-whitelist-dialog';
 
+vi.mock('@sentinel/hooks', () => ({
+    useActivePermissions: () => ({
+        hasPermission: () => true,
+        isLoading: false,
+    }),
+}));
+
 vi.mock('@/app/(protected)/(support)/users/whitelist/_hooks/use-student-whitelist-form', () => ({
     useStudentWhitelistForm: () => ({
         form: {

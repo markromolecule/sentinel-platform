@@ -16,12 +16,11 @@ import { type PaginationState } from '@tanstack/react-table';
 import { useQueryClient } from '@tanstack/react-query';
 import { type SubjectOffering } from '@sentinel/shared/types';
 import { SUBJECT_OFFERING_QUERY_KEYS, SUBJECT_QUERY_KEYS } from '@sentinel/shared/constants';
-import { deleteSubjectOffering } from '@sentinel/services';
 import { OfferedSubjectsEmptyState } from './offered-subjects-empty-state';
 import { offeredSubjectsFacets } from './offered-subjects-facets';
 import { useState } from 'react';
 import { FloatingActionBar } from './floating-action-bar';
-import { useApi } from '@sentinel/hooks';
+import { useApi, useDeleteSubjectOfferingsMutation } from '@sentinel/hooks';
 import { toast } from 'sonner';
 
 interface OfferedSubjectsListProps {
@@ -53,32 +52,31 @@ export function OfferedSubjectsList({
 }: OfferedSubjectsListProps) {
     const [rowSelection, setRowSelection] = useState<Record<string, boolean>>({});
     const [bulkDeleteOpen, setBulkDeleteOpen] = useState(false);
-    const [isBulkUnofferPending, setIsBulkUnofferPending] = useState(false);
-    const apiClient = useApi();
     const queryClient = useQueryClient();
 
     const selectedOfferings = offerings.filter((_, index) => rowSelection[index.toString()]);
+
+    const deleteOfferingsMutation = useDeleteSubjectOfferingsMutation({
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: SUBJECT_OFFERING_QUERY_KEYS.all });
+            queryClient.invalidateQueries({ queryKey: SUBJECT_QUERY_KEYS.all });
+            setRowSelection({});
+            setBulkDeleteOpen(false);
+            toast.success(`Successfully removed ${selectedOfferings.length} offered subjects`);
+        },
+        onError: () => {
+            toast.error('Failed to remove some offered subjects. Please try again.');
+        },
+    });
+
+    const isBulkUnofferPending = deleteOfferingsMutation.isPending;
 
     async function handleBulkUnoffer() {
         const ids = selectedOfferings.map((o) => o.id);
 
         if (ids.length === 0 || isBulkUnofferPending) return;
 
-        try {
-            setIsBulkUnofferPending(true);
-            await Promise.all(ids.map((id) => deleteSubjectOffering(apiClient, id)));
-            await Promise.all([
-                queryClient.invalidateQueries({ queryKey: SUBJECT_OFFERING_QUERY_KEYS.all }),
-                queryClient.invalidateQueries({ queryKey: SUBJECT_QUERY_KEYS.all }),
-            ]);
-            setRowSelection({});
-            setBulkDeleteOpen(false);
-            toast.success(`Successfully removed ${ids.length} offered subjects`);
-        } catch {
-            toast.error('Failed to remove some offered subjects. Please try again.');
-        } finally {
-            setIsBulkUnofferPending(false);
-        }
+        deleteOfferingsMutation.mutate(ids);
     }
 
     return (

@@ -19,6 +19,8 @@ import { DropZone } from './bulk-import/components/drop-zone';
 import { FilePreview } from './bulk-import/components/file-preview';
 import { IssuesList } from './bulk-import/components/issues-list';
 import { PreviewTable } from './bulk-import/components/preview-table';
+import { useActivePermissions } from '@sentinel/hooks';
+
 
 const MAX_PREVIEW_ROWS_LIMIT = 100;
 
@@ -27,6 +29,7 @@ const MAX_PREVIEW_ROWS_LIMIT = 100;
  * Coordinates with the modular `useBulkImportDialogState` hook and specialized sub-components.
  */
 export function BulkImportStudentWhitelistDialog() {
+    const { hasPermission } = useActivePermissions();
     const {
         open,
         isDragActive,
@@ -65,6 +68,11 @@ export function BulkImportStudentWhitelistDialog() {
         resetState,
         institutions,
     } = useBulkImportDialogState();
+
+    if (!hasPermission('student_whitelist:import')) {
+        return null;
+    }
+
 
     return (
         <Dialog open={open} onOpenChange={handleOpenChange}>

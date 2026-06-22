@@ -4,6 +4,8 @@ import { Button, Checkbox, DataTableColumnHeader } from '@sentinel/ui';
 import { Edit2, Trash2 } from 'lucide-react';
 import { OriginStatusBadge } from '@/app/(protected)/(support)/_components/origin-status-badge';
 import { getOriginStatusLabel } from '@/app/(protected)/(support)/_components/origin-status-badge';
+import { PermissionGuard } from '@sentinel/hooks';
+
 
 export type SectionColumnsProps = {
     departments: Department[];
@@ -100,18 +102,24 @@ export const getSectionColumns = ({
         cell: ({ row }) => (
             <div className="flex justify-end gap-1">
                 {row.original.isOverridden ? (
-                    <Button variant="outline" size="sm" onClick={() => onRevert(row.original)}>
-                        Revert
-                    </Button>
+                    <PermissionGuard permission="sections:update">
+                        <Button variant="outline" size="sm" onClick={() => onRevert(row.original)}>
+                            Revert
+                        </Button>
+                    </PermissionGuard>
                 ) : null}
-                <Button variant="ghost" size="icon" onClick={() => onEdit(row.original)}>
-                    <Edit2 className="h-4 w-4" />
-                    <span className="sr-only">Edit section</span>
-                </Button>
-                <Button variant="ghost" size="icon" onClick={() => onDelete(row.original)}>
-                    <Trash2 className="h-4 w-4" />
-                    <span className="sr-only">Delete section</span>
-                </Button>
+                <PermissionGuard permission="sections:update">
+                    <Button variant="ghost" size="icon" onClick={() => onEdit(row.original)}>
+                        <Edit2 className="h-4 w-4" />
+                        <span className="sr-only">Edit section</span>
+                    </Button>
+                </PermissionGuard>
+                <PermissionGuard permission="sections:delete">
+                    <Button variant="ghost" size="icon" onClick={() => onDelete(row.original)}>
+                        <Trash2 className="h-4 w-4" />
+                        <span className="sr-only">Delete section</span>
+                    </Button>
+                </PermissionGuard>
             </div>
         ),
     },
