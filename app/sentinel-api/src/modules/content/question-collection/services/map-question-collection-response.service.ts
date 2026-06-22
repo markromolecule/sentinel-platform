@@ -1,7 +1,7 @@
 import type { QuestionCollection, QuestionCollectionDetail } from '../question-collection.dto';
 import type { QuestionRecord } from '../../question/question.dto';
 
-type RawCollectionRecord = {
+export type RawCollectionRecord = {
     collection_id: string;
     institution_id: string | null;
     name: string;
