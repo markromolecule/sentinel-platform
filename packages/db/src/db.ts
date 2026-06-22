@@ -16,16 +16,22 @@ const createClient = () => {
         log: ['error', 'warn'],
     };
 
+    // Determine if the connection is to a local database
+    const isLocal =
+        connectionUrl.includes('localhost') ||
+        connectionUrl.includes('127.0.0.1') ||
+        connectionUrl.includes('host.docker.internal') ||
+        connectionUrl.includes('//db:') ||
+        connectionUrl.includes('@db:') ||
+        connectionUrl.includes('sslmode=disable');
+
     // 1. Initialize the standard connection pool with a strict limit
     const pool = new Pool({
         connectionString: connectionUrl,
         max: 3, // allow multiple sequential queries per handler (create/update use 2 calls)
         idleTimeoutMillis: 10000,
         connectionTimeoutMillis: 10000,
-        ssl:
-            connectionUrl.includes('supabase.co') || connectionUrl.includes('pooler.supabase.com')
-                ? { rejectUnauthorized: false }
-                : false,
+        ssl: isLocal ? false : { rejectUnauthorized: false },
     });
 
     // 2. Initialize Prisma 7 strictly with the required adapter
