@@ -3,6 +3,10 @@ import { describe, expect, it, vi } from 'vitest';
 import SharedEnrollmentRequestsPage from './page';
 
 vi.mock('@sentinel/hooks', () => ({
+    useServerPagination: () => ({
+        pagination: { pageIndex: 0, pageSize: 10 },
+        setPagination: vi.fn(),
+    }),
     findPermissionDeniedError: () => false,
     useEnrollmentRequestsQuery: () => ({
         data: [

@@ -3,6 +3,10 @@ import { describe, expect, it, vi } from 'vitest';
 import SubjectClassificationPage from './page';
 
 vi.mock('@sentinel/hooks', () => ({
+    useServerPagination: () => ({
+        pagination: { pageIndex: 0, pageSize: 10 },
+        setPagination: vi.fn(),
+    }),
     useDebounce: (value: string) => value,
     useSubjectClassificationsQuery: () => ({
         data: [

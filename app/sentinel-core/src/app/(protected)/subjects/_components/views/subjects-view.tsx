@@ -29,7 +29,7 @@ export function SubjectsView() {
     const { hasPermission } = useActivePermissions();
     const { pagination, setPagination } = useServerPagination([debouncedSearch, institutionId]);
 
-    const isCatalogManager = role === 'superadmin';
+    const isCatalogManager = role === 'superadmin' || role === 'admin';
     const canCreateSubject = hasPermission('subjects:create');
     const canDeleteSubjects = hasPermission('subjects:delete');
     const canOfferSubject = hasPermission('subject_offerings:offer');

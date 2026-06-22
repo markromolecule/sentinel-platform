@@ -22,6 +22,8 @@ import {
     DropdownMenuTrigger,
 } from '@sentinel/ui';
 import { AssignRoomDialog } from '../dialogs/assign-room-dialog';
+import { PermissionGuard } from '@sentinel/hooks';
+
 
 export type ExamActionCellProps = {
     exam: ProctorExam;
@@ -54,15 +56,17 @@ export function ExamActionCell({ exam }: ExamActionCellProps) {
                     </Button>
                 )}
                 {exam.status === 'draft' && (
-                    <Button
-                        variant="outline"
-                        size="sm"
-                        className="h-8 border-blue-500/50 text-blue-600 hover:bg-blue-50 hover:text-blue-700"
-                        onClick={handleAssign}
-                    >
-                        <UserPlus className="mr-2 h-4 w-4" />
-                        Assign
-                    </Button>
+                    <PermissionGuard permission="assessments:manage">
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            className="h-8 border-blue-500/50 text-blue-600 hover:bg-blue-50 hover:text-blue-700"
+                            onClick={handleAssign}
+                        >
+                            <UserPlus className="mr-2 h-4 w-4" />
+                            Assign
+                        </Button>
+                    </PermissionGuard>
                 )}
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>
@@ -75,15 +79,19 @@ export function ExamActionCell({ exam }: ExamActionCellProps) {
                             <Eye className="mr-2 h-4 w-4" />
                             View Details
                         </DropdownMenuItem>
-                        <DropdownMenuItem className="cursor-pointer">
-                            <Pencil className="mr-2 h-4 w-4" />
-                            Edit
-                        </DropdownMenuItem>
-                        {exam.status !== 'draft' && (
-                            <DropdownMenuItem className="cursor-pointer" onClick={handleAssign}>
-                                <UserPlus className="mr-2 h-4 w-4" />
-                                Assign to Students
+                        <PermissionGuard permission="assessments:manage">
+                            <DropdownMenuItem className="cursor-pointer">
+                                <Pencil className="mr-2 h-4 w-4" />
+                                Edit
                             </DropdownMenuItem>
+                        </PermissionGuard>
+                        {exam.status !== 'draft' && (
+                            <PermissionGuard permission="assessments:manage">
+                                <DropdownMenuItem className="cursor-pointer" onClick={handleAssign}>
+                                    <UserPlus className="mr-2 h-4 w-4" />
+                                    Assign to Students
+                                </DropdownMenuItem>
+                            </PermissionGuard>
                         )}
                         {exam.status !== 'draft' && (
                             <DropdownMenuItem className="cursor-pointer" asChild>
@@ -102,18 +110,22 @@ export function ExamActionCell({ exam }: ExamActionCellProps) {
                             </DropdownMenuItem>
                         )}
                         {exam.examCategory === 'MAJOR' && (
-                            <DropdownMenuItem
-                                className="cursor-pointer"
-                                onClick={() => setIsAssignRoomOpen(true)}
-                            >
-                                <School className="mr-2 h-4 w-4" />
-                                Assign Room
-                            </DropdownMenuItem>
+                            <PermissionGuard permission="assessments:manage">
+                                <DropdownMenuItem
+                                    className="cursor-pointer"
+                                    onClick={() => setIsAssignRoomOpen(true)}
+                                >
+                                    <School className="mr-2 h-4 w-4" />
+                                    Assign Room
+                                </DropdownMenuItem>
+                            </PermissionGuard>
                         )}
-                        <DropdownMenuItem className="cursor-pointer text-red-500 focus:text-red-500">
-                            <Trash2 className="mr-2 h-4 w-4" />
-                            Delete
-                        </DropdownMenuItem>
+                        <PermissionGuard permission="assessments:manage">
+                            <DropdownMenuItem className="cursor-pointer text-red-500 focus:text-red-500">
+                                <Trash2 className="mr-2 h-4 w-4" />
+                                Delete
+                            </DropdownMenuItem>
+                        </PermissionGuard>
                     </DropdownMenuContent>
                 </DropdownMenu>
             </div>

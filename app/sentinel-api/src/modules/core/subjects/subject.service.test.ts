@@ -158,8 +158,9 @@ describe('SubjectService pagination', () => {
             items: [{ subject_id: 'subject-2', subject_code: 'CS102' }],
             pagination: {
                 page: 2,
-                limit: 1,
+                pageSize: 1,
                 total: 3,
+                totalPages: 3,
                 hasMore: true,
             },
         });

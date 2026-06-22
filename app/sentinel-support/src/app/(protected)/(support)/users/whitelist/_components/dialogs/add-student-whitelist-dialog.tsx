@@ -15,6 +15,7 @@ import {
 } from '@sentinel/ui';
 import { useStudentWhitelistForm } from '@/app/(protected)/(support)/users/whitelist/_hooks/use-student-whitelist-form';
 import { StudentWhitelistFormFields } from '@/app/(protected)/(support)/users/whitelist/_components/forms/student-whitelist-form-fields';
+import { useActivePermissions } from '@sentinel/hooks';
 
 interface AddStudentWhitelistDialogProps {
     triggerLabel?: string;
@@ -28,10 +29,16 @@ export function AddStudentWhitelistDialog({
     triggerLabel = 'Add Whitelist Entry',
     triggerIcon = <Plus className="mr-2 h-4 w-4" />,
 }: AddStudentWhitelistDialogProps) {
+    const { hasPermission } = useActivePermissions();
     const [open, setOpen] = useState(false);
+
     const { form, onSubmit, isPending } = useStudentWhitelistForm({
         onSuccess: () => setOpen(false),
     });
+
+    if (!hasPermission('student_whitelist:create')) {
+        return null;
+    }
 
     return (
         <Dialog open={open} onOpenChange={setOpen}>

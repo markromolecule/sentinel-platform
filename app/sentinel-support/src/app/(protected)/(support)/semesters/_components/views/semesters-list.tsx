@@ -1,6 +1,6 @@
 'use client';
 
-import { useInstitutionsQuery, useDeleteSemestersMutation, useStableValue } from '@sentinel/hooks';
+import { useInstitutionsQuery, useDeleteSemestersMutation, useStableValue, PermissionGuard } from '@sentinel/hooks';
 import { ApiError } from '@sentinel/services';
 import { Semester } from '@sentinel/shared/types';
 import {
@@ -139,15 +139,17 @@ export function SemestersList({
                 manualPagination={manualPagination}
                 toolbarActions={
                     selectedIds.length > 0 ? (
-                        <Button
-                            variant="destructive"
-                            size="sm"
-                            onClick={() => setIsDeleteDialogOpen(true)}
-                            className="h-8"
-                        >
-                            <Trash2 className="mr-2 h-4 w-4" />
-                            Delete {selectedIds.length}
-                        </Button>
+                        <PermissionGuard permission="semesters:delete">
+                            <Button
+                                variant="destructive"
+                                size="sm"
+                                onClick={() => setIsDeleteDialogOpen(true)}
+                                className="h-8"
+                            >
+                                <Trash2 className="mr-2 h-4 w-4" />
+                                Delete {selectedIds.length}
+                            </Button>
+                        </PermissionGuard>
                     ) : null
                 }
             />

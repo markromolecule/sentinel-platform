@@ -1,6 +1,6 @@
 'use client';
 
-import { useDepartmentsQuery } from '@sentinel/hooks';
+import { useDepartmentsQuery, useActivePermissions } from '@sentinel/hooks';
 import { useState } from 'react';
 import { Plus } from 'lucide-react';
 import { Button } from '@sentinel/ui';
@@ -23,14 +23,21 @@ interface AddCourseDialogProps {
 }
 
 export function AddCourseDialog({ institutionId }: AddCourseDialogProps) {
+    const { hasPermission } = useActivePermissions();
     const [open, setOpen] = useState(false);
+
     const { data: departments = [], isLoading: isLoadingDepartments } = useDepartmentsQuery({
         search: '',
         institutionId: institutionId || undefined,
     });
     const { form, onSubmit, isPending } = useAddCourseForm(institutionId, () => setOpen(false));
 
+    if (!hasPermission('courses:create')) {
+        return null;
+    }
+
     return (
+
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
                 <Button disabled={!institutionId}>

@@ -4,6 +4,8 @@ import { Button, Checkbox, DataTableColumnHeader } from '@sentinel/ui';
 import { Edit2, Layers, Trash2 } from 'lucide-react';
 import { OriginStatusBadge } from '@/app/(protected)/(support)/_components/origin-status-badge';
 import { getOriginStatusLabel } from '@/app/(protected)/(support)/_components/origin-status-badge';
+import { PermissionGuard } from '@sentinel/hooks';
+
 
 export type CourseColumnsProps = {
     onEdit: (course: Course) => void;
@@ -76,9 +78,11 @@ export const getCourseColumns = ({
         cell: ({ row }) => (
             <div className="flex justify-end gap-1">
                 {row.original.isOverridden ? (
-                    <Button variant="outline" size="sm" onClick={() => onRevert(row.original)}>
-                        Revert
-                    </Button>
+                    <PermissionGuard permission="courses:update">
+                        <Button variant="outline" size="sm" onClick={() => onRevert(row.original)}>
+                            Revert
+                        </Button>
+                    </PermissionGuard>
                 ) : null}
                 <Button
                     variant="ghost"
@@ -89,14 +93,18 @@ export const getCourseColumns = ({
                     <Layers className="text-primary h-4 w-4" />
                     <span className="sr-only">Manage sections</span>
                 </Button>
-                <Button variant="ghost" size="icon" onClick={() => onEdit(row.original)}>
-                    <Edit2 className="h-4 w-4" />
-                    <span className="sr-only">Edit course</span>
-                </Button>
-                <Button variant="ghost" size="icon" onClick={() => onDelete(row.original)}>
-                    <Trash2 className="h-4 w-4" />
-                    <span className="sr-only">Delete course</span>
-                </Button>
+                <PermissionGuard permission="courses:update">
+                    <Button variant="ghost" size="icon" onClick={() => onEdit(row.original)}>
+                        <Edit2 className="h-4 w-4" />
+                        <span className="sr-only">Edit course</span>
+                    </Button>
+                </PermissionGuard>
+                <PermissionGuard permission="courses:delete">
+                    <Button variant="ghost" size="icon" onClick={() => onDelete(row.original)}>
+                        <Trash2 className="h-4 w-4" />
+                        <span className="sr-only">Delete course</span>
+                    </Button>
+                </PermissionGuard>
             </div>
         ),
     },

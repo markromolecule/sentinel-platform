@@ -6,6 +6,7 @@ import {
     useInstitutionsQuery,
     useStableValue,
     useServerPagination,
+    PermissionGuard,
 } from '@sentinel/hooks';
 import { useState, useMemo, Suspense } from 'react';
 import Link from 'next/link';
@@ -18,6 +19,7 @@ import {
 import { PageHeader, PermissionDeniedState, Separator } from '@sentinel/ui';
 import { Button } from '@sentinel/ui';
 import { Wand2, ChevronLeft, Edit2 } from 'lucide-react';
+
 
 function SupportInstitutionsPageContent() {
     const [searchTerm, setSearchTerm] = useState('');
@@ -89,7 +91,7 @@ function SupportInstitutionsPageContent() {
                                     Back to Institutions
                                 </Button>
                                 {parentInstitution && (
-                                    <>
+                                    <PermissionGuard permission="institutions:update">
                                         <Button
                                             variant="outline"
                                             onClick={() => setEditParentOpen(true)}
@@ -102,18 +104,20 @@ function SupportInstitutionsPageContent() {
                                             onOpenChange={setEditParentOpen}
                                             institution={parentInstitution}
                                         />
-                                    </>
+                                    </PermissionGuard>
                                 )}
                             </>
                         ) : (
                             <>
                                 <AddInstitutionDialog />
-                                <Button asChild className="bg-[#323d8f] hover:bg-[#323d8f]/90">
-                                    <Link href="/institutions/new">
-                                        <Wand2 className="mr-2 h-4 w-4" />
-                                        Setup Wizard
-                                    </Link>
-                                </Button>
+                                <PermissionGuard permission="institutions:create">
+                                    <Button asChild className="bg-[#323d8f] hover:bg-[#323d8f]/90">
+                                        <Link href="/institutions/new">
+                                            <Wand2 className="mr-2 h-4 w-4" />
+                                            Setup Wizard
+                                        </Link>
+                                    </Button>
+                                </PermissionGuard>
                             </>
                         )}
                         {parentId && parentInstitution ? (

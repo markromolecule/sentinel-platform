@@ -3,6 +3,10 @@ import { describe, expect, it, vi } from 'vitest';
 import SharedOfferedSubjectsPage from './page';
 
 vi.mock('@sentinel/hooks', () => ({
+        useServerPagination: () => ({
+        pagination: { pageIndex: 0, pageSize: 10 },
+        setPagination: vi.fn(),
+    }),
     findPermissionDeniedError: () => false,
     useActivePermissions: () => ({
         hasPermission: (permission: string) => {

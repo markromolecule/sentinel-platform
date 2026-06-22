@@ -51,6 +51,7 @@ vi.mock('../../inheritance/inheritance-resolver.helper', () => ({
 }));
 
 import { SubjectOfferingsService } from '../subject-offerings.service';
+import { GetSubjectOfferingsService } from './get-subject-offerings.service';
 
 describe('SubjectOfferingsService.createSubjectOfferingsFromClassification', () => {
     beforeEach(() => {
@@ -74,7 +75,7 @@ describe('SubjectOfferingsService.createSubjectOfferingsFromClassification', () 
                 subject_offering_id: 'offering-a',
             },
         ]);
-        vi.spyOn(SubjectOfferingsService, 'getSubjectOfferingById').mockResolvedValue({
+        vi.spyOn(GetSubjectOfferingsService, 'getSubjectOfferingById').mockResolvedValue({
             subject_offering_id: 'offering-a',
             subject_id: 'subject-a',
         } as any);

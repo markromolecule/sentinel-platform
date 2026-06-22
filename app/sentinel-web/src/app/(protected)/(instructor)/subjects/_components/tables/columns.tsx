@@ -1,7 +1,7 @@
 import { type ColumnDef } from '@tanstack/react-table';
 import { format } from 'date-fns';
 import { type Subject } from '@sentinel/shared/types';
-import { Badge, DataTableColumnHeader } from '@sentinel/ui';
+import { Badge, Checkbox, DataTableColumnHeader } from '@sentinel/ui';
 import { SubjectActionsCell } from '@/app/(protected)/(instructor)/subjects/_components/tables/subject-actions-cell';
 
 function renderCompactBadges(labels: string[], emptyLabel = 'N/A', limit = 3) {
@@ -37,7 +37,39 @@ function renderCompactBadges(labels: string[], emptyLabel = 'N/A', limit = 3) {
     );
 }
 
-export const columns = (): ColumnDef<Subject>[] => [
+export const columns = ({
+    showSelection = true,
+}: {
+    showSelection?: boolean;
+} = {}): ColumnDef<Subject>[] => [
+    ...(showSelection
+        ? [
+              {
+                  id: 'select',
+                  header: ({ table }) => (
+                      <Checkbox
+                          checked={
+                              table.getIsAllPageRowsSelected() ||
+                              (table.getIsSomePageRowsSelected() && 'indeterminate')
+                          }
+                          onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
+                          aria-label="Select all"
+                          className="translate-y-[2px]"
+                      />
+                  ),
+                  cell: ({ row }) => (
+                      <Checkbox
+                          checked={row.getIsSelected()}
+                          onCheckedChange={(value) => row.toggleSelected(!!value)}
+                          aria-label="Select row"
+                          className="translate-y-[2px]"
+                      />
+                  ),
+                  enableSorting: false,
+                  enableHiding: false,
+              } satisfies ColumnDef<Subject>,
+          ]
+        : []),
     {
         accessorKey: 'code',
         header: ({ column }) => <DataTableColumnHeader column={column} title="Code" />,
