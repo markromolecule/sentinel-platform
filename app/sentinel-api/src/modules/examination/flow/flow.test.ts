@@ -1,14 +1,14 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { HTTPException } from 'hono/http-exception';
-import { SessionManagerService } from './services/session-manager.service';
-import { AccessGatekeeperService } from '../access/services/access-gatekeeper.service';
+import { SessionManagerService } from './flow.service';
+import { AccessGatekeeperService } from '../access/access.service';
 import { SessionRepository } from './data/session.repository';
 import { type DbClient } from '@sentinel/db';
 import { getExamConfigurationState } from '../configuration/configuration.service';
 import { getExamQuestionsData } from '../exams/data/get-exam-questions';
 
 // Mock dependencies
-vi.mock('../access/services/access-gatekeeper.service');
+vi.mock('../access/access.service');
 vi.mock('./data/session.repository');
 vi.mock('../configuration/configuration.service', () => ({
     getExamConfigurationState: vi.fn(),

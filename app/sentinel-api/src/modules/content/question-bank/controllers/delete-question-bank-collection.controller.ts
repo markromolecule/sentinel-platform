@@ -2,7 +2,7 @@ import { createRoute } from '@hono/zod-openapi';
 import { type AppRouteHandler } from '../../../../types/hono';
 import { assertAssessmentAccess } from '../../../examination/assessment/assessment-access';
 import { deleteQuestionBankCollectionSchema } from '../question-bank.dto';
-import { QuestionBankService } from '../question-bank.service';
+import { deleteQuestionBankCollectionService } from '../services/delete-question-bank-collection.service';
 
 export const deleteQuestionBankCollectionRoute = createRoute({
     method: 'delete',
@@ -32,11 +32,11 @@ export const deleteQuestionBankCollectionRouteHandler: AppRouteHandler<
 
     assertAssessmentAccess(c);
 
-    await QuestionBankService.deleteCollection(
-        c.get('dbClient'),
+    await deleteQuestionBankCollectionService({
+        dbClient: c.get('dbClient'),
         id,
-        c.get('institutionId') || undefined,
-    );
+        institutionId: c.get('institutionId') || undefined,
+    });
 
     return c.json({
         message: 'Collection deleted successfully',

@@ -32,15 +32,13 @@ describe('useSectionsPageState', () => {
             if (args && args.page !== undefined && args.limit !== undefined) {
                 return {
                     data: {
-                        items: [
-                            { id: 'sec-1', name: 'Section 1', yearLevel: 1 }
-                        ],
+                        items: [{ id: 'sec-1', name: 'Section 1', yearLevel: 1 }],
                         pagination: {
                             total: 25,
                             page: 1,
                             pageSize: 10,
                             totalPages: 3,
-                        }
+                        },
                     },
                     isLoading: false,
                     isError: false,
@@ -64,9 +62,7 @@ describe('useSectionsPageState', () => {
             pageIndex: 0,
             pageSize: 10,
         });
-        expect(result.current.sections).toEqual([
-            { id: 'sec-1', name: 'Section 1', yearLevel: 1 }
-        ]);
+        expect(result.current.sections).toEqual([{ id: 'sec-1', name: 'Section 1', yearLevel: 1 }]);
         expect(result.current.pageCount).toBe(3);
         expect(result.current.totalCount).toBe(25);
     });

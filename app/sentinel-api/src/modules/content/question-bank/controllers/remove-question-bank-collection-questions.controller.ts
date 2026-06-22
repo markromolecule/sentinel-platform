@@ -3,7 +3,7 @@ import { HTTPException } from 'hono/http-exception';
 import { type AppRouteHandler } from '../../../../types/hono';
 import { assertAssessmentAccess } from '../../../examination/assessment/assessment-access';
 import { mutateQuestionBankCollectionQuestionsSchema } from '../question-bank.dto';
-import { QuestionBankService } from '../question-bank.service';
+import { removeQuestionsFromCollectionService } from '../services/remove-question-bank-collection-questions.service';
 
 export const removeQuestionBankCollectionQuestionsRoute = createRoute({
     method: 'delete',
@@ -47,13 +47,13 @@ export const removeQuestionBankCollectionQuestionsRouteHandler: AppRouteHandler<
         });
     }
 
-    const collection = await QuestionBankService.removeQuestionsFromCollection(
-        c.get('dbClient'),
+    const collection = await removeQuestionsFromCollectionService({
+        dbClient: c.get('dbClient'),
         id,
-        body.questionIds,
-        user.id,
-        c.get('institutionId') || undefined,
-    );
+        questionIds: body.questionIds,
+        userId: user.id,
+        institutionId: c.get('institutionId') || undefined,
+    });
 
     return c.json({
         message: 'Questions removed from collection successfully',

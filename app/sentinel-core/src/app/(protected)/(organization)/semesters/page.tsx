@@ -1,6 +1,11 @@
 'use client';
 
-import { useDebounce, useSemestersQuery, isPermissionDeniedError, useServerPagination } from '@sentinel/hooks';
+import {
+    useDebounce,
+    useSemestersQuery,
+    isPermissionDeniedError,
+    useServerPagination,
+} from '@sentinel/hooks';
 import { useState } from 'react';
 import { AddSemesterDialog, SemestersList } from './_components';
 import { PermissionDeniedState } from '@sentinel/ui';
@@ -24,13 +29,13 @@ export default function CoreSemestersPage() {
     const isViewDenied = isPermissionDeniedError(error, 'semesters:view');
     const semesters = Array.isArray(semestersResponse)
         ? semestersResponse
-        : semestersResponse?.items ?? [];
+        : (semestersResponse?.items ?? []);
     const totalCount = Array.isArray(semestersResponse)
         ? semestersResponse.length
-        : semestersResponse?.pagination?.total ?? 0;
+        : (semestersResponse?.pagination?.total ?? 0);
     const pageCount = Array.isArray(semestersResponse)
         ? 1
-        : semestersResponse?.pagination?.totalPages ?? 1;
+        : (semestersResponse?.pagination?.totalPages ?? 1);
 
     const actions = !isViewDenied ? <AddSemesterDialog /> : undefined;
 

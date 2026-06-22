@@ -33,13 +33,15 @@ export default function AdminSectionsPage() {
         limit: pagination.pageSize,
     });
     const isViewDenied = isPermissionDeniedError(error, 'sections:view');
-    const sections = Array.isArray(sectionsResponse) ? sectionsResponse : sectionsResponse?.items ?? [];
+    const sections = Array.isArray(sectionsResponse)
+        ? sectionsResponse
+        : (sectionsResponse?.items ?? []);
     const totalCount = Array.isArray(sectionsResponse)
         ? sectionsResponse.length
-        : sectionsResponse?.pagination?.total ?? 0;
+        : (sectionsResponse?.pagination?.total ?? 0);
     const pageCount = Array.isArray(sectionsResponse)
         ? 1
-        : sectionsResponse?.pagination?.totalPages ?? 1;
+        : (sectionsResponse?.pagination?.totalPages ?? 1);
 
     return (
         <div className="flex flex-col gap-6 p-4 md:p-6">

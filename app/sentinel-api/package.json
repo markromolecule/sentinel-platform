@@ -7,6 +7,7 @@
         "node": "22.x"
     },
     "scripts": {
+        "typecheck": "NODE_OPTIONS=\"--max-old-space-size=4096\" tsc --noEmit",
         "test": "vitest run",
         "dev": "tsx watch -r dotenv/config src/server.ts",
         "dev:telemetry-worker": "tsx watch -r dotenv/config src/modules/telemetry/ingestion/workers/telemetry.worker.ts",

@@ -42,12 +42,12 @@ export function useCollectionManagement() {
     const [isImportModalOpen, setIsImportModalOpen] = useState(false);
     const [draftCollectionName, setDraftCollectionName] = useState('');
     const [hasDraftCollection, setHasDraftCollection] = useState(false);
-    
+
     const { pagination, setPagination } = useServerPagination([], {
         pageIndex: 0,
         pageSize: COLLECTIONS_PER_PAGE,
     });
-    
+
     const currentPage = pagination.pageIndex + 1;
     const setCurrentPage = (page: number) => {
         setPagination((current) => ({

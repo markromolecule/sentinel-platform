@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { type DbClient } from '@sentinel/db';
-import { AccessGatekeeperService } from './services/access-gatekeeper.service';
+import { AccessGatekeeperService } from './access.service';
 import { EntitlementsRepository } from './data/entitlements.repository';
 import { RuntimeAccessService } from '../runtime-access/runtime-access.service';
 import { StudentOverridesService } from '../student-overrides/student-overrides.service';

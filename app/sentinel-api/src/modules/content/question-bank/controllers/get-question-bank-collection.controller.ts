@@ -2,7 +2,7 @@ import { createRoute } from '@hono/zod-openapi';
 import { type AppRouteHandler } from '../../../../types/hono';
 import { assertAssessmentAccess } from '../../../examination/assessment/assessment-access';
 import { getQuestionBankCollectionByIdSchema } from '../question-bank.dto';
-import { QuestionBankService } from '../question-bank.service';
+import { getQuestionBankCollectionByIdService } from '../services/get-question-bank-collection-by-id.service';
 
 export const getQuestionBankCollectionRoute = createRoute({
     method: 'get',
@@ -32,12 +32,12 @@ export const getQuestionBankCollectionRouteHandler: AppRouteHandler<
 
     assertAssessmentAccess(c);
 
-    const collection = await QuestionBankService.getCollectionById(
-        c.get('dbClient'),
+    const collection = await getQuestionBankCollectionByIdService({
+        dbClient: c.get('dbClient'),
         id,
-        c.get('institutionId') || undefined,
-        c.get('user')?.id,
-    );
+        institutionId: c.get('institutionId') || undefined,
+        userId: c.get('user')?.id,
+    });
 
     return c.json({
         message: 'Collection fetched successfully',

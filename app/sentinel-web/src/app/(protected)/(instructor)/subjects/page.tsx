@@ -18,12 +18,17 @@ export default function SubjectsPage() {
     const debouncedSearch = useDebounce(searchTerm, 500);
     const { pagination, setPagination } = useServerPagination([debouncedSearch]);
 
-    const { subjects, isLoading, isError, error, pagination: subjectsPagination } =
-        useSubjectsList({
-            search: debouncedSearch,
-            page: pagination.pageIndex + 1,
-            limit: pagination.pageSize,
-        });
+    const {
+        subjects,
+        isLoading,
+        isError,
+        error,
+        pagination: subjectsPagination,
+    } = useSubjectsList({
+        search: debouncedSearch,
+        page: pagination.pageIndex + 1,
+        limit: pagination.pageSize,
+    });
     const isViewDenied = isPermissionDeniedError(error, 'subject_requests:view');
     const totalCount = subjectsPagination?.total ?? 0;
     const pageCount = subjectsPagination?.totalPages ?? 1;

@@ -5,7 +5,7 @@ import {
     resolveAssessmentInstitutionId,
 } from '../../../examination/assessment/assessment-access';
 import { updateQuestionBankCollectionSchema } from '../question-bank.dto';
-import { QuestionBankService } from '../question-bank.service';
+import { updateQuestionBankCollectionService } from '../services/update-question-bank-collection.service';
 
 export const updateQuestionBankCollectionRoute = createRoute({
     method: 'put',
@@ -51,13 +51,13 @@ export const updateQuestionBankCollectionRouteHandler: AppRouteHandler<
         requestedInstitutionId: body.institutionId,
     });
 
-    const collection = await QuestionBankService.updateCollection(
-        c.get('dbClient'),
+    const collection = await updateQuestionBankCollectionService({
+        dbClient: c.get('dbClient'),
         id,
         body,
         institutionId,
-        user.id,
-    );
+        userId: user.id,
+    });
 
     return c.json({
         message: 'Collection updated successfully',

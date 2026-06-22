@@ -58,10 +58,11 @@ export class InstitutionHierarchyService {
     static async getBranches(dbClient: DbClient, parentId: string) {
         await this.assertInstitutionExists(dbClient, parentId);
 
-        return InstitutionService.getInstitutions(dbClient, {
+        const result = await InstitutionService.getInstitutions(dbClient, {
             parentInstitutionId: parentId,
             institutionKind: 'CHILD',
         });
+        return Array.isArray(result) ? result : result.items;
     }
 
     static async linkBranch(dbClient: DbClient, parentId: string, branchId: string) {

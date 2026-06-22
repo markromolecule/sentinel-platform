@@ -1,26 +1,26 @@
 import { type DbClient } from '@sentinel/db';
-import { ExamService } from '../exams/exam.service';
-import { QuestionTypeService } from '../../content/question-type/question-type.service';
+import { getBuilderWorkspaceService } from './services/get-builder-workspace.service';
+import { saveBuilderWorkspaceService } from './services/save-builder-workspace.service';
+import { publishBuilderWorkspaceService } from './services/publish-builder-workspace.service';
 import type { BuilderWorkspace, SaveBuilderWorkspaceBody } from './builder.dto';
-import { incrementQuestionUsageData } from '../../content/question-bank/data/increment-question-usage';
-import { checkExposureThreshold } from '../../content/question-bank/services/check-exposure-threshold';
-import { LogsService } from '../../general/logs/logs.service';
-import { ActivityNotificationService } from '../../general/notification/services/activity-notification.service';
 
-function buildBuilderWorkspace(exam: BuilderWorkspace['exam']): BuilderWorkspace {
-    return {
-        exam,
-        questionTypes: QuestionTypeService.getQuestionTypes(),
-    };
-}
-
+/**
+ * Service class for exam builder operations.
+ * @deprecated Use individual service functions in the services/ directory directly.
+ */
 export class BuilderService {
+    /**
+     * Retrieves the builder workspace configuration for a specific exam.
+     * @deprecated Use getBuilderWorkspaceService directly.
+     */
     static async getBuilderWorkspace(dbClient: DbClient, examId: string, institutionId?: string) {
-        const exam = await ExamService.getExamById(dbClient, examId, institutionId);
-
-        return buildBuilderWorkspace(exam);
+        return getBuilderWorkspaceService({ dbClient, examId, institutionId });
     }
 
+    /**
+     * Saves/updates the current builder workspace state for an exam.
+     * @deprecated Use saveBuilderWorkspaceService directly.
+     */
     static async saveBuilderWorkspace(
         dbClient: DbClient,
         examId: string,
@@ -29,100 +29,31 @@ export class BuilderService {
         userId: string,
         canBypassLock = false,
     ) {
-        const exam = await ExamService.updateExam(
+        return saveBuilderWorkspaceService({
             dbClient,
             examId,
             body,
             institutionId,
             userId,
             canBypassLock,
-        );
-
-        // Telemetry logging
-        try {
-            const instId =
-                institutionId || (exam as any).institutionId || (exam as any).institution_id;
-            if (instId) {
-                await LogsService.createLog(dbClient, {
-                    userId,
-                    action: 'exam.builder_saved',
-                    resourceType: 'exam',
-                    resourceId: examId,
-                    activeInstitutionId: instId,
-                    details: { examId },
-                });
-            }
-        } catch (logErr) {
-            console.error('Failed to log exam.builder_saved:', logErr);
-        }
-
-        return buildBuilderWorkspace(exam);
+        });
     }
 
+    /**
+     * Publishes the builder workspace, transitioning the exam status to published.
+     * @deprecated Use publishBuilderWorkspaceService directly.
+     */
     static async publishBuilderWorkspace(
         dbClient: DbClient,
         examId: string,
         institutionId: string | undefined,
         userId: string,
     ) {
-        const exam = await ExamService.updateExamStatus(
+        return publishBuilderWorkspaceService({
             dbClient,
             examId,
-            'published',
             institutionId,
             userId,
-        );
-
-        // 2.6 — After publishing, increment usage counts and check exposure thresholds
-        // for all question bank questions linked to this exam.
-        try {
-            const questionBankIds = (exam.questions ?? [])
-                .map((q: any) => q.sourceQuestionBankQuestionId)
-                .filter((id: string | undefined): id is string => Boolean(id));
-
-            if (questionBankIds.length > 0) {
-                await incrementQuestionUsageData({ dbClient, questionIds: questionBankIds });
-                await checkExposureThreshold({ dbClient, questionIds: questionBankIds });
-            }
-        } catch (error) {
-            // Non-critical: log but don't fail the publish operation
-            console.error('[BuilderService] Failed to update question usage after publish:', error);
-        }
-
-        // Telemetry logging and notifications
-        try {
-            const instId =
-                institutionId || (exam as any).institutionId || (exam as any).institution_id;
-            if (instId) {
-                await LogsService.createLog(dbClient, {
-                    userId,
-                    action: 'exam.builder_published',
-                    resourceType: 'exam',
-                    resourceId: examId,
-                    activeInstitutionId: instId,
-                    details: { examId },
-                });
-
-                await ActivityNotificationService.notifyInstitutionActivityCreated({
-                    dbClient,
-                    actorUserId: userId,
-                    institutionId: instId,
-                    targetType: 'EXAM',
-                    targetId: examId,
-                    targetLabel: exam.title || 'Exam',
-                    title: 'Exam published',
-                    message: `Exam "${exam.title || 'Exam'}" has been published.`,
-                    sourceModule: 'exams',
-                    sourceAction: 'publish',
-                    metadata: {
-                        examId,
-                    },
-                });
-            }
-        } catch (logErr) {
-            console.error('Failed to log or notify exam.builder_published:', logErr);
-        }
-
-        return buildBuilderWorkspace(exam);
+        });
     }
 }

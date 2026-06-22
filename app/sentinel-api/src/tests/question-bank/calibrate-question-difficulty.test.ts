@@ -3,7 +3,7 @@ import {
     calibrateQuestionDifficulty,
     mapPValueToDifficulty,
     type CalibrateQuestionDifficultyDependencies,
-} from '../../modules/content/question-bank/services/calibrate-question-difficulty';
+} from '../../modules/content/question-bank/services/calibrate-question-difficulty.service';
 
 // ---------------------------------------------------------------------------
 // mapPValueToDifficulty — pure function unit tests

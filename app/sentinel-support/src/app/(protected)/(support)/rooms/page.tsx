@@ -1,6 +1,11 @@
 'use client';
 
-import { useDebounce, useRoomsQuery, isPermissionDeniedError, useServerPagination } from '@sentinel/hooks';
+import {
+    useDebounce,
+    useRoomsQuery,
+    isPermissionDeniedError,
+    useServerPagination,
+} from '@sentinel/hooks';
 import { useState } from 'react';
 import {
     AddRoomDialog,

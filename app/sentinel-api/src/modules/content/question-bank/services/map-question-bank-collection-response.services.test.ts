@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { mapQuestionBankCollectionResponse } from './map-question-bank-collection-response';
+import { mapQuestionBankCollectionResponse } from './map-question-bank-collection-response.service';
 
 describe('mapQuestionBankCollectionResponse', () => {
     it('preserves creator and updater ids for ownership checks', () => {

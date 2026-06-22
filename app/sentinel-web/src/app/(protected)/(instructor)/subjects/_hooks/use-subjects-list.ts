@@ -1,6 +1,10 @@
 'use client';
 
-import { useEnrolledSubjectsQuery, useEnrollmentRequestsQuery, useStableValue } from '@sentinel/hooks';
+import {
+    useEnrolledSubjectsQuery,
+    useEnrollmentRequestsQuery,
+    useStableValue,
+} from '@sentinel/hooks';
 import { Subject, EnrolledSubjectData, EnrollmentRequest } from '@sentinel/shared/types';
 import type { PaginationState } from '@tanstack/react-table';
 import { type PaginatedApiResponse } from '@sentinel/services';
@@ -147,7 +151,9 @@ type UseSubjectsListResult = {
  */
 export function useSubjectsList(search?: string): UseSubjectsListResult;
 export function useSubjectsList(params: UseSubjectsListArgs): UseSubjectsListResult;
-export function useSubjectsList(searchOrParams?: string | UseSubjectsListArgs): UseSubjectsListResult {
+export function useSubjectsList(
+    searchOrParams?: string | UseSubjectsListArgs,
+): UseSubjectsListResult {
     const params =
         typeof searchOrParams === 'string' ? { search: searchOrParams } : (searchOrParams ?? {});
     const hasPagination = params.page !== undefined && params.limit !== undefined;
@@ -160,10 +166,10 @@ export function useSubjectsList(searchOrParams?: string | UseSubjectsListArgs): 
     } = useEnrolledSubjectsQuery(
         (hasPagination
             ? {
-                search: params.search,
-                page: params.page,
-                limit: params.limit,
-            }
+                  search: params.search,
+                  page: params.page,
+                  limit: params.limit,
+              }
             : params.search) as any,
     );
 
@@ -175,21 +181,21 @@ export function useSubjectsList(searchOrParams?: string | UseSubjectsListArgs): 
     } = useEnrollmentRequestsQuery(
         (hasPagination
             ? {
-                search: params.search,
-                page: params.page,
-                limit: params.limit,
-            }
+                  search: params.search,
+                  page: params.page,
+                  limit: params.limit,
+              }
             : undefined) as any,
         (hasPagination ? undefined : params.search) as any,
     );
 
     const enrolledItems = Array.isArray(enrolledRaw)
         ? enrolledRaw
-        : (enrolledRaw as PaginatedApiResponse<EnrolledSubjectData>).items ?? [];
+        : ((enrolledRaw as PaginatedApiResponse<EnrolledSubjectData>).items ?? []);
 
     const requestItems = Array.isArray(requestsRaw)
         ? requestsRaw
-        : (requestsRaw as PaginatedApiResponse<EnrollmentRequest>).items ?? [];
+        : ((requestsRaw as PaginatedApiResponse<EnrollmentRequest>).items ?? []);
 
     const subjects = useStableValue(() => {
         if (!enrolledItems.length && !requestItems.length) return [];
@@ -214,28 +220,38 @@ export function useSubjectsList(searchOrParams?: string | UseSubjectsListArgs): 
             return undefined;
         }
 
-        const enrolledPagination = (!Array.isArray(enrolledRaw) ? (enrolledRaw as any).pagination : undefined) as
+        const enrolledPagination = (
+            !Array.isArray(enrolledRaw) ? (enrolledRaw as any).pagination : undefined
+        ) as
             | {
-                page: number;
-                pageSize: number;
-                total: number;
-                totalPages: number;
-                hasMore: boolean;
-            }
+                  page: number;
+                  pageSize: number;
+                  total: number;
+                  totalPages: number;
+                  hasMore: boolean;
+              }
             | undefined;
-        const requestPagination = (!Array.isArray(requestsRaw) ? (requestsRaw as any).pagination : undefined) as
+        const requestPagination = (
+            !Array.isArray(requestsRaw) ? (requestsRaw as any).pagination : undefined
+        ) as
             | {
-                page: number;
-                pageSize: number;
-                total: number;
-                totalPages: number;
-                hasMore: boolean;
-            }
+                  page: number;
+                  pageSize: number;
+                  total: number;
+                  totalPages: number;
+                  hasMore: boolean;
+              }
             | undefined;
 
-        const pageSize = enrolledPagination?.pageSize ?? requestPagination?.pageSize ?? params.limit ?? 10;
-        const total = (enrolledPagination?.total ?? enrolledItems.length) + (requestPagination?.total ?? requestItems.length);
-        const totalPages = Math.max(enrolledPagination?.totalPages ?? 1, requestPagination?.totalPages ?? 1);
+        const pageSize =
+            enrolledPagination?.pageSize ?? requestPagination?.pageSize ?? params.limit ?? 10;
+        const total =
+            (enrolledPagination?.total ?? enrolledItems.length) +
+            (requestPagination?.total ?? requestItems.length);
+        const totalPages = Math.max(
+            enrolledPagination?.totalPages ?? 1,
+            requestPagination?.totalPages ?? 1,
+        );
 
         return {
             pageIndex: (params.page ?? 1) - 1,
@@ -244,7 +260,15 @@ export function useSubjectsList(searchOrParams?: string | UseSubjectsListArgs): 
             totalPages,
             hasMore: enrolledPagination?.hasMore || requestPagination?.hasMore || false,
         };
-    }, [enrolledItems.length, hasPagination, params.limit, params.page, requestItems.length, enrolledRaw, requestsRaw]);
+    }, [
+        enrolledItems.length,
+        hasPagination,
+        params.limit,
+        params.page,
+        requestItems.length,
+        enrolledRaw,
+        requestsRaw,
+    ]);
 
     return {
         subjects,

@@ -16,7 +16,10 @@ export default function CoreDepartmentsPage() {
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedInstitutionId, setSelectedInstitutionId] = useState<string | undefined>('');
     const debouncedSearch = useDebounce(searchTerm, 500);
-    const { pagination, setPagination } = useServerPagination([debouncedSearch, selectedInstitutionId]);
+    const { pagination, setPagination } = useServerPagination([
+        debouncedSearch,
+        selectedInstitutionId,
+    ]);
 
     const { hasPermission } = useActivePermissions();
     const canImportDepartments = hasPermission('departments:import');
@@ -36,14 +39,13 @@ export default function CoreDepartmentsPage() {
     const isViewDenied = isPermissionDeniedError(error, 'departments:view');
     const departments = Array.isArray(departmentsResponse)
         ? departmentsResponse
-        : departmentsResponse?.items ?? [];
+        : (departmentsResponse?.items ?? []);
     const totalCount = Array.isArray(departmentsResponse)
         ? departmentsResponse.length
-        : departmentsResponse?.pagination?.total ?? 0;
+        : (departmentsResponse?.pagination?.total ?? 0);
     const pageCount = Array.isArray(departmentsResponse)
         ? 1
-        : departmentsResponse?.pagination?.totalPages ?? 1;
-
+        : (departmentsResponse?.pagination?.totalPages ?? 1);
 
     const actions = !isViewDenied ? (
         <div className="flex items-center gap-2">

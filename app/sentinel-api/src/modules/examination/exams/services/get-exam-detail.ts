@@ -7,7 +7,7 @@ import { getExamSectionsData } from '../data/get-exam-sections';
 import { mapExamDetailResponse } from './map-exam-response';
 import { requireExamRecord } from './require-exam-record';
 import { RuntimeAccessService } from '../../runtime-access/runtime-access.service';
-import { AccessGatekeeperService } from '../../access/services/access-gatekeeper.service';
+import { AccessGatekeeperService } from '../../access/access.service';
 import { buildStudentOverrideRuntimeAccess } from '../../student-overrides/student-overrides.service';
 import type { ExamRuntimeAccess } from '../../runtime-access/runtime-access.dto';
 import { TelemetrySettingsService } from '../../../telemetry/settings/telemetry-settings.service';

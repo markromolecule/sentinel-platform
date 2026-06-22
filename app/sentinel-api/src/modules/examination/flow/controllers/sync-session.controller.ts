@@ -1,7 +1,7 @@
 import { createRoute } from '@hono/zod-openapi';
 import { type AppRouteHandler } from '../../../../types/hono';
 import { syncSessionSchema } from '../flow.dto';
-import { SessionManagerService } from '../services/session-manager.service';
+import { SessionManagerService } from '../flow.service';
 
 export const syncSessionRoute = createRoute({
     method: 'post',

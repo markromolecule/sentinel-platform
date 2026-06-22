@@ -78,7 +78,7 @@ function SupportInstitutionsPageContent() {
                 }
             >
                 {!isViewDenied ? (
-                     <div className="flex flex-wrap gap-2">
+                    <div className="flex flex-wrap gap-2">
                         {parentId ? (
                             <>
                                 <Button

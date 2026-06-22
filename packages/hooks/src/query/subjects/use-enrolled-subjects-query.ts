@@ -13,7 +13,9 @@ type UseEnrolledSubjectsQueryArgs = {
     limit?: number;
 };
 
-export function useEnrolledSubjectsQuery(search?: string): UseQueryResult<EnrolledSubjectData[], Error>;
+export function useEnrolledSubjectsQuery(
+    search?: string,
+): UseQueryResult<EnrolledSubjectData[], Error>;
 export function useEnrolledSubjectsQuery(
     params: UseEnrolledSubjectsQueryArgs & { page: number; limit: number },
 ): UseQueryResult<PaginatedApiResponse<EnrolledSubjectData>, Error>;
@@ -21,12 +23,15 @@ export function useEnrolledSubjectsQuery(searchOrParams?: string | UseEnrolledSu
     const apiClient = useApi();
     const isAuthenticatedQueryEnabled = useAuthenticatedQueryEnabled();
     const params =
-        typeof searchOrParams === 'string'
-            ? { search: searchOrParams }
-            : (searchOrParams ?? {});
+        typeof searchOrParams === 'string' ? { search: searchOrParams } : (searchOrParams ?? {});
     const hasPagination = params.page !== undefined && params.limit !== undefined;
     return useQuery({
-        queryKey: [...SUBJECT_QUERY_KEYS.enrolled, params.search ?? '', params.page ?? '', params.limit ?? ''],
+        queryKey: [
+            ...SUBJECT_QUERY_KEYS.enrolled,
+            params.search ?? '',
+            params.page ?? '',
+            params.limit ?? '',
+        ],
         queryFn: async () => {
             const response = await getEnrolledSubjects(apiClient, {
                 search: params.search,
