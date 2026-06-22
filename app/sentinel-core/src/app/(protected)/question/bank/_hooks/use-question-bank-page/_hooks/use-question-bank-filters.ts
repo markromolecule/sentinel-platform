@@ -6,7 +6,7 @@ import type { QuestionType, QuestionDifficulty } from '@sentinel/shared/types';
 export function useQuestionBankFilters() {
     const [searchQuery, setSearchQueryState] = useState('');
     const [columnFilters, setColumnFiltersState] = useState<ColumnFiltersState>([]);
-    
+
     const deferredSearchQuery = useDeferredValue(searchQuery);
     const { pagination, setPagination } = useServerPagination([deferredSearchQuery, columnFilters]);
 

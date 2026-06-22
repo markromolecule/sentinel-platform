@@ -65,13 +65,13 @@ export default function SharedOfferedSubjectsPage() {
     const canDeleteOfferings = hasPermission('subject_offerings:delete');
     const offerings = Array.isArray(offeringsResponse)
         ? offeringsResponse
-        : offeringsResponse?.items ?? [];
+        : (offeringsResponse?.items ?? []);
     const totalCount = Array.isArray(offeringsResponse)
         ? offeringsResponse.length
-        : offeringsResponse?.pagination?.total ?? 0;
+        : (offeringsResponse?.pagination?.total ?? 0);
     const pageCount = Array.isArray(offeringsResponse)
         ? 1
-        : offeringsResponse?.pagination?.totalPages ?? 1;
+        : (offeringsResponse?.pagination?.totalPages ?? 1);
 
     const columns = useStableValue(
         () =>

@@ -36,13 +36,15 @@ export function CoursesPage() {
     const isCourseViewDenied = isPermissionDeniedError(error, 'courses:view');
     const isCoursesReadOnly = isReadOnlyFor('courses');
     const canCreateCourse = hasPermission('courses:create') && !isCoursesReadOnly;
-    const courses = Array.isArray(coursesResponse) ? coursesResponse : coursesResponse?.items ?? [];
+    const courses = Array.isArray(coursesResponse)
+        ? coursesResponse
+        : (coursesResponse?.items ?? []);
     const totalCount = Array.isArray(coursesResponse)
         ? coursesResponse.length
-        : coursesResponse?.pagination?.total ?? 0;
+        : (coursesResponse?.pagination?.total ?? 0);
     const pageCount = Array.isArray(coursesResponse)
         ? 1
-        : coursesResponse?.pagination?.totalPages ?? 1;
+        : (coursesResponse?.pagination?.totalPages ?? 1);
 
     return (
         <div className="flex flex-col gap-6 p-4 md:p-6">

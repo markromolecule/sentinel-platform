@@ -2,7 +2,7 @@ import { createRoute } from '@hono/zod-openapi';
 import { type AppRouteHandler } from '../../../../types/hono';
 import { respondWithRouteError } from '../../../../lib/route-error-response';
 import { startSessionSchema } from '../flow.dto';
-import { SessionManagerService } from '../services/session-manager.service';
+import { SessionManagerService } from '../flow.service';
 
 export const startSessionRoute = createRoute({
     method: 'post',

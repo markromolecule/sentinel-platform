@@ -5,7 +5,7 @@ import {
     resolveAssessmentInstitutionId,
 } from '../../../examination/assessment/assessment-access';
 import { createQuestionBankCollectionSchema } from '../question-bank.dto';
-import { QuestionBankService } from '../question-bank.service';
+import { createQuestionBankCollectionService } from '../services/create-question-bank-collection.service';
 
 export const createQuestionBankCollectionRoute = createRoute({
     method: 'post',
@@ -49,12 +49,12 @@ export const createQuestionBankCollectionRouteHandler: AppRouteHandler<
         requestedInstitutionId: body.institutionId,
     });
 
-    const collection = await QuestionBankService.createCollection(
-        c.get('dbClient'),
+    const collection = await createQuestionBankCollectionService({
+        dbClient: c.get('dbClient'),
         body,
         institutionId,
-        user.id,
-    );
+        userId: user.id,
+    });
 
     return c.json(
         {

@@ -20,7 +20,7 @@ interface SubjectsTableProps {
             value: string;
             icon?: React.ComponentType<{ className?: string }>;
         }[];
-        }[];
+    }[];
     pagination?: PaginationState;
     onPaginationChange?: (pagination: PaginationState) => void;
     pageCount?: number;

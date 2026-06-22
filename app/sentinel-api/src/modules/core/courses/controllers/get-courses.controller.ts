@@ -75,14 +75,14 @@ export const getCoursesRouteHandler: AppRouteHandler<typeof getCoursesRoute> = a
         return c.json(
             Array.isArray(courses)
                 ? {
-                    message: 'Courses fetched successfully',
-                    data,
-                }
+                      message: 'Courses fetched successfully',
+                      data,
+                  }
                 : {
-                    message: 'Courses fetched successfully',
-                    data,
-                    pagination: courses.pagination,
-                },
+                      message: 'Courses fetched successfully',
+                      data,
+                      pagination: courses.pagination,
+                  },
             200,
         );
     } catch (error: any) {

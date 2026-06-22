@@ -1,0 +1,124 @@
+import { type DbClient } from '@sentinel/db';
+import { type ExamAttemptAnswers } from '@sentinel/shared';
+import { AccessGatekeeperService } from '../../access/access.service';
+import { getExamConfigurationState } from '../../configuration/configuration.service';
+import type { ExamConfigurationState } from '../../configuration/configuration.dto';
+import { SessionRepository } from '../data/session.repository';
+import { LogsService } from '../../../general/logs/logs.service';
+import { ActivityNotificationService } from '../../../general/notification/services/activity-notification.service';
+
+export type StartSessionServiceArgs = {
+    dbClient: DbClient;
+    studentId: string;
+    examId: string;
+};
+
+export type StartSessionResult = {
+    sessionId?: string;
+    configSnapshot?: ExamConfigurationState;
+    isResumed?: boolean;
+    answers?: ExamAttemptAnswers;
+    elapsedSeconds?: number;
+    reconnectAttemptCount?: number;
+    maxReconnectAttempts?: number;
+    attemptId?: string;
+    error?: string;
+    errorCode?: 'ATTEMPT_ALREADY_COMPLETED';
+};
+
+/**
+ * Attempts to start a student exam session.
+ * Verifies student eligibility, checks access constraints, config snapshot,
+ * initializes session database records, and logs telemetry/notifications.
+ */
+export async function startSessionService({
+    dbClient,
+    studentId,
+    examId,
+}: StartSessionServiceArgs): Promise<StartSessionResult> {
+    // 1. Cross-Domain Call: Verify access constraints
+    const accessCheck = await AccessGatekeeperService.verifyStudentExamEligibility(
+        dbClient,
+        studentId,
+        examId,
+    );
+
+    if (!accessCheck.isEligible) {
+        return { error: accessCheck.reason || 'Access denied mapping to current exam flow.' };
+    }
+
+    const configSnapshot = await getExamConfigurationState(dbClient, examId);
+
+    // 2. Access granted, initialize session data
+    const session = await SessionRepository.createSession(dbClient, {
+        studentId: accessCheck.context.studentId,
+        examId,
+        maxReconnectAttempts: configSnapshot.configuration.maxReconnectAttempts,
+        accessOverride: accessCheck.accessOverride ?? null,
+        updatedBy: studentId,
+    });
+
+    if ('errorCode' in session) {
+        return {
+            attemptId: session.attemptId,
+            error: session.error,
+            errorCode: session.errorCode,
+        };
+    }
+
+    // Telemetry logging and notifications
+    try {
+        await LogsService.createLog(dbClient, {
+            userId: studentId,
+            action: session.isResumed ? 'exam.session_resumed' : 'exam.session_started',
+            resourceType: 'exam_attempt',
+            resourceId: session.sessionId,
+            activeInstitutionId: accessCheck.context.institutionId ?? '',
+            details: {
+                examId,
+                isResumed: session.isResumed,
+            },
+        });
+
+        if (accessCheck.context.institutionId) {
+            const exam = await dbClient
+                .selectFrom('exams')
+                .select(['title'])
+                .where('exam_id', '=', examId)
+                .executeTakeFirst();
+            const examTitle = exam?.title || 'Exam';
+
+            await ActivityNotificationService.notifyInstitutionActivityCreated({
+                dbClient,
+                actorUserId: studentId,
+                institutionId: accessCheck.context.institutionId,
+                targetType: 'EXAM_ATTEMPT',
+                targetId: session.sessionId,
+                targetLabel: examTitle,
+                title: session.isResumed ? 'Exam attempt resumed' : 'Exam attempt started',
+                message: `Exam attempt ${session.isResumed ? 'resumed' : 'started'} for "${examTitle}".`,
+                sourceModule: 'exams',
+                sourceAction: session.isResumed ? 'resume-attempt' : 'start-attempt',
+                metadata: {
+                    examId,
+                    isResumed: session.isResumed,
+                    attemptId: session.sessionId,
+                },
+            });
+        }
+    } catch (logErr) {
+        console.error('Failed to log or notify exam session started/resumed:', logErr);
+    }
+
+    return {
+        sessionId: session.sessionId,
+        configSnapshot,
+        isResumed: session.isResumed,
+        answers: 'answers' in session ? session.answers : undefined,
+        elapsedSeconds: 'elapsedSeconds' in session ? session.elapsedSeconds : undefined,
+        reconnectAttemptCount:
+            'reconnectAttemptCount' in session ? session.reconnectAttemptCount : undefined,
+        maxReconnectAttempts:
+            'maxReconnectAttempts' in session ? session.maxReconnectAttempts : undefined,
+    };
+}

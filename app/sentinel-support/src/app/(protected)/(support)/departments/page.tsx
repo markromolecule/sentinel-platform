@@ -1,6 +1,11 @@
 'use client';
 
-import { useDebounce, useDepartmentsQuery, isPermissionDeniedError, useServerPagination } from '@sentinel/hooks';
+import {
+    useDebounce,
+    useDepartmentsQuery,
+    isPermissionDeniedError,
+    useServerPagination,
+} from '@sentinel/hooks';
 import { useState } from 'react';
 import {
     AddDepartmentDialog,

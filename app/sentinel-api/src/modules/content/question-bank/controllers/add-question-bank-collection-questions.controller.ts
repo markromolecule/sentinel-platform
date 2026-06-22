@@ -2,7 +2,7 @@ import { createRoute } from '@hono/zod-openapi';
 import { type AppRouteHandler } from '../../../../types/hono';
 import { assertAssessmentAccess } from '../../../examination/assessment/assessment-access';
 import { mutateQuestionBankCollectionQuestionsSchema } from '../question-bank.dto';
-import { QuestionBankService } from '../question-bank.service';
+import { addQuestionsToCollectionService } from '../services/add-question-bank-collection-questions.service';
 
 export const addQuestionBankCollectionQuestionsRoute = createRoute({
     method: 'post',
@@ -40,14 +40,14 @@ export const addQuestionBankCollectionQuestionsRouteHandler: AppRouteHandler<
 
     assertAssessmentAccess(c);
 
-    const collection = await QuestionBankService.addQuestionsToCollection(
-        c.get('dbClient'),
+    const collection = await addQuestionsToCollectionService({
+        dbClient: c.get('dbClient'),
         id,
-        body.questionIds ?? [],
-        body.questions,
-        user.id,
-        c.get('institutionId') || undefined,
-    );
+        questionIds: body.questionIds ?? [],
+        questions: body.questions,
+        userId: user.id,
+        institutionId: c.get('institutionId') || undefined,
+    });
 
     return c.json({
         message: 'Questions added to collection successfully',

@@ -35,14 +35,14 @@ Implement a centralized global query parameter mapping in the API client, and in
 
 **Goal:** Integrate server-side pagination for Semesters, Rooms, Departments, Sections, Courses, Subject offerings, and Classifications tables in sentinel-core.
 
-- [x] Update Semesters view in [page.tsx](file:///Applications/XAMPP/xamppfiles/htdocs/sentinel/app/sentinel-core/src/app/(protected)/(organization)/semesters/page.tsx) to handle page and limit state, query with pagination params, and pass props to component.
-- [x] Update Rooms view in [page.tsx](file:///Applications/XAMPP/xamppfiles/htdocs/sentinel/app/sentinel-core/src/app/(protected)/(organization)/rooms/page.tsx) to handle pagination state.
-- [x] Update Departments view in [page.tsx](file:///Applications/XAMPP/xamppfiles/htdocs/sentinel/app/sentinel-core/src/app/(protected)/(organization)/departments/page.tsx) to handle pagination state.
-- [x] Update Sections view in [page.tsx](file:///Applications/XAMPP/xamppfiles/htdocs/sentinel/app/sentinel-core/src/app/(protected)/sections/page.tsx) to handle pagination state.
-- [x] Update Courses view in [page.tsx](file:///Applications/XAMPP/xamppfiles/htdocs/sentinel/app/sentinel-core/src/app/(protected)/courses/page.tsx) to handle pagination state.
-- [x] Update Subject Classifications view in [page.tsx](file:///Applications/XAMPP/xamppfiles/htdocs/sentinel/app/sentinel-core/src/app/(protected)/subjects/classifications/page.tsx) to handle pagination state.
-- [x] Update Subject Offerings view in [page.tsx](file:///Applications/XAMPP/xamppfiles/htdocs/sentinel/app/sentinel-core/src/app/(protected)/subjects/offered/page.tsx) to handle pagination state.
-- [x] Update Enrollment Requests view in [page.tsx](file:///Applications/XAMPP/xamppfiles/htdocs/sentinel/app/sentinel-core/src/app/(protected)/subjects/requests/page.tsx) to handle pagination state.
+- [x] Update Semesters view in [page.tsx](<file:///Applications/XAMPP/xamppfiles/htdocs/sentinel/app/sentinel-core/src/app/(protected)/(organization)/semesters/page.tsx>) to handle page and limit state, query with pagination params, and pass props to component.
+- [x] Update Rooms view in [page.tsx](<file:///Applications/XAMPP/xamppfiles/htdocs/sentinel/app/sentinel-core/src/app/(protected)/(organization)/rooms/page.tsx>) to handle pagination state.
+- [x] Update Departments view in [page.tsx](<file:///Applications/XAMPP/xamppfiles/htdocs/sentinel/app/sentinel-core/src/app/(protected)/(organization)/departments/page.tsx>) to handle pagination state.
+- [x] Update Sections view in [page.tsx](<file:///Applications/XAMPP/xamppfiles/htdocs/sentinel/app/sentinel-core/src/app/(protected)/sections/page.tsx>) to handle pagination state.
+- [x] Update Courses view in [page.tsx](<file:///Applications/XAMPP/xamppfiles/htdocs/sentinel/app/sentinel-core/src/app/(protected)/courses/page.tsx>) to handle pagination state.
+- [x] Update Subject Classifications view in [page.tsx](<file:///Applications/XAMPP/xamppfiles/htdocs/sentinel/app/sentinel-core/src/app/(protected)/subjects/classifications/page.tsx>) to handle pagination state.
+- [x] Update Subject Offerings view in [page.tsx](<file:///Applications/XAMPP/xamppfiles/htdocs/sentinel/app/sentinel-core/src/app/(protected)/subjects/offered/page.tsx>) to handle pagination state.
+- [x] Update Enrollment Requests view in [page.tsx](<file:///Applications/XAMPP/xamppfiles/htdocs/sentinel/app/sentinel-core/src/app/(protected)/subjects/requests/page.tsx>) to handle pagination state.
 - [x] Update table components (such as `rooms-list.tsx`, `semesters-list.tsx`, etc. under sentinel-core) to accept pagination props and pass them to `<DataTable manualPagination={true} />`.
 - [x] Run `pnpm --dir app/sentinel-core test` to verify no regressions in sentinel-core.
 
@@ -54,8 +54,8 @@ Implement a centralized global query parameter mapping in the API client, and in
 
 **Goal:** Integrate server-side pagination for Subjects and Offered Subjects tables in sentinel-web.
 
-- [x] Update Subjects page view in [page.tsx](file:///Applications/XAMPP/xamppfiles/htdocs/sentinel/app/sentinel-web/src/app/(protected)/(instructor)/subjects/page.tsx) to handle pagination state.
-- [x] Update Offered Subjects page view in [page.tsx](file:///Applications/XAMPP/xamppfiles/htdocs/sentinel/app/sentinel-web/src/app/(protected)/(instructor)/subjects/offered/page.tsx) to handle pagination state.
+- [x] Update Subjects page view in [page.tsx](<file:///Applications/XAMPP/xamppfiles/htdocs/sentinel/app/sentinel-web/src/app/(protected)/(instructor)/subjects/page.tsx>) to handle pagination state.
+- [x] Update Offered Subjects page view in [page.tsx](<file:///Applications/XAMPP/xamppfiles/htdocs/sentinel/app/sentinel-web/src/app/(protected)/(instructor)/subjects/offered/page.tsx>) to handle pagination state.
 - [x] Update table components (such as `subjects-list.tsx` under sentinel-web) to accept pagination props and pass them to `<DataTable manualPagination={true} />`.
 - [x] Run `pnpm --dir app/sentinel-web test` to verify no regressions in sentinel-web.
 
@@ -77,12 +77,14 @@ Implement a centralized global query parameter mapping in the API client, and in
 ## Verification Plan
 
 ### Automated Tests
+
 - Run all workspace vitest tests to make sure types, services, and hooks compile:
-  ```bash
-  pnpm test
-  ```
+    ```bash
+    pnpm test
+    ```
 
 ### Manual Verification
+
 - Load each of the modified pages in `sentinel-core` and `sentinel-web`.
 - Verify in Chrome DevTools Network tab that loading the page, filtering, searching, or clicking pagination buttons fires requests with `page` and `pageSize` parameters (e.g. `?page=1&pageSize=10`).
 - Ensure the API responses contain the `pagination` metadata and only return the sliced page of items.

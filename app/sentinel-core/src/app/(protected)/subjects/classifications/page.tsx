@@ -55,13 +55,13 @@ export default function SubjectClassificationPage() {
     );
     const classifications = Array.isArray(classificationsResponse)
         ? classificationsResponse
-        : classificationsResponse?.items ?? [];
+        : (classificationsResponse?.items ?? []);
     const totalCount = Array.isArray(classificationsResponse)
         ? classificationsResponse.length
-        : classificationsResponse?.pagination?.total ?? 0;
+        : (classificationsResponse?.pagination?.total ?? 0);
     const pageCount = Array.isArray(classificationsResponse)
         ? 1
-        : classificationsResponse?.pagination?.totalPages ?? 1;
+        : (classificationsResponse?.pagination?.totalPages ?? 1);
 
     const isViewDenied = isPermissionDeniedError(error, 'subjects:view');
     const canCreateClassification = hasPermission('subjects:create');

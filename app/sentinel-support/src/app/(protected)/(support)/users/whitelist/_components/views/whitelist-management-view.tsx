@@ -93,7 +93,13 @@ export function WhitelistManagementView({
             page: pagination.pageIndex + 1,
             limit: pagination.pageSize,
         }),
-        [debouncedSearch, selectedInstitutionId, selectedDepartmentId, selectedCourseId, pagination],
+        [
+            debouncedSearch,
+            selectedInstitutionId,
+            selectedDepartmentId,
+            selectedCourseId,
+            pagination,
+        ],
     );
 
     const { data: recordsResponse, isLoading, error } = useStudentWhitelistQuery(whitelistParams);
@@ -190,4 +196,3 @@ export function WhitelistManagementView({
         </div>
     );
 }
-

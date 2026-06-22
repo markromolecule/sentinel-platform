@@ -3,7 +3,7 @@ import { HTTPException } from 'hono/http-exception';
 import { type AppRouteHandler } from '../../../../types/hono';
 import { respondWithRouteError } from '../../../../lib/route-error-response';
 import { completeSessionSchema } from '../flow.dto';
-import { SessionManagerService } from '../services/session-manager.service';
+import { SessionManagerService } from '../flow.service';
 import { resolveAssessmentActorRole } from '../../assessment/assessment-access';
 
 export const completeSessionRoute = createRoute({

@@ -33,15 +33,13 @@ describe('useCoursesPageState', () => {
             if (args && args.page !== undefined && args.limit !== undefined) {
                 return {
                     data: {
-                        items: [
-                            { id: 'course-1', title: 'Course 1', code: 'C1' }
-                        ],
+                        items: [{ id: 'course-1', title: 'Course 1', code: 'C1' }],
                         pagination: {
                             total: 15,
                             page: 1,
                             pageSize: 10,
                             totalPages: 2,
-                        }
+                        },
                     },
                     isLoading: false,
                     isError: false,
@@ -65,9 +63,7 @@ describe('useCoursesPageState', () => {
             pageIndex: 0,
             pageSize: 10,
         });
-        expect(result.current.courses).toEqual([
-            { id: 'course-1', title: 'Course 1', code: 'C1' }
-        ]);
+        expect(result.current.courses).toEqual([{ id: 'course-1', title: 'Course 1', code: 'C1' }]);
         expect(result.current.pageCount).toBe(2);
         expect(result.current.totalCount).toBe(15);
     });

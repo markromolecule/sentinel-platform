@@ -41,13 +41,13 @@ export default function SharedEnrollmentRequestsPage() {
     const isViewDenied = Boolean(deniedError);
     const requests = Array.isArray(requestsResponse)
         ? requestsResponse
-        : requestsResponse?.items ?? [];
+        : (requestsResponse?.items ?? []);
     const totalCount = Array.isArray(requestsResponse)
         ? requestsResponse.length
-        : requestsResponse?.pagination?.total ?? 0;
+        : (requestsResponse?.pagination?.total ?? 0);
     const pageCount = Array.isArray(requestsResponse)
         ? 1
-        : requestsResponse?.pagination?.totalPages ?? 1;
+        : (requestsResponse?.pagination?.totalPages ?? 1);
 
     return (
         <SubjectPageShell

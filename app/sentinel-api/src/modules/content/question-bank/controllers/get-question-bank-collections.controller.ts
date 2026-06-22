@@ -5,7 +5,7 @@ import {
     resolveAssessmentInstitutionId,
 } from '../../../examination/assessment/assessment-access';
 import { getQuestionBankCollectionsSchema } from '../question-bank.dto';
-import { QuestionBankService } from '../question-bank.service';
+import { getQuestionBankCollectionsService } from '../services/get-question-bank-collections.service';
 
 export const getQuestionBankCollectionsRoute = createRoute({
     method: 'get',
@@ -41,12 +41,12 @@ export const getQuestionBankCollectionsRouteHandler: AppRouteHandler<
         requestedInstitutionId: query.institutionId,
     });
 
-    const collections = await QuestionBankService.getCollections(
-        c.get('dbClient'),
-        query,
+    const collections = await getQuestionBankCollectionsService({
+        dbClient: c.get('dbClient'),
+        filters: query,
         institutionId,
-        user?.id,
-    );
+        userId: user?.id,
+    });
 
     return c.json({
         message: 'Collections fetched successfully',

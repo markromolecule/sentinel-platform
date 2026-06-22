@@ -1,0 +1,67 @@
+import { type DbClient } from '@sentinel/db';
+import { HTTPException } from 'hono/http-exception';
+import { type ExamAttemptAnswers } from '@sentinel/shared';
+import { SessionRepository } from '../data/session.repository';
+import { LogsService } from '../../../general/logs/logs.service';
+import type { SyncSessionBody } from '../flow.dto';
+
+export type SyncSessionServiceArgs = {
+    dbClient: DbClient;
+    studentUserId: string;
+    body: SyncSessionBody;
+};
+
+/**
+ * Synchronizes the current student exam attempt progress (answers, time elapsed) to database.
+ * Logs heartbeat telemetry.
+ */
+export async function syncSessionService({
+    dbClient,
+    studentUserId,
+    body,
+}: SyncSessionServiceArgs): Promise<void> {
+    const attempt = await SessionRepository.getOwnedSessionAttempt(dbClient, {
+        sessionId: body.sessionId,
+        studentUserId,
+    });
+
+    if (!attempt?.attempt_id) {
+        throw new HTTPException(404, {
+            message: 'Exam session not found for the authenticated student.',
+        });
+    }
+
+    if (attempt.completed_at || attempt.status === 'COMPLETED') {
+        throw new HTTPException(409, {
+            message: 'This exam session has already been submitted and cannot be synced.',
+        });
+    }
+
+    await SessionRepository.updateSyncProgress(dbClient, {
+        sessionId: body.sessionId,
+        answeredCount: body.answeredCount,
+        timeSpentMinutes: body.elapsedSeconds > 0 ? Math.ceil(body.elapsedSeconds / 60) : 0,
+        answers: body.answers as ExamAttemptAnswers | undefined,
+    });
+
+    // Telemetry logging
+    if (attempt.institution_id) {
+        try {
+            await LogsService.createLog(dbClient, {
+                userId: studentUserId,
+                action: 'exam.heartbeat_synced',
+                resourceType: 'exam_attempt',
+                resourceId: attempt.attempt_id,
+                activeInstitutionId: attempt.institution_id,
+                details: {
+                    sessionId: body.sessionId,
+                    answeredCount: body.answeredCount,
+                    timeSpentMinutes:
+                        body.elapsedSeconds > 0 ? Math.ceil(body.elapsedSeconds / 60) : 0,
+                },
+            });
+        } catch (logErr) {
+            console.error('Failed to log exam.heartbeat_synced:', logErr);
+        }
+    }
+}

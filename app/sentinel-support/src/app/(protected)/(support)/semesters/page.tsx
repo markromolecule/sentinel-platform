@@ -1,6 +1,11 @@
 'use client';
 
-import { useDebounce, useSemestersQuery, isPermissionDeniedError, useServerPagination } from '@sentinel/hooks';
+import {
+    useDebounce,
+    useSemestersQuery,
+    isPermissionDeniedError,
+    useServerPagination,
+} from '@sentinel/hooks';
 import { useState } from 'react';
 import {
     AddSemesterDialog,

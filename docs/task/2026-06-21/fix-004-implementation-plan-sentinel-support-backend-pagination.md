@@ -56,12 +56,12 @@ Create a tiny `useServerPagination` hook that encapsulates `PaginationState`, th
 **Goal:** Provide a reusable hook that encapsulates `PaginationState` and reset-on-search logic.
 
 - [x] Create `app/sentinel-support/src/hooks/use-server-pagination.ts`
-  - Export `useServerPagination(debouncedSearch: string)` returning `{ pagination, setPagination }`.
-  - On `debouncedSearch` change, reset `pageIndex` to `0` (mirrors `sentinel-core` pattern).
-  - JSDoc on exported function.
+    - Export `useServerPagination(debouncedSearch: string)` returning `{ pagination, setPagination }`.
+    - On `debouncedSearch` change, reset `pageIndex` to `0` (mirrors `sentinel-core` pattern).
+    - JSDoc on exported function.
 - [x] Write `app/sentinel-support/src/hooks/use-server-pagination.test.ts`
-  - Test that `pageIndex` resets to `0` when `debouncedSearch` changes.
-  - Test that `setPagination` updates state correctly.
+    - Test that `pageIndex` resets to `0` when `debouncedSearch` changes.
+    - Test that `setPagination` updates state correctly.
 
 **Migration required:** No
 
@@ -72,19 +72,19 @@ Create a tiny `useServerPagination` hook that encapsulates `PaginationState`, th
 **Goal:** The Institutions page fetches only one page of records from the API.
 
 - [x] Modify `app/sentinel-support/src/app/(protected)/(support)/institutions/_components/views/institutions-list.tsx`
-  - Add optional props: `pagination?: PaginationState`, `onPaginationChange?`, `pageCount?`, `totalCount?`, `manualPagination?`.
-  - Pass these through to `<DataTable>`.
-  - Update `selectedIds` derivation to use `institutions[parseInt(index)]?.id` (already correct; no regression).
+    - Add optional props: `pagination?: PaginationState`, `onPaginationChange?`, `pageCount?`, `totalCount?`, `manualPagination?`.
+    - Pass these through to `<DataTable>`.
+    - Update `selectedIds` derivation to use `institutions[parseInt(index)]?.id` (already correct; no regression).
 - [x] Modify `app/sentinel-support/src/app/(protected)/(support)/institutions/page.tsx`
-  - Import `useServerPagination`, `PaginationState`.
-  - Call `useServerPagination(debouncedSearch)` to obtain `pagination` / `setPagination`.
-  - Switch `useInstitutionsQuery` to paginated overload: `{ search, page: pagination.pageIndex + 1, limit: pagination.pageSize }`.
-  - Derive `visibleInstitutions` from `institutionsResponse?.items ?? []`.
-  - Derive `pageCount` from `institutionsResponse?.pagination?.totalPages ?? 1`.
-  - Pass `pagination`, `onPaginationChange={setPagination}`, `pageCount`, `manualPagination` to `<InstitutionsList>`.
-  - **Note:** `parentId` filtering currently happens client-side after fetch; after pagination is enabled, the parent-id drill-down (`visibleInstitutions.filter(...)`) will only filter within the current page. This is an **accepted limitation** for this ticket — a separate ticket should add a `parentId` query param to the API.
+    - Import `useServerPagination`, `PaginationState`.
+    - Call `useServerPagination(debouncedSearch)` to obtain `pagination` / `setPagination`.
+    - Switch `useInstitutionsQuery` to paginated overload: `{ search, page: pagination.pageIndex + 1, limit: pagination.pageSize }`.
+    - Derive `visibleInstitutions` from `institutionsResponse?.items ?? []`.
+    - Derive `pageCount` from `institutionsResponse?.pagination?.totalPages ?? 1`.
+    - Pass `pagination`, `onPaginationChange={setPagination}`, `pageCount`, `manualPagination` to `<InstitutionsList>`.
+    - **Note:** `parentId` filtering currently happens client-side after fetch; after pagination is enabled, the parent-id drill-down (`visibleInstitutions.filter(...)`) will only filter within the current page. This is an **accepted limitation** for this ticket — a separate ticket should add a `parentId` query param to the API.
 - [x] Write `app/sentinel-support/src/app/(protected)/(support)/institutions/_components/views/institutions-list.test.tsx`
-  - Smoke-test that `<InstitutionsList>` renders with pagination props forwarded.
+    - Smoke-test that `<InstitutionsList>` renders with pagination props forwarded.
 
 **Migration required:** No
 
@@ -95,16 +95,16 @@ Create a tiny `useServerPagination` hook that encapsulates `PaginationState`, th
 **Goal:** The Departments page fetches only one page of records from the API.
 
 - [x] Modify `app/sentinel-support/src/app/(protected)/(support)/departments/_components/views/departments-list.tsx`
-  - Add optional props: `pagination?`, `onPaginationChange?`, `pageCount?`, `totalCount?`, `manualPagination?`.
-  - Pass them to `<DataTable>`.
+    - Add optional props: `pagination?`, `onPaginationChange?`, `pageCount?`, `totalCount?`, `manualPagination?`.
+    - Pass them to `<DataTable>`.
 - [x] Modify `app/sentinel-support/src/app/(protected)/(support)/departments/page.tsx`
-  - Import `useServerPagination`, `PaginationState`.
-  - Call `useServerPagination(debouncedSearch)`.
-  - Switch `useDepartmentsQuery` to paginated overload.
-  - Derive `departments`, `pageCount`, `totalCount` from `departmentsResponse`.
-  - Pass pagination props to `<DepartmentsList>`.
+    - Import `useServerPagination`, `PaginationState`.
+    - Call `useServerPagination(debouncedSearch)`.
+    - Switch `useDepartmentsQuery` to paginated overload.
+    - Derive `departments`, `pageCount`, `totalCount` from `departmentsResponse`.
+    - Pass pagination props to `<DepartmentsList>`.
 - [x] Write `app/sentinel-support/src/app/(protected)/(support)/departments/_components/views/departments-list.test.tsx`
-  - Smoke-test rendering with pagination props.
+    - Smoke-test rendering with pagination props.
 
 **Migration required:** No
 
@@ -115,16 +115,16 @@ Create a tiny `useServerPagination` hook that encapsulates `PaginationState`, th
 **Goal:** The Courses view fetches only one page of records from the API.
 
 - [x] Modify `app/sentinel-support/src/app/(protected)/(support)/courses/_hooks/use-courses-page-state/index.ts`
-  - Import `useServerPagination`, `PaginationState`.
-  - Call `useServerPagination(debouncedSearch)` inside the hook.
-  - Switch primary `useCoursesQuery` to paginated overload `{ search, institutionId, page, limit }`.
-  - Derive `courses = coursesResponse?.items ?? []`, `pageCount`, `totalCount`.
-  - Return `pagination`, `setPagination`, `pageCount`, `totalCount` from hook.
+    - Import `useServerPagination`, `PaginationState`.
+    - Call `useServerPagination(debouncedSearch)` inside the hook.
+    - Switch primary `useCoursesQuery` to paginated overload `{ search, institutionId, page, limit }`.
+    - Derive `courses = coursesResponse?.items ?? []`, `pageCount`, `totalCount`.
+    - Return `pagination`, `setPagination`, `pageCount`, `totalCount` from hook.
 - [x] Modify `app/sentinel-support/src/app/(protected)/(support)/courses/_components/views/courses-view.tsx`
-  - Destructure `pagination`, `setPagination`, `pageCount`, `totalCount` from `useCoursesPageState`.
-  - Pass `pagination`, `onPaginationChange={setPagination}`, `pageCount`, `totalCount`, `manualPagination` to `<DataTable>`.
+    - Destructure `pagination`, `setPagination`, `pageCount`, `totalCount` from `useCoursesPageState`.
+    - Pass `pagination`, `onPaginationChange={setPagination}`, `pageCount`, `totalCount`, `manualPagination` to `<DataTable>`.
 - [x] Update `app/sentinel-support/src/app/(protected)/(support)/courses/_hooks/use-courses-page-state/index.test.ts`
-  - Add test for paginated query invocation and derived state.
+    - Add test for paginated query invocation and derived state.
 
 **Migration required:** No
 
@@ -135,16 +135,16 @@ Create a tiny `useServerPagination` hook that encapsulates `PaginationState`, th
 **Goal:** The Sections view fetches only one page of records from the API.
 
 - [x] Modify `app/sentinel-support/src/app/(protected)/(support)/sections/_hooks/use-sections-page-state/index.ts`
-  - Import `useServerPagination`, `PaginationState`.
-  - Call `useServerPagination(debouncedSearch)` inside the hook.
-  - Switch primary `useSectionsQuery` to paginated overload.
-  - Derive `sections = sectionsResponse?.items ?? []`, `pageCount`, `totalCount`.
-  - Return `pagination`, `setPagination`, `pageCount`, `totalCount`.
+    - Import `useServerPagination`, `PaginationState`.
+    - Call `useServerPagination(debouncedSearch)` inside the hook.
+    - Switch primary `useSectionsQuery` to paginated overload.
+    - Derive `sections = sectionsResponse?.items ?? []`, `pageCount`, `totalCount`.
+    - Return `pagination`, `setPagination`, `pageCount`, `totalCount`.
 - [x] Modify `app/sentinel-support/src/app/(protected)/(support)/sections/_components/views/sections-view.tsx`
-  - Destructure and pass `pagination`, `onPaginationChange`, `pageCount`, `totalCount`, `manualPagination` to `<DataTable>`.
-  - Update `selectedIds` computation to use the current page's `sections` array (already correct).
+    - Destructure and pass `pagination`, `onPaginationChange`, `pageCount`, `totalCount`, `manualPagination` to `<DataTable>`.
+    - Update `selectedIds` computation to use the current page's `sections` array (already correct).
 - [x] Update `app/sentinel-support/src/app/(protected)/(support)/sections/_hooks/use-sections-page-state/index.test.ts`
-  - Add test for paginated query invocation.
+    - Add test for paginated query invocation.
 
 **Migration required:** No
 
@@ -155,16 +155,16 @@ Create a tiny `useServerPagination` hook that encapsulates `PaginationState`, th
 **Goal:** The Semesters page fetches only one page of records from the API.
 
 - [x] Modify `app/sentinel-support/src/app/(protected)/(support)/semesters/_components/views/semesters-list.tsx`
-  - Add optional props: `pagination?`, `onPaginationChange?`, `pageCount?`, `totalCount?`, `manualPagination?`.
-  - Pass them to `<DataTable>`.
+    - Add optional props: `pagination?`, `onPaginationChange?`, `pageCount?`, `totalCount?`, `manualPagination?`.
+    - Pass them to `<DataTable>`.
 - [x] Modify `app/sentinel-support/src/app/(protected)/(support)/semesters/page.tsx`
-  - Import `useServerPagination`, `PaginationState`.
-  - Call `useServerPagination(debouncedSearch)`.
-  - Switch `useSemestersQuery` to paginated overload.
-  - Derive `semesters`, `pageCount`, `totalCount`.
-  - Pass pagination props to `<SemestersList>`.
+    - Import `useServerPagination`, `PaginationState`.
+    - Call `useServerPagination(debouncedSearch)`.
+    - Switch `useSemestersQuery` to paginated overload.
+    - Derive `semesters`, `pageCount`, `totalCount`.
+    - Pass pagination props to `<SemestersList>`.
 - [x] Write `app/sentinel-support/src/app/(protected)/(support)/semesters/_components/views/semesters-list.test.tsx`
-  - Smoke-test rendering with pagination props.
+    - Smoke-test rendering with pagination props.
 
 **Migration required:** No
 
@@ -175,16 +175,16 @@ Create a tiny `useServerPagination` hook that encapsulates `PaginationState`, th
 **Goal:** The Rooms page fetches only one page of records from the API.
 
 - [x] Modify `app/sentinel-support/src/app/(protected)/(support)/rooms/_components/views/rooms-list.tsx`
-  - Add optional props: `pagination?`, `onPaginationChange?`, `pageCount?`, `totalCount?`, `manualPagination?`.
-  - Pass them to `<DataTable>`.
+    - Add optional props: `pagination?`, `onPaginationChange?`, `pageCount?`, `totalCount?`, `manualPagination?`.
+    - Pass them to `<DataTable>`.
 - [x] Modify `app/sentinel-support/src/app/(protected)/(support)/rooms/page.tsx`
-  - Import `useServerPagination`, `PaginationState`.
-  - Call `useServerPagination(debouncedSearch)`.
-  - Switch `useRoomsQuery` to paginated object-params overload: `{ search, page, limit }`.
-  - Derive `rooms`, `pageCount`, `totalCount`.
-  - Pass pagination props to `<RoomsList>`.
+    - Import `useServerPagination`, `PaginationState`.
+    - Call `useServerPagination(debouncedSearch)`.
+    - Switch `useRoomsQuery` to paginated object-params overload: `{ search, page, limit }`.
+    - Derive `rooms`, `pageCount`, `totalCount`.
+    - Pass pagination props to `<RoomsList>`.
 - [x] Write `app/sentinel-support/src/app/(protected)/(support)/rooms/_components/views/rooms-list.test.tsx`
-  - Smoke-test rendering with pagination props.
+    - Smoke-test rendering with pagination props.
 
 **Migration required:** No
 
