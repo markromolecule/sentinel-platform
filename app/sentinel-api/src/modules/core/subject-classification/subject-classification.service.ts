@@ -5,11 +5,17 @@ import {
     type CreateSubjectClassificationPayload,
     type UpdateSubjectClassificationPayload,
 } from './helper/subject-classification-validator';
+import {
+    DUPLICATE_SUBJECT_CLASSIFICATION_ERROR,
+    INVALID_SUBJECT_CLASSIFICATION_PAYLOAD,
+} from './helper/subject-classification-errors';
 
 /**
  * Service facade to orchestrate subject classification operations.
  */
 export class SubjectClassificationService {
+    static readonly duplicateCode = DUPLICATE_SUBJECT_CLASSIFICATION_ERROR;
+    static readonly invalidPayloadCode = INVALID_SUBJECT_CLASSIFICATION_PAYLOAD;
     /**
      * Resolves the list of institution IDs that are visible under a parent scope.
      */

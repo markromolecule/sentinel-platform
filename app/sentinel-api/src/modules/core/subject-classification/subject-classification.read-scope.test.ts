@@ -91,18 +91,18 @@ describe('SubjectClassificationService read scope', () => {
             return [];
         });
 
-        const result = await SubjectClassificationService.getSubjectClassifications(
+        const result = (await SubjectClassificationService.getSubjectClassifications(
             dbClient,
             'parent-1',
-        );
+        )) as any[];
 
         expect(getSubjectClassificationsData).toHaveBeenCalledTimes(3);
-        expect(result.map((record) => record.subject_classification_id)).toEqual([
+        expect(result.map((record: any) => record.subject_classification_id)).toEqual([
             'branch-classification',
             'parent-classification',
         ]);
         expect(
-            result.find((record) => record.subject_classification_id === 'branch-classification'),
+            result.find((record: any) => record.subject_classification_id === 'branch-classification'),
         ).toMatchObject({
             institution_id: 'branch-1',
             effective_institution_id: 'parent-1',
