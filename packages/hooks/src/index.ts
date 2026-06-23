@@ -1,3 +1,5 @@
+'use client';
+
 export * from './api-provider';
 export * from './auth-provider';
 export * from './query';
@@ -16,4 +18,3 @@ export * from './use-server-pagination';
 export * from './query/_shared/permission-errors';
 export * from './query/notifications';
 export * from './permission-guard';
-

@@ -1,9 +1,10 @@
-import { describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { type DbClient } from '@sentinel/db';
 import {
     getUserPrimaryRole,
     getRecipientRolesForActorRole,
     resolveInstitutionLevel,
+    resetNotificationRoleRoutingCacheForTests,
 } from './activity-notification-base.service';
 
 type FakeBuilderResult = {
@@ -48,6 +49,11 @@ function createFakeDbClient(results: FakeBuilderResult[]) {
 }
 
 describe('activity-notification-base.service unit tests', () => {
+    beforeEach(() => {
+        resetNotificationRoleRoutingCacheForTests();
+        vi.restoreAllMocks();
+    });
+
     describe('getUserPrimaryRole', () => {
         it('resolves the primary role using the database query', async () => {
             const dbClient = createFakeDbClient([
@@ -92,6 +98,7 @@ describe('activity-notification-base.service unit tests', () => {
         });
 
         it('falls back to default routing if system_settings is missing', async () => {
+            const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
             const dbClient = createFakeDbClient([
                 {
                     executeTakeFirst: null,
@@ -100,9 +107,11 @@ describe('activity-notification-base.service unit tests', () => {
 
             const recipients = await getRecipientRolesForActorRole(dbClient, 'admin');
             expect(recipients).toEqual(['support', 'superadmin', 'admin', 'instructor']);
+            expect(warnSpy).not.toHaveBeenCalled();
         });
 
         it('falls back to default routing on query failure', async () => {
+            const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
             const dbClient = {
                 selectFrom: vi.fn(() => {
                     throw new Error('Database down');
@@ -111,6 +120,24 @@ describe('activity-notification-base.service unit tests', () => {
 
             const recipients = await getRecipientRolesForActorRole(dbClient, 'support');
             expect(recipients).toEqual(['admin', 'superadmin']);
+            expect(warnSpy).toHaveBeenCalledTimes(1);
+        });
+
+        it('reuses the cached default routing without logging when the setting is absent', async () => {
+            const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
+            const dbClient = createFakeDbClient([
+                {
+                    executeTakeFirst: null,
+                },
+            ]);
+
+            const first = await getRecipientRolesForActorRole(dbClient, 'admin');
+            const second = await getRecipientRolesForActorRole(dbClient, 'support');
+
+            expect(first).toEqual(['support', 'superadmin', 'admin', 'instructor']);
+            expect(second).toEqual(['admin', 'superadmin']);
+            expect(warnSpy).not.toHaveBeenCalled();
+            expect(dbClient.selectFrom).toHaveBeenCalledTimes(1);
         });
     });
 

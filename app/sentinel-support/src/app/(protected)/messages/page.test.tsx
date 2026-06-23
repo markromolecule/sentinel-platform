@@ -21,6 +21,7 @@ const {
     mockUseProfileQuery,
     mockUseUsersQuery,
     mockUseCreateDirectConversationMutation,
+    mockUseActivePermissions,
 } = vi.hoisted(() => ({
     mockUseConversationsQuery: vi.fn(),
     mockUseConversationMessagesQuery: vi.fn(),
@@ -31,6 +32,7 @@ const {
     mockUseProfileQuery: vi.fn(),
     mockUseUsersQuery: vi.fn(),
     mockUseCreateDirectConversationMutation: vi.fn(),
+    mockUseActivePermissions: vi.fn(),
 }));
 
 vi.mock('@sentinel/hooks', () => ({
@@ -43,6 +45,7 @@ vi.mock('@sentinel/hooks', () => ({
     useProfileQuery: mockUseProfileQuery,
     useUsersQuery: mockUseUsersQuery,
     useCreateDirectConversationMutation: mockUseCreateDirectConversationMutation,
+    useActivePermissions: mockUseActivePermissions,
 }));
 
 vi.mock('./_components/message-list', () => ({
@@ -89,6 +92,10 @@ describe('SupportMessagesPage - Phase 1 Verification', () => {
         mockUseCreateDirectConversationMutation.mockReturnValue({
             mutateAsync: mockMutateAsync,
             isPending: false,
+        });
+
+        mockUseActivePermissions.mockReturnValue({
+            hasPermission: () => true,
         });
 
         mockUseUsersQuery.mockReturnValue({

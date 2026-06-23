@@ -9,42 +9,40 @@ import {
     useUpdateSubjectMutation,
 } from '@sentinel/hooks';
 import { MasterSubject } from '@sentinel/shared/types';
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { type PaginationState } from '@tanstack/react-table';
 import { useAcademicScope } from '@/hooks';
 import { EMPTY_SUBJECT_FORM, SubjectFormState, getSubjectId } from './_types';
 
 export function useSubjectsPageState() {
     const { institutionId, isLoading: isScopeLoading } = useAcademicScope();
-    const [searchTerm, setSearchTerm] = useState('');
-    const [selectedInstitutionId, setSelectedInstitutionId] = useState<string | undefined>(
-        undefined,
-    );
+    const [searchTerm, setSearchTermState] = useState('');
+    const [manualInstitutionId, setManualInstitutionId] = useState<string | undefined>(undefined);
     const [formOpen, setFormOpen] = useState(false);
     const [form, setForm] = useState<SubjectFormState>(EMPTY_SUBJECT_FORM);
     const [subjectToRevert, setSubjectToRevert] = useState<MasterSubject | null>(null);
-    const [hasInitializedScope, setHasInitializedScope] = useState(false);
     const [pagination, setPagination] = useState<PaginationState>({
         pageIndex: 0,
         pageSize: 10,
     });
 
-    useEffect(() => {
-        if (!isScopeLoading && !hasInitializedScope) {
-            if (institutionId) {
-                setSelectedInstitutionId(institutionId);
-            }
-            setHasInitializedScope(true);
-        }
-    }, [institutionId, isScopeLoading, hasInitializedScope]);
+    const selectedInstitutionId = manualInstitutionId ?? (institutionId || undefined);
 
     const debouncedSearch = useDebounce(searchTerm, 500);
 
-    useEffect(() => {
+    const setSearchTerm = (value: string) => {
+        setSearchTermState(value);
         setPagination((current) =>
             current.pageIndex === 0 ? current : { ...current, pageIndex: 0 },
         );
-    }, [debouncedSearch, selectedInstitutionId]);
+    };
+
+    const setSelectedInstitutionId = (value: string | undefined) => {
+        setManualInstitutionId(value);
+        setPagination((current) =>
+            current.pageIndex === 0 ? current : { ...current, pageIndex: 0 },
+        );
+    };
 
     const { data: institutions = [] } = useInstitutionsQuery();
     const selectedInstitution = institutions.find(
@@ -70,7 +68,7 @@ export function useSubjectsPageState() {
         ? Math.max(1, Math.ceil(totalCount / pagination.pageSize))
         : 1;
 
-    const isLoading = isSubjectsLoading || !hasInitializedScope;
+    const isLoading = isSubjectsLoading || isScopeLoading;
 
     const { data: parentSubjects = [] } = useSubjectsQuery({
         search: undefined,

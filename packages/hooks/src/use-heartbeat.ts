@@ -1,3 +1,5 @@
+'use client';
+
 import { useEffect, useRef } from 'react';
 import { useAuth } from './auth-provider';
 import { useApi } from './api-provider';

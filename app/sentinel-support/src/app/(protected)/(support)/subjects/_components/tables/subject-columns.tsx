@@ -5,6 +5,7 @@ import { Edit2, Trash2 } from 'lucide-react';
 import { OriginStatusBadge } from '@/app/(protected)/(support)/_components/origin-status-badge';
 import { getOriginStatusLabel } from '@/app/(protected)/(support)/_components/origin-status-badge';
 import { getSubjectId } from '@/app/(protected)/(support)/subjects/_hooks/use-subjects-page-state/_types';
+import { PermissionGuard } from '@sentinel/hooks';
 
 export type SubjectColumnsProps = {
     onEdit: (subject: MasterSubject) => void;
@@ -92,28 +93,34 @@ export const getSubjectColumns = ({
             return (
                 <div className="flex justify-end gap-1">
                     {row.original.isOverridden ? (
-                        <Button
-                            variant="outline"
-                            size="sm"
-                            disabled={!subjectId}
-                            onClick={() => onRevert(row.original)}
-                        >
-                            Revert
-                        </Button>
+                        <PermissionGuard permission="subjects:update">
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                disabled={!subjectId}
+                                onClick={() => onRevert(row.original)}
+                            >
+                                Revert
+                            </Button>
+                        </PermissionGuard>
                     ) : null}
-                    <Button variant="ghost" size="icon" onClick={() => onEdit(row.original)}>
-                        <Edit2 className="h-4 w-4" />
-                        <span className="sr-only">Edit subject</span>
-                    </Button>
-                    <Button
-                        variant="ghost"
-                        size="icon"
-                        disabled={!subjectId}
-                        onClick={() => onDelete(row.original)}
-                    >
-                        <Trash2 className="h-4 w-4" />
-                        <span className="sr-only">Delete subject</span>
-                    </Button>
+                    <PermissionGuard permission="subjects:update">
+                        <Button variant="ghost" size="icon" onClick={() => onEdit(row.original)}>
+                            <Edit2 className="h-4 w-4" />
+                            <span className="sr-only">Edit subject</span>
+                        </Button>
+                    </PermissionGuard>
+                    <PermissionGuard permission="subjects:delete">
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            disabled={!subjectId}
+                            onClick={() => onDelete(row.original)}
+                        >
+                            <Trash2 className="h-4 w-4" />
+                            <span className="sr-only">Delete subject</span>
+                        </Button>
+                    </PermissionGuard>
                 </div>
             );
         },

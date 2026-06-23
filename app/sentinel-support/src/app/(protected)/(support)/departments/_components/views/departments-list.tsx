@@ -23,6 +23,7 @@ import {
     AlertDialogHeader,
     AlertDialogTitle,
 } from '@sentinel/ui';
+import { PermissionGuard } from '@sentinel/hooks';
 import { type Department } from '@sentinel/shared/types';
 import { columns } from '@/app/(protected)/(support)/departments/_components/tables/columns';
 import { DepartmentsEmptyState } from './departments-empty-state';
@@ -146,15 +147,17 @@ export function DepartmentsList({
                 manualPagination={manualPagination}
                 toolbarActions={
                     selectedIds.length > 0 ? (
-                        <Button
-                            variant="destructive"
-                            size="sm"
-                            onClick={() => setIsDeleteDialogOpen(true)}
-                            className="h-8"
-                        >
-                            <Trash2 className="mr-2 h-4 w-4" />
-                            Delete {selectedIds.length}
-                        </Button>
+                        <PermissionGuard permission="departments:delete">
+                            <Button
+                                variant="destructive"
+                                size="sm"
+                                onClick={() => setIsDeleteDialogOpen(true)}
+                                className="h-8"
+                            >
+                                <Trash2 className="mr-2 h-4 w-4" />
+                                Delete {selectedIds.length}
+                            </Button>
+                        </PermissionGuard>
                     ) : null
                 }
             />

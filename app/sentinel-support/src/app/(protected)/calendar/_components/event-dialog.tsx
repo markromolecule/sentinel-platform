@@ -29,6 +29,7 @@ interface EventDialogProps {
     onSave: (event: Omit<AdminEvent, 'id' | 'createdBy'>) => void;
     disabled?: boolean;
     error?: Error | null;
+    canAddEvent?: boolean;
 }
 
 export function EventDialog({
@@ -38,6 +39,7 @@ export function EventDialog({
     onSave,
     disabled,
     error,
+    canAddEvent = true,
 }: EventDialogProps) {
     const [title, setTitle] = useState('');
     const [description, setDescription] = useState('');
@@ -46,6 +48,10 @@ export function EventDialog({
     const [date, setDate] = useState<Date | undefined>(selectedDate || new Date());
     const [startTime, setStartTime] = useState('');
     const [endTime, setEndTime] = useState('');
+
+    if (!canAddEvent) {
+        return null;
+    }
 
     const handleSave = () => {
         if (!title || !date) return;

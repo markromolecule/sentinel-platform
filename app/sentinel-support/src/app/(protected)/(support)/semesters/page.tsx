@@ -5,6 +5,7 @@ import {
     useSemestersQuery,
     isPermissionDeniedError,
     useServerPagination,
+    useActivePermissions,
 } from '@sentinel/hooks';
 import { useState } from 'react';
 import {
@@ -14,6 +15,8 @@ import {
 import { PageHeader, PermissionDeniedState, Separator } from '@sentinel/ui';
 
 export default function SupportSemestersPage() {
+    const { hasPermission } = useActivePermissions();
+    const canCreateSemester = hasPermission('semesters:create');
     const [searchTerm, setSearchTerm] = useState('');
     const debouncedSearch = useDebounce(searchTerm, 500);
 
@@ -42,7 +45,7 @@ export default function SupportSemestersPage() {
                 title="Term Management"
                 description="Manage academic semesters, terms, and their schedules."
             >
-                {!isViewDenied ? <AddSemesterDialog /> : null}
+                {!isViewDenied && canCreateSemester ? <AddSemesterDialog /> : null}
             </PageHeader>
             <Separator />
 

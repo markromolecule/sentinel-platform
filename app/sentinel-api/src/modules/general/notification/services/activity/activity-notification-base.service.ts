@@ -15,6 +15,8 @@ export type GenericOperation =
     | 'TRANSACTION_COMPLETED'
     | 'OVERRIDE_COMPLETED';
 
+let cachedNotificationRoleRouting: Record<string, string[]> | null | undefined;
+
 export function toUniqueIds(values: string[]) {
     return Array.from(new Set(values));
 }
@@ -66,25 +68,27 @@ export async function getRecipientRolesForActorRole(
     actorRole: SupportedActorRole | null,
 ): Promise<string[]> {
     try {
-        const row = await dbClient
-            .selectFrom('system_settings')
-            .select('setting_value')
-            .where('setting_key', '=', 'notification_role_routing')
-            .executeTakeFirst();
+        if (cachedNotificationRoleRouting === undefined) {
+            const row = await dbClient
+                .selectFrom('system_settings')
+                .select('setting_value')
+                .where('setting_key', '=', 'notification_role_routing')
+                .executeTakeFirst();
 
-        if (row?.setting_value) {
-            const routing = row.setting_value as Record<string, string[]>;
+            cachedNotificationRoleRouting = row?.setting_value
+                ? (row.setting_value as Record<string, string[]>)
+                : null;
+        }
+
+        if (cachedNotificationRoleRouting) {
+            const routing = cachedNotificationRoleRouting;
             const key = actorRole || 'default';
             if (routing[key]) {
                 return routing[key];
             }
-            if (routing['default']) {
-                return routing['default'];
+            if (routing.default) {
+                return routing.default;
             }
-        } else {
-            console.warn(
-                "System setting 'notification_role_routing' is absent. Falling back to default role routing logic.",
-            );
         }
     } catch (err) {
         console.warn(
@@ -103,6 +107,10 @@ export async function getRecipientRolesForActorRole(
     }
 
     return ['admin', 'superadmin'];
+}
+
+export function resetNotificationRoleRoutingCacheForTests() {
+    cachedNotificationRoleRouting = undefined;
 }
 
 export function resolveInstitutionLevel(args: {

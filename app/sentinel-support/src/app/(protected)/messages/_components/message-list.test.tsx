@@ -31,6 +31,7 @@ describe('MessageList - Phase 2 Verification', () => {
         directoryUsers: [],
         onSelectUser: vi.fn(),
         isCreatingConversation: false,
+        canCreateConversation: true,
     };
 
     it('should skip rendering a conversation if it has zero participants, without crashing', () => {
@@ -191,5 +192,18 @@ describe('MessageList - Phase 2 Verification', () => {
         );
 
         expect(queryByText('National University')).toBeNull();
+    });
+
+    it('hides the new message trigger when create permission is missing', () => {
+        const { queryByTitle } = render(
+            <MessageList
+                {...defaultProps}
+                canCreateConversation={false}
+                conversations={[]}
+                showDirectory={false}
+            />,
+        );
+
+        expect(queryByTitle('New Message')).toBeNull();
     });
 });

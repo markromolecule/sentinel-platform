@@ -5,6 +5,7 @@ import {
     useRoomsQuery,
     isPermissionDeniedError,
     useServerPagination,
+    useActivePermissions,
 } from '@sentinel/hooks';
 import { useState } from 'react';
 import {
@@ -15,6 +16,8 @@ import {
 import { PageHeader, PermissionDeniedState, Separator } from '@sentinel/ui';
 
 export default function SupportRoomsPage() {
+    const { hasPermission } = useActivePermissions();
+    const canCreateRoom = hasPermission('rooms:create');
     const [searchTerm, setSearchTerm] = useState('');
     const debouncedSearch = useDebounce(searchTerm, 500);
 
@@ -45,8 +48,8 @@ export default function SupportRoomsPage() {
             >
                 {!isViewDenied ? (
                     <div className="flex items-center gap-2">
-                        <AddRoomDialog />
-                        <BulkRoomUploadDialog />
+                        {canCreateRoom ? <AddRoomDialog /> : null}
+                        {canCreateRoom ? <BulkRoomUploadDialog /> : null}
                     </div>
                 ) : null}
             </PageHeader>

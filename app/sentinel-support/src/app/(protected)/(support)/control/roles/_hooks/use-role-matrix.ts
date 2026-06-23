@@ -71,6 +71,7 @@ export function useRoleMatrix() {
     const [editingRoleId, setEditingRoleId] = useState<number | null>(null);
     const [editingRoleName, setEditingRoleName] = useState('');
     const pendingPermissionIdsByRoleIdRef = useRef<Record<number, string[]>>({});
+    const confirmedPermissionIdsByRoleIdRef = useRef<Record<number, string[]>>({});
 
     const sortedRoles = useStableValue(() => sortRolesForReview(roles), [roles]);
     const debouncedDraftPermissionIdsByRoleId = useDebounce(draftPermissionIdsByRoleId, 250);
@@ -82,9 +83,15 @@ export function useRoleMatrix() {
 
             sortedRoles.forEach((role) => {
                 const currentDraft = current[role.id];
+                const confirmedPermissionIds = confirmedPermissionIdsByRoleIdRef.current[role.id];
 
                 if (currentDraft && !arePermissionIdsEqual(currentDraft, role.permissionIds)) {
                     next[role.id] = currentDraft;
+                } else if (
+                    confirmedPermissionIds &&
+                    arePermissionIdsEqual(confirmedPermissionIds, role.permissionIds)
+                ) {
+                    next[role.id] = confirmedPermissionIds;
                 }
 
                 const pendingPermissionIds = pendingPermissionIdsByRoleIdRef.current[role.id];
@@ -176,6 +183,7 @@ export function useRoleMatrix() {
             }
 
             pendingPermissionIdsByRoleIdRef.current[roleId] = permissionIds;
+            confirmedPermissionIdsByRoleIdRef.current[roleId] = permissionIds;
             setSavingRoleIds((current) =>
                 current.includes(roleId) ? current : [...current, roleId],
             );

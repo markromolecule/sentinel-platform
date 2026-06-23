@@ -7,6 +7,7 @@ import {
     useStableValue,
     useServerPagination,
     PermissionGuard,
+    useActivePermissions,
 } from '@sentinel/hooks';
 import { useState, useMemo, Suspense } from 'react';
 import Link from 'next/link';
@@ -22,6 +23,8 @@ import { Wand2, ChevronLeft, Edit2 } from 'lucide-react';
 
 
 function SupportInstitutionsPageContent() {
+    const { hasPermission } = useActivePermissions();
+    const canCreateInstitution = hasPermission('institutions:create');
     const [searchTerm, setSearchTerm] = useState('');
     const debouncedSearch = useDebounce(searchTerm, 500);
     const searchParams = useSearchParams();
@@ -109,15 +112,15 @@ function SupportInstitutionsPageContent() {
                             </>
                         ) : (
                             <>
-                                <AddInstitutionDialog />
-                                <PermissionGuard permission="institutions:create">
+                                {canCreateInstitution ? <AddInstitutionDialog /> : null}
+                                {canCreateInstitution ? (
                                     <Button asChild className="bg-[#323d8f] hover:bg-[#323d8f]/90">
                                         <Link href="/institutions/new">
                                             <Wand2 className="mr-2 h-4 w-4" />
                                             Setup Wizard
                                         </Link>
                                     </Button>
-                                </PermissionGuard>
+                                ) : null}
                             </>
                         )}
                         {parentId && parentInstitution ? (
