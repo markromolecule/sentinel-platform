@@ -54,24 +54,50 @@ export async function getExamByIdData({
                 : sql<string | null>`null`.as('section_name'),
             (eb) =>
                 eb
-                    .selectFrom('exam_assigned_sections as eas')
-                    .innerJoin('sections as s_inner', 's_inner.section_id', 'eas.section_id')
+                    .selectFrom((qb) =>
+                        qb
+                            .selectFrom('exam_assigned_sections')
+                            .select('section_id')
+                            .whereRef('exam_id', '=', 'e.exam_id')
+                            .union(
+                                qb
+                                    .selectFrom('exam_section_assignments')
+                                    .select('section_id')
+                                    .whereRef('exam_id', '=', 'e.exam_id'),
+                            )
+                            .as('combined_sections'),
+                    )
+                    .innerJoin(
+                        'sections as s_inner',
+                        's_inner.section_id',
+                        'combined_sections.section_id',
+                    )
                     .select(
                         sql<string[]>`coalesce(json_agg(s_inner.section_name), '[]'::json)`.as(
                             'section_names',
                         ),
                     )
-                    .whereRef('eas.exam_id', '=', 'e.exam_id')
                     .as('assigned_section_names'),
             (eb) =>
                 eb
-                    .selectFrom('exam_assigned_sections as eas')
+                    .selectFrom((qb) =>
+                        qb
+                            .selectFrom('exam_assigned_sections')
+                            .select('section_id')
+                            .whereRef('exam_id', '=', 'e.exam_id')
+                            .union(
+                                qb
+                                    .selectFrom('exam_section_assignments')
+                                    .select('section_id')
+                                    .whereRef('exam_id', '=', 'e.exam_id'),
+                            )
+                            .as('combined_sections'),
+                    )
                     .select(
-                        sql<string[]>`coalesce(json_agg(eas.section_id), '[]'::json)`.as(
+                        sql<string[]>`coalesce(json_agg(combined_sections.section_id), '[]'::json)`.as(
                             'section_ids',
                         ),
                     )
-                    .whereRef('eas.exam_id', '=', 'e.exam_id')
                     .as('assigned_section_ids'),
             (eb) =>
                 eb

@@ -14,10 +14,13 @@ import {
     useProfileQuery,
     useUsersQuery,
     useCreateDirectConversationMutation,
+    useActivePermissions,
 } from '@sentinel/hooks';
 import { Conversation, Message } from '@sentinel/shared/types';
 
 function SupportMessagesPageContent() {
+    const { hasPermission } = useActivePermissions();
+    const canCreateConversation = hasPermission('messages:create');
     const hasFiredDeepLinkRef = useRef(false);
     const [selectedConversationId, setSelectedConversationId] = useState<string | null>(null);
     const [searchTerm, setSearchTerm] = useState('');
@@ -108,13 +111,16 @@ function SupportMessagesPageContent() {
 
     const handleStartConversation = useCallback(
         async (recipientId: string) => {
+            if (!canCreateConversation) {
+                return;
+            }
             try {
                 await createDirectConversationMutation.mutateAsync({ recipientId });
             } catch (err) {
                 console.error('Failed to start conversation:', err);
             }
         },
-        [createDirectConversationMutation],
+        [canCreateConversation, createDirectConversationMutation],
     );
 
     const searchParams = useSearchParams();
@@ -233,6 +239,9 @@ function SupportMessagesPageContent() {
                 onSearchChange={showDirectory ? setDirectorySearch : setSearchTerm}
                 showDirectory={showDirectory}
                 onToggleDirectory={() => {
+                    if (!canCreateConversation) {
+                        return;
+                    }
                     setShowDirectory((prev) => !prev);
                     setDirectorySearch('');
                     setSearchTerm('');
@@ -241,6 +250,7 @@ function SupportMessagesPageContent() {
                 onSelectUser={handleStartConversation}
                 isCreatingConversation={createDirectConversationMutation.isPending}
                 isLoading={conversationsQuery.isLoading}
+                canCreateConversation={canCreateConversation}
             />
             <ChatWindow
                 conversation={selectedConversation}

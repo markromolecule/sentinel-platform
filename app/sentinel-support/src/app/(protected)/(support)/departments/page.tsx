@@ -5,6 +5,7 @@ import {
     useDepartmentsQuery,
     isPermissionDeniedError,
     useServerPagination,
+    useActivePermissions,
 } from '@sentinel/hooks';
 import { useState } from 'react';
 import {
@@ -15,6 +16,8 @@ import {
 import { PageHeader, PermissionDeniedState, Separator } from '@sentinel/ui';
 
 export default function SupportDepartmentsPage() {
+    const { hasPermission } = useActivePermissions();
+    const canCreateDepartment = hasPermission('departments:create');
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedInstitutionId, setSelectedInstitutionId] = useState<string | undefined>('');
     const debouncedSearch = useDebounce(searchTerm, 500);
@@ -47,8 +50,14 @@ export default function SupportDepartmentsPage() {
             >
                 {!isViewDenied ? (
                     <div className="flex items-center gap-2">
-                        <BulkCreateDepartmentsDialog defaultInstitutionId={selectedInstitutionId} />
-                        <AddDepartmentDialog defaultInstitutionId={selectedInstitutionId} />
+                        {canCreateDepartment ? (
+                            <BulkCreateDepartmentsDialog
+                                defaultInstitutionId={selectedInstitutionId}
+                            />
+                        ) : null}
+                        {canCreateDepartment ? (
+                            <AddDepartmentDialog defaultInstitutionId={selectedInstitutionId} />
+                        ) : null}
                     </div>
                 ) : null}
             </PageHeader>

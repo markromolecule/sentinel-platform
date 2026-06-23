@@ -53,7 +53,11 @@ export function useEnrollmentRequestsQuery(
                 page: params.page,
                 limit: params.limit,
             });
-            return hasPagination ? response : response.items;
+            if (hasPagination) {
+                return response;
+            }
+
+            return Array.isArray(response) ? response : response.items;
         },
         enabled: isAuthenticatedQueryEnabled,
         refetchInterval: 5000,

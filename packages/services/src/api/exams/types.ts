@@ -66,6 +66,7 @@ export interface ApiExamSummary {
     questionCount: number;
     createdAt: string | null;
     updatedAt: string | null;
+    sectionIds?: string[] | null;
     assigned_section_ids?: string[] | null;
     attemptId?: string | null;
     completedAt?: string | null;

@@ -25,9 +25,10 @@ import { Calendar } from '@sentinel/ui';
 import { Popover, PopoverContent, PopoverTrigger } from '@sentinel/ui';
 import { announcementFormSchema, AnnouncementFormValues } from '@sentinel/shared/schema';
 
-import { useCreateAnnouncementMutation } from '@sentinel/hooks';
+import { useActivePermissions, useCreateAnnouncementMutation } from '@sentinel/hooks';
 
 export function AddAnnouncementDialog() {
+    const { hasPermission } = useActivePermissions();
     const [open, setOpen] = useState(false);
     const form = useForm<AnnouncementFormValues>({
         resolver: zodResolver(announcementFormSchema),
@@ -39,6 +40,10 @@ export function AddAnnouncementDialog() {
             publishedAt: new Date().toISOString(), // Default to current time
         },
     });
+
+    if (!hasPermission('announcements:create')) {
+        return null;
+    }
 
     const mutation = useCreateAnnouncementMutation({
         onSuccess: () => {

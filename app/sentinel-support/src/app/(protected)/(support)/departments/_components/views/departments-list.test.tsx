@@ -18,6 +18,7 @@ vi.mock('next/navigation', () => ({
 
 // Mock @sentinel/hooks fully
 vi.mock('@sentinel/hooks', () => ({
+    PermissionGuard: ({ children }: any) => <>{children}</>,
     useActivePermissions: () => ({
         hasPermission: () => true,
     }),

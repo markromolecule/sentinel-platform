@@ -19,6 +19,7 @@ import {
     AlertDialogHeader,
     AlertDialogTitle,
 } from '@sentinel/ui';
+import { PermissionGuard } from '@sentinel/hooks';
 import { type Room } from '@sentinel/shared/types';
 import { columns } from '@/app/(protected)/(support)/rooms/_components/tables/columns';
 import { RoomsEmptyState } from './rooms-empty-state';
@@ -123,15 +124,17 @@ export function RoomsList({
                 manualPagination={manualPagination}
                 toolbarActions={
                     selectedIds.length > 0 ? (
-                        <Button
-                            variant="destructive"
-                            size="sm"
-                            onClick={() => setIsDeleteDialogOpen(true)}
-                            className="h-8"
-                        >
-                            <Trash2 className="mr-2 h-4 w-4" />
-                            Delete {selectedIds.length}
-                        </Button>
+                        <PermissionGuard permission="rooms:delete">
+                            <Button
+                                variant="destructive"
+                                size="sm"
+                                onClick={() => setIsDeleteDialogOpen(true)}
+                                className="h-8"
+                            >
+                                <Trash2 className="mr-2 h-4 w-4" />
+                                Delete {selectedIds.length}
+                            </Button>
+                        </PermissionGuard>
                     ) : null
                 }
             />

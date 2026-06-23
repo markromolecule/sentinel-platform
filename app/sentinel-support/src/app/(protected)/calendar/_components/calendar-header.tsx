@@ -10,6 +10,7 @@ interface CalendarHeaderProps {
     onNextMonth: () => void;
     onToday: () => void;
     onAddEvent: () => void;
+    canAddEvent?: boolean;
 }
 
 export function CalendarHeader({
@@ -18,6 +19,7 @@ export function CalendarHeader({
     onNextMonth,
     onToday,
     onAddEvent,
+    canAddEvent = true,
 }: CalendarHeaderProps) {
     return (
         <div className="flex w-full flex-col gap-3 md:flex-row md:items-center md:justify-end">
@@ -36,10 +38,12 @@ export function CalendarHeader({
                 <Button variant="outline" onClick={onToday}>
                     Today
                 </Button>
-                <Button onClick={onAddEvent} className="bg-[#323d8f] hover:bg-[#323d8f]/90">
-                    <Plus className="mr-2 h-4 w-4" />
-                    Add Event
-                </Button>
+                {canAddEvent ? (
+                    <Button onClick={onAddEvent} className="bg-[#323d8f] hover:bg-[#323d8f]/90">
+                        <Plus className="mr-2 h-4 w-4" />
+                        Add Event
+                    </Button>
+                ) : null}
             </div>
         </div>
     );

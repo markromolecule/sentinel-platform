@@ -2,18 +2,22 @@ import { useState } from 'react';
 import { useExamsQuery } from '@sentinel/hooks';
 import { useStableValue } from '@sentinel/hooks';
 import { groupItemsByDate } from '@/app/(protected)/student/_lib/student-exam-listing';
+import { normalizeStudentExam } from '@/app/(protected)/student/_lib/normalize-student-exam';
 
+/**
+ * Builds the student exam list grouped by scheduled availability date.
+ */
 export function useExamList() {
     const [searchQuery, setSearchQuery] = useState('');
     const { data: exams = [], isLoading } = useExamsQuery();
 
     const filteredExams = useStableValue(() => {
-        return exams.filter((exam) => {
+        return exams.map(normalizeStudentExam).filter((exam) => {
             const matchesSearch =
                 exam.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
                 exam.subject.toLowerCase().includes(searchQuery.toLowerCase());
 
-            return matchesSearch && exam.status === 'upcoming';
+            return matchesSearch && (exam.status === 'upcoming' || exam.status === 'available');
         });
     }, [exams, searchQuery]);
 

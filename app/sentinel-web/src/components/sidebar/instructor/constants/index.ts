@@ -39,17 +39,19 @@ export const studentManagementItems = [
         icon: BookOpen,
     },
     {
-        title: 'Classrooms',
-        url: '/classrooms',
-        icon: School,
-    },
-    {
         title: 'Students',
         url: '/students',
         icon: Users,
     },
 ];
 
+export const classManagementItems = [
+    {
+        title: 'Classrooms',
+        url: '/classrooms',
+        icon: School,
+    },
+];
 export const examManagementItems = [
     {
         title: 'Exams',

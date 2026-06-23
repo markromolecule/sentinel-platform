@@ -17,6 +17,7 @@ interface EventDetailsSheetProps {
     getEventsForDate: (date: Date) => AdminEvent[];
     onAddEvent: () => void;
     onDeleteEvent: (id: string) => void;
+    canAddEvent?: boolean;
 }
 
 export function EventDetailsSheet({
@@ -26,6 +27,7 @@ export function EventDetailsSheet({
     getEventsForDate,
     onAddEvent,
     onDeleteEvent,
+    canAddEvent = true,
 }: EventDetailsSheetProps) {
     const events = selectedDate ? getEventsForDate(selectedDate) : [];
 
@@ -68,16 +70,18 @@ export function EventDetailsSheet({
 
                     {selectedDate && (
                         <div className="space-y-3 px-4 py-4">
-                            <Button
-                                className="h-10 w-full rounded-lg text-sm"
-                                onClick={() => {
-                                    onOpenChange(false);
-                                    onAddEvent();
-                                }}
-                            >
-                                <Plus className="mr-2 h-4 w-4" />
-                                Add Event
-                            </Button>
+                            {canAddEvent ? (
+                                <Button
+                                    className="h-10 w-full rounded-lg text-sm"
+                                    onClick={() => {
+                                        onOpenChange(false);
+                                        onAddEvent();
+                                    }}
+                                >
+                                    <Plus className="mr-2 h-4 w-4" />
+                                    Add Event
+                                </Button>
+                            ) : null}
 
                             <div className="space-y-2.5">
                                 {events.length === 0 ? (

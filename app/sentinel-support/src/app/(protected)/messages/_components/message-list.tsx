@@ -5,6 +5,16 @@ import { formatDistanceToNow } from 'date-fns';
 import { Conversation } from '@sentinel/shared/types';
 import { Plus, ArrowLeft, Loader2 } from 'lucide-react';
 
+interface DirectoryUser {
+    id: string;
+    firstName?: string | null;
+    lastName?: string | null;
+    name?: string | null;
+    avatarUrl?: string | null;
+    role?: string | null;
+    institution?: string | null;
+}
+
 interface MessageListProps {
     conversations: Conversation[];
     selectedId: string | null;
@@ -15,10 +25,11 @@ interface MessageListProps {
     // Directory Props
     showDirectory: boolean;
     onToggleDirectory: () => void;
-    directoryUsers: any[];
+    directoryUsers: DirectoryUser[];
     onSelectUser: (userId: string) => void;
     isCreatingConversation?: boolean;
     isLoading?: boolean;
+    canCreateConversation?: boolean;
 }
 
 function SkeletonRow() {
@@ -51,6 +62,7 @@ export function MessageList({
     onSelectUser,
     isCreatingConversation = false,
     isLoading = false,
+    canCreateConversation = true,
 }: MessageListProps) {
     return (
         <div
@@ -77,15 +89,17 @@ export function MessageList({
                     ) : (
                         <div className="flex w-full items-center justify-between">
                             <h2 className="text-xl font-bold">Messages</h2>
-                            <Button
-                                variant="ghost"
-                                size="icon"
-                                onClick={onToggleDirectory}
-                                className="hover:bg-muted h-8 w-8 rounded-full"
-                                title="New Message"
-                            >
-                                <Plus className="h-4 w-4" />
-                            </Button>
+                            {canCreateConversation ? (
+                                <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    onClick={onToggleDirectory}
+                                    className="hover:bg-muted h-8 w-8 rounded-full"
+                                    title="New Message"
+                                >
+                                    <Plus className="h-4 w-4" />
+                                </Button>
+                            ) : null}
                         </div>
                     )}
                 </div>
@@ -99,7 +113,7 @@ export function MessageList({
 
             {/* List Body */}
             <div className="custom-scrollbar flex-1 overflow-y-auto">
-                {showDirectory ? (
+                {showDirectory && canCreateConversation ? (
                     isCreatingConversation ? (
                         <div className="text-muted-foreground flex h-32 items-center justify-center gap-2 text-sm">
                             <Loader2 className="text-primary h-4 w-4 animate-spin" />
@@ -124,7 +138,7 @@ export function MessageList({
                                     className="hover:bg-muted/50 border-border/50 flex w-full items-center gap-4 border-b p-4 text-left transition-colors duration-150"
                                 >
                                     <Avatar className="border-background h-10 w-10 border-2">
-                                        <AvatarImage src={user.avatarUrl} alt={name} />
+                                        <AvatarImage src={user.avatarUrl ?? undefined} alt={name} />
                                         <AvatarFallback className="bg-primary/10 text-primary">
                                             {initials}
                                         </AvatarFallback>
@@ -148,10 +162,10 @@ export function MessageList({
                         <SkeletonRow />
                         <SkeletonRow />
                     </>
-                ) : conversations.length === 0 ? (
-                    <div className="text-muted-foreground p-8 text-center text-sm">
-                        No conversations yet. Click the '+' icon above to start one!
-                    </div>
+                    ) : conversations.length === 0 ? (
+                        <div className="text-muted-foreground p-8 text-center text-sm">
+                            No conversations yet. Click the + icon above to start one!
+                        </div>
                 ) : (
                     conversations.map((conversation) => {
                         const participant = conversation.participants[0];
@@ -168,7 +182,7 @@ export function MessageList({
                                 <div className="relative shrink-0">
                                     <Avatar className="border-background h-10 w-10 border-2 md:h-12 md:w-12">
                                         <AvatarImage
-                                            src={participant.avatar}
+                                            src={participant.avatar ?? undefined}
                                             alt={participant.name}
                                         />
                                         <AvatarFallback className="bg-primary/10 text-primary">

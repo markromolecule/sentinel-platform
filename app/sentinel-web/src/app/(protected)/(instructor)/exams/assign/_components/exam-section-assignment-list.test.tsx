@@ -112,6 +112,7 @@ describe('ExamSectionAssignmentList', () => {
         render(
             <ExamSectionAssignmentList
                 examId="exam-1"
+                subjectId="subject-1"
                 assignments={
                     mockAssignments as unknown as Parameters<
                         typeof ExamSectionAssignmentList
@@ -131,6 +132,7 @@ describe('ExamSectionAssignmentList', () => {
         render(
             <ExamSectionAssignmentList
                 examId="exam-1"
+                subjectId="subject-1"
                 assignments={[]}
                 isLoading={false}
                 onAssignClick={mockOnAssignClick}
@@ -148,6 +150,7 @@ describe('ExamSectionAssignmentList', () => {
         render(
             <ExamSectionAssignmentList
                 examId="exam-1"
+                subjectId="subject-1"
                 assignments={
                     mockAssignments as unknown as Parameters<
                         typeof ExamSectionAssignmentList
@@ -193,25 +196,18 @@ describe('NewAssignmentsBuilder', () => {
     });
 
     it('filters classrooms by subjectId if provided', () => {
-        const mockClassrooms = [
-            {
-                id: 'cls-1',
-                className: 'Math 101',
-                subjectId: 'subject-math',
-                sectionId: 'sec-1',
-                scopeSummary: { sectionLabel: 'Section Alpha' },
-            },
-            {
-                id: 'cls-2',
-                className: 'History 101',
-                subjectId: 'subject-history',
-                sectionId: 'sec-2',
-                scopeSummary: { sectionLabel: 'Section Beta' },
-            },
-        ];
-
         vi.mocked(useClassroomsQuery).mockReturnValue({
-            data: mockClassrooms,
+            data: [
+                {
+                    id: 'cls-1',
+                    className: 'Math 101',
+                    subjectId: 'subject-math',
+                    sectionId: 'sec-1',
+                    sectionName: 'Section Alpha',
+                    subjectCode: 'MATH101',
+                    scopeSummary: { sectionLabel: 'Section Alpha' },
+                },
+            ],
             isLoading: false,
         } as unknown as ReturnType<typeof useClassroomsQuery>);
 
@@ -225,28 +221,15 @@ describe('NewAssignmentsBuilder', () => {
 
         expect(screen.queryByTestId('select-item-cls-1')).not.toBeNull();
         expect(screen.queryByTestId('select-item-cls-2')).toBeNull();
+        expect(vi.mocked(useClassroomsQuery)).toHaveBeenCalledWith({
+            institutionId: 'institution-1',
+            subjectId: 'subject-math',
+        });
     });
 
-    it('falls back to all classrooms when no subject match exists', () => {
-        const mockClassrooms = [
-            {
-                id: 'cls-1',
-                className: 'Math 101',
-                subjectId: 'subject-math',
-                sectionId: 'sec-1',
-                scopeSummary: { sectionLabel: 'Section Alpha' },
-            },
-            {
-                id: 'cls-2',
-                className: 'History 101',
-                subjectId: 'subject-history',
-                sectionId: 'sec-2',
-                scopeSummary: { sectionLabel: 'Section Beta' },
-            },
-        ];
-
+    it('does not fall back to unrelated classrooms when no subject match exists', () => {
         vi.mocked(useClassroomsQuery).mockReturnValue({
-            data: mockClassrooms,
+            data: [],
             isLoading: false,
         } as unknown as ReturnType<typeof useClassroomsQuery>);
 
@@ -258,7 +241,47 @@ describe('NewAssignmentsBuilder', () => {
             />,
         );
 
+        expect(screen.queryByTestId('select-item-cls-1')).toBeNull();
+        expect(screen.queryByTestId('select-item-cls-2')).toBeNull();
+        expect(
+            screen.getByText("No classrooms are available for this exam's subject."),
+        ).toBeTruthy();
+    });
+
+    it('keeps all classrooms available when the exam has no subject constraint', () => {
+        const mockClassrooms = [
+            {
+                id: 'cls-1',
+                className: 'Math 101',
+                subjectId: 'subject-math',
+                sectionId: 'sec-1',
+                sectionName: 'Section Alpha',
+                subjectCode: 'MATH101',
+                scopeSummary: { sectionLabel: 'Section Alpha' },
+            },
+            {
+                id: 'cls-2',
+                className: 'History 101',
+                subjectId: 'subject-history',
+                sectionId: 'sec-2',
+                sectionName: 'Section Beta',
+                subjectCode: 'HIST101',
+                scopeSummary: { sectionLabel: 'Section Beta' },
+            },
+        ];
+
+        vi.mocked(useClassroomsQuery).mockReturnValue({
+            data: mockClassrooms,
+            isLoading: false,
+        } as unknown as ReturnType<typeof useClassroomsQuery>);
+
+        render(<NewAssignmentsBuilder examId="exam-1" currentAssignments={[]} />);
+
         expect(screen.queryByTestId('select-item-cls-1')).not.toBeNull();
         expect(screen.queryByTestId('select-item-cls-2')).not.toBeNull();
+        expect(vi.mocked(useClassroomsQuery)).toHaveBeenCalledWith({
+            institutionId: 'institution-1',
+            subjectId: undefined,
+        });
     });
 });

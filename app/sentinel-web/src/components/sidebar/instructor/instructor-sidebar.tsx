@@ -18,6 +18,7 @@ import {
     studentManagementItems,
     examManagementItems,
     communicationItems,
+    classManagementItems,
 } from '@/components/sidebar/instructor/constants';
 
 export { InstructorHeader } from './instructor-header';
@@ -32,6 +33,7 @@ export function InstructorSidebar() {
     const sections = [
         { title: 'Overview', items: overviewItems, showSeparator: true },
         { title: 'Management', items: studentManagementItems, showSeparator: true },
+        { title: 'Class Management', items: classManagementItems, showSeparator: true },
         { title: 'Exams Management', items: examManagementItems, showSeparator: true },
         { title: 'Communication', items: communicationItems, showSeparator: true },
         { title: 'Resources', items: supportItems, showSeparator: false },

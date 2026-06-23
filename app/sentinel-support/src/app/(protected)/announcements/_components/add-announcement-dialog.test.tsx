@@ -1,9 +1,10 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { AddAnnouncementDialog } from './add-announcement-dialog';
-import { useCreateAnnouncementMutation } from '@sentinel/hooks';
+import { useActivePermissions, useCreateAnnouncementMutation } from '@sentinel/hooks';
 
 vi.mock('@sentinel/hooks', () => ({
+    useActivePermissions: vi.fn(),
     useCreateAnnouncementMutation: vi.fn(),
 }));
 
@@ -32,6 +33,9 @@ describe('AddAnnouncementDialog', () => {
         vi.clearAllMocks();
         document.body.innerHTML = '';
         window.HTMLElement.prototype.scrollIntoView = vi.fn();
+        vi.mocked(useActivePermissions).mockReturnValue({
+            hasPermission: () => true,
+        } as any);
         vi.mocked(useCreateAnnouncementMutation).mockReturnValue({
             mutate: mockMutate,
             isPending: false,
@@ -93,5 +97,15 @@ describe('AddAnnouncementDialog', () => {
         );
         expect(arg.published_at).toBeDefined();
         expect(arg.unpublished_at).toBeNull();
+    });
+
+    it('does not render the trigger when create permission is missing', () => {
+        vi.mocked(useActivePermissions).mockReturnValue({
+            hasPermission: () => false,
+        } as any);
+
+        const { container } = render(<AddAnnouncementDialog />);
+
+        expect(container.querySelector('button')).toBeNull();
     });
 });

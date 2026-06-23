@@ -32,4 +32,69 @@ describe('mapExam', () => {
 
         expect(exam.isPublic).toBe(true);
     });
+
+    it('prefers sectionIds from the API response and preserves them on the mapped exam', () => {
+        const exam = mapExam({
+            id: 'exam-2',
+            title: 'Assigned Exam',
+            description: 'A section-assigned exam.',
+            durationMinutes: 60,
+            passingScore: 75,
+            status: 'PUBLISHED',
+            classroomId: null,
+            classroomName: null,
+            subjectId: 'subject-1',
+            subjectTitle: 'Science',
+            sectionId: null,
+            sectionName: null,
+            roomId: null,
+            roomName: null,
+            scheduledDate: '2026-06-14T08:00:00.000Z',
+            endDateTime: '2026-06-14T09:00:00.000Z',
+            publishedAt: '2026-06-14T07:30:00.000Z',
+            questionCount: 10,
+            createdAt: '2026-06-14T07:00:00.000Z',
+            updatedAt: '2026-06-14T07:45:00.000Z',
+            sectionIds: ['section-1', 'section-2'],
+            assigned_section_ids: ['legacy-section'],
+            isPublic: false,
+            assignedRoomNames: [],
+            assignedInstructorNames: [],
+            sectionNames: ['Section 1', 'Section 2'],
+        } as any);
+
+        expect(exam.sectionIds).toEqual(['section-1', 'section-2']);
+    });
+
+    it('falls back to assigned_section_ids when sectionIds is not present', () => {
+        const exam = mapExam({
+            id: 'exam-3',
+            title: 'Legacy Assigned Exam',
+            description: 'A legacy section-assigned exam.',
+            durationMinutes: 60,
+            passingScore: 75,
+            status: 'PUBLISHED',
+            classroomId: null,
+            classroomName: null,
+            subjectId: 'subject-1',
+            subjectTitle: 'Science',
+            sectionId: null,
+            sectionName: null,
+            roomId: null,
+            roomName: null,
+            scheduledDate: '2026-06-14T08:00:00.000Z',
+            endDateTime: '2026-06-14T09:00:00.000Z',
+            publishedAt: '2026-06-14T07:30:00.000Z',
+            questionCount: 10,
+            createdAt: '2026-06-14T07:00:00.000Z',
+            updatedAt: '2026-06-14T07:45:00.000Z',
+            assigned_section_ids: ['legacy-section-1', 'legacy-section-2'],
+            isPublic: false,
+            assignedRoomNames: [],
+            assignedInstructorNames: [],
+            sectionNames: ['Legacy Section 1', 'Legacy Section 2'],
+        } as any);
+
+        expect(exam.sectionIds).toEqual(['legacy-section-1', 'legacy-section-2']);
+    });
 });

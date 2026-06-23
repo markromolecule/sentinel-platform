@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo } from 'react';
 import { ColumnFiltersState } from '@tanstack/react-table';
 import {
     DataTable,
@@ -21,8 +21,9 @@ import {
     isPermissionDeniedError,
     useStableValue,
     useDeleteSelectedSubjectsMutation,
+    PermissionGuard,
 } from '@sentinel/hooks';
-import { useInstitutionFacet, useDataTableFilterSync } from '@/hooks';
+import { useInstitutionFacet } from '@/hooks';
 import { getSubjectId } from '@/app/(protected)/(support)/subjects/_hooks/use-subjects-page-state/_types';
 import { Trash2 } from 'lucide-react';
 
@@ -83,20 +84,31 @@ export function SubjectsView() {
         }
     };
 
-    const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>(
-        selectedInstitutionId ? [{ id: 'institution', value: [selectedInstitutionId] }] : [],
-    );
-
-    const [hasInitializedFilters, setHasInitializedFilters] = useState(false);
-
-    useEffect(() => {
-        if (selectedInstitutionId && !hasInitializedFilters) {
-            setColumnFilters([{ id: 'institution', value: [selectedInstitutionId] }]);
-            setHasInitializedFilters(true);
-        }
-    }, [selectedInstitutionId, hasInitializedFilters]);
+    const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
 
     const isViewDenied = isPermissionDeniedError(error, 'subjects:view');
+
+    const resolvedColumnFilters = useMemo(() => {
+        const filters = columnFilters.filter((filter) => filter.id !== 'institution');
+
+        if (selectedInstitutionId) {
+            filters.unshift({
+                id: 'institution',
+                value: [selectedInstitutionId],
+            });
+        }
+
+        return filters;
+    }, [columnFilters, selectedInstitutionId]);
+
+    const handleColumnFiltersChange = (nextFilters: ColumnFiltersState) => {
+        const institutionFilter = nextFilters.find((filter) => filter.id === 'institution');
+
+        setSelectedInstitutionId(
+            Array.isArray(institutionFilter?.value) ? institutionFilter?.value[0] : undefined,
+        );
+        setColumnFilters(nextFilters.filter((filter) => filter.id !== 'institution'));
+    };
 
     const columns = useMemo(
         () =>
@@ -109,16 +121,6 @@ export function SubjectsView() {
     );
 
     const institutionOptions = useInstitutionFacet({ institutions });
-
-    useDataTableFilterSync({
-        columnFilters,
-        syncKeys: ['institution'],
-        onFilterChange: (key, value) => {
-            if (key === 'institution') {
-                setSelectedInstitutionId(value);
-            }
-        },
-    });
 
     const facets = useStableValue(
         () => [
@@ -150,8 +152,8 @@ export function SubjectsView() {
                         data={subjects}
                         searchValue={searchTerm}
                         onSearchChange={setSearchTerm}
-                        columnFilters={columnFilters}
-                        onColumnFiltersChange={setColumnFilters}
+                        columnFilters={resolvedColumnFilters}
+                        onColumnFiltersChange={handleColumnFiltersChange}
                         searchPlaceholder="Search subjects..."
                         facets={facets}
                         isLoading={isLoading}
@@ -165,15 +167,17 @@ export function SubjectsView() {
                         onRowSelectionChange={setRowSelection}
                         toolbarActions={
                             selectedIds.length > 0 ? (
-                                <Button
-                                    variant="destructive"
-                                    size="sm"
-                                    onClick={() => setIsDeleteDialogOpen(true)}
-                                    className="h-8"
-                                >
-                                    <Trash2 className="mr-2 h-4 w-4" />
-                                    Delete {selectedIds.length}
-                                </Button>
+                                <PermissionGuard permission="subjects:delete">
+                                    <Button
+                                        variant="destructive"
+                                        size="sm"
+                                        onClick={() => setIsDeleteDialogOpen(true)}
+                                        className="h-8"
+                                    >
+                                        <Trash2 className="mr-2 h-4 w-4" />
+                                        Delete {selectedIds.length}
+                                    </Button>
+                                </PermissionGuard>
                             ) : null
                         }
                     />

@@ -5,9 +5,12 @@ import { CalendarHeader } from '@/app/(protected)/calendar/_components/calendar-
 import { CalendarGrid } from '@/app/(protected)/calendar/_components/calendar-grid';
 import { EventDialog } from '@/app/(protected)/calendar/_components/event-dialog';
 import { EventDetailsSheet } from './_components/event-details-sheet';
+import { useActivePermissions } from '@sentinel/hooks';
 import { PageHeader, Separator, Skeleton } from '@sentinel/ui';
 
 export default function AdminCalendarPage() {
+    const { hasPermission } = useActivePermissions();
+    const canAddEvent = hasPermission('calendar:create');
     const {
         currentMonth,
         selectedDate,
@@ -43,6 +46,7 @@ export default function AdminCalendarPage() {
                     onNextMonth={handleNextMonth}
                     onToday={handleToday}
                     onAddEvent={() => setIsAddEventOpen(true)}
+                    canAddEvent={canAddEvent}
                 />
             </PageHeader>
             <Separator />
@@ -74,6 +78,7 @@ export default function AdminCalendarPage() {
                 onSave={handleAddEvent}
                 disabled={isCreating}
                 error={createError}
+                canAddEvent={canAddEvent}
             />
 
             <EventDetailsSheet
@@ -83,6 +88,7 @@ export default function AdminCalendarPage() {
                 getEventsForDate={getEventsForDate}
                 onAddEvent={() => setIsAddEventOpen(true)}
                 onDeleteEvent={handleDeleteEvent}
+                canAddEvent={canAddEvent}
             />
         </div>
     );
