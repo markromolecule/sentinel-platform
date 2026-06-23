@@ -224,6 +224,53 @@ describe('AccessGatekeeperService', () => {
         });
     });
 
+    it('passes merged assigned section ids through the eligibility path', async () => {
+        vi.mocked(EntitlementsRepository.getStudentProfileByUserId).mockResolvedValue({
+            student_id: 'e5c1ca10-c818-4bda-8f95-5255c1d5b1e7',
+            institution_id: 'institution-1',
+        });
+        vi.mocked(EntitlementsRepository.getExamAccessPolicy).mockResolvedValue({
+            exam_id: examId,
+            class_group_id: null,
+            subject_id: 'subject-1',
+            section_id: null,
+            room_id: null,
+            duration_minutes: 60,
+            scheduled_date: new Date('2026-04-13T05:00:00.000Z'),
+            end_date_time: new Date('2026-04-13T07:00:00.000Z'),
+            status: 'PUBLISHED',
+            published_at: new Date('2026-04-12T06:00:00.000Z'),
+            institution_id: 'institution-1',
+            assigned_room_id: null,
+            room_institution_id: null,
+            assigned_section_ids: ['section-from-new-assignment-table'],
+            lobby_admission_mode: 'AUTOMATIC',
+        });
+        vi.mocked(EntitlementsRepository.hasStudentExamEnrollment).mockResolvedValue(true);
+        vi.mocked(EntitlementsRepository.getStudentLatestExamAttempt).mockResolvedValue(undefined);
+
+        const result = await AccessGatekeeperService.verifyStudentExamEligibility(
+            mockDb,
+            userId,
+            examId,
+            now,
+        );
+
+        expect(result).toMatchObject({
+            isEligible: true,
+            context: {
+                sectionIds: ['section-from-new-assignment-table'],
+            },
+        });
+        expect(EntitlementsRepository.hasStudentExamEnrollment).toHaveBeenCalledWith(mockDb, {
+            studentId: 'e5c1ca10-c818-4bda-8f95-5255c1d5b1e7',
+            classGroupId: null,
+            subjectId: 'subject-1',
+            sectionId: null,
+            sectionIds: ['section-from-new-assignment-table'],
+        });
+    });
+
     it('allows locked exams to resume when the student has an active attempt', async () => {
         vi.mocked(EntitlementsRepository.getStudentProfileByUserId).mockResolvedValue({
             student_id: 'e5c1ca10-c818-4bda-8f95-5255c1d5b1e7',

@@ -15,6 +15,7 @@ interface ResolvedAssignment extends ExamSectionAssignmentRecord {
 
 export interface ExamSectionAssignmentListProps {
     examId: string;
+    subjectId?: string;
     assignments: ExamSectionAssignmentRecord[];
     isLoading: boolean;
     onAssignClick: () => void;
@@ -89,6 +90,7 @@ function createColumns(
  */
 export function ExamSectionAssignmentList({
     examId,
+    subjectId,
     assignments,
     isLoading,
     onAssignClick,
@@ -102,7 +104,13 @@ export function ExamSectionAssignmentList({
         },
     });
 
-    const { data: classrooms = [] } = useClassroomsQuery();
+    const { data: classrooms = [] } = useClassroomsQuery(
+        subjectId
+            ? {
+                  subjectId,
+              }
+            : undefined,
+    );
 
     const resolvedAssignments = React.useMemo(() => {
         return assignments.map((assignment) => {

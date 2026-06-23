@@ -68,23 +68,15 @@ export function NewAssignmentsBuilder({
 
     const { data: classrooms = [], isLoading: isClassroomsLoading } = useClassroomsQuery({
         institutionId: profile?.institutionId || undefined,
+        subjectId,
     });
     const { data: rooms = [], isLoading: isRoomsLoading } = useRoomsQuery();
     const { data: users = [], isLoading: isUsersLoading } = useUsersQuery({ role: 'instructor' });
 
-    const filteredClassrooms = React.useMemo(() => {
-        const subjectMatchedClassrooms = !subjectId
-            ? []
-            : (classrooms as ClassroomSummary[]).filter(
-                  (classroom) => classroom.subjectId === subjectId,
-              );
-
-        if (subjectMatchedClassrooms.length > 0) {
-            return subjectMatchedClassrooms;
-        }
-
-        return classrooms as ClassroomSummary[];
-    }, [classrooms, subjectId]);
+    const filteredClassrooms = React.useMemo(
+        () => classrooms as ClassroomSummary[],
+        [classrooms],
+    );
 
     const createMutation = useCreateExamSectionAssignmentsBatchMutation({
         onSuccess: () => {
@@ -159,6 +151,7 @@ export function NewAssignmentsBuilder({
         selectedSectionIdsInRows.length > 0 &&
         !hasDuplicatesInRows &&
         !hasConflictsWithExisting &&
+        filteredClassrooms.length > 0 &&
         rows.every((row) => row.classroomId !== 'none');
 
     const handleSubmit = async () => {
@@ -238,13 +231,26 @@ export function NewAssignmentsBuilder({
                                             </SelectItem>
                                             {filteredClassrooms.map((classroom) => (
                                                 <SelectItem key={classroom.id} value={classroom.id}>
-                                                    {classroom.className ||
+                                                    {[
+                                                        classroom.className,
+                                                        classroom.subjectCode,
+                                                        classroom.sectionName,
+                                                    ]
+                                                        .filter(Boolean)
+                                                        .join(' • ') ||
                                                         classroom.scopeSummary.sectionLabel}
                                                 </SelectItem>
                                             ))}
                                         </SelectContent>
                                     </Select>
                                 )}
+                                {!isClassroomsLoading &&
+                                subjectId &&
+                                filteredClassrooms.length === 0 ? (
+                                    <p className="text-xs text-amber-600">
+                                        No classrooms are available for this exam&apos;s subject.
+                                    </p>
+                                ) : null}
                             </div>
 
                             <div className="space-y-1.5 md:col-span-3">

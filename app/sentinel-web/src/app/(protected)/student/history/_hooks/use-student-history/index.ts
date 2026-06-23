@@ -3,9 +3,17 @@ import { useInfiniteExamHistoryQuery, useExamsQuery } from '@sentinel/hooks';
 import { useStableValue } from '@sentinel/hooks';
 import { HistoryFilterStatus, ExamHistory } from '@sentinel/shared/types';
 import { groupItemsByDate } from '@/app/(protected)/student/_lib/student-exam-listing';
+import { normalizeStudentExam } from '@/app/(protected)/student/_lib/normalize-student-exam';
 import { UseStudentHistoryReturn } from '@/app/(protected)/student/history/_hooks/use-student-history/_types';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 
+function isActiveStudentExamStatus(status: string) {
+    return status === 'available' || status === 'upcoming' || status === 'in-progress';
+}
+
+/**
+ * Builds the student exam/history feed state from route-driven tab selection.
+ */
 export function useStudentHistory(): UseStudentHistoryReturn {
     const router = useRouter();
     const pathname = usePathname();
@@ -55,16 +63,12 @@ export function useStudentHistory(): UseStudentHistoryReturn {
     const filteredHistory = useStableValue(() => {
         if (statusFilter === 'available') {
             return exams
+                .map(normalizeStudentExam)
                 .filter((exam) => {
                     const matchesSearch =
                         exam.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
                         exam.subject.toLowerCase().includes(searchQuery.toLowerCase());
-                    return (
-                        matchesSearch &&
-                        (exam.status === 'upcoming' ||
-                            exam.status === 'available' ||
-                            exam.status === 'in-progress')
-                    );
+                    return matchesSearch && isActiveStudentExamStatus(exam.status);
                 })
                 .map((exam) => ({
                     id: exam.id,

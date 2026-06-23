@@ -7,6 +7,11 @@ import { Button, Input, Card, CardContent } from '@sentinel/ui';
 import { ExamCard } from '../../exam/_components/exam-card';
 import { Skeleton } from '@sentinel/ui';
 import { useState } from 'react';
+import { normalizeStudentExam } from '../../_lib/normalize-student-exam';
+
+function isActiveClassroomAssessmentStatus(status: string) {
+    return status === 'available' || status === 'upcoming' || status === 'in-progress';
+}
 
 export default function StudentClassroomDetailPage() {
     const { id } = useParams() as { id: string };
@@ -21,7 +26,13 @@ export default function StudentClassroomDetailPage() {
     });
 
     const filteredExams =
-        exams?.filter((e) => e.title.toLowerCase().includes(search.toLowerCase())) ?? [];
+        exams
+            ?.map(normalizeStudentExam)
+            .filter(
+                (exam) =>
+                    isActiveClassroomAssessmentStatus(exam.status) &&
+                    exam.title.toLowerCase().includes(search.toLowerCase()),
+            ) ?? [];
 
     if (isClassroomsLoading || !classroom) {
         if (!isClassroomsLoading && !classroom) {
@@ -125,7 +136,7 @@ export default function StudentClassroomDetailPage() {
                             <p className="text-muted-foreground mt-1 text-sm">
                                 {search
                                     ? 'Try a different search term.'
-                                    : 'There are no exams assigned to this classroom yet.'}
+                                    : 'There are no active assessments assigned to this classroom right now.'}
                             </p>
                         </CardContent>
                     </Card>

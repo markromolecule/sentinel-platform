@@ -1,5 +1,5 @@
-import { sql } from 'kysely';
 import { type DbClient } from '@sentinel/db';
+import { buildAssignedSectionIdsSelect } from '../../exams/data/build-student-exam-scope-predicates';
 
 export class EntitlementsRepository {
     /**
@@ -49,12 +49,9 @@ export class EntitlementsRepository {
                 'ec.max_reconnect_attempts as max_reconnect_attempts',
                 'r.room_id as assigned_room_id',
                 'r.institution_id as room_institution_id',
-                (eb) =>
-                    eb
-                        .selectFrom('exam_assigned_sections as eas')
-                        .select(sql<string[]>`array_agg(eas.section_id)`.as('section_ids'))
-                        .whereRef('eas.exam_id', '=', 'e.exam_id')
-                        .as('assigned_section_ids'),
+                buildAssignedSectionIdsSelect({
+                    examAlias: 'e',
+                }).as('assigned_section_ids'),
             ])
             .where('e.exam_id', '=', examId)
             .executeTakeFirst();

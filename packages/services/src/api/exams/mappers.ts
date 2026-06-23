@@ -174,6 +174,9 @@ export function mapExamReportStudent(
     };
 }
 
+/**
+ * Maps exam API responses into the shared proctor exam model used by the web app.
+ */
 export function mapExam(apiExam: ApiExamSummary | ApiExamDetail): ProctorExam {
     return {
         id: apiExam.id,
@@ -229,7 +232,7 @@ export function mapExam(apiExam: ApiExamSummary | ApiExamDetail): ProctorExam {
         subject: apiExam.subjectTitle ?? 'Untitled Subject',
         subjectId: apiExam.subjectId ?? undefined,
         section: apiExam.sectionName ?? undefined,
-        sectionIds: apiExam.assigned_section_ids ?? [],
+        sectionIds: apiExam.sectionIds ?? apiExam.assigned_section_ids ?? [],
         room: apiExam.roomName ?? undefined,
         roomId: apiExam.roomId ?? undefined,
         scheduledDate: normalizeDateTime(apiExam.scheduledDate),

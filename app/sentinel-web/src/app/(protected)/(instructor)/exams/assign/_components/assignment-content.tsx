@@ -30,7 +30,7 @@ export function InstructorAssignmentContent() {
     const currentExamId = searchParams.get('examId') || '';
     const [isAssignDialogOpen, setIsAssignDialogOpen] = React.useState(false);
 
-    const { data: exams = [], isLoading: isExamsLoading } = useExamsQuery({ status: 'draft' });
+    const { data: exams = [], isLoading: isExamsLoading } = useExamsQuery();
     const { data: assignments = [], isLoading: isAssignmentsLoading } =
         useExamSectionAssignmentsQuery(currentExamId);
 
@@ -91,6 +91,7 @@ export function InstructorAssignmentContent() {
                 <>
                     <ExamSectionAssignmentList
                         examId={currentExamId}
+                        subjectId={selectedExam?.subjectId}
                         assignments={assignments}
                         isLoading={isAssignmentsLoading}
                         onAssignClick={() => setIsAssignDialogOpen(true)}
