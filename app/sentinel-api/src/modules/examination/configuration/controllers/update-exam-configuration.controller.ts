@@ -3,7 +3,7 @@ import { type AppRouteHandler } from '../../../../types/hono';
 import { assertAssessmentAccess } from '../../assessment/assessment-access';
 import { updateExamConfigurationSchema } from '../configuration.dto';
 import { ConfigurationService } from '../configuration.service';
-import { hasActivePermission } from '../../../../lib/permissions';
+import { hasActivePermission, requireActivePermission } from '../../../../lib/permissions';
 
 export const updateExamConfigurationRoute = createRoute({
     method: 'put',
@@ -40,6 +40,7 @@ export const updateExamConfigurationRouteHandler: AppRouteHandler<
     const supabaseUser = c.get('supabaseUser') as any;
 
     assertAssessmentAccess(supabaseUser?.user_metadata?.role);
+    requireActivePermission(c, 'examinations:update');
 
     const canBypassLock = hasActivePermission(c, 'examinations:bypass_publish_lock');
 

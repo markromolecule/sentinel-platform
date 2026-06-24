@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { useDeleteClassroomStudentMutation } from '@sentinel/hooks';
+import { PermissionGuard, useDeleteClassroomStudentMutation } from '@sentinel/hooks';
 import {
     AlertDialog,
     AlertDialogAction,
@@ -40,24 +40,26 @@ export function ClassroomStudentActionCell({
 
     return (
         <>
-            <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="icon" className="h-8 w-8">
-                        <MoreHorizontal className="h-4 w-4" />
-                        <span className="sr-only">Open student actions</span>
-                    </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-40">
-                    <DropdownMenuItem
-                        variant="destructive"
-                        className="cursor-pointer"
-                        onClick={() => setOpen(true)}
-                    >
-                        <Trash2 className="mr-2 h-4 w-4" />
-                        Unenroll
-                    </DropdownMenuItem>
-                </DropdownMenuContent>
-            </DropdownMenu>
+            <PermissionGuard permission="classrooms:unenroll_students">
+                <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="icon" className="h-8 w-8">
+                            <MoreHorizontal className="h-4 w-4" />
+                            <span className="sr-only">Open student actions</span>
+                        </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" className="w-40">
+                        <DropdownMenuItem
+                            variant="destructive"
+                            className="cursor-pointer"
+                            onClick={() => setOpen(true)}
+                        >
+                            <Trash2 className="mr-2 h-4 w-4" />
+                            Unenroll
+                        </DropdownMenuItem>
+                    </DropdownMenuContent>
+                </DropdownMenu>
+            </PermissionGuard>
 
             <AlertDialog open={open} onOpenChange={setOpen}>
                 <AlertDialogContent>

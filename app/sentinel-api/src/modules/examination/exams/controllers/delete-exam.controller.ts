@@ -4,6 +4,7 @@ import {
     assertAssessmentAccess,
     resolveAssessmentActorRole,
 } from '../../assessment/assessment-access';
+import { hasActivePermission, requireActivePermission } from '../../../../lib/permissions';
 import { deleteExamSchema } from '../exam.dto';
 import { ExamService } from '../exam.service';
 
@@ -41,12 +42,14 @@ export const deleteExamRouteHandler: AppRouteHandler<typeof deleteExamRoute> = a
     });
 
     assertAssessmentAccess(c);
+    requireActivePermission(c, 'examinations:delete');
 
     await ExamService.deleteExam(
         c.get('dbClient'),
         id,
         c.get('institutionId') || undefined,
         user.id,
+        hasActivePermission(c, 'examinations:delete'),
         role || undefined,
     );
 

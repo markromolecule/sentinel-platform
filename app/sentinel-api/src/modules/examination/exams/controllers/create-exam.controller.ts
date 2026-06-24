@@ -5,6 +5,7 @@ import {
     resolveAssessmentActorRole,
     resolveAssessmentInstitutionId,
 } from '../../assessment/assessment-access';
+import { requireActivePermission } from '../../../../lib/permissions';
 import { createExamSchema } from '../exam.dto';
 import { ExamService } from '../exam.service';
 
@@ -45,6 +46,7 @@ export const createExamRouteHandler: AppRouteHandler<typeof createExamRoute> = a
     });
 
     assertAssessmentAccess(c);
+    requireActivePermission(c, 'examinations:create');
 
     const institutionId = resolveAssessmentInstitutionId({
         role,

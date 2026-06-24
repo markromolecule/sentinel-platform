@@ -217,4 +217,53 @@ describe('getExams service', () => {
             sectionNames: ['INF232'],
         });
     });
+
+    it('keeps published classroom-linked exams visible in the student feed', async () => {
+        vi.mocked(getExamsData).mockResolvedValue([
+            {
+                exam_id: 'exam-classroom-assigned',
+                title: 'Classroom assigned exam',
+                description: 'Exam description',
+                duration_minutes: 60,
+                passing_score: 75,
+                status: 'PUBLISHED',
+                class_group_id: 'classroom-1',
+                subject_id: 'subject-1',
+                scheduled_date: new Date('2099-04-17T01:00:00.000Z'),
+                end_date_time: new Date('2099-04-17T03:00:00.000Z'),
+                published_at: new Date('2099-04-16T01:00:00.000Z'),
+                question_count: 10,
+                created_at: new Date('2099-04-15T01:00:00.000Z'),
+                updated_at: new Date('2099-04-16T01:00:00.000Z'),
+                subject_title: 'Science',
+                class_name: 'INF232 A',
+                room_id: null,
+                room_name: null,
+                section_id: null,
+                section_name: null,
+                linked_section_name: null,
+                assigned_section_ids: ['section-1'],
+                assigned_section_names: ['INF232'],
+                is_public: false,
+                attempt_id: null,
+                attempt_status: null,
+                attempt_completed_at: null,
+                attempt_score: null,
+                attempt_total_score: null,
+                attempt_time_spent_minutes: null,
+                attempt_incident_count: 0,
+                attempt_primary_incident_type: null,
+            },
+        ] as any);
+
+        const exams = await getExams(mockDb, {}, 'institution-1', 'student-user-1');
+
+        expect(exams).toHaveLength(1);
+        expect(exams[0]).toMatchObject({
+            id: 'exam-classroom-assigned',
+            status: 'upcoming',
+            isPublic: false,
+            classroomId: 'classroom-1',
+        });
+    });
 });

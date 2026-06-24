@@ -18,6 +18,8 @@ export type RawExamRecord = {
     section_id?: string | null;
     assigned_section_ids?: string[] | null;
     assigned_section_names?: string[] | null;
+    assigned_class_group_ids?: string[] | null;
+    assigned_class_group_names?: string[] | null;
     assigned_instructor_ids?: string[] | null;
     section_name: string | null;
     linked_section_name?: string | null;
@@ -163,11 +165,23 @@ function buildSectionNames(record: RawExamRecord) {
     return Array.from(new Set([record.section_name, ...assignedNames].filter(Boolean))) as string[];
 }
 
+function buildClassroomIds(record: RawExamRecord) {
+    const assignedIds = parseJsonArray(record.assigned_class_group_ids);
+    return Array.from(new Set([record.class_group_id, ...assignedIds].filter(Boolean))) as string[];
+}
+
+function buildClassroomNames(record: RawExamRecord) {
+    const assignedNames = parseJsonArray(record.assigned_class_group_names);
+    return Array.from(new Set([record.class_name, ...assignedNames].filter(Boolean))) as string[];
+}
+
 export function mapExamSummaryResponse(
     record: RawExamRecord,
     options?: { studentView?: boolean; runtimeAccess?: ExamRuntimeAccess },
 ): ExamSummary {
     const studentView = options?.studentView ?? false;
+    const classroomIds = buildClassroomIds(record);
+    const classroomNames = buildClassroomNames(record);
 
     return {
         id: record.exam_id,
@@ -178,8 +192,10 @@ export function mapExamSummaryResponse(
         status: studentView
             ? resolveMappedExamStatus(record, true)
             : resolveMappedExamStatus(record, false),
-        classroomId: record.class_group_id ?? null,
-        classroomName: record.class_name ?? null,
+        classroomId: classroomIds[0] ?? null,
+        classroomIds,
+        classroomName: classroomNames[0] ?? null,
+        classroomNames,
         subjectId: record.subject_id,
         subjectTitle: record.subject_title ?? null,
         sectionId: record.section_id ?? null,

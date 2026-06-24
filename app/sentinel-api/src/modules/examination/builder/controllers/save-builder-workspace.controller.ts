@@ -6,7 +6,7 @@ import {
 } from '../../assessment/assessment-access';
 import { saveBuilderWorkspaceSchema } from '../builder.dto';
 import { BuilderService } from '../builder.service';
-import { hasActivePermission } from '../../../../lib/permissions';
+import { hasActivePermission, requireActivePermission } from '../../../../lib/permissions';
 
 export const saveBuilderWorkspaceRoute = createRoute({
     method: 'put',
@@ -45,6 +45,7 @@ export const saveBuilderWorkspaceRouteHandler: AppRouteHandler<
     const role = supabaseUser?.user_metadata?.role;
 
     assertAssessmentAccess(c);
+    requireActivePermission(c, 'examinations:update');
 
     const institutionId = resolveAssessmentInstitutionId({
         role,

@@ -44,7 +44,7 @@ export const acceptExamAssignmentRouteHandler: AppRouteHandler<
     assertAssessmentAccess(role);
     requireActivePermission(
         c,
-        'examinations:view',
+        'examinations:assign',
         'Forbidden. You do not have permission to respond to exam assignments.',
     );
 

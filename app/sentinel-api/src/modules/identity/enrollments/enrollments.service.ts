@@ -139,9 +139,10 @@ export class EnrollmentService {
         dbClient: DbClient,
         institutionId: string,
         userId: string,
+        userRole: string | undefined,
         payload: EnrollStudentsBody,
     ) {
-        return enrollStudentsService({ dbClient, institutionId, userId, payload });
+        return enrollStudentsService({ dbClient, institutionId, userId, userRole, payload });
     }
 
     /**
@@ -151,6 +152,7 @@ export class EnrollmentService {
         dbClient: DbClient,
         institutionId: string,
         userId: string,
+        userRole: string | undefined,
         studentNumbers: string[],
         classGroupId?: string,
     ) {
@@ -158,6 +160,7 @@ export class EnrollmentService {
             dbClient,
             institutionId,
             userId,
+            userRole,
             studentNumbers,
             classGroupId,
         });

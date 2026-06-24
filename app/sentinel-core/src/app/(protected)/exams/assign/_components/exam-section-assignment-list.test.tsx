@@ -115,6 +115,7 @@ describe('ExamSectionAssignmentList', () => {
             id: 'assignment-1',
             examId: 'exam-1',
             sectionId: 'section-1',
+            classGroupId: 'cls-2',
             sectionName: 'Section Alpha',
             roomId: 'room-1',
             roomName: 'Room 101',
@@ -136,8 +137,8 @@ describe('ExamSectionAssignmentList', () => {
             />,
         );
 
-        // Resolved from sectionId section-1 -> Classroom Alpha
-        expect(screen.getByText('Classroom Alpha')).toBeDefined();
+        // Resolved from classGroupId cls-2 -> Classroom Beta, even though the section points elsewhere.
+        expect(screen.getByText('Classroom Beta')).toBeDefined();
         expect(screen.getByText('Room 101')).toBeDefined();
         expect(screen.getByText('John Doe')).toBeDefined();
     });
@@ -169,7 +170,7 @@ describe('ExamSectionAssignmentList', () => {
             />,
         );
 
-        const row = screen.getByText('Classroom Alpha').closest('tr');
+        const row = screen.getByText('Classroom Beta').closest('tr');
         const deleteBtn = row?.querySelector('button');
         expect(deleteBtn).toBeDefined();
 
@@ -206,9 +207,22 @@ describe('NewAssignmentsBuilder', () => {
 
         expect(screen.getByText('Add Classroom Row')).toBeDefined();
 
-        // Renders Save button
+        fireEvent.click(screen.getByTestId('mock-classroom-combobox'));
         const saveBtn = screen.getByRole('button', { name: 'Save Assignments' });
         expect(saveBtn).toBeDefined();
+        fireEvent.click(saveBtn);
+
+        expect(mockBatchMutate).toHaveBeenCalledWith({
+            examId: 'exam-1',
+            payload: {
+                assignments: [
+                    {
+                        sectionId: 'section-1',
+                        classGroupId: 'cls-1',
+                    },
+                ],
+            },
+        });
     });
 
     it('filters classrooms by subjectId if provided', () => {

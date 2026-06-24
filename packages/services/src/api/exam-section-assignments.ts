@@ -9,6 +9,7 @@ export interface ExamSectionAssignmentRecord {
     id: string;
     examId: string;
     sectionId: string;
+    classGroupId?: string | null;
     sectionName: string;
     roomId: string | null;
     roomName: string | null;
@@ -21,6 +22,7 @@ export interface ExamSectionAssignmentRecord {
 
 export interface CreateExamSectionAssignmentPayload {
     sectionId: string;
+    classGroupId?: string | null;
     roomId?: string | null;
     instructorId?: string | null;
     scheduledAt?: string | null;

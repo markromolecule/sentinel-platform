@@ -738,6 +738,8 @@ export interface SubjectOfferingCourse {
 
 export interface SubjectOfferingSection {
     id: string;
+    classGroupId?: string | null;
+    sectionId?: string | null;
     name: string;
     departmentId?: string | null;
     courseId?: string | null;

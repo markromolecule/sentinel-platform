@@ -5,7 +5,9 @@ import {
     type ClassroomStudentAccessScope,
 } from '../helper/classroom.types';
 import { getClassGroupColumnSupport } from '../helper/classroom-schema-compat';
+import { getAccessibleClassroomOrThrow } from './classroom-access-query.service';
 import { ActivityNotificationService } from '../../../general/notification/services/activity-notification.service';
+import { deleteExamForCleanup } from '../../../examination/exams/services/delete-exam';
 
 export async function saveClassroomConfiguration(args: {
     dbClient: DbClient;
@@ -61,6 +63,10 @@ export async function saveClassroomConfiguration(args: {
     }
 }
 
+/**
+ * Deletes a classroom after first removing directly owned exams and any
+ * remaining classroom-scoped exam assignment links tied to that classroom.
+ */
 export async function deleteClassroom(
     dbClient: DbClient,
     { classGroupId, userId, institutionId, userRole }: ClassroomAccessScope,
@@ -86,6 +92,22 @@ export async function deleteClassroom(
     if (!classroom) {
         throw new HTTPException(404, { message: 'Classroom not found.' });
     }
+
+    const ownedExams = await dbClient
+        .selectFrom('exams')
+        .select(['exam_id'])
+        .where('class_group_id', '=', classGroupId)
+        .where('institution_id', '=', institutionId)
+        .execute();
+
+    for (const exam of ownedExams) {
+        await deleteExamForCleanup(dbClient, exam.exam_id, institutionId);
+    }
+
+    await dbClient
+        .deleteFrom('exam_section_assignments' as any)
+        .where('class_group_id', '=', classGroupId)
+        .execute();
 
     await dbClient.deleteFrom('class_groups').where('class_group_id', '=', classGroupId).execute();
 
@@ -177,18 +199,21 @@ export async function bulkDeleteClassrooms(
 
 export async function unenrollClassroomStudent(
     dbClient: DbClient,
-    { classGroupId, studentId, userId, institutionId }: ClassroomStudentAccessScope,
+    { classGroupId, studentId, userId, institutionId, userRole }: ClassroomStudentAccessScope,
 ) {
+    await getAccessibleClassroomOrThrow(dbClient, {
+        classGroupId,
+        userId,
+        institutionId,
+        userRole,
+    });
+
     const enrollment = await dbClient
         .selectFrom('class_groups as cg')
-        .innerJoin('class_roles as cr', 'cr.class_group_id', 'cg.class_group_id')
-        .innerJoin('roles as r', 'r.role_id', 'cr.role_id')
         .innerJoin('enrollments as enr', 'enr.class_group_id', 'cg.class_group_id')
         .innerJoin('students as st', 'st.student_id', 'enr.student_id')
         .select(['enr.enrollment_id'])
         .where('cg.class_group_id', '=', classGroupId)
-        .where('cr.user_id', '=', userId)
-        .where('r.role_name', '=', 'instructor')
         .where('cg.institution_id', '=', institutionId)
         .where('st.student_id', '=', studentId)
         .where('st.institution_id', '=', institutionId)
@@ -238,16 +263,8 @@ export async function unenrollClassroomStudent(
 
 export async function archiveClassroom(
     dbClient: DbClient,
-    { classGroupId, userId, institutionId, userRole }: ClassroomAccessScope,
+    { classGroupId, userId, institutionId }: ClassroomAccessScope,
 ) {
-    const isCoreAdmin = userRole ? ['support', 'superadmin', 'admin'].includes(userRole) : false;
-
-    if (!isCoreAdmin) {
-        throw new HTTPException(403, {
-            message: 'Forbidden. Only administrators can archive classrooms.',
-        });
-    }
-
     const classroom = await dbClient
         .selectFrom('class_groups as cg')
         .select(['cg.class_group_id', 'cg.class_name'])
@@ -287,16 +304,8 @@ export async function archiveClassroom(
 
 export async function unarchiveClassroom(
     dbClient: DbClient,
-    { classGroupId, userId, institutionId, userRole }: ClassroomAccessScope,
+    { classGroupId, userId, institutionId }: ClassroomAccessScope,
 ) {
-    const isCoreAdmin = userRole ? ['support', 'superadmin', 'admin'].includes(userRole) : false;
-
-    if (!isCoreAdmin) {
-        throw new HTTPException(403, {
-            message: 'Forbidden. Only administrators can unarchive classrooms.',
-        });
-    }
-
     const classroom = await dbClient
         .selectFrom('class_groups as cg')
         .select(['cg.class_group_id', 'cg.class_name'])

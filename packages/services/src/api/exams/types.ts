@@ -53,7 +53,9 @@ export interface ApiExamSummary {
     passingScore: number;
     status: ExamStatus;
     classroomId: string | null;
+    classroomIds?: string[] | null;
     classroomName: string | null;
+    classroomNames?: string[] | null;
     subjectId: string | null;
     subjectTitle: string | null;
     sectionId: string | null;

@@ -129,6 +129,7 @@ export async function updateExam(
     institutionId: string | undefined,
     userId: string,
     canBypassLock = false,
+    canManageExam = false,
     role?: string,
 ) {
     const current = requireExamRecord(
@@ -138,7 +139,7 @@ export async function updateExam(
             institutionId,
         }),
     );
-    assertExamOwnership(current.created_by, userId, role);
+    assertExamOwnership(current.created_by, userId, canManageExam, role);
     const targetInstitutionId =
         institutionId ?? body.institutionId ?? current.institution_id ?? undefined;
 

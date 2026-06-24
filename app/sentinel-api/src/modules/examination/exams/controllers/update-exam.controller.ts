@@ -7,7 +7,7 @@ import {
 } from '../../assessment/assessment-access';
 import { updateExamSchema } from '../exam.dto';
 import { ExamService } from '../exam.service';
-import { hasActivePermission } from '../../../../lib/permissions';
+import { hasActivePermission, requireActivePermission } from '../../../../lib/permissions';
 
 export const updateExamRoute = createRoute({
     method: 'put',
@@ -49,6 +49,7 @@ export const updateExamRouteHandler: AppRouteHandler<typeof updateExamRoute> = a
     });
 
     assertAssessmentAccess(c);
+    requireActivePermission(c, 'examinations:update');
 
     // Resolve institution id based on role
     const institutionId = resolveAssessmentInstitutionId({
@@ -59,6 +60,7 @@ export const updateExamRouteHandler: AppRouteHandler<typeof updateExamRoute> = a
 
     // Bypass lock permission for superadmin and system role
     const canBypassLock = hasActivePermission(c, 'examinations:bypass_publish_lock');
+    const canManageExam = hasActivePermission(c, 'examinations:update');
 
     const exam = await ExamService.updateExam(
         c.get('dbClient'),
@@ -67,6 +69,7 @@ export const updateExamRouteHandler: AppRouteHandler<typeof updateExamRoute> = a
         institutionId,
         user.id,
         canBypassLock,
+        canManageExam,
         role || undefined,
     );
 

@@ -4,7 +4,7 @@ import { type AppRouteHandler } from '../../../../types/hono';
 import { respondWithRouteError } from '../../../../lib/route-error-response';
 import { completeSessionSchema } from '../flow.dto';
 import { SessionManagerService } from '../flow.service';
-import { resolveAssessmentActorRole } from '../../assessment/assessment-access';
+import { EntitlementsRepository } from '../../access/data/entitlements.repository';
 
 export const completeSessionRoute = createRoute({
     method: 'post',
@@ -48,14 +48,19 @@ export const completeSessionRouteHandler: AppRouteHandler<typeof completeSession
     try {
         const body = c.req.valid('json');
         const user = c.get('user');
-        const supabaseUser = c.get('supabaseUser') as any;
-        const role = await resolveAssessmentActorRole({
-            dbClient: c.get('dbClient'),
-            userId: user?.id,
-            claimedRole: supabaseUser?.user_metadata?.role,
-        });
 
-        if (role !== 'student' || !user?.id) {
+        if (!user?.id) {
+            throw new HTTPException(403, {
+                message: 'Forbidden. Only students can complete exam sessions.',
+            });
+        }
+
+        const studentProfile = await EntitlementsRepository.getStudentProfileByUserId(
+            c.get('dbClient'),
+            user.id,
+        );
+
+        if (!studentProfile) {
             throw new HTTPException(403, {
                 message: 'Forbidden. Only students can complete exam sessions.',
             });

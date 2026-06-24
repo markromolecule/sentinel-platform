@@ -4,9 +4,25 @@ import { verify } from 'hono/jwt';
 import { HTTPException } from 'hono/http-exception';
 import { prisma } from '@sentinel/db';
 import { getUserActivePermissions } from '../modules/security/permission/data/get-user-active-permissions';
+import { ensureAccessControlCatalogs } from '../modules/security/access-control/services/access-control-catalog.service';
 import type { HonoEnv } from '../types/hono';
 
 export type AppBindings = HonoEnv;
+
+let accessControlCatalogSyncPromise: Promise<void> | null = null;
+
+async function ensureAccessControlCatalogsSynced(c: Context<HonoEnv>) {
+    if (!accessControlCatalogSyncPromise) {
+        accessControlCatalogSyncPromise = ensureAccessControlCatalogs(c.get('dbClient')).catch(
+            (error) => {
+                accessControlCatalogSyncPromise = null;
+                throw error;
+            },
+        );
+    }
+
+    await accessControlCatalogSyncPromise;
+}
 
 export const authMiddleware = async (c: Context<HonoEnv>, next: Next) => {
     // 1. Handle CORS Preflight immediately
@@ -91,6 +107,7 @@ export const authMiddleware = async (c: Context<HonoEnv>, next: Next) => {
             '';
         c.set('role', String(rawRole).toLowerCase());
 
+        await ensureAccessControlCatalogsSynced(c);
         const activePermissionKeys = await getUserActivePermissions(c.get('dbClient'), userId);
         c.set('activePermissionKeys', activePermissionKeys);
 

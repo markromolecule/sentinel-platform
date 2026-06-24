@@ -271,6 +271,99 @@ describe('AccessGatekeeperService', () => {
         });
     });
 
+    it('treats exact classroom assignments as eligible even when the section is shared elsewhere', async () => {
+        vi.mocked(EntitlementsRepository.getStudentProfileByUserId).mockResolvedValue({
+            student_id: 'e5c1ca10-c818-4bda-8f95-5255c1d5b1e7',
+            institution_id: 'institution-1',
+        });
+        vi.mocked(EntitlementsRepository.getExamAccessPolicy).mockResolvedValue({
+            exam_id: examId,
+            class_group_id: 'classroom-1',
+            subject_id: 'subject-1',
+            section_id: 'section-1',
+            room_id: null,
+            duration_minutes: 60,
+            scheduled_date: new Date('2026-04-13T05:00:00.000Z'),
+            end_date_time: new Date('2026-04-13T07:00:00.000Z'),
+            status: 'PUBLISHED',
+            published_at: new Date('2026-04-12T06:00:00.000Z'),
+            institution_id: 'institution-1',
+            assigned_room_id: null,
+            room_institution_id: null,
+            assigned_section_ids: ['section-1'],
+            lobby_admission_mode: 'AUTOMATIC',
+        });
+        vi.mocked(EntitlementsRepository.hasStudentExamEnrollment).mockResolvedValue(true);
+        vi.mocked(EntitlementsRepository.getStudentLatestExamAttempt).mockResolvedValue(undefined);
+
+        const result = await AccessGatekeeperService.verifyStudentExamEligibility(
+            mockDb,
+            userId,
+            examId,
+            now,
+        );
+
+        expect(result).toMatchObject({
+            isEligible: true,
+            context: {
+                classroomId: 'classroom-1',
+                sectionId: 'section-1',
+            },
+        });
+        expect(EntitlementsRepository.hasStudentExamEnrollment).toHaveBeenCalledWith(mockDb, {
+            studentId: 'e5c1ca10-c818-4bda-8f95-5255c1d5b1e7',
+            classGroupId: 'classroom-1',
+            subjectId: 'subject-1',
+            sectionId: 'section-1',
+            sectionIds: ['section-1'],
+        });
+    });
+
+    it('rejects students in another classroom when exact classroom eligibility fails', async () => {
+        vi.mocked(EntitlementsRepository.getStudentProfileByUserId).mockResolvedValue({
+            student_id: 'e5c1ca10-c818-4bda-8f95-5255c1d5b1e7',
+            institution_id: 'institution-1',
+        });
+        vi.mocked(EntitlementsRepository.getExamAccessPolicy).mockResolvedValue({
+            exam_id: examId,
+            class_group_id: 'classroom-1',
+            subject_id: 'subject-1',
+            section_id: 'section-1',
+            room_id: null,
+            duration_minutes: 60,
+            scheduled_date: new Date('2026-04-13T05:00:00.000Z'),
+            end_date_time: new Date('2026-04-13T07:00:00.000Z'),
+            status: 'PUBLISHED',
+            published_at: new Date('2026-04-12T06:00:00.000Z'),
+            institution_id: 'institution-1',
+            assigned_room_id: null,
+            room_institution_id: null,
+            assigned_section_ids: ['section-1'],
+            lobby_admission_mode: 'AUTOMATIC',
+        });
+        vi.mocked(EntitlementsRepository.hasStudentExamEnrollment).mockResolvedValue(false);
+        vi.mocked(EntitlementsRepository.getStudentLatestExamAttempt).mockResolvedValue(undefined);
+
+        const result = await AccessGatekeeperService.verifyStudentExamEligibility(
+            mockDb,
+            userId,
+            examId,
+            now,
+        );
+
+        expect(result).toMatchObject({
+            isEligible: false,
+            reasonCode: 'CLOSED',
+        });
+        expect(EntitlementsRepository.hasStudentExamEnrollment).toHaveBeenCalledWith(mockDb, {
+            studentId: 'e5c1ca10-c818-4bda-8f95-5255c1d5b1e7',
+            classGroupId: 'classroom-1',
+            subjectId: 'subject-1',
+            sectionId: 'section-1',
+            sectionIds: ['section-1'],
+        });
+    });
+
     it('allows locked exams to resume when the student has an active attempt', async () => {
         vi.mocked(EntitlementsRepository.getStudentProfileByUserId).mockResolvedValue({
             student_id: 'e5c1ca10-c818-4bda-8f95-5255c1d5b1e7',

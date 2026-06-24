@@ -1,6 +1,7 @@
 import { createRoute } from '@hono/zod-openapi';
 import { type AppRouteHandler } from '../../../../types/hono';
 import { assertAssessmentAccess } from '../../assessment/assessment-access';
+import { requireActivePermission } from '../../../../lib/permissions';
 import { updateExamStatusSchema } from '../exam.dto';
 import { ExamService } from '../exam.service';
 
@@ -40,6 +41,7 @@ export const updateExamStatusRouteHandler: AppRouteHandler<typeof updateExamStat
     const user = c.get('user');
 
     assertAssessmentAccess(c);
+    requireActivePermission(c, 'examinations:update');
 
     const exam = await ExamService.updateExamStatus(
         c.get('dbClient'),

@@ -17,6 +17,13 @@ const STUDENT_EXAM_STATUSES = new Set([
  * instructor/internal values such as "published".
  */
 export function normalizeStudentExam(exam: ProctorExam): ProctorExam {
+    if (exam.completedAt) {
+        return {
+            ...exam,
+            status: 'turned_in',
+        };
+    }
+
     if (STUDENT_EXAM_STATUSES.has(exam.status)) {
         return exam;
     }

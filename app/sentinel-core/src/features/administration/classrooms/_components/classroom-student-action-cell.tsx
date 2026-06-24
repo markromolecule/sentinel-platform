@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { useDeleteClassroomStudentMutation } from '@sentinel/hooks';
+import { PermissionGuard, useDeleteClassroomStudentMutation } from '@sentinel/hooks';
 import {
     AlertDialog,
     AlertDialogAction,
@@ -20,7 +20,6 @@ import {
 import { MoreHorizontal, Trash2 } from 'lucide-react';
 import { type ClassroomStudent } from '@sentinel/shared/types';
 import { toast } from 'sonner';
-import { PermissionGate } from '@/features/administration/shared/permission-gate';
 
 type ClassroomStudentActionCellProps = {
     classroomId: string;
@@ -41,7 +40,7 @@ export function ClassroomStudentActionCell({
 
     return (
         <>
-            <PermissionGate permission="classrooms" action="edit">
+            <PermissionGuard permission="classrooms:unenroll_students">
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                         <Button variant="ghost" size="icon" className="h-8 w-8">
@@ -60,7 +59,7 @@ export function ClassroomStudentActionCell({
                         </DropdownMenuItem>
                     </DropdownMenuContent>
                 </DropdownMenu>
-            </PermissionGate>
+            </PermissionGuard>
 
             <AlertDialog open={open} onOpenChange={setOpen}>
                 <AlertDialogContent>

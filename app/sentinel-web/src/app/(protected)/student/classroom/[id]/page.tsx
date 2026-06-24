@@ -8,9 +8,37 @@ import { ExamCard } from '../../exam/_components/exam-card';
 import { Skeleton } from '@sentinel/ui';
 import { useState } from 'react';
 import { normalizeStudentExam } from '../../_lib/normalize-student-exam';
+import type { StudentClassroom } from '@sentinel/shared';
+import type { ProctorExam } from '@sentinel/shared/types';
 
 function isActiveClassroomAssessmentStatus(status: string) {
     return status === 'available' || status === 'upcoming' || status === 'in-progress';
+}
+
+function matchesStudentClassroomExam(classroom: StudentClassroom, exam: ProctorExam) {
+    const classroomIds = exam.classroomIds ?? [];
+    const sectionIds = exam.sectionIds ?? [];
+
+    if (classroomIds.length > 0) {
+        return classroomIds.includes(classroom.id);
+    }
+
+    if (exam.classroomId) {
+        return exam.classroomId === classroom.id;
+    }
+
+    if (sectionIds.includes(classroom.sectionId)) {
+        return true;
+    }
+
+    // Keep older published exams visible when they were linked only by subject
+    // and do not yet carry an explicit classroom/section association.
+    return (
+        exam.subjectId === classroom.subjectId &&
+        !exam.classroomId &&
+        sectionIds.length === 0 &&
+        !exam.section
+    );
 }
 
 export default function StudentClassroomDetailPage() {
@@ -21,18 +49,22 @@ export default function StudentClassroomDetailPage() {
     const { data: classrooms, isLoading: isClassroomsLoading } = useStudentClassroomsQuery();
     const classroom = classrooms?.find((c) => c.id === id);
 
-    const { data: exams, isLoading: isExamsLoading } = useExamsQuery({
-        classroomId: id,
+    const { data: exams, isLoading: isExamsLoading } = useExamsQuery({ classroomId: id }, {
+        staleTime: 0,
+        refetchOnMount: 'always',
+        refetchOnWindowFocus: true,
     });
 
-    const filteredExams =
-        exams
-            ?.map(normalizeStudentExam)
-            .filter(
-                (exam) =>
-                    isActiveClassroomAssessmentStatus(exam.status) &&
-                    exam.title.toLowerCase().includes(search.toLowerCase()),
-            ) ?? [];
+    const filteredExams = classroom
+        ? (exams
+              ?.map(normalizeStudentExam)
+              .filter(
+                  (exam) =>
+                      matchesStudentClassroomExam(classroom, exam) &&
+                      isActiveClassroomAssessmentStatus(exam.status) &&
+                      exam.title.toLowerCase().includes(search.toLowerCase()),
+              ) ?? [])
+        : [];
 
     if (isClassroomsLoading || !classroom) {
         if (!isClassroomsLoading && !classroom) {

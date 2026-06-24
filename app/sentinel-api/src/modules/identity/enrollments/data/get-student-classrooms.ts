@@ -1,6 +1,10 @@
 import { type DbClient } from '@sentinel/db';
 import { sql } from 'kysely';
 
+/**
+ * Returns the active classrooms a student is enrolled in for the student
+ * classroom experience. Archived classrooms are excluded at the query level.
+ */
 export const getStudentClassroomsData = async ({
     dbClient,
     userId,
@@ -37,6 +41,7 @@ export const getStudentClassroomsData = async ({
             'enr.enrolled_at as enrolledAt',
         ])
         .where('st.user_id', '=', userId)
+        .where('cg.archived_at', 'is', null)
         .orderBy('t.start_date', 'desc')
         .orderBy('s.subject_code', 'asc')
         .execute();

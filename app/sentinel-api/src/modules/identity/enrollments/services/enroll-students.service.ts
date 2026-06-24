@@ -12,6 +12,7 @@ export type EnrollStudentsServiceArgs = {
     dbClient: DbClient;
     institutionId: string;
     userId: string;
+    userRole?: string;
     payload: EnrollStudentsBody;
 };
 
@@ -28,9 +29,16 @@ export async function enrollStudentsService({
     dbClient,
     institutionId,
     userId,
+    userRole,
     payload,
 }: EnrollStudentsServiceArgs) {
-    const result = await enrollStudentsData({ dbClient, institutionId, userId, payload });
+    const result = await enrollStudentsData({
+        dbClient,
+        institutionId,
+        userId,
+        userRole,
+        payload,
+    });
 
     try {
         await LogsService.createLog(dbClient, {
@@ -59,6 +67,7 @@ export type PreviewStudentEnrollmentServiceArgs = {
     dbClient: DbClient;
     institutionId: string;
     userId: string;
+    userRole?: string;
     studentNumbers: string[];
     classGroupId?: string;
 };
@@ -77,6 +86,7 @@ export async function previewStudentEnrollmentService({
     dbClient,
     institutionId,
     userId,
+    userRole,
     studentNumbers,
     classGroupId,
 }: PreviewStudentEnrollmentServiceArgs) {
@@ -84,6 +94,7 @@ export async function previewStudentEnrollmentService({
         dbClient,
         institutionId,
         userId,
+        userRole,
         studentNumbers,
         classGroupId,
     });

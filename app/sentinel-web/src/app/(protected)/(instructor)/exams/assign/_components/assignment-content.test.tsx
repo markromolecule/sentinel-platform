@@ -2,11 +2,12 @@ import { render } from '@testing-library/react';
 import type { ReactNode } from 'react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { InstructorAssignmentContent } from './assignment-content';
-import { useExamSectionAssignmentsQuery, useExamsQuery } from '@sentinel/hooks';
+import { useExamSectionAssignmentsQuery, useExamsQuery, useProfileQuery } from '@sentinel/hooks';
 
 vi.mock('@sentinel/hooks', () => ({
     useExamsQuery: vi.fn(),
     useExamSectionAssignmentsQuery: vi.fn(),
+    useProfileQuery: vi.fn(),
 }));
 
 vi.mock('next/navigation', () => ({
@@ -55,15 +56,23 @@ describe('InstructorAssignmentContent', () => {
             data: [],
             isLoading: false,
         } as any);
+        vi.mocked(useProfileQuery).mockReturnValue({
+            profile: {
+                institutionId: 'institution-1',
+            },
+            isLoading: false,
+        } as any);
         vi.mocked(useExamSectionAssignmentsQuery).mockReturnValue({
             data: [],
             isLoading: false,
         } as any);
     });
 
-    it('loads all manageable exams instead of filtering the selector to drafts only', () => {
+    it('loads manageable exams within the active institution so the selected exam subject can scope classroom assignment', () => {
         render(<InstructorAssignmentContent />);
 
-        expect(useExamsQuery).toHaveBeenCalledWith();
+        expect(useExamsQuery).toHaveBeenCalledWith({
+            institutionId: 'institution-1',
+        });
     });
 });

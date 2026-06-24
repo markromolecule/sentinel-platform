@@ -350,11 +350,13 @@ export class ClassroomService {
             studentId,
             userId,
             institutionId,
+            userRole,
         }: {
             classGroupId: string;
             studentId: string;
             userId: string;
             institutionId: string;
+            userRole?: string;
         },
     ) {
         await unenrollClassroomStudent(dbClient, {
@@ -362,6 +364,7 @@ export class ClassroomService {
             studentId,
             userId,
             institutionId,
+            userRole,
         });
 
         // Telemetry logging

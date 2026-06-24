@@ -2,6 +2,7 @@ import { createRoute } from '@hono/zod-openapi';
 import { type AppRouteHandler } from '../../../../types/hono';
 import { HTTPException } from 'hono/http-exception';
 import { assertAssessmentAccess } from '../../assessment/assessment-access';
+import { requireActivePermission } from '../../../../lib/permissions';
 import { createExamSectionAssignmentsBatchSchema } from '../section-assignments.dto';
 import { SectionAssignmentsService } from '../section-assignments.service';
 
@@ -36,6 +37,7 @@ export const createExamSectionAssignmentsBatchRouteHandler: AppRouteHandler<
     typeof createExamSectionAssignmentsBatchRoute
 > = async (c) => {
     assertAssessmentAccess(c);
+    requireActivePermission(c, 'examinations:assign');
     const { examId } = c.req.valid('param');
     const { assignments } = c.req.valid('json');
 

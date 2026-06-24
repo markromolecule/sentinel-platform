@@ -136,15 +136,32 @@ export function NewAssignmentsBuilder({
     };
 
     const assignedSectionIds = new Set(
-        currentAssignments.map((assignment) => assignment.sectionId),
+        currentAssignments
+            .filter((assignment) => !assignment.classGroupId)
+            .map((assignment) => assignment.sectionId),
+    );
+    const assignedClassroomIds = new Set(
+        currentAssignments
+            .map((assignment) => assignment.classGroupId)
+            .filter((id): id is string => Boolean(id)),
     );
     const selectedSectionIdsInRows = rows.map((row) => row.sectionId).filter((id) => id !== 'none');
+    const selectedClassroomIdsInRows = rows
+        .map((row) => row.classroomId)
+        .filter((id) => id !== 'none');
 
-    const hasDuplicatesInRows =
+    const hasDuplicateClassroomsInRows =
+        selectedClassroomIdsInRows.length !== new Set(selectedClassroomIdsInRows).size;
+    const hasDuplicateLegacySectionsInRows =
         selectedSectionIdsInRows.length !== new Set(selectedSectionIdsInRows).size;
-    const hasConflictsWithExisting = selectedSectionIdsInRows.some((id) =>
-        assignedSectionIds.has(id),
-    );
+    const hasDuplicatesInRows = hasDuplicateClassroomsInRows || hasDuplicateLegacySectionsInRows;
+    const hasConflictsWithExisting = rows.some((row) => {
+        if (row.classroomId !== 'none' && assignedClassroomIds.has(row.classroomId)) {
+            return true;
+        }
+
+        return row.sectionId !== 'none' && assignedSectionIds.has(row.sectionId);
+    });
 
     const isPending = createMutation.isPending;
     const isValid =
@@ -161,6 +178,7 @@ export function NewAssignmentsBuilder({
             assignments: rows.map((row) => {
                 const item: CreateExamSectionAssignmentPayload = {
                     sectionId: row.sectionId,
+                    classGroupId: row.classroomId,
                 };
 
                 if (row.roomId !== 'none') {

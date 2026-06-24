@@ -1,6 +1,7 @@
 import { createRoute } from '@hono/zod-openapi';
 import { type AppRouteHandler } from '../../../../types/hono';
 import { assertAssessmentAccess } from '../../assessment/assessment-access';
+import { requireActivePermission } from '../../../../lib/permissions';
 import { deleteExamSectionAssignmentSchema } from '../section-assignments.dto';
 import { SectionAssignmentsService } from '../section-assignments.service';
 
@@ -28,6 +29,7 @@ export const deleteExamSectionAssignmentRouteHandler: AppRouteHandler<
     typeof deleteExamSectionAssignmentRoute
 > = async (c) => {
     assertAssessmentAccess(c);
+    requireActivePermission(c, 'examinations:assign');
     const { examId, id } = c.req.valid('param');
 
     const deletedId = await SectionAssignmentsService.deleteExamSectionAssignment({

@@ -222,7 +222,9 @@ export type Exam = {
     share?: ExamShareSettings;
     assignment?: ExamAssignment;
     classroomId?: string;
+    classroomIds?: string[];
     classroomName?: string;
+    classroomNames?: string[];
     subject: string;
     subjectId?: string;
     section?: string;

@@ -178,6 +178,31 @@ describe('mapExamDetailResponse', () => {
         expect(detail.assignedInstructorNames).toEqual(['Juan dela Cruz', 'Maria Santos']);
     });
 
+    it('maps assign-first classroom relationships into singular and plural classroom fields', () => {
+        const detail = mapExamDetailResponse({
+            exam: {
+                ...createRawExamRecord(),
+                assigned_class_group_ids: ['classroom-1'],
+                assigned_class_group_names: ['GEETH01X INF232'],
+            },
+            settings: {
+                shuffleQuestions: false,
+                showCorrectAnswers: false,
+                allowReview: true,
+                randomizeChoices: false,
+            },
+            configuration: createExamConfiguration(),
+            mediaPipeSandbox: DEFAULT_TELEMETRY_SETTINGS.mediaPipeSandbox,
+            questionSections: [],
+            questions: [],
+        });
+
+        expect(detail.classroomId).toBe('classroom-1');
+        expect(detail.classroomIds).toEqual(['classroom-1']);
+        expect(detail.classroomName).toBe('GEETH01X INF232');
+        expect(detail.classroomNames).toEqual(['GEETH01X INF232']);
+    });
+
     it('maps isPublic, createdByName, and publishedByName correctly', () => {
         const detail = mapExamDetailResponse({
             exam: {
