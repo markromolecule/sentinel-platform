@@ -82,14 +82,24 @@ export function CreateClassroomDialog({
                         .filter(Boolean)
                         .join(' • '),
                     sections: (offering.sections ?? [])
-                        .filter((section) => !configuredClassGroupIds.includes(section.id))
                         .map((section) => ({
-                            classGroupId: section.id,
+                            resolvedClassGroupId: section.classGroupId ?? section.id,
                             sectionName: section.name,
                             yearLevelLabel: formatYearLevel(section.yearLevel),
                             compactLabel: [section.name, formatYearLevel(section.yearLevel)]
                                 .filter(Boolean)
                                 .join(' • '),
+                        }))
+                        .filter(
+                            (section) =>
+                                section.resolvedClassGroupId &&
+                                !configuredClassGroupIds.includes(section.resolvedClassGroupId),
+                        )
+                        .map((section) => ({
+                            classGroupId: section.resolvedClassGroupId,
+                            sectionName: section.sectionName,
+                            yearLevelLabel: section.yearLevelLabel,
+                            compactLabel: section.compactLabel,
                         })),
                 }))
                 .filter((subject) => subject.sections.length > 0),

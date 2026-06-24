@@ -10,6 +10,9 @@ type ClassroomRosterSectionProps = {
     searchTerm: string;
     onSearchChange: (value: string) => void;
     isLoading?: boolean;
+    rowSelection?: Record<string, boolean>;
+    onRowSelectionChange?: (selection: Record<string, boolean>) => void;
+    toolbarActions?: React.ReactNode;
 };
 
 export function ClassroomRosterSection({
@@ -18,6 +21,9 @@ export function ClassroomRosterSection({
     searchTerm,
     onSearchChange,
     isLoading = false,
+    rowSelection,
+    onRowSelectionChange,
+    toolbarActions,
 }: ClassroomRosterSectionProps) {
     return (
         <section>
@@ -28,6 +34,9 @@ export function ClassroomRosterSection({
                 onSearchChange={onSearchChange}
                 searchPlaceholder="Search roster..."
                 isLoading={isLoading}
+                rowSelection={rowSelection}
+                onRowSelectionChange={onRowSelectionChange}
+                toolbarActions={toolbarActions}
                 emptyContent={
                     <div className="flex flex-col items-center justify-center gap-3 py-12 text-center">
                         <div className="text-muted-foreground text-sm">

@@ -1,4 +1,4 @@
-import { resolveExamStatus } from '@sentinel/shared';
+import { resolveExamStatus, resolveStudentExamStatus } from '@sentinel/shared';
 import type {
     ExamRuntimeAccess,
     Flag,
@@ -178,18 +178,28 @@ export function mapExamReportStudent(
  * Maps exam API responses into the shared proctor exam model used by the web app.
  */
 export function mapExam(apiExam: ApiExamSummary | ApiExamDetail): ProctorExam {
+    const status = apiExam.completedAt
+        ? resolveStudentExamStatus({
+              status: apiExam.status,
+              scheduledDate: apiExam.scheduledDate,
+              endDateTime: apiExam.endDateTime,
+              durationMinutes: apiExam.durationMinutes,
+              attemptCompletedAt: apiExam.completedAt,
+          })
+        : resolveExamStatus({
+              status: apiExam.status,
+              scheduledDate: apiExam.scheduledDate,
+              endDateTime: apiExam.endDateTime,
+              durationMinutes: apiExam.durationMinutes,
+          });
+
     return {
         id: apiExam.id,
         title: apiExam.title,
         description: apiExam.description ?? '',
         duration: apiExam.durationMinutes,
         passingScore: apiExam.passingScore,
-        status: resolveExamStatus({
-            status: apiExam.status,
-            scheduledDate: apiExam.scheduledDate,
-            endDateTime: apiExam.endDateTime,
-            durationMinutes: apiExam.durationMinutes,
-        }),
+        status,
         settings: 'settings' in apiExam ? apiExam.settings : undefined,
         configuration: 'configuration' in apiExam ? apiExam.configuration : undefined,
         questions:

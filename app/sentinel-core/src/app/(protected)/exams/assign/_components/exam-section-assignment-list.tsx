@@ -100,11 +100,15 @@ export function ExamSectionAssignmentList({
     const resolvedAssignments = React.useMemo(() => {
         return assignments.map((assignment) => {
             const classroom = (classrooms as ClassroomSummary[]).find(
-                (c) => c.sectionId === assignment.sectionId,
+                (entry) =>
+                    (assignment.classGroupId && entry.id === assignment.classGroupId) ||
+                    (!assignment.classGroupId && entry.sectionId === assignment.sectionId),
             );
+
             return {
                 ...assignment,
-                resolvedName: classroom?.className || assignment.sectionName,
+                resolvedName:
+                    classroom?.className || assignment.sectionName || 'Unassigned classroom',
             };
         });
     }, [assignments, classrooms]);

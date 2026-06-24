@@ -9,6 +9,7 @@ import { createExamSectionAssignment } from './data/create-exam-section-assignme
 import { createExamSectionAssignmentsBatch } from './data/create-exam-section-assignments-batch';
 import { updateExamSectionAssignment } from './data/update-exam-section-assignment';
 import { deleteExamSectionAssignment } from './data/delete-exam-section-assignment';
+import { syncExamAssignmentSummary } from './data/sync-exam-assignment-summary';
 
 export class SectionAssignmentsService {
     static async getExamSectionAssignments(args: { dbClient: DbClient; examId: string }) {
@@ -20,7 +21,7 @@ export class SectionAssignmentsService {
         examId: string;
         body: CreateExamSectionAssignmentBody;
     }) {
-        return await createExamSectionAssignment({
+        const assignment = await createExamSectionAssignment({
             dbClient: args.dbClient,
             examId: args.examId,
             sectionId: args.body.sectionId,
@@ -29,6 +30,13 @@ export class SectionAssignmentsService {
             instructorId: args.body.instructorId,
             scheduledAt: args.body.scheduledAt,
         });
+
+        await syncExamAssignmentSummary({
+            dbClient: args.dbClient,
+            examId: args.examId,
+        });
+
+        return assignment;
     }
 
     static async createExamSectionAssignmentsBatch(args: {
@@ -36,11 +44,18 @@ export class SectionAssignmentsService {
         examId: string;
         body: CreateExamSectionAssignmentBatchBody;
     }) {
-        return await createExamSectionAssignmentsBatch({
+        const assignments = await createExamSectionAssignmentsBatch({
             dbClient: args.dbClient,
             examId: args.examId,
             assignments: args.body.assignments,
         });
+
+        await syncExamAssignmentSummary({
+            dbClient: args.dbClient,
+            examId: args.examId,
+        });
+
+        return assignments;
     }
 
     static async updateExamSectionAssignment(args: {
@@ -49,7 +64,7 @@ export class SectionAssignmentsService {
         examId: string;
         body: UpdateExamSectionAssignmentBody;
     }) {
-        return await updateExamSectionAssignment({
+        const assignment = await updateExamSectionAssignment({
             dbClient: args.dbClient,
             id: args.id,
             examId: args.examId,
@@ -57,6 +72,13 @@ export class SectionAssignmentsService {
             instructorId: args.body.instructorId,
             scheduledAt: args.body.scheduledAt,
         });
+
+        await syncExamAssignmentSummary({
+            dbClient: args.dbClient,
+            examId: args.examId,
+        });
+
+        return assignment;
     }
 
     static async deleteExamSectionAssignment(args: {
@@ -64,6 +86,13 @@ export class SectionAssignmentsService {
         id: string;
         examId: string;
     }) {
-        return await deleteExamSectionAssignment(args);
+        const deletedId = await deleteExamSectionAssignment(args);
+
+        await syncExamAssignmentSummary({
+            dbClient: args.dbClient,
+            examId: args.examId,
+        });
+
+        return deletedId;
     }
 }

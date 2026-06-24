@@ -1,4 +1,5 @@
 import { createRoute } from '@hono/zod-openapi';
+import { requireActivePermission } from '../../../../lib/permissions';
 import { respondWithRouteError } from '../../../../lib/route-error-response';
 import { type AppRouteHandler } from '../../../../types/hono';
 import { previewStudentEnrollmentSchema } from '../enrollments.dto';
@@ -39,27 +40,26 @@ export const previewStudentEnrollmentRouteHandler: AppRouteHandler<
     typeof previewStudentEnrollmentRoute
 > = async (c) => {
     try {
-        const supabaseUser = c.get('supabaseUser') as any;
-        const role = supabaseUser?.user_metadata?.role;
         const institutionId = c.get('institutionId');
         const user = c.get('user');
+        const userRole = c.get('role');
 
         if (!institutionId) {
             return c.json({ error: 'Unauthorized. Institution ID not found.' }, 401 as any);
         }
 
-        if (role !== 'instructor') {
-            return c.json(
-                { error: 'Forbidden. Only instructors can preview student enrollment.' },
-                403 as any,
-            );
-        }
+        requireActivePermission(
+            c,
+            'classrooms:preview_student_enrollment',
+            'Forbidden. Missing classrooms:preview_student_enrollment permission.',
+        );
 
         const payload = c.req.valid('json');
         const results = await EnrollmentService.previewStudentEnrollment(
             c.get('dbClient'),
             institutionId,
             user.id,
+            userRole,
             payload.studentNumbers,
             payload.classGroupId,
         );

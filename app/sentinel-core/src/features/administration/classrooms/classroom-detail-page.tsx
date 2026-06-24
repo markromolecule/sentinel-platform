@@ -3,16 +3,31 @@
 import Link from 'next/link';
 import { useState } from 'react';
 import { useParams } from 'next/navigation';
-import { useClassroomQuery, useStableValue, isPermissionDeniedError } from '@sentinel/hooks';
 import {
+    useActivePermissions,
+    useBulkDeleteClassroomStudentsMutation,
+    useClassroomQuery,
+    useStableValue,
+    isPermissionDeniedError,
+} from '@sentinel/hooks';
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
     Button,
+    Checkbox,
     DataTableColumnHeader,
     PageHeader,
     Separator,
     PermissionDeniedState,
 } from '@sentinel/ui';
 import { type ColumnDef } from '@tanstack/react-table';
-import { ArrowLeft, Users, UserPlus } from 'lucide-react';
+import { ArrowLeft, Trash2, Users, UserPlus } from 'lucide-react';
 import { type ClassroomStudent } from '@sentinel/shared/types';
 import { ClassroomInstructorsDialog } from './_components/classroom-instructors-dialog';
 import { ClassroomRosterSection } from './_components/classroom-roster-section';
@@ -22,6 +37,32 @@ import { PermissionGate } from '@/features/administration/shared/permission-gate
 
 function buildStudentColumns(classroomId: string): ColumnDef<ClassroomStudent>[] {
     return [
+        {
+            id: 'select',
+            header: ({ table }) => (
+                <Checkbox
+                    checked={
+                        table.getIsAllPageRowsSelected() ||
+                        (table.getIsSomePageRowsSelected() && 'indeterminate')
+                    }
+                    onCheckedChange={(status) => table.toggleAllPageRowsSelected(!!status)}
+                    aria-label="Select all students"
+                    className="translate-y-[2px]"
+                />
+            ),
+            cell: ({ row }) => (
+                <div onClick={(event) => event.stopPropagation()}>
+                    <Checkbox
+                        checked={row.getIsSelected()}
+                        onCheckedChange={(status) => row.toggleSelected(!!status)}
+                        aria-label={`Select ${row.original.fullName || row.original.studentNumber}`}
+                        className="translate-y-[2px]"
+                    />
+                </div>
+            ),
+            enableSorting: false,
+            enableHiding: false,
+        },
         {
             accessorKey: 'studentNumber',
             header: ({ column }) => <DataTableColumnHeader column={column} title="Student No." />,
@@ -70,7 +111,16 @@ export function ClassroomDetailPage() {
     const [searchTerm, setSearchTerm] = useState('');
     const [isEnrollmentOpen, setIsEnrollmentOpen] = useState(false);
     const [isInstructorsOpen, setIsInstructorsOpen] = useState(false);
+    const [rowSelection, setRowSelection] = useState<Record<string, boolean>>({});
+    const [isBulkUnenrollOpen, setIsBulkUnenrollOpen] = useState(false);
     const { data: classroom, isLoading, error } = useClassroomQuery(classroomId);
+    const { hasPermission } = useActivePermissions();
+    const bulkDeleteStudentsMutation = useBulkDeleteClassroomStudentsMutation({
+        onSuccess: () => {
+            setRowSelection({});
+            setIsBulkUnenrollOpen(false);
+        },
+    });
 
     const isClassroomViewDenied = isPermissionDeniedError(error, 'classrooms:view');
 
@@ -97,6 +147,38 @@ export function ClassroomDetailPage() {
         () => buildStudentColumns(classroomId ?? ''),
         [classroomId],
     );
+
+    const selectedIndexes = Object.keys(rowSelection).filter((key) => rowSelection[key]);
+    const selectedStudents = selectedIndexes
+        .map((index) => filteredStudents[Number(index)])
+        .filter(Boolean);
+    const canUnenrollStudents = hasPermission('classrooms:unenroll_students');
+    const toolbarActions =
+        canUnenrollStudents && selectedStudents.length > 0 ? (
+            <Button
+                variant="destructive"
+                size="sm"
+                onClick={() => setIsBulkUnenrollOpen(true)}
+                disabled={bulkDeleteStudentsMutation.isPending}
+                className="h-8"
+            >
+                <Trash2 className="mr-2 h-4 w-4" />
+                Unenroll Selected ({selectedStudents.length})
+            </Button>
+        ) : undefined;
+
+    const handleBulkUnenroll = () => {
+        if (!classroomId || selectedStudents.length === 0) {
+            return;
+        }
+
+        bulkDeleteStudentsMutation.mutate(
+            selectedStudents.map((student) => ({
+                classroomId,
+                studentId: student.studentId,
+            })),
+        );
+    };
 
     if (!classroomId) {
         return (
@@ -172,6 +254,9 @@ export function ClassroomDetailPage() {
                 searchTerm={searchTerm}
                 onSearchChange={setSearchTerm}
                 isLoading={isLoading}
+                rowSelection={rowSelection}
+                onRowSelectionChange={setRowSelection}
+                toolbarActions={toolbarActions}
             />
 
             {classroom ? (
@@ -191,6 +276,32 @@ export function ClassroomDetailPage() {
                     />
                 </>
             ) : null}
+
+            <AlertDialog open={isBulkUnenrollOpen} onOpenChange={setIsBulkUnenrollOpen}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>Unenroll selected students?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            This will remove {selectedStudents.length} selected student
+                            {selectedStudents.length === 1 ? '' : 's'} from the classroom roster.
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel disabled={bulkDeleteStudentsMutation.isPending}>
+                            Cancel
+                        </AlertDialogCancel>
+                        <AlertDialogAction
+                            onClick={handleBulkUnenroll}
+                            disabled={bulkDeleteStudentsMutation.isPending}
+                            className="bg-red-600 text-white hover:bg-red-700"
+                        >
+                            {bulkDeleteStudentsMutation.isPending
+                                ? 'Removing...'
+                                : 'Unenroll Selected'}
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
         </div>
     );
 }

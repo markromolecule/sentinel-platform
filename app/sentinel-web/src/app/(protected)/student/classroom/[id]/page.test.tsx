@@ -108,6 +108,29 @@ describe('StudentClassroomDetailPage', () => {
         ).toBeTruthy();
     });
 
+    it('shows classroom not found and hides exams when the active classroom list no longer includes the requested classroom', () => {
+        vi.mocked(useStudentClassroomsQuery).mockReturnValue({
+            data: [],
+            isLoading: false,
+        } as any);
+        vi.mocked(useExamsQuery).mockReturnValue({
+            data: [
+                {
+                    id: 'exam-from-archived-classroom',
+                    title: 'Archived Classroom Exam',
+                    status: 'available',
+                    classroomId: 'classroom-1',
+                },
+            ],
+            isLoading: false,
+        } as any);
+
+        render(<StudentClassroomDetailPage />);
+
+        expect(screen.getByText('Classroom not found')).toBeTruthy();
+        expect(screen.queryByText('Archived Classroom Exam')).toBeNull();
+    });
+
     it('keeps published classroom assessments visible after student status normalization', () => {
         vi.mocked(useStudentClassroomsQuery).mockReturnValue({
             data: [
@@ -174,7 +197,7 @@ describe('StudentClassroomDetailPage', () => {
         render(<StudentClassroomDetailPage />);
 
         expect(useExamsQuery).toHaveBeenCalledWith(
-            undefined,
+            { classroomId: 'classroom-1' },
             expect.objectContaining({
                 staleTime: 0,
                 refetchOnMount: 'always',
@@ -220,6 +243,53 @@ describe('StudentClassroomDetailPage', () => {
         render(<StudentClassroomDetailPage />);
 
         expect(screen.getByText('Section Assigned Exam')).toBeTruthy();
+        expect(screen.getAllByText('upcoming').length).toBeGreaterThan(0);
+    });
+
+    it('requests classroom-scoped exams and keeps assign-first published exams visible after normalization', () => {
+        vi.mocked(useStudentClassroomsQuery).mockReturnValue({
+            data: [
+                {
+                    id: 'classroom-1',
+                    subjectId: 'subject-1',
+                    subjectCode: 'GEETH01X',
+                    sectionName: 'INF232',
+                    sectionId: 'section-1',
+                    subjectTitle: 'ETHICS',
+                    instructors: ['Keanna Mae Cloma'],
+                    term: 'AY 2025-2026 1st Semester',
+                },
+            ],
+            isLoading: false,
+        } as any);
+        vi.mocked(useExamsQuery).mockReturnValue({
+            data: [
+                {
+                    id: 'exam-assigned-published',
+                    title: 'Assigned Published Exam',
+                    status: 'published',
+                    classroomId: null,
+                    classroomIds: ['classroom-1'],
+                    sectionIds: [],
+                    scheduledDate: '2099-06-24T09:00:00Z',
+                    endDateTime: '2099-06-24T11:00:00Z',
+                    duration: 60,
+                },
+            ],
+            isLoading: false,
+        } as any);
+
+        render(<StudentClassroomDetailPage />);
+
+        expect(useExamsQuery).toHaveBeenCalledWith(
+            { classroomId: 'classroom-1' },
+            expect.objectContaining({
+                staleTime: 0,
+                refetchOnMount: 'always',
+                refetchOnWindowFocus: true,
+            }),
+        );
+        expect(screen.getByText('Assigned Published Exam')).toBeTruthy();
         expect(screen.getAllByText('upcoming').length).toBeGreaterThan(0);
     });
 

@@ -105,6 +105,8 @@ export async function getSubjectOfferingByIdData({
                 (
                     SELECT jsonb_agg(DISTINCT jsonb_build_object(
                         'id', COALESCE(cg.class_group_id, s.section_id),
+                        'class_group_id', cg.class_group_id,
+                        'section_id', s.section_id,
                         'name', s.section_name,
                         'department_id', s.department_id,
                         'course_id', s.course_id,

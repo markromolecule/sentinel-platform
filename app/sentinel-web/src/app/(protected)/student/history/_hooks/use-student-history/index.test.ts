@@ -81,6 +81,17 @@ describe('useStudentHistory', () => {
                 duration: 30,
                 totalScore: 20,
             },
+            {
+                id: 'exam-6',
+                title: 'Completed Attempt Exam',
+                subject: 'Physics',
+                scheduledDate: '2026-06-20T08:00:00Z',
+                endDateTime: '2026-06-20T10:00:00Z',
+                status: 'available',
+                completedAt: '2026-06-20T09:30:00Z',
+                duration: 45,
+                totalScore: 50,
+            },
         ];
 
         vi.mocked(useExamsQuery).mockReturnValue({
@@ -112,6 +123,7 @@ describe('useStudentHistory', () => {
         expect(allItems.map((i) => i.id)).toContain('exam-3');
         expect(allItems.map((i) => i.id)).not.toContain('exam-4');
         expect(allItems.map((i) => i.id)).not.toContain('exam-5');
+        expect(allItems.map((i) => i.id)).not.toContain('exam-6');
     });
 
     it('keeps exams visible in the available feed when they are assigned through classroom scope', () => {
@@ -156,6 +168,53 @@ describe('useStudentHistory', () => {
         expect(result.current.statusFilter).toBe('available');
         expect(allItems).toHaveLength(1);
         expect(allItems[0]?.id).toBe('exam-section-assigned');
+    });
+
+    it('keeps assigned published exams visible in the available feed after status normalization', () => {
+        vi.mocked(usePathname).mockReturnValue('/student/exam');
+        vi.mocked(useSearchParams).mockReturnValue({
+            get: () => null,
+        } as any);
+
+        vi.mocked(useExamsQuery).mockReturnValue({
+            data: [
+                {
+                    id: 'exam-assigned-published',
+                    title: 'Assigned Published Exam',
+                    subject: 'Physics',
+                    scheduledDate: '2099-06-24T09:00:00Z',
+                    endDateTime: '2099-06-24T11:00:00Z',
+                    status: 'published',
+                    duration: 60,
+                    totalScore: 100,
+                    classroomId: null,
+                    classroomIds: ['classroom-1'],
+                    sectionIds: [],
+                },
+            ],
+            isLoading: false,
+        } as any);
+        vi.mocked(useInfiniteExamHistoryQuery).mockReturnValue({
+            data: {
+                pages: [
+                    { items: [], pagination: { page: 1, limit: 10, total: 0, hasMore: false } },
+                ],
+            },
+            isLoading: false,
+            fetchNextPage: vi.fn(),
+            hasNextPage: false,
+            isFetchingNextPage: false,
+        } as any);
+
+        const { result } = renderHook(() => useStudentHistory());
+        const allItems = result.current.groupedHistory.flatMap((group) => group.items);
+
+        expect(result.current.statusFilter).toBe('available');
+        expect(allItems).toHaveLength(1);
+        expect(allItems[0]).toMatchObject({
+            id: 'exam-assigned-published',
+            status: 'upcoming',
+        });
     });
 
     it('normalizes raw published exams into the available feed for student surfaces', () => {

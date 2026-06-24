@@ -1,17 +1,19 @@
 import { type DbClient } from '@sentinel/db';
-import { assertInstructorClassroomAccess } from '../../../core/classroom/data/assert-instructor-classroom-access';
+import { getAccessibleClassroomOrThrow } from '../../../core/classroom/services/classroom-access-query.service';
 import { normalizeStudentNumbers } from './normalize-student-numbers';
 
 export async function previewStudentEnrollmentData({
     dbClient,
     institutionId,
     userId,
+    userRole,
     studentNumbers,
     classGroupId,
 }: {
     dbClient: DbClient;
     institutionId: string;
     userId: string;
+    userRole?: string;
     studentNumbers: string[];
     classGroupId?: string;
 }) {
@@ -35,11 +37,11 @@ export async function previewStudentEnrollmentData({
     const alreadyEnrolledUserIds = new Set<string>();
 
     if (classGroupId) {
-        await assertInstructorClassroomAccess({
-            dbClient,
+        await getAccessibleClassroomOrThrow(dbClient, {
             classGroupId,
             userId,
             institutionId,
+            userRole,
         });
     }
 

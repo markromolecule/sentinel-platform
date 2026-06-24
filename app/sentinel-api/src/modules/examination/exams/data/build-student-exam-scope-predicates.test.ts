@@ -193,4 +193,23 @@ describe('student exam scope predicates', () => {
 
         void db.destroy();
     });
+
+    it('excludes archived classroom enrollments from student exam visibility', () => {
+        const db = createCompilerDb();
+        const compiled = db
+            .selectFrom('exams as e')
+            .select('e.exam_id')
+            .where(
+                buildStudentExamVisibilityPredicate({
+                    studentUserId: '4bb7db25-f34f-4a57-b6ae-1db2f898f142',
+                    hasSectionId: true,
+                }),
+            )
+            .compile();
+
+        expect(compiled.sql).toContain('inner join class_groups as student_cg');
+        expect(compiled.sql).toContain('student_cg.archived_at is null');
+
+        void db.destroy();
+    });
 });

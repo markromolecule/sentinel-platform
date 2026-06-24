@@ -168,6 +168,56 @@ describe('getExamsData', () => {
         expect(compiledQuery.sql).toContain('"class_groups" as "cg_inner"');
     });
 
+    it('should compile classroom-scoped exam queries with exact classroom matching and legacy section fallback', async () => {
+        const { db, executeSpy } = createMockDb(
+            [
+                { column_name: 'section_id' },
+                { column_name: 'section_name' },
+                { column_name: 'room_id' },
+            ],
+            [],
+        );
+
+        await getExamsData({
+            dbClient: db as any,
+            institutionId: 'inst-123',
+            filters: { classroomId: 'classroom-123' },
+        });
+
+        const compiledQuery = executeSpy.mock.calls[1][0];
+
+        expect(compiledQuery.sql).toContain('where target_cg.class_group_id = $');
+        expect(compiledQuery.sql).toContain('esa.class_group_id = "target_cg"."class_group_id"');
+        expect(compiledQuery.sql).toContain('from exam_assigned_sections as eas');
+        expect(compiledQuery.sql).toContain('esa.class_group_id is null');
+    });
+
+    it('should keep student exam visibility tied to published exact-classroom or legacy section assignments', async () => {
+        const { db, executeSpy } = createMockDb(
+            [
+                { column_name: 'section_id' },
+                { column_name: 'section_name' },
+                { column_name: 'room_id' },
+            ],
+            [],
+        );
+
+        await getExamsData({
+            dbClient: db as any,
+            institutionId: 'inst-123',
+            filters: {},
+            studentUserId: 'student-123',
+        });
+
+        const compiledQuery = executeSpy.mock.calls[1][0];
+
+        expect(compiledQuery.sql).toContain('"e"."published_at" is not null');
+        expect(compiledQuery.sql).toContain('enr.class_group_id = e.class_group_id');
+        expect(compiledQuery.sql).toContain('esa.class_group_id = "student_cg"."class_group_id"');
+        expect(compiledQuery.sql).toContain('from exam_assigned_sections as eas');
+        expect(compiledQuery.sql).toContain('esa.class_group_id is null');
+    });
+
     it('should include creator/publisher joins, is_public selection, and instructorUserId filters in SQL', async () => {
         const { db, executeSpy } = createMockDb(
             [

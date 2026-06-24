@@ -1,27 +1,29 @@
 import { type DbClient } from '@sentinel/db';
 import { EnrollStudentsBody } from '../enrollments.dto';
-import { assertInstructorClassroomAccess } from '../../../core/classroom/data/assert-instructor-classroom-access';
+import { getAccessibleClassroomOrThrow } from '../../../core/classroom/services/classroom-access-query.service';
 import { normalizeStudentNumbers } from './normalize-student-numbers';
 
 export async function enrollStudentsData({
     dbClient,
     institutionId,
     userId,
+    userRole,
     payload,
 }: {
     dbClient: DbClient;
     institutionId: string;
     userId: string;
+    userRole?: string;
     payload: EnrollStudentsBody;
 }) {
     const classGroupId = payload.classGroupId;
     const studentNumbers = normalizeStudentNumbers(payload.studentNumbers);
 
-    await assertInstructorClassroomAccess({
-        dbClient,
+    await getAccessibleClassroomOrThrow(dbClient, {
         classGroupId,
         userId,
         institutionId,
+        userRole,
     });
 
     if (!studentNumbers.length) {

@@ -19,7 +19,11 @@ import {
     useProfileQuery,
 } from '@sentinel/hooks';
 import { type ClassroomSummary, type Room } from '@sentinel/shared/types';
-import { type User, type CreateExamSectionAssignmentPayload } from '@sentinel/services';
+import {
+    type User,
+    type CreateExamSectionAssignmentPayload,
+    type ExamSectionAssignmentRecord,
+} from '@sentinel/services';
 import { toast } from 'sonner';
 import { Loader2, Plus, Trash2, AlertCircle } from 'lucide-react';
 import { AnimatePresence, motion } from 'framer-motion';
@@ -28,14 +32,31 @@ import { type AssignmentRow } from './types';
 import { RowInstructorCombobox } from './row-instructor-combobox';
 import { RowClassroomCombobox } from './row-classroom-combobox';
 
+let assignmentRowSequence = 0;
+
+function createAssignmentRow(): AssignmentRow {
+    assignmentRowSequence += 1;
+
+    return {
+        localId: `assignment-row-${assignmentRowSequence}`,
+        classroomId: 'none',
+        sectionId: 'none',
+        roomId: 'none',
+        instructorId: 'none',
+    };
+}
+
 export interface NewAssignmentsBuilderProps {
     examId: string;
     subjectId?: string;
-    currentAssignments: any[];
+    currentAssignments: ExamSectionAssignmentRecord[];
     onSuccess?: () => void;
     onCancel?: () => void;
 }
 
+/**
+ * NewAssignmentsBuilder renders a multi-row assignment editor for section, room, and instructor.
+ */
 export function NewAssignmentsBuilder({
     examId,
     subjectId,
@@ -44,15 +65,7 @@ export function NewAssignmentsBuilder({
     onCancel,
 }: NewAssignmentsBuilderProps) {
     const { profile } = useProfileQuery();
-    const [rows, setRows] = React.useState<AssignmentRow[]>([
-        {
-            localId: Math.random().toString(),
-            classroomId: 'none',
-            sectionId: 'none',
-            roomId: 'none',
-            instructorId: 'none',
-        },
-    ]);
+    const [rows, setRows] = React.useState<AssignmentRow[]>(() => [createAssignmentRow()]);
 
     const { data: classrooms = [], isLoading: isClassroomsLoading } = useClassroomsQuery({
         institutionId: profile?.institutionId || undefined,
@@ -78,15 +91,7 @@ export function NewAssignmentsBuilder({
     const createMutation = useCreateExamSectionAssignmentsBatchMutation({
         onSuccess: () => {
             toast.success('Classroom assignments saved successfully');
-            setRows([
-                {
-                    localId: Math.random().toString(),
-                    classroomId: 'none',
-                    sectionId: 'none',
-                    roomId: 'none',
-                    instructorId: 'none',
-                },
-            ]);
+            setRows([createAssignmentRow()]);
             onSuccess?.();
         },
         onError: (err) => {
@@ -97,16 +102,7 @@ export function NewAssignmentsBuilder({
     const activeRooms = (rooms as Room[]).filter((room: Room) => room.status !== 'MAINTENANCE');
 
     const handleAddRow = () => {
-        setRows([
-            ...rows,
-            {
-                localId: Math.random().toString(),
-                classroomId: 'none',
-                sectionId: 'none',
-                roomId: 'none',
-                instructorId: 'none',
-            },
-        ]);
+        setRows([...rows, createAssignmentRow()]);
     };
 
     const handleRemoveRow = (localId: string) => {
@@ -145,23 +141,40 @@ export function NewAssignmentsBuilder({
         );
     };
 
-    const assignedSectionIds = new Set(currentAssignments.map((a) => a.sectionId));
-    const selectedSectionIdsInRows = rows.map((r) => r.sectionId).filter((id) => id !== 'none');
-
-    // Check if any section is selected more than once in the builder
-    const hasDuplicatesInRows =
-        selectedSectionIdsInRows.length !== new Set(selectedSectionIdsInRows).size;
-
-    // Check if any selected section is already assigned
-    const hasConflictsWithExisting = selectedSectionIdsInRows.some((id) =>
-        assignedSectionIds.has(id),
+    const assignedSectionIds = new Set(
+        currentAssignments
+            .filter((assignment) => !assignment.classGroupId)
+            .map((assignment) => assignment.sectionId),
     );
+    const assignedClassroomIds = new Set(
+        currentAssignments
+            .map((assignment) => assignment.classGroupId)
+            .filter((id): id is string => Boolean(id)),
+    );
+    const selectedSectionIdsInRows = rows.map((row) => row.sectionId).filter((id) => id !== 'none');
+    const selectedClassroomIdsInRows = rows
+        .map((row) => row.classroomId)
+        .filter((id) => id !== 'none');
+
+    const hasDuplicateClassroomsInRows =
+        selectedClassroomIdsInRows.length !== new Set(selectedClassroomIdsInRows).size;
+    const hasDuplicateLegacySectionsInRows =
+        selectedSectionIdsInRows.length !== new Set(selectedSectionIdsInRows).size;
+    const hasDuplicatesInRows = hasDuplicateClassroomsInRows || hasDuplicateLegacySectionsInRows;
+    const hasConflictsWithExisting = rows.some((row) => {
+        if (row.classroomId !== 'none' && assignedClassroomIds.has(row.classroomId)) {
+            return true;
+        }
+
+        return row.sectionId !== 'none' && assignedSectionIds.has(row.sectionId);
+    });
 
     const isPending = createMutation.isPending;
     const isValid =
         selectedSectionIdsInRows.length > 0 &&
         !hasDuplicatesInRows &&
         !hasConflictsWithExisting &&
+        filteredClassrooms.length > 0 &&
         rows.every((row) => row.classroomId !== 'none');
 
     const handleSubmit = async () => {
@@ -171,13 +184,17 @@ export function NewAssignmentsBuilder({
             assignments: rows.map((row) => {
                 const item: CreateExamSectionAssignmentPayload = {
                     sectionId: row.sectionId,
+                    classGroupId: row.classroomId,
                 };
+
                 if (row.roomId !== 'none') {
                     item.roomId = row.roomId;
                 }
+
                 if (row.instructorId !== 'none') {
                     item.instructorId = row.instructorId;
                 }
+
                 return item;
             }),
         };

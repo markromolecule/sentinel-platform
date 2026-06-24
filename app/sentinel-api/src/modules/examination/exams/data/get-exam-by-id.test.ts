@@ -56,4 +56,58 @@ describe('getExamByIdData', () => {
 
         void db.destroy();
     });
+
+    it('aggregates assigned classroom ids and names for exact classroom assignments', async () => {
+        const { db, executeSpy } = createMockDb(
+            [
+                { column_name: 'section_id' },
+                { column_name: 'section_name' },
+                { column_name: 'room_id' },
+            ],
+            [],
+        );
+
+        await getExamByIdData({
+            dbClient: db as any,
+            id: 'exam-1',
+            institutionId: 'institution-1',
+        });
+
+        const compiledQuery = executeSpy.mock.calls[1][0];
+
+        expect(compiledQuery.sql).toContain('"exam_section_assignments" as "esa_cg"');
+        expect(compiledQuery.sql).toContain('json_agg(distinct esa_cg.class_group_id)');
+        expect(compiledQuery.sql).toContain('"exam_section_assignments" as "esa_cg_names"');
+        expect(compiledQuery.sql).toContain('"class_groups" as "cg_inner"');
+
+        void db.destroy();
+    });
+
+    it('keeps published student exam detail visibility scoped to exact classroom assignments with legacy fallback', async () => {
+        const { db, executeSpy } = createMockDb(
+            [
+                { column_name: 'section_id' },
+                { column_name: 'section_name' },
+                { column_name: 'room_id' },
+            ],
+            [],
+        );
+
+        await getExamByIdData({
+            dbClient: db as any,
+            id: 'exam-1',
+            institutionId: 'institution-1',
+            studentUserId: 'student-1',
+        });
+
+        const compiledQuery = executeSpy.mock.calls[1][0];
+
+        expect(compiledQuery.sql).toContain('"e"."published_at" is not null');
+        expect(compiledQuery.sql).toContain('enr.class_group_id = e.class_group_id');
+        expect(compiledQuery.sql).toContain('esa.class_group_id = "student_cg"."class_group_id"');
+        expect(compiledQuery.sql).toContain('from "exam_assigned_sections"');
+        expect(compiledQuery.sql).toContain('esa.class_group_id is null');
+
+        void db.destroy();
+    });
 });

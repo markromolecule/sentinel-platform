@@ -1,4 +1,5 @@
 import { createRoute } from '@hono/zod-openapi';
+import { requireActivePermission } from '../../../../lib/permissions';
 import { respondWithRouteError } from '../../../../lib/route-error-response';
 import { type AppRouteHandler } from '../../../../types/hono';
 import { enrollStudentsSchema } from '../enrollments.dto';
@@ -39,21 +40,19 @@ export const enrollStudentsRouteHandler: AppRouteHandler<typeof enrollStudentsRo
     c,
 ) => {
     try {
-        const supabaseUser = c.get('supabaseUser') as any;
-        const role = supabaseUser?.user_metadata?.role;
         const institutionId = c.get('institutionId');
         const user = c.get('user');
+        const userRole = c.get('role');
 
         if (!institutionId) {
             return c.json({ error: 'Unauthorized. Institution ID not found.' }, 401 as any);
         }
 
-        if (role !== 'instructor') {
-            return c.json(
-                { error: 'Forbidden. Only instructors can enroll students.' },
-                403 as any,
-            );
-        }
+        requireActivePermission(
+            c,
+            'classrooms:enroll_students',
+            'Forbidden. Missing classrooms:enroll_students permission.',
+        );
 
         const payload = c.req.valid('json');
 
@@ -61,6 +60,7 @@ export const enrollStudentsRouteHandler: AppRouteHandler<typeof enrollStudentsRo
             c.get('dbClient'),
             institutionId,
             user.id,
+            userRole,
             payload,
         );
 

@@ -6,4 +6,5 @@ export * from './use-bulk-delete-classrooms-mutation';
 export * from './use-archive-classroom-mutation';
 export * from './use-unarchive-classroom-mutation';
 export * from './use-delete-classroom-student-mutation';
+export * from './use-bulk-delete-classroom-students-mutation';
 export * from './use-classroom-instructors-query';

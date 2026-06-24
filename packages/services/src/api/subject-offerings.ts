@@ -42,6 +42,8 @@ interface ApiSubjectOffering {
     }>;
     sections: Array<{
         id: string;
+        class_group_id?: string | null;
+        section_id?: string | null;
         name: string;
         department_id?: string | null;
         course_id?: string | null;
@@ -126,6 +128,8 @@ function mapCourses(courses: ApiSubjectOffering['courses']): SubjectOfferingCour
 function mapSections(sections: ApiSubjectOffering['sections']): SubjectOfferingSection[] {
     return (sections ?? []).map((section) => ({
         id: section.id,
+        classGroupId: section.class_group_id ?? null,
+        sectionId: section.section_id ?? null,
         name: section.name,
         departmentId: section.department_id ?? null,
         courseId: section.course_id ?? null,

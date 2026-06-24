@@ -21,6 +21,7 @@ describe('getExamSectionAssignments', () => {
                 examId: 'exam-1',
                 sectionId: 'section-1',
                 classGroupId: 'classroom-1',
+                classGroupName: 'Classroom Alpha',
                 sectionName: 'Section A',
                 roomId: null,
                 roomName: null,
@@ -42,6 +43,10 @@ describe('getExamSectionAssignments', () => {
         });
 
         expect(result).toEqual(rows);
+        expect(result[0]).toMatchObject({
+            classGroupId: 'classroom-1',
+            classGroupName: 'Classroom Alpha',
+        });
     });
 
     it('keeps legacy section-only assignments readable when classGroupId is null', async () => {
@@ -51,6 +56,7 @@ describe('getExamSectionAssignments', () => {
                 examId: 'exam-1',
                 sectionId: 'section-legacy',
                 classGroupId: null,
+                classGroupName: null,
                 sectionName: 'Legacy Section',
                 roomId: null,
                 roomName: null,
@@ -72,5 +78,9 @@ describe('getExamSectionAssignments', () => {
         });
 
         expect(result).toEqual(rows);
+        expect(result[0]).toMatchObject({
+            classGroupId: null,
+            classGroupName: null,
+        });
     });
 });

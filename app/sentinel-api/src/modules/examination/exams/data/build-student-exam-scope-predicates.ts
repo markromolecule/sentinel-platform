@@ -157,6 +157,7 @@ export function buildStudentExamVisibilityPredicate(args: {
         left join subject_offerings as student_so
             on student_so.subject_offering_id = student_cg.subject_offering_id
         where st.user_id = ${studentUserId}
+          and student_cg.archived_at is null
           and (
               (e.class_group_id is not null and enr.class_group_id = e.class_group_id)
               or ${buildClassroomAssignmentExistsPredicate({
