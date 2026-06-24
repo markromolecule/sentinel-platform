@@ -13,7 +13,7 @@ export async function syncSystemRolePermissions(dbClient: DbClient) {
         return;
     }
 
-    const [roles, permissions, existingRolePermissionRows] = await Promise.all([
+    const [roles, permissions] = await Promise.all([
         dbClient
             .selectFrom('roles')
             .select(['role_id', 'role_name'])
@@ -24,18 +24,7 @@ export async function syncSystemRolePermissions(dbClient: DbClient) {
             .select(['permission_id', 'permission_key'])
             .where('permission_key', 'in', permissionKeys)
             .execute(),
-        dbClient
-            .selectFrom('rbac_role_permissions')
-            .select(['role_id'])
-            .where('role_id', 'in', (eb) =>
-                eb.selectFrom('roles').select('role_id').where('role_name', 'in', roleNames)
-            )
-            .execute(),
     ]);
-
-    if (existingRolePermissionRows.length > 0) {
-        return;
-    }
 
     const roleIdByName = new Map(roles.map((role) => [role.role_name, role.role_id]));
     const permissionIdByKey = new Map(

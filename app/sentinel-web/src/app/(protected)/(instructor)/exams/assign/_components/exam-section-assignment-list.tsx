@@ -115,7 +115,9 @@ export function ExamSectionAssignmentList({
     const resolvedAssignments = React.useMemo(() => {
         return assignments.map((assignment) => {
             const classroom = (classrooms as ClassroomSummary[]).find(
-                (entry) => entry.sectionId === assignment.sectionId,
+                (entry) =>
+                    (assignment.classGroupId && entry.id === assignment.classGroupId) ||
+                    (!assignment.classGroupId && entry.sectionId === assignment.sectionId),
             );
 
             return {

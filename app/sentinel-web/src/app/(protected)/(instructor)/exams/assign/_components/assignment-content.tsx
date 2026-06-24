@@ -14,7 +14,7 @@ import {
     Separator,
     Spinner,
 } from '@sentinel/ui';
-import { useExamsQuery, useExamSectionAssignmentsQuery } from '@sentinel/hooks';
+import { useExamsQuery, useExamSectionAssignmentsQuery, useProfileQuery } from '@sentinel/hooks';
 import { type ProctorExam } from '@sentinel/shared/types';
 import { ExamsPageShell } from '../../_components/layout';
 import { AddExamSectionAssignmentDialog } from './add-exam-section-assignment-dialog';
@@ -29,8 +29,11 @@ export function InstructorAssignmentContent() {
     const searchParams = useSearchParams();
     const currentExamId = searchParams.get('examId') || '';
     const [isAssignDialogOpen, setIsAssignDialogOpen] = React.useState(false);
+    const { profile } = useProfileQuery();
 
-    const { data: exams = [], isLoading: isExamsLoading } = useExamsQuery();
+    const { data: exams = [], isLoading: isExamsLoading } = useExamsQuery({
+        institutionId: profile?.institutionId || undefined,
+    });
     const { data: assignments = [], isLoading: isAssignmentsLoading } =
         useExamSectionAssignmentsQuery(currentExamId);
 

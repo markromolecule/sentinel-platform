@@ -43,4 +43,22 @@ describe('useExamsQuery', () => {
             }),
         );
     });
+
+    it('allows callers to override freshness behavior for fast-moving student feeds', () => {
+        useExamsQuery(
+            { classroomId: 'classroom-1' },
+            {
+                staleTime: 0,
+                refetchOnMount: 'always',
+            },
+        );
+
+        expect(mockUseQuery).toHaveBeenCalledWith(
+            expect.objectContaining({
+                queryKey: ['exams', 'user-1', { classroomId: 'classroom-1' }],
+                staleTime: 0,
+                refetchOnMount: 'always',
+            }),
+        );
+    });
 });

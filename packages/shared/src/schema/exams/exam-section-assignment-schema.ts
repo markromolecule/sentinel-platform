@@ -6,6 +6,7 @@ export const examSectionAssignmentSchema = z.object({
     id: z.string().uuid(),
     examId: z.string().uuid(),
     sectionId: z.string().uuid(),
+    classGroupId: z.string().uuid().nullable().optional(),
     roomId: z.string().uuid().nullable().optional(),
     instructorId: z.string().uuid().nullable().optional(),
     scheduledAt: nullableDateTimeSchema.optional(),
@@ -15,6 +16,7 @@ export const examSectionAssignmentSchema = z.object({
 
 export const createExamSectionAssignmentBodySchema = z.object({
     sectionId: z.string().uuid(),
+    classGroupId: z.string().uuid().nullable().optional(),
     roomId: z.string().uuid().nullable().optional(),
     instructorId: z.string().uuid().nullable().optional(),
     scheduledAt: z.union([z.string(), z.date()]).nullable().optional(),

@@ -131,6 +131,7 @@ describe('useStudentHistory', () => {
                     status: 'available',
                     duration: 60,
                     totalScore: 100,
+                    classroomId: 'classroom-1',
                     sectionIds: ['section-1'],
                     sectionNames: ['Section 1'],
                 },

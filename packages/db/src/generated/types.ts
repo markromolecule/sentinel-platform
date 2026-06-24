@@ -582,6 +582,7 @@ export type exam_section_assignments = {
     id: Generated<string>;
     exam_id: string;
     section_id: string;
+    class_group_id: string | null;
     room_id: string | null;
     instructor_id: string | null;
     scheduled_at: Timestamp | null;

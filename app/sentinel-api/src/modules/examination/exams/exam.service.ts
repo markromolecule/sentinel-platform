@@ -52,6 +52,7 @@ export class ExamService {
         institutionId: string | undefined,
         userId: string,
         canBypassLock = false,
+        canManageExam = false,
         role?: string,
     ) {
         return await updateExamService(
@@ -61,6 +62,7 @@ export class ExamService {
             institutionId,
             userId,
             canBypassLock,
+            canManageExam,
             role,
         );
     }
@@ -83,8 +85,9 @@ export class ExamService {
         id: string,
         institutionId: string | undefined,
         userId: string,
+        canManageExam = false,
         role?: string,
     ) {
-        await deleteExamService(dbClient, id, institutionId, userId, role);
+        await deleteExamService(dbClient, id, institutionId, userId, canManageExam, role);
     }
 }

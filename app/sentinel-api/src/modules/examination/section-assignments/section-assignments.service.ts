@@ -24,6 +24,7 @@ export class SectionAssignmentsService {
             dbClient: args.dbClient,
             examId: args.examId,
             sectionId: args.body.sectionId,
+            classGroupId: args.body.classGroupId,
             roomId: args.body.roomId,
             instructorId: args.body.instructorId,
             scheduledAt: args.body.scheduledAt,

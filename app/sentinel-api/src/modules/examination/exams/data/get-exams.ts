@@ -125,6 +125,35 @@ export async function getExamsData({
                     .as('assigned_section_ids'),
             (eb) =>
                 eb
+                    .selectFrom('exam_section_assignments as esa_cg')
+                    .select(
+                        sql<string[]>`coalesce(
+                            json_agg(distinct esa_cg.class_group_id)
+                                filter (where esa_cg.class_group_id is not null),
+                            '[]'::json
+                        )`.as('class_group_ids'),
+                    )
+                    .whereRef('esa_cg.exam_id', '=', 'e.exam_id')
+                    .as('assigned_class_group_ids'),
+            (eb) =>
+                eb
+                    .selectFrom('exam_section_assignments as esa_cg_names')
+                    .innerJoin(
+                        'class_groups as cg_inner',
+                        'cg_inner.class_group_id',
+                        'esa_cg_names.class_group_id',
+                    )
+                    .select(
+                        sql<string[]>`coalesce(
+                            json_agg(distinct cg_inner.class_name)
+                                filter (where cg_inner.class_name is not null),
+                            '[]'::json
+                        )`.as('class_group_names'),
+                    )
+                    .whereRef('esa_cg_names.exam_id', '=', 'e.exam_id')
+                    .as('assigned_class_group_names'),
+            (eb) =>
+                eb
                     .selectFrom('exam_attempts as ea')
                     .select(sql<number>`count(distinct ea.student_id)::int`.as('count'))
                     .whereRef('ea.exam_id', '=', 'e.exam_id')

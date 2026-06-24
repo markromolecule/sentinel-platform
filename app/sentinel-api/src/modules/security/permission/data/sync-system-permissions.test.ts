@@ -19,6 +19,10 @@ describe('syncSystemPermissions', () => {
             'permissions:manage',
             'assessments:view',
             'assessments:manage',
+            'examinations:create',
+            'examinations:update',
+            'examinations:delete',
+            'examinations:assign',
             'ai:generate_questions',
         ];
 
@@ -42,6 +46,52 @@ describe('syncSystemPermissions', () => {
         expect(SYSTEM_ROLE_BLUEPRINTS.admin.permissionKeys).toContain('classrooms:archive');
         expect(SYSTEM_ROLE_BLUEPRINTS.instructor.permissionKeys).not.toContain(
             'classrooms:archive',
+        );
+    });
+
+    it('should define exam CRUD and assignment permissions for managed roles', () => {
+        const activeKeys = ALL_PERMISSIONS.map((p) => p.id);
+
+        expect(activeKeys).toEqual(
+            expect.arrayContaining([
+                'examinations:create',
+                'examinations:update',
+                'examinations:delete',
+                'examinations:assign',
+            ]),
+        );
+
+        expect(SYSTEM_ROLE_BLUEPRINTS.support.permissionKeys).toEqual(
+            expect.arrayContaining([
+                'examinations:create',
+                'examinations:update',
+                'examinations:delete',
+                'examinations:assign',
+            ]),
+        );
+        expect(SYSTEM_ROLE_BLUEPRINTS.superadmin.permissionKeys).toEqual(
+            expect.arrayContaining([
+                'examinations:create',
+                'examinations:update',
+                'examinations:delete',
+                'examinations:assign',
+            ]),
+        );
+        expect(SYSTEM_ROLE_BLUEPRINTS.admin.permissionKeys).toEqual(
+            expect.arrayContaining([
+                'examinations:create',
+                'examinations:update',
+                'examinations:delete',
+                'examinations:assign',
+            ]),
+        );
+        expect(SYSTEM_ROLE_BLUEPRINTS.instructor.permissionKeys).toEqual(
+            expect.arrayContaining([
+                'examinations:create',
+                'examinations:update',
+                'examinations:delete',
+                'examinations:assign',
+            ]),
         );
     });
 

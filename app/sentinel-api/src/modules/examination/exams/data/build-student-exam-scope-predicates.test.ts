@@ -32,8 +32,10 @@ describe('student exam scope predicates', () => {
             .compile();
 
         expect(compiled.sql).toContain('e.class_group_id = $1');
+        expect(compiled.sql).toContain('esa.class_group_id = "target_cg"."class_group_id"');
         expect(compiled.sql).toContain('from exam_assigned_sections as eas');
         expect(compiled.sql).toContain('from exam_section_assignments as esa');
+        expect(compiled.sql).toContain('esa.class_group_id is null');
         expect(compiled.sql).toContain('e.class_group_id is null');
         expect(compiled.sql).toContain('target_cg.class_group_id = $2');
         expect(compiled.sql).toContain('"target_cg"."section_id"');
@@ -55,8 +57,10 @@ describe('student exam scope predicates', () => {
             .compile();
 
         expect(compiled.sql).toContain('enr.class_group_id = e.class_group_id');
+        expect(compiled.sql).toContain('esa.class_group_id = "student_cg"."class_group_id"');
         expect(compiled.sql).toContain('from exam_assigned_sections as eas');
         expect(compiled.sql).toContain('from exam_section_assignments as esa');
+        expect(compiled.sql).toContain('esa.class_group_id is null');
         expect(compiled.sql).toContain('e.class_group_id is null');
         expect(compiled.sql).toContain('coalesce(student_cg.subject_id, student_so.subject_id)');
         expect(compiled.sql).toContain('"student_cg"."section_id"');
@@ -78,6 +82,7 @@ describe('student exam scope predicates', () => {
             .compile();
 
         expect(compiled.sql).toContain('from exam_section_assignments as esa');
+        expect(compiled.sql).toContain('esa.class_group_id = "target_cg"."class_group_id"');
         expect(compiled.sql).toContain('"target_cg"."section_id"');
         expect(compiled.sql).toContain(
             'exists (\n            select 1\n            from exam_assigned_sections as eas',
@@ -100,6 +105,7 @@ describe('student exam scope predicates', () => {
             .compile();
 
         expect(compiled.sql).toContain('from exam_section_assignments as esa');
+        expect(compiled.sql).toContain('esa.class_group_id is null');
         expect(compiled.sql).toContain('coalesce(student_cg.subject_id, student_so.subject_id)');
         expect(compiled.sql).toContain(
             'and (\n                      e.section_id is null or student_cg.section_id = e.section_id\n                  )',
@@ -162,6 +168,28 @@ describe('student exam scope predicates', () => {
         expect(compiled.sql).toContain('from exam_assigned_sections as eas');
         expect(compiled.sql).toContain('from exam_section_assignments as esa');
         expect(compiled.sql).toContain('enr.class_group_id = e.class_group_id');
+
+        void db.destroy();
+    });
+
+    it('prefers exact classroom assignments over same-section matches from other classrooms', () => {
+        const db = createCompilerDb();
+        const compiled = db
+            .selectFrom('exams as e')
+            .select('e.exam_id')
+            .where(
+                buildStudentExamVisibilityPredicate({
+                    studentUserId: '4bb7db25-f34f-4a57-b6ae-1db2f898f142',
+                    hasSectionId: true,
+                }),
+            )
+            .compile();
+
+        expect(compiled.sql).toContain('esa.class_group_id = "student_cg"."class_group_id"');
+        expect(compiled.sql).toContain('e.class_group_id is null');
+        expect(compiled.sql).not.toContain(
+            'where esa.exam_id = "e"."exam_id"\n              and esa.section_id = "student_cg"."section_id"',
+        );
 
         void db.destroy();
     });

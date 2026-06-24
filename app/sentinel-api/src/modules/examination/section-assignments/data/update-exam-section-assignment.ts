@@ -1,5 +1,9 @@
 import { type DbClient } from '@sentinel/db';
 
+/**
+ * Updates mutable assignment metadata without moving the assignment to a
+ * different classroom.
+ */
 export async function updateExamSectionAssignment(args: {
     dbClient: DbClient;
     id: string;
@@ -33,6 +37,7 @@ export async function updateExamSectionAssignment(args: {
             'id',
             'exam_id as examId',
             'section_id as sectionId',
+            'class_group_id as classGroupId',
             'room_id as roomId',
             'instructor_id as instructorId',
             'scheduled_at as scheduledAt',

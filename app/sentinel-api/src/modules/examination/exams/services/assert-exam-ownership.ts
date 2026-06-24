@@ -6,9 +6,10 @@ import { HTTPException } from 'hono/http-exception';
 export function assertExamOwnership(
     createdBy: string | null | undefined,
     requestingUserId: string,
+    canManageExam = false,
     role?: string | null,
 ) {
-    if (role === 'admin' || role === 'superadmin') {
+    if (canManageExam || role === 'admin' || role === 'superadmin') {
         return;
     }
 

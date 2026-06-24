@@ -8,12 +8,12 @@ describe('assertExamOwnership', () => {
     });
 
     it('blocks a non-owner instructor', () => {
-        expect(() => assertExamOwnership('user-1', 'user-2', 'instructor')).toThrowError(
+        expect(() => assertExamOwnership('user-1', 'user-2', false, 'instructor')).toThrowError(
             HTTPException,
         );
 
         try {
-            assertExamOwnership('user-1', 'user-2', 'instructor');
+            assertExamOwnership('user-1', 'user-2', false, 'instructor');
         } catch (error) {
             expect(error).toMatchObject({
                 status: 403,
@@ -23,11 +23,15 @@ describe('assertExamOwnership', () => {
     });
 
     it('allows admin bypass', () => {
-        expect(() => assertExamOwnership('user-1', 'user-2', 'admin')).not.toThrow();
+        expect(() => assertExamOwnership('user-1', 'user-2', false, 'admin')).not.toThrow();
     });
 
     it('allows superadmin bypass', () => {
-        expect(() => assertExamOwnership('user-1', 'user-2', 'superadmin')).not.toThrow();
+        expect(() => assertExamOwnership('user-1', 'user-2', false, 'superadmin')).not.toThrow();
+    });
+
+    it('allows dynamic RBAC bypass when the caller has exam management permission', () => {
+        expect(() => assertExamOwnership('user-1', 'user-2', true, 'instructor')).not.toThrow();
     });
 
     it('blocks missing creator values', () => {

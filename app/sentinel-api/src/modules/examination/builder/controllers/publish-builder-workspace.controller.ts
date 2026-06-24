@@ -1,6 +1,7 @@
 import { createRoute } from '@hono/zod-openapi';
 import { type AppRouteHandler } from '../../../../types/hono';
 import { assertAssessmentAccess } from '../../assessment/assessment-access';
+import { requireActivePermission } from '../../../../lib/permissions';
 import { publishBuilderWorkspaceSchema } from '../builder.dto';
 import { BuilderService } from '../builder.service';
 
@@ -32,6 +33,7 @@ export const publishBuilderWorkspaceRouteHandler: AppRouteHandler<
     const user = c.get('user');
 
     assertAssessmentAccess(c);
+    requireActivePermission(c, 'examinations:update');
 
     const workspace = await BuilderService.publishBuilderWorkspace(
         c.get('dbClient'),

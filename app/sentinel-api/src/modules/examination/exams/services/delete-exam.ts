@@ -14,6 +14,7 @@ export async function deleteExam(
     id: string,
     institutionId: string | undefined,
     userId: string,
+    canManageExam = false,
     role?: string,
 ) {
     const current = requireExamRecord(
@@ -23,7 +24,7 @@ export async function deleteExam(
             institutionId,
         }),
     );
-    assertExamOwnership(current.created_by, userId, role);
+    assertExamOwnership(current.created_by, userId, canManageExam, role);
 
     const deletedRecord = await deleteExamData({
         dbClient,

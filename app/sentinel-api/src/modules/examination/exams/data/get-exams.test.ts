@@ -145,6 +145,29 @@ describe('getExamsData', () => {
         expect(compiledQuery.sql).toContain('"user_profiles" as "up_inner"');
     });
 
+    it('should aggregate classroom ids from exam section assignments', async () => {
+        const { db, executeSpy } = createMockDb(
+            [
+                { column_name: 'section_id' },
+                { column_name: 'section_name' },
+                { column_name: 'room_id' },
+            ],
+            [],
+        );
+
+        await getExamsData({
+            dbClient: db as any,
+            institutionId: 'inst-123',
+            filters: {},
+        });
+
+        const compiledQuery = executeSpy.mock.calls[1][0];
+
+        expect(compiledQuery.sql).toContain('"exam_section_assignments" as "esa_cg"');
+        expect(compiledQuery.sql).toContain('json_agg(distinct esa_cg.class_group_id)');
+        expect(compiledQuery.sql).toContain('"class_groups" as "cg_inner"');
+    });
+
     it('should include creator/publisher joins, is_public selection, and instructorUserId filters in SQL', async () => {
         const { db, executeSpy } = createMockDb(
             [

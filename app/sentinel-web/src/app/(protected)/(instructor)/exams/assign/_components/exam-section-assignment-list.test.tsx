@@ -96,6 +96,7 @@ describe('ExamSectionAssignmentList', () => {
         {
             id: 'assignment-1',
             examId: 'exam-1',
+            classGroupId: 'cls-1',
             sectionId: 'section-1',
             sectionName: 'Section Alpha',
             roomId: 'room-1',
@@ -126,6 +127,37 @@ describe('ExamSectionAssignmentList', () => {
         expect(screen.getByText('Classroom Alpha')).toBeDefined();
         expect(screen.getByText('Room 101')).toBeDefined();
         expect(screen.getByText('John Doe')).toBeDefined();
+    });
+
+    it('resolves assignment display by classGroupId before falling back to sectionId', () => {
+        render(
+            <ExamSectionAssignmentList
+                examId="exam-1"
+                subjectId="subject-1"
+                assignments={
+                    [
+                        {
+                            id: 'assignment-2',
+                            examId: 'exam-1',
+                            classGroupId: 'cls-2',
+                            sectionId: 'section-1',
+                            sectionName: 'Section Alpha',
+                            roomId: null,
+                            roomName: null,
+                            instructorId: null,
+                            instructorName: null,
+                            scheduledAt: null,
+                            createdAt: '2026-06-13T12:00:00.000Z',
+                            updatedAt: '2026-06-13T12:00:00.000Z',
+                        },
+                    ] as unknown as Parameters<typeof ExamSectionAssignmentList>[0]['assignments']
+                }
+                isLoading={false}
+                onAssignClick={mockOnAssignClick}
+            />,
+        );
+
+        expect(screen.getByText('Classroom Beta')).toBeDefined();
     });
 
     it('renders the empty state and responds to assign click', () => {
@@ -193,6 +225,25 @@ describe('NewAssignmentsBuilder', () => {
         expect(screen.getByText('Add Classroom Row')).toBeDefined();
         const saveBtn = screen.getByRole('button', { name: 'Save Assignments' });
         expect(saveBtn).toBeDefined();
+    });
+
+    it('includes classGroupId in the batch payload when saving assignments', async () => {
+        render(<NewAssignmentsBuilder examId="exam-1" currentAssignments={[]} />);
+
+        fireEvent.click(screen.getAllByTestId('mock-select')[0]);
+        fireEvent.click(screen.getByRole('button', { name: 'Save Assignments' }));
+
+        expect(mockBatchMutate).toHaveBeenCalledWith({
+            examId: 'exam-1',
+            payload: {
+                assignments: [
+                    {
+                        classGroupId: 'cls-1',
+                        sectionId: 'section-1',
+                    },
+                ],
+            },
+        });
     });
 
     it('filters classrooms by subjectId if provided', () => {

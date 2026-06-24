@@ -1,6 +1,7 @@
 import { createRoute } from '@hono/zod-openapi';
 import { type AppRouteHandler } from '../../../../types/hono';
 import { assertAssessmentReadAccess } from '../../assessment/assessment-access';
+import { requireActivePermission } from '../../../../lib/permissions';
 import { getExamSectionAssignmentsSchema } from '../section-assignments.dto';
 import { SectionAssignmentsService } from '../section-assignments.service';
 
@@ -28,6 +29,7 @@ export const getExamSectionAssignmentsRouteHandler: AppRouteHandler<
     typeof getExamSectionAssignmentsRoute
 > = async (c) => {
     assertAssessmentReadAccess(c);
+    requireActivePermission(c, 'examinations:assign');
     const { examId } = c.req.valid('param');
 
     const assignments = await SectionAssignmentsService.getExamSectionAssignments({
