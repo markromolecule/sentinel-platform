@@ -1,4 +1,4 @@
-import { PreviewFooterActions } from '@/app/(protected)/(instructor)/exams/[id]/preview/[sessionId]/_components/common/preview-footer-actions';
+import { StudentFlowFooterActions } from '../../../_components/student-flow-primitives';
 import { buildStudentExamHref } from '../../_lib/student-exam-flow';
 import type { ExamRuntimeAccess } from '@sentinel/shared/types';
 import { type StoredExamSession } from '../../_lib/exam-session-storage';
@@ -45,7 +45,7 @@ export function LobbyFooterActions({
     };
 
     return (
-        <PreviewFooterActions
+        <StudentFlowFooterActions
             primaryLabel={getPrimaryLabel()}
             primaryDisabled={!hasCompletedFlow || isStartingSession || !canEnterExam}
             primaryOnClick={onEnterExam}

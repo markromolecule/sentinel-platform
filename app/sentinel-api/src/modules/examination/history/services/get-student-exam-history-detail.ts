@@ -6,7 +6,7 @@ import { getExamColumnSupport } from '../../exams/helper/exam-schema-compat';
 import {
     mapExamHistoryDetailResponse,
     type RawExamRecord,
-} from '../../exams/services/map-exam-response';
+} from '../../exams/services/map-exam-response.service';
 
 export async function getStudentExamHistoryDetail(
     dbClient: DbClient,

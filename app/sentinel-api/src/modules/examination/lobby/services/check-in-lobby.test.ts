@@ -22,6 +22,9 @@ describe('checkInLobby', () => {
             exam_id: 'exam-1',
             lobby_admission_mode: 'INSTRUCTOR_GATED',
         });
+        const studentSelect = createSelectBuilder({
+            user_id: 'user-1',
+        });
         const admissionSelect = createSelectBuilder(undefined);
         const insertBuilder = {
             values: vi.fn().mockReturnThis(),
@@ -39,6 +42,7 @@ describe('checkInLobby', () => {
             selectFrom: vi
                 .fn()
                 .mockReturnValueOnce(examSelect)
+                .mockReturnValueOnce(studentSelect)
                 .mockReturnValueOnce(admissionSelect),
             insertInto: vi.fn().mockReturnValue(insertBuilder),
         } as unknown as DbClient;
@@ -70,6 +74,9 @@ describe('checkInLobby', () => {
             exam_id: 'exam-1',
             lobby_admission_mode: 'AUTOMATIC',
         });
+        const studentSelect = createSelectBuilder({
+            user_id: 'user-1',
+        });
         const admissionSelect = createSelectBuilder(undefined);
         const insertBuilder = {
             values: vi.fn().mockReturnThis(),
@@ -88,6 +95,7 @@ describe('checkInLobby', () => {
             selectFrom: vi
                 .fn()
                 .mockReturnValueOnce(examSelect)
+                .mockReturnValueOnce(studentSelect)
                 .mockReturnValueOnce(admissionSelect),
             insertInto: vi.fn().mockReturnValue(insertBuilder),
         } as unknown as DbClient;
@@ -115,6 +123,9 @@ describe('checkInLobby', () => {
             exam_id: 'exam-1',
             lobby_admission_mode: 'INSTRUCTOR_GATED',
         });
+        const studentSelect = createSelectBuilder({
+            user_id: 'user-1',
+        });
         const admissionSelect = createSelectBuilder({
             admission_id: 'admission-1',
             exam_id: 'exam-1',
@@ -127,6 +138,7 @@ describe('checkInLobby', () => {
             selectFrom: vi
                 .fn()
                 .mockReturnValueOnce(examSelect)
+                .mockReturnValueOnce(studentSelect)
                 .mockReturnValueOnce(admissionSelect),
             insertInto: vi.fn(),
             updateTable: vi.fn(),
@@ -147,6 +159,9 @@ describe('checkInLobby', () => {
         const examSelect = createSelectBuilder({
             exam_id: 'exam-1',
             lobby_admission_mode: 'AUTOMATIC',
+        });
+        const studentSelect = createSelectBuilder({
+            user_id: 'user-1',
         });
         const admissionSelect = createSelectBuilder({
             admission_id: 'admission-1',
@@ -173,6 +188,7 @@ describe('checkInLobby', () => {
             selectFrom: vi
                 .fn()
                 .mockReturnValueOnce(examSelect)
+                .mockReturnValueOnce(studentSelect)
                 .mockReturnValueOnce(admissionSelect),
             insertInto: vi.fn(),
             updateTable: vi.fn().mockReturnValue(updateBuilder),

@@ -3,13 +3,12 @@ import { useInfiniteExamHistoryQuery, useExamsQuery } from '@sentinel/hooks';
 import { useStableValue } from '@sentinel/hooks';
 import { HistoryFilterStatus, ExamHistory } from '@sentinel/shared/types';
 import { groupItemsByDate } from '@/app/(protected)/student/_lib/student-exam-listing';
-import { normalizeStudentExam } from '@/app/(protected)/student/_lib/normalize-student-exam';
+import {
+    isActiveStudentExamStatus,
+    normalizeStudentExam,
+} from '@/app/(protected)/student/_lib/normalize-student-exam';
 import { UseStudentHistoryReturn } from '@/app/(protected)/student/history/_hooks/use-student-history/_types';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
-
-function isActiveStudentExamStatus(status: string) {
-    return status === 'available' || status === 'upcoming' || status === 'in-progress';
-}
 
 /**
  * Builds the student exam/history feed state from route-driven tab selection.

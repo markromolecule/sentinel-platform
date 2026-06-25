@@ -18,11 +18,14 @@ export default function StudentExamLobbyPage() {
     const { data: lobbyCount, isError } = useExamLobbyCountQuery(examId);
     const { presenceCount } = useLobbyPresence(examId);
 
-    const displayCount = isError
-        ? presenceCount > 0
-            ? presenceCount
-            : '--'
-        : Math.max(lobbyCount?.count ?? 0, presenceCount);
+    const displayCount =
+        typeof lobbyCount?.count === 'number'
+            ? lobbyCount.count
+            : isError
+              ? presenceCount > 0
+                  ? presenceCount
+                  : '--'
+              : '--';
 
     const {
         countdownLabel,

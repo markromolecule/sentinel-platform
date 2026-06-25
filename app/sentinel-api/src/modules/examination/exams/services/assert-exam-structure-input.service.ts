@@ -1,13 +1,9 @@
 import { HTTPException } from 'hono/http-exception';
 import type { CreateExamBody, UpdateExamBody } from '../exam.dto';
-
-type ExamSectionInput =
-    | NonNullable<CreateExamBody['questionSections']>[number]
-    | NonNullable<UpdateExamBody['questionSections']>[number];
-
-type ExamQuestionInput =
-    | NonNullable<CreateExamBody['questions']>[number]
-    | NonNullable<UpdateExamBody['questions']>[number];
+import {
+    ExamStructureSectionInput,
+    ExamStructureQuestionInput,
+} from './exam-service.types.service';
 
 function assertNoDuplicates<T>(args: {
     items: T[];
@@ -37,8 +33,8 @@ export function assertExamStructureInput(args: {
     questionSections?: CreateExamBody['questionSections'] | UpdateExamBody['questionSections'];
     questions?: CreateExamBody['questions'] | UpdateExamBody['questions'];
 }) {
-    const questionSections = (args.questionSections ?? []) as ExamSectionInput[];
-    const questions = (args.questions ?? []) as ExamQuestionInput[];
+    const questionSections = (args.questionSections ?? []) as ExamStructureSectionInput[];
+    const questions = (args.questions ?? []) as ExamStructureQuestionInput[];
 
     assertNoDuplicates({
         items: questionSections,

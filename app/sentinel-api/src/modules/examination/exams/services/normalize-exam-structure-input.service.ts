@@ -1,10 +1,10 @@
 import { HTTPException } from 'hono/http-exception';
 import { validateQuestionContentByType } from '../../assessment/assessment-contracts';
-import { assertExamStructureInput } from './assert-exam-structure-input';
+import { assertExamStructureInput } from './assert-exam-structure-input.service';
 import type {
     ExamStructureQuestionInput,
     NormalizeExamStructureInputArgs,
-} from './exam-service.types';
+} from './exam-service.types.service';
 
 export function normalizeExamStructureInput(args: NormalizeExamStructureInputArgs) {
     assertExamStructureInput({

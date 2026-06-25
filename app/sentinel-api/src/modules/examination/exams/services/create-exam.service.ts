@@ -3,24 +3,23 @@ import { saveExamConfiguration } from '../../configuration/configuration.service
 import type { CreateExamBody } from '../exam.dto';
 import { createExamData } from '../data/create-exam';
 import { LogsService } from '../../../general/logs/logs.service';
-
 import { replaceExamQuestionsData } from '../data/replace-exam-questions';
 import { replaceExamSectionsData } from '../data/replace-exam-sections';
 import { replaceExamAssignedSectionsData } from '../data/replace-exam-assigned-sections';
 import { updateExamData } from '../data/update-exam';
 import { getExamColumnSupport, getExamQuestionColumnSupport } from '../helper/exam-schema-compat';
-import { assertExamRoomAvailability } from './assert-exam-room-availability';
-import { assertRoomBelongsToInstitution } from './assert-room-belongs-to-institution';
-import { assertExamScheduleWindow } from './assert-exam-schedule-window';
-import { buildCreateExamValues } from './build-exam-write-values';
-import { executeExamTransaction } from './execute-exam-transaction';
-import { getExamDetail } from './get-exam-detail';
-import { normalizeExamStructureInput } from './normalize-exam-structure-input';
+import { assertExamRoomAvailability } from './assert-exam-room-availability.service';
+import { assertRoomBelongsToInstitution } from './assert-room-belongs-to-institution.service';
+import { assertExamScheduleWindow } from './assert-exam-schedule-window.service';
+import { buildCreateExamValues } from './build-exam-write-values.service';
+import { executeExamTransaction } from './execute-exam-transaction.service';
+import { getExamDetail } from './get-exam-detail.service';
+import { normalizeExamStructureInput } from './normalize-exam-structure-input.service';
 import { recalculateRoomStatus } from '../../../core/rooms/services/recalculate-room-status';
 import {
     resolveInstructorExamAssignmentTargets,
     resolveInstructorLegacyExamAssignment,
-} from './resolve-classroom-assignment';
+} from './resolve-classroom-assignment.service';
 
 export async function createExam(
     dbClient: DbClient,

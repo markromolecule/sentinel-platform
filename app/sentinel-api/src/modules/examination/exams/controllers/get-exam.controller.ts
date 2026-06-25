@@ -9,7 +9,7 @@ import {
 import { getExamByIdSchema } from '../exam.dto';
 import { ExamService } from '../exam.service';
 import { getExamByIdData } from '../data/get-exam-by-id';
-import { requireExamRecord } from '../services/require-exam-record';
+import { requireExamRecord } from '../services/require-exam-record.service';
 
 export const getExamRoute = createRoute({
     method: 'get',

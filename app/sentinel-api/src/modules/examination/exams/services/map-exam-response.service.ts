@@ -1,6 +1,6 @@
 import type { ExamDetail, ExamSummary } from '../exam.dto';
 import type { ExamHistoryDetail, ExamHistorySummary } from '../../history/history.dto';
-import { resolveExamStatus, resolveStudentExamStatus } from './resolve-exam-status';
+import { resolveExamStatus, resolveStudentExamStatus } from './resolve-exam-status.service';
 import type { ExamRuntimeAccess } from '../../runtime-access/runtime-access.dto';
 import type { TelemetryMediaPipeSandboxSchemaValues } from '@sentinel/shared';
 

@@ -1,10 +1,10 @@
 import { HTTPException } from 'hono/http-exception';
 import { describe, expect, it } from 'vitest';
 import { createExamSchema, updateExamSchema } from '../../modules/examination/exams/exam.dto';
-import { assertExamScheduleWindow } from '../../modules/examination/exams/services/assert-exam-schedule-window';
-import { mapExamSummaryResponse } from '../../modules/examination/exams/services/map-exam-response';
-import { assertExamStructureInput } from '../../modules/examination/exams/services/assert-exam-structure-input';
-import { resolveExamStatus } from '../../modules/examination/exams/services/resolve-exam-status';
+import { assertExamScheduleWindow } from '../../modules/examination/exams/services/assert-exam-schedule-window.service';
+import { mapExamSummaryResponse } from '../../modules/examination/exams/services/map-exam-response.service';
+import { assertExamStructureInput } from '../../modules/examination/exams/services/assert-exam-structure-input.service';
+import { resolveExamStatus } from '../../modules/examination/exams/services/resolve-exam-status.service';
 import {
     checkInLobbySchema,
     getAdmissionStatusSchema,

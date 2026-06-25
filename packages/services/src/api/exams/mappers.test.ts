@@ -161,4 +161,36 @@ describe('mapExam', () => {
 
         expect(exam.status).toBe('turned_in');
     });
+
+    it('preserves schedule fields needed for downstream student status normalization', () => {
+        const exam = mapExam({
+            id: 'exam-6',
+            title: 'Student Feed Exam',
+            description: 'An exam whose schedule fields must be preserved.',
+            durationMinutes: 60,
+            passingScore: 75,
+            status: 'PUBLISHED',
+            classroomId: 'classroom-1',
+            classroomName: 'Classroom 1',
+            subjectId: 'subject-1',
+            subjectTitle: 'Science',
+            sectionId: null,
+            sectionName: null,
+            roomId: null,
+            roomName: null,
+            scheduledDate: '2099-06-14T08:00:00.000Z',
+            endDateTime: '2099-06-14T09:00:00.000Z',
+            publishedAt: '2099-06-14T07:30:00.000Z',
+            questionCount: 10,
+            createdAt: '2099-06-14T07:00:00.000Z',
+            updatedAt: '2099-06-14T07:45:00.000Z',
+            isPublic: false,
+            assignedRoomNames: [],
+            assignedInstructorNames: [],
+            sectionNames: [],
+        } as any);
+
+        expect(exam.scheduledDate).toBe('2099-06-14T08:00:00.000Z');
+        expect(exam.endDateTime).toBe('2099-06-14T09:00:00.000Z');
+    });
 });

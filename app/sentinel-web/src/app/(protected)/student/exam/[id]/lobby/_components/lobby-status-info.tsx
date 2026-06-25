@@ -7,6 +7,19 @@ export type LobbyStatusInfoProps = {
 };
 
 export function LobbyStatusInfo({ readyCount, totalChecks, runtimeAccess }: LobbyStatusInfoProps) {
+    const reconnectSummary =
+        runtimeAccess?.reconnectAttemptsRemaining !== undefined &&
+        runtimeAccess?.totalReconnectAttempts !== undefined
+            ? {
+                  used: Math.max(
+                      0,
+                      runtimeAccess.totalReconnectAttempts - runtimeAccess.reconnectAttemptsRemaining,
+                  ),
+                  remaining: runtimeAccess.reconnectAttemptsRemaining,
+                  total: runtimeAccess.totalReconnectAttempts,
+              }
+            : null;
+
     return (
         <div className="border-border/60 bg-background flex h-full flex-col space-y-4 rounded-2xl border p-4 sm:p-5 lg:rounded-none lg:border-0 lg:bg-transparent lg:p-0">
             <h2 className="text-base font-semibold sm:text-lg">Lobby status</h2>
@@ -22,6 +35,12 @@ export function LobbyStatusInfo({ readyCount, totalChecks, runtimeAccess }: Lobb
                 <p>
                     Current readiness: {readyCount}/{totalChecks} completed.
                 </p>
+                {reconnectSummary ? (
+                    <p>
+                        Reconnect attempts used: {reconnectSummary.used} of{' '}
+                        {reconnectSummary.total}. Remaining: {reconnectSummary.remaining}.
+                    </p>
+                ) : null}
                 {runtimeAccess?.state === 'lobby_waiting' ? (
                     <p>Instructor approval is still required before the attempt can start.</p>
                 ) : null}

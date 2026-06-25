@@ -1,5 +1,5 @@
 import { type DbClient, executeTransaction } from '@sentinel/db';
-import { removeLinkedExamQuestionsBySourceQuestionIds } from '../../../examination/exams/services/remove-linked-exam-questions';
+import { removeLinkedExamQuestionsBySourceQuestionIds } from '../../../examination/exams/services/remove-linked-exam-questions.service';
 import { addQuestionCollectionQuestionsData } from '../data/add-question-collection-questions';
 import { clearQuestionCollectionQuestionsData } from '../data/clear-question-collection-questions';
 import { getQuestionCollectionQuestionLinksData } from '../data/get-question-collection-question-links';

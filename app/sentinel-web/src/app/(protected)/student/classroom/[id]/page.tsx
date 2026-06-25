@@ -7,13 +7,9 @@ import { Button, Input, Card, CardContent } from '@sentinel/ui';
 import { ExamCard } from '../../exam/_components/exam-card';
 import { Skeleton } from '@sentinel/ui';
 import { useState } from 'react';
-import { normalizeStudentExam } from '../../_lib/normalize-student-exam';
+import { isActiveStudentExamStatus, normalizeStudentExam } from '../../_lib/normalize-student-exam';
 import type { StudentClassroom } from '@sentinel/shared';
 import type { ProctorExam } from '@sentinel/shared/types';
-
-function isActiveClassroomAssessmentStatus(status: string) {
-    return status === 'available' || status === 'upcoming' || status === 'in-progress';
-}
 
 function matchesStudentClassroomExam(classroom: StudentClassroom, exam: ProctorExam) {
     const classroomIds = exam.classroomIds ?? [];
@@ -61,7 +57,7 @@ export default function StudentClassroomDetailPage() {
               .filter(
                   (exam) =>
                       matchesStudentClassroomExam(classroom, exam) &&
-                      isActiveClassroomAssessmentStatus(exam.status) &&
+                      isActiveStudentExamStatus(exam.status) &&
                       exam.title.toLowerCase().includes(search.toLowerCase()),
               ) ?? [])
         : [];

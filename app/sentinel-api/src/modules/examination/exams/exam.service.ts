@@ -1,11 +1,11 @@
 import { type DbClient } from '@sentinel/db';
 import type { CreateExamBody, GetExamsQuery, UpdateExamBody } from './exam.dto';
-import { createExam as createExamService } from './services/create-exam';
-import { deleteExam as deleteExamService } from './services/delete-exam';
-import { getExamDetail } from './services/get-exam-detail';
-import { getExams as getExamsService } from './services/get-exams';
-import { updateExam as updateExamService } from './services/update-exam';
-import { updateExamStatus as updateExamStatusService } from './services/update-exam-status';
+import { createExam as createExamService } from './services/create-exam.service';
+import { deleteExam as deleteExamService } from './services/delete-exam.service';
+import { getExamDetail } from './services/get-exam-detail.service';
+import { getExams as getExamsService } from './services/get-exams.service';
+import { updateExam as updateExamService } from './services/update-exam.service';
+import { updateExamStatus as updateExamStatusService } from './services/update-exam-status.service';
 
 export class ExamService {
     static async getExams(

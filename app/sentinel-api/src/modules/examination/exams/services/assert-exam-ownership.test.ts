@@ -1,6 +1,6 @@
 import { HTTPException } from 'hono/http-exception';
 import { describe, expect, it } from 'vitest';
-import { assertExamOwnership } from './assert-exam-ownership';
+import { assertExamOwnership } from './assert-exam-ownership.service';
 
 describe('assertExamOwnership', () => {
     it('allows the owner to pass', () => {

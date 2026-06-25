@@ -7,7 +7,7 @@ import {
 import { getClassGroupColumnSupport } from '../helper/classroom-schema-compat';
 import { getAccessibleClassroomOrThrow } from './classroom-access-query.service';
 import { ActivityNotificationService } from '../../../general/notification/services/activity-notification.service';
-import { deleteExamForCleanup } from '../../../examination/exams/services/delete-exam';
+import { deleteExamForCleanup } from '../../../examination/exams/services/delete-exam.service';
 
 export async function saveClassroomConfiguration(args: {
     dbClient: DbClient;

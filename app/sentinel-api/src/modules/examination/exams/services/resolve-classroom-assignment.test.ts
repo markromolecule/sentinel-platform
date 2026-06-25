@@ -2,7 +2,7 @@ import { Pool } from 'pg';
 import { describe, expect, it } from 'vitest';
 import { type DbClient } from '@sentinel/db';
 import { Kysely, PostgresDialect } from 'kysely';
-import { buildAccessibleClassroomAssignmentQuery } from './resolve-classroom-assignment';
+import { buildAccessibleClassroomAssignmentQuery } from './resolve-classroom-assignment.service';
 
 function createCompilerDb() {
     return new Kysely<any>({

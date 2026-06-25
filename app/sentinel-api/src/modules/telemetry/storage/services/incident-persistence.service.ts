@@ -4,6 +4,8 @@ import type { PersistableProctoringEvent } from '../../ingestion/ingestion.dto';
 import { telemetryConfigurationResolverService } from '../../ingestion/services/telemetry-configuration-resolver.service';
 import { buildTelemetryIncidentInsertShape } from '../mappers/insert-incident.mapper';
 import { incidentSeverityResolverService } from './incident-severity-resolver.service';
+import { LogsService } from '../../../general/logs/logs.service';
+import { ActivityNotificationService } from '../../../general/notification/services/activity-notification.service';
 
 function parseDetails(details: unknown): Record<string, unknown> {
     if (!details) {
@@ -75,8 +77,8 @@ export class IncidentPersistenceService {
                 TELEMETRY_GRACE_PERIOD_MS;
 
         if ((session.completed_at || session.status === 'COMPLETED') && !isRecentlyCompleted) {
-            console.error(
-                '[TelemetryStorage] Storage failure: session completed and grace period expired',
+            console.warn(
+                '[TelemetryStorage] Storage rejection: session completed and grace period expired',
                 {
                     attemptId: payload.examSessionId,
                     completedAt: session.completed_at,
@@ -229,7 +231,6 @@ export class IncidentPersistenceService {
         // Telemetry logging and notifications
         if (session.institution_id) {
             try {
-                const { LogsService } = await import('../../../general/logs/logs.service');
                 await LogsService.createLog(db, {
                     userId: session.user_id,
                     action: 'telemetry.incident_flagged',
@@ -243,9 +244,6 @@ export class IncidentPersistenceService {
                         severity: severityResolution.finalSeverity,
                     },
                 });
-
-                const { ActivityNotificationService } =
-                    await import('../../../general/notification/services/activity-notification.service');
                 await ActivityNotificationService.notifyInstitutionActivityCreated({
                     dbClient: db,
                     actorUserId: session.user_id,

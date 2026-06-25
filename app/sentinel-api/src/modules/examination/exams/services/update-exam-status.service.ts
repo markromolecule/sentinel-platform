@@ -1,8 +1,8 @@
 import { type DbClient } from '@sentinel/db';
 import { mapExamStatusToDb } from '../../assessment/assessment-contracts';
 import { updateExamData } from '../data/update-exam';
-import { getExamDetail } from './get-exam-detail';
-import { requireExamRecord } from './require-exam-record';
+import { getExamDetail } from './get-exam-detail.service';
+import { requireExamRecord } from './require-exam-record.service';
 import { recalculateRoomStatus } from '../../../core/rooms/services/recalculate-room-status';
 
 export async function updateExamStatus(
