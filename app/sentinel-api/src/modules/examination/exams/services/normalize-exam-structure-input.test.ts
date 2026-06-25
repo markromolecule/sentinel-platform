@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { normalizeExamStructureInput } from './normalize-exam-structure-input';
+import { normalizeExamStructureInput } from './normalize-exam-structure-input.service';
 
 describe('normalizeExamStructureInput', () => {
     it('trims section descriptions and stores blank descriptions as null', () => {

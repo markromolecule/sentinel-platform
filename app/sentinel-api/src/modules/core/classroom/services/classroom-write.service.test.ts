@@ -7,7 +7,7 @@ import {
 } from './classroom-write.service';
 import { ActivityNotificationService } from '../../../general/notification/services/activity-notification.service';
 import { HTTPException } from 'hono/http-exception';
-import { deleteExamForCleanup } from '../../../examination/exams/services/delete-exam';
+import { deleteExamForCleanup } from '../../../examination/exams/services/delete-exam.service';
 
 vi.mock('../../../general/notification/services/activity-notification.service', () => ({
     ActivityNotificationService: {
@@ -167,18 +167,8 @@ describe('classroom-write.service', () => {
             });
 
             expect(deleteExamForCleanup).toHaveBeenCalledTimes(2);
-            expect(deleteExamForCleanup).toHaveBeenNthCalledWith(
-                1,
-                dbClient,
-                'exam-1',
-                'inst-1',
-            );
-            expect(deleteExamForCleanup).toHaveBeenNthCalledWith(
-                2,
-                dbClient,
-                'exam-2',
-                'inst-1',
-            );
+            expect(deleteExamForCleanup).toHaveBeenNthCalledWith(1, dbClient, 'exam-1', 'inst-1');
+            expect(deleteExamForCleanup).toHaveBeenNthCalledWith(2, dbClient, 'exam-2', 'inst-1');
             expect(dbClient.deleteFrom).toHaveBeenNthCalledWith(1, 'exam_section_assignments');
             expect(deleteAssignmentBuilder.where).toHaveBeenCalledWith(
                 'class_group_id',

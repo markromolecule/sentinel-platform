@@ -1,6 +1,6 @@
 import { HTTPException } from 'hono/http-exception';
 import { type DbClient, executeTransaction } from '@sentinel/db';
-import { removeLinkedExamQuestionsBySourceQuestionIds } from '../../../examination/exams/services/remove-linked-exam-questions';
+import { removeLinkedExamQuestionsBySourceQuestionIds } from '../../../examination/exams/services/remove-linked-exam-questions.service';
 import { archiveQuestionsData } from '../../question/data/archive-questions';
 import { deleteQuestionBankCollectionData } from '../data/delete-question-bank-collection';
 import { getQuestionBankCollectionQuestionLinksData } from '../data/get-question-bank-collection-question-links';

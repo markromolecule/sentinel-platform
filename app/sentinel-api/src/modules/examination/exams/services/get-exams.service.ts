@@ -1,7 +1,7 @@
 import { type DbClient } from '@sentinel/db';
 import type { GetExamsQuery } from '../exam.dto';
 import { getExamsData } from '../data/get-exams';
-import { mapExamSummaryResponse } from './map-exam-response';
+import { mapExamSummaryResponse } from './map-exam-response.service';
 
 export async function getExams(
     dbClient: DbClient,

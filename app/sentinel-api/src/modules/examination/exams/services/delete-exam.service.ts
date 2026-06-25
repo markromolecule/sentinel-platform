@@ -1,15 +1,14 @@
 import { type DbClient } from '@sentinel/db';
 import { getExamByIdData } from '../data/get-exam-by-id';
-import { deleteExamData } from '../data/delete-exam';
-import { requireExamRecord } from './require-exam-record';
+import { requireExamRecord } from './require-exam-record.service';
 import { LogsService } from '../../../general/logs/logs.service';
 import { recalculateRoomStatus } from '../../../core/rooms/services/recalculate-room-status';
-import { assertExamOwnership } from './assert-exam-ownership';
-import { type exams } from '@sentinel/db';
+import { assertExamOwnership } from './assert-exam-ownership.service';
+import { type DeleteExamDataResponse, deleteExamData } from '../data/delete-exam';
 
 async function finalizeDeletedExam(
     dbClient: DbClient,
-    deletedRecord: Pick<exams, 'exam_id' | 'room_id'>,
+    deletedRecord: DeleteExamDataResponse,
     institutionId?: string,
 ) {
     if (deletedRecord.room_id) {
@@ -36,11 +35,7 @@ async function finalizeDeletedExam(
  * cleanup flows such as classroom deletion where access has already been
  * authorized at the parent resource level.
  */
-export async function deleteExamForCleanup(
-    dbClient: DbClient,
-    id: string,
-    institutionId?: string,
-) {
+export async function deleteExamForCleanup(dbClient: DbClient, id: string, institutionId?: string) {
     const deletedRecord = await deleteExamData({
         dbClient,
         id,

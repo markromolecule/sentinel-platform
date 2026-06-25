@@ -6,6 +6,11 @@ export type DeleteExamDataArgs = {
     institutionId?: string;
 };
 
+export type DeleteExamDataResponse = {
+    exam_id: string;
+    room_id: string | null;
+};
+
 export async function deleteExamData({ dbClient, id, institutionId }: DeleteExamDataArgs) {
     let query = dbClient
         .deleteFrom('exams')
@@ -16,5 +21,5 @@ export async function deleteExamData({ dbClient, id, institutionId }: DeleteExam
         query = query.where('institution_id', '=', institutionId);
     }
 
-    return await query.executeTakeFirst();
+    return (await query.executeTakeFirst()) as DeleteExamDataResponse | undefined;
 }

@@ -15,19 +15,19 @@ import { replaceExamSectionsData } from '../data/replace-exam-sections';
 import { replaceExamAssignedSectionsData } from '../data/replace-exam-assigned-sections';
 import { updateExamData } from '../data/update-exam';
 import { getExamColumnSupport, getExamQuestionColumnSupport } from '../helper/exam-schema-compat';
-import { assertExamRoomAvailability } from './assert-exam-room-availability';
-import { assertExamOwnership } from './assert-exam-ownership';
-import { assertRoomBelongsToInstitution } from './assert-room-belongs-to-institution';
-import { assertExamScheduleWindow } from './assert-exam-schedule-window';
-import { buildUpdateExamValues } from './build-exam-write-values';
-import { executeExamTransaction } from './execute-exam-transaction';
-import { getExamDetail } from './get-exam-detail';
+import { assertExamRoomAvailability } from './assert-exam-room-availability.service';
+import { assertExamOwnership } from './assert-exam-ownership.service';
+import { assertRoomBelongsToInstitution } from './assert-room-belongs-to-institution.service';
+import { assertExamScheduleWindow } from './assert-exam-schedule-window.service';
+import { buildUpdateExamValues } from './build-exam-write-values.service';
+import { executeExamTransaction } from './execute-exam-transaction.service';
+import { getExamDetail } from './get-exam-detail.service';
 import {
     mapExamStructureQuestionInput,
     normalizeExamStructureInput,
-} from './normalize-exam-structure-input';
-import { requireExamRecord } from './require-exam-record';
-import { resolveInstructorExamAssignmentTargets } from './resolve-classroom-assignment';
+} from './normalize-exam-structure-input.service';
+import { requireExamRecord } from './require-exam-record.service';
+import { resolveInstructorExamAssignmentTargets } from './resolve-classroom-assignment.service';
 import { recalculateRoomStatus } from '../../../core/rooms/services/recalculate-room-status';
 
 async function syncExamStructure(args: {

@@ -6,7 +6,7 @@ import {
     assertExamRoomAvailability,
     buildExamRoomConflictQuery,
     EXAM_ROOM_SCHEDULE_CONFLICT_MESSAGE,
-} from '../../modules/examination/exams/services/assert-exam-room-availability';
+} from '../../modules/examination/exams/services/assert-exam-room-availability.service';
 
 function createCompilerDb() {
     return new Kysely<any>({

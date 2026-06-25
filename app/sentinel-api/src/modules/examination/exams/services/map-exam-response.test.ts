@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { DEFAULT_TELEMETRY_SETTINGS } from '@sentinel/shared';
-import { mapExamDetailResponse } from './map-exam-response';
+import { mapExamDetailResponse } from './map-exam-response.service';
 
 function createRawExamRecord() {
     return {
