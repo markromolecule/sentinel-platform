@@ -15,6 +15,12 @@ export const checkInLobby = async (dbClient: DbClient, examId: string, studentId
     }
 
     const mode = exam.lobby_admission_mode ?? 'AUTOMATIC';
+    const student = await dbClient
+        .selectFrom('students')
+        .select(['user_id'])
+        .where('student_id', '=', studentId)
+        .executeTakeFirst();
+    const actorUserId = student?.user_id ?? null;
 
     const existingAdmission = await dbClient
         .selectFrom('exam_lobby_admissions')
@@ -43,11 +49,11 @@ export const checkInLobby = async (dbClient: DbClient, examId: string, studentId
         }
 
         const resolvedStatus = existingAdmission.status ?? 'WAITING';
-        if (resolvedStatus === 'WAITING' && exam.institution_id) {
+        if (resolvedStatus === 'WAITING' && exam.institution_id && actorUserId) {
             try {
                 await ActivityNotificationService.notifyInstitutionActivityCreated({
                     dbClient,
-                    actorUserId: studentId,
+                    actorUserId,
                     institutionId: exam.institution_id,
                     targetType: 'EXAM_LOBBY',
                     targetId: examId,
@@ -91,11 +97,11 @@ export const checkInLobby = async (dbClient: DbClient, examId: string, studentId
         .executeTakeFirstOrThrow();
 
     const resolvedStatus = newAdmission.status ?? 'WAITING';
-    if (resolvedStatus === 'WAITING' && exam.institution_id) {
+    if (resolvedStatus === 'WAITING' && exam.institution_id && actorUserId) {
         try {
             await ActivityNotificationService.notifyInstitutionActivityCreated({
                 dbClient,
-                actorUserId: studentId,
+                actorUserId,
                 institutionId: exam.institution_id,
                 targetType: 'EXAM_LOBBY',
                 targetId: examId,

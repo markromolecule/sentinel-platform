@@ -35,8 +35,8 @@ describe('useStudentHistory', () => {
                 id: 'exam-1',
                 title: 'Available Exam',
                 subject: 'Math',
-                scheduledDate: '2026-06-20T10:00:00Z',
-                endDateTime: '2026-06-20T12:00:00Z',
+                scheduledDate: '2099-06-20T10:00:00Z',
+                endDateTime: '2099-06-20T12:00:00Z',
                 status: 'available',
                 duration: 60,
                 totalScore: 100,
@@ -45,8 +45,8 @@ describe('useStudentHistory', () => {
                 id: 'exam-2',
                 title: 'Upcoming Exam',
                 subject: 'Science',
-                scheduledDate: '2026-06-21T10:00:00Z',
-                endDateTime: '2026-06-21T12:00:00Z',
+                scheduledDate: '2099-06-21T10:00:00Z',
+                endDateTime: '2099-06-21T12:00:00Z',
                 status: 'upcoming',
                 duration: 90,
                 totalScore: 100,
@@ -55,8 +55,8 @@ describe('useStudentHistory', () => {
                 id: 'exam-3',
                 title: 'In Progress Exam',
                 subject: 'History',
-                scheduledDate: '2026-06-20T08:00:00Z',
-                endDateTime: '2026-06-20T10:00:00Z',
+                scheduledDate: '2099-06-20T08:00:00Z',
+                endDateTime: '2099-06-20T10:00:00Z',
                 status: 'in-progress',
                 duration: 45,
                 totalScore: 50,
@@ -85,10 +85,10 @@ describe('useStudentHistory', () => {
                 id: 'exam-6',
                 title: 'Completed Attempt Exam',
                 subject: 'Physics',
-                scheduledDate: '2026-06-20T08:00:00Z',
-                endDateTime: '2026-06-20T10:00:00Z',
+                scheduledDate: '2099-06-20T08:00:00Z',
+                endDateTime: '2099-06-20T10:00:00Z',
                 status: 'available',
-                completedAt: '2026-06-20T09:30:00Z',
+                completedAt: '2099-06-20T09:30:00Z',
                 duration: 45,
                 totalScore: 50,
             },
@@ -138,8 +138,8 @@ describe('useStudentHistory', () => {
                     id: 'exam-section-assigned',
                     title: 'Section Assigned Exam',
                     subject: 'Physics',
-                    scheduledDate: '2026-06-24T09:00:00Z',
-                    endDateTime: '2026-06-24T11:00:00Z',
+                    scheduledDate: '2099-06-24T09:00:00Z',
+                    endDateTime: '2099-06-24T11:00:00Z',
                     status: 'available',
                     duration: 60,
                     totalScore: 100,
@@ -258,6 +258,45 @@ describe('useStudentHistory', () => {
             id: 'exam-published',
             status: 'upcoming',
         });
+    });
+
+    it('excludes exams from the available feed after schedule normalization turns them past_due', () => {
+        vi.mocked(usePathname).mockReturnValue('/student/exam');
+        vi.mocked(useSearchParams).mockReturnValue({
+            get: () => null,
+        } as any);
+
+        vi.mocked(useExamsQuery).mockReturnValue({
+            data: [
+                {
+                    id: 'exam-stale-available',
+                    title: 'Stale Available Exam',
+                    subject: 'Ethics',
+                    scheduledDate: '2000-06-24T09:00:00Z',
+                    endDateTime: '2000-06-24T11:00:00Z',
+                    status: 'available',
+                    duration: 60,
+                    totalScore: 100,
+                },
+            ],
+            isLoading: false,
+        } as any);
+        vi.mocked(useInfiniteExamHistoryQuery).mockReturnValue({
+            data: {
+                pages: [
+                    { items: [], pagination: { page: 1, limit: 10, total: 0, hasMore: false } },
+                ],
+            },
+            isLoading: false,
+            fetchNextPage: vi.fn(),
+            hasNextPage: false,
+            isFetchingNextPage: false,
+        } as any);
+
+        const { result } = renderHook(() => useStudentHistory());
+        const allItems = result.current.groupedHistory.flatMap((group) => group.items);
+
+        expect(allItems).toHaveLength(0);
     });
 
     it('returns history items for turned_in status', () => {

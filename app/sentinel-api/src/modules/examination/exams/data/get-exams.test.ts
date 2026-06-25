@@ -212,6 +212,7 @@ describe('getExamsData', () => {
         const compiledQuery = executeSpy.mock.calls[1][0];
 
         expect(compiledQuery.sql).toContain('"e"."published_at" is not null');
+        expect(compiledQuery.sql).toContain('lower(cast("e"."status" as text)) <>');
         expect(compiledQuery.sql).toContain('enr.class_group_id = e.class_group_id');
         expect(compiledQuery.sql).toContain('esa.class_group_id = "student_cg"."class_group_id"');
         expect(compiledQuery.sql).toContain('from exam_assigned_sections as eas');

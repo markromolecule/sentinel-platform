@@ -46,25 +46,23 @@ export interface PolicyDefinition {
 export const PRIVACY_POLICIES: PolicyDefinition[] = [
     {
         title: 'RA 10173 compliance',
-        content:
-            'Collected biometric and audio data is processed under the Data Privacy Act of 2012 for transparency, security, and legitimate academic use.',
+        content: 'Biometric and audio data are processed under the Data Privacy Act of 2012.',
     },
     {
         title: 'Academic integrity',
         content: (
             <>
-                Continuing means the student acknowledges the institutional{' '}
+                By continuing, you agree to the institutional{' '}
                 <Link href="/terms-of-service" className="text-primary font-medium hover:underline">
                     Terms of Service
-                </Link>{' '}
-                for conduct, monitoring, and readiness requirements.
+                </Link>
+                .
             </>
         ),
     },
     {
         title: 'Data security',
-        content:
-            'Access to recordings, logs, and reports is limited to authorized proctors and institutional administrators.',
+        content: 'Recordings, logs, and reports are limited to authorized institutional staff.',
     },
 ];
 

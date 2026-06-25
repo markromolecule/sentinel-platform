@@ -1,4 +1,7 @@
-import { ReadinessList } from '@/app/(protected)/(instructor)/exams/[id]/preview/[sessionId]/_components/lists/readiness-list';
+import {
+    StudentFlowPanel,
+    StudentFlowReadinessList,
+} from '../../../_components/student-flow-primitives';
 import { LOBBY_READINESS_CONFIG } from '../_constants';
 import type { ExamRuntimeAccess } from '@sentinel/shared/types';
 
@@ -18,9 +21,9 @@ export function LobbyEntryRequirements({
     reopenedUntil,
 }: LobbyEntryRequirementsProps) {
     return (
-        <div className="border-border/60 bg-background flex h-full flex-col space-y-4 rounded-2xl border p-4 sm:p-5 lg:rounded-none lg:border-0 lg:bg-transparent lg:p-0">
+        <StudentFlowPanel>
             <h2 className="text-base font-semibold sm:text-lg">Before entry</h2>
-            <ReadinessList items={LOBBY_READINESS_CONFIG.items} />
+            <StudentFlowReadinessList items={LOBBY_READINESS_CONFIG.items} />
 
             <div className="mt-4 rounded-lg bg-blue-50 p-4 text-sm leading-6 text-blue-900 dark:bg-blue-900/20 dark:text-blue-200">
                 <p className="text-blue-800/80 dark:text-blue-200/80">
@@ -46,6 +49,6 @@ export function LobbyEntryRequirements({
                     </p>
                 ) : null}
             </div>
-        </div>
+        </StudentFlowPanel>
     );
 }

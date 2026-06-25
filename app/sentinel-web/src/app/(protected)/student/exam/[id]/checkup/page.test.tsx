@@ -55,49 +55,48 @@ vi.mock('../_components/student-exam-audio-provider', () => ({
     useCheckupAudio: () => mockCheckupAudio(),
 }));
 
-vi.mock(
-    '@/app/(protected)/(instructor)/exams/[id]/preview/[sessionId]/_components/common/preview-page-header',
-    () => ({
-        PreviewPageHeader: ({ title, description }: { title: string; description: string }) => (
-            <div>
-                <h1>{title}</h1>
-                <p>{description}</p>
-            </div>
-        ),
-    }),
-);
-
-vi.mock(
-    '@/app/(protected)/(instructor)/exams/[id]/preview/[sessionId]/_components/lists/readiness-list',
-    () => ({
-        ReadinessList: () => <div>Readiness list</div>,
-    }),
-);
-
-vi.mock(
-    '@/app/(protected)/(instructor)/exams/[id]/preview/[sessionId]/_components/common/preview-footer-actions',
-    () => ({
-        PreviewFooterActions: ({
-            primaryLabel,
-            primaryDisabled,
-            title,
-            description,
-        }: {
-            primaryLabel: string;
-            primaryDisabled?: boolean;
-            title?: string;
-            description?: string;
-        }) => (
-            <div>
-                {title ? <p>{title}</p> : null}
-                {description ? <p>{description}</p> : null}
-                <button type="button" disabled={primaryDisabled}>
-                    {primaryLabel}
-                </button>
-            </div>
-        ),
-    }),
-);
+vi.mock('../../_components/student-flow-primitives', () => ({
+    StudentFlowPageHeader: ({ title, description }: { title: string; description: string }) => (
+        <div>
+            <h1>{title}</h1>
+            <p>{description}</p>
+        </div>
+    ),
+    StudentFlowReadinessList: () => <div>Readiness list</div>,
+    StudentFlowFooterActions: ({
+        primaryLabel,
+        primaryDisabled,
+        title,
+        description,
+    }: {
+        primaryLabel: string;
+        primaryDisabled?: boolean;
+        title?: string;
+        description?: string;
+    }) => (
+        <div>
+            {title ? <p>{title}</p> : null}
+            {description ? <p>{description}</p> : null}
+            <button type="button" disabled={primaryDisabled}>
+                {primaryLabel}
+            </button>
+        </div>
+    ),
+    StudentFlowDevicePreviewPanel: ({
+        supplementaryContent,
+    }: {
+        supplementaryContent?: ReactNode;
+    }) => (
+        <div>
+            <div>Device preview</div>
+            {supplementaryContent}
+        </div>
+    ),
+    StudentFlowCheckupStatusCard: () => <div>Check status</div>,
+    StudentFlowHighlightsList: () => <div>Highlights</div>,
+    StudentFlowPanel: ({ children }: { children: ReactNode }) => <div>{children}</div>,
+    StudentFlowSideLabel: ({ label }: { label: string }) => <div>{label}</div>,
+}));
 
 vi.mock(
     '@/app/(protected)/(instructor)/exams/[id]/preview/[sessionId]/_constants/preview-constants',
@@ -106,19 +105,6 @@ vi.mock(
     }),
 );
 
-vi.mock(
-    '@/app/(protected)/(instructor)/exams/[id]/preview/[sessionId]/_components/checkup/device-preview-panel',
-    () => ({
-        DevicePreviewPanel: () => <div>Device preview</div>,
-    }),
-);
-
-vi.mock(
-    '@/app/(protected)/(instructor)/exams/[id]/preview/[sessionId]/_components/checkup/checkup-status-card',
-    () => ({
-        CheckupStatusCard: () => <div>Check status</div>,
-    }),
-);
 
 vi.mock('../_lib/student-exam-flow', async () => {
     const actual = await vi.importActual<typeof import('../_lib/student-exam-flow')>(

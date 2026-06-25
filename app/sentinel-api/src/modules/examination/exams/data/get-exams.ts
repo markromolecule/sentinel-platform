@@ -6,6 +6,7 @@ import { getExamColumnSupport } from '../helper/exam-schema-compat';
 import type { RawExamRecord } from '../services/map-exam-response.service';
 import {
     buildClassroomExamFilter,
+    buildPublishedStudentExamPredicate,
     buildStudentExamVisibilityPredicate,
 } from './build-student-exam-scope-predicates';
 
@@ -241,11 +242,14 @@ export async function getExamsData({
     }
 
     if (studentUserId) {
-        query = query.where('e.published_at', 'is not', null).where(
-            buildStudentExamVisibilityPredicate({
-                studentUserId,
-                hasSectionId: columnSupport.hasSectionId,
-            }),
+        query = query.where((eb) =>
+            eb.and([
+                buildPublishedStudentExamPredicate({ examAlias: 'e' }),
+                buildStudentExamVisibilityPredicate({
+                    studentUserId,
+                    hasSectionId: columnSupport.hasSectionId,
+                }),
+            ]),
         );
     }
 

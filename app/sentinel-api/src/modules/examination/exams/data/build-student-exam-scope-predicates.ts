@@ -1,5 +1,18 @@
 import { sql } from 'kysely';
 
+/**
+ * Builds the student-facing publication gate so student surfaces only receive
+ * exams that have actually been published and are not still marked as drafts.
+ */
+export function buildPublishedStudentExamPredicate(args: { examAlias: string }) {
+    const { examAlias } = args;
+
+    return sql<boolean>`(
+        ${sql.ref(`${examAlias}.published_at`)} is not null
+        and lower(cast(${sql.ref(`${examAlias}.status`)} as text)) <> 'draft'
+    )`;
+}
+
 function buildClassroomAssignmentExistsPredicate(args: {
     examAlias: string;
     classroomId: string;

@@ -1,5 +1,7 @@
-import { PreviewPageHeader } from '@/app/(protected)/(instructor)/exams/[id]/preview/[sessionId]/_components/common/preview-page-header';
-import { PreviewHighlightsList } from '@/app/(protected)/(instructor)/exams/[id]/preview/[sessionId]/_components/cards/preview-highlights-list';
+import {
+    StudentFlowHighlightsList,
+    StudentFlowPageHeader,
+} from '../../../_components/student-flow-primitives';
 import { LOBBY_READINESS_CONFIG } from '../_constants';
 import { getLobbyStateLabel } from '../_utils';
 import type { ExamRuntimeAccess } from '@sentinel/shared/types';
@@ -19,6 +21,14 @@ export function LobbyHeader({
     runtimeAccess,
     hasCompletedFlow,
 }: LobbyHeaderProps) {
+    const reconnectAttemptsUsed =
+        runtimeAccess?.reconnectAttemptsRemaining !== undefined &&
+        runtimeAccess?.totalReconnectAttempts !== undefined
+            ? Math.max(
+                  0,
+                  runtimeAccess.totalReconnectAttempts - runtimeAccess.reconnectAttemptsRemaining,
+              )
+            : null;
     const highlights = [
         {
             label: 'Duration',
@@ -33,8 +43,10 @@ export function LobbyHeader({
         {
             label: 'Reconnect',
             value:
+                reconnectAttemptsUsed !== null &&
+                runtimeAccess?.totalReconnectAttempts !== undefined &&
                 runtimeAccess?.reconnectAttemptsRemaining !== undefined
-                    ? `${runtimeAccess.reconnectAttemptsRemaining} of ${runtimeAccess.totalReconnectAttempts} left`
+                    ? `${reconnectAttemptsUsed} used • ${runtimeAccess.reconnectAttemptsRemaining} left`
                     : `${maxReconnectAttempts} attempts`,
             icon: LOBBY_READINESS_CONFIG.icons.Reconnect,
         },
@@ -47,11 +59,11 @@ export function LobbyHeader({
 
     return (
         <section className="space-y-4 border-b pb-6 sm:space-y-5 sm:pb-8">
-            <PreviewPageHeader
+            <StudentFlowPageHeader
                 title="Lobby"
                 description="This is the final waiting area before the live attempt begins."
             />
-            <PreviewHighlightsList highlights={highlights} />
+            <StudentFlowHighlightsList highlights={highlights} />
         </section>
     );
 }

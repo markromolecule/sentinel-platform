@@ -3,7 +3,10 @@ import { sql } from 'kysely';
 import { buildStudentAttemptSelects } from '../../history/data/build-student-attempt-selects';
 import { getExamColumnSupport } from '../helper/exam-schema-compat';
 import type { RawExamRecord } from '../services/map-exam-response.service';
-import { buildStudentExamVisibilityPredicate } from './build-student-exam-scope-predicates';
+import {
+    buildPublishedStudentExamPredicate,
+    buildStudentExamVisibilityPredicate,
+} from './build-student-exam-scope-predicates';
 
 export type GetExamByIdDataArgs = {
     dbClient: DbClient;
@@ -165,11 +168,14 @@ export async function getExamByIdData({
     }
 
     if (studentUserId) {
-        query = query.where('e.published_at', 'is not', null).where(
-            buildStudentExamVisibilityPredicate({
-                studentUserId,
-                hasSectionId: columnSupport.hasSectionId,
-            }),
+        query = query.where((eb) =>
+            eb.and([
+                buildPublishedStudentExamPredicate({ examAlias: 'e' }),
+                buildStudentExamVisibilityPredicate({
+                    studentUserId,
+                    hasSectionId: columnSupport.hasSectionId,
+                }),
+            ]),
         );
     }
 

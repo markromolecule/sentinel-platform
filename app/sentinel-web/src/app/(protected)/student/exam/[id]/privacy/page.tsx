@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Checkbox, Label } from '@sentinel/ui';
 import { Eye, Mic, Monitor } from 'lucide-react';
@@ -13,12 +14,13 @@ import {
     patchStoredStudentExamFlow,
     readStoredStudentExamFlow,
 } from '../_lib/student-exam-flow';
-import { PreviewPageHeader } from '@/app/(protected)/(instructor)/exams/[id]/preview/[sessionId]/_components/common/preview-page-header';
-import { PreviewHighlightsList } from '@/app/(protected)/(instructor)/exams/[id]/preview/[sessionId]/_components/cards/preview-highlights-list';
-import { DisclosureList } from '@/app/(protected)/(instructor)/exams/[id]/preview/[sessionId]/_components/lists/disclosure-list';
-import { PreviewFooterActions } from '@/app/(protected)/(instructor)/exams/[id]/preview/[sessionId]/_components/common/preview-footer-actions';
-import { PrivacyPolicySections } from '@/app/(protected)/(instructor)/exams/[id]/preview/[sessionId]/_components/sections/privacy-policy-sections';
-import { PRIVACY_STATIC_HIGHLIGHTS } from '@/app/(protected)/(instructor)/exams/[id]/preview/[sessionId]/_constants/preview-constants';
+import {
+    StudentFlowDisclosureList,
+    StudentFlowFooterActions,
+    StudentFlowPageHeader,
+    StudentFlowPanel,
+} from '../../_components/student-flow-primitives';
+import { PRIVACY_POLICIES } from '@/app/(protected)/(instructor)/exams/[id]/preview/[sessionId]/_constants/preview-constants';
 
 export default function StudentExamPrivacyPage() {
     const router = useRouter();
@@ -61,43 +63,72 @@ export default function StudentExamPrivacyPage() {
                 : 'Standard monitoring is active without browser lock enforcement.',
         },
     ];
-
     return (
-        <StudentFlowShell>
-            <div>
-                <section className="space-y-4 border-b pb-6 sm:space-y-5 sm:pb-8">
-                    <PreviewPageHeader
-                        title="Privacy & Data Consent"
-                        description="Review how exam data is collected, protected, and used before moving to the device checkup step."
-                    />
-
-                    <PreviewHighlightsList highlights={PRIVACY_STATIC_HIGHLIGHTS} columns={3} />
-                </section>
-
-                <section className="grid items-stretch gap-4 py-6 sm:gap-5 sm:py-8 lg:grid-cols-[minmax(0,1.35fr)_minmax(280px,0.9fr)] lg:gap-8 xl:gap-10">
-                    <div className="border-border/60 bg-background flex h-full flex-col space-y-6 rounded-2xl border p-4 sm:p-5 lg:rounded-none lg:border-0 lg:bg-transparent lg:p-0">
-                        <div className="space-y-4">
-                            <h2 className="text-base font-semibold sm:text-lg">Data collection</h2>
-                            <p className="text-muted-foreground text-sm leading-6 sm:text-[15px]">
-                                Sentinel may request access to device signals and behavioral checks
-                                required by your institution’s proctoring policy for this exam.
-                            </p>
-                        </div>
-
-                        <DisclosureList items={disclosures} />
-
-                        <div className="mt-4 rounded-lg bg-blue-50 p-4 text-sm leading-6 text-blue-900 dark:bg-blue-900/20 dark:text-blue-200">
-                            <p className="text-blue-800/80 dark:text-blue-200/80">
-                                <span className="font-semibold">Note:</span> Your consent is
-                                required before continuing to the device readiness step.
-                            </p>
-                        </div>
+        <StudentFlowShell
+            maxWidthClassName="max-w-5xl"
+            mainClassName="py-6 sm:py-8"
+            contentClassName="my-auto"
+        >
+            <div className="flex min-h-full flex-col justify-center gap-6">
+                <section className="space-y-4 border-b pb-5 sm:space-y-5 sm:pb-6">
+                    <div className="flex items-center justify-end">
+                        <span className="text-primary text-[11px] font-semibold tracking-[0.22em] uppercase">
+                            Step 2 of 4
+                        </span>
                     </div>
 
-                    <div className="border-border/60 bg-background flex h-full flex-col space-y-6 rounded-2xl border p-4 sm:p-5 lg:rounded-none lg:border-0 lg:bg-transparent lg:p-0">
-                        <PrivacyPolicySections />
+                    <StudentFlowPageHeader
+                        title="Privacy & Consent"
+                        description="Review what may be monitored, how it is protected, and confirm before the device checkup."
+                    />
 
-                        <div className="border-t pt-4">
+                </section>
+
+                <section className="grid gap-5 lg:grid-cols-[minmax(0,1.05fr)_minmax(320px,0.95fr)] lg:items-start">
+                    <StudentFlowPanel className="space-y-4">
+                        <div className="space-y-2">
+                            <h2 className="text-base font-semibold sm:text-lg">Monitored signals</h2>
+                            <p className="text-muted-foreground text-sm leading-6 sm:text-[15px]">
+                                Only the signals required by your institution are requested for
+                                this exam session.
+                            </p>
+                        </div>
+
+                        <StudentFlowDisclosureList items={disclosures} />
+
+                        <div className="rounded-lg bg-blue-50 px-4 py-3 text-sm leading-6 text-blue-900 dark:bg-blue-900/20 dark:text-blue-200">
+                            <p className="text-blue-800/80 dark:text-blue-200/80">
+                                <span className="font-semibold">Note:</span> Consent is required
+                                before you can continue to the device readiness step.
+                            </p>
+                        </div>
+                    </StudentFlowPanel>
+
+                    <StudentFlowPanel className="space-y-4">
+                        <div className="space-y-2">
+                            <h2 className="text-base font-semibold sm:text-lg">Policies & terms</h2>
+                            <p className="text-muted-foreground text-sm leading-6 sm:text-[15px]">
+                                Review the key policies before confirming your consent.
+                            </p>
+                        </div>
+
+                        <div className="space-y-3">
+                            {PRIVACY_POLICIES.map((policy) => (
+                                <div
+                                    key={policy.title}
+                                    className="border-border/60 bg-muted/20 rounded-2xl border px-4 py-3"
+                                >
+                                    <p className="text-primary text-sm font-semibold">
+                                        {policy.title}
+                                    </p>
+                                    <div className="text-muted-foreground mt-1.5 text-sm leading-6">
+                                        {policy.content}
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+
+                        <div className="border-border/60 bg-muted/20 rounded-2xl border p-4">
                             <div className="flex items-start gap-3">
                                 <Checkbox
                                     id="student-privacy-consent"
@@ -115,15 +146,21 @@ export default function StudentExamPrivacyPage() {
                                     htmlFor="student-privacy-consent"
                                     className="text-muted-foreground cursor-pointer text-sm leading-6 font-normal sm:text-[15px]"
                                 >
-                                    I understand that this exam may request device permissions and
-                                    monitor behavior according to the rules set by the institution.
+                                    I agree to this exam&apos;s{' '}
+                                    <Link
+                                        href="/terms-of-service"
+                                        className="text-primary font-semibold underline underline-offset-4"
+                                    >
+                                        policies and terms
+                                    </Link>
+                                    .
                                 </Label>
                             </div>
                         </div>
-                    </div>
+                    </StudentFlowPanel>
                 </section>
 
-                <PreviewFooterActions
+                <StudentFlowFooterActions
                     primaryLabel="Continue to Checkup"
                     primaryDisabled={!hasConsented}
                     primaryOnClick={() => router.push(buildStudentExamHref(examId, 'checkup'))}

@@ -293,6 +293,43 @@ describe('StudentClassroomDetailPage', () => {
         expect(screen.getAllByText('upcoming').length).toBeGreaterThan(0);
     });
 
+    it('hides exams whose stale active status normalizes to past_due on the classroom page', () => {
+        vi.mocked(useStudentClassroomsQuery).mockReturnValue({
+            data: [
+                {
+                    id: 'classroom-1',
+                    subjectId: 'subject-1',
+                    subjectCode: 'GEETH01X',
+                    sectionName: 'INF232',
+                    sectionId: 'section-1',
+                    subjectTitle: 'ETHICS',
+                    instructors: ['Keanna Mae Cloma'],
+                    term: 'AY 2025-2026 1st Semester',
+                },
+            ],
+            isLoading: false,
+        } as any);
+        vi.mocked(useExamsQuery).mockReturnValue({
+            data: [
+                {
+                    id: 'exam-stale-available',
+                    title: 'Stale Available Exam',
+                    status: 'available',
+                    classroomId: 'classroom-1',
+                    scheduledDate: '2000-06-24T09:00:00Z',
+                    endDateTime: '2000-06-24T11:00:00Z',
+                    duration: 60,
+                },
+            ],
+            isLoading: false,
+        } as any);
+
+        render(<StudentClassroomDetailPage />);
+
+        expect(screen.queryByText('Stale Available Exam')).toBeNull();
+        expect(screen.getAllByText('No assessments found').length).toBeGreaterThan(0);
+    });
+
     it('shows exams linked through assign-first classroom ids', () => {
         vi.mocked(useStudentClassroomsQuery).mockReturnValue({
             data: [
