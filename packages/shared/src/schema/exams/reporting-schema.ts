@@ -58,6 +58,11 @@ export const examReportExamSchema = z.object({
     passingScore: z.number().int().min(0),
 });
 
+export const examReportSectionOptionSchema = z.object({
+    id: z.string().uuid(),
+    name: z.string(),
+});
+
 export const examReportStudentSummarySchema = z.object({
     id: z.string().uuid(),
     studentId: z.string().uuid(),
@@ -109,10 +114,27 @@ export const examReportActionItemsSchema = z.object({
     retake: z.array(examReportActionItemSchema),
 });
 
+export const examReportStudentsPaginationSchema = z.object({
+    page: z.number().int().min(1),
+    pageSize: z.number().int().min(1),
+    total: z.number().int().min(0),
+    totalPages: z.number().int().min(0),
+    hasMore: z.boolean(),
+});
+
+export const getExamReportQuerySchema = z.object({
+    search: z.string().trim().optional(),
+    sectionId: z.string().uuid().optional(),
+    page: z.coerce.number().int().min(1).default(1),
+    pageSize: z.coerce.number().int().min(1).max(100).default(10),
+});
+
 export const examReportSchema = z.object({
     exam: examReportExamSchema,
     summary: examReportSummarySchema,
+    sections: z.array(examReportSectionOptionSchema),
     students: z.array(examReportStudentSummarySchema),
+    studentsPagination: examReportStudentsPaginationSchema,
     actionItems: examReportActionItemsSchema,
 });
 
@@ -130,7 +152,12 @@ export type ExamReportIncidentSeverityBreakdownType = z.infer<
 >;
 export type ExamReportActionItemType = z.infer<typeof examReportActionItemSchema>;
 export type ExamReportExamType = z.infer<typeof examReportExamSchema>;
+export type ExamReportSectionOptionType = z.infer<typeof examReportSectionOptionSchema>;
 export type ExamReportStudentSummaryType = z.infer<typeof examReportStudentSummarySchema>;
 export type ExamReportSummaryType = z.infer<typeof examReportSummarySchema>;
 export type ExamReportActionItemsType = z.infer<typeof examReportActionItemsSchema>;
+export type ExamReportStudentsPaginationType = z.infer<
+    typeof examReportStudentsPaginationSchema
+>;
+export type GetExamReportQueryType = z.infer<typeof getExamReportQuerySchema>;
 export type ExamReportType = z.infer<typeof examReportSchema>;

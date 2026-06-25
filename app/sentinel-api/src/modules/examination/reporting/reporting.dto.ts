@@ -34,16 +34,34 @@ export const examReportActionItemsSchema = z
     .openapi('ExamReportActionItems');
 
 export const examReportSchema = z.object(Schema.examReportSchema.shape).openapi('ExamReport');
+export const attemptReportSchema = z
+    .object({
+        attempt: z.object(Schema.attemptGradingDetailSchema.shape),
+        questions: z.array(z.object(Schema.gradingQuestionSchema.shape)),
+    })
+    .openapi('AttemptReport');
 
 export const getExamReportSchema = {
     params: Schema.examIdParamsSchema,
+    query: Schema.getExamReportQuerySchema,
     response: z.object({
         message: z.string(),
         data: examReportSchema,
     }),
 };
 
+export const getAttemptReportSchema = {
+    params: z.object({
+        attemptId: z.string().uuid().openapi({ description: 'ID of the student exam attempt' }),
+    }),
+    response: z.object({
+        message: z.string(),
+        data: attemptReportSchema,
+    }),
+};
+
 export type ExamReport = z.infer<typeof examReportSchema>;
+export type AttemptReport = z.infer<typeof attemptReportSchema>;
 export type ExamReportExam = z.infer<typeof examReportExamSchema>;
 export type ExamReportSummary = z.infer<typeof examReportSummarySchema>;
 export type ExamReportStudentSummary = z.infer<typeof examReportStudentSummarySchema>;

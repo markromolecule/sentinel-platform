@@ -180,6 +180,11 @@ export interface ApiExamReportExam {
     passingScore: number;
 }
 
+export interface ApiExamReportSectionOption {
+    id: string;
+    name: string;
+}
+
 export interface ApiExamReportIncidentOutcomeSummary {
     pending: number;
     reviewed: number;
@@ -258,10 +263,20 @@ export interface ApiExamReportActionItems {
     retake: ApiExamReportActionItem[];
 }
 
+export interface ApiExamReportStudentsPagination {
+    page: number;
+    pageSize: number;
+    total: number;
+    totalPages: number;
+    hasMore: boolean;
+}
+
 export interface ApiExamReport {
     exam: ApiExamReportExam;
     summary: ApiExamReportSummary;
+    sections: ApiExamReportSectionOption[];
     students: ApiExamReportStudentSummary[];
+    studentsPagination: ApiExamReportStudentsPagination;
     actionItems: ApiExamReportActionItems;
 }
 
@@ -271,6 +286,13 @@ export type GetExamsParams = {
     subjectId?: string;
     classroomId?: string;
     institutionId?: string;
+};
+
+export type GetExamReportParams = {
+    search?: string;
+    sectionId?: string;
+    page?: number;
+    pageSize?: number;
 };
 
 export type CreateExamPayload = {

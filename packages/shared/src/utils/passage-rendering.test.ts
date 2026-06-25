@@ -25,6 +25,17 @@ describe('passage rendering', () => {
         expect(rendered?.html).not.toContain('onclick');
     });
 
+    it('prefers passageContent over legacy sourceEvidence when both are present', () => {
+        const rendered = renderPassage({
+            sourceEvidence: 'Legacy source excerpt',
+            passageContent: '<p>Preferred passage body</p>',
+            passageType: 'html',
+        });
+
+        expect(rendered?.html).toContain('Preferred passage body');
+        expect(rendered?.html).not.toContain('Legacy source excerpt');
+    });
+
     it('neutralizes script and javascript url injections', () => {
         const rendered = sanitizePassageHtml(
             '<script>alert(1)</script><a href="javascript:alert(1)">bad</a><img src="data:text/html;base64,xyz" alt="x" />',

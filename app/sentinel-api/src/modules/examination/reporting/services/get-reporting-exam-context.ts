@@ -1,7 +1,7 @@
 import { type DbClient } from '@sentinel/db';
 import { HTTPException } from 'hono/http-exception';
 import { sql } from 'kysely';
-import { buildInstructorExamVisibilityPredicates } from '../../assign/services/exam-access';
+import { buildAssignedInstructorExamVisibilityPredicates } from '../../assign/services/exam-access';
 import type { AssessmentAllowedRole } from '../../assessment/assessment-access';
 
 export type ReportingExamContext = {
@@ -63,7 +63,7 @@ export async function getReportingExamContext({
     }
 
     if (viewerRole === 'instructor' && userId) {
-        const visibilityPredicates = await buildInstructorExamVisibilityPredicates({
+        const visibilityPredicates = await buildAssignedInstructorExamVisibilityPredicates({
             dbClient,
             userId,
         });

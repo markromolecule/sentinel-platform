@@ -1,5 +1,6 @@
 import { useSearchParams } from 'next/navigation';
-import { useExamHistoryDetailQuery, useExamQuery } from '@sentinel/hooks';
+import { useAttemptReportQuery, useExamHistoryDetailQuery, useExamQuery } from '@sentinel/hooks';
+import { ApiError } from '@sentinel/services';
 import type { ExamHistory } from '@sentinel/shared/types';
 import { UseExamDetailsReturn } from '@/app/(protected)/student/history/details/_hooks/use-exam-details/_types';
 
@@ -9,6 +10,7 @@ export function useExamDetails(): UseExamDetailsReturn {
     const examId = searchParams.get('examId') ?? searchParams.get('id');
     const { data: historyItem, isLoading: isHistoryLoading } = useExamHistoryDetailQuery(attemptId);
     const { data: exam, isLoading: isExamLoading } = useExamQuery(examId ?? undefined);
+    const reportQuery = useAttemptReportQuery(attemptId);
 
     const fallbackHistoryItem: ExamHistory | undefined =
         !historyItem && exam
@@ -47,10 +49,20 @@ export function useExamDetails(): UseExamDetailsReturn {
               }
             : undefined;
 
+    const reportAvailability = reportQuery.data
+        ? 'available'
+        : reportQuery.error instanceof ApiError && reportQuery.error.status === 409
+          ? 'grading_in_progress'
+          : 'unavailable';
+
     return {
         examId,
         attemptId,
         historyItem: historyItem ?? fallbackHistoryItem,
-        isLoading: attemptId ? isHistoryLoading : isExamLoading,
+        report: reportQuery.data,
+        reportAvailability,
+        isLoading: attemptId
+            ? isHistoryLoading || reportQuery.isLoading
+            : isExamLoading,
     };
 }

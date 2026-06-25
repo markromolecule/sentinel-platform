@@ -1,11 +1,16 @@
 import { type DbClient } from '@sentinel/db';
-import { calculateEssayWeightedScore, scoreExamAttempt } from '@sentinel/shared';
+import {
+    buildExamAttemptQuestionReports,
+    calculateEssayWeightedScore,
+    scoreExamAttempt,
+} from '@sentinel/shared';
 import { HTTPException } from 'hono/http-exception';
 import { getGradingAttemptDetail } from './get-grading-attempt-detail';
 
 export type UpdateGradingAttemptArgs = {
     dbClient: DbClient;
     attemptId: string;
+    actorUserId?: string;
     institutionId?: string;
     evaluations: Record<
         string,
@@ -20,7 +25,15 @@ export type UpdateGradingAttemptArgs = {
             feedback?: string | null;
         }
     >;
+    itemOverrides?: Record<
+        string,
+        {
+            awardedScore: number;
+            reason?: string | null;
+        }
+    >;
     feedback?: string | null;
+    finalize?: boolean;
 };
 
 /**
@@ -33,9 +46,12 @@ export type UpdateGradingAttemptArgs = {
 export async function updateGradingAttempt({
     dbClient,
     attemptId,
+    actorUserId,
     institutionId,
     evaluations,
+    itemOverrides = {},
     feedback,
+    finalize = false,
 }: UpdateGradingAttemptArgs) {
     // 1. Fetch current attempt details and questions
     const detail = await getGradingAttemptDetail({
@@ -57,18 +73,17 @@ export async function updateGradingAttempt({
         tags: [],
     }));
 
-    const summary = scoreExamAttempt({
+    scoreExamAttempt({
         questions: mappedQuestions,
         answers: attempt.answers,
     });
-
-    // Start with the auto-graded objective score
-    let calculatedScore = summary.score;
 
     // Build the updated evaluations record
     const updatedEvaluations: Record<string, any> = {};
 
     // 3. Score the essay questions using the provided criteria scores
+    const questionPointsMap = new Map(questions.map((question) => [question.id, question.points]));
+
     for (const question of questions) {
         if (question.type === 'ESSAY') {
             const evaluation = evaluations[question.id];
@@ -81,8 +96,6 @@ export async function updateGradingAttempt({
 
             const essayScore = calculateEssayWeightedScore(evaluation.scores, question.points);
 
-            calculatedScore += essayScore;
-
             updatedEvaluations[question.id] = {
                 scores: evaluation.scores,
                 score: essayScore,
@@ -91,13 +104,65 @@ export async function updateGradingAttempt({
         }
     }
 
+    const persistedOverrides = Object.entries(itemOverrides).reduce<Record<string, any>>(
+        (acc, [questionId, override]) => {
+            const maxPoints = questionPointsMap.get(questionId);
+
+            if (typeof maxPoints !== 'number') {
+                throw new HTTPException(400, {
+                    message: `Override targets an unknown question: ${questionId}`,
+                });
+            }
+
+            if (override.awardedScore > maxPoints) {
+                throw new HTTPException(400, {
+                    message: `Override score exceeds max points for question: ${questionId}`,
+                });
+            }
+
+            acc[questionId] = {
+                awardedScore: override.awardedScore,
+                reason: override.reason ?? null,
+                overriddenBy: actorUserId ?? null,
+                overriddenAt: new Date().toISOString(),
+            };
+
+            return acc;
+        },
+        {},
+    );
+
+    const questionReports = buildExamAttemptQuestionReports({
+        questions: mappedQuestions,
+        answers: attempt.answers,
+        evaluations: updatedEvaluations,
+        itemOverrides: persistedOverrides,
+    });
+
+    const calculatedScore = questionReports.reduce(
+        (sum, report) => sum + (report.awardedScore ?? 0),
+        0,
+    );
+
     // 4. Round the final score to nearest integer for DB compatibility (Int)
     const roundedScore = Math.round(calculatedScore);
+
+    const existingGradingMetadata =
+        typeof attempt.grading === 'object' && attempt.grading !== null ? attempt.grading : {};
+    const updatedGradingMetadata = finalize
+        ? {
+              ...existingGradingMetadata,
+              finalizedAt: new Date().toISOString(),
+              finalizedBy: actorUserId ?? null,
+          }
+        : existingGradingMetadata;
 
     // 5. Build updated answer snapshot with metadata prefixed with "_"
     const updatedSnapshot = {
         ...attempt.answers,
         _evaluations: updatedEvaluations,
+        _itemOverrides: persistedOverrides,
+        _grading: updatedGradingMetadata,
         _feedback: feedback ?? null,
     };
 

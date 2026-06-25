@@ -1,5 +1,6 @@
 import { createRoute } from '@hono/zod-openapi';
 import { type AppRouteHandler } from '../../../../types/hono';
+import { assertAssignedInstructorAttemptAccess } from '../../assign/services/exam-access';
 import {
     assertAssessmentAccess,
     resolveAssessmentActorRole,
@@ -47,6 +48,15 @@ export const getGradingAttemptDetailRouteHandler: AppRouteHandler<
         role,
         contextInstitutionId: c.get('institutionId'),
     });
+
+    if (role === 'instructor' && user?.id) {
+        await assertAssignedInstructorAttemptAccess({
+            dbClient: c.get('dbClient'),
+            attemptId,
+            userId: user.id,
+            institutionId,
+        });
+    }
 
     const data = await GradingService.getGradingAttemptDetail({
         dbClient: c.get('dbClient'),

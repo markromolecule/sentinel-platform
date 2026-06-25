@@ -1,4 +1,5 @@
 import { type DbClient } from '@sentinel/db';
+import { buildExamAttemptQuestionReports } from '@sentinel/shared';
 import { HTTPException } from 'hono/http-exception';
 import { sql } from 'kysely';
 
@@ -51,22 +52,34 @@ export async function getGradingAttemptDetail({
     }
 
     const questions = await dbClient
-        .selectFrom('exam_questions')
+        .selectFrom('exam_questions as eq')
+        .leftJoin(
+            'question_bank_questions as qbq',
+            'qbq.question_bank_question_id',
+            'eq.source_question_bank_question_id',
+        )
         .select([
-            'question_id as id',
-            'exam_id as examId',
-            'question_type as type',
-            'content',
-            'points',
-            'order_index as orderIndex',
+            'eq.question_id as id',
+            'eq.exam_id as examId',
+            'eq.question_type as type',
+            'qbq.source_file_name as sourceFileName',
+            'qbq.source_page_number as sourcePageNumber',
+            'qbq.source_evidence as sourceEvidence',
+            'eq.passage_content as passageContent',
+            'eq.passage_type as passageType',
+            'eq.content as content',
+            'eq.points as points',
+            'eq.order_index as orderIndex',
         ])
-        .where('exam_id', '=', attemptRow.examId)
-        .orderBy('order_index', 'asc')
+        .where('eq.exam_id', '=', attemptRow.examId)
+        .orderBy('eq.order_index', 'asc')
         .execute();
 
     const snapshotObj = (attemptRow.answerSnapshot ?? {}) as Record<string, any>;
     const evaluations = (snapshotObj._evaluations ?? {}) as Record<string, any>;
     const overallFeedback = (snapshotObj._feedback ?? null) as string | null;
+    const itemOverrides = (snapshotObj._itemOverrides ?? {}) as Record<string, any>;
+    const grading = (snapshotObj._grading ?? {}) as Record<string, any>;
 
     // Filter out internal metadata keys from student answers
     const answers: Record<string, any> = {};
@@ -75,6 +88,23 @@ export async function getGradingAttemptDetail({
             answers[key] = snapshotObj[key];
         }
     }
+
+    const mappedQuestions = questions.map((q) => ({
+        id: q.id,
+        examId: q.examId,
+        type: q.type as any,
+        points: q.points,
+        orderIndex: q.orderIndex,
+        content: q.content as any,
+        tags: [],
+    }));
+
+    const questionReports = buildExamAttemptQuestionReports({
+        questions: mappedQuestions,
+        answers,
+        evaluations,
+        itemOverrides,
+    });
 
     return {
         attempt: {
@@ -92,11 +122,24 @@ export async function getGradingAttemptDetail({
             answers,
             evaluations,
             feedback: overallFeedback,
+            itemOverrides,
+            grading: {
+                finalizedAt:
+                    typeof grading.finalizedAt === 'string' ? grading.finalizedAt : null,
+                finalizedBy:
+                    typeof grading.finalizedBy === 'string' ? grading.finalizedBy : null,
+            },
+            questionReports,
         },
         questions: questions.map((q) => ({
             id: q.id,
             examId: q.examId,
             type: q.type,
+            sourceFileName: q.sourceFileName ?? null,
+            sourcePageNumber: q.sourcePageNumber ?? null,
+            sourceEvidence: q.sourceEvidence ?? null,
+            passageContent: q.passageContent ?? null,
+            passageType: q.passageType === 'html' ? 'html' : q.passageType ? 'plain' : null,
             content: q.content as any,
             points: q.points,
             orderIndex: q.orderIndex,

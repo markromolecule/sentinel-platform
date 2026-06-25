@@ -10,9 +10,10 @@ import { ExamHeader } from '@/app/(protected)/student/history/details/_component
 import { ExamHeroScore } from '@/app/(protected)/student/history/details/_components/exam-hero-score';
 import { ExamInfo } from '@/app/(protected)/student/history/details/_components/exam-info';
 import { useExamDetails } from '@/app/(protected)/student/history/details/_hooks/use-exam-details';
+import { AttemptReportView } from '@/features/exams/reports';
 
 function HistoryDetailsContent() {
-    const { historyItem, isLoading } = useExamDetails();
+    const { historyItem, report, reportAvailability, isLoading } = useExamDetails();
 
     if (isLoading) {
         return (
@@ -66,6 +67,35 @@ function HistoryDetailsContent() {
                         totalScore={historyItem.totalScore ?? null}
                         percentage={historyItem.percentage ?? null}
                     />
+
+                    {reportAvailability === 'available' ? (
+                        <div className="space-y-4">
+                            <div className="border-border/60 bg-muted/30 border p-4">
+                                <p className="text-sm font-semibold">Finalized Report Ready</p>
+                                <p className="text-muted-foreground mt-1 text-sm">
+                                    Your instructor has finalized this report.{' '}
+                                    {report?.questions.length ?? 0} question
+                                    {report?.questions.length === 1 ? '' : 's'} can now be
+                                    reviewed with final grading decisions.
+                                </p>
+                            </div>
+
+                            {report ? (
+                                <AttemptReportView
+                                    attempt={report.attempt}
+                                    questions={report.questions}
+                                />
+                            ) : null}
+                        </div>
+                    ) : reportAvailability === 'grading_in_progress' ? (
+                        <div className="border-border/60 bg-muted/30 border p-4">
+                            <p className="text-sm font-semibold">Report In Review</p>
+                            <p className="text-muted-foreground mt-1 text-sm">
+                                This attempt includes instructor-reviewed responses. Your detailed
+                                report will appear here after grading is finalized.
+                            </p>
+                        </div>
+                    ) : null}
 
                     <CheatingReport
                         cheated={historyItem.cheated}

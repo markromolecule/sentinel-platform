@@ -2,11 +2,11 @@
 
 import Link from 'next/link';
 import { usePathname, useSearchParams } from 'next/navigation';
-import { LayoutDashboard, UserCheck, ClipboardCheck, ShieldAlert } from 'lucide-react';
+import { LayoutDashboard, UserCheck, ClipboardCheck, ShieldAlert, FileText } from 'lucide-react';
 import type { ElementType } from 'react';
 import { cn, Separator } from '@sentinel/ui';
 
-export type ExamSection = 'dashboard' | 'assign' | 'grading' | 'logs';
+export type ExamSection = 'dashboard' | 'assign' | 'grading' | 'reports' | 'logs';
 
 type ExamNavItem = {
     id: ExamSection;
@@ -22,6 +22,7 @@ const EXAM_NAV_GROUPS: Array<{ title: string; items: ExamNavItem[] }> = [
             { id: 'dashboard', label: 'Dashboard', href: '/exams', icon: LayoutDashboard },
             { id: 'assign', label: 'Assignments', href: '/exams?view=assign', icon: UserCheck },
             { id: 'grading', label: 'Grading', href: '/exams?view=grade', icon: ClipboardCheck },
+            { id: 'reports', label: 'Reports', href: '/exams/reports', icon: FileText },
             { id: 'logs', label: 'Incident Logs', href: '/exams/logs', icon: ShieldAlert },
         ],
     },
@@ -32,6 +33,10 @@ type SearchParamsLike = Pick<URLSearchParams, 'get'>;
 function resolveActiveSection(pathname: string, searchParams: SearchParamsLike): ExamSection {
     if (pathname.startsWith('/exams/logs')) {
         return 'logs';
+    }
+
+    if (pathname.startsWith('/exams/reports')) {
+        return 'reports';
     }
 
     if (pathname.startsWith('/exams/assign') || searchParams.get('view') === 'assign') {

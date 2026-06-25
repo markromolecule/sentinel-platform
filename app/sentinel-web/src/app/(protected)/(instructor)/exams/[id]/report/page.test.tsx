@@ -5,9 +5,10 @@ import { act, fireEvent, render, screen } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import ExamReportPage from './page';
 
-const { mockApiClient, mockRefetch } = vi.hoisted(() => ({
+const { mockApiClient, mockRefetch, mockUseExamReportQuery } = vi.hoisted(() => ({
     mockApiClient: vi.fn(),
     mockRefetch: vi.fn(),
+    mockUseExamReportQuery: vi.fn(),
 }));
 
 vi.mock('next/link', () => ({
@@ -18,112 +19,7 @@ vi.mock('next/link', () => ({
 
 vi.mock('@sentinel/hooks', () => ({
     useApi: () => mockApiClient,
-    useExamReportQuery: () => ({
-        data: {
-            exam: {
-                id: 'exam-1',
-                title: 'Final Exam',
-                subject: 'Algorithms',
-                scheduledDate: '2026-04-20T09:00:00.000Z',
-                endDateTime: '2026-04-20T10:00:00.000Z',
-                durationMinutes: 60,
-                passingScore: 75,
-            },
-            summary: {
-                totalAssignedStudents: 2,
-                totalStarted: 2,
-                totalSubmitted: 2,
-                totalAbsent: 0,
-                flaggedStudentsCount: 0,
-                averageScore: 90,
-                passRate: 100,
-                incidentBreakdownByType: [],
-                incidentBreakdownBySeverity: [],
-                needsReviewCount: 0,
-                needsMakeupCount: 0,
-                needsRetakeCount: 0,
-            },
-            students: [
-                {
-                    id: 'student-1',
-                    studentId: 'student-record-1',
-                    attemptId: 'attempt-1',
-                    studentNo: '2024-0001',
-                    firstName: 'Ana',
-                    lastName: 'Santos',
-                    sectionId: 'section-1',
-                    sectionName: 'BSCS 3A',
-                    status: 'submitted',
-                    startedAt: '2026-04-20T09:00:00.000Z',
-                    completedAt: '2026-04-20T09:45:00.000Z',
-                    score: 90,
-                    totalScore: 100,
-                    percentage: 90,
-                    timeSpentMinutes: 45,
-                    incidentCount: 0,
-                    openIncidentCount: 0,
-                    primaryIncidentType: null,
-                    highestIncidentSeverity: null,
-                    incidentOutcomes: {
-                        pending: 0,
-                        reviewed: 0,
-                        confirmed: 0,
-                        dismissed: 0,
-                    },
-                    submissionType: 'manual_submit',
-                    attemptKind: 'primary',
-                    attemptCount: 1,
-                    isFlagged: false,
-                    needsReview: false,
-                    needsMakeup: false,
-                    needsRetake: false,
-                },
-                {
-                    id: 'student-2',
-                    studentId: 'student-record-2',
-                    attemptId: 'attempt-2',
-                    studentNo: '2024-0002',
-                    firstName: 'Luis',
-                    lastName: 'Reyes',
-                    sectionId: 'section-2',
-                    sectionName: 'BSCS 3B',
-                    status: 'submitted',
-                    startedAt: '2026-04-20T09:00:00.000Z',
-                    completedAt: '2026-04-20T09:50:00.000Z',
-                    score: 95,
-                    totalScore: 100,
-                    percentage: 95,
-                    timeSpentMinutes: 50,
-                    incidentCount: 0,
-                    openIncidentCount: 0,
-                    primaryIncidentType: null,
-                    highestIncidentSeverity: null,
-                    incidentOutcomes: {
-                        pending: 0,
-                        reviewed: 0,
-                        confirmed: 0,
-                        dismissed: 0,
-                    },
-                    submissionType: 'manual_submit',
-                    attemptKind: 'primary',
-                    attemptCount: 1,
-                    isFlagged: false,
-                    needsReview: false,
-                    needsMakeup: false,
-                    needsRetake: false,
-                },
-            ],
-            actionItems: {
-                review: [],
-                makeup: [],
-                retake: [],
-            },
-        },
-        isLoading: false,
-        isError: false,
-        refetch: mockRefetch,
-        isFetching: false,
-    }),
+    useExamReportQuery: mockUseExamReportQuery,
 }));
 
 vi.mock('@sentinel/services', () => ({
@@ -150,10 +46,6 @@ vi.mock('@sentinel/ui', () => ({
                 {children}
             </button>
         ),
-    Card: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
-    CardContent: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
-    CardHeader: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
-    CardTitle: ({ children }: { children: React.ReactNode }) => <h2>{children}</h2>,
     Input: ({
         value,
         onChange,
@@ -187,6 +79,16 @@ vi.mock('@sentinel/ui', () => ({
     ),
     SelectTrigger: ({ children }: { children: React.ReactNode }) => <>{children}</>,
     SelectValue: () => null,
+    Tabs: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+    TabsList: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+    TabsTrigger: ({
+        children,
+        value,
+    }: {
+        children: React.ReactNode;
+        value: string;
+    }) => <button type="button">{children ?? value}</button>,
+    TabsContent: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
     Table: ({ children }: { children: React.ReactNode }) => <table>{children}</table>,
     TableBody: ({ children }: { children: React.ReactNode }) => <tbody>{children}</tbody>,
     TableCell: ({
@@ -217,9 +119,126 @@ vi.mock('sonner', () => ({
 describe('ExamReportPage', () => {
     beforeEach(() => {
         vi.clearAllMocks();
+        mockUseExamReportQuery.mockReturnValue({
+            data: {
+                exam: {
+                    id: 'exam-1',
+                    title: 'Final Exam',
+                    subject: 'Algorithms',
+                    scheduledDate: '2026-04-20T09:00:00.000Z',
+                    endDateTime: '2026-04-20T10:00:00.000Z',
+                    durationMinutes: 60,
+                    passingScore: 75,
+                },
+                summary: {
+                    totalAssignedStudents: 2,
+                    totalStarted: 2,
+                    totalSubmitted: 2,
+                    totalAbsent: 0,
+                    flaggedStudentsCount: 0,
+                    averageScore: 90,
+                    passRate: 100,
+                    incidentBreakdownByType: [],
+                    incidentBreakdownBySeverity: [],
+                    needsReviewCount: 0,
+                    needsMakeupCount: 0,
+                    needsRetakeCount: 0,
+                },
+                sections: [
+                    { id: 'section-1', name: 'BSCS 3A' },
+                    { id: 'section-2', name: 'BSCS 3B' },
+                ],
+                students: [
+                    {
+                        id: 'student-1',
+                        studentId: 'student-record-1',
+                        attemptId: 'attempt-1',
+                        studentNo: '2024-0001',
+                        firstName: 'Ana',
+                        lastName: 'Santos',
+                        sectionId: 'section-1',
+                        sectionName: 'BSCS 3A',
+                        status: 'submitted',
+                        startedAt: '2026-04-20T09:00:00.000Z',
+                        completedAt: '2026-04-20T09:45:00.000Z',
+                        score: 90,
+                        totalScore: 100,
+                        percentage: 90,
+                        timeSpentMinutes: 45,
+                        incidentCount: 0,
+                        openIncidentCount: 0,
+                        primaryIncidentType: null,
+                        highestIncidentSeverity: null,
+                        incidentOutcomes: {
+                            pending: 0,
+                            reviewed: 0,
+                            confirmed: 0,
+                            dismissed: 0,
+                        },
+                        submissionType: 'manual_submit',
+                        attemptKind: 'primary',
+                        attemptCount: 1,
+                        isFlagged: false,
+                        needsReview: false,
+                        needsMakeup: false,
+                        needsRetake: false,
+                    },
+                    {
+                        id: 'student-2',
+                        studentId: 'student-record-2',
+                        attemptId: 'attempt-2',
+                        studentNo: '2024-0002',
+                        firstName: 'Luis',
+                        lastName: 'Reyes',
+                        sectionId: 'section-2',
+                        sectionName: 'BSCS 3B',
+                        status: 'submitted',
+                        startedAt: '2026-04-20T09:00:00.000Z',
+                        completedAt: '2026-04-20T09:50:00.000Z',
+                        score: 95,
+                        totalScore: 100,
+                        percentage: 95,
+                        timeSpentMinutes: 50,
+                        incidentCount: 0,
+                        openIncidentCount: 0,
+                        primaryIncidentType: null,
+                        highestIncidentSeverity: null,
+                        incidentOutcomes: {
+                            pending: 0,
+                            reviewed: 0,
+                            confirmed: 0,
+                            dismissed: 0,
+                        },
+                        submissionType: 'manual_submit',
+                        attemptKind: 'primary',
+                        attemptCount: 1,
+                        isFlagged: false,
+                        needsReview: false,
+                        needsMakeup: false,
+                        needsRetake: false,
+                    },
+                ],
+                actionItems: {
+                    review: [],
+                    makeup: [],
+                    retake: [],
+                },
+                studentsPagination: {
+                    page: 1,
+                    pageSize: 10,
+                    total: 2,
+                    totalPages: 1,
+                    hasMore: false,
+                },
+            },
+            isLoading: false,
+            isError: false,
+            refetch: mockRefetch,
+            isFetching: false,
+        });
     });
 
-    it('filters the report table by section', async () => {
+    it('passes the selected section filter into the report query', async () => {
         const params = Promise.resolve({ id: 'exam-1' });
 
         await act(async () => {
@@ -239,8 +258,32 @@ describe('ExamReportPage', () => {
             target: { value: 'section-2' },
         });
 
-        expect(screen.queryByText('Santos, Ana')).toBeNull();
-        expect(screen.getByText('Reyes, Luis')).toBeTruthy();
+        expect(mockUseExamReportQuery).toHaveBeenLastCalledWith('exam-1', {
+            search: undefined,
+            sectionId: 'section-2',
+            page: 1,
+            pageSize: 10,
+        });
         expect(screen.getAllByText('BSCS 3B').length).toBeGreaterThan(0);
+    });
+
+    it('links each submitted attempt into the detailed report route', async () => {
+        const params = Promise.resolve({ id: 'exam-1' });
+
+        await act(async () => {
+            render(
+                <Suspense fallback={<div>Loading...</div>}>
+                    <ExamReportPage params={params} />
+                </Suspense>,
+            );
+
+            await params;
+        });
+
+        expect(
+            screen
+                .getAllByRole('link', { name: 'View Attempt' })
+                .map((link) => link.getAttribute('href')),
+        ).toContain('/exams/reports/exam-1/attempt-1');
     });
 });
