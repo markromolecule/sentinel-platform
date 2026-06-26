@@ -3,14 +3,10 @@ import type { AssessmentAllowedRole } from '../assessment/assessment-access';
 import { getAttemptReport } from './services/get-attempt-report';
 import { getExamReport } from './services/get-exam-report';
 
+type GetExamReportArgs = Parameters<typeof getExamReport>[0];
+
 export class ReportingService {
-    static async getExamReport(args: {
-        dbClient: DbClient;
-        examId: string;
-        institutionId?: string;
-        viewerRole: AssessmentAllowedRole;
-        userId?: string | null;
-    }) {
+    static async getExamReport(args: GetExamReportArgs) {
         return getExamReport(args);
     }
 
