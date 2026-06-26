@@ -1,0 +1,220 @@
+import type { ExamAttemptAnswerValue, ExamQuestion } from '../types';
+import type { ExamQuestionReportCorrectAnswer } from './score-exam-attempt.types';
+import { normalizeText } from './score-exam-attempt-utils';
+
+// ─── Shared Utilities ────────────────────────────────────────────────────────
+
+function toBoolean(value: unknown): boolean | null {
+    if (typeof value === 'boolean') return value;
+
+    if (typeof value === 'string') {
+        const normalized = value.toLowerCase().trim();
+        if (normalized === 'true') return true;
+        if (normalized === 'false') return false;
+    }
+
+    return null;
+}
+
+/**
+ * Resolves a choice value (index or text) to its normalized text equivalent.
+ * Returns null for unresolvable types.
+ */
+function resolveOptionToText(value: unknown, options: string[]): string | null {
+    if (typeof value === 'number') return normalizeText(options[value] ?? '');
+    if (typeof value === 'string') return normalizeText(value);
+    return null;
+}
+
+/**
+ * Resolves the TRUE_FALSE expected answer with consistent priority:
+ * correctBoolean > correctAnswer — used by both scoring and display.
+ */
+function resolveTrueFalseExpected(question: ExamQuestion): boolean | null {
+    return toBoolean(question.content.correctBoolean) ?? toBoolean(question.content.correctAnswer);
+}
+
+// ─── Answer Resolvers ─────────────────────────────────────────────────────────
+
+function resolveSingleChoiceAnswer(question: ExamQuestion, value: ExamAttemptAnswerValue): boolean {
+    const options = question.content.options ?? [];
+    const expected = resolveOptionToText(question.content.correctAnswer, options);
+    const received = resolveOptionToText(value, options);
+    return expected !== null && received !== null && expected === received;
+}
+
+function resolveMultiChoiceAnswers(question: ExamQuestion, value: ExamAttemptAnswerValue): boolean {
+    if (!Array.isArray(value)) return false;
+
+    const options = question.content.options ?? [];
+    const answerKey = Array.isArray(question.content.correctAnswer)
+        ? question.content.correctAnswer
+        : [];
+
+    // Guard: empty answer key should never be treated as correct
+    if (answerKey.length === 0) return false;
+
+    // Always normalize to text for consistent cross-type comparison.
+    // This fixes the bug where index-keyed answers silently dropped string submissions.
+    const toTextSet = (items: unknown[]): Set<string> =>
+        new Set(
+            items
+                .map((item) => resolveOptionToText(item, options))
+                .filter((item): item is string => item !== null && item.length > 0),
+        );
+
+    const expected = toTextSet(answerKey);
+    const received = toTextSet(value);
+
+    if (expected.size !== received.size) return false;
+    return Array.from(expected).every((item) => received.has(item));
+}
+
+function resolveIdentificationAnswer(
+    question: ExamQuestion,
+    value: ExamAttemptAnswerValue,
+): boolean {
+    if (typeof value !== 'string') return false;
+
+    const caseSensitive = question.content.caseSensitive ?? false;
+    const acceptedAnswers = question.content.acceptedAnswers?.length
+        ? question.content.acceptedAnswers
+        : typeof question.content.correctAnswer === 'string'
+          ? [question.content.correctAnswer]
+          : [];
+
+    const normalizedValue = normalizeText(value, caseSensitive);
+    return acceptedAnswers.some(
+        (answer) => normalizeText(answer, caseSensitive) === normalizedValue,
+    );
+}
+
+function resolveFillBlankAnswer(question: ExamQuestion, value: ExamAttemptAnswerValue): boolean {
+    if (!Array.isArray(value)) return false;
+
+    const caseSensitive = question.content.caseSensitive ?? false;
+    const expectedBlanks = question.content.blanks ?? [];
+
+    if (expectedBlanks.length === 0) return false;
+    if (value.length < expectedBlanks.length) return false;
+
+    return expectedBlanks.every((blank, index) => {
+        const submittedValue = value[index];
+        return (
+            typeof submittedValue === 'string' &&
+            normalizeText(submittedValue, caseSensitive) === normalizeText(blank, caseSensitive)
+        );
+    });
+}
+
+function resolveMatchingAnswer(question: ExamQuestion, value: ExamAttemptAnswerValue): boolean {
+    if (!value || typeof value !== 'object' || Array.isArray(value)) return false;
+
+    const submittedAnswers = value as Record<string, unknown>;
+    const pairs = question.content.pairs ?? [];
+    // Fixed: now respects caseSensitive, consistent with IDENTIFICATION and FILL_BLANK
+    const caseSensitive = question.content.caseSensitive ?? false;
+
+    if (pairs.length === 0) return false;
+
+    return pairs.every((pair) => {
+        const submittedValue = submittedAnswers[pair.left];
+        return (
+            typeof submittedValue === 'string' &&
+            normalizeText(submittedValue, caseSensitive) ===
+                normalizeText(pair.right, caseSensitive)
+        );
+    });
+}
+
+function resolveEnumerationAnswer(question: ExamQuestion, value: ExamAttemptAnswerValue): boolean {
+    if (!Array.isArray(value)) return false;
+
+    const acceptedAnswers = question.content.acceptedAnswers ?? question.content.blanks ?? [];
+
+    if (acceptedAnswers.length === 0) return false;
+
+    const expected = acceptedAnswers.map((answer) => normalizeText(answer)).sort();
+    const received = value
+        .filter((item): item is string => typeof item === 'string' && item.trim().length > 0)
+        .map((item) => normalizeText(item))
+        .sort();
+
+    if (expected.length !== received.length) return false;
+    return expected.every((item, index) => item === received[index]);
+}
+
+// ─── Public API ───────────────────────────────────────────────────────────────
+
+export function isCorrectAnswer(
+    question: ExamQuestion,
+    value: ExamAttemptAnswerValue,
+): boolean | null {
+    switch (question.type) {
+        case 'MULTIPLE_CHOICE':
+            return resolveSingleChoiceAnswer(question, value);
+        case 'MULTIPLE_RESPONSE':
+            return resolveMultiChoiceAnswers(question, value);
+        case 'TRUE_FALSE': {
+            const submitted = toBoolean(value);
+            const expected = resolveTrueFalseExpected(question);
+            if (submitted === null || expected === null) return false;
+            return submitted === expected;
+        }
+        case 'IDENTIFICATION':
+            return resolveIdentificationAnswer(question, value);
+        case 'FILL_BLANK':
+            return resolveFillBlankAnswer(question, value);
+        case 'MATCHING':
+            return resolveMatchingAnswer(question, value);
+        case 'ENUMERATION':
+            return resolveEnumerationAnswer(question, value);
+        case 'ESSAY':
+            return null;
+        default:
+            return false;
+    }
+}
+
+export function resolveQuestionCorrectAnswer(
+    question: ExamQuestion,
+): ExamQuestionReportCorrectAnswer {
+    switch (question.type) {
+        case 'MULTIPLE_CHOICE': {
+            const answerKey = question.content.correctAnswer;
+            const options = question.content.options ?? [];
+            if (typeof answerKey === 'number') return options[answerKey] ?? answerKey;
+            return typeof answerKey === 'string' ? answerKey : null;
+        }
+        case 'MULTIPLE_RESPONSE': {
+            const answerKey = Array.isArray(question.content.correctAnswer)
+                ? question.content.correctAnswer
+                : [];
+            const options = question.content.options ?? [];
+            return answerKey.map((item) =>
+                typeof item === 'number' ? (options[item] ?? item) : item,
+            );
+        }
+        case 'TRUE_FALSE':
+            return resolveTrueFalseExpected(question);
+        case 'IDENTIFICATION':
+            return question.content.acceptedAnswers?.length
+                ? question.content.acceptedAnswers
+                : typeof question.content.correctAnswer === 'string'
+                  ? [question.content.correctAnswer]
+                  : null;
+        case 'FILL_BLANK':
+            return question.content.blanks ?? null;
+        case 'MATCHING':
+            return (question.content.pairs ?? []).reduce<Record<string, string>>((acc, pair) => {
+                acc[pair.left] = pair.right;
+                return acc;
+            }, {});
+        case 'ENUMERATION':
+            return question.content.acceptedAnswers ?? question.content.blanks ?? null;
+        case 'ESSAY':
+            return null;
+        default:
+            return null;
+    }
+}
