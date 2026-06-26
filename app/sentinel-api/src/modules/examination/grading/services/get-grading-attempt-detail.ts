@@ -1,5 +1,6 @@
 import { type DbClient } from '@sentinel/db';
 import { buildExamAttemptQuestionReports } from '@sentinel/shared';
+import type { PassageType } from '@sentinel/shared/types';
 import { HTTPException } from 'hono/http-exception';
 import { sql } from 'kysely';
 
@@ -66,7 +67,13 @@ export async function getGradingAttemptDetail({
             'qbq.source_page_number as sourcePageNumber',
             'qbq.source_evidence as sourceEvidence',
             'eq.passage_content as passageContent',
-            'eq.passage_type as passageType',
+            sql<PassageType | null>`
+                CASE
+                    WHEN eq.passage_type IS NULL THEN NULL
+                    WHEN eq.passage_type = 'html' THEN 'html'
+                    ELSE 'plain'
+                END
+            `.as('passageType'),
             'eq.content as content',
             'eq.points as points',
             'eq.order_index as orderIndex',
@@ -139,7 +146,7 @@ export async function getGradingAttemptDetail({
             sourcePageNumber: q.sourcePageNumber ?? null,
             sourceEvidence: q.sourceEvidence ?? null,
             passageContent: q.passageContent ?? null,
-            passageType: q.passageType === 'html' ? 'html' : q.passageType ? 'plain' : null,
+            passageType: q.passageType,
             content: q.content as any,
             points: q.points,
             orderIndex: q.orderIndex,

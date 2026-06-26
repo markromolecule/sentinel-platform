@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useExamsQuery } from '@sentinel/hooks';
 import { Badge, Button, Card, CardContent, CardHeader, CardTitle } from '@sentinel/ui';
 import { ArrowLeft, CalendarDays, FileText, Users } from 'lucide-react';
@@ -22,20 +22,20 @@ export default function ExamReportsIndexPage() {
     const pageSize = 9;
 
     const reportableExams = useMemo(
-        () => exams.filter((exam) => exam.publishedAt || exam.attemptId || exam.studentsCount >= 0),
+        () =>
+            exams.filter(
+                (exam) => exam.publishedAt || exam.attemptId || exam.studentsCount != null,
+            ),
         [exams],
     );
 
     const pageCount = Math.max(1, Math.ceil(reportableExams.length / pageSize));
-
-    useEffect(() => {
-        setPage(1);
-    }, [reportableExams.length]);
+    const safePage = Math.min(page, pageCount);
 
     const visibleExams = useMemo(() => {
-        const startIndex = (page - 1) * pageSize;
+        const startIndex = (safePage - 1) * pageSize;
         return reportableExams.slice(startIndex, startIndex + pageSize);
-    }, [page, pageSize, reportableExams]);
+    }, [safePage, pageSize, reportableExams]);
 
     return (
         <div className="mx-auto flex w-full max-w-6xl flex-col gap-6 p-4 md:p-6">
@@ -106,7 +106,7 @@ export default function ExamReportsIndexPage() {
 
             {!isLoading ? (
                 <ExamsPagination
-                    page={page}
+                    page={safePage}
                     pageCount={pageCount}
                     pageSize={pageSize}
                     totalCount={reportableExams.length}

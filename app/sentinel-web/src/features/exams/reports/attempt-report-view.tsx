@@ -1,6 +1,4 @@
-'use client';
-
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import type {
     AttemptGradingDetailType,
     GradingQuestionType,
@@ -68,6 +66,20 @@ function getQuestionPassage(question?: GradingQuestionType) {
     });
 }
 
+function normalizeOverrideDrafts(
+    itemOverrides: AttemptGradingDetailType['itemOverrides'],
+): Record<string, { awardedScore: string; reason: string }> {
+    return Object.fromEntries(
+        Object.entries(itemOverrides ?? {}).map(([questionId, override]) => [
+            questionId,
+            {
+                awardedScore: String(override.awardedScore),
+                reason: override.reason ?? '',
+            },
+        ]),
+    );
+}
+
 /**
  * Renders a question-by-question exam attempt report and optionally exposes
  * override controls for instructor review workflows.
@@ -81,21 +93,7 @@ export function AttemptReportView({
 }: AttemptReportViewProps) {
     const [overrideDrafts, setOverrideDrafts] = useState<
         Record<string, { awardedScore: string; reason: string }>
-    >({});
-
-    useEffect(() => {
-        setOverrideDrafts(
-            Object.fromEntries(
-                Object.entries(attempt.itemOverrides ?? {}).map(([questionId, override]) => [
-                    questionId,
-                    {
-                        awardedScore: String(override.awardedScore),
-                        reason: override.reason ?? '',
-                    },
-                ]),
-            ),
-        );
-    }, [attempt.itemOverrides]);
+    >(() => normalizeOverrideDrafts(attempt.itemOverrides));
 
     const reportCards = useMemo(
         () =>
@@ -110,7 +108,11 @@ export function AttemptReportView({
         [attempt.questionReports, questions],
     );
 
-    const handleOverrideChange = (questionId: string, field: 'awardedScore' | 'reason', value: string) => {
+    const handleOverrideChange = (
+        questionId: string,
+        field: 'awardedScore' | 'reason',
+        value: string,
+    ) => {
         setOverrideDrafts((prev) => ({
             ...prev,
             [questionId]: {
@@ -179,7 +181,9 @@ export function AttemptReportView({
                         </CardTitle>
                     </CardHeader>
                     <CardContent>
-                        <p className="text-sm">{attempt.feedback || 'No overall feedback recorded.'}</p>
+                        <p className="text-sm">
+                            {attempt.feedback || 'No overall feedback recorded.'}
+                        </p>
                     </CardContent>
                 </Card>
             </div>
@@ -228,7 +232,8 @@ export function AttemptReportView({
                                                             'No linked document'}
                                                     </span>
                                                     <span>
-                                                        {report.question?.sourcePageNumber !== null &&
+                                                        {report.question?.sourcePageNumber !==
+                                                            null &&
                                                         report.question?.sourcePageNumber !==
                                                             undefined
                                                             ? `Referenced page ${report.question.sourcePageNumber}`
@@ -237,7 +242,7 @@ export function AttemptReportView({
                                                 </div>
                                             </div>
                                             <div
-                                                className="text-sm leading-7 [&_img]:max-h-64 [&_img]:w-auto [&_img]:rounded-md [&_img]:border sm:text-[15px]"
+                                                className="text-sm leading-7 sm:text-[15px] [&_img]:max-h-64 [&_img]:w-auto [&_img]:rounded-md [&_img]:border"
                                                 dangerouslySetInnerHTML={{
                                                     __html: renderedPassage.html,
                                                 }}
@@ -276,7 +281,9 @@ export function AttemptReportView({
                                                     <p className="text-muted-foreground text-xs uppercase">
                                                         {criterion}
                                                     </p>
-                                                    <p className="mt-2 text-lg font-semibold">{value}</p>
+                                                    <p className="mt-2 text-lg font-semibold">
+                                                        {formatAnswerValue(value)}
+                                                    </p>
                                                 </div>
                                             ),
                                         )}
