@@ -64,12 +64,51 @@ export const attemptGradingDetailSchema = z.object({
     answers: z.record(z.string(), z.any()),
     evaluations: z.record(z.string(), z.any()),
     feedback: z.string().nullable(),
+    itemOverrides: z.record(
+        z.string(),
+        z.object({
+            awardedScore: z.number().min(0),
+            reason: z.string().nullable().optional(),
+            overriddenBy: z.string().uuid().nullable().optional(),
+            overriddenAt: z.string().nullable().optional(),
+        }),
+    ),
+    grading: z.object({
+        finalizedAt: z.string().nullable().optional(),
+        finalizedBy: z.string().uuid().nullable().optional(),
+    }),
+    questionReports: z.array(
+        z.object({
+            questionId: z.string().uuid(),
+            questionType: z.string(),
+            prompt: z.string(),
+            answer: z.any(),
+            correctAnswer: z.any().nullable(),
+            isCorrect: z.boolean().nullable(),
+            awardedScore: z.number().nullable(),
+            maxScore: z.number(),
+            evaluation: z.record(z.string(), z.any()).nullable(),
+            override: z
+                .object({
+                    awardedScore: z.number().min(0),
+                    reason: z.string().nullable().optional(),
+                    overriddenBy: z.string().uuid().nullable().optional(),
+                    overriddenAt: z.string().nullable().optional(),
+                })
+                .nullable(),
+        }),
+    ),
 });
 
 export const gradingQuestionSchema = z.object({
     id: z.string().uuid(),
     examId: z.string().uuid(),
     type: z.string(),
+    sourceFileName: z.string().nullable().optional(),
+    sourcePageNumber: z.number().int().nullable().optional(),
+    sourceEvidence: z.string().nullable().optional(),
+    passageContent: z.string().nullable().optional(),
+    passageType: z.enum(['plain', 'html']).nullable().optional(),
     content: z.record(z.string(), z.any()),
     points: z.number(),
     orderIndex: z.number(),
@@ -89,7 +128,17 @@ export const updateGradingAttemptBodySchema = z.object({
             feedback: z.string().optional().nullable(),
         }),
     ),
+    itemOverrides: z
+        .record(
+            z.string().uuid(),
+            z.object({
+                awardedScore: z.number().min(0),
+                reason: z.string().optional().nullable(),
+            }),
+        )
+        .optional(),
     feedback: z.string().optional().nullable(),
+    finalize: z.boolean().optional(),
 });
 
 export type AttemptGradingDetailType = z.infer<typeof attemptGradingDetailSchema>;

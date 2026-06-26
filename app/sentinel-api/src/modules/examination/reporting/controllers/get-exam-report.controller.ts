@@ -16,6 +16,7 @@ export const getExamReportRoute = createRoute({
     summary: 'Get the exam report for instructors and proctors',
     request: {
         params: getExamReportSchema.params,
+        query: getExamReportSchema.query,
     },
     responses: {
         200: {
@@ -31,6 +32,7 @@ export const getExamReportRoute = createRoute({
 
 export const getExamReportRouteHandler: AppRouteHandler<typeof getExamReportRoute> = async (c) => {
     const { id } = c.req.valid('param');
+    const query = c.req.valid('query');
     const supabaseUser = c.get('supabaseUser') as any;
     const user = c.get('user');
     const resolvedRole = await resolveAssessmentActorRole({
@@ -51,6 +53,10 @@ export const getExamReportRouteHandler: AppRouteHandler<typeof getExamReportRout
         }),
         viewerRole: role,
         userId: user?.id,
+        search: query.search,
+        sectionId: query.sectionId,
+        page: query.page,
+        pageSize: query.pageSize,
     });
 
     return c.json({

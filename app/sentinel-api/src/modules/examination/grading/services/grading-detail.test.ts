@@ -72,6 +72,18 @@ describe('Grading attempt details and update services', () => {
                             feedback: 'Good work',
                         },
                     },
+                    _itemOverrides: {
+                        'q-essay-1': {
+                            awardedScore: 4,
+                            reason: 'Manual adjustment',
+                            overriddenBy: '99999999-9999-9999-9999-999999999999',
+                            overriddenAt: '2026-04-18T10:00:00.000Z',
+                        },
+                    },
+                    _grading: {
+                        finalizedAt: '2026-04-18T10:05:00.000Z',
+                        finalizedBy: '99999999-9999-9999-9999-999999999999',
+                    },
                     _feedback: 'Overall solid effort.',
                 },
                 studentName: 'Alice Student',
@@ -82,7 +94,12 @@ describe('Grading attempt details and update services', () => {
                     id: 'q-obj-1',
                     examId: '22222222-2222-2222-2222-222222222222',
                     type: 'MULTIPLE_CHOICE',
-                    content: { prompt: 'Objective Prompt', options: ['A', 'B'] },
+                    sourceFileName: 'math-source.pdf',
+                    sourcePageNumber: 2,
+                    sourceEvidence: 'Legacy source excerpt',
+                    passageContent: '<p><strong>Passage first</strong></p>',
+                    passageType: 'html',
+                    content: { prompt: 'Objective Prompt', options: ['A', 'B'], correctAnswer: 0 },
                     points: 5,
                     orderIndex: 0,
                 },
@@ -90,6 +107,11 @@ describe('Grading attempt details and update services', () => {
                     id: 'q-essay-1',
                     examId: '22222222-2222-2222-2222-222222222222',
                     type: 'ESSAY',
+                    sourceFileName: null,
+                    sourcePageNumber: null,
+                    sourceEvidence: null,
+                    passageContent: null,
+                    passageType: null,
                     content: { prompt: 'Essay Prompt', maxLength: 1000 },
                     points: 5,
                     orderIndex: 1,
@@ -110,6 +132,41 @@ describe('Grading attempt details and update services', () => {
             });
             expect(result.attempt.evaluations).toEqual(mockAttempt.answerSnapshot._evaluations);
             expect(result.attempt.feedback).toBe('Overall solid effort.');
+            expect(result.attempt.itemOverrides).toEqual(mockAttempt.answerSnapshot._itemOverrides);
+            expect(result.attempt.grading).toEqual(mockAttempt.answerSnapshot._grading);
+            expect(result.attempt.questionReports).toEqual([
+                {
+                    questionId: 'q-obj-1',
+                    questionType: 'MULTIPLE_CHOICE',
+                    prompt: 'Objective Prompt',
+                    answer: 'A',
+                    correctAnswer: 'A',
+                    isCorrect: true,
+                    awardedScore: 5,
+                    maxScore: 5,
+                    evaluation: null,
+                    override: null,
+                },
+                {
+                    questionId: 'q-essay-1',
+                    questionType: 'ESSAY',
+                    prompt: 'Essay Prompt',
+                    answer: 'Student essay response text',
+                    correctAnswer: null,
+                    isCorrect: null,
+                    awardedScore: 4,
+                    maxScore: 5,
+                    evaluation: mockAttempt.answerSnapshot._evaluations['q-essay-1'],
+                    override: mockAttempt.answerSnapshot._itemOverrides['q-essay-1'],
+                },
+            ]);
+            expect(result.questions[0]).toMatchObject({
+                sourceFileName: 'math-source.pdf',
+                sourcePageNumber: 2,
+                sourceEvidence: 'Legacy source excerpt',
+                passageContent: '<p><strong>Passage first</strong></p>',
+                passageType: 'html',
+            });
             expect(result.questions).toHaveLength(2);
         });
     });
@@ -139,7 +196,11 @@ describe('Grading attempt details and update services', () => {
                     id: 'q-obj-1',
                     examId: '22222222-2222-2222-2222-222222222222',
                     type: 'MULTIPLE_CHOICE',
-                    content: { prompt: 'Objective Prompt', options: ['A', 'B'] },
+                    content: {
+                        prompt: 'Objective Prompt',
+                        options: ['A', 'B'],
+                        correctAnswer: 0,
+                    },
                     points: 5,
                     orderIndex: 0,
                 },
@@ -156,9 +217,8 @@ describe('Grading attempt details and update services', () => {
             mockDb.executeTakeFirst.mockResolvedValue(mockAttempt);
             mockDb.execute.mockResolvedValue(mockQuestions);
 
-            // Mock auto-grade results
             vi.mocked(scoreExamAttempt).mockReturnValue({
-                score: 5, // Auto-graded score for objective item
+                score: 5,
                 totalScore: 10,
                 percentage: 50,
                 answeredCount: 2,
@@ -167,7 +227,6 @@ describe('Grading attempt details and update services', () => {
                 requiresManualReview: true,
             });
 
-            // Mock essay weighted score calculation: Content(4), all others (4) -> 4 points (100% of 5 max points) -> 5
             vi.mocked(calculateEssayWeightedScore).mockReturnValue(3.5);
 
             const evaluationsInput = {
@@ -183,29 +242,115 @@ describe('Grading attempt details and update services', () => {
                 },
             };
 
-            const executeUpdateMock = vi.fn();
-            mockDb.execute.mockImplementation(async () => {
-                if (mockDb.execute.mock.calls.length === 1) {
-                    return mockQuestions;
-                }
-                executeUpdateMock();
-                return [];
-            });
+            const setSpy = vi.fn().mockReturnValue(mockDb);
+            mockDb.set = setSpy;
 
             const result = await updateGradingAttempt({
                 dbClient: mockDb as DbClient,
                 attemptId: '11111111-1111-1111-1111-111111111111',
+                actorUserId: '77777777-7777-7777-7777-777777777777',
                 evaluations: evaluationsInput,
+                itemOverrides: {
+                    'q-essay-1': {
+                        awardedScore: 4,
+                        reason: 'Rounded up after review',
+                    },
+                },
                 feedback: 'Nice job Alice!',
+                finalize: true,
             });
 
-            // Auto score (5) + Essay score (3.5) = 8.5 -> rounds to 9
             expect(result.score).toBe(9);
             expect(scoreExamAttempt).toHaveBeenCalled();
             expect(calculateEssayWeightedScore).toHaveBeenCalledWith(
                 evaluationsInput['q-essay-1'].scores,
                 5,
             );
+            expect(setSpy).toHaveBeenCalledWith(
+                expect.objectContaining({
+                    score: 9,
+                    answer_snapshot: expect.objectContaining({
+                        _evaluations: {
+                            'q-essay-1': expect.objectContaining({
+                                score: 3.5,
+                                feedback: 'Nice argument structures.',
+                            }),
+                        },
+                        _itemOverrides: {
+                            'q-essay-1': expect.objectContaining({
+                                awardedScore: 4,
+                                reason: 'Rounded up after review',
+                                overriddenBy: '77777777-7777-7777-7777-777777777777',
+                            }),
+                        },
+                        _grading: expect.objectContaining({
+                            finalizedBy: '77777777-7777-7777-7777-777777777777',
+                        }),
+                        _feedback: 'Nice job Alice!',
+                    }),
+                }),
+            );
+        });
+
+        it('rejects overrides above the question max points', async () => {
+            const mockAttempt = {
+                attemptId: '11111111-1111-1111-1111-111111111111',
+                examId: '22222222-2222-2222-2222-222222222222',
+                examTitle: 'History Final',
+                subjectTitle: 'History',
+                studentId: '33333333-3333-3333-3333-333333333333',
+                studentNumber: '2026-0001',
+                completedAt: new Date('2026-04-18T09:30:00.000Z'),
+                score: 5,
+                totalScore: 10,
+                status: 'COMPLETED',
+                answerSnapshot: {
+                    'q-obj-1': 'A',
+                },
+                studentName: 'Alice Student',
+            };
+
+            const mockQuestions = [
+                {
+                    id: 'q-obj-1',
+                    examId: '22222222-2222-2222-2222-222222222222',
+                    type: 'MULTIPLE_CHOICE',
+                    content: {
+                        prompt: 'Objective Prompt',
+                        options: ['A', 'B'],
+                        correctAnswer: 0,
+                    },
+                    points: 5,
+                    orderIndex: 0,
+                },
+            ];
+
+            mockDb.executeTakeFirst.mockResolvedValue(mockAttempt);
+            mockDb.execute.mockResolvedValue(mockQuestions);
+            vi.mocked(scoreExamAttempt).mockReturnValue({
+                score: 5,
+                totalScore: 5,
+                percentage: 100,
+                answeredCount: 1,
+                autoGradableQuestionCount: 1,
+                manualReviewQuestionCount: 0,
+                requiresManualReview: false,
+            });
+
+            await expect(
+                updateGradingAttempt({
+                    dbClient: mockDb as DbClient,
+                    attemptId: '11111111-1111-1111-1111-111111111111',
+                    evaluations: {},
+                    itemOverrides: {
+                        'q-obj-1': {
+                            awardedScore: 6,
+                        },
+                    },
+                }),
+            ).rejects.toMatchObject({
+                status: 400,
+            });
         });
     });
 });

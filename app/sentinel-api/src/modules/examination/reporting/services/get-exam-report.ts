@@ -1,5 +1,6 @@
 import { type DbClient } from '@sentinel/db';
 import { sql } from 'kysely';
+import { paginateItems } from '../../../../lib/pagination';
 import type { AssessmentAllowedRole } from '../../assessment/assessment-access';
 import type { ExamReport } from '../reporting.dto';
 import { getReportingExamContext } from './get-reporting-exam-context';
@@ -20,6 +21,10 @@ type GetExamReportArgs = {
     institutionId?: string;
     viewerRole: AssessmentAllowedRole;
     userId?: string | null;
+    search?: string;
+    sectionId?: string;
+    page: number;
+    pageSize: number;
 };
 
 function parseDateValue(value?: string | Date | null) {
@@ -52,6 +57,10 @@ export async function getExamReport({
     institutionId,
     viewerRole,
     userId,
+    search,
+    sectionId,
+    page,
+    pageSize,
 }: GetExamReportArgs): Promise<ExamReport> {
     const exam = await getReportingExamContext({
         dbClient,
@@ -302,10 +311,49 @@ export async function getExamReport({
         active_override_type: activeOverrideMap.get(row.student_record_id) ?? null,
     }));
 
-    return buildExamReport({
+    const baseReport = buildExamReport({
         exam: mapReportExam(exam),
         students: enrichedStudentRows.map((row) => mapReportStudentSummary(row, exam.passingScore)),
         incidentBreakdownByType: incidentTypeBreakdown,
         incidentBreakdownBySeverity: incidentSeverityBreakdown,
     });
+
+    const normalizedSearch = search?.trim().toLowerCase() ?? '';
+    const filteredStudents = baseReport.students.filter((student) => {
+        if (sectionId && student.sectionId !== sectionId) {
+            return false;
+        }
+
+        if (!normalizedSearch) {
+            return true;
+        }
+
+        return [student.firstName, student.lastName, student.studentNo, student.sectionName]
+            .filter(Boolean)
+            .join(' ')
+            .toLowerCase()
+            .includes(normalizedSearch);
+    });
+
+    const paginatedStudents = paginateItems(filteredStudents, page, pageSize);
+    const sections = Array.from(
+        new Map(
+            baseReport.students
+                .map((student) =>
+                    student.sectionId && student.sectionName
+                        ? ([student.sectionId, student.sectionName] as const)
+                        : null,
+                )
+                .filter((entry): entry is readonly [string, string] => Boolean(entry)),
+        ).entries(),
+    )
+        .sort((left, right) => left[1].localeCompare(right[1]))
+        .map(([id, name]) => ({ id, name }));
+
+    return {
+        ...baseReport,
+        sections,
+        students: paginatedStudents.items,
+        studentsPagination: paginatedStudents.pagination,
+    };
 }

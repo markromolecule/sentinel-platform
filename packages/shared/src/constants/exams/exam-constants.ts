@@ -16,6 +16,7 @@ export const EXAM_QUERY_KEYS = {
     configuration: (id: string) => ['exams', id, 'configuration'] as const,
     lobbyCount: (id: string) => ['exams', id, 'lobby', 'count'] as const,
     report: (id: string) => ['exams', id, 'report'] as const,
+    attemptReport: (attemptId: string) => ['exams', 'attempt-report', attemptId] as const,
     monitoring: (id: string) => ['exams', id, 'monitoring'] as const,
     monitoringStudent: (id: string, studentId: string) =>
         ['exams', id, 'monitoring', studentId] as const,
