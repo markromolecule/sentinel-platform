@@ -1,6 +1,6 @@
 import { type DbClient } from '@sentinel/db';
 import { sql } from 'kysely';
-import { paginateItems } from '../../../../lib/pagination';
+import { isPaginatedResult, paginateItems } from '../../../../lib/pagination';
 import type { AssessmentAllowedRole } from '../../assessment/assessment-access';
 import type { ExamReport } from '../reporting.dto';
 import { getReportingExamContext } from './get-reporting-exam-context';
@@ -49,6 +49,19 @@ function compareOverrideRecency(left: StudentExamAccessOverride, right: StudentE
         0;
 
     return rightTime - leftTime;
+}
+
+function buildStudentsPagination(total: number, page: number, pageSize: number) {
+    const totalPages = Math.ceil(total / pageSize);
+    const visibleCount = Math.min(pageSize, Math.max(total - (page - 1) * pageSize, 0));
+
+    return {
+        page,
+        pageSize,
+        total,
+        totalPages,
+        hasMore: (page - 1) * pageSize + visibleCount < total,
+    };
 }
 
 export async function getExamReport({
@@ -350,10 +363,19 @@ export async function getExamReport({
         .sort((left, right) => left[1].localeCompare(right[1]))
         .map(([id, name]) => ({ id, name }));
 
+    if (isPaginatedResult(paginatedStudents)) {
+        return {
+            ...baseReport,
+            sections,
+            students: paginatedStudents.items,
+            studentsPagination: paginatedStudents.pagination,
+        };
+    }
+
     return {
         ...baseReport,
         sections,
-        students: paginatedStudents.items,
-        studentsPagination: paginatedStudents.pagination,
+        students: paginatedStudents,
+        studentsPagination: buildStudentsPagination(filteredStudents.length, page, pageSize),
     };
 }
