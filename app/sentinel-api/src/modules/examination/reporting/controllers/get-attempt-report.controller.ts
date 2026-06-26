@@ -1,7 +1,9 @@
 import { createRoute } from '@hono/zod-openapi';
+import { HTTPException } from 'hono/http-exception';
 import { type AppRouteHandler } from '../../../../types/hono';
 import { assertAssignedInstructorAttemptAccess } from '../../assign/services/exam-access';
 import {
+    type AssessmentAllowedRole,
     assertAssessmentAccess,
     resolveAssessmentActorRole,
     resolveAssessmentInstitutionId,
@@ -33,7 +35,7 @@ export const getAttemptReportRouteHandler: AppRouteHandler<typeof getAttemptRepo
     c,
 ) => {
     const { attemptId } = c.req.valid('param');
-    const supabaseUser = c.get('supabaseUser') as any;
+    const supabaseUser = c.get('supabaseUser');
     const user = c.get('user');
     const resolvedRole = await resolveAssessmentActorRole({
         dbClient: c.get('dbClient'),
@@ -47,23 +49,32 @@ export const getAttemptReportRouteHandler: AppRouteHandler<typeof getAttemptRepo
     });
 
     if (resolvedRole === 'student') {
-        const data = await ReportingService.getAttemptReport({
+        return respondWithAttemptReport(c, {
             dbClient: c.get('dbClient'),
             attemptId,
             institutionId,
             viewerRole: 'student',
             userId: user?.id,
         });
+    }
 
-        return c.json({
-            message: 'Attempt report fetched successfully',
-            data,
+    if (!resolvedRole) {
+        throw new HTTPException(403, {
+            message: 'Forbidden. Unable to resolve attempt report viewer role.',
         });
     }
 
     assertAssessmentAccess(resolvedRole);
+    const viewerRole = resolvedRole as AssessmentAllowedRole;
 
-    if (resolvedRole === 'instructor' && user?.id) {
+    if (resolvedRole === 'instructor') {
+        if (!user?.id) {
+            throw new HTTPException(403, {
+                message:
+                    'Forbidden. Instructor report access requires an authenticated instructor.',
+            });
+        }
+
         await assertAssignedInstructorAttemptAccess({
             dbClient: c.get('dbClient'),
             attemptId,
@@ -72,16 +83,28 @@ export const getAttemptReportRouteHandler: AppRouteHandler<typeof getAttemptRepo
         });
     }
 
-    const data = await ReportingService.getAttemptReport({
+    return respondWithAttemptReport(c, {
         dbClient: c.get('dbClient'),
         attemptId,
         institutionId,
-        viewerRole: resolvedRole,
+        viewerRole,
         userId: user?.id,
     });
-
-    return c.json({
-        message: 'Attempt report fetched successfully',
-        data,
-    });
 };
+
+type GetAttemptReportRouteContext = Parameters<AppRouteHandler<typeof getAttemptReportRoute>>[0];
+
+async function respondWithAttemptReport(
+    c: GetAttemptReportRouteContext,
+    args: Parameters<typeof ReportingService.getAttemptReport>[0],
+) {
+    const data = await ReportingService.getAttemptReport(args);
+
+    return c.json(
+        {
+            message: 'Attempt report fetched successfully',
+            data,
+        },
+        200,
+    );
+}
