@@ -6,8 +6,8 @@ import {
     type ReportIncidentTypeBreakdownRow,
     type ReportStudentRow,
 } from './reporting-response.types';
-import { mapStudentSummary } from './student-reporting.helpers';
-import { buildActionItems, buildReportSummary, sortStudents } from './summary-reporting.helpers';
+import { mapStudentSummary } from '../helpers/student-reporting.helpers';
+import { buildActionItems, buildReportSummary, sortStudents } from '../helpers/summary-reporting.helpers';
 
 export type { ReportIncidentSeverityBreakdownRow, ReportIncidentTypeBreakdownRow, ReportStudentRow };
 

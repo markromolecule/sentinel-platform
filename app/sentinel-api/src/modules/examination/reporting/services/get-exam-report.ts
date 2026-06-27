@@ -3,7 +3,7 @@ import type { AssessmentAllowedRole } from '../../assessment/assessment-access';
 import type { ExamReport } from '../reporting.dto';
 import { getReportingExamContext } from './get-reporting-exam-context';
 import { buildExamReport, mapReportExam, mapReportStudentSummary } from './map-reporting-response';
-import { buildOverrideRecencyMaps, loadExamReportSourceData } from './get-exam-report.query.helpers';
+import { buildOverrideRecencyMaps, loadExamReportSourceData } from './exam-report-queries';
 import {
     buildSections,
     enrichStudentRows,

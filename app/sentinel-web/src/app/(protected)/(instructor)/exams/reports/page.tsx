@@ -1,10 +1,10 @@
 'use client';
 
 import Link from 'next/link';
-import { useMemo, useState } from 'react';
-import { useExamsQuery } from '@sentinel/hooks';
-import { Badge, Button, Card, CardContent, CardHeader, CardTitle } from '@sentinel/ui';
-import { ArrowLeft, CalendarDays, FileText, Users } from 'lucide-react';
+import { useDeferredValue, useState } from 'react';
+import { useExamReportsListQuery } from '@sentinel/hooks';
+import { Badge, Button, Card, CardContent, CardHeader, CardTitle, Input } from '@sentinel/ui';
+import { CalendarDays, FileText, Search, Users } from 'lucide-react';
 import { ExamsPagination } from '@/features/exams/_components/views/exams-pagination';
 
 function formatDateTime(value?: string | null) {
@@ -17,31 +17,30 @@ function formatDateTime(value?: string | null) {
 }
 
 export default function ExamReportsIndexPage() {
-    const { data: exams = [], isLoading } = useExamsQuery();
     const [page, setPage] = useState(1);
+    const [searchValue, setSearchValue] = useState('');
+    const deferredSearch = useDeferredValue(searchValue);
     const pageSize = 9;
 
-    const reportableExams = useMemo(
-        () =>
-            exams.filter(
-                (exam) => exam.publishedAt || exam.attemptId || exam.studentsCount != null,
-            ),
-        [exams],
-    );
+    const { data, isLoading } = useExamReportsListQuery({
+        page,
+        limit: pageSize,
+        search: deferredSearch.trim() || undefined,
+    });
 
-    const pageCount = Math.max(1, Math.ceil(reportableExams.length / pageSize));
-    const safePage = Math.min(page, pageCount);
+    const reportableExams = data?.data ?? [];
+    const totalCount = data?.meta?.total ?? 0;
+    const pageCount = data?.meta?.totalPages ?? 1;
 
-    const visibleExams = useMemo(() => {
-        const startIndex = (safePage - 1) * pageSize;
-        return reportableExams.slice(startIndex, startIndex + pageSize);
-    }, [safePage, pageSize, reportableExams]);
+    const handleSearchChange = (val: string) => {
+        setSearchValue(val);
+        setPage(1);
+    };
 
     return (
         <div className="mx-auto flex w-full max-w-6xl flex-col gap-6 p-4 md:p-6">
             <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
                 <div className="space-y-2">
-                    <div className="text-muted-foreground text-sm">Exams / Reports</div>
                     <div className="flex items-center gap-3">
                         <FileText className="h-6 w-6 text-slate-500" />
                         <div>
@@ -52,12 +51,15 @@ export default function ExamReportsIndexPage() {
                         </div>
                     </div>
                 </div>
-                <Button variant="outline" asChild>
-                    <Link href="/exams">
-                        <ArrowLeft className="mr-2 h-4 w-4" />
-                        Back to Exams
-                    </Link>
-                </Button>
+                <div className="relative w-full md:w-72">
+                    <Search className="text-muted-foreground pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
+                    <Input
+                        value={searchValue}
+                        onChange={(e) => handleSearchChange(e.target.value)}
+                        placeholder="Search exam reports..."
+                        className="pl-9"
+                    />
+                </div>
             </div>
 
             <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
@@ -65,10 +67,10 @@ export default function ExamReportsIndexPage() {
                     ? Array.from({ length: 6 }).map((_, index) => (
                           <div key={index} className="bg-muted h-36 animate-pulse rounded-xl" />
                       ))
-                    : visibleExams.map((exam) => (
+                    : reportableExams.map((exam) => (
                           <Card
                               key={exam.id}
-                              className="border-border/70 overflow-hidden shadow-sm"
+                              className="border-border/70 flex h-full flex-col overflow-hidden shadow-sm"
                           >
                               <CardHeader className="space-y-3 pb-3">
                                   <div className="flex items-start justify-between gap-3">
@@ -85,16 +87,18 @@ export default function ExamReportsIndexPage() {
                                       </Badge>
                                   </div>
                               </CardHeader>
-                              <CardContent className="space-y-3 pt-0">
-                                  <div className="text-muted-foreground flex items-center gap-2 text-sm">
-                                      <CalendarDays className="h-4 w-4" />
-                                      <span>Scheduled {formatDateTime(exam.scheduledDate)}</span>
+                              <CardContent className="flex flex-1 flex-col justify-between gap-3 pt-0">
+                                  <div className="space-y-3">
+                                      <div className="text-muted-foreground flex items-center gap-2 text-sm">
+                                          <CalendarDays className="h-4 w-4" />
+                                          <span>Scheduled {formatDateTime(exam.scheduledDate)}</span>
+                                      </div>
+                                      <div className="text-muted-foreground flex items-center gap-2 text-sm">
+                                          <Users className="h-4 w-4" />
+                                          <span>{exam.studentsCount ?? 0} student attempts</span>
+                                      </div>
                                   </div>
-                                  <div className="text-muted-foreground flex items-center gap-2 text-sm">
-                                      <Users className="h-4 w-4" />
-                                      <span>{exam.studentsCount ?? 0} student attempts</span>
-                                  </div>
-                                  <Button asChild className="mt-1 w-full">
+                                  <Button asChild className="mt-auto w-full">
                                       <Link href={`/exams/${exam.id}/report`}>
                                           Open Report Summary
                                       </Link>
@@ -104,12 +108,18 @@ export default function ExamReportsIndexPage() {
                       ))}
             </div>
 
-            {!isLoading ? (
+            {!isLoading && reportableExams.length === 0 && (
+                <div className="text-muted-foreground py-12 text-center">
+                    No exam reports found.
+                </div>
+            )}
+
+            {!isLoading && reportableExams.length > 0 ? (
                 <ExamsPagination
-                    page={safePage}
+                    page={page}
                     pageCount={pageCount}
                     pageSize={pageSize}
-                    totalCount={reportableExams.length}
+                    totalCount={totalCount}
                     onPageChange={setPage}
                 />
             ) : null}

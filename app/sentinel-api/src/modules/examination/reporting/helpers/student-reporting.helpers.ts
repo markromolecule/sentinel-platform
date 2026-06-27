@@ -1,5 +1,5 @@
 import type { ExamReportStudentSummary } from '../reporting.dto';
-import type { ReportStudentRow } from './reporting-response.types';
+import type { ReportStudentRow } from '../services/reporting-response.types';
 import {
     getPercentage,
     needsRetake,
@@ -8,10 +8,10 @@ import {
     resolveAttemptKind,
     resolveStudentNames,
     isSubmitted,
-} from './reporting-response.shared';
-import { toIsoDate, toNumber } from './reporting-response.types';
+} from '../services/reporting-response.shared';
+import { toIsoDate, toNumber } from '../services/reporting-response.types';
 
-export { getPercentage, needsRetake, needsReview, normalizeIncidentSeverity, resolveAttemptKind, resolveStudentNames, isSubmitted } from './reporting-response.shared';
+export { getPercentage, needsRetake, needsReview, normalizeIncidentSeverity, resolveAttemptKind, resolveStudentNames, isSubmitted } from '../services/reporting-response.shared';
 
 export function buildActionItemSource(student: ExamReportStudentSummary): ReportStudentRow {
     return {
@@ -56,6 +56,8 @@ export function buildActionItem(
         firstName,
         lastName,
         reason,
+        sectionId: row.section_id ?? null,
+        sectionName: row.section_name ?? null,
     };
 }
 

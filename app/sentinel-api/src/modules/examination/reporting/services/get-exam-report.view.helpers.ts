@@ -1,5 +1,5 @@
 import type { ExamReportStudentSummary } from '../reporting.dto';
-import type { EnrichedReportStudentRow } from './get-exam-report.query.helpers';
+import type { EnrichedReportStudentRow } from './exam-report-queries';
 import type { ReportStudentRow } from './reporting-response.types';
 import type { StudentExamAccessOverride } from '../../student-overrides/student-overrides.dto';
 

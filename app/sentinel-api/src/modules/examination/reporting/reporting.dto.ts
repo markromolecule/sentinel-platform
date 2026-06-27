@@ -67,3 +67,28 @@ export type ExamReportSummary = z.infer<typeof examReportSummarySchema>;
 export type ExamReportStudentSummary = z.infer<typeof examReportStudentSummarySchema>;
 export type ExamReportActionItems = z.infer<typeof examReportActionItemsSchema>;
 export type ExamReportActionItem = z.infer<typeof examReportActionItemSchema>;
+
+export const getExamReportsQuerySchema = z.object({
+    page: z.coerce.number().int().min(1).default(1).optional().openapi({ description: 'Page index to fetch' }),
+    limit: z.coerce.number().int().min(1).max(100).default(9).optional().openapi({ description: 'Number of items per page' }),
+    search: z.string().optional().openapi({ description: 'Search filter' }),
+});
+
+export const examReportSummaryItemSchema = z.object(Schema.examSummarySchema.shape).openapi('ExamReportSummaryItem');
+
+export const getExamReportsSchema = {
+    query: getExamReportsQuerySchema,
+    response: z.object({
+        message: z.string(),
+        data: z.array(examReportSummaryItemSchema),
+        meta: z.object({
+            total: z.number().int(),
+            page: z.number().int(),
+            limit: z.number().int(),
+            totalPages: z.number().int(),
+        }),
+    }),
+};
+
+export type GetExamReportsQuery = z.infer<typeof getExamReportsQuerySchema>;
+

@@ -295,6 +295,13 @@ export type GetExamReportParams = {
     pageSize?: number;
 };
 
+export type GetExamReportsParams = {
+    page?: number;
+    limit?: number;
+    search?: string;
+};
+
+
 export type CreateExamPayload = {
     title: string;
     description: string;

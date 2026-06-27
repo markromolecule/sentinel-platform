@@ -46,6 +46,8 @@ export const examReportActionItemSchema = z.object({
     firstName: z.string(),
     lastName: z.string(),
     reason: z.string(),
+    sectionId: z.string().uuid().nullable().optional(),
+    sectionName: z.string().nullable().optional(),
 });
 
 export const examReportExamSchema = z.object({
