@@ -6,6 +6,10 @@ import {
     updateGradingAttempt as updateGradingAttemptService,
     type UpdateGradingAttemptArgs,
 } from './services/update-grading-attempt';
+import {
+    bulkFinalizeAttempts as bulkFinalizeAttemptsService,
+    type BulkFinalizeAttemptsArgs,
+} from './services/bulk-finalize-attempts';
 
 export class GradingService {
     static async getGradingExams(params: {
@@ -37,5 +41,9 @@ export class GradingService {
 
     static async updateGradingAttempt(params: UpdateGradingAttemptArgs) {
         return await updateGradingAttemptService(params);
+    }
+
+    static async bulkFinalizeAttempts(params: BulkFinalizeAttemptsArgs) {
+        return await bulkFinalizeAttemptsService(params);
     }
 }

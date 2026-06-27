@@ -81,3 +81,16 @@ export async function updateGradingAttempt(
         });
     return response.data;
 }
+
+export async function bulkFinalizeAttempts(
+    apiClient: ApiClientType,
+    examId: string,
+): Promise<{ count: number }> {
+    const response: ApiResponse<{ count: number }> = await apiClient(
+        `/grading/exams/${examId}/finalize-all`,
+        {
+            method: 'POST',
+        },
+    );
+    return response.data;
+}

@@ -35,6 +35,10 @@ export async function saveExamConfiguration(args: {
             payload.configuration?.lobbyAdmissionMode ??
             currentRecord?.lobby_admission_mode ??
             defaultConfiguration.lobbyAdmissionMode,
+        releaseScoreMode:
+            payload.configuration?.releaseScoreMode ??
+            (currentRecord?.release_score_mode as any) ??
+            defaultConfiguration.releaseScoreMode,
         maxReconnectAttempts:
             payload.configuration?.maxReconnectAttempts ??
             currentRecord?.max_reconnect_attempts ??
@@ -83,6 +87,7 @@ export async function saveExamConfiguration(args: {
             allow_review: settings.allowReview,
             randomize_choices: settings.randomizeChoices,
             lobby_admission_mode: configuration.lobbyAdmissionMode,
+            release_score_mode: configuration.releaseScoreMode,
             max_reconnect_attempts: configuration.maxReconnectAttempts,
             strict_mode: configuration.strictMode,
             screen_lock: configuration.screenLock,
@@ -101,6 +106,7 @@ export async function saveExamConfiguration(args: {
             allow_review: settings.allowReview,
             randomize_choices: settings.randomizeChoices,
             lobby_admission_mode: configuration.lobbyAdmissionMode,
+            release_score_mode: configuration.releaseScoreMode,
             max_reconnect_attempts: configuration.maxReconnectAttempts,
             strict_mode: configuration.strictMode,
             screen_lock: configuration.screenLock,

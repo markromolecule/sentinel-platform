@@ -352,5 +352,68 @@ describe('Grading attempt details and update services', () => {
                 status: 400,
             });
         });
+
+        it('allows updating an attempt with evaluations omitted', async () => {
+            const mockAttempt = {
+                attemptId: '11111111-1111-1111-1111-111111111111',
+                examId: '22222222-2222-2222-2222-222222222222',
+                examTitle: 'History Final',
+                subjectTitle: 'History',
+                studentId: '33333333-3333-3333-3333-333333333333',
+                studentNumber: '2026-0001',
+                completedAt: new Date('2026-04-18T09:30:00.000Z'),
+                score: 5,
+                totalScore: 10,
+                status: 'COMPLETED',
+                answerSnapshot: {
+                    'q-obj-1': 'A',
+                },
+                studentName: 'Alice Student',
+            };
+
+            const mockQuestions = [
+                {
+                    id: 'q-obj-1',
+                    examId: '22222222-2222-2222-2222-222222222222',
+                    type: 'MULTIPLE_CHOICE',
+                    content: {
+                        prompt: 'Objective Prompt',
+                        options: ['A', 'B'],
+                        correctAnswer: 0,
+                    },
+                    points: 5,
+                    orderIndex: 0,
+                },
+            ];
+
+            mockDb.executeTakeFirst.mockResolvedValue(mockAttempt);
+            mockDb.execute.mockResolvedValue(mockQuestions);
+            vi.mocked(scoreExamAttempt).mockReturnValue({
+                score: 5,
+                totalScore: 5,
+                percentage: 100,
+                answeredCount: 1,
+                autoGradableQuestionCount: 1,
+                manualReviewQuestionCount: 0,
+                requiresManualReview: false,
+            });
+
+            const setSpy = vi.fn().mockReturnValue(mockDb);
+            mockDb.set = setSpy;
+
+            const result = await updateGradingAttempt({
+                dbClient: mockDb as DbClient,
+                attemptId: '11111111-1111-1111-1111-111111111111',
+                itemOverrides: {
+                    'q-obj-1': {
+                        awardedScore: 4,
+                        reason: 'Correction',
+                    },
+                },
+            });
+
+            expect(result.score).toBe(4);
+            expect(setSpy).toHaveBeenCalled();
+        });
     });
 });

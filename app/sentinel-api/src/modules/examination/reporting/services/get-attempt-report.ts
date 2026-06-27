@@ -62,9 +62,16 @@ export async function getAttemptReport({
             });
         }
 
+        const configRecord = await dbClient
+            .selectFrom('exam_configurations')
+            .select('release_score_mode')
+            .where('exam_id', '=', detail.attempt.examId)
+            .executeTakeFirst();
+
+        const isManualRelease = configRecord?.release_score_mode === 'MANUAL_RELEASE';
         const requiresFinalization = detail.questions.some((question) => question.type === 'ESSAY');
 
-        if (requiresFinalization && !detail.attempt.grading.finalizedAt) {
+        if ((requiresFinalization || isManualRelease) && !detail.attempt.grading.finalizedAt) {
             throw new HTTPException(409, {
                 message: 'This report is still being finalized by your instructor.',
             });

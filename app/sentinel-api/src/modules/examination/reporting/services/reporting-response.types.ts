@@ -30,6 +30,7 @@ export type ReportStudentRow = {
     highest_incident_severity: string | null;
     attempt_kind?: 'primary' | 'makeup' | 'retake' | null;
     active_override_type?: 'MAKEUP' | 'RETAKE' | 'REOPEN' | null;
+    attempt_finalized_at?: Date | string | null;
 };
 
 export type ReportIncidentTypeBreakdownRow = {

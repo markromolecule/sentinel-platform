@@ -108,6 +108,7 @@ export const examSettingsSchema = z.object({
 export const examConfigurationSchema = z.object({
     // 1. Shared Core & Hardware
     lobbyAdmissionMode: examLobbyAdmissionModeSchema.default('AUTOMATIC'),
+    releaseScoreMode: z.enum(['AUTO_RELEASE', 'MANUAL_RELEASE']).default('AUTO_RELEASE'),
     maxReconnectAttempts: z.number().int().min(0).default(3),
     strictMode: z.boolean().default(true),
     screenLock: z.boolean().default(true),

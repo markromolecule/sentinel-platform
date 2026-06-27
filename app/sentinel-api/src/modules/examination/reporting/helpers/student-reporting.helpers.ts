@@ -39,6 +39,7 @@ export function buildActionItemSource(student: ExamReportStudentSummary): Report
         highest_incident_type: student.primaryIncidentType,
         highest_incident_severity: student.highestIncidentSeverity?.toUpperCase() ?? null,
         attempt_kind: student.attemptKind,
+        attempt_finalized_at: student.finalizedAt ?? null,
     };
 }
 
@@ -142,5 +143,7 @@ export function mapStudentSummary(
         needsReview: reviewRequired,
         needsMakeup: makeupRequired && row.active_override_type !== 'MAKEUP',
         needsRetake: retakeRequired,
+        isFinalized: row.attempt_finalized_at != null,
+        finalizedAt: toIsoDate(row.attempt_finalized_at),
     };
 }

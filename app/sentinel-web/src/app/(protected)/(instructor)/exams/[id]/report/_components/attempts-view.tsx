@@ -1,6 +1,19 @@
 import * as React from 'react';
 import type { ExamReport } from '@sentinel/shared/types';
-import { DataTable, FacetedFilter } from '@sentinel/ui';
+import {
+    DataTable,
+    FacetedFilter,
+    Button,
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogTrigger,
+} from '@sentinel/ui';
 import type { ColumnDef } from '@tanstack/react-table';
 
 type AttemptsViewProps = {
@@ -14,6 +27,8 @@ type AttemptsViewProps = {
     studentPage: number;
     setStudentPage: (page: number) => void;
     pageSize: number;
+    onFinalizeAll?: () => Promise<void> | void;
+    isFinalizingAll?: boolean;
 };
 
 /**
@@ -33,7 +48,11 @@ export function AttemptsView({
     studentPage,
     setStudentPage,
     pageSize,
+    onFinalizeAll,
+    isFinalizingAll,
 }: AttemptsViewProps) {
+    const hasSubmittedAttempts = report.summary.totalSubmitted > 0;
+
     return (
         <div className="space-y-4">
             <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
@@ -44,6 +63,38 @@ export function AttemptsView({
                         retake workflows in one place.
                     </p>
                 </div>
+                {onFinalizeAll && (
+                    <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                            <Button
+                                variant="outline"
+                                className="border-[#323d8f] text-[#323d8f] hover:bg-[#323d8f]/10"
+                                disabled={!hasSubmittedAttempts || isFinalizingAll}
+                            >
+                                {isFinalizingAll ? 'Finalizing...' : 'Finalize All'}
+                            </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                            <AlertDialogHeader>
+                                <AlertDialogTitle>Finalize All Submissions</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                    Are you sure you want to finalize all submitted attempts for this exam? 
+                                    This will release the final grades and feedback to all students. 
+                                    This action cannot be undone.
+                                </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                <AlertDialogAction
+                                    onClick={onFinalizeAll}
+                                    className="bg-[#323d8f] text-white hover:bg-[#323d8f]/90"
+                                >
+                                    Confirm Finalize
+                                </AlertDialogAction>
+                            </AlertDialogFooter>
+                        </AlertDialogContent>
+                    </AlertDialog>
+                )}
             </div>
 
             <DataTable
