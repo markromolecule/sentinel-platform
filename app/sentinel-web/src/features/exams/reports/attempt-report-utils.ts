@@ -61,7 +61,7 @@ export function buildOverridePayload(overrideDrafts: AttemptReportOverrideDrafts
 
         acc[questionId] = {
             awardedScore,
-            reason: override.reason.trim() ? override.reason.trim() : null,
+            reason: override.reason && override.reason.trim() ? override.reason.trim() : null,
         };
 
         return acc;

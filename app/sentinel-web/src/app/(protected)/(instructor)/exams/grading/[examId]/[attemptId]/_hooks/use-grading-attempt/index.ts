@@ -168,7 +168,7 @@ function useGradingAttempt({ examId, attemptId }: UseGradingAttemptProps): UseGr
                     };
                     return acc;
                 },
-                {} as UpdateGradingAttemptBody['evaluations'],
+                {} as NonNullable<UpdateGradingAttemptBody['evaluations']>,
             ),
             feedback: overallFeedback || null,
         };

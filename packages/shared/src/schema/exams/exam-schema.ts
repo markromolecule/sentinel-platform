@@ -144,6 +144,8 @@ export const getExamsQuerySchema = z.object({
     subjectId: z.string().uuid().optional(),
     classroomId: z.string().uuid().optional(),
     institutionId: z.string().uuid().optional(),
+    limit: z.coerce.number().int().min(1).max(100).optional(),
+    page: z.coerce.number().int().min(1).optional(),
 });
 
 export const examIdParamsSchema = z.object({

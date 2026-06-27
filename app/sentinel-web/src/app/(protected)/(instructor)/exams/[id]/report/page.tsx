@@ -3,7 +3,7 @@
 import { Suspense, use, useDeferredValue, useEffect, useMemo, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { useApi, useExamReportQuery } from '@sentinel/hooks';
-import { createStudentExamAccessOverride } from '@sentinel/services';
+import { createStudentExamAccessOverride, bulkFinalizeAttempts } from '@sentinel/services';
 import type { ExamReport, ExamReportActionItem } from '@sentinel/shared/types';
 import { Button, Separator } from '@sentinel/ui';
 import { ArrowLeft } from 'lucide-react';
@@ -143,6 +143,21 @@ function ExamReportContent({ id }: { id: string }) {
             toast.error(error instanceof Error ? error.message : 'Failed to grant override.');
         } finally {
             setActiveAsctionId(null);
+        }
+    };
+
+    const [isFinalizingAll, setIsFinalizingAll] = useState(false);
+
+    const handleFinalizeAll = async () => {
+        setIsFinalizingAll(true);
+        try {
+            const result = await bulkFinalizeAttempts(apiClient, id);
+            toast.success(`Successfully finalized ${result.count} attempt(s).`);
+            await refetch();
+        } catch (error) {
+            toast.error(error instanceof Error ? error.message : 'Failed to finalize attempts.');
+        } finally {
+            setIsFinalizingAll(false);
         }
     };
 
@@ -300,6 +315,8 @@ function ExamReportContent({ id }: { id: string }) {
                         studentPage={studentPage}
                         setStudentPage={setStudentPage}
                         pageSize={pageSize}
+                        onFinalizeAll={handleFinalizeAll}
+                        isFinalizingAll={isFinalizingAll}
                     />
                 )}
 

@@ -1376,6 +1376,7 @@ model exam_configurations {
   web_security                Json?                      @default("{\"clipboard_control\": true, \"right_click_disable\": true, \"full_screen_required\": true, \"print_screen_disable\": true, \"tab_switching_monitor\": true}")
   mobile_security             Json?                      @default("{\"screenshot_block\": true, \"notification_block\": true, \"app_pinning_required\": true, \"prevent_backgrounding\": true, \"root_jailbreak_detection\": true}")
   lobby_admission_mode        exam_lobby_admission_mode? @default(AUTOMATIC)
+  release_score_mode          release_score_mode?        @default(AUTO_RELEASE)
   exams                       exams?                     @relation(fields: [exam_id], references: [exam_id], onDelete: Cascade, onUpdate: NoAction)
 
   @@schema("public")
@@ -2183,5 +2184,12 @@ model exam_section_assignments {
   @@index([section_id])
   @@index([class_group_id])
   @@index([instructor_id])
+  @@schema("public")
+}
+
+enum release_score_mode {
+  AUTO_RELEASE
+  MANUAL_RELEASE
+
   @@schema("public")
 }

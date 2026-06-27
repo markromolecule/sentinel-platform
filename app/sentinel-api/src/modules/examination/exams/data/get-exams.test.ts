@@ -246,4 +246,55 @@ describe('getExamsData', () => {
         // Should filter by instructorUserId
         expect(compiledQuery.sql).toContain('"e"."created_by" =');
     });
+
+    it('applies default limit and offset when not specified in filters', async () => {
+        const { db, executeSpy } = createMockDb(
+            [
+                { column_name: 'section_id' },
+                { column_name: 'section_name' },
+                { column_name: 'room_id' },
+            ],
+            [],
+        );
+
+        await getExamsData({
+            dbClient: db as any,
+            institutionId: 'inst-123',
+            filters: {},
+        });
+
+        const compiledQuery = executeSpy.mock.calls[1][0];
+
+        // Should apply default limit of 50 and offset of 0
+        expect(compiledQuery.sql).toContain('limit $2 offset $3');
+        expect(compiledQuery.parameters).toContain(50);
+        expect(compiledQuery.parameters).toContain(0);
+    });
+
+    it('respects limit and page overrides from filters', async () => {
+        const { db, executeSpy } = createMockDb(
+            [
+                { column_name: 'section_id' },
+                { column_name: 'section_name' },
+                { column_name: 'room_id' },
+            ],
+            [],
+        );
+
+        await getExamsData({
+            dbClient: db as any,
+            institutionId: 'inst-123',
+            filters: {
+                limit: 20,
+                page: 3,
+            },
+        });
+
+        const compiledQuery = executeSpy.mock.calls[1][0];
+
+        // limit = 20, page = 3 => offset = (3-1)*20 = 40
+        expect(compiledQuery.sql).toContain('limit $2 offset $3');
+        expect(compiledQuery.parameters).toContain(20);
+        expect(compiledQuery.parameters).toContain(40);
+    });
 });

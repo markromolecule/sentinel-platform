@@ -94,6 +94,7 @@ export type ExamSettings = {
 
 export type ExamConfiguration = {
     lobbyAdmissionMode: 'AUTOMATIC' | 'INSTRUCTOR_GATED';
+    releaseScoreMode?: 'AUTO_RELEASE' | 'MANUAL_RELEASE';
     maxReconnectAttempts: number;
     strictMode: boolean;
     screenLock: boolean;

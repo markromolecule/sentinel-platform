@@ -93,6 +93,8 @@ export const examReportStudentSummarySchema = z.object({
     needsReview: z.boolean(),
     needsMakeup: z.boolean(),
     needsRetake: z.boolean(),
+    isFinalized: z.boolean().optional(),
+    finalizedAt: nullableDateTimeSchema.optional(),
 });
 
 export const examReportSummarySchema = z.object({

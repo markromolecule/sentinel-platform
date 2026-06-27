@@ -1,4 +1,4 @@
-import { type DbClient } from '@sentinel/db';
+import { type DbClient, type question_type } from '@sentinel/db';
 import { sql } from 'kysely';
 import type { GetExamsQuery } from '../exam.dto';
 import { buildStudentAttemptSelects } from '../../history/data/build-student-attempt-selects';
@@ -32,10 +32,15 @@ export async function getExamsData({
 }: GetExamsDataArgs) {
     const columnSupport = await getExamColumnSupport(dbClient);
 
+    const limit = filters.limit ?? 50;
+    const page = filters.page ?? 1;
+    const offset = (page - 1) * limit;
+
     let query = dbClient
         .selectFrom('exams as e')
         .leftJoin('class_groups as cg', 'cg.class_group_id', 'e.class_group_id')
         .leftJoin('subjects as s', 's.subject_id', 'e.subject_id')
+        .leftJoin('exam_configurations as ec', 'ec.exam_id', 'e.exam_id')
         .leftJoin('user_profiles as up_creator', 'up_creator.user_id', 'e.created_by')
         .leftJoin('user_profiles as up_publisher', 'up_publisher.user_id', 'e.published_by')
         .$if(columnSupport.hasRoomId, (qb) => qb.leftJoin('rooms as r', 'r.room_id', 'e.room_id'))
@@ -66,6 +71,14 @@ export async function getExamsData({
             ),
             'cg.class_name',
             's.subject_title',
+            'ec.release_score_mode',
+            (eb) =>
+                eb
+                    .selectFrom('exam_questions as q')
+                    .select(sql<number>`count(*)::int`.as('count'))
+                    .whereRef('q.exam_id', '=', 'e.exam_id')
+                    .where('q.question_type', '=', sql<question_type>`'ESSAY'`)
+                    .as('essay_question_count'),
             'e.exam_category',
             columnSupport.hasRoomId ? 'e.room_id' : sql<string | null>`null`.as('room_id'),
             columnSupport.hasRoomId
@@ -315,5 +328,9 @@ export async function getExamsData({
         );
     }
 
-    return (await query.orderBy('e.updated_at', 'desc').execute()) as RawExamRecord[];
+    return (await query
+        .orderBy('e.updated_at', 'desc')
+        .limit(limit)
+        .offset(offset)
+        .execute()) as RawExamRecord[];
 }

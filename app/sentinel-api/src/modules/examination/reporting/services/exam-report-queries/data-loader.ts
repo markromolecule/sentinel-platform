@@ -84,6 +84,9 @@ export async function loadExamReportSourceData(args: {
                     ),
                     'incident_summary.highest_incident_type',
                     'incident_summary.highest_incident_severity',
+                    sql<string | null>`(latest_attempts.answer_snapshot->'_grading'->>'finalizedAt')::text`.as(
+                        'attempt_finalized_at'
+                    ),
                 ])
                 .orderBy('assigned_students.last_name')
                 .orderBy('assigned_students.first_name')

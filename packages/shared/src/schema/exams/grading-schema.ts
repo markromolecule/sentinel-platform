@@ -113,21 +113,22 @@ export const gradingQuestionSchema = z.object({
     points: z.number(),
     orderIndex: z.number(),
 });
-
 export const updateGradingAttemptBodySchema = z.object({
-    evaluations: z.record(
-        z.string().uuid(),
-        z.object({
-            scores: z.object({
-                contentSubstance: z.number().int().min(0).max(4),
-                structureOrganization: z.number().int().min(0).max(4),
-                argumentationSupport: z.number().int().min(0).max(4),
-                styleTone: z.number().int().min(0).max(4),
-                grammarConventions: z.number().int().min(0).max(4),
+    evaluations: z
+        .record(
+            z.string().uuid(),
+            z.object({
+                scores: z.object({
+                    contentSubstance: z.number().int().min(0).max(4),
+                    structureOrganization: z.number().int().min(0).max(4),
+                    argumentationSupport: z.number().int().min(0).max(4),
+                    styleTone: z.number().int().min(0).max(4),
+                    grammarConventions: z.number().int().min(0).max(4),
+                }),
+                feedback: z.string().optional().nullable(),
             }),
-            feedback: z.string().optional().nullable(),
-        }),
-    ),
+        )
+        .optional(),
     itemOverrides: z
         .record(
             z.string().uuid(),

@@ -14,6 +14,7 @@ export function buildDefaultExamConfiguration(
     ``;
     return {
         lobbyAdmissionMode: defaults.defaultLobbyAdmissionMode,
+        releaseScoreMode: 'AUTO_RELEASE',
         maxReconnectAttempts: defaults.defaultMaxReconnectAttempts,
         strictMode: defaults.defaultStrictMode,
         screenLock: defaults.defaultScreenLock,

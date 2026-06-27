@@ -17,6 +17,10 @@ import {
     updateGradingAttemptRoute,
     updateGradingAttemptRouteHandler,
 } from './controllers/update-grading-attempt.controller';
+import {
+    bulkFinalizeAttemptsRoute,
+    bulkFinalizeAttemptsRouteHandler,
+} from './controllers/bulk-finalize-attempts.controller';
 
 const gradingRoutes = new OpenAPIHono<HonoEnv>();
 
@@ -26,6 +30,7 @@ gradingRoutes
     .openapi(getGradingExamsRoute, getGradingExamsRouteHandler)
     .openapi(getGradingStudentsRoute, getGradingStudentsRouteHandler)
     .openapi(getGradingAttemptDetailRoute, getGradingAttemptDetailRouteHandler)
-    .openapi(updateGradingAttemptRoute, updateGradingAttemptRouteHandler);
+    .openapi(updateGradingAttemptRoute, updateGradingAttemptRouteHandler)
+    .openapi(bulkFinalizeAttemptsRoute, bulkFinalizeAttemptsRouteHandler);
 
 export default gradingRoutes;

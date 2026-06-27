@@ -328,6 +328,11 @@ export const exam_category = {
     MAJOR: 'MAJOR',
 } as const;
 export type exam_category = (typeof exam_category)[keyof typeof exam_category];
+export const release_score_mode = {
+    AUTO_RELEASE: 'AUTO_RELEASE',
+    MANUAL_RELEASE: 'MANUAL_RELEASE',
+} as const;
+export type release_score_mode = (typeof release_score_mode)[keyof typeof release_score_mode];
 export type analytics_reports = {
     report_id: Generated<string>;
     title: string;
@@ -553,6 +558,7 @@ export type exam_configurations = {
     web_security: Generated<unknown | null>;
     mobile_security: Generated<unknown | null>;
     lobby_admission_mode: Generated<exam_lobby_admission_mode | null>;
+    release_score_mode: Generated<release_score_mode | null>;
 };
 export type exam_lobby_admissions = {
     admission_id: Generated<string>;

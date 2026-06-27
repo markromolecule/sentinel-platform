@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import {
     buildOverridePayload,
     normalizeOverrideDrafts,
@@ -22,6 +22,10 @@ export function useAttemptReport({
     const [overrideDrafts, setOverrideDrafts] = useState<AttemptReportOverrideDrafts>(() =>
         normalizeOverrideDrafts(attempt.itemOverrides),
     );
+
+    useEffect(() => {
+        setOverrideDrafts(normalizeOverrideDrafts(attempt.itemOverrides));
+    }, [attempt.itemOverrides]);
 
     const [selectedReport, setSelectedReport] = useState<ReportCardType | null>(null);
 

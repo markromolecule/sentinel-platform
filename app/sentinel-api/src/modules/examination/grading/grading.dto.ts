@@ -93,3 +93,17 @@ export const updateGradingAttemptSchema = {
         }),
     }),
 };
+
+export const bulkFinalizeAttemptsSchema = {
+    request: {
+        params: z.object({
+            examId: z.string().uuid().openapi({ description: 'ID of the exam' }),
+        }),
+    },
+    response: z.object({
+        message: z.string(),
+        data: z.object({
+            count: z.number(),
+        }),
+    }),
+};

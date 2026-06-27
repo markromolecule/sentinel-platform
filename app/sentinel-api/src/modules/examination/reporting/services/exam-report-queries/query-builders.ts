@@ -78,6 +78,7 @@ export function buildLatestAttemptsQuery(dbClient: DbClient, examId: string) {
             'ea.score',
             'ea.total_score',
             'ea.created_at',
+            'ea.answer_snapshot',
         ])
         .where('ea.exam_id', '=', examId)
         .where('ea.student_id', 'is not', null)

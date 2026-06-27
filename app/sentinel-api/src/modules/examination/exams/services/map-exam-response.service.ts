@@ -50,6 +50,9 @@ export type RawExamRecord = {
     is_public?: boolean | null;
     created_by_name?: string | null;
     published_by_name?: string | null;
+    release_score_mode?: string | null;
+    essay_question_count?: number | string | null;
+    attempt_finalized_at?: string | null;
 };
 
 function resolveMappedExamStatus(
@@ -250,6 +253,11 @@ export function mapExamSummaryResponse(
 }
 
 export function mapExamHistorySummaryResponse(record: RawExamRecord): ExamHistorySummary {
+    const isManualRelease = record.release_score_mode === 'MANUAL_RELEASE';
+    const hasEssayQuestions = Number(record.essay_question_count ?? 0) > 0;
+    const isFinalized = record.attempt_finalized_at != null;
+    const isReleased = isFinalized || (!isManualRelease && !hasEssayQuestions);
+
     return {
         id: record.attempt_id ?? record.exam_id,
         attemptId: record.attempt_id ?? null,
@@ -260,13 +268,13 @@ export function mapExamHistorySummaryResponse(record: RawExamRecord): ExamHistor
         sectionNames: buildSectionNames(record),
         sectionName: record.section_name ?? record.linked_section_name ?? null,
         status: resolveMappedExamStatus(record, true),
-        result: resolveHistoryResult(record),
+        result: isReleased ? resolveHistoryResult(record) : null,
         availableAt: getAvailableAt(record),
         dueAt: getDueAt(record),
         completedAt: record.attempt_completed_at ?? null,
-        score: record.attempt_score != null ? Number(record.attempt_score) : null,
-        totalScore: record.attempt_total_score != null ? Number(record.attempt_total_score) : null,
-        percentage: computePercentage(record.attempt_score, record.attempt_total_score),
+        score: isReleased && record.attempt_score != null ? Number(record.attempt_score) : null,
+        totalScore: isReleased && record.attempt_total_score != null ? Number(record.attempt_total_score) : null,
+        percentage: isReleased ? computePercentage(record.attempt_score, record.attempt_total_score) : null,
         timeSpent: record.attempt_time_spent_minutes ?? null,
         cheated: (record.attempt_incident_count ?? 0) > 0,
         cheatingType:

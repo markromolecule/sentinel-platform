@@ -41,6 +41,8 @@ export function mapExamConfigurationState(
         configuration: normalizeExamConfigurationState({
             lobbyAdmissionMode:
                 record?.lobby_admission_mode ?? defaultConfiguration.lobbyAdmissionMode,
+            releaseScoreMode:
+                (record?.release_score_mode as any) ?? defaultConfiguration.releaseScoreMode,
             maxReconnectAttempts:
                 record?.max_reconnect_attempts ?? defaultConfiguration.maxReconnectAttempts,
             strictMode: record?.strict_mode ?? defaultConfiguration.strictMode,

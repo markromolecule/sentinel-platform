@@ -12,7 +12,7 @@ export type UpdateGradingAttemptArgs = {
     attemptId: string;
     actorUserId?: string;
     institutionId?: string;
-    evaluations: Record<
+    evaluations?: Record<
         string,
         {
             scores: {
@@ -48,7 +48,7 @@ export async function updateGradingAttempt({
     attemptId,
     actorUserId,
     institutionId,
-    evaluations,
+    evaluations = {},
     itemOverrides = {},
     feedback,
     finalize = false,
