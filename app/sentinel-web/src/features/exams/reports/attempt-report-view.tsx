@@ -1,19 +1,15 @@
-import { useMemo, useState } from 'react';
 import type {
     AttemptGradingDetailType,
     GradingQuestionType,
     UpdateGradingAttemptBodyType,
 } from '@sentinel/shared';
-import {
-    buildOverridePayload,
-    normalizeOverrideDrafts,
-    type AttemptReportOverrideDrafts,
-} from './attempt-report-utils';
+import { useAttemptReport } from './_hooks/use-attempt-report';
 import { AttemptReportActions } from './_components/attempt-report-actions';
-import { AttemptReportQuestionCard } from './_components/attempt-report-question-card';
 import { AttemptReportSummaryCards } from './_components/attempt-report-summary-cards';
+import { AttemptReportTable } from './_components/attempt-report-table';
+import { AttemptReportOverrideDialog } from './_components/attempt-report-override-dialog';
 
-type AttemptReportViewProps = {
+export type AttemptReportViewProps = {
     attempt: AttemptGradingDetailType;
     questions: GradingQuestionType[];
     editable?: boolean;
@@ -25,8 +21,10 @@ type AttemptReportViewProps = {
 };
 
 /**
- * Renders a question-by-question exam attempt report and optionally exposes
- * override controls for instructor review workflows.
+ * Renders a modular exam attempt report displaying summary cards, a questions table,
+ * actions panel, and an override adjustments modal dialog.
+ *
+ * @param props - AttemptReportViewProps containing attempt data and submit handlers.
  */
 export function AttemptReportView({
     attempt,
@@ -35,65 +33,26 @@ export function AttemptReportView({
     isSubmitting = false,
     onSubmit,
 }: AttemptReportViewProps) {
-    const [overrideDrafts, setOverrideDrafts] = useState<AttemptReportOverrideDrafts>(() =>
-        normalizeOverrideDrafts(attempt.itemOverrides),
-    );
+    const {
+        overrideDrafts,
+        selectedReport,
+        setSelectedReport,
+        reportCards,
+        handleOverrideChange,
+        handleSubmit,
+    } = useAttemptReport({ attempt, questions, onSubmit });
 
-    const reportCards = useMemo(
-        () =>
-            attempt.questionReports.map((report) => {
-                const question = questions.find((entry) => entry.id === report.questionId);
-
-                return {
-                    ...report,
-                    question,
-                };
-            }),
-        [attempt.questionReports, questions],
-    );
-
-    const handleOverrideChange = (
-        questionId: string,
-        field: 'awardedScore' | 'reason',
-        value: string,
-    ) => {
-        setOverrideDrafts((prev) => ({
-            ...prev,
-            [questionId]: {
-                awardedScore:
-                    field === 'awardedScore' ? value : (prev[questionId]?.awardedScore ?? ''),
-                reason: field === 'reason' ? value : (prev[questionId]?.reason ?? ''),
-            },
-        }));
-    };
-
-    const handleSubmit = (finalize: boolean) => {
-        if (!onSubmit) {
-            return;
-        }
-
-        onSubmit({
-            itemOverrides: buildOverridePayload(overrideDrafts),
-            finalize,
-        });
-    };
+    const selectedIndex = selectedReport ? reportCards.indexOf(selectedReport) : -1;
 
     return (
         <div className="space-y-6">
             <AttemptReportSummaryCards attempt={attempt} />
 
-            <div className="space-y-4">
-                {reportCards.map((report, index) => (
-                    <AttemptReportQuestionCard
-                        key={report.questionId}
-                        report={report}
-                        index={index}
-                        editable={editable}
-                        overrideDraft={overrideDrafts[report.questionId]}
-                        onOverrideChange={handleOverrideChange}
-                    />
-                ))}
-            </div>
+            <AttemptReportTable
+                reportCards={reportCards}
+                editable={editable}
+                onRowClick={setSelectedReport}
+            />
 
             <AttemptReportActions
                 editable={editable}
@@ -102,6 +61,17 @@ export function AttemptReportView({
                 onSaveOverrides={() => handleSubmit(false)}
                 onSaveAndFinalize={() => handleSubmit(true)}
             />
+
+            {selectedReport && (
+                <AttemptReportOverrideDialog
+                    selectedReport={selectedReport}
+                    open={!!selectedReport}
+                    onOpenChange={(open) => !open && setSelectedReport(null)}
+                    overrideDraft={overrideDrafts[selectedReport.questionId]}
+                    onOverrideChange={handleOverrideChange}
+                    questionIndex={selectedIndex}
+                />
+            )}
         </div>
     );
 }

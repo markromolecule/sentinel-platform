@@ -1,8 +1,53 @@
-import type { ExamReport } from '@sentinel/shared/types';
+import type { ExamReport, ProctorExam } from '@sentinel/shared/types';
 import type { AttemptGradingDetailType, GradingQuestionType } from '@sentinel/shared';
 import type { ApiClientType } from '../../api-client';
-import { mapExamReportStudent, mapExamReportActionItem } from './mappers';
-import type { ApiExamResponse, ApiExamReport, GetExamReportParams } from './types';
+import { mapExamReportStudent, mapExamReportActionItem, mapExam } from './mappers';
+import type {
+    ApiExamResponse,
+    ApiExamReport,
+    GetExamReportParams,
+    GetExamReportsParams,
+    ApiExamSummary,
+    ApiExamReportStudentsPagination,
+} from './types';
+
+export async function getExamReportsList(
+    apiClient: ApiClientType,
+    params?: GetExamReportsParams,
+): Promise<{ data: ProctorExam[]; meta: ApiExamReportStudentsPagination }> {
+    const searchParams = new URLSearchParams();
+
+    if (params?.page !== undefined) {
+        searchParams.set('page', String(params.page));
+    }
+
+    if (params?.limit !== undefined) {
+        searchParams.set('limit', String(params.limit));
+    }
+
+    if (params?.search) {
+        searchParams.set('search', params.search);
+    }
+
+    const query = searchParams.toString();
+    const queryString = query ? `?${query}` : '';
+
+    const response: ApiExamResponse<ApiExamSummary[]> & {
+        meta: { total: number; page: number; limit: number; totalPages: number };
+    } = await apiClient(`/exams/reports${queryString}`);
+
+    return {
+        data: response.data.map(mapExam),
+        meta: {
+            page: response.meta.page,
+            pageSize: response.meta.limit,
+            total: response.meta.total,
+            totalPages: response.meta.totalPages,
+            hasMore: response.meta.page < response.meta.totalPages,
+        },
+    };
+}
+
 
 function buildExamReportQueryString(params?: GetExamReportParams) {
     if (!params) {

@@ -5,10 +5,17 @@ import { act, fireEvent, render, screen } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import ExamReportPage from './page';
 
-const { mockApiClient, mockRefetch, mockUseExamReportQuery } = vi.hoisted(() => ({
+const { mockApiClient, mockRefetch, mockUseExamReportQuery, mockSearchParamsGet } = vi.hoisted(() => ({
     mockApiClient: vi.fn(),
     mockRefetch: vi.fn(),
     mockUseExamReportQuery: vi.fn(),
+    mockSearchParamsGet: vi.fn().mockReturnValue(null),
+}));
+
+vi.mock('next/navigation', () => ({
+    useSearchParams: () => ({
+        get: mockSearchParamsGet,
+    }),
 }));
 
 vi.mock('next/link', () => ({
@@ -107,6 +114,60 @@ vi.mock('@sentinel/ui', () => ({
     TableHead: ({ children }: { children: React.ReactNode }) => <th>{children}</th>,
     TableHeader: ({ children }: { children: React.ReactNode }) => <thead>{children}</thead>,
     TableRow: ({ children }: { children: React.ReactNode }) => <tr>{children}</tr>,
+    Separator: () => <hr />,
+    cn: (...args: any[]) => args.filter(Boolean).join(' '),
+    FacetedFilter: ({ title, options, selectedValues, onSelect, onClear }: any) => {
+        return (
+            <div>
+                <span>{title}</span>
+                <select
+                    data-testid="faceted-filter"
+                    value={Array.from(selectedValues)[0] ?? 'all'}
+                    onChange={(e) => {
+                        const val = e.target.value;
+                        if (val === 'all') {
+                            onClear?.();
+                        } else {
+                            onSelect?.(val);
+                        }
+                    }}
+                >
+                    <option value="all">All sections</option>
+                    {options.map((opt: any) => (
+                        <option key={opt.value} value={opt.value}>
+                            {opt.label}
+                        </option>
+                    ))}
+                </select>
+            </div>
+        );
+    },
+    DataTable: ({ columns, data, toolbarActions }: any) => {
+        return (
+            <div>
+                {toolbarActions}
+                <table>
+                    <thead>
+                        <tr>
+                            {columns.map((c: any, i: number) => (
+                                <th key={i}>{typeof c.header === 'string' ? c.header : ''}</th>
+                            ))}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {data.map((row: any, i: number) => (
+                            <tr key={i}>
+                                {columns.map((c: any, j: number) => {
+                                    const cellContent = c.cell ? c.cell({ row: { original: row } }) : null;
+                                    return <td key={j}>{cellContent}</td>;
+                                })}
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            </div>
+        );
+    },
 }));
 
 vi.mock('sonner', () => ({
@@ -251,6 +312,9 @@ describe('ExamReportPage', () => {
             await params;
         });
 
+        // Switch to Attempt Summary tab
+        fireEvent.click(screen.getAllByText('Attempt Summary')[0]);
+
         expect(await screen.findByText('Santos, Ana')).toBeTruthy();
         expect(screen.getByText('Reyes, Luis')).toBeTruthy();
 
@@ -280,10 +344,31 @@ describe('ExamReportPage', () => {
             await params;
         });
 
+        // Switch to Attempt Summary tab
+        fireEvent.click(screen.getAllByText('Attempt Summary')[0]);
+
         expect(
             screen
                 .getAllByRole('link', { name: 'View Attempt' })
                 .map((link) => link.getAttribute('href')),
         ).toContain('/exams/reports/exam-1/attempt-1');
+    });
+
+    it('initializes activeSection from search parameters', async () => {
+        const params = Promise.resolve({ id: 'exam-1' });
+        mockSearchParamsGet.mockReturnValue('attempts');
+
+        await act(async () => {
+            render(
+                <Suspense fallback={<div>Loading...</div>}>
+                    <ExamReportPage params={params} />
+                </Suspense>,
+            );
+            await params;
+        });
+
+        // The attempts summary view should be rendered
+        expect(screen.getAllByText('Attempt Summary Report').length).toBeGreaterThan(0);
+        mockSearchParamsGet.mockReturnValue(null);
     });
 });

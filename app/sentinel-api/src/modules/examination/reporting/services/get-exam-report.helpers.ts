@@ -1,10 +1,10 @@
-export type { ExamContextForReporting } from './get-exam-report.query.helpers';
+export type { ExamContextForReporting } from './exam-report-queries';
 export {
     buildOverrideRecencyMaps,
     compareOverrideRecency,
     loadExamReportSourceData,
     parseDateValue,
-} from './get-exam-report.query.helpers';
+} from './exam-report-queries';
 export {
     buildSections,
     buildStudentsPagination,

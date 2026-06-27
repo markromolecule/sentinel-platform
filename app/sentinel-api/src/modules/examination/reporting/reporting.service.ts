@@ -2,12 +2,17 @@ import { type DbClient } from '@sentinel/db';
 import type { AssessmentAllowedRole } from '../assessment/assessment-access';
 import { getAttemptReport } from './services/get-attempt-report';
 import { getExamReport } from './services/get-exam-report';
+import { getExamReportsList } from './services/get-exam-reports-list';
 
 type GetExamReportArgs = Parameters<typeof getExamReport>[0];
 
 export class ReportingService {
     static async getExamReport(args: GetExamReportArgs) {
         return getExamReport(args);
+    }
+
+    static async getExamReportsList(args: Parameters<typeof getExamReportsList>[0]) {
+        return getExamReportsList(args);
     }
 
     static async getAttemptReport(args: {

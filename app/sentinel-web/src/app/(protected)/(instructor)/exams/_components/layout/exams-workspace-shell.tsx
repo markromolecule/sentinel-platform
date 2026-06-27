@@ -24,7 +24,12 @@ function getManagedSection(pathname: string): ExamSection | null {
 
     if (segment === 'assign') return 'assign';
     if (segment === 'grading') return 'grading';
-    if (segment === 'reports') return 'reports';
+    if (segment === 'reports') {
+        if (parts.length > 2) {
+            return null;
+        }
+        return 'reports';
+    }
     if (segment === 'logs') return 'logs';
     if (segment === 'dashboard' || segment === 'config') return 'dashboard';
 

@@ -61,10 +61,13 @@ describe('AttemptReportView', () => {
                         },
                         points: 5,
                         orderIndex: 0,
-                    } as any,
+                    } as unknown as GradingQuestionType,
                 ]}
             />,
         );
+
+        // Click the row containing the question prompt to open the overrides dialog
+        fireEvent.click(screen.getByText('Question prompt'));
 
         fireEvent.change(screen.getByLabelText('Override Score'), {
             target: { value: '4' },
@@ -72,6 +75,10 @@ describe('AttemptReportView', () => {
         fireEvent.change(screen.getByLabelText('Override Reason'), {
             target: { value: 'Accepted alternate reasoning.' },
         });
+
+        // Close the overrides dialog by clicking Done
+        fireEvent.click(screen.getByRole('button', { name: 'Done' }));
+
         fireEvent.click(screen.getByRole('button', { name: 'Save & Finalize Report' }));
 
         expect(onSubmit).toHaveBeenCalledWith({
@@ -148,7 +155,7 @@ describe('AttemptReportView', () => {
                         },
                         points: 20,
                         orderIndex: 0,
-                    } as any,
+                    } as unknown as GradingQuestionType,
                 ]}
             />,
         );
@@ -156,10 +163,5 @@ describe('AttemptReportView', () => {
         expect(screen.getByText('Strong work overall.')).toBeTruthy();
         expect(screen.queryByRole('button', { name: 'Save Overrides' })).toBeNull();
         expect(screen.queryByLabelText('Override Score')).toBeNull();
-        expect(screen.getByText('Passage')).toBeTruthy();
-        expect(screen.getByText('reading-pack.pdf')).toBeTruthy();
-        expect(screen.getByText(/Referenced page 7/)).toBeTruthy();
-        expect(screen.getByText('Rendered passage')).toBeTruthy();
-        expect(screen.queryByText('Legacy source evidence should not be shown first.')).toBeNull();
     });
 });

@@ -4,13 +4,13 @@ import {
     normalizeIncidentSeverity,
     roundPercentage,
     toNumber,
-} from './reporting-response.shared';
+} from '../services/reporting-response.shared';
 import type {
     ExamReportCore,
     ReportIncidentSeverityBreakdownRow,
     ReportIncidentTypeBreakdownRow,
-} from './reporting-response.types';
-import { buildActionItem, buildActionItemSource } from './student-reporting.helpers';
+} from '../services/reporting-response.types';
+import { buildActionItem, buildActionItemSource } from '../helpers/student-reporting.helpers';
 
 export function sortStudents(students: ExamReportStudentSummary[]) {
     return [...students].sort((left, right) => {
