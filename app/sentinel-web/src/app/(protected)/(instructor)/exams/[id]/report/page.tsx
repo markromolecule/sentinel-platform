@@ -1,6 +1,7 @@
 'use client';
 
-import { use, useDeferredValue, useEffect, useMemo, useState } from 'react';
+import { Suspense, use, useDeferredValue, useEffect, useMemo, useState } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { useApi, useExamReportQuery } from '@sentinel/hooks';
 import { createStudentExamAccessOverride } from '@sentinel/services';
 import type { ExamReport, ExamReportActionItem } from '@sentinel/shared/types';
@@ -17,14 +18,27 @@ import { ActionQueueView } from './_components/action-queue-view';
 type ActionQueueType = 'review' | 'makeup' | 'retake';
 
 /**
- * Main instructor detailed exam report page component.
+ * Main instructor detailed exam report page content component.
  * Manages core query variables, fetching states, sidebar navigation, and override grants.
  */
-export default function ExamReportPage({ params }: { params: Promise<{ id: string }> }) {
-    const { id } = use(params);
+function ExamReportContent({ id }: { id: string }) {
     const apiClient = useApi();
+    const searchParams = useSearchParams();
+    const sectionParam = searchParams.get('section');
 
-    const [activeSection, setActiveSection] = useState<'overview' | 'attempts' | 'queue'>('overview');
+    const [activeSection, setActiveSection] = useState<'overview' | 'attempts' | 'queue'>(() => {
+        if (sectionParam === 'attempts' || sectionParam === 'queue') {
+            return sectionParam;
+        }
+        return 'overview';
+    });
+
+    useEffect(() => {
+        if (sectionParam === 'attempts' || sectionParam === 'queue' || sectionParam === 'overview') {
+            setActiveSection(sectionParam);
+        }
+    }, [sectionParam]);
+
     const [searchValue, setSearchValue] = useState('');
     const [sectionFilter, setSectionFilter] = useState<string | undefined>(undefined);
     const [studentPage, setStudentPage] = useState(1);
@@ -304,5 +318,28 @@ export default function ExamReportPage({ params }: { params: Promise<{ id: strin
                 )}
             </main>
         </div>
+    );
+}
+
+/**
+ * Main instructor detailed exam report page component.
+ * Wraps the content in a Suspense boundary for SSR-safe search parameters handling.
+ */
+export default function ExamReportPage({ params }: { params: Promise<{ id: string }> }) {
+    const { id } = use(params);
+
+    return (
+        <Suspense
+            fallback={
+                <div className="flex h-full flex-1 flex-col space-y-6 p-6 md:p-8">
+                    <div className="space-y-2">
+                        <div className="bg-muted h-8 w-64 animate-pulse rounded" />
+                        <div className="bg-muted h-4 w-80 animate-pulse rounded" />
+                    </div>
+                </div>
+            }
+        >
+            <ExamReportContent id={id} />
+        </Suspense>
     );
 }
