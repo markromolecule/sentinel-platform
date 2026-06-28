@@ -188,9 +188,10 @@ export async function updateGradingAttempt({
         if (!attempt.completedAt) {
             updatePayload.completed_at = new Date();
         }
-        if (attempt.totalScore === null || attempt.totalScore === undefined) {
-            updatePayload.total_score = totalAttemptPoints;
-        }
+    }
+
+    if (attempt.totalScore === null || attempt.totalScore === undefined) {
+        updatePayload.total_score = totalAttemptPoints;
     }
 
     // Capture the pre-override baseline on the very first instructor save.

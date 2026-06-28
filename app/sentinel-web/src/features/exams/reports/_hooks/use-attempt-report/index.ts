@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import {
     buildOverridePayload,
     normalizeOverrideDrafts,
@@ -18,14 +18,22 @@ export function useAttemptReport({
     attempt,
     questions,
     onSubmit,
+    isSaving = false,
 }: UseAttemptReportProps): UseAttemptReportReturn {
     const [overrideDrafts, setOverrideDrafts] = useState<AttemptReportOverrideDrafts>(() =>
         normalizeOverrideDrafts(attempt.itemOverrides),
     );
 
+    const prevIsSaving = useRef(isSaving);
+
     useEffect(() => {
-        setOverrideDrafts(normalizeOverrideDrafts(attempt.itemOverrides));
-    }, [attempt.itemOverrides]);
+        // Sync drafts from server ONLY when a save operation completes.
+        // This prevents background refetches (focus, etc.) from wiping out active user edits.
+        if (prevIsSaving.current && !isSaving) {
+            setOverrideDrafts(normalizeOverrideDrafts(attempt.itemOverrides));
+        }
+        prevIsSaving.current = isSaving;
+    }, [attempt.itemOverrides, isSaving]);
 
     const [selectedReport, setSelectedReport] = useState<ReportCardType | null>(null);
 

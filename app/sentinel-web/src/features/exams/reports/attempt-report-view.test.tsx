@@ -164,4 +164,124 @@ describe('AttemptReportView', () => {
         expect(screen.queryByRole('button', { name: 'Save Overrides' })).toBeNull();
         expect(screen.queryByLabelText('Override Score')).toBeNull();
     });
+
+    it('retains local override drafts when attempt updates while isSubmitting is true', () => {
+        const onSubmit = vi.fn();
+        const attemptMock = {
+            attemptId: 'attempt-1',
+            examId: 'exam-1',
+            examTitle: 'Final Exam',
+            subjectTitle: 'Algorithms',
+            studentId: 'student-1',
+            studentName: 'Ana Santos',
+            studentNumber: '2024-0001',
+            completedAt: '2026-06-26T09:00:00.000Z',
+            score: 8,
+            totalScore: 10,
+            status: 'COMPLETED',
+            answers: { 'question-1': 'A' },
+            evaluations: {},
+            feedback: 'Overall feedback',
+            itemOverrides: {}, // initially empty
+            grading: { finalizedAt: null, finalizedBy: null },
+            questionReports: [
+                {
+                    questionId: 'question-1',
+                    questionType: 'MULTIPLE_CHOICE',
+                    prompt: 'Question prompt',
+                    answer: 'A',
+                    correctAnswer: 'B',
+                    isCorrect: false,
+                    awardedScore: 0,
+                    maxScore: 5,
+                    evaluation: null,
+                    override: null,
+                },
+            ],
+        };
+
+        const questionsMock = [
+            {
+                id: 'question-1',
+                examId: 'exam-1',
+                type: 'MULTIPLE_CHOICE',
+                content: { prompt: 'Question prompt' },
+                points: 5,
+                orderIndex: 0,
+            },
+        ];
+
+        const { rerender } = render(
+            <AttemptReportView
+                editable
+                isSubmitting={true} // saving is in-flight
+                onSubmit={onSubmit}
+                attempt={attemptMock}
+                questions={questionsMock as any}
+            />,
+        );
+
+        // Open the dialog
+        fireEvent.click(screen.getByText('Question prompt'));
+
+        // Change the override score in the dialog
+        fireEvent.change(screen.getByLabelText('Override Score'), {
+            target: { value: '3' },
+        });
+
+        // Close dialog
+        fireEvent.click(screen.getByRole('button', { name: 'Done' }));
+
+        // Now, trigger a rerender with updated attempt props from a background query refetch,
+        // but since isSubmitting is still true, the local draft of '3' should NOT be overwritten by the server's empty overrides.
+        rerender(
+            <AttemptReportView
+                editable
+                isSubmitting={true}
+                onSubmit={onSubmit}
+                attempt={{
+                    ...attemptMock,
+                    itemOverrides: {}, // still empty from server
+                }}
+                questions={questionsMock as any}
+            />,
+        );
+
+        // Open dialog again
+        fireEvent.click(screen.getByText('Question prompt'));
+
+        // Check if value is still '3'
+        const overrideInput = screen.getByLabelText('Override Score') as HTMLInputElement;
+        expect(overrideInput.value).toBe('3');
+
+        // Close dialog
+        fireEvent.click(screen.getByRole('button', { name: 'Done' }));
+
+        // Now, trigger a rerender where saving has completed (isSubmitting = false)
+        // and the new attempt.itemOverrides are received from the server (awardedScore: 3).
+        rerender(
+            <AttemptReportView
+                editable
+                isSubmitting={false}
+                onSubmit={onSubmit}
+                attempt={{
+                    ...attemptMock,
+                    itemOverrides: {
+                        'question-1': {
+                            awardedScore: 3,
+                            reason: 'Server Reason',
+                        },
+                    },
+                }}
+                questions={questionsMock as any}
+            />,
+        );
+
+        // Open dialog again
+        fireEvent.click(screen.getByText('Question prompt'));
+
+        // Check if value is updated with the new server reason
+        expect((screen.getByLabelText('Override Score') as HTMLInputElement).value).toBe('3');
+        expect((screen.getByLabelText('Override Reason') as HTMLInputElement).value).toBe('Server Reason');
+    });
 });

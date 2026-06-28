@@ -63,6 +63,16 @@ export default function InstructorAttemptReportPage({
                     queryKey: EXAM_QUERY_KEYS.report(examId),
                 }),
             ]);
+            if (payload.finalize) {
+                await queryClient.refetchQueries({
+                    queryKey: EXAM_QUERY_KEYS.report(examId),
+                });
+            } else {
+                await queryClient.refetchQueries({
+                    queryKey: EXAM_QUERY_KEYS.attemptReport(attemptId),
+                });
+            }
+
             toast.success(
                 payload.finalize
                     ? 'Report finalized successfully.'

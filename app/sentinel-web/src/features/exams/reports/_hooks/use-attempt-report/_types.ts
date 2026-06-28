@@ -12,6 +12,7 @@ export type UseAttemptReportProps = {
         itemOverrides: NonNullable<UpdateGradingAttemptBodyType['itemOverrides']>;
         finalize: boolean;
     }) => void;
+    isSaving?: boolean;
 };
 
 export type ReportCardType = AttemptGradingDetailType['questionReports'][number] & {

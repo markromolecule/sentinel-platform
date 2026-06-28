@@ -42,9 +42,11 @@ export function AttemptReportView({
         reportCards,
         handleOverrideChange,
         handleSubmit,
-    } = useAttemptReport({ attempt, questions, onSubmit });
+    } = useAttemptReport({ attempt, questions, onSubmit, isSaving: isSubmitting });
 
-    const selectedIndex = selectedReport ? reportCards.indexOf(selectedReport) : -1;
+    const selectedIndex = selectedReport
+        ? reportCards.findIndex((card) => card.questionId === selectedReport.questionId)
+        : -1;
     const isReportFinalized = !!attempt.grading.finalizedAt;
     const isEditable = editable && !isReportFinalized;
 
