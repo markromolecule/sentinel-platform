@@ -239,7 +239,7 @@ export const getColumns = (examId: string): ColumnDef<StudentRow>[] => [
             return student.attemptId ? (
                 <Button variant="outline" size="sm" asChild>
                     <Link href={`/exams/reports/${examId}/${student.attemptId}`}>
-                        View Attempt
+                        {student.isFinalized ? 'View Results' : 'View Attempt'}
                     </Link>
                 </Button>
             ) : (

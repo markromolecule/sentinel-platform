@@ -33,13 +33,23 @@ export function useAttemptReport({
         () =>
             attempt.questionReports.map((report) => {
                 const question = questions.find((entry) => entry.id === report.questionId);
+                const draft = overrideDrafts[report.questionId];
+
+                let awardedScore = report.awardedScore;
+                if (draft && draft.awardedScore !== '') {
+                    const draftScore = Number(draft.awardedScore);
+                    if (!Number.isNaN(draftScore)) {
+                        awardedScore = draftScore;
+                    }
+                }
 
                 return {
                     ...report,
+                    awardedScore,
                     question,
                 };
             }),
-        [attempt.questionReports, questions],
+        [attempt.questionReports, questions, overrideDrafts],
     );
 
     const handleOverrideChange = (

@@ -1,6 +1,7 @@
 'use client';
 
-import { use } from 'react';
+import { use, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useApi, useAttemptReportQuery } from '@sentinel/hooks';
@@ -23,16 +24,36 @@ export default function InstructorAttemptReportPage({
     const { examId, attemptId } = use(params);
     const apiClient = useApi();
     const queryClient = useQueryClient();
+    const router = useRouter();
     const { data, isLoading, isError } = useAttemptReportQuery(attemptId);
+    const [optimisticScore, setOptimisticScore] = useState<number | null>(null);
+
+    const calculateOptimisticScore = (itemOverrides: Record<string, any>) => {
+        if (!data) return null;
+        let score = 0;
+        for (const report of data.attempt.questionReports) {
+            const override = itemOverrides[report.questionId];
+            if (override && typeof override.awardedScore === 'number') {
+                score += override.awardedScore;
+            } else {
+                score += report.awardedScore ?? 0;
+            }
+        }
+        return Math.round(score);
+    };
 
     const saveMutation = useMutation({
         mutationFn: (payload: { itemOverrides: Record<string, any>; finalize: boolean }) =>
             updateGradingAttempt(apiClient, attemptId, {
                 evaluations: data?.attempt.evaluations ?? {},
-                feedback: data?.attempt.feedback ?? null,
+                feedback: data?.attempt.feedback !== null ? data?.attempt.feedback : undefined,
                 itemOverrides: payload.itemOverrides,
                 finalize: payload.finalize,
             }),
+        onMutate: (variables) => {
+            const optScore = calculateOptimisticScore(variables.itemOverrides);
+            setOptimisticScore(optScore);
+        },
         onSuccess: async (_, payload) => {
             await Promise.all([
                 queryClient.invalidateQueries({
@@ -47,9 +68,16 @@ export default function InstructorAttemptReportPage({
                     ? 'Report finalized successfully.'
                     : 'Override changes saved successfully.',
             );
+
+            if (payload.finalize) {
+                router.push(`/exams/${examId}/report?section=attempts`);
+            }
         },
         onError: (error) => {
             toast.error(error instanceof Error ? error.message : 'Failed to save report changes.');
+        },
+        onSettled: () => {
+            setOptimisticScore(null);
         },
     });
 
@@ -160,6 +188,7 @@ export default function InstructorAttemptReportPage({
                     editable
                     isSubmitting={saveMutation.isPending}
                     onSubmit={(payload) => saveMutation.mutate(payload)}
+                    optimisticScore={optimisticScore}
                 />
             </main>
         </div>

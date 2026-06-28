@@ -46,6 +46,12 @@ export function AttemptReportTable({
                     const truncatedPrompt =
                         prompt.length > 80 ? `${prompt.substring(0, 80).trim()}...` : prompt;
 
+                    const formattedAnswer = formatAnswerValue(report.answer);
+                    const truncatedAnswer =
+                        formattedAnswer.length > 100
+                            ? `${formattedAnswer.substring(0, 100).trim()}...`
+                            : formattedAnswer;
+
                     return (
                         <TableRow
                             key={report.questionId}
@@ -73,8 +79,11 @@ export function AttemptReportTable({
                                 </Badge>
                             </TableCell>
                             <TableCell className="space-y-2">
-                                <div className="text-sm break-words whitespace-pre-wrap text-slate-800">
-                                    {formatAnswerValue(report.answer)}
+                                <div
+                                    className="text-sm break-words whitespace-pre-wrap text-slate-800"
+                                    title={formattedAnswer}
+                                >
+                                    {truncatedAnswer}
                                 </div>
                                 {report.evaluation && (
                                     <div className="mt-2 flex flex-wrap gap-1.5">

@@ -529,6 +529,10 @@ export type exam_attempts = {
     completed_at: Timestamp | null;
     score: number | null;
     total_score: number | null;
+    /**
+     * Auto-graded score at time of submission, before any instructor overrides. Write-once.
+     */
+    initial_score: number | null;
     status: Generated<exam_status | null>;
     time_spent_minutes: Generated<number | null>;
     is_verified: Generated<boolean | null>;

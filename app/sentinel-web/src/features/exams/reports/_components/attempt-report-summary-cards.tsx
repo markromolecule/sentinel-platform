@@ -4,16 +4,17 @@ import { Trophy, Lock, Unlock, MessageSquare } from 'lucide-react';
 
 type AttemptReportSummaryCardsProps = {
     attempt: AttemptGradingDetailType;
+    optimisticScore?: number | null;
 };
 
 /**
  * Renders a row of modular, compact summary cards for an exam attempt report.
  * Includes the final score, finalization status, and overall feedback.
  */
-export function AttemptReportSummaryCards({ attempt }: AttemptReportSummaryCardsProps) {
+export function AttemptReportSummaryCards({ attempt, optimisticScore = null }: AttemptReportSummaryCardsProps) {
     return (
         <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3">
-            <ScoreCard attempt={attempt} />
+            <ScoreCard attempt={attempt} optimisticScore={optimisticScore} />
             <StatusCard attempt={attempt} />
             <FeedbackCard attempt={attempt} />
         </div>
@@ -23,7 +24,15 @@ export function AttemptReportSummaryCards({ attempt }: AttemptReportSummaryCards
 /**
  * Displays the student's final score metric with a trophy accent.
  */
-function ScoreCard({ attempt }: { attempt: AttemptGradingDetailType }) {
+function ScoreCard({
+    attempt,
+    optimisticScore = null,
+}: {
+    attempt: AttemptGradingDetailType;
+    optimisticScore?: number | null;
+}) {
+    const displayedScore = optimisticScore !== null ? optimisticScore : attempt.score;
+
     return (
         <Card className="flex flex-row items-center gap-3.5 p-4 py-3 border-border/50 bg-card shadow-none">
             <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-amber-500/10 text-amber-600 dark:text-amber-400">
@@ -34,7 +43,7 @@ function ScoreCard({ attempt }: { attempt: AttemptGradingDetailType }) {
                     Final Score
                 </span>
                 <span className="text-lg font-bold text-foreground">
-                    {attempt.score ?? 'N/A'}{' '}
+                    {displayedScore ?? 'N/A'}{' '}
                     <span className="text-muted-foreground font-normal text-xs">
                         / {attempt.totalScore ?? 'N/A'}
                     </span>

@@ -415,5 +415,365 @@ describe('Grading attempt details and update services', () => {
             expect(result.score).toBe(4);
             expect(setSpy).toHaveBeenCalled();
         });
+
+        it('allows saving overrides without essay evaluations if finalize is false, but rejects if finalize is true', async () => {
+            const mockAttempt = {
+                attemptId: '11111111-1111-1111-1111-111111111111',
+                examId: '22222222-2222-2222-2222-222222222222',
+                examTitle: 'History Final',
+                subjectTitle: 'History',
+                studentId: '33333333-3333-3333-3333-333333333333',
+                studentNumber: '2026-0001',
+                completedAt: new Date('2026-04-18T09:30:00.000Z'),
+                score: 5,
+                totalScore: 10,
+                status: 'COMPLETED',
+                answerSnapshot: {
+                    'q-essay-1': 'Student essay response text',
+                },
+                studentName: 'Alice Student',
+            };
+
+            const mockQuestions = [
+                {
+                    id: 'q-essay-1',
+                    examId: '22222222-2222-2222-2222-222222222222',
+                    type: 'ESSAY',
+                    content: { prompt: 'Essay Prompt', maxLength: 1000 },
+                    points: 5,
+                    orderIndex: 0,
+                },
+            ];
+
+            mockDb.executeTakeFirst.mockResolvedValue(mockAttempt);
+            mockDb.execute.mockResolvedValue(mockQuestions);
+            vi.mocked(scoreExamAttempt).mockReturnValue({
+                score: 0,
+                totalScore: 5,
+                percentage: 0,
+                answeredCount: 1,
+                autoGradableQuestionCount: 0,
+                manualReviewQuestionCount: 1,
+                requiresManualReview: true,
+            });
+
+            const setSpy = vi.fn().mockReturnValue(mockDb);
+            mockDb.set = setSpy;
+
+            // Success when finalize is false
+            await expect(
+                updateGradingAttempt({
+                    dbClient: mockDb as DbClient,
+                    attemptId: '11111111-1111-1111-1111-111111111111',
+                    itemOverrides: {
+                        'q-essay-1': { awardedScore: 4, reason: 'Correction' },
+                    },
+                    finalize: false,
+                }),
+            ).resolves.toBeDefined();
+
+            // Error when finalize is true
+            await expect(
+                updateGradingAttempt({
+                    dbClient: mockDb as DbClient,
+                    attemptId: '11111111-1111-1111-1111-111111111111',
+                    itemOverrides: {
+                        'q-essay-1': { awardedScore: 4, reason: 'Correction' },
+                    },
+                    finalize: true,
+                }),
+            ).rejects.toMatchObject({
+                status: 400,
+            });
+        });
+
+        it('preserves existing score overrides when itemOverrides is omitted', async () => {
+            const mockAttempt = {
+                attemptId: '11111111-1111-1111-1111-111111111111',
+                examId: '22222222-2222-2222-2222-222222222222',
+                examTitle: 'History Final',
+                subjectTitle: 'History',
+                studentId: '33333333-3333-3333-3333-333333333333',
+                studentNumber: '2026-0001',
+                completedAt: new Date('2026-04-18T09:30:00.000Z'),
+                score: 5,
+                totalScore: 10,
+                status: 'COMPLETED',
+                answerSnapshot: {
+                    _itemOverrides: {
+                        'q-obj-1': { awardedScore: 2, reason: 'Original Override', overriddenBy: '123', overriddenAt: '2026-06-28T00:00:00.000Z' },
+                    },
+                },
+                studentName: 'Alice Student',
+                itemOverrides: {
+                    'q-obj-1': { awardedScore: 2, reason: 'Original Override', overriddenBy: '123', overriddenAt: '2026-06-28T00:00:00.000Z' },
+                },
+            };
+
+            const mockQuestions = [
+                {
+                    id: 'q-obj-1',
+                    examId: '22222222-2222-2222-2222-222222222222',
+                    type: 'MULTIPLE_CHOICE',
+                    content: { prompt: 'Q1' },
+                    points: 5,
+                    orderIndex: 0,
+                },
+            ];
+
+            mockDb.executeTakeFirst.mockResolvedValue(mockAttempt);
+            mockDb.execute.mockResolvedValue(mockQuestions);
+            vi.mocked(scoreExamAttempt).mockReturnValue({
+                score: 0,
+                totalScore: 5,
+                percentage: 0,
+                answeredCount: 1,
+                autoGradableQuestionCount: 1,
+                manualReviewQuestionCount: 0,
+                requiresManualReview: false,
+            });
+
+            const setSpy = vi.fn().mockReturnValue(mockDb);
+            mockDb.set = setSpy;
+
+            await updateGradingAttempt({
+                dbClient: mockDb as DbClient,
+                attemptId: '11111111-1111-1111-1111-111111111111',
+                evaluations: {},
+                finalize: false,
+            });
+
+            const lastCallArgs = setSpy.mock.calls[0][0];
+            expect(lastCallArgs.answer_snapshot._itemOverrides).toEqual({
+                'q-obj-1': {
+                    awardedScore: 2,
+                    reason: 'Original Override',
+                    overriddenBy: '123',
+                    overriddenAt: '2026-06-28T00:00:00.000Z',
+                },
+            });
+        });
+
+        it('transitions IN_PROGRESS status and populates completed_at / total_score on finalize', async () => {
+            const mockAttempt = {
+                attemptId: '11111111-1111-1111-1111-111111111111',
+                examId: '22222222-2222-2222-2222-222222222222',
+                examTitle: 'History Final',
+                subjectTitle: 'History',
+                studentId: '33333333-3333-3333-3333-333333333333',
+                studentNumber: '2026-0001',
+                completedAt: null,
+                score: 0,
+                totalScore: null,
+                status: 'IN_PROGRESS',
+                answerSnapshot: {},
+                studentName: 'Alice Student',
+            };
+
+            const mockQuestions = [
+                {
+                    id: 'q-obj-1',
+                    examId: '22222222-2222-2222-2222-222222222222',
+                    type: 'MULTIPLE_CHOICE',
+                    content: { prompt: 'Q1' },
+                    points: 5,
+                    orderIndex: 0,
+                },
+            ];
+
+            mockDb.executeTakeFirst.mockResolvedValue(mockAttempt);
+            mockDb.execute.mockResolvedValue(mockQuestions);
+            vi.mocked(scoreExamAttempt).mockReturnValue({
+                score: 0,
+                totalScore: 5,
+                percentage: 0,
+                answeredCount: 0,
+                autoGradableQuestionCount: 1,
+                manualReviewQuestionCount: 0,
+                requiresManualReview: false,
+            });
+
+            const setSpy = vi.fn().mockReturnValue(mockDb);
+            mockDb.set = setSpy;
+
+            const res = await updateGradingAttempt({
+                dbClient: mockDb as DbClient,
+                attemptId: '11111111-1111-1111-1111-111111111111',
+                evaluations: {},
+                finalize: true,
+            });
+
+            const lastCallArgs = setSpy.mock.calls[0][0];
+            expect(lastCallArgs.status).toBe('COMPLETED');
+            expect(lastCallArgs.completed_at).toBeDefined();
+            expect(lastCallArgs.total_score).toBe(5);
+            expect(res.totalScore).toBe(5);
+        });
+
+        it('preserves existing feedback when feedback parameter is undefined', async () => {
+            const mockAttempt = {
+                attemptId: '11111111-1111-1111-1111-111111111111',
+                examId: '22222222-2222-2222-2222-222222222222',
+                examTitle: 'History Final',
+                subjectTitle: 'History',
+                studentId: '33333333-3333-3333-3333-333333333333',
+                studentNumber: '2026-0001',
+                completedAt: new Date('2026-04-18T09:30:00.000Z'),
+                score: 5,
+                totalScore: 10,
+                status: 'COMPLETED',
+                answerSnapshot: {
+                    _feedback: 'Existing Feedback',
+                },
+                feedback: 'Existing Feedback',
+                studentName: 'Alice Student',
+            };
+
+            const mockQuestions = [
+                {
+                    id: 'q-obj-1',
+                    examId: '22222222-2222-2222-2222-222222222222',
+                    type: 'MULTIPLE_CHOICE',
+                    content: { prompt: 'Q1' },
+                    points: 5,
+                    orderIndex: 0,
+                },
+            ];
+
+            mockDb.executeTakeFirst.mockResolvedValue(mockAttempt);
+            mockDb.execute.mockResolvedValue(mockQuestions);
+            vi.mocked(scoreExamAttempt).mockReturnValue({
+                score: 5,
+                totalScore: 5,
+                percentage: 100,
+                answeredCount: 1,
+                autoGradableQuestionCount: 1,
+                manualReviewQuestionCount: 0,
+                requiresManualReview: false,
+            });
+
+            const setSpy = vi.fn().mockReturnValue(mockDb);
+            mockDb.set = setSpy;
+
+            await updateGradingAttempt({
+                dbClient: mockDb as DbClient,
+                attemptId: '11111111-1111-1111-1111-111111111111',
+                evaluations: {},
+                finalize: false,
+                // feedback is omitted/undefined
+            });
+
+            const lastCallArgs = setSpy.mock.calls[0][0];
+            expect(lastCallArgs.answer_snapshot._feedback).toBe('Existing Feedback');
+        });
+
+        it('writes initial_score on first override save when initial_score is null', async () => {
+            const mockAttempt = {
+                attemptId: '11111111-1111-1111-1111-111111111111',
+                examId: '22222222-2222-2222-2222-222222222222',
+                examTitle: 'Science Test',
+                subjectTitle: 'Science',
+                studentId: '33333333-3333-3333-3333-333333333333',
+                studentNumber: '2026-0001',
+                completedAt: new Date('2026-04-18T09:30:00.000Z'),
+                score: 7,
+                totalScore: 10,
+                initialScore: null, // not yet captured
+                status: 'COMPLETED',
+                answerSnapshot: {},
+                studentName: 'Bob Student',
+            };
+
+            const mockQuestions = [
+                {
+                    id: 'q-mc-1',
+                    examId: '22222222-2222-2222-2222-222222222222',
+                    type: 'MULTIPLE_CHOICE',
+                    content: { prompt: 'Q1' },
+                    points: 10,
+                    orderIndex: 0,
+                },
+            ];
+
+            mockDb.executeTakeFirst.mockResolvedValue(mockAttempt);
+            mockDb.execute.mockResolvedValue(mockQuestions);
+            vi.mocked(scoreExamAttempt).mockReturnValue({
+                score: 7,
+                totalScore: 10,
+                percentage: 70,
+                answeredCount: 1,
+                autoGradableQuestionCount: 1,
+                manualReviewQuestionCount: 0,
+                requiresManualReview: false,
+            });
+
+            const setSpy = vi.fn().mockReturnValue(mockDb);
+            mockDb.set = setSpy;
+
+            await updateGradingAttempt({
+                dbClient: mockDb as DbClient,
+                attemptId: '11111111-1111-1111-1111-111111111111',
+                evaluations: {},
+                finalize: false,
+            });
+
+            const lastCallArgs = setSpy.mock.calls[0][0];
+            expect(lastCallArgs.initial_score).toBe(7); // captured from attempt.score
+        });
+
+        it('does NOT overwrite initial_score on subsequent saves when already set', async () => {
+            const mockAttempt = {
+                attemptId: '11111111-1111-1111-1111-111111111111',
+                examId: '22222222-2222-2222-2222-222222222222',
+                examTitle: 'Science Test',
+                subjectTitle: 'Science',
+                studentId: '33333333-3333-3333-3333-333333333333',
+                studentNumber: '2026-0001',
+                completedAt: new Date('2026-04-18T09:30:00.000Z'),
+                score: 9, // overridden score
+                totalScore: 10,
+                initialScore: 7, // already captured from the first save
+                status: 'COMPLETED',
+                answerSnapshot: {},
+                studentName: 'Bob Student',
+            };
+
+            const mockQuestions = [
+                {
+                    id: 'q-mc-1',
+                    examId: '22222222-2222-2222-2222-222222222222',
+                    type: 'MULTIPLE_CHOICE',
+                    content: { prompt: 'Q1' },
+                    points: 10,
+                    orderIndex: 0,
+                },
+            ];
+
+            mockDb.executeTakeFirst.mockResolvedValue(mockAttempt);
+            mockDb.execute.mockResolvedValue(mockQuestions);
+            vi.mocked(scoreExamAttempt).mockReturnValue({
+                score: 9,
+                totalScore: 10,
+                percentage: 90,
+                answeredCount: 1,
+                autoGradableQuestionCount: 1,
+                manualReviewQuestionCount: 0,
+                requiresManualReview: false,
+            });
+
+            const setSpy = vi.fn().mockReturnValue(mockDb);
+            mockDb.set = setSpy;
+
+            await updateGradingAttempt({
+                dbClient: mockDb as DbClient,
+                attemptId: '11111111-1111-1111-1111-111111111111',
+                evaluations: {},
+                finalize: false,
+            });
+
+            const lastCallArgs = setSpy.mock.calls[0][0];
+            // initial_score should NOT be in the update payload when already set
+            expect(lastCallArgs.initial_score).toBeUndefined();
+        });
     });
 });
