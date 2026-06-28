@@ -1508,6 +1508,8 @@ model exam_attempts {
   completed_at            DateTime?           @db.Timestamptz(6)
   score                   Int?
   total_score             Int?
+  /// Auto-graded score at time of submission, before any instructor overrides. Write-once.
+  initial_score           Int?
   status                  exam_status?        @default(IN_PROGRESS)
   time_spent_minutes      Int?                @default(0)
   is_verified             Boolean?            @default(false)

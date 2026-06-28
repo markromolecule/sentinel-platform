@@ -60,6 +60,7 @@ export const attemptGradingDetailSchema = z.object({
     completedAt: z.string().nullable(),
     score: z.number().nullable(),
     totalScore: z.number().nullable(),
+    initialScore: z.number().nullable(),
     status: z.string().nullable(),
     answers: z.record(z.string(), z.any()),
     evaluations: z.record(z.string(), z.any()),

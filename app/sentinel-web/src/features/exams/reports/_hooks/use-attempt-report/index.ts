@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import {
     buildOverridePayload,
     normalizeOverrideDrafts,
@@ -18,14 +18,22 @@ export function useAttemptReport({
     attempt,
     questions,
     onSubmit,
+    isSaving = false,
 }: UseAttemptReportProps): UseAttemptReportReturn {
     const [overrideDrafts, setOverrideDrafts] = useState<AttemptReportOverrideDrafts>(() =>
         normalizeOverrideDrafts(attempt.itemOverrides),
     );
 
+    const prevIsSaving = useRef(isSaving);
+
     useEffect(() => {
-        setOverrideDrafts(normalizeOverrideDrafts(attempt.itemOverrides));
-    }, [attempt.itemOverrides]);
+        // Sync drafts from server ONLY when a save operation completes.
+        // This prevents background refetches (focus, etc.) from wiping out active user edits.
+        if (prevIsSaving.current && !isSaving) {
+            setOverrideDrafts(normalizeOverrideDrafts(attempt.itemOverrides));
+        }
+        prevIsSaving.current = isSaving;
+    }, [attempt.itemOverrides, isSaving]);
 
     const [selectedReport, setSelectedReport] = useState<ReportCardType | null>(null);
 
@@ -33,13 +41,23 @@ export function useAttemptReport({
         () =>
             attempt.questionReports.map((report) => {
                 const question = questions.find((entry) => entry.id === report.questionId);
+                const draft = overrideDrafts[report.questionId];
+
+                let awardedScore = report.awardedScore;
+                if (draft && draft.awardedScore !== '') {
+                    const draftScore = Number(draft.awardedScore);
+                    if (!Number.isNaN(draftScore)) {
+                        awardedScore = draftScore;
+                    }
+                }
 
                 return {
                     ...report,
+                    awardedScore,
                     question,
                 };
             }),
-        [attempt.questionReports, questions],
+        [attempt.questionReports, questions, overrideDrafts],
     );
 
     const handleOverrideChange = (

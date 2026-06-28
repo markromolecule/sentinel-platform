@@ -158,7 +158,7 @@ function useGradingAttempt({ examId, attemptId }: UseGradingAttemptProps): UseGr
         });
     };
 
-    const handleSubmit = () => {
+    const handleSubmit = (finalize: boolean) => {
         const body: UpdateGradingAttemptBody = {
             evaluations: Object.entries(evaluations).reduce(
                 (acc, [qId, qEval]) => {
@@ -171,6 +171,7 @@ function useGradingAttempt({ examId, attemptId }: UseGradingAttemptProps): UseGr
                 {} as NonNullable<UpdateGradingAttemptBody['evaluations']>,
             ),
             feedback: overallFeedback || null,
+            finalize,
         };
         saveMutation.mutate(body);
     };

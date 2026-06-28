@@ -12,7 +12,7 @@ type GradingHeaderProps = {
     subjectTitle: string;
     examId: string;
     isSubmitting: boolean;
-    onSubmit: () => void;
+    onSubmit: (finalize: boolean) => void;
 };
 
 type GradingScoreHighlightsProps = {

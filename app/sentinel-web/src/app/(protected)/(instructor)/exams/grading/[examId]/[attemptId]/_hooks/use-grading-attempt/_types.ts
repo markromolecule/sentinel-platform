@@ -28,7 +28,7 @@ type UseGradingAttemptReturn = {
     isSubmitting: boolean;
     handleScoreChange: (qId: string, criterionKey: keyof CriteriaScores, value: number) => void;
     handleFeedbackChange: (qId: string, text: string) => void;
-    handleSubmit: () => void;
+    handleSubmit: (finalize: boolean) => void;
 };
 
 export type { UseGradingAttemptProps, UseGradingAttemptReturn };

@@ -86,12 +86,15 @@ export async function updateGradingAttempt({
 
     for (const question of questions) {
         if (question.type === 'ESSAY') {
-            const evaluation = evaluations[question.id];
+            const evaluation = evaluations[question.id] ?? detail.attempt.evaluations[question.id];
 
             if (!evaluation) {
-                throw new HTTPException(400, {
-                    message: `Evaluation missing for essay question: ${question.id}`,
-                });
+                if (finalize) {
+                    throw new HTTPException(400, {
+                        message: `Evaluation missing for essay question: ${question.id}`,
+                    });
+                }
+                continue;
             }
 
             const essayScore = calculateEssayWeightedScore(evaluation.scores, question.points);
@@ -104,7 +107,12 @@ export async function updateGradingAttempt({
         }
     }
 
-    const persistedOverrides = Object.entries(itemOverrides).reduce<Record<string, any>>(
+    const mergedOverrides = {
+        ...attempt.itemOverrides,
+        ...itemOverrides,
+    };
+
+    const persistedOverrides = Object.entries(mergedOverrides).reduce<Record<string, any>>(
         (acc, [questionId, override]) => {
             const maxPoints = questionPointsMap.get(questionId);
 
@@ -123,8 +131,8 @@ export async function updateGradingAttempt({
             acc[questionId] = {
                 awardedScore: override.awardedScore,
                 reason: override.reason ?? null,
-                overriddenBy: actorUserId ?? null,
-                overriddenAt: new Date().toISOString(),
+                overriddenBy: override.overriddenBy ?? actorUserId ?? null,
+                overriddenAt: override.overriddenAt ?? new Date().toISOString(),
             };
 
             return acc;
@@ -151,10 +159,10 @@ export async function updateGradingAttempt({
         typeof attempt.grading === 'object' && attempt.grading !== null ? attempt.grading : {};
     const updatedGradingMetadata = finalize
         ? {
-              ...existingGradingMetadata,
-              finalizedAt: new Date().toISOString(),
-              finalizedBy: actorUserId ?? null,
-          }
+            ...existingGradingMetadata,
+            finalizedAt: new Date().toISOString(),
+            finalizedBy: actorUserId ?? null,
+        }
         : existingGradingMetadata;
 
     // 5. Build updated answer snapshot with metadata prefixed with "_"
@@ -163,23 +171,45 @@ export async function updateGradingAttempt({
         _evaluations: updatedEvaluations,
         _itemOverrides: persistedOverrides,
         _grading: updatedGradingMetadata,
-        _feedback: feedback ?? null,
+        _feedback: feedback !== undefined ? feedback : (attempt.feedback ?? null),
     };
+
+    const totalAttemptPoints = questions.reduce((sum, q) => sum + q.points, 0);
+    const finalTotalScore = attempt.totalScore ?? totalAttemptPoints;
+
+    const updatePayload: Record<string, any> = {
+        score: roundedScore,
+        answer_snapshot: updatedSnapshot as any,
+        last_synced_at: new Date(),
+    };
+
+    if (finalize) {
+        updatePayload.status = 'COMPLETED';
+        if (!attempt.completedAt) {
+            updatePayload.completed_at = new Date();
+        }
+    }
+
+    if (attempt.totalScore === null || attempt.totalScore === undefined) {
+        updatePayload.total_score = totalAttemptPoints;
+    }
+
+    // Capture the pre-override baseline on the very first instructor save.
+    // initial_score is write-once — never overwritten on subsequent saves.
+    if (attempt.initialScore === null || attempt.initialScore === undefined) {
+        updatePayload.initial_score = attempt.score ?? 0;
+    }
 
     // 6. Update the database
     await dbClient
         .updateTable('exam_attempts')
-        .set({
-            score: roundedScore,
-            answer_snapshot: updatedSnapshot as any,
-            last_synced_at: new Date(),
-        })
+        .set(updatePayload)
         .where('attempt_id', '=', attemptId)
         .execute();
 
     return {
         attemptId,
         score: roundedScore,
-        totalScore: attempt.totalScore,
+        totalScore: finalTotalScore,
     };
 }

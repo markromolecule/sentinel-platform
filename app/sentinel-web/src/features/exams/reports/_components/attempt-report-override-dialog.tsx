@@ -11,7 +11,7 @@ import {
     Label,
     Textarea,
 } from '@sentinel/ui';
-import type { AttemptReportOverrideDrafts } from '../attempt-report-utils';
+import { formatAnswerValue, type AttemptReportOverrideDrafts } from '../attempt-report-utils';
 import type { ReportCardType } from '../_hooks/use-attempt-report/_types';
 
 export type AttemptReportOverrideDialogProps = {
@@ -44,7 +44,7 @@ export function AttemptReportOverrideDialog({
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent>
+            <DialogContent className="sm:max-w-3xl">
                 <DialogHeader>
                     <DialogTitle>Adjust Score</DialogTitle>
                     <DialogDescription>
@@ -52,54 +52,67 @@ export function AttemptReportOverrideDialog({
                     </DialogDescription>
                 </DialogHeader>
 
-                <div className="space-y-4 py-2">
-                    <div className="text-foreground text-sm font-medium">{prompt}</div>
-
-                    <div className="space-y-2">
-                        <Label htmlFor={`override-score-${selectedReport.questionId}`}>
-                            Override Score
-                        </Label>
-                        <Input
-                            id={`override-score-${selectedReport.questionId}`}
-                            type="number"
-                            min={0}
-                            max={selectedReport.maxScore}
-                            step="0.1"
-                            value={overrideDraft?.awardedScore ?? ''}
-                            onChange={(event) =>
-                                onOverrideChange(
-                                    selectedReport.questionId,
-                                    'awardedScore',
-                                    event.target.value,
-                                )
-                            }
-                            placeholder={String(selectedReport.maxScore)}
-                        />
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 py-2">
+                    <div className="space-y-4">
+                        <div className="space-y-2">
+                            <Label className="text-xs text-muted-foreground uppercase tracking-wider">Question Prompt</Label>
+                            <div className="text-foreground text-sm font-medium">{prompt}</div>
+                        </div>
+                        <div className="space-y-2">
+                            <Label className="text-xs text-muted-foreground uppercase tracking-wider">Student's Answer</Label>
+                            <div className="bg-slate-50/50 border rounded-lg p-3 text-sm text-slate-800 font-mono whitespace-pre-wrap max-h-60 overflow-y-auto">
+                                {formatAnswerValue(selectedReport.answer)}
+                            </div>
+                        </div>
                     </div>
 
-                    <div className="space-y-2">
-                        <Label htmlFor={`override-reason-${selectedReport.questionId}`}>
-                            Override Reason
-                        </Label>
-                        <Textarea
-                            id={`override-reason-${selectedReport.questionId}`}
-                            className="min-h-[4rem] resize-none"
-                            value={overrideDraft?.reason ?? ''}
-                            onChange={(event) =>
-                                onOverrideChange(
-                                    selectedReport.questionId,
-                                    'reason',
-                                    event.target.value,
-                                )
-                            }
-                            placeholder="Explain why this score was adjusted."
-                        />
+                    <div className="space-y-4">
+                        <div className="space-y-2">
+                            <Label htmlFor={`override-score-${selectedReport.questionId}`}>
+                                Override Score
+                            </Label>
+                            <Input
+                                id={`override-score-${selectedReport.questionId}`}
+                                type="number"
+                                min={0}
+                                max={selectedReport.maxScore}
+                                step="0.1"
+                                value={overrideDraft?.awardedScore ?? ''}
+                                onChange={(event) =>
+                                    onOverrideChange(
+                                        selectedReport.questionId,
+                                        'awardedScore',
+                                        event.target.value,
+                                    )
+                                }
+                                placeholder={String(selectedReport.maxScore)}
+                            />
+                        </div>
+
+                        <div className="space-y-2">
+                            <Label htmlFor={`override-reason-${selectedReport.questionId}`}>
+                                Override Reason
+                            </Label>
+                            <Textarea
+                                id={`override-reason-${selectedReport.questionId}`}
+                                className="min-h-[4rem] resize-none"
+                                value={overrideDraft?.reason ?? ''}
+                                onChange={(event) =>
+                                    onOverrideChange(
+                                        selectedReport.questionId,
+                                        'reason',
+                                        event.target.value,
+                                    )
+                                }
+                                placeholder="Explain why this score was adjusted."
+                            />
+                        </div>
                     </div>
                 </div>
 
                 <DialogFooter>
                     <DialogClose asChild>
-                        <Button variant="outline">Done</Button>
+                        <Button className="bg-[#323d8f] text-white hover:bg-[#323d8f]/90">Done</Button>
                     </DialogClose>
                 </DialogFooter>
             </DialogContent>

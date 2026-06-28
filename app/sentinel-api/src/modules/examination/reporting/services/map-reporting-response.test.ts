@@ -186,4 +186,38 @@ describe('map reporting response', () => {
         expect(report.summary.needsMakeupCount).toBe(1);
         expect(report.actionItems.makeup).toHaveLength(1);
     });
+
+    it('correctly maps percentage and isFinalized attributes from raw database rows', () => {
+        const student = mapReportStudentSummary(
+            {
+                student_user_id: '11111111-1111-4111-8111-111111111111',
+                student_record_id: '22222222-2222-4222-8222-222222222222',
+                student_number: '2024-0006',
+                first_name: 'David',
+                last_name: 'Tan',
+                attempt_id: '33333333-3333-4333-8333-333333333333',
+                attempt_status: 'COMPLETED',
+                started_at: '2026-04-20T09:00:00.000Z',
+                completed_at: '2026-04-20T09:45:00.000Z',
+                time_spent_minutes: 45,
+                score: 85,
+                total_score: 100,
+                attempt_count: 1,
+                incident_count: 0,
+                open_incident_count: 0,
+                pending_incident_count: 0,
+                reviewed_incident_count: 0,
+                confirmed_incident_count: 0,
+                dismissed_incident_count: 0,
+                highest_incident_type: null,
+                highest_incident_severity: null,
+                attempt_finalized_at: '2026-04-20T10:00:00.000Z',
+            },
+            75,
+        );
+
+        expect(student.percentage).toBe(85);
+        expect(student.isFinalized).toBe(true);
+        expect(student.finalizedAt).toBe('2026-04-20T10:00:00.000Z');
+    });
 });

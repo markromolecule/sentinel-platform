@@ -77,6 +77,9 @@ export async function updateGradingAttempt(
     const response: ApiResponse<{ attemptId: string; score: number; totalScore: number }> =
         await apiClient(`/grading/attempts/${attemptId}`, {
             method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
             body: JSON.stringify(body),
         });
     return response.data;

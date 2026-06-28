@@ -2,7 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 import { Button } from '@sentinel/ui';
-import { Award, ArrowLeft, Save } from 'lucide-react';
+import { Award, ArrowLeft, Save, CheckSquare } from 'lucide-react';
 import type { GradingHeaderProps } from './_types';
 
 /**
@@ -40,9 +40,13 @@ function GradingHeader({
                 <Button variant="outline" onClick={() => router.push(`/exams/grading/${examId}`)}>
                     <ArrowLeft className="mr-2 h-4 w-4" /> Back
                 </Button>
-                <Button onClick={onSubmit} disabled={isSubmitting}>
+                <Button variant="outline" onClick={() => onSubmit(false)} disabled={isSubmitting}>
                     <Save className="mr-2 h-4 w-4" />
-                    {isSubmitting ? 'Submitting...' : 'Submit Grades'}
+                    {isSubmitting ? 'Saving...' : 'Save Draft'}
+                </Button>
+                <Button onClick={() => onSubmit(true)} disabled={isSubmitting}>
+                    <CheckSquare className="mr-2 h-4 w-4" />
+                    {isSubmitting ? 'Finalizing...' : 'Submit & Finalize'}
                 </Button>
             </div>
         </div>

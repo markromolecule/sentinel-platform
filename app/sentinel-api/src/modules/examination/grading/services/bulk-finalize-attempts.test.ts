@@ -33,9 +33,13 @@ describe('bulkFinalizeAttempts', () => {
 
     it('finalizes non-finalized completed attempts', async () => {
         mockDb.executeTakeFirst.mockResolvedValueOnce({ exam_id: 'exam-1' }); // Exam exists
+        // First execute call: fetch attempts
         mockDb.execute.mockResolvedValueOnce([
             {
                 attempt_id: 'attempt-1',
+                status: 'COMPLETED',
+                completed_at: '2026-06-27T00:00:00Z',
+                total_score: 10,
                 answer_snapshot: {
                     'q-1': 'A',
                     _grading: {
@@ -45,11 +49,19 @@ describe('bulkFinalizeAttempts', () => {
             },
             {
                 attempt_id: 'attempt-2',
+                status: 'COMPLETED',
+                completed_at: '2026-06-27T00:00:00Z',
+                total_score: 10,
                 answer_snapshot: {
                     'q-1': 'B',
                 },
             },
-        ]); // Two attempts, only one finalized
+        ]);
+        // Second execute call: fetch exam questions
+        mockDb.execute.mockResolvedValueOnce([
+            { points: 5 },
+            { points: 5 },
+        ]);
 
         const result = await bulkFinalizeAttempts({
             dbClient: mockDb,
@@ -68,6 +80,9 @@ describe('bulkFinalizeAttempts', () => {
         mockDb.execute.mockResolvedValueOnce([
             {
                 attempt_id: 'attempt-1',
+                status: 'COMPLETED',
+                completed_at: '2026-06-27T00:00:00Z',
+                total_score: 10,
                 answer_snapshot: {
                     'q-1': 'A',
                     _grading: {
@@ -85,5 +100,38 @@ describe('bulkFinalizeAttempts', () => {
 
         expect(result.count).toBe(0);
         expect(mockDb.updateTable).not.toHaveBeenCalled();
+    });
+
+    it('transitions IN_PROGRESS attempts and populates total_score', async () => {
+        mockDb.executeTakeFirst.mockResolvedValueOnce({ exam_id: 'exam-1' });
+        // First execute call: fetch attempts
+        mockDb.execute.mockResolvedValueOnce([
+            {
+                attempt_id: 'attempt-in-progress',
+                status: 'IN_PROGRESS',
+                completed_at: null,
+                total_score: null,
+                answer_snapshot: {},
+            },
+        ]);
+        // Second execute call: fetch exam questions
+        mockDb.execute.mockResolvedValueOnce([
+            { points: 10 },
+        ]);
+
+        const setSpy = vi.fn().mockReturnThis();
+        mockDb.set = setSpy;
+
+        const result = await bulkFinalizeAttempts({
+            dbClient: mockDb,
+            examId: 'exam-1',
+            actorUserId: 'user-1',
+        });
+
+        expect(result.count).toBe(1);
+        const lastCallArgs = setSpy.mock.calls[0][0];
+        expect(lastCallArgs.status).toBe('COMPLETED');
+        expect(lastCallArgs.completed_at).toBeDefined();
+        expect(lastCallArgs.total_score).toBe(10);
     });
 });

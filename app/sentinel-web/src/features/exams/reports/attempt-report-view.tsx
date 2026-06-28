@@ -18,6 +18,7 @@ export type AttemptReportViewProps = {
         itemOverrides: NonNullable<UpdateGradingAttemptBodyType['itemOverrides']>;
         finalize: boolean;
     }) => void;
+    optimisticScore?: number | null;
 };
 
 /**
@@ -32,6 +33,7 @@ export function AttemptReportView({
     editable = false,
     isSubmitting = false,
     onSubmit,
+    optimisticScore = null,
 }: AttemptReportViewProps) {
     const {
         overrideDrafts,
@@ -40,17 +42,21 @@ export function AttemptReportView({
         reportCards,
         handleOverrideChange,
         handleSubmit,
-    } = useAttemptReport({ attempt, questions, onSubmit });
+    } = useAttemptReport({ attempt, questions, onSubmit, isSaving: isSubmitting });
 
-    const selectedIndex = selectedReport ? reportCards.indexOf(selectedReport) : -1;
+    const selectedIndex = selectedReport
+        ? reportCards.findIndex((card) => card.questionId === selectedReport.questionId)
+        : -1;
+    const isReportFinalized = !!attempt.grading.finalizedAt;
+    const isEditable = editable && !isReportFinalized;
 
     return (
         <div className="space-y-6">
-            <AttemptReportSummaryCards attempt={attempt} />
+            <AttemptReportSummaryCards attempt={attempt} optimisticScore={optimisticScore} />
 
             <AttemptReportTable
                 reportCards={reportCards}
-                editable={editable}
+                editable={isEditable}
                 onRowClick={setSelectedReport}
             />
 
@@ -60,6 +66,7 @@ export function AttemptReportView({
                 isSubmitting={isSubmitting}
                 onSaveOverrides={() => handleSubmit(false)}
                 onSaveAndFinalize={() => handleSubmit(true)}
+                isFinalized={isReportFinalized}
             />
 
             {selectedReport && (
