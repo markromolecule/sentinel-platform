@@ -20,7 +20,7 @@ export default function ExamReportsIndexPage() {
     const [page, setPage] = useState(1);
     const [searchValue, setSearchValue] = useState('');
     const deferredSearch = useDeferredValue(searchValue);
-    const pageSize = 9;
+    const pageSize = 6;
 
     const { data, isLoading } = useExamReportsListQuery({
         page,
@@ -42,11 +42,10 @@ export default function ExamReportsIndexPage() {
             <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
                 <div className="space-y-2">
                     <div className="flex items-center gap-3">
-                        <FileText className="h-6 w-6 text-slate-500" />
                         <div>
                             <h1 className="text-3xl font-semibold tracking-tight">Exam Reports</h1>
                             <p className="text-muted-foreground">
-                                Open a report summary first, then drill into each student attempt.
+                                View and analyze exam reports and incident logs.
                             </p>
                         </div>
                     </div>
@@ -65,47 +64,49 @@ export default function ExamReportsIndexPage() {
             <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
                 {isLoading
                     ? Array.from({ length: 6 }).map((_, index) => (
-                          <div key={index} className="bg-muted h-36 animate-pulse rounded-xl" />
-                      ))
+                        <div key={index} className="bg-muted h-36 animate-pulse rounded-xl" />
+                    ))
                     : reportableExams.map((exam) => (
-                          <Card
-                              key={exam.id}
-                              className="border-border/70 flex h-full flex-col overflow-hidden shadow-sm"
-                          >
-                              <CardHeader className="space-y-3 pb-3">
-                                  <div className="flex items-start justify-between gap-3">
-                                      <div className="min-w-0 space-y-1">
-                                          <CardTitle className="line-clamp-2 text-lg">
-                                              {exam.title}
-                                          </CardTitle>
-                                          <p className="text-muted-foreground line-clamp-2 text-sm">
-                                              {exam.subject}
-                                          </p>
-                                      </div>
-                                      <Badge variant="secondary" className="shrink-0">
-                                          {exam.questionCount} Qs
-                                      </Badge>
-                                  </div>
-                              </CardHeader>
-                              <CardContent className="flex flex-1 flex-col justify-between gap-3 pt-0">
-                                  <div className="space-y-3">
-                                      <div className="text-muted-foreground flex items-center gap-2 text-sm">
-                                          <CalendarDays className="h-4 w-4" />
-                                          <span>Scheduled {formatDateTime(exam.scheduledDate)}</span>
-                                      </div>
-                                      <div className="text-muted-foreground flex items-center gap-2 text-sm">
-                                          <Users className="h-4 w-4" />
-                                          <span>{exam.studentsCount ?? 0} student attempts</span>
-                                      </div>
-                                  </div>
-                                  <Button asChild className="mt-auto w-full">
-                                      <Link href={`/exams/${exam.id}/report`}>
-                                          Open Report Summary
-                                      </Link>
-                                  </Button>
-                              </CardContent>
-                          </Card>
-                      ))}
+                        <Card
+                            key={exam.id}
+                            className="border-border/70 flex h-full flex-col overflow-hidden shadow-sm"
+                        >
+                            <CardHeader className="space-y-3 pb-3">
+                                <div className="flex items-start justify-between gap-3">
+                                    <div className="min-w-0 space-y-1">
+                                        <CardTitle className="line-clamp-2 text-lg">
+                                            {exam.title}
+                                        </CardTitle>
+                                        <p className="text-muted-foreground line-clamp-2 text-sm">
+                                            {exam.subject}
+                                        </p>
+                                    </div>
+                                    <Badge variant="secondary" className="shrink-0">
+                                        {exam.questionCount} Qs
+                                    </Badge>
+                                </div>
+                            </CardHeader>
+                            <CardContent className="flex flex-1 flex-col justify-between gap-3 pt-0">
+                                <div className="space-y-3">
+                                    <div className="text-muted-foreground flex items-center gap-2 text-sm">
+                                        <CalendarDays className="h-4 w-4" />
+                                        <span>Scheduled {formatDateTime(exam.scheduledDate)}</span>
+                                    </div>
+                                    <div className="text-muted-foreground flex items-center gap-2 text-sm">
+                                        <Users className="h-4 w-4" />
+                                        <span>{exam.studentsCount ?? 0} student attempts</span>
+                                    </div>
+                                </div>
+                                <div className="mt-auto flex flex-col gap-2">
+                                    <Button asChild className="w-full">
+                                        <Link href={`/exams/reports/${exam.id}`}>
+                                            Report Summary
+                                        </Link>
+                                    </Button>
+                                </div>
+                            </CardContent>
+                        </Card>
+                    ))}
             </div>
 
             {!isLoading && reportableExams.length === 0 && (

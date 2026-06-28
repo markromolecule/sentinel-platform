@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Check, X, ShieldAlert } from 'lucide-react';
+import { Check, X } from 'lucide-react';
 import { Button } from '@sentinel/ui';
 
 interface BulkActionsProps {

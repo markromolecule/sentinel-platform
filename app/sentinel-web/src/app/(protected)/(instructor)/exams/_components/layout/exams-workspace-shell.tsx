@@ -30,7 +30,6 @@ function getManagedSection(pathname: string): ExamSection | null {
         }
         return 'reports';
     }
-    if (segment === 'logs') return 'logs';
     if (segment === 'dashboard' || segment === 'config') return 'dashboard';
 
     return null;

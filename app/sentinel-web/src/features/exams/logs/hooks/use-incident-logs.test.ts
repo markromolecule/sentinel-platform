@@ -1,23 +1,11 @@
 import { act, renderHook } from '@testing-library/react';
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { useExamIncidentLogs } from './use-exam-incident-logs';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { useIncidentLogs } from './use-incident-logs';
 import { toast } from 'sonner';
 
 const mockRefetch = vi.fn();
 const mockFetchNextPage = vi.fn();
 const mockReviewIncidents = vi.fn();
-const mockPush = vi.fn();
-
-const mockSearchParams = vi.hoisted(() => vi.fn());
-
-vi.mock('next/navigation', () => ({
-    useParams: () => ({}),
-    usePathname: () => '/exams/logs',
-    useSearchParams: () => mockSearchParams(),
-    useRouter: () => ({
-        push: mockPush,
-    }),
-}));
 
 vi.mock('sonner', () => ({
     toast: {
@@ -28,10 +16,6 @@ vi.mock('sonner', () => ({
 
 vi.mock('@sentinel/hooks', () => ({
     useDebounce: (value: any) => value,
-    useExamsQuery: () => ({
-        data: [{ id: 'exam-1', title: 'Midterm Exam', subject: 'CS 101' }],
-        isLoading: false,
-    }),
     useExamIncidentsQuery: (examId: string) => ({
         data:
             examId === 'exam-1'
@@ -118,44 +102,30 @@ vi.mock('@sentinel/hooks', () => ({
     }),
 }));
 
-describe('useExamIncidentLogs Custom Hook', () => {
+describe('useIncidentLogs Custom Hook', () => {
     beforeEach(() => {
         vi.clearAllMocks();
-        mockSearchParams.mockReturnValue(new URLSearchParams());
     });
 
-    it('returns empty states when no exam is selected', () => {
-        const { result } = renderHook(() => useExamIncidentLogs());
+    it('returns empty states and no incidents when exam ID is empty', () => {
+        const { result } = renderHook(() => useIncidentLogs(''));
 
-        expect(result.current.examId).toBe('');
         expect(result.current.groupMode).toBe('logs');
         expect(result.current.selectedIds).toEqual([]);
         expect(result.current.selectedIncident).toBeNull();
         expect(result.current.drawerOpen).toBe(false);
-    });
-
-    it('handles exam selection changes by pushing URL search params', () => {
-        const { result } = renderHook(() => useExamIncidentLogs());
-
-        act(() => {
-            result.current.handleExamChange('exam-1');
-        });
-
-        expect(mockPush).toHaveBeenCalledWith('/exams/logs?examId=exam-1');
+        expect(result.current.displayIncidents).toEqual([]);
     });
 
     it('returns incident records when exam is selected', () => {
-        mockSearchParams.mockReturnValue(new URLSearchParams({ examId: 'exam-1' }));
-        const { result } = renderHook(() => useExamIncidentLogs());
+        const { result } = renderHook(() => useIncidentLogs('exam-1'));
 
-        expect(result.current.examId).toBe('exam-1');
         expect(result.current.displayIncidents).toHaveLength(3);
         expect(result.current.displayIncidents[0].studentName).toBe('Juan Dela Cruz');
     });
 
     it('groups incidents by student when groupMode is toggled to student', () => {
-        mockSearchParams.mockReturnValue(new URLSearchParams({ examId: 'exam-1' }));
-        const { result } = renderHook(() => useExamIncidentLogs());
+        const { result } = renderHook(() => useIncidentLogs('exam-1'));
 
         expect(result.current.displayIncidents).toHaveLength(3);
 
@@ -176,8 +146,7 @@ describe('useExamIncidentLogs Custom Hook', () => {
     });
 
     it('confirms and dismisses incidents via mutations', async () => {
-        mockSearchParams.mockReturnValue(new URLSearchParams({ examId: 'exam-1' }));
-        const { result } = renderHook(() => useExamIncidentLogs());
+        const { result } = renderHook(() => useIncidentLogs('exam-1'));
 
         mockReviewIncidents.mockResolvedValue({});
 
@@ -191,5 +160,10 @@ describe('useExamIncidentLogs Custom Hook', () => {
             reviewNotes: 'confirmed note',
         });
         expect(toast.success).toHaveBeenCalledWith('Incident confirmed successfully');
+    });
+
+    it('derives sections from exam report data', () => {
+        const { result } = renderHook(() => useIncidentLogs('exam-1'));
+        expect(result.current.sections).toEqual([{ id: 'sec-1', name: 'BSCS 4A' }]);
     });
 });

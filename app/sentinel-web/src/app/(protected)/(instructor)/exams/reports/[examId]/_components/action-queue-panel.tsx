@@ -16,7 +16,7 @@ type ActionQueuePanelProps = {
     page: number;
     onPageChange: (page: number) => void;
     examId: string;
-    sectionOptions: (readonly [string, string])[];
+    sectionOptions: readonly (readonly [string, string])[];
 };
 
 /**

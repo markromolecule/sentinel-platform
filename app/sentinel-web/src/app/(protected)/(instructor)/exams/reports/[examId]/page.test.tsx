@@ -33,7 +33,22 @@ vi.mock('@sentinel/services', () => ({
     createStudentExamAccessOverride: vi.fn(),
 }));
 
+vi.mock('@/features/exams/logs', () => ({
+    IncidentLogsView: ({ examId }: { examId: string }) => (
+        <div data-testid="incident-logs-view">Incident Logs for {examId}</div>
+    ),
+}));
+
 vi.mock('@sentinel/ui', () => ({
+    AlertDialog: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+    AlertDialogTrigger: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+    AlertDialogContent: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+    AlertDialogHeader: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+    AlertDialogTitle: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+    AlertDialogDescription: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+    AlertDialogFooter: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+    AlertDialogAction: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+    AlertDialogCancel: ({ children }: { children: React.ReactNode }) => <>{children}</>,
     Badge: ({ children }: { children: React.ReactNode }) => <span>{children}</span>,
     Button: ({
         children,
@@ -300,7 +315,7 @@ describe('ExamReportPage', () => {
     });
 
     it('passes the selected section filter into the report query', async () => {
-        const params = Promise.resolve({ id: 'exam-1' });
+        const params = Promise.resolve({ examId: 'exam-1' });
 
         await act(async () => {
             render(
@@ -332,7 +347,7 @@ describe('ExamReportPage', () => {
     });
 
     it('links each submitted attempt into the detailed report route', async () => {
-        const params = Promise.resolve({ id: 'exam-1' });
+        const params = Promise.resolve({ examId: 'exam-1' });
 
         await act(async () => {
             render(
@@ -355,7 +370,7 @@ describe('ExamReportPage', () => {
     });
 
     it('initializes activeSection from search parameters', async () => {
-        const params = Promise.resolve({ id: 'exam-1' });
+        const params = Promise.resolve({ examId: 'exam-1' });
         mockSearchParamsGet.mockReturnValue('attempts');
 
         await act(async () => {
@@ -369,6 +384,24 @@ describe('ExamReportPage', () => {
 
         // The attempts summary view should be rendered
         expect(screen.getAllByText('Attempt Summary Report').length).toBeGreaterThan(0);
+        mockSearchParamsGet.mockReturnValue(null);
+    });
+
+    it('renders Incident Logs section when section is logs', async () => {
+        const params = Promise.resolve({ examId: 'exam-1' });
+        mockSearchParamsGet.mockReturnValue('logs');
+
+        await act(async () => {
+            render(
+                <Suspense fallback={<div>Loading...</div>}>
+                    <ExamReportPage params={params} />
+                </Suspense>,
+            );
+            await params;
+        });
+
+        expect(screen.getByTestId('incident-logs-view')).toBeTruthy();
+        expect(screen.getByText('Incident Logs for exam-1')).toBeTruthy();
         mockSearchParamsGet.mockReturnValue(null);
     });
 });
