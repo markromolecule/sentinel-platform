@@ -25,7 +25,7 @@ export async function getExamReportsList({
     departmentId,
 }: GetExamReportsListArgs) {
     const page = filters.page ?? 1;
-    const limit = filters.limit ?? 9;
+    const limit = filters.pageSize ?? filters.limit ?? 9;
     const offset = (page - 1) * limit;
 
     let baseQuery = dbClient

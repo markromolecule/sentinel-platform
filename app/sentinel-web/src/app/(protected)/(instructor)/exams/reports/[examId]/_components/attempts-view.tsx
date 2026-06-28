@@ -23,7 +23,7 @@ type AttemptsViewProps = {
     setSearchValue: (v: string) => void;
     sectionFilter: string | undefined;
     setSectionFilter: (v: string | undefined) => void;
-    sectionOptions: (readonly [string, string])[];
+    sectionOptions: readonly (readonly [string, string])[];
     studentPage: number;
     setStudentPage: (page: number) => void;
     pageSize: number;

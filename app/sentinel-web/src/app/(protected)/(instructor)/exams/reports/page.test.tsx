@@ -15,7 +15,7 @@ vi.mock('next/link', () => ({
 }));
 
 vi.mock('@sentinel/hooks', () => ({
-    useExamReportsListQuery: ({ page = 1, limit = 9, search }: any = {}) => {
+    useExamReportsListQuery: ({ page = 1, limit = 6, search }: any = {}) => {
         const allData = Array.from({ length: 10 }, (_, index) => ({
             id: `exam-${index + 1}`,
             title: `Exam ${index + 1}`,
@@ -56,8 +56,8 @@ describe('ExamReportsIndexPage', () => {
 
         expect(screen.getByText('Exam 1')).toBeTruthy();
         expect(screen.queryByText('Exam 10')).toBeNull();
-        expect(screen.getAllByRole('link', { name: 'Open Report Summary' })[0]?.getAttribute('href')).toBe(
-            '/exams/exam-1/report',
+        expect(screen.getAllByRole('link', { name: 'Report Summary' })[0]?.getAttribute('href')).toBe(
+            '/exams/reports/exam-1',
         );
     });
 
@@ -67,6 +67,6 @@ describe('ExamReportsIndexPage', () => {
         fireEvent.click(screen.getAllByRole('button', { name: /next/i })[0]!);
 
         expect(await screen.findByText('Exam 10')).toBeTruthy();
-        expect(screen.queryByText('Exam 9')).toBeNull();
+        expect(screen.queryByText('Exam 6')).toBeNull();
     });
 });

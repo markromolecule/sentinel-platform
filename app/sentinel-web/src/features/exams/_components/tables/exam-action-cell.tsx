@@ -75,7 +75,7 @@ export function ExamActionCell({ exam }: ExamActionCellProps) {
                         )}
                         {exam.status !== 'draft' && (
                             <DropdownMenuItem className="cursor-pointer" asChild>
-                                <Link href={`/exams/${exam.id}/report`}>
+                                <Link href={`/exams/reports/${exam.id}`}>
                                     <FileText className="mr-2 h-4 w-4" />
                                     View Report
                                 </Link>

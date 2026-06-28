@@ -1,13 +1,11 @@
 'use client';
 
 import { useMemo, useState, useEffect } from 'react';
-import { useRouter, usePathname, useSearchParams } from 'next/navigation';
 import { toast } from 'sonner';
 import {
     useExamIncidentsQuery,
     useUpdateExamIncidentsMutation,
     useExamReportQuery,
-    useExamsQuery,
     useDebounce,
 } from '@sentinel/hooks';
 import type { ColumnFiltersState } from '@tanstack/react-table';
@@ -16,16 +14,12 @@ import { type ApiGetExamIncidentsQuery, type ApiIncidentLogItem } from '@sentine
 /**
  * Custom hook encapsulating state, API queries, data mapping, and action handlers
  * for the exam incident logs view.
+ * 
+ * @param examId - The UUID of the exam to fetch incident logs for.
  */
-export function useExamIncidentLogs() {
-    const router = useRouter();
-    const pathname = usePathname();
-    const searchParams = useSearchParams();
-    const examId = searchParams.get('examId') || '';
-
+export function useIncidentLogs(examId: string) {
     // Filter states
     const [search, setSearch] = useState('');
-    const [examSearch, setExamSearch] = useState('');
     const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
     const [groupMode, setGroupMode] = useState<'logs' | 'student'>('logs');
 
@@ -36,12 +30,6 @@ export function useExamIncidentLogs() {
 
     // Debounce search inputs to limit API requests
     const debouncedSearch = useDebounce(search, 300);
-    const debouncedExamSearch = useDebounce(examSearch, 300);
-
-    // Fetch list of all exams
-    const { data: exams, isLoading: isExamsLoading } = useExamsQuery(
-        debouncedExamSearch ? { search: debouncedExamSearch } : undefined,
-    );
 
     // Build API query parameters
     const queryParams = useMemo(() => {
@@ -203,18 +191,6 @@ export function useExamIncidentLogs() {
             .sort((a, b) => a.name.localeCompare(b.name));
     }, [report]);
 
-    // Selector Change Handler
-    const handleExamChange = (selectedId: string) => {
-        const params = new URLSearchParams(searchParams.toString());
-        if (selectedId && selectedId !== 'NONE') {
-            params.set('examId', selectedId);
-        } else {
-            params.delete('examId');
-        }
-        setSelectedIds([]);
-        router.push(`${pathname}?${params.toString()}`);
-    };
-
     // Review Actions
     const handleConfirmIncident = async (incidentIds: string[], notes: string) => {
         try {
@@ -309,11 +285,8 @@ export function useExamIncidentLogs() {
     };
 
     return {
-        examId,
         search,
         setSearch,
-        examSearch,
-        setExamSearch,
         columnFilters,
         setColumnFilters,
         groupMode,
@@ -324,10 +297,8 @@ export function useExamIncidentLogs() {
         setSelectedIncident,
         drawerOpen,
         setDrawerOpen,
-        exams,
         displayIncidents,
         sections,
-        isExamsLoading,
         isIncidentsLoading,
         isFetching,
         isError,
@@ -336,7 +307,6 @@ export function useExamIncidentLogs() {
         isReviewing,
         refetch,
         fetchNextPage,
-        handleExamChange,
         handleConfirmIncident,
         handleDismissIncident,
         handleConfirmBulk,

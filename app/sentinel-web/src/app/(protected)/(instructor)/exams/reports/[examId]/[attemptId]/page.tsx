@@ -80,7 +80,7 @@ export default function InstructorAttemptReportPage({
             );
 
             if (payload.finalize) {
-                router.push(`/exams/${examId}/report?section=attempts`);
+                router.push(`/exams/reports/${examId}?section=attempts`);
             }
         },
         onError: (error) => {
@@ -103,7 +103,7 @@ export default function InstructorAttemptReportPage({
                     The report could not be loaded for this attempt in your current scope.
                 </p>
                 <Button variant="outline" asChild className="w-fit">
-                    <Link href={`/exams/${examId}/report?section=attempts`}>
+                    <Link href={`/exams/reports/${examId}?section=attempts`}>
                         <ArrowLeft className="mr-2 h-4 w-4" />
                         Back to Summary
                     </Link>
@@ -124,19 +124,19 @@ export default function InstructorAttemptReportPage({
                 <Separator className="bg-border/40 shrink-0" />
                 <nav className="flex-1 space-y-1 p-3">
                     <Link
-                        href={`/exams/${examId}/report?section=overview`}
+                        href={`/exams/reports/${examId}?section=overview`}
                         className="group flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left text-sm font-medium text-muted-foreground hover:bg-accent/30 hover:text-foreground transition-colors"
                     >
                         Overview
                     </Link>
                     <Link
-                        href={`/exams/${examId}/report?section=attempts`}
+                        href={`/exams/reports/${examId}?section=attempts`}
                         className="group flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left text-sm font-semibold text-[#323d8f] bg-accent/50 transition-colors"
                     >
                         Attempt Summary
                     </Link>
                     <Link
-                        href={`/exams/${examId}/report?section=queue`}
+                        href={`/exams/reports/${examId}?section=queue`}
                         className="group flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left text-sm font-medium text-muted-foreground hover:bg-accent/30 hover:text-foreground transition-colors"
                     >
                         Action Queue
@@ -148,19 +148,19 @@ export default function InstructorAttemptReportPage({
             <div className="px-4 pt-6 lg:hidden">
                 <div className="bg-card/20 rounded-xl border p-1.5 shadow-sm backdrop-blur-sm flex gap-2">
                     <Link
-                        href={`/exams/${examId}/report?section=overview`}
+                        href={`/exams/reports/${examId}?section=overview`}
                         className="flex-1 rounded-lg py-2 text-center text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
                     >
                         Overview
                     </Link>
                     <Link
-                        href={`/exams/${examId}/report?section=attempts`}
+                        href={`/exams/reports/${examId}?section=attempts`}
                         className="flex-1 rounded-lg py-2 text-center text-sm font-semibold text-[#323d8f] bg-background shadow transition-colors"
                     >
                         Attempt Summary
                     </Link>
                     <Link
-                        href={`/exams/${examId}/report?section=queue`}
+                        href={`/exams/reports/${examId}?section=queue`}
                         className="flex-1 rounded-lg py-2 text-center text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
                     >
                         Action Queue
@@ -185,7 +185,7 @@ export default function InstructorAttemptReportPage({
                         </div>
                     </div>
                     <Button variant="outline" asChild>
-                        <Link href={`/exams/${examId}/report?section=attempts`}>
+                        <Link href={`/exams/reports/${examId}?section=attempts`}>
                             <ArrowLeft className="mr-2 h-4 w-4" />
                             Back to Summary
                         </Link>

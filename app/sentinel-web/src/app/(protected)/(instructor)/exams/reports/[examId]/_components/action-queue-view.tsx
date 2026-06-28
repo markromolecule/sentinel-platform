@@ -18,7 +18,7 @@ type ActionQueueViewProps = {
     setActionPages: React.Dispatch<React.SetStateAction<Record<ActionQueueType, number>>>;
     activeActionId: string | null;
     examId: string;
-    sectionOptions: (readonly [string, string])[];
+    sectionOptions: readonly (readonly [string, string])[];
     onGrantOverride: (item: ExamReportActionItem, type: 'MAKEUP' | 'RETAKE') => Promise<void>;
 };
 
