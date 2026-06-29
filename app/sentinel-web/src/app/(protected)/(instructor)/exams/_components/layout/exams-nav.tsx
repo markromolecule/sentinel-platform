@@ -15,7 +15,7 @@ type ExamNavItem = {
 
 const EXAM_NAV_GROUPS: Array<{ title: string; items: ExamNavItem[] }> = [
     {
-        title: 'Exam Management',
+        title: 'Management',
         items: [
             { id: 'dashboard', label: 'Dashboard', href: '/exams' },
             { id: 'assign', label: 'Assignments', href: '/exams?view=assign' },

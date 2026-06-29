@@ -196,7 +196,11 @@ export default function ProctorGuidePage() {
                 </AccordionItem>
 
                 {/* 6. Assigning Another Instructor (Optional) */}
-                <AccordionItem value="item-6" className="rounded-lg border px-4">
+                <AccordionItem
+                    value="item-6"
+                    className="rounded-lg border px-4"
+                    style={{ borderBottomWidth: '1px' }}
+                >
                     <AccordionTrigger className="hover:no-underline">
                         <div className="flex items-center gap-3">
                             <div className="rounded-full bg-rose-100 p-2 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400">

@@ -26,8 +26,8 @@ export function TosMatrixPageContent() {
         <QuestionBankPageShell>
             {/* Page header */}
             <PageHeader
-                title="TOS Matrix"
-                description="Table of Specifications — question distribution across topics and Bloom's cognitive levels."
+                title="Table of Specifications"
+                description="Question distribution across topics and Bloom's cognitive levels."
             >
                 <div className="flex items-center gap-2">
                     <Button

@@ -2,8 +2,6 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { BarChart3, Database, LayoutGrid } from 'lucide-react';
-import type { ElementType } from 'react';
 import { cn, Separator } from '@sentinel/ui';
 
 export type QuestionBankSection = 'questions' | 'collections' | 'tos';
@@ -12,30 +10,26 @@ type QuestionBankNavItem = {
     id: QuestionBankSection;
     label: string;
     href: string;
-    icon: ElementType;
 };
 
 const QUESTION_BANK_NAV_GROUPS: Array<{ title: string; items: QuestionBankNavItem[] }> = [
     {
-        title: 'Question Bank',
+        title: 'Management',
         items: [
             {
                 id: 'questions',
-                label: 'All Questions',
+                label: 'Questions',
                 href: '/question/bank',
-                icon: Database,
             },
             {
                 id: 'collections',
                 label: 'Collections',
                 href: '/question/bank/collections',
-                icon: LayoutGrid,
             },
             {
                 id: 'tos',
-                label: 'TOS Matrix',
+                label: 'Table of Specifications',
                 href: '/question/bank/tos',
-                icon: BarChart3,
             },
         ],
     },
@@ -87,7 +81,6 @@ export function QuestionBankNav() {
                                             : 'text-muted-foreground hover:bg-accent/30 hover:text-foreground',
                                     )}
                                 >
-                                    <item.icon className="h-4 w-4 shrink-0" />
                                     <span className="truncate">{item.label}</span>
                                 </Link>
                             );
