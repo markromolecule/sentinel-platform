@@ -4,7 +4,7 @@
     "description": "",
     "main": "index.js",
     "engines": {
-        "node": "22.x"
+        "node": ">=22"
     },
     "scripts": {
         "typecheck": "NODE_OPTIONS=\"--max-old-space-size=4096\" tsc --noEmit",

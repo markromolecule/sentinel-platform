@@ -3,7 +3,7 @@
     "version": "0.0.0",
     "private": true,
     "engines": {
-        "node": "22.x"
+        "node": ">=22"
     },
     "packageManager": "pnpm@10.28.0",
     "scripts": {
@@ -29,17 +29,5 @@
     "dependencies": {
         "expo": "^54.0.33",
         "pg": "^8.19.0"
-    },
-    "pnpm": {
-        "overrides": {
-            "@prisma/client-runtime-utils": "7.5.0",
-            "@types/pg": "8.11.11",
-            "@types/react": "19.1.17",
-            "@types/react-dom": "19.1.11"
-        },
-        "onlyBuiltDependencies": [
-            "@prisma/engines",
-            "prisma"
-        ]
     }
 }
