@@ -111,6 +111,29 @@ function toSectionArray(value: unknown) {
         );
 }
 
+function toInstructorArray(value: unknown) {
+    if (!Array.isArray(value)) {
+        return [];
+    }
+
+    return value
+        .map((item) => {
+            if (!item || typeof item !== 'object') {
+                return null;
+            }
+
+            return {
+                id: typeof item.id === 'string' ? item.id : '',
+                firstName: typeof item.firstName === 'string' ? item.firstName : null,
+                lastName: typeof item.lastName === 'string' ? item.lastName : null,
+                email: typeof item.email === 'string' ? item.email : null,
+            };
+        })
+        .filter((item): item is { id: string; firstName: string | null; lastName: string | null; email: string | null } =>
+            Boolean(item?.id),
+        );
+}
+
 export function mapSubjectOfferingResponse(rawSubjectOffering: any) {
     return {
         subject_offering_id: rawSubjectOffering.subject_offering_id,
@@ -155,5 +178,6 @@ export function mapSubjectOfferingResponse(rawSubjectOffering: any) {
         is_hidden: rawSubjectOffering.isHidden ?? rawSubjectOffering.inheritanceStatus === 'HIDDEN',
         institution_name: rawSubjectOffering.institution_name,
         institutionName: rawSubjectOffering.institution_name,
+        instructors: toInstructorArray(rawSubjectOffering.instructors),
     };
 }

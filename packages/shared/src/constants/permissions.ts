@@ -1161,6 +1161,8 @@ export const SYSTEM_ROLE_BLUEPRINTS: Record<string, SystemRoleBlueprint> = {
             'announcement:delete',
             'reports:view',
             'reports:export',
+            'subjects:update',
+            'subject_requests:approve',
         ],
     },
     superadmin: {
@@ -1334,6 +1336,7 @@ export const SYSTEM_ROLE_BLUEPRINTS: Record<string, SystemRoleBlueprint> = {
             'incidents:view',
             'incidents:review',
             'incidents:export',
+            'subjects:update',
         ],
     },
     proctor: {

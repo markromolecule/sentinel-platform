@@ -280,3 +280,22 @@ export const bulkDeleteEnrollmentSchema = {
 
 export type BulkDeleteEnrollmentBody = z.infer<typeof bulkDeleteEnrollmentSchema.body>;
 export type BulkDeleteEnrollmentResponse = z.infer<typeof bulkDeleteEnrollmentSchema.response>;
+
+export const assignOfferedSubjectSchema = {
+    body: z.object({
+        instructorId: z.string().uuid().openapi({ description: 'The instructor user ID' }),
+        subjectOfferingId: z.string().uuid().openapi({ description: 'The subject offering ID to assign' }),
+    }),
+    response: z.object({
+        message: z.string(),
+        data: z.object({
+            assignedClassGroupIds: z.array(z.string().uuid()),
+            enrollmentRequestIds: z.array(z.string().uuid()),
+            classRoleIds: z.array(z.string().uuid()),
+        }),
+    }),
+};
+
+export type AssignOfferedSubjectBody = z.infer<typeof assignOfferedSubjectSchema.body>;
+export type AssignOfferedSubjectResponse = z.infer<typeof assignOfferedSubjectSchema.response>;
+

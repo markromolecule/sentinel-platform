@@ -74,6 +74,12 @@ type UpdateEnrollmentRequestResult = {
     resolved_section_count: number;
 };
 
+export type AssignOfferedSubjectResult = {
+    assignedClassGroupIds: string[];
+    enrollmentRequestIds: string[];
+    classRoleIds: string[];
+};
+
 function mapSubject(apiSubject: ApiSubject): MasterSubject {
     return {
         id: apiSubject.subject_id,
@@ -402,3 +408,21 @@ export async function getStudentClassrooms(apiClient: ApiClientType): Promise<St
     );
     return response.data;
 }
+
+export async function assignOfferedSubject(
+    apiClient: ApiClientType,
+    payload: { instructorId: string; subjectOfferingId: string },
+): Promise<ApiResponse<AssignOfferedSubjectResult>> {
+    const response: ApiResponse<AssignOfferedSubjectResult> = await apiClient(
+        '/enrollments/assign',
+        {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(payload),
+        },
+    );
+    return response;
+}
+

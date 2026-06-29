@@ -1,12 +1,13 @@
 'use client';
 
 import { Button } from '@sentinel/ui';
-import { Trash2, X } from 'lucide-react';
+import { Trash2, X, UserPlus } from 'lucide-react';
 
 interface FloatingActionBarProps {
     selectedCount: number;
     onClear: () => void;
-    onUnoffer: () => void;
+    onUnoffer?: () => void;
+    onAssign?: () => void;
     isPending?: boolean;
 }
 
@@ -14,6 +15,7 @@ export function FloatingActionBar({
     selectedCount,
     onClear,
     onUnoffer,
+    onAssign,
     isPending = false,
 }: FloatingActionBarProps) {
     if (selectedCount === 0) return null;
@@ -29,16 +31,30 @@ export function FloatingActionBar({
                 </div>
 
                 <div className="flex flex-1 items-center gap-1 px-2">
-                    <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={onUnoffer}
-                        disabled={isPending}
-                        className="text-destructive hover:bg-destructive/10 h-9 gap-2 rounded-xl"
-                    >
-                        <Trash2 className="h-4 w-4" />
-                        {isPending ? 'Removing...' : 'Unoffer Subjects'}
-                    </Button>
+                    {onUnoffer && (
+                        <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={onUnoffer}
+                            disabled={isPending}
+                            className="text-destructive hover:bg-destructive/10 h-9 gap-2 rounded-xl"
+                        >
+                            <Trash2 className="h-4 w-4" />
+                            {isPending ? 'Removing...' : 'Unoffer Subjects'}
+                        </Button>
+                    )}
+                    {onAssign && (
+                        <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={onAssign}
+                            disabled={isPending}
+                            className="text-[#323d8f] hover:bg-[#323d8f]/10 h-9 gap-2 rounded-xl"
+                        >
+                            <UserPlus className="h-4 w-4" />
+                            Assign to Instructor
+                        </Button>
+                    )}
                 </div>
 
                 <div className="border-border border-l pr-1 pl-2">

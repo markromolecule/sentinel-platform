@@ -3,6 +3,7 @@ import { type EnrollInstructorSubjectBody, type EnrollStudentsBody } from './enr
 import { type updateEnrollmentRequestData } from './data/update-enrollment-request';
 import { getEnrolledSubjectsService } from './services/get-enrolled-subjects.service';
 import { enrollInstructorService } from './services/enroll-instructor.service';
+import { assignOfferedSubjectService } from './services/assign-offered-subject.service';
 import { getEnrollmentRequestsService } from './services/get-enrollment-requests.service';
 import { approveEnrollmentRequestService } from './services/approve-enrollment-request.service';
 import { rejectEnrollmentRequestService } from './services/reject-enrollment-request.service';
@@ -189,5 +190,14 @@ export class EnrollmentService {
      */
     static async bulkUnenrollStudents(dbClient: DbClient, enrollmentIds: string[]): Promise<void> {
         return bulkUnenrollStudentsService({ dbClient, enrollmentIds });
+    }
+
+    static async assignOfferedSubject(
+        dbClient: DbClient,
+        instructorId: string,
+        subjectOfferingId: string,
+        approvedBy: string,
+    ) {
+        return assignOfferedSubjectService({ dbClient, instructorId, subjectOfferingId, approvedBy });
     }
 }

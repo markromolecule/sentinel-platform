@@ -19,4 +19,6 @@ export * from './use-reject-enrollment-mutation';
 export * from './use-unapprove-enrollment-mutation';
 export * from './use-delete-enrollment-requests-mutation';
 export * from './use-bulk-unenroll-instructor-subjects-mutation';
+export * from './use-assign-offered-subject-mutation';
+
 

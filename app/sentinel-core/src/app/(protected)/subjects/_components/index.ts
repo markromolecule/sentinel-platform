@@ -7,6 +7,7 @@ export * from './dialogs/offer-classification-subjects-dialog';
 export * from './dialogs/offer-subject-dialog';
 export * from './dialogs/subject-form-dialog';
 export * from './dialogs/subject-classification-dialog';
+export * from './dialogs/subject-offering-details-sheet';
 
 // forms
 export * from './forms';
