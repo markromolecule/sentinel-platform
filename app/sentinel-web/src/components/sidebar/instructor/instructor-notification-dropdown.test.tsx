@@ -1,17 +1,23 @@
-import { render, screen, waitFor } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import type { ReactNode } from 'react';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { InstructorNotificationDropdown } from './instructor-notification-dropdown';
-import { ApiError, getNotifications } from '@sentinel/services';
+import { markNotificationRead } from '@sentinel/services';
 
-const { mockApiClient } = vi.hoisted(() => ({
-    mockApiClient: vi.fn(),
-}));
+const { mockApiClient, mockUseNotificationsQuery, mockUseDeleteNotificationsMutation } = vi.hoisted(
+    () => ({
+        mockApiClient: vi.fn(),
+        mockUseNotificationsQuery: vi.fn(),
+        mockUseDeleteNotificationsMutation: vi.fn(),
+    }),
+);
 
 vi.mock('@sentinel/hooks', () => ({
     useApi: () => mockApiClient,
     useNotificationRealtime: vi.fn(),
+    useNotificationsQuery: (...args: any[]) => mockUseNotificationsQuery(...args),
+    useDeleteNotificationsMutation: (...args: any[]) => mockUseDeleteNotificationsMutation(...args),
 }));
 
 vi.mock('@sentinel/services', async () => {
@@ -19,7 +25,8 @@ vi.mock('@sentinel/services', async () => {
 
     return {
         ...actual,
-        getNotifications: vi.fn(),
+        markNotificationRead: vi.fn(),
+        markAllNotificationsRead: vi.fn(),
     };
 });
 
@@ -32,43 +39,135 @@ function createWrapper() {
         },
     });
 
+    queryClient.setQueryDefaults(['notifications', 'instructor-header'], {
+        queryFn: async () => null,
+    });
+
     return function Wrapper({ children }: { children: ReactNode }) {
         return <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>;
+    };
+}
+
+function buildNotification(overrides?: Record<string, unknown>) {
+    return {
+        id: '11111111-1111-1111-1111-111111111111',
+        title: 'Subject request approved',
+        message: 'Alex approved 3 pending subject requests.',
+        status: 'UNREAD',
+        actionType: 'SUBJECT_ENROLLMENT_REQUEST_APPROVED',
+        institutionId: '22222222-2222-2222-2222-222222222222',
+        actor: {
+            id: '33333333-3333-3333-3333-333333333333',
+            name: 'Alex Admin',
+        },
+        resource: {
+            type: 'SUBJECT_ENROLLMENT_REQUEST',
+            id: '44444444-4444-4444-4444-444444444444',
+            label: 'Programming Languages',
+        },
+        metadata: {
+            requestIds: ['44444444-4444-4444-4444-444444444444'],
+        },
+        createdAt: '2026-05-10T08:00:00.000Z',
+        readAt: null,
+        ...overrides,
     };
 }
 
 describe('InstructorNotificationDropdown', () => {
     beforeEach(() => {
         vi.clearAllMocks();
+        mockUseNotificationsQuery.mockReturnValue({
+            data: {
+                items: [],
+                unreadCount: 0,
+            },
+            isLoading: false,
+        });
+        mockUseDeleteNotificationsMutation.mockReturnValue({
+            mutate: vi.fn((ids: string[], options?: { onSuccess?: () => void }) => {
+                options?.onSuccess?.();
+            }),
+            isPending: false,
+        });
     });
 
-    it('renders the unread indicator after loading notifications', async () => {
-        vi.mocked(getNotifications).mockResolvedValue({
-            items: [
-                {
-                    id: '11111111-1111-1111-1111-111111111111',
-                    title: 'New exam assignment',
-                    message: 'Jordan assigned you to "Midterm".',
-                    status: 'UNREAD',
-                    actionType: 'EXAM_ASSIGNMENT_CREATED',
-                    institutionId: '22222222-2222-2222-2222-222222222222',
-                    actor: {
-                        id: '33333333-3333-3333-3333-333333333333',
-                        name: 'Jordan Instructor',
-                    },
-                    resource: {
-                        type: 'EXAM_ASSIGNMENT',
-                        id: '44444444-4444-4444-4444-444444444444',
-                        label: 'Midterm',
-                    },
-                    metadata: {
-                        examId: '44444444-4444-4444-4444-444444444444',
-                    },
-                    createdAt: '2026-05-09T12:00:00.000Z',
-                    readAt: null,
-                },
-            ],
-            unreadCount: 1,
+    afterEach(() => {
+        cleanup();
+    });
+
+    async function openNotifications() {
+        const trigger = await screen.findByRole('button', { name: 'Open notifications' });
+        fireEvent.pointerDown(trigger, { button: 0, ctrlKey: false });
+        fireEvent.click(trigger);
+        return trigger;
+    }
+
+    it('renders unread notifications from the API', async () => {
+        mockUseNotificationsQuery.mockReturnValue({
+            data: {
+                items: [buildNotification()],
+                unreadCount: 1,
+            },
+            isLoading: false,
+        });
+
+        render(<InstructorNotificationDropdown />, {
+            wrapper: createWrapper(),
+        });
+
+        const trigger = await openNotifications();
+        expect(trigger).toBeTruthy();
+
+        expect(await screen.findByText('Subject request approved')).toBeTruthy();
+        expect(screen.getByText('Alex approved 3 pending subject requests.')).toBeTruthy();
+        expect(screen.getByText('1 new')).toBeTruthy();
+    });
+
+    it('marks an unread notification as read when the row is selected', async () => {
+        mockUseNotificationsQuery.mockReturnValue({
+            data: {
+                items: [buildNotification()],
+                unreadCount: 1,
+            },
+            isLoading: false,
+        });
+
+        render(<InstructorNotificationDropdown />, {
+            wrapper: createWrapper(),
+        });
+
+        await openNotifications();
+
+        const item = await screen.findByText('Subject request approved');
+        fireEvent.click(item);
+
+        await waitFor(() => {
+            expect(markNotificationRead).toHaveBeenCalledWith(
+                mockApiClient,
+                '11111111-1111-1111-1111-111111111111',
+            );
+        });
+    });
+
+    it('renders an empty state when there are no notifications', async () => {
+        render(<InstructorNotificationDropdown />, {
+            wrapper: createWrapper(),
+        });
+
+        await openNotifications();
+
+        expect(await screen.findByText('No notifications yet.')).toBeTruthy();
+    });
+
+    it('hides the notification surface when the role is forbidden', async () => {
+        mockUseNotificationsQuery.mockReturnValue({
+            data: {
+                items: [],
+                unreadCount: 0,
+                forbidden: true,
+            },
+            isLoading: false,
         });
 
         render(<InstructorNotificationDropdown />, {
@@ -76,29 +175,64 @@ describe('InstructorNotificationDropdown', () => {
         });
 
         await waitFor(() => {
-            expect(getNotifications).toHaveBeenCalledWith(mockApiClient, { limit: 5 });
+            expect(screen.queryByRole('button', { name: 'Open notifications' })).toBeNull();
         });
-
-        expect(screen.getByRole('button')).toBeTruthy();
     });
 
-    it('falls back to an empty state when notifications are forbidden', async () => {
-        vi.mocked(getNotifications).mockRejectedValue(
-            new ApiError({
-                message: 'Forbidden',
-                status: 403,
-                statusText: 'Forbidden',
-            }),
+    it('lets the user select notifications and remove them in bulk', async () => {
+        mockUseNotificationsQuery.mockReturnValue({
+            data: {
+                items: [
+                    buildNotification(),
+                    buildNotification({
+                        id: '22222222-2222-2222-2222-222222222222',
+                        title: 'Subject request rejected',
+                        message: 'A subject request was rejected after review.',
+                    }),
+                ],
+                unreadCount: 2,
+            },
+            isLoading: false,
+        });
+        const mutate = vi.fn((ids: string[], options?: { onSuccess?: () => void }) => {
+            options?.onSuccess?.();
+        });
+        mockUseDeleteNotificationsMutation.mockReturnValue({
+            mutate,
+            isPending: false,
+        });
+
+        render(<InstructorNotificationDropdown />, {
+            wrapper: createWrapper(),
+        });
+
+        await openNotifications();
+
+        const checkbox = await screen.findByRole('checkbox', {
+            name: 'Select notification Subject request approved',
+        });
+        expect(screen.getByRole('button', { name: 'Remove selected notifications' }).disabled).toBe(
+            true,
         );
 
-        render(<InstructorNotificationDropdown />, {
-            wrapper: createWrapper(),
+        fireEvent.click(checkbox);
+
+        await waitFor(() => {
+            expect(
+                screen.getByRole('button', { name: 'Remove selected notifications' }).disabled,
+            ).toBe(false);
+        });
+
+        fireEvent.click(screen.getByRole('button', { name: 'Remove selected notifications' }));
+
+        expect(mutate).toHaveBeenCalledWith(['11111111-1111-1111-1111-111111111111'], {
+            onSuccess: expect.any(Function),
         });
 
         await waitFor(() => {
-            expect(getNotifications).toHaveBeenCalledWith(mockApiClient, { limit: 5 });
+            expect(
+                screen.getByRole('button', { name: 'Remove selected notifications' }).disabled,
+            ).toBe(true);
         });
-
-        expect(screen.getAllByRole('button').length).toBeGreaterThan(0);
     });
 });

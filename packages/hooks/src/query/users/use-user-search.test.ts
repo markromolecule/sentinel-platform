@@ -29,6 +29,7 @@ describe('useUserSearch Hook', () => {
         expect(useUsersQuery).toHaveBeenCalledWith({
             search: 'jo',
             role: undefined,
+            includeInstitutionUsers: undefined,
             enabled: true,
         });
         expect(result.users).toEqual([{ id: 'user-1', name: 'John Doe' }]);
@@ -47,6 +48,7 @@ describe('useUserSearch Hook', () => {
         expect(useUsersQuery).toHaveBeenCalledWith({
             search: 'j',
             role: undefined,
+            includeInstitutionUsers: undefined,
             enabled: false,
         });
         expect(result.users).toEqual([]);
@@ -91,5 +93,22 @@ describe('useUserSearch Hook', () => {
         const result = useUserSearch('bo');
 
         expect(result.users[0].avatarUrl).toBeNull();
+    });
+
+    it('passes includeInstitutionUsers option when provided', () => {
+        vi.mocked(useUsersQuery).mockReturnValue({
+            data: [],
+            isLoading: false,
+            isError: false,
+        } as any);
+
+        useUserSearch('jo', { includeInstitutionUsers: true });
+
+        expect(useUsersQuery).toHaveBeenCalledWith({
+            search: 'jo',
+            role: undefined,
+            includeInstitutionUsers: true,
+            enabled: true,
+        });
     });
 });

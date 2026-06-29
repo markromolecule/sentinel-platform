@@ -1,26 +1,29 @@
 'use client';
 
-import { useMemo } from 'react';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Bell } from 'lucide-react';
-import { useApi } from '@sentinel/hooks';
-import { useNotificationRealtime } from '@sentinel/hooks';
-import { formatDistanceToNow } from 'date-fns';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { Bell, Trash2 } from 'lucide-react';
 import {
-    ApiError,
-    getNotifications,
-    markNotificationRead,
-    markAllNotificationsRead,
-} from '@sentinel/services';
-import { Button, cn } from '@sentinel/ui';
+    useApi,
+    useDeleteNotificationsMutation,
+    useNotificationRealtime,
+    useNotificationsQuery,
+} from '@sentinel/hooks';
+import { formatDistanceToNow } from 'date-fns';
+import { markAllNotificationsRead, markNotificationRead } from '@sentinel/services';
+import type { NotificationList } from '@sentinel/shared/types';
+import { Button, Checkbox, cn } from '@sentinel/ui';
 import {
     DropdownMenu,
     DropdownMenuContent,
     DropdownMenuItem,
-    DropdownMenuLabel,
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from '@sentinel/ui';
+import { useState } from 'react';
+
+type NotificationQueryResult = NotificationList & {
+    forbidden?: boolean;
+};
 
 const NOTIFICATION_QUERY_KEY = ['notifications', 'instructor-header'] as const;
 
@@ -28,24 +31,15 @@ export function InstructorNotificationDropdown() {
     const apiClient = useApi();
     const queryClient = useQueryClient();
     useNotificationRealtime({ queryKey: NOTIFICATION_QUERY_KEY });
+    const [selectedNotificationIds, setSelectedNotificationIds] = useState<string[]>([]);
 
-    const { data, isLoading } = useQuery({
+    const { data, isLoading } = useNotificationsQuery({
         queryKey: NOTIFICATION_QUERY_KEY,
-        queryFn: async () => {
-            try {
-                return await getNotifications(apiClient, { limit: 5 });
-            } catch (error) {
-                if (error instanceof ApiError && error.status === 403) {
-                    return {
-                        items: [],
-                        unreadCount: 0,
-                    };
-                }
+        params: { limit: 5 },
+    }) as { data?: NotificationQueryResult; isLoading: boolean };
 
-                throw error;
-            }
-        },
-        retry: false,
+    const deleteNotificationsMutation = useDeleteNotificationsMutation({
+        queryKey: NOTIFICATION_QUERY_KEY,
     });
 
     const markReadMutation = useMutation({
@@ -66,24 +60,50 @@ export function InstructorNotificationDropdown() {
         },
     });
 
-    const unreadCount = data?.unreadCount ?? 0;
-    const hasUnread = unreadCount > 0;
+    if (isLoading || data?.forbidden) {
+        return null;
+    }
 
-    const recentNotifications = useMemo(() => {
-        return (data?.items ?? []).slice(0, 5);
-    }, [data?.items]);
+    const unreadCount = data?.unreadCount ?? 0;
+    const recentNotifications = data?.items ?? [];
+    const selectedCount = selectedNotificationIds.length;
+
+    const toggleSelectedNotification = (notificationId: string) => {
+        setSelectedNotificationIds((current) =>
+            current.includes(notificationId)
+                ? current.filter((selectedId) => selectedId !== notificationId)
+                : [...current, notificationId],
+        );
+    };
+
+    const handleDeleteSelectedNotifications = () => {
+        if (selectedNotificationIds.length === 0) {
+            return;
+        }
+
+        deleteNotificationsMutation.mutate(selectedNotificationIds, {
+            onSuccess: () => {
+                setSelectedNotificationIds([]);
+            },
+        });
+    };
 
     return (
         <DropdownMenu>
             <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" className="relative">
+                <Button
+                    variant="ghost"
+                    size="icon"
+                    className="relative"
+                    aria-label="Open notifications"
+                >
                     <Bell className="h-5 w-5" />
-                    {hasUnread && (
+                    {unreadCount > 0 && (
                         <span className="bg-destructive absolute top-2 right-2 h-2 w-2 rounded-full" />
                     )}
                 </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-96">
+            <DropdownMenuContent align="end" className="w-96 p-0">
                 <div className="flex items-center justify-between px-4 py-3">
                     <div className="flex items-center gap-2">
                         <span className="text-base font-semibold">Notifications</span>
@@ -107,56 +127,99 @@ export function InstructorNotificationDropdown() {
                         </button>
                     )}
                 </div>
-                <DropdownMenuSeparator />
-                {isLoading ? (
-                    <div className="text-muted-foreground p-4 text-sm">
-                        Loading notifications...
-                    </div>
-                ) : recentNotifications.length === 0 ? (
-                    <div className="text-muted-foreground p-4 text-sm">No notifications yet.</div>
-                ) : (
-                    recentNotifications.map((notification) => (
-                        <DropdownMenuItem
-                            key={notification.id}
-                            className={cn(
-                                'flex cursor-pointer flex-col items-start gap-1.5 p-4 transition-colors',
-                                notification.status === 'UNREAD'
-                                    ? 'bg-background hover:bg-accent'
-                                    : 'hover:bg-accent opacity-80',
-                            )}
-                            onClick={() => {
-                                if (notification.status === 'UNREAD') {
-                                    markReadMutation.mutate(notification.id);
-                                }
-                            }}
-                        >
-                            <div className="flex w-full items-start justify-between gap-3">
-                                <div className="flex items-center gap-2">
-                                    {notification.status === 'UNREAD' && (
-                                        <span className="bg-primary h-2 w-2 flex-shrink-0 rounded-full" />
+                <DropdownMenuSeparator className="mx-0" />
+                <div className="max-h-72 overflow-y-auto">
+                    {recentNotifications.length === 0 ? (
+                        <div className="text-muted-foreground p-4 text-sm">
+                            No notifications yet.
+                        </div>
+                    ) : (
+                        recentNotifications.map((notification) => {
+                            const isSelected = selectedNotificationIds.includes(notification.id);
+
+                            return (
+                                <DropdownMenuItem
+                                    key={notification.id}
+                                    className={cn(
+                                        'flex cursor-pointer items-start gap-3 p-4 transition-colors',
+                                        notification.status === 'UNREAD'
+                                            ? 'bg-background hover:bg-accent'
+                                            : 'hover:bg-accent opacity-80',
                                     )}
-                                    <span
-                                        className={cn(
-                                            'text-sm font-semibold',
-                                            notification.status === 'UNREAD'
-                                                ? 'text-foreground'
-                                                : 'text-foreground/80',
-                                        )}
-                                    >
-                                        {notification.title}
-                                    </span>
-                                </div>
-                                <span className="text-muted-foreground text-xs whitespace-nowrap">
-                                    {formatDistanceToNow(new Date(notification.createdAt), {
-                                        addSuffix: true,
-                                    })}
+                                    onSelect={(event) => {
+                                        event.preventDefault();
+                                        if (notification.status === 'UNREAD') {
+                                            markReadMutation.mutate(notification.id);
+                                        }
+                                    }}
+                                >
+                                    <Checkbox
+                                        checked={isSelected}
+                                        aria-label={`Select notification ${notification.title}`}
+                                        onCheckedChange={() =>
+                                            toggleSelectedNotification(notification.id)
+                                        }
+                                        onClick={(event) => event.stopPropagation()}
+                                        onPointerDownCapture={(event) => event.stopPropagation()}
+                                    />
+                                    <div className="flex w-full items-start justify-between gap-3">
+                                        <div className="flex min-w-0 items-start gap-2">
+                                            {notification.status === 'UNREAD' && (
+                                                <span className="bg-primary mt-1 h-2 w-2 flex-shrink-0 rounded-full" />
+                                            )}
+                                            <div className="min-w-0">
+                                                <span
+                                                    className={cn(
+                                                        'text-sm font-semibold',
+                                                        notification.status === 'UNREAD'
+                                                            ? 'text-foreground'
+                                                            : 'text-foreground/80',
+                                                    )}
+                                                >
+                                                    {notification.title}
+                                                </span>
+                                                <p className="text-muted-foreground line-clamp-2 text-xs">
+                                                    {notification.message}
+                                                </p>
+                                            </div>
+                                        </div>
+                                        <span className="text-muted-foreground text-xs whitespace-nowrap">
+                                            {formatDistanceToNow(new Date(notification.createdAt), {
+                                                addSuffix: true,
+                                            })}
+                                        </span>
+                                    </div>
+                                </DropdownMenuItem>
+                            );
+                        })
+                    )}
+                </div>
+                {recentNotifications.length > 0 && (
+                    <>
+                        <DropdownMenuSeparator className="mx-0" />
+                        <div className="flex items-center justify-between gap-3 px-4 py-3">
+                            <span className="text-muted-foreground text-xs">
+                                {selectedCount} selected
+                            </span>
+                            <Button
+                                variant="destructive"
+                                size="icon"
+                                className="h-8 w-8 shrink-0"
+                                onClick={handleDeleteSelectedNotifications}
+                                disabled={
+                                    selectedCount === 0 || deleteNotificationsMutation.isPending
+                                }
+                                aria-label="Remove selected notifications"
+                            >
+                                <Trash2 className="h-4 w-4" />
+                                <span className="sr-only">
+                                    {deleteNotificationsMutation.isPending
+                                        ? 'Removing selected notifications'
+                                        : 'Remove selected notifications'}
                                 </span>
-                            </div>
-                            <p className="text-muted-foreground line-clamp-2 text-xs">
-                                {notification.message}
-                            </p>
-                        </DropdownMenuItem>
-                    ))
+                            </Button>
+                        </div>
+                    </>
                 )}
             </DropdownMenuContent>
         </DropdownMenu>
