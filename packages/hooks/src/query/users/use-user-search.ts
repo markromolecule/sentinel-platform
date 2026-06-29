@@ -8,12 +8,16 @@ import { useUsersQuery } from './use-users-query';
  * @param query - The raw search string typed by the user.
  * @param options - Optional role filter.
  */
-export function useUserSearch(query: string, options?: { role?: string[] }) {
+export function useUserSearch(
+    query: string,
+    options?: { role?: string[]; includeInstitutionUsers?: boolean },
+) {
     const debouncedQuery = useDebounce(query, 300);
 
     const usersQuery = useUsersQuery({
         search: debouncedQuery,
         role: options?.role,
+        includeInstitutionUsers: options?.includeInstitutionUsers,
         enabled: debouncedQuery.length >= 2,
     });
 

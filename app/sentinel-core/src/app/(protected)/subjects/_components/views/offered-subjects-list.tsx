@@ -93,6 +93,7 @@ export function OfferedSubjectsList({
                 rowSelection={rowSelection}
                 onRowSelectionChange={setRowSelection}
                 initialColumnVisibility={{
+                    subjectTitle: false,
                     inheritanceStatus: false,
                     updatedAt: false,
                 }}

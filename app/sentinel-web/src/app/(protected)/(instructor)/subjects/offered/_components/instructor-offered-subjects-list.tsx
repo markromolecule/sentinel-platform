@@ -54,7 +54,7 @@ export function InstructorOfferedSubjectsList({
             isLoading={isLoading}
             facets={offeredSubjectsFacets}
             initialColumnVisibility={{
-                subjectCode: false,
+                subjectTitle: false,
             }}
             emptyContent={<InstructorOfferedSubjectsEmptyState searchTerm={searchTerm} />}
             pagination={pagination}

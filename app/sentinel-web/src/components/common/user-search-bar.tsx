@@ -42,7 +42,9 @@ export function UserSearchBar({ redirectPath, className }: UserSearchBarProps) {
     const router = useRouter();
     const [open, setOpen] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
-    const { users, isLoading } = useUserSearch(searchQuery);
+    const { users, isLoading } = useUserSearch(searchQuery, {
+        includeInstitutionUsers: true,
+    });
     const [recentSearches, setRecentSearches] = useState<RecentUser[]>([]);
     const inputRef = useRef<HTMLInputElement>(null);
 
