@@ -11,6 +11,7 @@ import type {
     SubjectOfferingCourse,
     SubjectOfferingDepartment,
     SubjectOfferingSection,
+    SubjectOfferingInstructor,
 } from '@sentinel/shared/types';
 import type { ApiClientType } from '../api-client';
 import type { PaginatedApiResponse } from './pagination';
@@ -64,6 +65,7 @@ interface ApiSubjectOffering {
     is_overridden?: boolean;
     is_hidden?: boolean;
     institution_name?: string | null;
+    instructors?: SubjectOfferingInstructor[];
 }
 
 interface ApiResponse<T> {
@@ -171,6 +173,7 @@ function mapSubjectOffering(apiSubjectOffering: ApiSubjectOffering): SubjectOffe
         isOverridden: apiSubjectOffering.is_overridden,
         isHidden: apiSubjectOffering.is_hidden,
         institutionName: apiSubjectOffering.institution_name,
+        instructors: apiSubjectOffering.instructors ?? [],
     };
 }
 
@@ -331,4 +334,19 @@ export async function deleteSubjectOfferings(
         },
         body: JSON.stringify({ ids }),
     });
+}
+
+/**
+ * Fetches a single subject offering by ID.
+ * @param apiClient API Client instance
+ * @param id Offering ID to fetch
+ */
+export async function getSubjectOffering(
+    apiClient: ApiClientType,
+    id: string,
+): Promise<SubjectOffering> {
+    const response: ApiResponse<ApiSubjectOffering> = await apiClient(
+        `/subject-offerings/${id}`,
+    );
+    return mapSubjectOffering(response.data);
 }

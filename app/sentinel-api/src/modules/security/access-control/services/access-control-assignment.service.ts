@@ -5,7 +5,7 @@ import type { AccessControlAssignment, AccessControlAssignmentInput } from '@sen
 import { resolveTargetUserRole } from '../../../identity/users/data/resolve-target-user-role';
 import { UserAuthService } from '../../../identity/users/services/user-auth.service';
 import { ActivityNotificationService } from '../../../general/notification/services/activity-notification.service';
-import { RolesService } from '../../roles/services/roles.service';
+import { RolesService } from '../../roles/roles.service';
 import { RolesRepository } from '../../roles/roles.repository';
 import { getAccessControlAssignmentsData } from '../data/get-access-control-assignments';
 import { getAuthUserById } from '../data/get-auth-user-by-id';

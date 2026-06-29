@@ -28,6 +28,13 @@ const subjectOfferingSectionSchemaOpenApi = z.object({
     year_level: z.number().int().nullable().optional(),
 });
 
+const subjectOfferingInstructorSchemaOpenApi = z.object({
+    id: z.string().uuid(),
+    firstName: z.string().nullable().optional(),
+    lastName: z.string().nullable().optional(),
+    email: z.string().nullable().optional(),
+});
+
 export const subjectOfferingSchemaOpenApi = z
     .object({
         subject_offering_id: z.string().uuid(),
@@ -61,6 +68,7 @@ export const subjectOfferingSchemaOpenApi = z
         is_inherited: z.boolean().optional(),
         is_overridden: z.boolean().optional(),
         is_hidden: z.boolean().optional(),
+        instructors: z.array(subjectOfferingInstructorSchemaOpenApi).optional(),
     })
     .openapi('SubjectOffering');
 
@@ -159,6 +167,16 @@ export const deleteSubjectOfferingsSchema = {
     response: z.object({
         message: z.string(),
         data: z.null(),
+    }),
+};
+
+export const getSubjectOfferingByIdSchema = {
+    params: z.object({
+        id: z.string().uuid('Invalid subject offering ID format'),
+    }),
+    response: z.object({
+        message: z.string(),
+        data: subjectOfferingSchemaOpenApi,
     }),
 };
 

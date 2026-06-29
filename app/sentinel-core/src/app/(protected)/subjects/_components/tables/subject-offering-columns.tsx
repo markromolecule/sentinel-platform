@@ -13,6 +13,7 @@ interface CreateSubjectOfferingColumnsArgs {
     courseLabelMap: Map<string, string>;
     sectionLabelMap: Map<string, string>;
     canDeleteOfferings?: boolean;
+    onViewDetails?: (offering: SubjectOffering) => void;
 }
 
 function SummaryBadges({ labels, emptyLabel }: { labels: string[]; emptyLabel: string }) {
@@ -45,6 +46,7 @@ export function createSubjectOfferingColumns({
     courseLabelMap,
     sectionLabelMap,
     canDeleteOfferings = false,
+    onViewDetails,
 }: CreateSubjectOfferingColumnsArgs): ColumnDef<SubjectOffering>[] {
     const columns: ColumnDef<SubjectOffering>[] = [];
 
@@ -77,7 +79,14 @@ export function createSubjectOfferingColumns({
         {
             accessorKey: 'subjectCode',
             header: ({ column }) => <DataTableColumnHeader column={column} title="Subject Code" />,
-            cell: ({ row }) => <span className="font-medium">{row.original.subjectCode}</span>,
+            cell: ({ row }) => (
+                <span
+                    className="font-medium cursor-pointer text-[#323d8f] hover:underline"
+                    onClick={() => onViewDetails?.(row.original)}
+                >
+                    {row.original.subjectCode}
+                </span>
+            ),
         },
         {
             accessorKey: 'subjectTitle',
@@ -179,7 +188,12 @@ export function createSubjectOfferingColumns({
         },
         {
             id: 'actions',
-            cell: ({ row }) => <SubjectOfferingActionsCell offering={row.original} />,
+            cell: ({ row }) => (
+                <SubjectOfferingActionsCell
+                    offering={row.original}
+                    onViewDetails={onViewDetails}
+                />
+            ),
         },
     );
 

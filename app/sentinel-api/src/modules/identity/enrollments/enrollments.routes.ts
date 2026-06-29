@@ -7,6 +7,10 @@ import {
     enrollSubjectRouteHandler,
 } from './controllers/enroll-subject.controller';
 import {
+    assignOfferedSubjectRoute,
+    assignOfferedSubjectRouteHandler,
+} from './controllers/assign-offered-subject.controller';
+import {
     getEnrolledSubjectsRoute,
     getEnrolledSubjectsRouteHandler,
 } from './controllers/get-enrolled-subjects.controller';
@@ -74,6 +78,7 @@ enrollmentsRoutes
     .openapi(unapproveEnrollmentRequestRoute, unapproveEnrollmentRequestRouteHandler)
     .openapi(deleteEnrollmentRequestsRoute, deleteEnrollmentRequestsRouteHandler)
     .openapi(enrollSubjectRoute, enrollSubjectRouteHandler)
+    .openapi(assignOfferedSubjectRoute, assignOfferedSubjectRouteHandler)
     .openapi(previewStudentEnrollmentRoute, previewStudentEnrollmentRouteHandler)
     .openapi(enrollStudentsRoute, enrollStudentsRouteHandler)
     .openapi(getStudentClassroomsRoute, getStudentClassroomsRouteHandler)

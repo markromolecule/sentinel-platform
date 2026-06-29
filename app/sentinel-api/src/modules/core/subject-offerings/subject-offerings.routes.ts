@@ -14,6 +14,10 @@ import {
     getSubjectOfferingsRouteHandler,
 } from './controllers/get-subject-offerings.controller';
 import {
+    getSubjectOfferingRoute,
+    getSubjectOfferingRouteHandler,
+} from './controllers/get-subject-offering.controller';
+import {
     updateSubjectOfferingRoute,
     updateSubjectOfferingRouteHandler,
 } from './controllers/update-subject-offering.controller';
@@ -37,6 +41,7 @@ subjectOfferingsRoutes
     )
     .openapi(createSubjectOfferingRoute, createSubjectOfferingRouteHandler)
     .openapi(getSubjectOfferingsRoute, getSubjectOfferingsRouteHandler)
+    .openapi(getSubjectOfferingRoute, getSubjectOfferingRouteHandler)
     .openapi(updateSubjectOfferingRoute, updateSubjectOfferingRouteHandler)
     .openapi(deleteSubjectOfferingRoute, deleteSubjectOfferingRouteHandler)
     .openapi(deleteSubjectOfferingsRoute, deleteSubjectOfferingsRouteHandler);

@@ -20,7 +20,8 @@ import { OfferedSubjectsEmptyState } from './offered-subjects-empty-state';
 import { offeredSubjectsFacets } from './offered-subjects-facets';
 import { useState } from 'react';
 import { FloatingActionBar } from './floating-action-bar';
-import { useApi, useDeleteSubjectOfferingsMutation } from '@sentinel/hooks';
+import { useApi, useDeleteSubjectOfferingsMutation, useActivePermissions } from '@sentinel/hooks';
+import { AssignSubjectToInstructorDialog } from '../dialogs/assign-subject-to-instructor-dialog';
 import { toast } from 'sonner';
 
 interface OfferedSubjectsListProps {
@@ -52,7 +53,11 @@ export function OfferedSubjectsList({
 }: OfferedSubjectsListProps) {
     const [rowSelection, setRowSelection] = useState<Record<string, boolean>>({});
     const [bulkDeleteOpen, setBulkDeleteOpen] = useState(false);
+    const [bulkAssignOpen, setBulkAssignOpen] = useState(false);
     const queryClient = useQueryClient();
+
+    const { hasPermission } = useActivePermissions();
+    const canAssignSubjects = hasPermission('subjects:update');
 
     const selectedOfferings = offerings.filter((_, index) => rowSelection[index.toString()]);
 
@@ -104,11 +109,12 @@ export function OfferedSubjectsList({
                 manualPagination={manualPagination}
             />
 
-            {canDeleteOfferings && (
+            {(canDeleteOfferings || canAssignSubjects) && (
                 <FloatingActionBar
                     selectedCount={selectedOfferings.length}
                     onClear={() => setRowSelection({})}
-                    onUnoffer={() => setBulkDeleteOpen(true)}
+                    onUnoffer={canDeleteOfferings ? () => setBulkDeleteOpen(true) : undefined}
+                    onAssign={canAssignSubjects ? () => setBulkAssignOpen(true) : undefined}
                     isPending={isBulkUnofferPending}
                 />
             )}
@@ -151,6 +157,13 @@ export function OfferedSubjectsList({
                         </AlertDialogFooter>
                     </AlertDialogContent>
                 </AlertDialog>
+            )}
+            {canAssignSubjects && (
+                <AssignSubjectToInstructorDialog
+                    open={bulkAssignOpen}
+                    onOpenChange={setBulkAssignOpen}
+                    subjectOfferingId={selectedOfferings.map((o) => o.id)}
+                />
             )}
         </div>
     );

@@ -132,6 +132,30 @@ export async function getSubjectOfferingByIdData({
                 ),
                 '[]'::jsonb
             )`.as('classifications'),
+            sql<any>`COALESCE(
+                (
+                    SELECT jsonb_agg(DISTINCT jsonb_build_object(
+                        'id', up.user_id,
+                        'firstName', up.first_name,
+                        'lastName', up.last_name,
+                        'email', u.email
+                    ))
+                    FROM class_groups cg
+                    JOIN user_profiles up ON up.user_id IN (
+                        SELECT cr.user_id 
+                        FROM class_roles cr
+                        JOIN roles r ON r.role_id = cr.role_id AND r.role_name = 'instructor'
+                        WHERE cr.class_group_id = cg.class_group_id
+                        UNION
+                        SELECT cia.instructor_user_id 
+                        FROM classroom_instructor_assignments cia 
+                        WHERE cia.class_group_id = cg.class_group_id AND cia.status = 'ACTIVE'
+                    )
+                    JOIN users u ON u.id = up.user_id
+                    WHERE cg.subject_offering_id = so.subject_offering_id
+                ),
+                '[]'::jsonb
+            )`.as('instructors'),
         ])
         .where('so.subject_offering_id', '=', id);
 

@@ -746,6 +746,13 @@ export interface SubjectOfferingSection {
     yearLevel?: number | null;
 }
 
+export interface SubjectOfferingInstructor {
+    id: string;
+    firstName: string | null;
+    lastName: string | null;
+    email: string | null;
+}
+
 export interface SubjectOffering {
     id: string;
     subjectId: string;
@@ -779,6 +786,7 @@ export interface SubjectOffering {
     isOverridden?: boolean;
     isHidden?: boolean;
     institutionName?: string | null;
+    instructors?: SubjectOfferingInstructor[];
 }
 
 export interface SkippedSubjectOffering {

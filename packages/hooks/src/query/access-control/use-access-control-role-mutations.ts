@@ -94,7 +94,9 @@ export function useReplaceAccessControlRolePermissionsMutation(
         mutationFn: ({ roleId, permissionIds }) =>
             replaceAccessControlRolePermissions(apiClient, roleId, permissionIds),
         onSuccess: async (data, variables, context) => {
-            await invalidateRoleQueries(queryClient);
+            // Invalidate only the roles query key since permissions catalog and overview details
+            // are unaffected by specific role-to-permission mapping updates.
+            await queryClient.invalidateQueries({ queryKey: ACCESS_CONTROL_QUERY_KEYS.roles() });
             (args.onSuccess as any)?.(data, variables, context);
         },
     });

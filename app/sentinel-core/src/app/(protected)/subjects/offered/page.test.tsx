@@ -51,6 +51,7 @@ vi.mock('../_components', () => ({
             Offerings: {offerings.map((o: any) => o.subjectTitle).join(', ')}
         </div>
     ),
+    SubjectOfferingDetailsSheet: () => <div data-testid="details-sheet" />,
 }));
 
 vi.mock('@sentinel/ui', () => ({

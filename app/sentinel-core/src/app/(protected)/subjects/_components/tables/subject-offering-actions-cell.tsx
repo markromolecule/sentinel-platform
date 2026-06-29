@@ -9,6 +9,7 @@ import {
 import { type SubjectOffering } from '@sentinel/shared/types';
 import { OfferSubjectDialog } from '../dialogs/offer-subject-dialog';
 import { EditSubjectOfferingDialog } from '../dialogs/edit-subject-offering-dialog';
+import { AssignSubjectToInstructorDialog } from '../dialogs/assign-subject-to-instructor-dialog';
 import { SubjectOfferingActionsMenu } from './_components/subject-offering-actions-menu';
 import { SubjectOfferingConfirmationDialog } from './_components/subject-offering-confirmation-dialog';
 import {
@@ -18,14 +19,16 @@ import {
 
 interface SubjectOfferingActionsCellProps {
     offering: SubjectOffering;
+    onViewDetails?: (offering: SubjectOffering) => void;
 }
 
-export function SubjectOfferingActionsCell({ offering }: SubjectOfferingActionsCellProps) {
+export function SubjectOfferingActionsCell({ offering, onViewDetails }: SubjectOfferingActionsCellProps) {
     const { hasPermission } = useActivePermissions();
     const [offerOpen, setOfferOpen] = useState(false);
     const [editOpen, setEditOpen] = useState(false);
     const [statusOpen, setStatusOpen] = useState(false);
     const [deleteOpen, setDeleteOpen] = useState(false);
+    const [assignOpen, setAssignOpen] = useState(false);
 
     const updateSubjectOffering = useUpdateSubjectOfferingMutation();
     const deleteSubjectOffering = useDeleteSubjectOfferingMutation();
@@ -35,6 +38,7 @@ export function SubjectOfferingActionsCell({ offering }: SubjectOfferingActionsC
     const canOfferSubject = hasPermission('subject_offerings:offer');
     const canUpdateSubjectOffering = hasPermission('subject_offerings:update');
     const canDeleteSubjectOffering = hasPermission('subject_offerings:delete');
+    const canAssignSubject = hasPermission('subjects:update');
 
     function handleStatusChange() {
         updateSubjectOffering.mutate(
@@ -67,6 +71,8 @@ export function SubjectOfferingActionsCell({ offering }: SubjectOfferingActionsC
                 onEdit={canUpdateSubjectOffering ? () => setEditOpen(true) : undefined}
                 onStatusChange={canUpdateSubjectOffering ? () => setStatusOpen(true) : undefined}
                 onUnoffer={canDeleteSubjectOffering ? () => setDeleteOpen(true) : undefined}
+                onAssign={canAssignSubject ? () => setAssignOpen(true) : undefined}
+                onViewDetails={onViewDetails ? () => onViewDetails(offering) : undefined}
             />
 
             {canUpdateSubjectOffering ? (
@@ -120,6 +126,16 @@ export function SubjectOfferingActionsCell({ offering }: SubjectOfferingActionsC
                     confirmVariant="destructive"
                     confirmClassName="bg-red-600 hover:bg-red-700"
                     onConfirm={handleUnoffer}
+                />
+            ) : null}
+
+            {canAssignSubject ? (
+                <AssignSubjectToInstructorDialog
+                    open={assignOpen}
+                    onOpenChange={setAssignOpen}
+                    subjectOfferingId={offering.id}
+                    subjectCode={offering.subjectCode}
+                    subjectTitle={offering.subjectTitle}
                 />
             ) : null}
         </>

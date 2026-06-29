@@ -12,15 +12,17 @@ import {
     useSubjectOfferingsQuery,
     useServerPagination,
 } from '@sentinel/hooks';
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import {
     createSubjectOfferingColumns,
     OfferSubjectDialog,
     OfferedSubjectsList,
+    SubjectOfferingDetailsSheet,
 } from '../_components';
 import { Button, PermissionDeniedState } from '@sentinel/ui';
 import { Plus } from 'lucide-react';
 import { SubjectPageShell } from '../_components/layout';
+import type { SubjectOffering } from '@sentinel/shared/types';
 
 /**
  * SharedOfferedSubjectsPage renders the offered subjects listing page for sentinel-core,
@@ -29,10 +31,18 @@ import { SubjectPageShell } from '../_components/layout';
 export default function SharedOfferedSubjectsPage() {
     const [searchTerm, setSearchTerm] = useState('');
     const [offerSubjectOpen, setOfferSubjectOpen] = useState(false);
+    const [detailsOpen, setDetailsOpen] = useState(false);
+    const [detailsId, setDetailsId] = useState<string | null>(null);
+
     const debouncedSearch = useDebounce(searchTerm, 500);
     const { pagination, setPagination } = useServerPagination([debouncedSearch]);
     const { hasPermission } = useActivePermissions();
     const canOfferSubject = hasPermission('subject_offerings:offer');
+
+    const handleViewDetails = useCallback((offering: SubjectOffering) => {
+        setDetailsId(offering.id);
+        setDetailsOpen(true);
+    }, []);
 
     const {
         data: offeringsResponse,
@@ -80,8 +90,9 @@ export default function SharedOfferedSubjectsPage() {
                 courseLabelMap,
                 sectionLabelMap,
                 canDeleteOfferings,
+                onViewDetails: handleViewDetails,
             }),
-        [courseLabelMap, departmentLabelMap, sectionLabelMap, canDeleteOfferings],
+        [courseLabelMap, departmentLabelMap, sectionLabelMap, canDeleteOfferings, handleViewDetails],
     );
 
     const actions = (
@@ -133,6 +144,12 @@ export default function SharedOfferedSubjectsPage() {
             {!isViewDenied && canOfferSubject ? (
                 <OfferSubjectDialog open={offerSubjectOpen} onOpenChange={setOfferSubjectOpen} />
             ) : null}
+
+            <SubjectOfferingDetailsSheet
+                offeringId={detailsId}
+                open={detailsOpen}
+                onOpenChange={setDetailsOpen}
+            />
         </SubjectPageShell>
     );
 }
