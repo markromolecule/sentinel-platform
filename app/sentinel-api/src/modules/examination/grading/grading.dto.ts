@@ -37,6 +37,10 @@ export const getGradingStudentsSchema = {
                 .uuid()
                 .optional()
                 .openapi({ description: 'Filter by specific section ID' }),
+            search: z
+                .string()
+                .optional()
+                .openapi({ description: 'Filter students by name or student number' }),
         }),
     },
     response: z.object({

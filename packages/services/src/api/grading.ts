@@ -17,6 +17,7 @@ export type GetGradingExamsParams = {
 
 export type GetGradingStudentsParams = {
     sectionId?: string;
+    search?: string;
 };
 
 function buildGradingQueryString(params?: GetGradingExamsParams | GetGradingStudentsParams) {
@@ -26,6 +27,9 @@ function buildGradingQueryString(params?: GetGradingExamsParams | GetGradingStud
     const searchParams = new URLSearchParams();
     if (params.sectionId) {
         searchParams.set('sectionId', params.sectionId);
+    }
+    if ('search' in params && params.search) {
+        searchParams.set('search', params.search);
     }
     const query = searchParams.toString();
     return query ? `?${query}` : '';

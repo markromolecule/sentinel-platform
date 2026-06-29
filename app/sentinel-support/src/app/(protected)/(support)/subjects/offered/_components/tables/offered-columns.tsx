@@ -100,24 +100,33 @@ export const offeredColumns: ColumnDef<SubjectOffering>[] = [
     {
         id: 'departments',
         accessorFn: (row) =>
-            row.departments.map((department) => department.code ?? department.name).join(', '),
+            (row.departments ?? [])
+                .map((department) => department.code?.trim() || department.name)
+                .filter(Boolean)
+                .join(', '),
         header: ({ column }) => <DataTableColumnHeader column={column} title="Departments" />,
         cell: ({ row }) => (
             <SummaryBadges
-                labels={row.original.departments.map(
-                    (department) => department.code ?? department.name,
-                )}
+                labels={(row.original.departments ?? [])
+                    .map((department) => department.code?.trim() || department.name)
+                    .filter(Boolean)}
                 emptyLabel="No departments"
             />
         ),
     },
     {
         id: 'courses',
-        accessorFn: (row) => row.courses.map((course) => course.code ?? course.title).join(', '),
+        accessorFn: (row) =>
+            (row.courses ?? [])
+                .map((course) => course.code?.trim() || course.title)
+                .filter(Boolean)
+                .join(', '),
         header: ({ column }) => <DataTableColumnHeader column={column} title="Courses" />,
         cell: ({ row }) => (
             <SummaryBadges
-                labels={row.original.courses.map((course) => course.code ?? course.title)}
+                labels={(row.original.courses ?? [])
+                    .map((course) => course.code?.trim() || course.title)
+                    .filter(Boolean)}
                 emptyLabel="No courses"
             />
         ),

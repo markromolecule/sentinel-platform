@@ -119,8 +119,8 @@ export function SubjectOfferingDetailsSheet({
                                     <div className="flex flex-wrap gap-1.5">
                                         {offering.departments && offering.departments.length > 0 ? (
                                             offering.departments.map((dept) => (
-                                                <Badge key={dept.id} variant="outline" className="text-xs py-0.5">
-                                                    {dept.code ? `[${dept.code}] ` : ''}{dept.name}
+                                                <Badge key={dept.id} variant="secondary" className="text-xs py-0.5">
+                                                    {dept.code?.trim() || dept.name}
                                                 </Badge>
                                             ))
                                         ) : (
@@ -137,8 +137,8 @@ export function SubjectOfferingDetailsSheet({
                                     <div className="flex flex-wrap gap-1.5">
                                         {offering.courses && offering.courses.length > 0 ? (
                                             offering.courses.map((course) => (
-                                                <Badge key={course.id} variant="outline" className="text-xs py-0.5">
-                                                    {course.code ? `[${course.code}] ` : ''}{course.title}
+                                                <Badge key={course.id} variant="secondary" className="text-xs py-0.5">
+                                                    {course.code?.trim() || course.title}
                                                 </Badge>
                                             ))
                                         ) : (

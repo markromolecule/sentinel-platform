@@ -1,239 +1,87 @@
 'use client';
 
-import Link from 'next/link';
-import {
-    Badge,
-    Card,
-    CardContent,
-    CardHeader,
-    CardTitle,
-    SearchBar,
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-    Skeleton,
-    Table,
-    TableBody,
-    TableCell,
-    TableHead,
-    TableHeader,
-    TableRow,
-} from '@sentinel/ui';
-import type { GradingStudentSection } from '@sentinel/shared/types';
+import { useMemo } from 'react';
+import { DataTable } from '@sentinel/ui';
+import type { DataTableFacet } from '@sentinel/ui';
+import type { ColumnFiltersState } from '@tanstack/react-table';
+import type { GradingStudent } from '@sentinel/shared/types';
+import { studentColumns } from '@/app/(protected)/(instructor)/exams/grading/_components/student-columns';
 
 interface GradingStudentListProps {
-    examId: string;
-    sections: GradingStudentSection[];
+    students: GradingStudent[];
     isLoading?: boolean;
     searchValue: string;
     onSearchChange: (value: string) => void;
-    sectionId?: string;
-    onSectionChange: (sectionId?: string) => void;
     availableSections: {
         id: string;
         name: string;
     }[];
-    isSectionsLoading?: boolean;
+    onSectionChange: (sectionId?: string) => void;
 }
 
-function renderStatusBadge(status: 'NOT_SUBMITTED' | 'SUBMITTED' | 'GRADED') {
-    return (
-        <Badge
-            variant={
-                status === 'GRADED'
-                    ? 'default'
-                    : status === 'SUBMITTED'
-                      ? 'secondary'
-                      : 'destructive'
-            }
-        >
-            {status.replace('_', ' ')}
-        </Badge>
-    );
-}
-
-function getSectionLabel(section: GradingStudentSection) {
-    return section.sectionName ?? 'Unassigned Section';
-}
-
+/**
+ * Renders a flat, paginated DataTable of students for a given exam.
+ * Section filtering is via a facet (server-side), search is server-side.
+ */
 export function GradingStudentList({
-    examId,
-    sections,
+    students,
     isLoading,
     searchValue,
     onSearchChange,
-    sectionId,
-    onSectionChange,
     availableSections,
-    isSectionsLoading,
+    onSectionChange,
 }: GradingStudentListProps) {
+    /** Build the section facet options from available sections. */
+    const sectionFacet: DataTableFacet = useMemo(
+        () => ({
+            columnKey: 'sectionName',
+            title: 'Section',
+            options: availableSections.map((s) => ({
+                label: s.name,
+                value: s.name,
+            })),
+        }),
+        [availableSections],
+    );
+
+    /**
+     * When the facet filter changes we derive the selected section ID
+     * (by matching the chosen name back to availableSections) and notify
+     * the parent so it can refetch with the correct sectionId.
+     */
+    function handleColumnFiltersChange(filters: ColumnFiltersState) {
+        const sectionFilter = filters.find((f) => f.id === 'sectionName');
+        if (!sectionFilter || !sectionFilter.value) {
+            onSectionChange(undefined);
+            return;
+        }
+        // The faceted filter stores selected values as string[]
+        const selectedValues = sectionFilter.value as string[];
+        if (selectedValues.length === 0) {
+            onSectionChange(undefined);
+            return;
+        }
+        // Use the first selected value; map name → id for the API
+        const selectedName = selectedValues[0];
+        const match = availableSections.find((s) => s.name === selectedName);
+        onSectionChange(match?.id);
+    }
+
     return (
-        <div className="space-y-6">
-            <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-                <SearchBar
-                    placeholder="Filter students..."
-                    value={searchValue}
-                    onChange={(event) => onSearchChange(event.target.value)}
-                    containerClassName="w-full md:max-w-sm"
-                />
-                <Select
-                    value={sectionId || 'all'}
-                    onValueChange={(value) => onSectionChange(value === 'all' ? undefined : value)}
-                >
-                    <SelectTrigger className="w-full md:w-[220px]">
-                        <SelectValue
-                            placeholder={isSectionsLoading ? 'Loading sections...' : 'All Sections'}
-                        />
-                    </SelectTrigger>
-                    <SelectContent>
-                        <SelectItem value="all">All Sections</SelectItem>
-                        {availableSections.map((section) => (
-                            <SelectItem key={section.id} value={section.id}>
-                                {section.name}
-                            </SelectItem>
-                        ))}
-                    </SelectContent>
-                </Select>
-            </div>
-
-            {isLoading ? (
-                Array.from({ length: 2 }).map((_, index) => (
-                    <Card key={`grading-section-skeleton-${index}`}>
-                        <CardHeader className="space-y-3">
-                            <Skeleton className="h-6 w-48" />
-                            <div className="grid gap-3 md:grid-cols-3">
-                                <Skeleton className="h-16 w-full" />
-                                <Skeleton className="h-16 w-full" />
-                                <Skeleton className="h-16 w-full" />
-                            </div>
-                        </CardHeader>
-                        <CardContent>
-                            <div className="space-y-2">
-                                {Array.from({ length: 3 }).map((__, rowIndex) => (
-                                    <Skeleton
-                                        key={`grading-section-skeleton-row-${index}-${rowIndex}`}
-                                        className="h-12 w-full"
-                                    />
-                                ))}
-                            </div>
-                        </CardContent>
-                    </Card>
-                ))
-            ) : sections.length === 0 ? (
-                <Card>
-                    <CardContent className="text-muted-foreground py-12 text-center">
-                        No students matched the current filters.
-                    </CardContent>
-                </Card>
-            ) : (
-                sections.map((section) => (
-                    <Card key={section.sectionId ?? section.sectionName ?? 'unassigned'}>
-                        <CardHeader className="gap-4">
-                            <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
-                                <CardTitle>{getSectionLabel(section)}</CardTitle>
-                                <Badge variant="outline">
-                                    {section.totalStudents} student
-                                    {section.totalStudents === 1 ? '' : 's'}
-                                </Badge>
-                            </div>
-                            <div className="grid gap-3 md:grid-cols-3">
-                                <div className="rounded-lg border p-3">
-                                    <div className="text-muted-foreground text-xs uppercase">
-                                        Students
-                                    </div>
-                                    <div className="text-2xl font-semibold">
-                                        {section.totalStudents}
-                                    </div>
-                                </div>
-                                <div className="rounded-lg border p-3">
-                                    <div className="text-muted-foreground text-xs uppercase">
-                                        Submitted
-                                    </div>
-                                    <div className="text-2xl font-semibold">
-                                        {section.submittedCount}
-                                    </div>
-                                </div>
-                                <div className="rounded-lg border p-3">
-                                    <div className="text-muted-foreground text-xs uppercase">
-                                        Graded
-                                    </div>
-                                    <div className="text-2xl font-semibold">
-                                        {section.gradedCount}
-                                    </div>
-                                </div>
-                            </div>
-                        </CardHeader>
-                        <CardContent>
-                            <Table>
-                                <TableHeader>
-                                    <TableRow>
-                                        <TableHead>Student Name</TableHead>
-                                        <TableHead>Submission Date</TableHead>
-                                        <TableHead>Status</TableHead>
-                                        <TableHead>Score</TableHead>
-                                    </TableRow>
-                                </TableHeader>
-                                <TableBody>
-                                    {section.students.map((student) => {
-                                        const showLink =
-                                            student.attemptId && student.status !== 'NOT_SUBMITTED';
-
-                                        return (
-                                            <TableRow key={student.id}>
-                                                <TableCell>
-                                                    {showLink ? (
-                                                        <Link
-                                                            href={`/exams/grading/${examId}/${student.attemptId}`}
-                                                            className="text-primary font-medium hover:underline"
-                                                        >
-                                                            {student.name}
-                                                        </Link>
-                                                    ) : (
-                                                        <div className="font-medium">
-                                                            {student.name}
-                                                        </div>
-                                                    )}
-                                                    <div className="text-muted-foreground text-xs">
-                                                        {student.studentId}
-                                                    </div>
-                                                </TableCell>
-                                                <TableCell>
-                                                    {student.submissionDate ? (
-                                                        new Date(
-                                                            student.submissionDate,
-                                                        ).toLocaleString()
-                                                    ) : (
-                                                        <span className="text-muted-foreground">
-                                                            -
-                                                        </span>
-                                                    )}
-                                                </TableCell>
-                                                <TableCell>
-                                                    {renderStatusBadge(student.status)}
-                                                </TableCell>
-                                                <TableCell>
-                                                    {student.score === null ||
-                                                    student.score === undefined ? (
-                                                        <span className="text-muted-foreground">
-                                                            -/{student.maxScore}
-                                                        </span>
-                                                    ) : (
-                                                        <span className="font-medium">
-                                                            {student.score}/{student.maxScore}
-                                                        </span>
-                                                    )}
-                                                </TableCell>
-                                            </TableRow>
-                                        );
-                                    })}
-                                </TableBody>
-                            </Table>
-                        </CardContent>
-                    </Card>
-                ))
-            )}
-        </div>
+        <DataTable
+            columns={studentColumns}
+            data={students}
+            isLoading={isLoading}
+            searchValue={searchValue}
+            onSearchChange={onSearchChange}
+            searchPlaceholder="Search students..."
+            facets={[sectionFacet]}
+            onColumnFiltersChange={handleColumnFiltersChange}
+            emptyContent={
+                <div className="text-muted-foreground py-12 text-center text-sm">
+                    No students matched the current filters.
+                </div>
+            }
+        />
     );
 }

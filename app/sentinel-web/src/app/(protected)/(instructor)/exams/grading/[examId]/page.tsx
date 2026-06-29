@@ -1,6 +1,6 @@
 'use client';
 
-import { use, useMemo, useState } from 'react';
+import { use, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { GradingStudentList } from '@/app/(protected)/(instructor)/exams/grading/[examId]/_components/grading-student-list';
 import {
     useExportGrades,
@@ -18,10 +18,42 @@ interface ExamGradingPageProps {
 
 export default function ExamGradingPage({ params }: ExamGradingPageProps) {
     const { examId } = use(params);
+
+    /** Raw search input (immediate, for the controlled input) */
+    const [searchInput, setSearchInput] = useState('');
+    /** Debounced search value sent to the API */
+    const [debouncedSearch, setDebouncedSearch] = useState('');
+    /** Section ID selected via the facet filter (server-side) */
     const [sectionId, setSectionId] = useState<string | undefined>();
-    const [studentSearch, setStudentSearch] = useState('');
-    const { exam, students, studentSections, isLoading } = useGradingDetail(examId, sectionId);
+
+    const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+    const { exam, students, isLoading } = useGradingDetail(examId, sectionId, debouncedSearch);
     const { exportToExcel } = useExportGrades();
+
+    /**
+     * 300 ms debounce: update the raw input immediately for the controlled
+     * SearchBar, but only fire the API query after the user stops typing.
+     */
+    const handleSearchChange = useCallback((value: string) => {
+        setSearchInput(value);
+        if (debounceTimer.current) {
+            clearTimeout(debounceTimer.current);
+        }
+        debounceTimer.current = setTimeout(() => {
+            setDebouncedSearch(value);
+        }, 300);
+    }, []);
+
+    useEffect(
+        () => () => {
+            if (debounceTimer.current) {
+                clearTimeout(debounceTimer.current);
+            }
+        },
+        [],
+    );
+
     const gradingSections = useMemo(
         () =>
             (exam?.sectionIds ?? [])
@@ -31,50 +63,6 @@ export default function ExamGradingPage({ params }: ExamGradingPageProps) {
                 }))
                 .sort((left, right) => left.name.localeCompare(right.name)),
         [exam?.sectionIds, exam?.sectionNames],
-    );
-
-    const visibleStudents = useMemo(() => {
-        const normalizedSearch = studentSearch.trim().toLowerCase();
-
-        if (!normalizedSearch) {
-            return students;
-        }
-
-        return students.filter((student: (typeof students)[number]) => {
-            const haystack = [student.name, student.studentId, student.sectionName ?? '']
-                .join(' ')
-                .toLowerCase();
-
-            return haystack.includes(normalizedSearch);
-        });
-    }, [studentSearch, students]);
-
-    const visibleSections = useMemo(() => {
-        const visibleStudentIds = new Set(visibleStudents.map((student) => student.id));
-
-        return studentSections
-            .map((section) => {
-                const sectionStudents = section.students.filter((student) =>
-                    visibleStudentIds.has(student.id),
-                );
-
-                return {
-                    ...section,
-                    totalStudents: sectionStudents.length,
-                    submittedCount: sectionStudents.filter(
-                        (student) => student.status !== 'NOT_SUBMITTED',
-                    ).length,
-                    gradedCount: sectionStudents.filter((student) => student.status === 'GRADED')
-                        .length,
-                    students: sectionStudents,
-                };
-            })
-            .filter((section) => section.students.length > 0);
-    }, [studentSections, visibleStudents]);
-
-    const selectedSectionName = useMemo(
-        () => gradingSections.find((section) => section.id === sectionId)?.name,
-        [gradingSections, sectionId],
     );
 
     if (!exam) {
@@ -110,11 +98,11 @@ export default function ExamGradingPage({ params }: ExamGradingPageProps) {
                     </p>
                 </div>
                 <div className="flex items-center gap-2">
+                    {/* Export button styled with a soft Excel green */}
                     <Button
+                        className="border-[#217346] bg-[#217346]/10 text-[#217346] hover:bg-[#217346]/20"
                         variant="outline"
-                        onClick={() =>
-                            exportToExcel(visibleStudents, exam.title, selectedSectionName)
-                        }
+                        onClick={() => exportToExcel(students, exam.title)}
                     >
                         <Download className="mr-2 h-4 w-4" />
                         Export to Excel
@@ -128,15 +116,12 @@ export default function ExamGradingPage({ params }: ExamGradingPageProps) {
                 </div>
             </div>
             <GradingStudentList
-                examId={examId}
-                sections={visibleSections}
+                students={students}
                 isLoading={isLoading}
-                searchValue={studentSearch}
-                onSearchChange={setStudentSearch}
-                sectionId={sectionId}
-                onSectionChange={setSectionId}
+                searchValue={searchInput}
+                onSearchChange={handleSearchChange}
                 availableSections={gradingSections}
-                isSectionsLoading={!exam}
+                onSectionChange={setSectionId}
             />
         </div>
     );

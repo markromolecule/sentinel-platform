@@ -19,8 +19,7 @@ export function useAssignOfferedSubjectMutation() {
             queryClient.invalidateQueries({
                 queryKey: SUBJECT_OFFERING_QUERY_KEYS.all,
             });
-            const message = response?.message || 'Successfully assigned offered subject to instructor.';
-            toast.success(message);
+            toast.success('Instructor assigned successfully');
         },
         onError: (error: any) => {
             toast.error(error?.message || 'Failed to assign offered subject to instructor.');
