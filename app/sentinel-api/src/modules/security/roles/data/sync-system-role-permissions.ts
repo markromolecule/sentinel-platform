@@ -13,7 +13,7 @@ export async function syncSystemRolePermissions(dbClient: DbClient) {
         return;
     }
 
-    const [roles, permissions] = await Promise.all([
+    const [roles, permissions, rolesWithPermissions] = await Promise.all([
         dbClient
             .selectFrom('roles')
             .select(['role_id', 'role_name'])
@@ -24,17 +24,29 @@ export async function syncSystemRolePermissions(dbClient: DbClient) {
             .select(['permission_id', 'permission_key'])
             .where('permission_key', 'in', permissionKeys)
             .execute(),
+        dbClient
+            .selectFrom('rbac_role_permissions')
+            .select('role_id')
+            .distinct()
+            .execute(),
     ]);
 
     const roleIdByName = new Map(roles.map((role) => [role.role_name, role.role_id]));
     const permissionIdByKey = new Map(
         permissions.map((permission) => [permission.permission_key, permission.permission_id]),
     );
+    const roleIdsWithPermissions = new Set(rolesWithPermissions.map((r) => r.role_id));
 
     const mappings = Object.entries(SYSTEM_ROLE_BLUEPRINTS).flatMap(([roleName, blueprint]) => {
         const roleId = roleIdByName.get(roleName);
 
         if (!roleId) {
+            return [];
+        }
+
+        // Only seed permissions if the role currently has no mappings assigned.
+        // This prevents overwriting user deletions/edits to system role permissions.
+        if (roleIdsWithPermissions.has(roleId)) {
             return [];
         }
 

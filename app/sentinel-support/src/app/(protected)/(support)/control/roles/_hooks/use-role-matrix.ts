@@ -165,6 +165,11 @@ export function useRoleMatrix() {
         });
     }, [groupedPermissions]);
 
+    /**
+     * Reconciles and saves modified permissions mapping for a given role ID.
+     * Uses a ref-based pending/confirmed tracking system to avoid race conditions 
+     * during React Query invalidation and subsequent refetches.
+     */
     const saveRolePermissions = useCallback(
         async (roleId: number, permissionIds: string[]) => {
             const currentRole = sortedRoles.find((role) => role.id === roleId);
@@ -183,7 +188,6 @@ export function useRoleMatrix() {
             }
 
             pendingPermissionIdsByRoleIdRef.current[roleId] = permissionIds;
-            confirmedPermissionIdsByRoleIdRef.current[roleId] = permissionIds;
             setSavingRoleIds((current) =>
                 current.includes(roleId) ? current : [...current, roleId],
             );
@@ -193,9 +197,19 @@ export function useRoleMatrix() {
                     roleId,
                     permissionIds,
                 });
+                confirmedPermissionIdsByRoleIdRef.current[roleId] = permissionIds;
             } catch {
                 delete pendingPermissionIdsByRoleIdRef.current[roleId];
-                return;
+                delete confirmedPermissionIdsByRoleIdRef.current[roleId];
+                // Roll draft back to last known server state
+                setDraftPermissionIdsByRoleId((current) => {
+                    const currentRole = sortedRoles.find((r) => r.id === roleId);
+                    if (!currentRole) return current;
+                    return {
+                        ...current,
+                        [roleId]: currentRole.permissionIds,
+                    };
+                });
             } finally {
                 setSavingRoleIds((current) => current.filter((id) => id !== roleId));
             }

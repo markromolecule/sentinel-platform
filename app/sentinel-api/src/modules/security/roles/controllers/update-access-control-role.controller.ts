@@ -1,7 +1,7 @@
 import { createRoute } from '@hono/zod-openapi';
 import { type AppRouteHandler } from '../../../../types/hono';
 import { updateRoleSchema } from '../roles.dto';
-import { RolesService } from '../services/roles.service';
+import { RolesService } from '../roles.service';
 import { assertSupportAccess } from '../../access-control/services/access-control-authorization.service';
 
 export const updateAccessControlRoleRoute = createRoute({
