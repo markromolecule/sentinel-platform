@@ -27,6 +27,7 @@ export class GradingService {
         userId?: string;
         institutionId?: string;
         sectionId?: string;
+        search?: string;
     }) {
         return await getGradingStudentsService(params);
     }

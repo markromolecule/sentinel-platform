@@ -8,6 +8,7 @@ export type GetGradingStudentsDataArgs = {
     userId?: string;
     institutionId?: string;
     sectionId?: string;
+    search?: string;
 };
 
 export async function buildGetGradingStudentsQuery({
@@ -16,6 +17,7 @@ export async function buildGetGradingStudentsQuery({
     userId,
     institutionId,
     sectionId,
+    search,
 }: GetGradingStudentsDataArgs) {
     let query = dbClient
         .selectFrom('exams as e')
@@ -51,6 +53,20 @@ export async function buildGetGradingStudentsQuery({
 
     if (sectionId) {
         query = query.where('eas.section_id', '=', sectionId);
+    }
+
+    if (search) {
+        const term = `%${search}%`;
+        query = query.where((eb) =>
+            eb.or([
+                eb(
+                    sql<string>`trim(concat(up.first_name, ' ', up.last_name))`,
+                    'ilike',
+                    term,
+                ),
+                eb('st.student_number', 'ilike', term),
+            ]),
+        );
     }
 
     return query

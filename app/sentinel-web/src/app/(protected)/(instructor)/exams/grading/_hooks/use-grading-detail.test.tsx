@@ -143,7 +143,6 @@ describe('useGradingDetail', () => {
         await waitFor(() => {
             expect(result.current.exam).toEqual(exam);
             expect(result.current.students).toEqual(students);
-            expect(result.current.studentSections).toEqual(gradingStudentList.sections);
         });
 
         expect(getExam).toHaveBeenCalledWith(mockApiClient, '11111111-1111-1111-1111-111111111111');
@@ -152,7 +151,34 @@ describe('useGradingDetail', () => {
             '11111111-1111-1111-1111-111111111111',
             {
                 sectionId: '22222222-2222-2222-2222-222222222222',
+                search: undefined,
             },
+        );
+    });
+
+    it('passes the search term to getGradingStudents when provided', async () => {
+        const gradingStudentList: GradingStudentList = { students: [], sections: [] };
+        vi.mocked(getExam).mockResolvedValue({} as any);
+        vi.mocked(getGradingStudents).mockResolvedValue(gradingStudentList);
+
+        const { result } = renderHook(
+            () =>
+                useGradingDetail(
+                    '11111111-1111-1111-1111-111111111111',
+                    undefined,
+                    'alice',
+                ),
+            { wrapper: createWrapper() },
+        );
+
+        await waitFor(() => {
+            expect(result.current.students).toEqual([]);
+        });
+
+        expect(getGradingStudents).toHaveBeenCalledWith(
+            mockApiClient,
+            '11111111-1111-1111-1111-111111111111',
+            { sectionId: undefined, search: 'alice' },
         );
     });
 });

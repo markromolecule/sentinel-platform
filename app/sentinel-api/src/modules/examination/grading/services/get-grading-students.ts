@@ -12,6 +12,7 @@ export type GetGradingStudentsArgs = {
     userId?: string | null;
     institutionId?: string;
     sectionId?: string;
+    search?: string;
 };
 
 export async function getGradingStudents({
@@ -20,6 +21,7 @@ export async function getGradingStudents({
     userId,
     institutionId,
     sectionId,
+    search,
 }: GetGradingStudentsArgs): Promise<GradingStudentListType> {
     const records = await getGradingStudentsData({
         dbClient,
@@ -27,6 +29,7 @@ export async function getGradingStudents({
         userId: userId ?? undefined,
         institutionId,
         sectionId,
+        search,
     });
 
     const students = records

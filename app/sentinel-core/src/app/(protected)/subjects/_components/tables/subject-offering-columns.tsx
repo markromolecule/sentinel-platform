@@ -132,22 +132,34 @@ export function createSubjectOfferingColumns({
         },
         {
             id: 'departments',
-            accessorFn: (row) => mapLabels(row.departmentIds, departmentLabelMap).join(', '),
+            accessorFn: (row) =>
+                (row.departments ?? [])
+                    .map((d) => d.code?.trim() || d.name)
+                    .filter(Boolean)
+                    .join(', '),
             header: ({ column }) => <DataTableColumnHeader column={column} title="Departments" />,
             cell: ({ row }) => (
                 <SummaryBadges
-                    labels={mapLabels(row.original.departmentIds, departmentLabelMap)}
+                    labels={(row.original.departments ?? [])
+                        .map((d) => d.code?.trim() || d.name)
+                        .filter(Boolean)}
                     emptyLabel="No departments"
                 />
             ),
         },
         {
             id: 'courses',
-            accessorFn: (row) => mapLabels(row.courseIds, courseLabelMap).join(', '),
+            accessorFn: (row) =>
+                (row.courses ?? [])
+                    .map((c) => c.code?.trim() || c.title)
+                    .filter(Boolean)
+                    .join(', '),
             header: ({ column }) => <DataTableColumnHeader column={column} title="Courses" />,
             cell: ({ row }) => (
                 <SummaryBadges
-                    labels={mapLabels(row.original.courseIds, courseLabelMap)}
+                    labels={(row.original.courses ?? [])
+                        .map((c) => c.code?.trim() || c.title)
+                        .filter(Boolean)}
                     emptyLabel="No courses"
                 />
             ),

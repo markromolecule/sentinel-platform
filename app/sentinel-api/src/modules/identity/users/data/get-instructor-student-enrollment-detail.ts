@@ -56,6 +56,7 @@ async function getStudentEnrollmentDetailData({
             sql<string | null>`CONCAT(t.academic_year, ' - ', t.semester)`.as('term_name'),
             'sec.year_level',
         ])
+        .where('cg.archived_at', 'is', null)
         .where('up.user_id', '=', targetUserId);
 
     if (requesterUserId) {

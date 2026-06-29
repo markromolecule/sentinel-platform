@@ -120,6 +120,7 @@ export async function getInstructorStudentEnrollmentsData({
         ])
         .where('cr.user_id', '=', requesterUserId)
         .where('role_scope.role_name', '=', 'instructor')
+        .where('cg.archived_at', 'is', null)
         .groupBy([
             'up.user_id',
             'up.first_name',

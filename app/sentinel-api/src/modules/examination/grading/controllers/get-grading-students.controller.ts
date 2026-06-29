@@ -55,6 +55,7 @@ export const getGradingStudentsRouteHandler: AppRouteHandler<
         userId: user?.id,
         institutionId,
         sectionId: query.sectionId,
+        search: query.search,
     });
 
     return c.json({

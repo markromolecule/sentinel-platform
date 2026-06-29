@@ -22,6 +22,10 @@ export function useUnarchiveClassroomMutation(args: UseUnarchiveClassroomMutatio
             await queryClient.removeQueries({
                 queryKey: CLASSROOM_QUERY_KEYS.details(variables),
             });
+            await queryClient.invalidateQueries({ queryKey: ['instructor-students'] });
+            await queryClient.removeQueries({
+                queryKey: ['instructor-student-enrollment-detail'],
+            });
 
             if (args.onSuccess) {
                 (args.onSuccess as any)(data, variables, context);

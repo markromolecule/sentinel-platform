@@ -34,6 +34,21 @@ describe('getGradingStudents service', () => {
         });
     });
 
+    it('forwards the search argument to the data layer', async () => {
+        vi.mocked(getGradingStudentsData).mockResolvedValue([]);
+
+        await getGradingStudents({
+            dbClient: mockDb,
+            examId: 'exam-1',
+            userId: 'user-1',
+            search: 'alice',
+        });
+
+        expect(getGradingStudentsData).toHaveBeenCalledWith(
+            expect.objectContaining({ search: 'alice' }),
+        );
+    });
+
     it('maps latest-attempt grading statuses and sorts students by name', async () => {
         vi.mocked(getGradingStudentsData).mockResolvedValue([
             {

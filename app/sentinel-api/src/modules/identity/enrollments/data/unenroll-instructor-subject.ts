@@ -34,5 +34,12 @@ export const unenrollInstructorSubjectData = async ({
             .where('user_id', '=', userId)
             .where('class_group_id', 'in', classGroupIds)
             .execute();
+
+        // Also delete from classroom_instructor_assignments to remove them from teaching classrooms
+        await dbClient
+            .deleteFrom('classroom_instructor_assignments')
+            .where('instructor_user_id', '=', userId)
+            .where('class_group_id', 'in', classGroupIds)
+            .execute();
     }
 };

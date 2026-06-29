@@ -49,5 +49,24 @@ describe('getInstructorStudentEnrollmentsData', () => {
         expect(compiledQuery.sql).toContain("STRING_AGG(DISTINCT sub.subject_title, ', ')");
         // Should filter by instructor user ID
         expect(compiledQuery.sql).toContain('"cr"."user_id" = $1');
+        // Should exclude archived classrooms
+        expect(compiledQuery.sql).toContain('"cg"."archived_at" is null');
+    });
+
+    it('should keep archived classrooms out of search and aggregated student rows', async () => {
+        const { db, executeSpy } = createMockDb([]);
+
+        await getInstructorStudentEnrollmentsData({
+            dbClient: db as any,
+            requesterUserId: 'instructor-123',
+            search: 'INF232',
+        });
+
+        expect(executeSpy).toHaveBeenCalledTimes(1);
+        const compiledQuery = executeSpy.mock.calls[0][0];
+
+        expect(compiledQuery.sql).toContain('"cg"."archived_at" is null');
+        expect(compiledQuery.sql).toContain('"sec"."section_name" ilike');
+        expect(compiledQuery.parameters).toContain('%INF232%');
     });
 });

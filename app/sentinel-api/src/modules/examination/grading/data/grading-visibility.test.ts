@@ -76,4 +76,21 @@ describe('grading visibility queries', () => {
 
         void db.destroy();
     });
+
+    it('applies an ilike search filter on name and student number when search is provided', async () => {
+        const db = createCompilerDb();
+        const query = await buildGetGradingStudentsQuery({
+            dbClient: db as any,
+            examId: 'exam-1',
+            userId: 'user-1',
+            institutionId: 'institution-1',
+            search: 'alice',
+        });
+        const compiled = query.compile();
+
+        expect(compiled.sql).toContain('ilike');
+        expect(compiled.parameters).toContain('%alice%');
+
+        void db.destroy();
+    });
 });
