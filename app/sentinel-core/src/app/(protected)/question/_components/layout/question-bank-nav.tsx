@@ -14,11 +14,11 @@ type QuestionBankNavItem = {
 
 const QUESTION_BANK_NAV_GROUPS: Array<{ title: string; items: QuestionBankNavItem[] }> = [
     {
-        title: 'Question Bank',
+        title: 'Management',
         items: [
             {
                 id: 'questions',
-                label: 'All Questions',
+                label: 'Questions',
                 href: '/question/bank',
             },
             {

@@ -21,7 +21,8 @@ export type CoreAdminPageId =
     | 'messages'
     | 'announcements'
     | 'exams'
-    | 'question-bank';
+    | 'question-bank'
+    | 'guides';
 
 export interface CoreAdminPageCapability {
     id: CoreAdminPageId;
@@ -240,6 +241,15 @@ export const CORE_ADMIN_PAGE_CAPABILITIES: Record<CoreAdminPageId, CoreAdminPage
         allowedRoles: ['admin', 'superadmin'],
         requiredViewPermissions: ['assessments:view'],
         requiredActionPermissions: ['assessments:manage'],
+    },
+    guides: {
+        id: 'guides',
+        title: 'Guides',
+        primaryPath: '/guides',
+        aliases: ['/guides', '/guides/tos', '/guides/rubric'],
+        allowedRoles: ['admin', 'superadmin'],
+        requiredViewPermissions: [],
+        requiredActionPermissions: [],
     },
 };
 

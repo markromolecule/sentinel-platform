@@ -8,33 +8,34 @@ import { cn, Separator } from '@sentinel/ui';
 type GuideSection = 'steps' | 'rubric' | 'tos';
 
 const GUIDE_NAV_ITEMS = [
-    { id: 'steps' as GuideSection, label: 'Guide Steps', href: '/guide' },
-    { id: 'rubric' as GuideSection, label: 'Essay Rubric', href: '/guide/rubric' },
-    { id: 'tos' as GuideSection, label: 'TOS Guide', href: '/guide/tos' },
+    { id: 'steps' as GuideSection, label: 'Guide Steps', href: '/guides' },
+    { id: 'rubric' as GuideSection, label: 'Essay Rubric', href: '/guides/rubric' },
+    { id: 'tos' as GuideSection, label: 'TOS Guide', href: '/guides/tos' },
 ];
 
 /**
- * InstructorGuideLayout wraps the guide steps and the rubric pages with a persistent sidebar layout.
+ * AdminGuideLayout wraps the guide steps, rubric, and TOS pages with a persistent sidebar layout.
  *
  * @param props - Layout props containing children ReactNode
  */
-export default function InstructorGuideLayout({ children }: { children: ReactNode }) {
+export default function AdminGuideLayout({ children }: { children: ReactNode }) {
     const pathname = usePathname() || '';
 
     // Derive active section based on the current pathname
     let activeSection: GuideSection = 'steps';
-    if (pathname.includes('/guide/rubric')) {
+    if (pathname.includes('/guides/rubric')) {
         activeSection = 'rubric';
-    } else if (pathname.includes('/guide/tos')) {
+    } else if (pathname.includes('/guides/tos')) {
         activeSection = 'tos';
     }
+
     return (
         <div className="relative flex min-h-[calc(100vh-64px)] flex-col lg:-m-6 lg:flex-row lg:items-stretch">
             {/* Desktop Sidebar */}
             <div className="bg-background sticky top-0 z-30 hidden w-64 shrink-0 flex-col border-r lg:flex">
                 <div className="flex h-14 shrink-0 items-center px-4">
                     <h1 className="text-foreground text-[1.1rem] font-bold tracking-tight">
-                        Instructor Guide
+                        System Guide
                     </h1>
                 </div>
                 <Separator className="bg-border/40 shrink-0" />
