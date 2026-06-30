@@ -50,6 +50,18 @@ export const requestColumns: ColumnDef<EnrollmentRequest>[] = [
         enableHiding: false,
     },
     {
+        accessorKey: 'institution',
+        header: ({ column }) => <DataTableColumnHeader column={column} title="Institution" />,
+        filterFn: (row, columnId, filterValue) => {
+            if (!Array.isArray(filterValue) || filterValue.length === 0) {
+                return true;
+            }
+
+            const value = row.getValue<string | null>(columnId);
+            return value ? filterValue.includes(value) : false;
+        },
+    },
+    {
         accessorKey: 'instructor_name',
         header: ({ column }) => <DataTableColumnHeader column={column} title="Instructor" />,
     },

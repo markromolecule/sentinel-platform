@@ -1,6 +1,6 @@
 'use client';
 
-import { PageHeader } from '@sentinel/ui';
+import { PageHeader, Separator } from '@sentinel/ui';
 import { useCalendar, CalendarHeader, CalendarGrid, DayDetailsSheet } from '@/features/calendar';
 import { useCalendarEventsQuery } from '@sentinel/hooks';
 import { Skeleton } from '@sentinel/ui';
@@ -16,6 +16,7 @@ export default function ProctorCalendarPage() {
         calendarDays,
         handlePreviousMonth,
         handleNextMonth,
+        handleToday,
         handleDayClick,
     } = useCalendar({ events: [] });
 
@@ -61,18 +62,22 @@ export default function ProctorCalendarPage() {
     }, [mappedEvents]);
 
     return (
-        <div className="flex h-full flex-col space-y-6" data-lenis-prevent>
+        <div
+            className="flex h-[calc(100vh-130px)] flex-col gap-4 overflow-hidden p-4 md:p-5"
+            data-lenis-prevent
+        >
             <PageHeader
                 title="Calendar"
-                description="View your scheduled examinations."
-                className="px-0"
+                description="View institution events, announcements, and schedules."
             >
                 <CalendarHeader
                     currentMonth={currentMonth}
                     onPreviousMonth={handlePreviousMonth}
                     onNextMonth={handleNextMonth}
+                    onToday={handleToday}
                 />
             </PageHeader>
+            <Separator />
 
             {isLoading ? (
                 <div className="bg-card border-border flex flex-1 flex-col overflow-hidden rounded-xl border p-4 shadow-sm">

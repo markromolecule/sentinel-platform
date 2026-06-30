@@ -37,6 +37,7 @@ export function useCalendar({ events }: UseCalendarOptions) {
 
     const handlePreviousMonth = () => setCurrentMonth(subMonths(currentMonth, 1));
     const handleNextMonth = () => setCurrentMonth(addMonths(currentMonth, 1));
+    const handleToday = () => setCurrentMonth(new Date());
 
     const handleDayClick = (day: Date) => {
         setSelectedDate(day);
@@ -55,6 +56,7 @@ export function useCalendar({ events }: UseCalendarOptions) {
         calendarDays,
         handlePreviousMonth,
         handleNextMonth,
+        handleToday,
         handleDayClick,
         getEventsForDate,
     };

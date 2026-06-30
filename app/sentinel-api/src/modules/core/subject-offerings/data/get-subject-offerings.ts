@@ -137,6 +137,7 @@ export async function getSubjectOfferingsData({
                     JOIN sections s ON s.section_id = sos2.section_id
                     LEFT JOIN class_groups cg ON cg.subject_offering_id = sos2.subject_offering_id AND cg.section_id = s.section_id
                     WHERE sos2.subject_offering_id = so.subject_offering_id
+                      AND cg.class_group_id IS NOT NULL
                 ),
                 '[]'::jsonb
             )`.as('sections'),
@@ -162,16 +163,10 @@ export async function getSubjectOfferingsData({
                         'email', u.email
                     ))
                     FROM class_groups cg
-                    JOIN user_profiles up ON up.user_id IN (
-                        SELECT cr.user_id 
-                        FROM class_roles cr
-                        JOIN roles r ON r.role_id = cr.role_id AND r.role_name = 'instructor'
-                        WHERE cr.class_group_id = cg.class_group_id
-                        UNION
-                        SELECT cia.instructor_user_id 
-                        FROM classroom_instructor_assignments cia 
-                        WHERE cia.class_group_id = cg.class_group_id AND cia.status = 'ACTIVE'
-                    )
+                    JOIN classroom_instructor_assignments cia
+                      ON cia.class_group_id = cg.class_group_id
+                     AND cia.status = 'ACTIVE'
+                    JOIN user_profiles up ON up.user_id = cia.instructor_user_id
                     JOIN users u ON u.id = up.user_id
                     WHERE cg.subject_offering_id = so.subject_offering_id
                 ),

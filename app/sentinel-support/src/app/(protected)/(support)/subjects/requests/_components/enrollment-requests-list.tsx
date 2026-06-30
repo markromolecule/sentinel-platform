@@ -67,6 +67,14 @@ export function EnrollmentRequestsList({
     }, [selectedInstitutionId, hasInitializedFilters]);
 
     const institutionOptions = useInstitutionFacet({ institutions });
+    const tableRequests = useStableValue(
+        () =>
+            requests.map((request) => ({
+                ...request,
+                institution: selectedInstitutionId ?? '',
+            })),
+        [requests, selectedInstitutionId],
+    );
 
     useDataTableFilterSync({
         columnFilters,
@@ -79,8 +87,8 @@ export function EnrollmentRequestsList({
     });
 
     const selectedRequests = useStableValue(
-        () => requests.filter((_, index) => rowSelection[String(index)]),
-        [requests, rowSelection],
+        () => tableRequests.filter((_, index) => rowSelection[String(index)]),
+        [tableRequests, rowSelection],
     );
     const selectedRequestIds = useStableValue(
         () =>
@@ -121,11 +129,12 @@ export function EnrollmentRequestsList({
         <>
             <DataTable
                 columns={requestColumns}
-                data={requests}
+                data={tableRequests}
                 searchKey="instructor_name"
                 searchPlaceholder="Search by instructor..."
                 facets={facets}
                 initialColumnVisibility={{
+                    institution: false,
                     department_id: false,
                     course_id: false,
                     section_id: false,

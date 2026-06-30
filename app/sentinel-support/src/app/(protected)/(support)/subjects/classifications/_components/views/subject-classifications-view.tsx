@@ -196,11 +196,27 @@ export function SubjectClassificationsView() {
                     )}
 
                     {!isLoading && totalCount > 0 ? (
-                        <div className="flex flex-col gap-3 border-t pt-4 sm:flex-row sm:items-center sm:justify-between">
-                            <div className="text-muted-foreground text-sm">
-                                Page {pagination.pageIndex + 1} of {pageCount}
+                        <div className="flex flex-col gap-4 border-t pt-4 lg:flex-row lg:items-center lg:justify-between">
+                            <div className="flex flex-col gap-1 text-sm sm:flex-row sm:items-center sm:gap-3">
+                                <span className="text-muted-foreground">
+                                    Showing{' '}
+                                    {Math.min(
+                                        pagination.pageIndex * pagination.pageSize + 1,
+                                        totalCount,
+                                    )}
+                                    -
+                                    {Math.min(
+                                        (pagination.pageIndex + 1) * pagination.pageSize,
+                                        totalCount,
+                                    )}{' '}
+                                    of {totalCount}
+                                </span>
+                                <span className="text-muted-foreground hidden sm:inline">•</span>
+                                <span className="text-muted-foreground">
+                                    Page {pagination.pageIndex + 1} of {pageCount}
+                                </span>
                             </div>
-                            <div className="flex flex-wrap items-center gap-3">
+                            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-end">
                                 <div className="flex items-center gap-2">
                                     <span className="text-muted-foreground text-sm">
                                         Rows per page
@@ -227,7 +243,7 @@ export function SubjectClassificationsView() {
                                         </SelectContent>
                                     </Select>
                                 </div>
-                                <Pagination className="justify-start">
+                                <Pagination className="justify-start sm:justify-end">
                                     <PaginationContent>
                                         <PaginationItem>
                                             <PaginationPrevious
