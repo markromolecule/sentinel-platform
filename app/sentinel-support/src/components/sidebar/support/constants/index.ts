@@ -2,6 +2,7 @@ import {
     LucideIcon,
     Activity,
     BarChart3,
+    ClipboardList,
     FileText,
     LayoutDashboard,
     School2,
@@ -112,6 +113,11 @@ export const ANALYTICS_ITEMS: SidebarItem[] = [
         title: 'System Logs',
         url: '/logs',
         icon: FileText,
+    },
+    {
+        title: 'Feedback',
+        url: '/feedbacks',
+        icon: ClipboardList,
     },
 ];
 

@@ -972,6 +972,24 @@ export const PERMISSIONS: Record<string, Permission> = {
         description: 'Remove announcements from the institution.',
         category: 'COMMUNICATION',
     },
+    CREATE_FEEDBACK: {
+        id: 'feedback:create',
+        moduleKey: 'feedbacks',
+        actionKey: 'create',
+        scope: 'self',
+        name: 'Create Feedback',
+        description: 'Submit post-exam feedback for a completed attempt.',
+        category: 'COMMUNICATION',
+    },
+    VIEW_FEEDBACK: {
+        id: 'feedback:view',
+        moduleKey: 'feedbacks',
+        actionKey: 'view',
+        scope: 'institution',
+        name: 'View Feedback',
+        description: 'Review submitted student exam feedback records.',
+        category: 'COMMUNICATION',
+    },
 
     VIEW_GUIDES: {
         id: 'guides:view',
@@ -1159,6 +1177,7 @@ export const SYSTEM_ROLE_BLUEPRINTS: Record<string, SystemRoleBlueprint> = {
             'announcement:create',
             'announcement:update',
             'announcement:delete',
+            'feedback:view',
             'reports:view',
             'reports:export',
             'subjects:update',
@@ -1250,6 +1269,7 @@ export const SYSTEM_ROLE_BLUEPRINTS: Record<string, SystemRoleBlueprint> = {
             'announcement:create',
             'announcement:update',
             'announcement:delete',
+            'feedback:view',
             'incidents:view',
             'incidents:review',
             'incidents:export',
@@ -1415,6 +1435,7 @@ export const SYSTEM_ROLE_BLUEPRINTS: Record<string, SystemRoleBlueprint> = {
             'guides:view',
             'calendar:view',
             'announcement:view',
+            'feedback:create',
         ],
     },
     disciplinary_officer: {

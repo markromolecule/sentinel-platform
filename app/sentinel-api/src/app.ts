@@ -57,6 +57,7 @@ import announcementsRouter from './modules/general/announcements/announcement.ro
 import analyticsRouter from './modules/general/analytics/analytics.routes';
 import messagesRouter from './modules/general/messages/messages.routes';
 import logsRouter from './modules/general/logs/logs.routes';
+import feedbackRouter from './modules/general/feedbacks/feedback.routes';
 import instructorSubjectRequestsRouter from './modules/core/instructor-subject-requests/instructor-subject-requests.routes';
 import passageImagesRouter from './modules/infrastructure/passage-images/passage-images.routes';
 
@@ -188,6 +189,7 @@ app.route('/calendar', calendarRouter);
 app.route('/analytics', analyticsRouter);
 app.route('/messages', messagesRouter);
 app.route('/logs', logsRouter);
+app.route('/feedbacks', feedbackRouter);
 app.route('/instructor-subject-requests', instructorSubjectRequestsRouter);
 
 // 6. OpenAPI Specs & Documentation

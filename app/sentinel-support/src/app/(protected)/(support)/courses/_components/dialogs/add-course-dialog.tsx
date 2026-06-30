@@ -1,7 +1,7 @@
 'use client';
 
 import { useDepartmentsQuery, useActivePermissions } from '@sentinel/hooks';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Plus } from 'lucide-react';
 import { Button } from '@sentinel/ui';
 import {
@@ -22,6 +22,8 @@ interface AddCourseDialogProps {
     institutionId: string;
 }
 
+const UNASSIGNED_DEPARTMENT_VALUE = '__unassigned__';
+
 export function AddCourseDialog({ institutionId }: AddCourseDialogProps) {
     const { hasPermission } = useActivePermissions();
     const [open, setOpen] = useState(false);
@@ -31,6 +33,10 @@ export function AddCourseDialog({ institutionId }: AddCourseDialogProps) {
         institutionId: institutionId || undefined,
     });
     const { form, onSubmit, isPending } = useAddCourseForm(institutionId, () => setOpen(false));
+    const scopedDepartments = useMemo(
+        () => departments.filter((department) => department.institutionId === institutionId),
+        [departments, institutionId],
+    );
 
     if (!hasPermission('courses:create')) {
         return null;
@@ -89,8 +95,14 @@ export function AddCourseDialog({ institutionId }: AddCourseDialogProps) {
                                 <FormItem>
                                     <FormLabel>Department</FormLabel>
                                     <Select
-                                        onValueChange={field.onChange}
-                                        value={field.value || ''}
+                                        onValueChange={(value) =>
+                                            field.onChange(
+                                                value === UNASSIGNED_DEPARTMENT_VALUE
+                                                    ? null
+                                                    : value,
+                                            )
+                                        }
+                                        value={field.value ?? UNASSIGNED_DEPARTMENT_VALUE}
                                     >
                                         <FormControl>
                                             <SelectTrigger>
@@ -98,13 +110,15 @@ export function AddCourseDialog({ institutionId }: AddCourseDialogProps) {
                                             </SelectTrigger>
                                         </FormControl>
                                         <SelectContent>
-                                            <SelectItem value="">Unassigned</SelectItem>
+                                            <SelectItem value={UNASSIGNED_DEPARTMENT_VALUE}>
+                                                Unassigned
+                                            </SelectItem>
                                             {isLoadingDepartments ? (
                                                 <SelectItem value="loading" disabled>
                                                     Loading departments...
                                                 </SelectItem>
                                             ) : (
-                                                departments.map((department) => (
+                                                scopedDepartments.map((department) => (
                                                     <SelectItem
                                                         key={department.id}
                                                         value={department.id}

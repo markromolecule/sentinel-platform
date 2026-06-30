@@ -37,6 +37,12 @@ describe('syncSystemPermissions', () => {
         expect(SYSTEM_ROLE_BLUEPRINTS.support.permissionKeys).toContain('ai:generate_questions');
     });
 
+    it('should define feedback:view and grant it to the support blueprint', () => {
+        const activeKeys = ALL_PERMISSIONS.map((p) => p.id);
+        expect(activeKeys).toContain('feedback:view');
+        expect(SYSTEM_ROLE_BLUEPRINTS.support.permissionKeys).toContain('feedback:view');
+    });
+
     it('should define classrooms:archive permission and assign it to key roles', () => {
         const activeKeys = ALL_PERMISSIONS.map((p) => p.id);
         expect(activeKeys).toContain('classrooms:archive');

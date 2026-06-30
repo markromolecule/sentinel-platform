@@ -1,6 +1,9 @@
-import { render, screen } from '@testing-library/react';
-import { describe, expect, it, vi } from 'vitest';
+import { cleanup, render, screen } from '@testing-library/react';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import SubjectClassificationPage from './page';
+
+const handleEditOpen = vi.fn();
+const subjectClassificationsListSpy = vi.fn();
 
 vi.mock('@sentinel/hooks', () => ({
     useServerPagination: () => ({
@@ -17,6 +20,16 @@ vi.mock('@sentinel/hooks', () => ({
                 subjectCount: 2,
                 subjects: [{ id: 's1', code: 'CS101' }],
                 inheritanceStatus: 'LOCAL',
+                isInherited: false,
+            },
+            {
+                id: 'class-2',
+                name: 'Inherited Subjects',
+                type: 'GENERAL',
+                subjectCount: 1,
+                subjects: [{ id: 's2', code: 'GE101' }],
+                inheritanceStatus: 'INHERITED',
+                isInherited: true,
             },
         ],
         isLoading: false,
@@ -57,17 +70,20 @@ vi.mock('../_hooks/use-subject-classifications-management', () => ({
         selectedOfferingClassification: null,
         setSelectedOfferingClassification: vi.fn(),
         handleCreateOpen: vi.fn(),
-        handleEditOpen: vi.fn(),
+        handleEditOpen,
         handleOfferOpen: vi.fn(),
     }),
 }));
 
 vi.mock('../_components', () => ({
-    SubjectClassificationsList: ({ classifications }: any) => (
-        <div data-testid="classifications-list">
-            Classifications: {classifications.map((c: any) => c.name).join(', ')}
-        </div>
-    ),
+    SubjectClassificationsList: (props: any) => {
+        subjectClassificationsListSpy(props);
+        return (
+            <div data-testid="classifications-list">
+                Classifications: {props.classifications.map((c: any) => c.name).join(', ')}
+            </div>
+        );
+    },
     SubjectClassificationDialog: () => <div data-testid="classification-dialog" />,
     OfferClassificationSubjectsDialog: () => <div data-testid="offer-dialog" />,
 }));
@@ -85,11 +101,52 @@ vi.mock('@sentinel/ui', () => ({
 }));
 
 describe('SubjectClassificationPage Permission Gating Test', () => {
+    beforeEach(() => {
+        handleEditOpen.mockClear();
+        subjectClassificationsListSpy.mockClear();
+    });
+
+    afterEach(() => {
+        cleanup();
+    });
+
+    it('does not forward inherited classifications into edit flow from the page handler', () => {
+        render(<SubjectClassificationPage />);
+
+        const props = subjectClassificationsListSpy.mock.calls.at(-1)?.[0];
+        expect(props).toBeTruthy();
+
+        props.onEdit({
+            id: 'class-2',
+            name: 'Inherited Subjects',
+            type: 'GENERAL',
+            subjectCount: 1,
+            subjects: [{ id: 's2', code: 'GE101' }],
+            inheritanceStatus: 'INHERITED',
+            isInherited: true,
+        });
+
+        props.onEdit({
+            id: 'class-1',
+            name: 'Core Subjects',
+            type: 'CORE',
+            subjectCount: 2,
+            subjects: [{ id: 's1', code: 'CS101' }],
+            inheritanceStatus: 'LOCAL',
+            isInherited: false,
+        });
+
+        expect(handleEditOpen).toHaveBeenCalledTimes(1);
+        expect(handleEditOpen).toHaveBeenCalledWith(
+            expect.objectContaining({ id: 'class-1' }),
+        );
+    });
+
     it('renders page header and classifications list with create group action', () => {
         render(<SubjectClassificationPage />);
-        expect(screen.getByText('Subject Classifications')).toBeTruthy();
+        expect(screen.getAllByText('Subject Classifications').length).toBeGreaterThan(0);
         expect(screen.getByText('Create Group')).toBeTruthy();
         expect(screen.getByTestId('classifications-list')).toBeTruthy();
-        expect(screen.getByText('Classifications: Core Subjects')).toBeTruthy();
+        expect(screen.getByText('Classifications: Core Subjects, Inherited Subjects')).toBeTruthy();
     });
 });

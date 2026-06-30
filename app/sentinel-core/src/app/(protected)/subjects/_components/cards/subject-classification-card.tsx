@@ -20,10 +20,7 @@ import {
 } from '@sentinel/ui';
 import { useDeleteSubjectClassificationMutation } from '@sentinel/hooks';
 import { Edit2, PackagePlus, Trash2 } from 'lucide-react';
-import {
-    InheritanceStatusBadge,
-    isParentOwnedRecord,
-} from '@/components/common/inheritance-status-badge';
+import { isParentOwnedRecord } from '@/components/common/inheritance-status-badge';
 
 interface SubjectClassificationCardProps {
     classification: SubjectClassification;
@@ -45,11 +42,15 @@ export function SubjectClassificationCard({
         onSuccess: () => setDeleteOpen(false),
     });
     const isInheritedClassification = isParentOwnedRecord(classification);
+    const inheritanceLabel = isInheritedClassification ? 'Inherited' : 'Local';
 
     const isGeneral = classification.type === 'GENERAL';
     const typeBadgeClassName = isGeneral
         ? 'border-indigo-200/60 bg-indigo-50/50 text-indigo-700 dark:bg-indigo-950/30 dark:text-indigo-400 dark:border-indigo-900/40'
         : 'border-violet-200/60 bg-violet-50/50 text-violet-700 dark:bg-violet-950/30 dark:text-violet-400 dark:border-violet-900/40';
+    const inheritanceBadgeClassName = isInheritedClassification
+        ? 'border-slate-200/60 bg-slate-100/70 text-slate-700 dark:border-slate-800 dark:bg-slate-900/40 dark:text-slate-300'
+        : 'border-emerald-200/60 bg-emerald-50/70 text-emerald-700 dark:border-emerald-900/40 dark:bg-emerald-950/30 dark:text-emerald-400';
 
     const previewSubjects = classification.subjects.slice(0, 3);
     const remainingSubjectCount = Math.max(classification.subjectCount - previewSubjects.length, 0);
@@ -83,7 +84,12 @@ export function SubjectClassificationCard({
                                 >
                                     {isGeneral ? 'General' : 'Core'}
                                 </Badge>
-                                <InheritanceStatusBadge record={classification} />
+                                <Badge
+                                    variant="outline"
+                                    className={`h-5 px-2 text-[9px] font-semibold tracking-wider uppercase ${inheritanceBadgeClassName}`}
+                                >
+                                    {inheritanceLabel}
+                                </Badge>
                             </div>
 
                             <hr className="border-border/30 my-3" />

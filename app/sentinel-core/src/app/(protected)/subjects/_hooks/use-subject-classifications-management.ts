@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { type SubjectClassification } from '@sentinel/shared/types';
+import { isParentOwnedRecord } from '@/components/common/inheritance-status-badge';
 
 export function useSubjectClassificationsManagement() {
     const [searchTerm, setSearchTerm] = useState('');
@@ -17,6 +18,10 @@ export function useSubjectClassificationsManagement() {
     }
 
     function handleEditOpen(classification: SubjectClassification) {
+        if (isParentOwnedRecord(classification)) {
+            return;
+        }
+
         setSelectedClassification(classification);
         setDialogOpen(true);
     }

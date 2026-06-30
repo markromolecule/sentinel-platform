@@ -5,6 +5,7 @@ import { type SubjectClassification } from '@sentinel/shared/types';
 import { SubjectClassificationCard } from '../cards/subject-classification-card';
 import { SubjectClassificationsEmptyState } from './subject-classifications-empty-state';
 import { type PaginationState } from '@tanstack/react-table';
+import { isParentOwnedRecord } from '@/components/common/inheritance-status-badge';
 
 interface SubjectClassificationsListProps {
     classifications: SubjectClassification[];
@@ -73,10 +74,12 @@ export function SubjectClassificationsList({
                         <SubjectClassificationCard
                             key={classification.id}
                             classification={classification}
-                            onEdit={onEdit}
+                            onEdit={
+                                onEdit && !isParentOwnedRecord(classification) ? onEdit : undefined
+                            }
                             onOffer={onOffer}
                             canOffer={canOffer}
-                            canDelete={canDelete}
+                            canDelete={canDelete && !isParentOwnedRecord(classification)}
                         />
                     ))}
                 </div>

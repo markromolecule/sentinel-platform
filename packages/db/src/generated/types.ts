@@ -564,6 +564,17 @@ export type exam_configurations = {
     lobby_admission_mode: Generated<exam_lobby_admission_mode | null>;
     release_score_mode: Generated<release_score_mode | null>;
 };
+export type exam_feedbacks = {
+    feedback_id: Generated<string>;
+    attempt_id: string;
+    exam_id: string | null;
+    student_id: string | null;
+    institution_id: string | null;
+    rating: number;
+    experience: string | null;
+    created_at: Generated<Timestamp | null>;
+    updated_at: Generated<Timestamp | null>;
+};
 export type exam_lobby_admissions = {
     admission_id: Generated<string>;
     exam_id: string;
@@ -1339,6 +1350,7 @@ export type DB = {
     exam_assigned_sections: exam_assigned_sections;
     exam_attempts: exam_attempts;
     exam_configurations: exam_configurations;
+    exam_feedbacks: exam_feedbacks;
     exam_lobby_admissions: exam_lobby_admissions;
     exam_questions: exam_questions;
     exam_section_assignments: exam_section_assignments;

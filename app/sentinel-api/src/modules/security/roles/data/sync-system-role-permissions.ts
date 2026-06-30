@@ -13,7 +13,7 @@ export async function syncSystemRolePermissions(dbClient: DbClient) {
         return;
     }
 
-    const [roles, permissions, rolesWithPermissions] = await Promise.all([
+    const [roles, permissions, existingMappings] = await Promise.all([
         dbClient
             .selectFrom('roles')
             .select(['role_id', 'role_name'])
@@ -26,8 +26,7 @@ export async function syncSystemRolePermissions(dbClient: DbClient) {
             .execute(),
         dbClient
             .selectFrom('rbac_role_permissions')
-            .select('role_id')
-            .distinct()
+            .select(['role_id', 'permission_id'])
             .execute(),
     ]);
 
@@ -35,7 +34,9 @@ export async function syncSystemRolePermissions(dbClient: DbClient) {
     const permissionIdByKey = new Map(
         permissions.map((permission) => [permission.permission_key, permission.permission_id]),
     );
-    const roleIdsWithPermissions = new Set(rolesWithPermissions.map((r) => r.role_id));
+    const existingMappingKeys = new Set(
+        existingMappings.map((mapping) => `${mapping.role_id}:${mapping.permission_id}`),
+    );
 
     const mappings = Object.entries(SYSTEM_ROLE_BLUEPRINTS).flatMap(([roleName, blueprint]) => {
         const roleId = roleIdByName.get(roleName);
@@ -44,15 +45,10 @@ export async function syncSystemRolePermissions(dbClient: DbClient) {
             return [];
         }
 
-        // Only seed permissions if the role currently has no mappings assigned.
-        // This prevents overwriting user deletions/edits to system role permissions.
-        if (roleIdsWithPermissions.has(roleId)) {
-            return [];
-        }
-
         return blueprint.permissionKeys
             .map((permissionKey) => permissionIdByKey.get(permissionKey))
             .filter((permissionId): permissionId is string => Boolean(permissionId))
+            .filter((permissionId) => !existingMappingKeys.has(`${roleId}:${permissionId}`))
             .map((permissionId) => ({
                 role_id: roleId,
                 permission_id: permissionId,

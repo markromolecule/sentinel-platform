@@ -58,6 +58,7 @@ export const MODULE_SORT_ORDER = [
     'examinations',
     'results',
     'proctoring',
+    'feedback',
     'incidents',
     'reports',
     'guides',
@@ -108,6 +109,14 @@ export const SYSTEM_AREAS = [
         title: 'Operational Modules',
         description: 'Monitoring, reporting, guidance, and platform visibility modules.',
         sourcePath: 'cross-module platform services',
-        moduleKeys: ['proctoring', 'incidents', 'reports', 'guides', 'announcements', 'dashboard'],
+        moduleKeys: [
+            'proctoring',
+            'feedback',
+            'incidents',
+            'reports',
+            'guides',
+            'announcements',
+            'dashboard',
+        ],
     },
 ];

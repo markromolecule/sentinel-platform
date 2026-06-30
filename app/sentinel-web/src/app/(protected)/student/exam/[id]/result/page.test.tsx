@@ -115,7 +115,7 @@ describe('StudentExamResultPage', () => {
         expect(screen.getByText('Back to Attempt')).toBeTruthy();
     });
 
-    it('submits the stored preview and redirects to the history detail page', async () => {
+    it('submits the stored preview and redirects to the feedback page', async () => {
         mockReadStoredExamTurnInPreview.mockReturnValue({
             examId: '11111111-1111-1111-1111-111111111111',
             sessionId: '22222222-2222-2222-2222-222222222222',
@@ -168,7 +168,7 @@ describe('StudentExamResultPage', () => {
         );
         expect(mockToastSuccess).toHaveBeenCalledWith('Exam turned in successfully.');
         expect(mockRouterReplace).toHaveBeenCalledWith(
-            '/student/history/details?attemptId=33333333-3333-3333-3333-333333333333',
+            '/student/exam/11111111-1111-1111-1111-111111111111/feedback?attemptId=33333333-3333-3333-3333-333333333333',
         );
     });
 });
