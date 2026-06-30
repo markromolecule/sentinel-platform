@@ -10,8 +10,24 @@ jobs:
     flush:
         runs-on: ubuntu-latest
         steps:
+            - name: Validate API_URL secret
+              run: |
+                  if [ -z "${{ secrets.API_URL }}" ]; then
+                    echo "::error::API_URL secret is not set. Please add it in GitHub → Settings → Secrets."
+                    exit 1
+                  fi
+                  # Warn if API_URL has a trailing slash (causes double-slash 404s)
+                  if [[ "${{ secrets.API_URL }}" == */ ]]; then
+                    echo "::warning::API_URL has a trailing slash. This may cause 404s. Remove it from the secret."
+                  fi
+                  echo "Targeting: ${{ secrets.API_URL }}/telemetry/internal/flush"
+
             - name: Ping Telemetry Flush Endpoint
               run: |
                   curl -X GET "${{ secrets.API_URL }}/telemetry/internal/flush" \
                   -H "Authorization: Bearer ${{ secrets.TELEMETRY_CRON_SECRET }}" \
-                  -f # Fail the job if the request returns an error code
+                  --max-time 30 \
+                  --retry 2 \
+                  --retry-delay 5 \
+                  -f \
+                  -v 2>&1 | grep -E "^[<>*]|HTTP|curl:"
