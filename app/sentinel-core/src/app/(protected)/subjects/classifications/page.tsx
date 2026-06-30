@@ -18,6 +18,8 @@ import { useSubjectClassificationsManagement } from '../_hooks/use-subject-class
 import { useAcademicScope } from '@/hooks/use-academic-scope';
 import { SubjectPageShell } from '../_components/layout';
 import { useState } from 'react';
+import { isParentOwnedRecord } from '@/components/common/inheritance-status-badge';
+import { SubjectClassification } from '@sentinel/shared/types';
 
 /**
  * SubjectClassificationPage renders the subject classifications page for sentinel-core,
@@ -68,6 +70,15 @@ export default function SubjectClassificationPage() {
     const canUpdateClassification = hasPermission('subjects:update');
     const canDeleteClassification = hasPermission('subjects:delete');
     const canOfferSubject = hasPermission('subject_offerings:offer');
+    const handleClassificationEdit = canUpdateClassification
+        ? (classification: SubjectClassification) => {
+              if (isParentOwnedRecord(classification)) {
+                  return;
+              }
+
+              handleEditOpen(classification);
+          }
+        : undefined;
 
     const actions = (
         <div className="flex items-center gap-2">
@@ -98,7 +109,7 @@ export default function SubjectClassificationPage() {
                         isLoading={isLoading}
                         searchTerm={searchTerm}
                         onSearchChange={setSearchTerm}
-                        onEdit={canUpdateClassification ? handleEditOpen : undefined}
+                        onEdit={handleClassificationEdit}
                         onOffer={canOfferSubject ? handleOfferOpen : undefined}
                         canCreate={canCreateClassification}
                         onCreate={handleCreateOpen}

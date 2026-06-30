@@ -1,4 +1,6 @@
 export function mapClassificationRecord(record: any) {
+    const inheritanceStatus = record.inheritanceStatus ?? record.inheritance_status ?? 'LOCAL';
+
     return {
         ...record,
         created_by: record.creator_first_name
@@ -8,17 +10,21 @@ export function mapClassificationRecord(record: any) {
             ? `${record.updater_first_name} ${record.updater_last_name}`
             : record.updated_by,
         source_record_id: record.sourceRecordId ?? record.source_record_id ?? null,
-        inheritance_status: record.inheritanceStatus ?? record.inheritance_status ?? 'LOCAL',
+        inheritance_status: inheritanceStatus,
         origin_institution_id: record.originInstitutionId ?? record.institution_id ?? null,
         effective_institution_id: record.effectiveInstitutionId ?? record.institution_id ?? null,
-        is_local: record.isLocal ?? record.inheritanceStatus === 'LOCAL',
-        is_inherited: record.isInherited ?? record.inheritanceStatus === 'INHERITED',
-        is_overridden: record.isOverridden ?? record.inheritanceStatus === 'OVERRIDDEN',
-        is_hidden: record.isHidden ?? record.inheritanceStatus === 'HIDDEN',
-        isLocal: record.isLocal ?? record.inheritanceStatus === 'LOCAL',
-        isInherited: record.isInherited ?? record.inheritanceStatus === 'INHERITED',
-        isOverridden: record.isOverridden ?? record.inheritanceStatus === 'OVERRIDDEN',
-        isHidden: record.isHidden ?? record.inheritanceStatus === 'HIDDEN',
+        is_local: record.isLocal ?? record.is_local ?? inheritanceStatus === 'LOCAL',
+        is_inherited:
+            record.isInherited ?? record.is_inherited ?? inheritanceStatus === 'INHERITED',
+        is_overridden:
+            record.isOverridden ?? record.is_overridden ?? inheritanceStatus === 'OVERRIDDEN',
+        is_hidden: record.isHidden ?? record.is_hidden ?? inheritanceStatus === 'HIDDEN',
+        isLocal: record.isLocal ?? record.is_local ?? inheritanceStatus === 'LOCAL',
+        isInherited:
+            record.isInherited ?? record.is_inherited ?? inheritanceStatus === 'INHERITED',
+        isOverridden:
+            record.isOverridden ?? record.is_overridden ?? inheritanceStatus === 'OVERRIDDEN',
+        isHidden: record.isHidden ?? record.is_hidden ?? inheritanceStatus === 'HIDDEN',
         subjects: (() => {
             if (Array.isArray(record.subjects)) return record.subjects;
             if (typeof record.subjects === 'string') {

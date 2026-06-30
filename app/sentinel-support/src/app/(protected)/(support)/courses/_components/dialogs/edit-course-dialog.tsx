@@ -2,6 +2,7 @@
 
 import { useDepartmentsQuery } from '@sentinel/hooks';
 import { Button } from '@sentinel/ui';
+import { useMemo } from 'react';
 import {
     Dialog,
     DialogContent,
@@ -23,6 +24,8 @@ interface EditCourseDialogProps {
     institutionId: string;
 }
 
+const UNASSIGNED_DEPARTMENT_VALUE = '__unassigned__';
+
 export function EditCourseDialog({
     open,
     onOpenChange,
@@ -34,6 +37,10 @@ export function EditCourseDialog({
     });
     const { form, onSubmit, isPending } = useEditCourseForm(course, institutionId, () =>
         onOpenChange(false),
+    );
+    const scopedDepartments = useMemo(
+        () => departments.filter((department) => department.institutionId === institutionId),
+        [departments, institutionId],
     );
 
     const isInherited = course.isInherited;
@@ -87,8 +94,14 @@ export function EditCourseDialog({
                                 <FormItem>
                                     <FormLabel>Department</FormLabel>
                                     <Select
-                                        onValueChange={field.onChange}
-                                        value={field.value || ''}
+                                        onValueChange={(value) =>
+                                            field.onChange(
+                                                value === UNASSIGNED_DEPARTMENT_VALUE
+                                                    ? null
+                                                    : value,
+                                            )
+                                        }
+                                        value={field.value ?? UNASSIGNED_DEPARTMENT_VALUE}
                                     >
                                         <FormControl>
                                             <SelectTrigger>
@@ -96,13 +109,15 @@ export function EditCourseDialog({
                                             </SelectTrigger>
                                         </FormControl>
                                         <SelectContent>
-                                            <SelectItem value="">Unassigned</SelectItem>
+                                            <SelectItem value={UNASSIGNED_DEPARTMENT_VALUE}>
+                                                Unassigned
+                                            </SelectItem>
                                             {isLoadingDepartments ? (
                                                 <SelectItem value="loading" disabled>
                                                     Loading departments...
                                                 </SelectItem>
                                             ) : (
-                                                departments.map((dept) => (
+                                                scopedDepartments.map((dept) => (
                                                     <SelectItem key={dept.id} value={dept.id}>
                                                         {dept.name}
                                                     </SelectItem>

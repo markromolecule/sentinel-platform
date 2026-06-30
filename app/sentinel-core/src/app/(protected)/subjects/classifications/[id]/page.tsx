@@ -18,7 +18,7 @@ import { OfferClassificationSubjectsDialog } from '../../_components/dialogs/off
 import { SubjectClassificationSubject } from '@sentinel/shared/types';
 import { type ColumnDef } from '@tanstack/react-table';
 import {
-    InheritanceStatusBadge,
+    getInheritanceStatusLabel,
     isParentOwnedRecord,
 } from '@/components/common/inheritance-status-badge';
 
@@ -45,6 +45,7 @@ export default function SubjectClassificationDetailsPage({ params }: PageProps) 
 
     const { data: classification, isLoading, isError } = useSubjectClassificationQuery(id);
     const isInheritedClassification = classification ? isParentOwnedRecord(classification) : false;
+    const inheritanceLabel = classification ? getInheritanceStatusLabel(classification) : 'Local';
 
     const canUpdateClassification = hasPermission('subjects:update');
     const canOfferSubject = hasPermission('subject_offerings:offer');
@@ -53,6 +54,16 @@ export default function SubjectClassificationDetailsPage({ params }: PageProps) 
         classification?.type === 'GENERAL'
             ? 'border-emerald-200 bg-emerald-50 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400'
             : 'border-amber-200 bg-amber-50 text-amber-700 dark:bg-amber-500/10 dark:text-amber-400';
+    const inheritanceToneClassName = isInheritedClassification
+        ? 'border-slate-200 bg-slate-100 text-slate-700 dark:border-slate-800 dark:bg-slate-900/40 dark:text-slate-300'
+        : 'border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-900/40 dark:bg-emerald-950/30 dark:text-emerald-400';
+    const handleManageGroup = () => {
+        if (isInheritedClassification) {
+            return;
+        }
+
+        setDialogOpen(true);
+    };
 
     if (isError || (!isLoading && !classification)) {
         return <ErrorState />;
@@ -92,7 +103,12 @@ export default function SubjectClassificationDetailsPage({ params }: PageProps) 
                                     ? 'General Subject'
                                     : 'Core Subject'}
                             </Badge>
-                            <InheritanceStatusBadge record={classification} />
+                            <Badge
+                                variant="outline"
+                                className={`${inheritanceToneClassName} px-3 py-1 text-xs font-medium`}
+                            >
+                                {inheritanceLabel}
+                            </Badge>
                         </div>
                     )}
                     {classification && canOfferSubject && (
@@ -108,7 +124,7 @@ export default function SubjectClassificationDetailsPage({ params }: PageProps) 
                     )}
                     {canUpdateClassification && (
                         <Button
-                            onClick={() => setDialogOpen(true)}
+                            onClick={handleManageGroup}
                             className="bg-[#323d8f] shadow-sm hover:bg-[#323d8f]/90"
                             disabled={isLoading || isInheritedClassification}
                             title={
@@ -140,14 +156,16 @@ export default function SubjectClassificationDetailsPage({ params }: PageProps) 
                             title="No subjects assigned"
                             description="This classification group doesn't have any subjects assigned yet. You can manage assignments using the button above."
                             action={
-                                <Button
-                                    variant="outline"
-                                    size="sm"
-                                    onClick={() => setDialogOpen(true)}
-                                >
-                                    <Edit2 className="mr-2 h-4 w-4" />
-                                    Assign subjects now
-                                </Button>
+                                canUpdateClassification && !isInheritedClassification ? (
+                                    <Button
+                                        variant="outline"
+                                        size="sm"
+                                        onClick={handleManageGroup}
+                                    >
+                                        <Edit2 className="mr-2 h-4 w-4" />
+                                        Assign subjects now
+                                    </Button>
+                                ) : undefined
                             }
                         />
                     }

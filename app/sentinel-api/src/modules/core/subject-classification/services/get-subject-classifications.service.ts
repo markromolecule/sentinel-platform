@@ -2,14 +2,9 @@ import { type DbClient } from '@sentinel/db';
 import { getSubjectClassificationsData } from '../data/get-subject-classifications';
 import { getSubjectClassificationByIdData } from '../data/get-subject-classification-by-id';
 import { mapClassificationRecord } from '../helper/subject-classification-mapper';
-import {
-    supportsSubjectClassificationTables,
-} from '../../subjects/helper/subject-offering-compat';
+import { supportsSubjectClassificationTables } from '../../subjects/helper/subject-offering-compat';
 import { loadEffectiveRows } from '../../inheritance/effective-row-loader';
-import {
-    decorateWithOriginMetadata,
-    resolveParentScope,
-} from '../../inheritance/inheritance-resolver.helper';
+import { resolveParentScope } from '../../inheritance/inheritance-resolver.helper';
 import { isMissingSubjectOfferingColumnError } from '../../subjects/helper/subject-offering-compat';
 import { paginateItems } from '../../../../lib/pagination';
 
@@ -17,6 +12,28 @@ import { paginateItems } from '../../../../lib/pagination';
  * Service to handle retrieval and query of subject classifications.
  */
 export class GetSubjectClassificationsService {
+    private static async loadEffectiveClassificationRows(
+        dbClient: DbClient,
+        args: {
+            institutionId?: string;
+            search?: string;
+            includeClassificationFields: boolean;
+        },
+    ) {
+        return loadEffectiveRows<any>({
+            institutionId: args.institutionId,
+            dbClient,
+            idKey: 'subject_classification_id',
+            loadRows: (scopeInstitutionId) =>
+                getSubjectClassificationsData({
+                    dbClient,
+                    institutionId: scopeInstitutionId,
+                    search: args.search,
+                    includeClassificationFields: args.includeClassificationFields,
+                }),
+        });
+    }
+
     /**
      * Resolves the list of institution IDs that are visible under a parent scope.
      */
@@ -72,8 +89,9 @@ export class GetSubjectClassificationsService {
             if (parentVisibleInstitutionIds) {
                 const branchScopedRecords = await Promise.all(
                     parentVisibleInstitutionIds.map((scopeInstitutionId) =>
-                        getSubjectClassificationsData({
-                            dbClient,
+                        // Parent users need each visible institution's effective view so inherited
+                        // rows remain visible with accurate local/inherited status.
+                        GetSubjectClassificationsService.loadEffectiveClassificationRows(dbClient, {
                             institutionId: scopeInstitutionId,
                             search,
                             includeClassificationFields: supportsTables,
@@ -82,12 +100,7 @@ export class GetSubjectClassificationsService {
                 );
 
                 const records = branchScopedRecords
-                    .flatMap((records) =>
-                        decorateWithOriginMetadata(records, {
-                            idKey: 'subject_classification_id',
-                            effectiveInstitutionId: institutionId ?? null,
-                        }),
-                    )
+                    .flat()
                     .sort((left: any, right: any) =>
                         String(left.name ?? '').localeCompare(String(right.name ?? '')),
                     )
@@ -96,18 +109,12 @@ export class GetSubjectClassificationsService {
                 return paginateItems(records, page, pageSize);
             }
 
-            const records = await loadEffectiveRows<any>({
-                institutionId,
-                dbClient,
-                idKey: 'subject_classification_id',
-                loadRows: (scopeInstitutionId) =>
-                    getSubjectClassificationsData({
-                        dbClient,
-                        institutionId: scopeInstitutionId,
-                        search,
-                        includeClassificationFields: supportsTables,
-                    }),
-            });
+            const records =
+                await GetSubjectClassificationsService.loadEffectiveClassificationRows(dbClient, {
+                    institutionId,
+                    search,
+                    includeClassificationFields: supportsTables,
+                });
 
             return paginateItems(records.map(mapClassificationRecord), page, pageSize);
         } catch (error) {
@@ -133,43 +140,39 @@ export class GetSubjectClassificationsService {
                 dbClient,
                 institutionId,
             );
+        const supportsTables = await supportsSubjectClassificationTables(dbClient);
 
         if (parentVisibleInstitutionIds) {
             for (const scopeInstitutionId of parentVisibleInstitutionIds) {
-                const record = await getSubjectClassificationByIdData({
-                    dbClient,
-                    id,
-                    institutionId: scopeInstitutionId,
-                }).catch(() => null);
+                const effectiveRecords =
+                    await GetSubjectClassificationsService.loadEffectiveClassificationRows(
+                        dbClient,
+                        {
+                            institutionId: scopeInstitutionId,
+                            includeClassificationFields: supportsTables,
+                        },
+                    );
+                const effectiveRecord = effectiveRecords.find(
+                    (record: any) =>
+                        record.subject_classification_id === id || record.sourceRecordId === id,
+                );
 
-                if (!record) {
+                if (!effectiveRecord) {
                     continue;
                 }
 
-                return mapClassificationRecord(
-                    decorateWithOriginMetadata([record], {
-                        idKey: 'subject_classification_id',
-                        effectiveInstitutionId: institutionId ?? null,
-                    })[0],
-                );
+                return mapClassificationRecord(effectiveRecord);
             }
 
             return null;
         }
 
         if (institutionId) {
-            const supportsTables = await supportsSubjectClassificationTables(dbClient);
-            const effectiveRecords = await loadEffectiveRows<any>({
-                institutionId,
-                dbClient,
-                idKey: 'subject_classification_id',
-                loadRows: (scopeInstitutionId) =>
-                    getSubjectClassificationsData({
-                        dbClient,
-                        institutionId: scopeInstitutionId,
-                        includeClassificationFields: supportsTables,
-                    }),
-            });
+            const effectiveRecords =
+                await GetSubjectClassificationsService.loadEffectiveClassificationRows(dbClient, {
+                    institutionId,
+                    includeClassificationFields: supportsTables,
+                });
             const effectiveRecord = effectiveRecords.find(
                 (record: any) =>
                     record.subject_classification_id === id || record.sourceRecordId === id,

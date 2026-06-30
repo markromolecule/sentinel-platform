@@ -6,11 +6,6 @@ import {
     EmptyState,
     FacetedFilter,
     PermissionDeniedState,
-    Pagination,
-    PaginationContent,
-    PaginationItem,
-    PaginationNext,
-    PaginationPrevious,
     SearchBar,
     Select,
     SelectContent,
@@ -19,7 +14,7 @@ import {
     SelectValue,
 } from '@sentinel/ui';
 import { SubjectPageShell } from '@/app/(protected)/(support)/subjects/_components/layout';
-import { Plus } from 'lucide-react';
+import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, Plus } from 'lucide-react';
 import { SubjectClassificationDialog } from '../dialogs/subject-classification-dialog';
 import { OfferClassificationSubjectsDialog } from '../dialogs/offer-classification-subjects-dialog';
 import { useSubjectClassificationsPageState } from '../../_hooks/use-subject-classifications-page-state';
@@ -177,13 +172,6 @@ export function SubjectClassificationsView() {
                                 <ClassificationCard
                                     key={classification.id}
                                     classification={classification}
-                                    institutionName={
-                                        institutionNameById.get(
-                                            classification.originInstitutionId ??
-                                                classification.institution_id ??
-                                                '',
-                                        ) ?? null
-                                    }
                                     canOffer={canOffer}
                                     canEdit={canUpdate}
                                     canDelete={canDelete}
@@ -196,9 +184,9 @@ export function SubjectClassificationsView() {
                     )}
 
                     {!isLoading && totalCount > 0 ? (
-                        <div className="flex flex-col gap-4 border-t pt-4 lg:flex-row lg:items-center lg:justify-between">
-                            <div className="flex flex-col gap-1 text-sm sm:flex-row sm:items-center sm:gap-3">
-                                <span className="text-muted-foreground">
+                        <div className="flex flex-col gap-4 border-t px-2 pt-4 lg:flex-row lg:items-center lg:justify-between">
+                            <div className="text-muted-foreground flex-1 text-sm">
+                                <span>
                                     Showing{' '}
                                     {Math.min(
                                         pagination.pageIndex * pagination.pageSize + 1,
@@ -211,16 +199,10 @@ export function SubjectClassificationsView() {
                                     )}{' '}
                                     of {totalCount}
                                 </span>
-                                <span className="text-muted-foreground hidden sm:inline">•</span>
-                                <span className="text-muted-foreground">
-                                    Page {pagination.pageIndex + 1} of {pageCount}
-                                </span>
                             </div>
-                            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-end">
-                                <div className="flex items-center gap-2">
-                                    <span className="text-muted-foreground text-sm">
-                                        Rows per page
-                                    </span>
+                            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-end sm:space-x-6 lg:space-x-8">
+                                <div className="flex items-center space-x-2">
+                                    <span className="text-sm font-medium">Rows per page</span>
                                     <Select
                                         value={`${pagination.pageSize}`}
                                         onValueChange={(value) =>
@@ -231,10 +213,10 @@ export function SubjectClassificationsView() {
                                             }))
                                         }
                                     >
-                                        <SelectTrigger className="h-8 w-[80px]">
+                                        <SelectTrigger className="h-8 w-[70px]">
                                             <SelectValue placeholder={`${pagination.pageSize}`} />
                                         </SelectTrigger>
-                                        <SelectContent>
+                                        <SelectContent side="top">
                                             {[10, 20, 30, 40, 50].map((pageSize) => (
                                                 <SelectItem key={pageSize} value={`${pageSize}`}>
                                                     {pageSize}
@@ -243,54 +225,70 @@ export function SubjectClassificationsView() {
                                         </SelectContent>
                                     </Select>
                                 </div>
-                                <Pagination className="justify-start sm:justify-end">
-                                    <PaginationContent>
-                                        <PaginationItem>
-                                            <PaginationPrevious
-                                                href="#"
-                                                onClick={(event) => {
-                                                    event.preventDefault();
-                                                    setPagination((current) => ({
-                                                        ...current,
-                                                        pageIndex: Math.max(
-                                                            current.pageIndex - 1,
-                                                            0,
-                                                        ),
-                                                    }));
-                                                }}
-                                                aria-disabled={pagination.pageIndex === 0}
-                                                className={
-                                                    pagination.pageIndex === 0
-                                                        ? 'pointer-events-none opacity-50'
-                                                        : ''
-                                                }
-                                            />
-                                        </PaginationItem>
-                                        <PaginationItem>
-                                            <PaginationNext
-                                                href="#"
-                                                onClick={(event) => {
-                                                    event.preventDefault();
-                                                    setPagination((current) => ({
-                                                        ...current,
-                                                        pageIndex: Math.min(
-                                                            current.pageIndex + 1,
-                                                            Math.max(pageCount - 1, 0),
-                                                        ),
-                                                    }));
-                                                }}
-                                                aria-disabled={
-                                                    pagination.pageIndex >= pageCount - 1
-                                                }
-                                                className={
-                                                    pagination.pageIndex >= pageCount - 1
-                                                        ? 'pointer-events-none opacity-50'
-                                                        : ''
-                                                }
-                                            />
-                                        </PaginationItem>
-                                    </PaginationContent>
-                                </Pagination>
+                                <div className="flex w-[100px] items-center justify-center text-sm font-medium">
+                                    Page {pagination.pageIndex + 1} of {pageCount}
+                                </div>
+                                <div className="flex items-center space-x-2">
+                                    <Button
+                                        variant="outline"
+                                        className="hidden h-8 w-8 p-0 lg:flex"
+                                        onClick={() =>
+                                            setPagination((current) => ({
+                                                ...current,
+                                                pageIndex: 0,
+                                            }))
+                                        }
+                                        disabled={pagination.pageIndex === 0}
+                                    >
+                                        <span className="sr-only">Go to first page</span>
+                                        <ChevronsLeft className="h-4 w-4" />
+                                    </Button>
+                                    <Button
+                                        variant="outline"
+                                        className="h-8 w-8 p-0"
+                                        onClick={() =>
+                                            setPagination((current) => ({
+                                                ...current,
+                                                pageIndex: Math.max(current.pageIndex - 1, 0),
+                                            }))
+                                        }
+                                        disabled={pagination.pageIndex === 0}
+                                    >
+                                        <span className="sr-only">Go to previous page</span>
+                                        <ChevronLeft className="h-4 w-4" />
+                                    </Button>
+                                    <Button
+                                        variant="outline"
+                                        className="h-8 w-8 p-0"
+                                        onClick={() =>
+                                            setPagination((current) => ({
+                                                ...current,
+                                                pageIndex: Math.min(
+                                                    current.pageIndex + 1,
+                                                    Math.max(pageCount - 1, 0),
+                                                ),
+                                            }))
+                                        }
+                                        disabled={pagination.pageIndex >= pageCount - 1}
+                                    >
+                                        <span className="sr-only">Go to next page</span>
+                                        <ChevronRight className="h-4 w-4" />
+                                    </Button>
+                                    <Button
+                                        variant="outline"
+                                        className="hidden h-8 w-8 p-0 lg:flex"
+                                        onClick={() =>
+                                            setPagination((current) => ({
+                                                ...current,
+                                                pageIndex: Math.max(pageCount - 1, 0),
+                                            }))
+                                        }
+                                        disabled={pagination.pageIndex >= pageCount - 1}
+                                    >
+                                        <span className="sr-only">Go to last page</span>
+                                        <ChevronsRight className="h-4 w-4" />
+                                    </Button>
+                                </div>
                             </div>
                         </div>
                     ) : null}
