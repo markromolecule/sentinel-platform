@@ -3,7 +3,7 @@ import { describe, expect, it, vi } from 'vitest';
 import SharedOfferedSubjectsPage from './page';
 
 vi.mock('@sentinel/hooks', () => ({
-        useServerPagination: () => ({
+    useServerPagination: () => ({
         pagination: { pageIndex: 0, pageSize: 10 },
         setPagination: vi.fn(),
     }),
@@ -30,6 +30,22 @@ vi.mock('@sentinel/hooks', () => ({
                 departmentIds: [],
                 courseIds: [],
                 sectionIds: [],
+                sections: [
+                    {
+                        id: 'class-group-1',
+                        classGroupId: 'class-group-1',
+                        sectionId: 'section-1',
+                        name: 'CS1A',
+                    },
+                ],
+                instructors: [
+                    {
+                        id: 'instructor-1',
+                        firstName: 'Jamie',
+                        lastName: 'Reyes',
+                        email: 'jamie@example.com',
+                    },
+                ],
             },
         ],
         isLoading: false,
@@ -48,7 +64,18 @@ vi.mock('../_components', () => ({
     OfferSubjectDialog: () => <div data-testid="offer-dialog" />,
     OfferedSubjectsList: ({ offerings }: any) => (
         <div data-testid="offerings-list">
-            Offerings: {offerings.map((o: any) => o.subjectTitle).join(', ')}
+            Offerings: {offerings.map((o: any) => o.subjectTitle).join(', ')} | Classrooms:{' '}
+            {offerings
+                .flatMap((o: any) => o.sections.map((section: any) => section.name))
+                .join(', ')}{' '}
+            | Instructors:{' '}
+            {offerings
+                .flatMap((o: any) =>
+                    o.instructors.map((instructor: any) =>
+                        `${instructor.firstName} ${instructor.lastName}`.trim(),
+                    ),
+                )
+                .join(', ')}
         </div>
     ),
     SubjectOfferingDetailsSheet: () => <div data-testid="details-sheet" />,
@@ -72,6 +99,10 @@ describe('SharedOfferedSubjectsPage Gating Test', () => {
         expect(screen.getByText('Offered Subjects')).toBeTruthy();
         expect(screen.getByText('Offer Subject')).toBeTruthy();
         expect(screen.getByTestId('offerings-list')).toBeTruthy();
-        expect(screen.getByText('Offerings: Computer Science I')).toBeTruthy();
+        expect(
+            screen.getByText(
+                'Offerings: Computer Science I | Classrooms: CS1A | Instructors: Jamie Reyes',
+            ),
+        ).toBeTruthy();
     });
 });

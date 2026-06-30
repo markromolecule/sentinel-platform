@@ -44,12 +44,23 @@ const mockUseAnnouncementsQuery = vi.mocked(useAnnouncementsQuery);
 
 const buildQueryResult = (data: unknown[] = [], isLoading = false) =>
     ({
-        data: { data, meta: { total: data.length, page: 1, limit: 3, totalPages: 1 } },
+        data: { data, meta: { total: data.length, page: 1, limit: 4, totalPages: 1 } },
         isLoading,
         isError: false,
     }) as ReturnType<typeof useAnnouncementsQuery>;
 
 describe('DashboardSidebar', () => {
+    it('requests four announcements for the sidebar feed', () => {
+        mockUseAnnouncementsQuery.mockReturnValue(buildQueryResult([]));
+        render(<DashboardSidebar />);
+        expect(mockUseAnnouncementsQuery).toHaveBeenCalledWith({
+            limit: 4,
+            sortBy: 'published_at',
+            sortOrder: 'desc',
+            status: 'published',
+        });
+    });
+
     it('renders the "Calendar" section heading', () => {
         mockUseAnnouncementsQuery.mockReturnValue(buildQueryResult([]));
         render(<DashboardSidebar />);
@@ -92,6 +103,39 @@ describe('DashboardSidebar', () => {
         render(<DashboardSidebar />);
         expect(screen.getByText('System Maintenance Tonight')).toBeDefined();
         expect(screen.getByText('New Policy Update')).toBeDefined();
+    });
+
+    it('renders three full announcement rows plus a faded preview row', () => {
+        mockUseAnnouncementsQuery.mockReturnValue(
+            buildQueryResult([
+                {
+                    id: '1',
+                    title: 'System Maintenance Tonight',
+                    published_at: '2026-06-09T00:00:00Z',
+                },
+                {
+                    id: '2',
+                    title: 'New Policy Update',
+                    published_at: '2026-06-08T00:00:00Z',
+                },
+                {
+                    id: '3',
+                    title: 'Faculty Development Week',
+                    published_at: '2026-06-07T00:00:00Z',
+                },
+                {
+                    id: '4',
+                    title: 'Preview Announcement',
+                    published_at: '2026-06-06T00:00:00Z',
+                },
+            ]),
+        );
+
+        render(<DashboardSidebar />);
+
+        expect(screen.getAllByTestId('announcement-item')).toHaveLength(3);
+        expect(screen.getByTestId('announcement-preview')).toBeDefined();
+        expect(screen.getByText('Preview Announcement')).toBeDefined();
     });
 
     it('renders the "View all →" link with href /announcements', () => {

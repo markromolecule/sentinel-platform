@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { ColumnFiltersState } from '@tanstack/react-table';
 import { DataTable, PageHeader, PermissionDeniedState, Separator, Button } from '@sentinel/ui';
 import { RevertPreviewDialog } from '@/app/(protected)/(support)/_components/revert-preview-dialog';
@@ -13,7 +13,6 @@ import { BulkDeleteCoursesDialog } from '@/app/(protected)/(support)/courses/_co
 import { isPermissionDeniedError, useStableValue, PermissionGuard } from '@sentinel/hooks';
 import { useInstitutionFacet, useDataTableFilterSync } from '@/hooks';
 import { Trash2 } from 'lucide-react';
-
 
 export function CoursesView() {
     const {
@@ -54,6 +53,12 @@ export function CoursesView() {
     const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>(
         selectedInstitutionId ? [{ id: 'institution', value: [selectedInstitutionId] }] : [],
     );
+
+    useEffect(() => {
+        setColumnFilters(
+            selectedInstitutionId ? [{ id: 'institution', value: [selectedInstitutionId] }] : [],
+        );
+    }, [selectedInstitutionId]);
 
     const isViewDenied = isPermissionDeniedError(error, 'courses:view');
 

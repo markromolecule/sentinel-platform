@@ -41,6 +41,14 @@ function mapLabels(ids: string[], labelMap: Map<string, string>) {
     return ids.map((id) => labelMap.get(id)).filter((label): label is string => Boolean(label));
 }
 
+function formatInstructorLabels(offering: SubjectOffering) {
+    return (offering.instructors ?? [])
+        .map((instructor) =>
+            [instructor.firstName, instructor.lastName].filter(Boolean).join(' ').trim(),
+        )
+        .filter(Boolean);
+}
+
 export function createSubjectOfferingColumns({
     departmentLabelMap,
     courseLabelMap,
@@ -81,7 +89,7 @@ export function createSubjectOfferingColumns({
             header: ({ column }) => <DataTableColumnHeader column={column} title="Subject Code" />,
             cell: ({ row }) => (
                 <span
-                    className="font-medium cursor-pointer text-[#323d8f] hover:underline"
+                    className="cursor-pointer font-medium text-[#323d8f] hover:underline"
                     onClick={() => onViewDetails?.(row.original)}
                 >
                     {row.original.subjectCode}
@@ -187,6 +195,36 @@ export function createSubjectOfferingColumns({
             ),
         },
         {
+            id: 'classrooms',
+            accessorFn: (row) =>
+                (row.sections ?? [])
+                    .filter((section) => section.classGroupId)
+                    .map((section) => section.name)
+                    .join(', '),
+            header: ({ column }) => <DataTableColumnHeader column={column} title="Classrooms" />,
+            cell: ({ row }) => (
+                <SummaryBadges
+                    labels={(row.original.sections ?? [])
+                        .filter((section) => section.classGroupId)
+                        .map((section) => section.name)}
+                    emptyLabel="No classrooms"
+                />
+            ),
+        },
+        {
+            id: 'assignedInstructors',
+            accessorFn: (row) => formatInstructorLabels(row).join(', '),
+            header: ({ column }) => (
+                <DataTableColumnHeader column={column} title="Assigned Instructors" />
+            ),
+            cell: ({ row }) => (
+                <SummaryBadges
+                    labels={formatInstructorLabels(row.original)}
+                    emptyLabel="No assigned instructors"
+                />
+            ),
+        },
+        {
             accessorKey: 'updatedAt',
             header: ({ column }) => <DataTableColumnHeader column={column} title="Updated At" />,
             cell: ({ row }) => {
@@ -201,10 +239,7 @@ export function createSubjectOfferingColumns({
         {
             id: 'actions',
             cell: ({ row }) => (
-                <SubjectOfferingActionsCell
-                    offering={row.original}
-                    onViewDetails={onViewDetails}
-                />
+                <SubjectOfferingActionsCell offering={row.original} onViewDetails={onViewDetails} />
             ),
         },
     );

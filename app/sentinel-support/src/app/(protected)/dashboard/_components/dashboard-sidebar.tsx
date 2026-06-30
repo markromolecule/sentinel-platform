@@ -16,15 +16,17 @@ import { useAnnouncementsQuery } from '@sentinel/hooks';
 export function DashboardSidebar() {
     const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
 
-    // Fetch the latest published announcements — only 3 needed for the sidebar
+    // Fetch the latest published announcements — three visible plus one preview row
     const { data: announcementsResponse, isLoading } = useAnnouncementsQuery({
-        limit: 3,
+        limit: 4,
         sortBy: 'published_at',
         sortOrder: 'desc',
         status: 'published',
     });
 
     const announcements = announcementsResponse?.data ?? [];
+    const visibleAnnouncements = announcements.slice(0, 3);
+    const previewAnnouncement = announcements[3];
 
     return (
         <div className="flex flex-col gap-0">
@@ -60,10 +62,11 @@ export function DashboardSidebar() {
                 ) : announcements.length === 0 ? (
                     <p className="text-muted-foreground text-xs">No announcements yet.</p>
                 ) : (
-                    <ul className="flex flex-col gap-3">
-                        {announcements.map((announcement) => (
+                    <ul className="flex flex-col gap-2.5">
+                        {visibleAnnouncements.map((announcement) => (
                             <li
                                 key={announcement.id}
+                                data-testid="announcement-item"
                                 className="group flex cursor-pointer flex-col gap-1.5 rounded-xl border border-slate-100 bg-slate-50/50 p-3.5 shadow-2xs transition-all hover:bg-slate-100/50 hover:shadow-xs dark:border-slate-800 dark:bg-slate-900/40 dark:hover:bg-slate-900/60"
                             >
                                 <p className="group-hover:text-primary line-clamp-2 text-sm leading-snug font-semibold text-slate-800 transition-colors dark:text-slate-200">
@@ -80,6 +83,25 @@ export function DashboardSidebar() {
                                 )}
                             </li>
                         ))}
+                        {previewAnnouncement ? (
+                            <li
+                                data-testid="announcement-preview"
+                                className="pointer-events-none flex flex-col gap-1.5 rounded-xl border border-slate-100/80 bg-slate-50/40 p-3.5 opacity-55 dark:border-slate-800/80 dark:bg-slate-900/30"
+                            >
+                                <p className="line-clamp-2 text-sm leading-snug font-semibold text-slate-700 dark:text-slate-300">
+                                    {previewAnnouncement.title}
+                                </p>
+                                {previewAnnouncement.published_at && (
+                                    <p className="text-[11px] font-medium text-slate-500 dark:text-slate-400">
+                                        {new Intl.DateTimeFormat('en-US', {
+                                            month: 'short',
+                                            day: 'numeric',
+                                            year: 'numeric',
+                                        }).format(new Date(previewAnnouncement.published_at))}
+                                    </p>
+                                )}
+                            </li>
+                        ) : null}
                     </ul>
                 )}
 

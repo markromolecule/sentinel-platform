@@ -1,6 +1,7 @@
 import { type DbClient } from '@sentinel/db';
 import { sql } from 'kysely';
 import { resolveCalendarScopeInstitutionIds } from './resolve-calendar-scope-institution-ids';
+import { resolveCalendarRoleAudiences } from './resolve-calendar-role-audiences';
 
 export type GetCalendarEventsDataArgs = {
     institutionId: string;
@@ -48,11 +49,10 @@ export async function getCalendarEventsData(
         query = query.where('ce.institution_id', 'in', allowedInstitutionIds);
     }
 
-    // 2. Filter events depending on the requester's role
-    if (role === 'student') {
-        query = query.where('ce.target_audience', 'in', ['ALL', 'STUDENTS']);
-    } else if (role === 'instructor') {
-        query = query.where('ce.target_audience', 'in', ['ALL', 'INSTRUCTORS']);
+    const allowedAudiences = resolveCalendarRoleAudiences(role);
+
+    if (allowedAudiences) {
+        query = query.where('ce.target_audience', 'in', allowedAudiences);
     }
 
     if (month) {

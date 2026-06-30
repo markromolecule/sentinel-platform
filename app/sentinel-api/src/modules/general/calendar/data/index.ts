@@ -4,3 +4,4 @@ export * from './create-calendar-event';
 export * from './update-calendar-event';
 export * from './delete-calendar-event';
 export * from './resolve-calendar-scope-institution-ids';
+export * from './resolve-calendar-role-audiences';

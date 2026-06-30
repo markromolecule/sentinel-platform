@@ -89,6 +89,9 @@ function toSectionArray(value: unknown) {
 
             return {
                 id: typeof item.id === 'string' ? item.id : '',
+                class_group_id:
+                    typeof item.class_group_id === 'string' ? item.class_group_id : null,
+                section_id: typeof item.section_id === 'string' ? item.section_id : null,
                 name: typeof item.name === 'string' ? item.name : '',
                 department_id: typeof item.department_id === 'string' ? item.department_id : null,
                 course_id: typeof item.course_id === 'string' ? item.course_id : null,
@@ -103,11 +106,13 @@ function toSectionArray(value: unknown) {
                 item,
             ): item is {
                 id: string;
+                class_group_id: string | null;
+                section_id: string | null;
                 name: string;
                 department_id: string | null;
                 course_id: string | null;
                 year_level: number | null;
-            } => Boolean(item?.id && item.name),
+            } => Boolean(item?.id && item.name && item.section_id),
         );
 }
 
@@ -129,12 +134,23 @@ function toInstructorArray(value: unknown) {
                 email: typeof item.email === 'string' ? item.email : null,
             };
         })
-        .filter((item): item is { id: string; firstName: string | null; lastName: string | null; email: string | null } =>
-            Boolean(item?.id),
+        .filter(
+            (
+                item,
+            ): item is {
+                id: string;
+                firstName: string | null;
+                lastName: string | null;
+                email: string | null;
+            } => Boolean(item?.id),
         );
 }
 
 export function mapSubjectOfferingResponse(rawSubjectOffering: any) {
+    const sections = toSectionArray(rawSubjectOffering.sections).filter(
+        (section) => typeof section.id === 'string' && section.id.length > 0,
+    );
+
     return {
         subject_offering_id: rawSubjectOffering.subject_offering_id,
         subject_id: rawSubjectOffering.subject_id,
@@ -152,7 +168,7 @@ export function mapSubjectOfferingResponse(rawSubjectOffering: any) {
         year_levels: toNumberArray(rawSubjectOffering.year_levels),
         departments: toDepartmentArray(rawSubjectOffering.departments),
         courses: toCourseArray(rawSubjectOffering.courses),
-        sections: toSectionArray(rawSubjectOffering.sections),
+        sections,
         classifications: toClassificationArray(rawSubjectOffering.classifications),
         is_multi_department: toStringArray(rawSubjectOffering.department_ids).length > 1,
         created_at: rawSubjectOffering.created_at,

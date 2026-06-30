@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { renderHook } from '@testing-library/react';
+import { act, renderHook } from '@testing-library/react';
 
 // Prevent Supabase client init error in test environment
 vi.mock('@/data/supabase/client', () => ({ supabaseClient: {} }));
@@ -107,5 +107,35 @@ describe('useAdminCalendar (sentinel-support) — audience mapping', () => {
                 );
             });
         }
+
+        it('passes the schedule time range through to the create mutation', () => {
+            const createMutate = vi.fn();
+            vi.mocked(useCreateCalendarEventMutation).mockReturnValue({
+                mutate: createMutate,
+                isPending: false,
+                error: null,
+            } as any);
+
+            const { result } = renderHook(() => useAdminCalendar());
+
+            act(() => {
+                result.current.handleAddEvent({
+                    title: 'Timed Event',
+                    description: 'With a schedule',
+                    type: 'announcement',
+                    targetAudience: 'institution',
+                    date: new Date('2026-05-21'),
+                    startTime: '09:00',
+                    endTime: '10:30',
+                });
+            });
+
+            expect(createMutate).toHaveBeenCalledWith(
+                expect.objectContaining({
+                    startTime: '09:00',
+                    endTime: '10:30',
+                }),
+            );
+        });
     });
 });

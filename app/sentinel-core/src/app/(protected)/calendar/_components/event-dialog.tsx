@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { format } from 'date-fns';
 
 import { Button } from '@sentinel/ui';
@@ -47,15 +47,50 @@ export function EventDialog({
     const [startTime, setStartTime] = useState('');
     const [endTime, setEndTime] = useState('');
 
-    // Update internal state when selectedDate prop changes
-    if (selectedDate && (!date || date.getTime() !== selectedDate.getTime())) {
-        // This might cause infinite loop if not careful, better use useEffect or just initialize.
-        // Actually, for a dialog, simpler to just rely on initial state or key change.
-        // For now, I'll rely on key or open change handling.
-    }
+    useEffect(() => {
+        if (open) {
+            setDate(selectedDate || new Date());
+        }
+    }, [open, selectedDate]);
+
+    useEffect(() => {
+        if (startTime && endTime && endTime <= startTime) {
+            setEndTime('');
+        }
+    }, [startTime, endTime]);
+
+    const hasInvalidTimeRange = useMemo(() => {
+        if (!startTime || !endTime) {
+            return false;
+        }
+
+        return endTime <= startTime;
+    }, [startTime, endTime]);
+
+    const scheduleSummary = useMemo(() => {
+        if (!date) {
+            return 'Pick a date and optional time range.';
+        }
+
+        if (!startTime && !endTime) {
+            return `Scheduled for ${format(date, 'MMMM d, yyyy')}.`;
+        }
+
+        return `Scheduled for ${format(date, 'MMMM d, yyyy')} from ${startTime || '--:--'} to ${endTime || '--:--'}.`;
+    }, [date, endTime, startTime]);
+
+    const resetForm = () => {
+        setTitle('');
+        setDescription('');
+        setType('event');
+        setTargetAudience('institution');
+        setStartTime('');
+        setEndTime('');
+        setDate(selectedDate || new Date());
+    };
 
     const handleSave = () => {
-        if (!title || !date) return;
+        if (!title || !date || hasInvalidTimeRange) return;
 
         onSave({
             date: date,
@@ -71,13 +106,7 @@ export function EventDialog({
 
     const handleOpenChange = (newOpen: boolean) => {
         if (!newOpen) {
-            setTitle('');
-            setDescription('');
-            setType('event');
-            setTargetAudience('institution');
-            setStartTime('');
-            setEndTime('');
-            setDate(selectedDate || new Date());
+            resetForm();
         }
         onOpenChange(newOpen);
     };
@@ -113,90 +142,65 @@ export function EventDialog({
                         />
                     </div>
 
-                    <div className="space-y-2">
-                        <Label>Date</Label>
-                        <Popover>
-                            <PopoverTrigger asChild>
-                                <Button
-                                    variant={'outline'}
-                                    className={cn(
-                                        'w-full justify-start text-left font-normal',
-                                        !date && 'text-muted-foreground',
-                                    )}
+                    <div className="space-y-3 rounded-lg border p-3">
+                        <div>
+                            <Label>Schedule</Label>
+                            <p className="text-muted-foreground text-xs">{scheduleSummary}</p>
+                        </div>
+                        <div className="grid gap-3 md:grid-cols-[minmax(0,1.35fr)_minmax(0,1fr)_minmax(0,1fr)]">
+                            <div className="space-y-2">
+                                <Label>Date</Label>
+                                <Popover>
+                                    <PopoverTrigger asChild>
+                                        <Button
+                                            variant="outline"
+                                            className={cn(
+                                                'w-full justify-start text-left font-normal',
+                                                !date && 'text-muted-foreground',
+                                            )}
+                                            disabled={disabled}
+                                        >
+                                            <CalendarIcon className="mr-2 h-4 w-4" />
+                                            {date ? format(date, 'PPP') : <span>Pick a date</span>}
+                                        </Button>
+                                    </PopoverTrigger>
+                                    <PopoverContent className="w-auto p-0" align="start">
+                                        <Calendar
+                                            mode="single"
+                                            selected={date}
+                                            onSelect={setDate}
+                                            initialFocus
+                                        />
+                                    </PopoverContent>
+                                </Popover>
+                            </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="start-time">Start Time</Label>
+                                <Input
+                                    id="start-time"
+                                    type="time"
+                                    value={startTime}
+                                    onChange={(e) => setStartTime(e.target.value)}
                                     disabled={disabled}
-                                >
-                                    <CalendarIcon className="mr-2 h-4 w-4" />
-                                    {date ? format(date, 'PPP') : <span>Pick a date</span>}
-                                </Button>
-                            </PopoverTrigger>
-                            <PopoverContent className="w-auto p-0" align="start">
-                                <Calendar
-                                    mode="single"
-                                    selected={date}
-                                    onSelect={setDate}
-                                    initialFocus
                                 />
-                            </PopoverContent>
-                        </Popover>
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                            <Label>Start Time</Label>
-                            <Select
-                                value={startTime}
-                                onValueChange={setStartTime}
-                                disabled={disabled}
-                            >
-                                <SelectTrigger className="w-full">
-                                    <SelectValue placeholder="Select time" />
-                                </SelectTrigger>
-                                <SelectContent
-                                    className="h-[200px]"
-                                    position="popper"
-                                    sideOffset={4}
-                                >
-                                    {Array.from({ length: 48 }).map((_, i) => {
-                                        const hour = Math.floor(i / 2)
-                                            .toString()
-                                            .padStart(2, '0');
-                                        const minute = i % 2 === 0 ? '00' : '30';
-                                        const time = `${hour}:${minute}`;
-                                        return (
-                                            <SelectItem key={time} value={time}>
-                                                {time}
-                                            </SelectItem>
-                                        );
-                                    })}
-                                </SelectContent>
-                            </Select>
+                            </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="end-time">End Time</Label>
+                                <Input
+                                    id="end-time"
+                                    type="time"
+                                    value={endTime}
+                                    onChange={(e) => setEndTime(e.target.value)}
+                                    min={startTime || undefined}
+                                    disabled={disabled || !startTime}
+                                />
+                            </div>
                         </div>
-                        <div className="space-y-2">
-                            <Label>End Time</Label>
-                            <Select value={endTime} onValueChange={setEndTime} disabled={disabled}>
-                                <SelectTrigger className="w-full">
-                                    <SelectValue placeholder="Select time" />
-                                </SelectTrigger>
-                                <SelectContent
-                                    className="h-[200px]"
-                                    position="popper"
-                                    sideOffset={4}
-                                >
-                                    {Array.from({ length: 48 }).map((_, i) => {
-                                        const hour = Math.floor(i / 2)
-                                            .toString()
-                                            .padStart(2, '0');
-                                        const minute = i % 2 === 0 ? '00' : '30';
-                                        const time = `${hour}:${minute}`;
-                                        return (
-                                            <SelectItem key={time} value={time}>
-                                                {time}
-                                            </SelectItem>
-                                        );
-                                    })}
-                                </SelectContent>
-                            </Select>
-                        </div>
+                        {hasInvalidTimeRange ? (
+                            <p className="text-destructive text-xs font-medium">
+                                End time must be later than start time.
+                            </p>
+                        ) : null}
                     </div>
 
                     <div className="grid grid-cols-2 gap-4">
@@ -256,12 +260,15 @@ export function EventDialog({
                 <DialogFooter>
                     <Button
                         variant="outline"
-                        onClick={() => onOpenChange(false)}
+                        onClick={() => handleOpenChange(false)}
                         disabled={disabled}
                     >
                         Cancel
                     </Button>
-                    <Button onClick={handleSave} disabled={disabled || !title}>
+                    <Button
+                        onClick={handleSave}
+                        disabled={disabled || !title || hasInvalidTimeRange}
+                    >
                         {disabled ? 'Saving...' : 'Save Event'}
                     </Button>
                 </DialogFooter>

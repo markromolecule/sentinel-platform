@@ -3,6 +3,10 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { useCoursesPageState } from './index';
 import { useCoursesQuery, useInstitutionsQuery } from '@sentinel/hooks';
 
+const mockUseAcademicScope = vi.fn(() => ({
+    institutionId: '',
+}));
+
 vi.mock('@sentinel/hooks', () => ({
     useCoursesQuery: vi.fn(),
     useInstitutionsQuery: vi.fn(),
@@ -20,9 +24,16 @@ vi.mock('@sentinel/hooks', () => ({
     }),
 }));
 
+vi.mock('@/hooks', () => ({
+    useAcademicScope: () => mockUseAcademicScope(),
+}));
+
 describe('useCoursesPageState', () => {
     beforeEach(() => {
         vi.clearAllMocks();
+        mockUseAcademicScope.mockReturnValue({
+            institutionId: '',
+        });
         (useInstitutionsQuery as any).mockReturnValue({
             data: [
                 { id: '1', name: 'Inst 1' },
@@ -68,6 +79,16 @@ describe('useCoursesPageState', () => {
         expect(result.current.totalCount).toBe(15);
     });
 
+    it('initializes selectedInstitutionId from academic scope when available', () => {
+        mockUseAcademicScope.mockReturnValue({
+            institutionId: '2',
+        });
+
+        const { result } = renderHook(() => useCoursesPageState());
+
+        expect(result.current.selectedInstitutionId).toBe('2');
+    });
+
     it('updates searchTerm', () => {
         const { result } = renderHook(() => useCoursesPageState());
         act(() => {
@@ -85,10 +106,32 @@ describe('useCoursesPageState', () => {
     });
 
     it('handles undefined selectedInstitutionId', () => {
+        mockUseAcademicScope.mockReturnValue({
+            institutionId: '2',
+        });
+
         const { result } = renderHook(() => useCoursesPageState());
         act(() => {
             result.current.setSelectedInstitutionId(undefined);
         });
-        expect(result.current.selectedInstitutionId).toBeUndefined();
+
+        expect(result.current.selectedInstitutionId).toBe('2');
+    });
+
+    it('resets pagination when selectedInstitutionId changes', () => {
+        const { result } = renderHook(() => useCoursesPageState());
+
+        act(() => {
+            result.current.setPagination({ pageIndex: 1, pageSize: 10 });
+        });
+
+        act(() => {
+            result.current.setSelectedInstitutionId('1');
+        });
+
+        expect(result.current.pagination).toEqual({
+            pageIndex: 0,
+            pageSize: 10,
+        });
     });
 });

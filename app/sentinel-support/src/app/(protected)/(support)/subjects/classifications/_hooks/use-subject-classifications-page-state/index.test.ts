@@ -112,4 +112,44 @@ describe('useSubjectClassificationsPageState', () => {
         expect(result.current.selectedInstitutions.has('inst-123')).toBe(true);
         expect(result.current.isFiltered).toBe(true);
     });
+
+    it('resets pagination when the scoped institution filter changes', () => {
+        const { result } = renderHook(() => useSubjectClassificationsPageState());
+
+        act(() => {
+            result.current.setPagination({
+                pageIndex: 2,
+                pageSize: 10,
+            });
+        });
+
+        act(() => {
+            result.current.handleSelectInstitution('inst-1');
+        });
+
+        expect(result.current.pagination).toEqual({
+            pageIndex: 0,
+            pageSize: 10,
+        });
+    });
+
+    it('resets pagination when the debounced search term changes', () => {
+        const { result } = renderHook(() => useSubjectClassificationsPageState());
+
+        act(() => {
+            result.current.setPagination({
+                pageIndex: 1,
+                pageSize: 10,
+            });
+        });
+
+        act(() => {
+            result.current.setSearchTerm('science');
+        });
+
+        expect(result.current.pagination).toEqual({
+            pageIndex: 0,
+            pageSize: 10,
+        });
+    });
 });

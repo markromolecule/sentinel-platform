@@ -11,12 +11,12 @@ import {
 } from '@sentinel/hooks';
 import { Course } from '@sentinel/shared/types';
 import { useMemo, useState } from 'react';
+import { useAcademicScope } from '@/hooks';
 
 export function useCoursesPageState() {
+    const { institutionId } = useAcademicScope();
     const [searchTerm, setSearchTerm] = useState('');
-    const [selectedInstitutionId, setSelectedInstitutionId] = useState<string | undefined>(
-        undefined,
-    );
+    const [manualInstitutionId, setManualInstitutionId] = useState<string | undefined>(undefined);
     const [courseToEdit, setCourseToEdit] = useState<Course | null>(null);
     const [editDialogOpen, setEditDialogOpen] = useState(false);
     const [courseToRevert, setCourseToRevert] = useState<Course | null>(null);
@@ -26,6 +26,7 @@ export function useCoursesPageState() {
 
     const debouncedSearch = useDebounce(searchTerm, 500);
     const { pagination, setPagination } = useServerPagination([debouncedSearch]);
+    const selectedInstitutionId = manualInstitutionId ?? (institutionId || undefined);
 
     const { data: institutions = [] } = useInstitutionsQuery();
     const selectedInstitution = institutions.find(
@@ -48,6 +49,13 @@ export function useCoursesPageState() {
     const courses = coursesResponse?.items ?? [];
     const pageCount = coursesResponse?.pagination?.totalPages ?? 1;
     const totalCount = coursesResponse?.pagination?.total ?? 0;
+
+    const setSelectedInstitutionId = (value: string | undefined) => {
+        setManualInstitutionId(value);
+        setPagination((current) =>
+            current.pageIndex === 0 ? current : { ...current, pageIndex: 0 },
+        );
+    };
 
     const { data: parentCourses = [] } = useCoursesQuery({
         search: '',

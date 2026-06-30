@@ -37,10 +37,9 @@ export function AddCourseDialog({ institutionId }: AddCourseDialogProps) {
     }
 
     return (
-
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
-                <Button disabled={!institutionId}>
+                <Button disabled={!institutionId} aria-disabled={!institutionId}>
                     <Plus className="mr-2 h-4 w-4" />
                     Add Course
                 </Button>

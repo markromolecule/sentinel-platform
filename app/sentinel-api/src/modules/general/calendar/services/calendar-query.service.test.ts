@@ -33,6 +33,24 @@ describe('calendar-query.service', () => {
             });
             expect(result).toEqual(expectedEvents);
         });
+
+        it('should forward the requester role to the data layer for audience filtering', async () => {
+            vi.mocked(dataLayer.getCalendarEventsData).mockResolvedValue([]);
+
+            await getCalendarEvents(mockDbClient, {
+                institutionId: 'inst-123',
+                role: 'support',
+                month: '06',
+                year: '2026',
+            });
+
+            expect(dataLayer.getCalendarEventsData).toHaveBeenCalledWith(mockDbClient, {
+                institutionId: 'inst-123',
+                role: 'support',
+                month: '06',
+                year: '2026',
+            });
+        });
     });
 
     describe('getCalendarEventById', () => {
