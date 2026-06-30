@@ -75,7 +75,7 @@ export default function StudentExamResultPage() {
             clearStoredExamSession(examId);
 
             toast.success('Exam turned in successfully.');
-            router.replace(`/student/history/details?attemptId=${result.attemptId}`);
+            router.replace(`/student/exam/${examId}/feedback?attemptId=${result.attemptId}`);
         } catch (error) {
             toast.error(resolveStudentExamSessionError(error));
             setIsTurningIn(false);

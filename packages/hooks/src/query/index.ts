@@ -34,3 +34,4 @@ export * from './onboarding';
 export * from './messages';
 export * from './announcements';
 export * from './exam-section-assignments';
+export * from './feedbacks';

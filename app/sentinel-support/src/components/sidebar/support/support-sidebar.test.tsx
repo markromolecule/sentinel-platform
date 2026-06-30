@@ -87,12 +87,15 @@ describe('SuperAdminSidebar', () => {
         const items = screen.getAllByTestId('sidebar-item');
         const analyticsItem = items.find((item) => item.getAttribute('data-url') === '/analytics');
         const logsItem = items.find((item) => item.getAttribute('data-url') === '/logs');
+        const feedbackItem = items.find((item) => item.getAttribute('data-url') === '/feedbacks');
 
         expect(analyticsItem).toBeTruthy();
         expect(logsItem).toBeTruthy();
+        expect(feedbackItem).toBeTruthy();
 
         expect(analyticsItem?.getAttribute('data-url')).toBe('/analytics');
         expect(logsItem?.getAttribute('data-url')).toBe('/logs');
+        expect(feedbackItem?.getAttribute('data-url')).toBe('/feedbacks');
     });
 
     it('marks the analytics branch active when the pathname is under /analytics', () => {
@@ -126,8 +129,26 @@ describe('SuperAdminSidebar', () => {
         const items = screen.getAllByTestId('sidebar-item');
         const analyticsItem = items.find((item) => item.getAttribute('data-url') === '/analytics');
         const logsItem = items.find((item) => item.getAttribute('data-url') === '/logs');
+        const feedbackItem = items.find((item) => item.getAttribute('data-url') === '/feedbacks');
 
         expect(logsItem?.getAttribute('data-active')).toBe('true');
         expect(analyticsItem?.getAttribute('data-active')).toBe('false');
+        expect(feedbackItem?.getAttribute('data-active')).toBe('false');
+    });
+
+    it('marks the feedback branch active when the pathname is under /feedbacks', () => {
+        mockUseDashboardNav.mockReturnValue({
+            pathname: '/feedbacks',
+            openMenus: {},
+            toggleMenu: vi.fn(),
+            isChildActive: (url: string) => url === '/feedbacks',
+        });
+
+        render(<SuperAdminSidebar />);
+
+        const items = screen.getAllByTestId('sidebar-item');
+        const feedbackItem = items.find((item) => item.getAttribute('data-url') === '/feedbacks');
+
+        expect(feedbackItem?.getAttribute('data-active')).toBe('true');
     });
 });
