@@ -26,9 +26,7 @@ export const feedbackRecordOpenApi = z
     })
     .openapi('FeedbackRecord');
 
-const createFeedbackBody = z
-    .object(sharedCreateFeedbackSchema.shape)
-    .openapi('CreateFeedbackBody');
+const createFeedbackBody = z.object(sharedCreateFeedbackSchema.shape).openapi('CreateFeedbackBody');
 
 const getFeedbacksQuery = z.object(sharedGetFeedbacksQuerySchema.shape);
 

@@ -21,13 +21,20 @@ export default function StudentExamFeedbackThankYouPage() {
                     <div className="space-y-2">
                         <CardTitle className="text-2xl">Thank you for the feedback</CardTitle>
                         <p className="text-muted-foreground text-sm leading-6">
-                            Your response has been recorded and will help improve the exam experience.
+                            Your response has been recorded and will help improve the exam
+                            experience.
                         </p>
                     </div>
                 </CardHeader>
                 <CardContent className="flex flex-col gap-3 sm:flex-row sm:justify-center">
                     <Button asChild>
-                        <Link href={attemptId ? `/student/history/details?attemptId=${attemptId}` : '/student/history'}>
+                        <Link
+                            href={
+                                attemptId
+                                    ? `/student/history/details?attemptId=${attemptId}`
+                                    : '/student/history'
+                            }
+                        >
                             <LineChart className="mr-2 h-4 w-4" />
                             View Exam Result
                         </Link>

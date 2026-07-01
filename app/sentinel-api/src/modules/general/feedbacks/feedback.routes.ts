@@ -5,10 +5,7 @@ import {
     createFeedbackRoute,
     createFeedbackRouteHandler,
 } from './controllers/create-feedback.controller';
-import {
-    getFeedbackRoute,
-    getFeedbackRouteHandler,
-} from './controllers/get-feedback.controller';
+import { getFeedbackRoute, getFeedbackRouteHandler } from './controllers/get-feedback.controller';
 import {
     getFeedbacksRoute,
     getFeedbacksRouteHandler,
