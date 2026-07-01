@@ -3,7 +3,7 @@
 import { useMemo, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { DEFAULT_AUDIO_ANOMALY_CONFIG } from '@sentinel/shared';
-import { getExamContextDetails, hasAnswer } from '@/features/exams/_components/engine';
+import { getRuntimePassageDetails, hasAnswer } from '@/features/exams/_components/engine';
 import { useStudentExamData } from '@/app/(protected)/student/exam/[id]/_hooks/use-student-exam-data';
 import { useExamSession } from '@/app/(protected)/student/exam/[id]/_hooks/use-exam-session';
 import { useTurnedInExamRedirect } from '@/app/(protected)/student/exam/[id]/_hooks/use-turned-in-exam-redirect';
@@ -125,6 +125,7 @@ export function useStudentExamAttempt() {
     const submissionHook = useAttemptSubmission({
         examId,
         sessionId: examSession?.sessionId,
+        releaseScoreMode: effectiveConfiguration.releaseScoreMode ?? 'AUTO_RELEASE',
         questions,
         selectedAnswers: answersHook.selectedAnswers,
         elapsedSeconds,
@@ -145,13 +146,9 @@ export function useStudentExamAttempt() {
         ? uiHook.reviewQuestionIds.includes(currentQuestion.id)
         : false;
 
-    const currentContext = getExamContextDetails({
-        questionBody: currentQuestion?.sourceEvidence,
+    const currentContext = getRuntimePassageDetails({
         questionPassageContent: currentQuestion?.passageContent,
         questionPassageType: currentQuestion?.passageType,
-        questionSourceFileName: currentQuestion?.sourceFileName,
-        questionSourcePageNumber: currentQuestion?.sourcePageNumber,
-        examDescription: exam?.description,
     });
 
     return {

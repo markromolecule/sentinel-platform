@@ -3,7 +3,7 @@ import {
     StudentFlowPageHeader,
 } from '../../../_components/student-flow-primitives';
 import { LOBBY_READINESS_CONFIG } from '../_constants';
-import { getLobbyStateLabel } from '../_utils';
+import { getLobbyStateLabel, resolveReconnectDisplay } from '../_utils';
 import type { ExamRuntimeAccess } from '@sentinel/shared/types';
 
 export type LobbyHeaderProps = {
@@ -21,14 +21,7 @@ export function LobbyHeader({
     runtimeAccess,
     hasCompletedFlow,
 }: LobbyHeaderProps) {
-    const reconnectAttemptsUsed =
-        runtimeAccess?.reconnectAttemptsRemaining !== undefined &&
-        runtimeAccess?.totalReconnectAttempts !== undefined
-            ? Math.max(
-                  0,
-                  runtimeAccess.totalReconnectAttempts - runtimeAccess.reconnectAttemptsRemaining,
-              )
-            : null;
+    const reconnectDisplay = resolveReconnectDisplay(runtimeAccess, maxReconnectAttempts);
     const highlights = [
         {
             label: 'Duration',
@@ -42,12 +35,7 @@ export function LobbyHeader({
         },
         {
             label: 'Reconnect',
-            value:
-                reconnectAttemptsUsed !== null &&
-                runtimeAccess?.totalReconnectAttempts !== undefined &&
-                runtimeAccess?.reconnectAttemptsRemaining !== undefined
-                    ? `${reconnectAttemptsUsed} used • ${runtimeAccess.reconnectAttemptsRemaining} left`
-                    : `${maxReconnectAttempts} attempts`,
+            value: reconnectDisplay.headerValue,
             icon: LOBBY_READINESS_CONFIG.icons.Reconnect,
         },
         {

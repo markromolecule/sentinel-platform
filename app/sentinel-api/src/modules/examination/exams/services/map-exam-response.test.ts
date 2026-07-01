@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { DEFAULT_TELEMETRY_SETTINGS } from '@sentinel/shared';
-import { mapExamDetailResponse } from './map-exam-response.service';
+import { mapExamDetailResponse, mapExamHistoryDetailResponse } from './map-exam-response.service';
 
 function createRawExamRecord() {
     return {
@@ -264,5 +264,45 @@ describe('mapExamDetailResponse', () => {
 
         expect(detail.questions[0]?.passageContent).toBe('<p>Passage</p>');
         expect(detail.questions[0]?.passageType).toBe('html');
+    });
+});
+
+describe('mapExamHistoryDetailResponse', () => {
+    it('hides manual-release scores until the attempt is finalized', () => {
+        const detail = mapExamHistoryDetailResponse({
+            ...createRawExamRecord(),
+            attempt_id: 'attempt-1',
+            attempt_status: 'COMPLETED',
+            attempt_completed_at: new Date('2026-06-26T10:00:00.000Z'),
+            attempt_score: 1,
+            attempt_total_score: 2,
+            release_score_mode: 'MANUAL_RELEASE',
+            essay_question_count: 0,
+            attempt_finalized_at: null,
+        });
+
+        expect(detail.score).toBeNull();
+        expect(detail.totalScore).toBeNull();
+        expect(detail.percentage).toBeNull();
+        expect(detail.result).toBeNull();
+    });
+
+    it('returns finalized manual-release scores and result', () => {
+        const detail = mapExamHistoryDetailResponse({
+            ...createRawExamRecord(),
+            attempt_id: 'attempt-1',
+            attempt_status: 'COMPLETED',
+            attempt_completed_at: new Date('2026-06-26T10:00:00.000Z'),
+            attempt_score: 2,
+            attempt_total_score: 2,
+            release_score_mode: 'MANUAL_RELEASE',
+            essay_question_count: 0,
+            attempt_finalized_at: '2026-06-26T11:00:00.000Z',
+        });
+
+        expect(detail.score).toBe(2);
+        expect(detail.totalScore).toBe(2);
+        expect(detail.percentage).toBe(100);
+        expect(detail.result).toBe('passed');
     });
 });

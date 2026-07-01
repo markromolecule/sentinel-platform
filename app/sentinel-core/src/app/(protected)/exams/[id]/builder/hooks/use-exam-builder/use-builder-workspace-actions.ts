@@ -55,6 +55,10 @@ export function useBuilderWorkspaceActions({
         updateConfiguration('lobbyAdmissionMode', enabled ? 'INSTRUCTOR_GATED' : 'AUTOMATIC');
     };
 
+    const handleToggleReleaseScoreMode = (enabled: boolean) => {
+        updateConfiguration('releaseScoreMode', enabled ? 'AUTO_RELEASE' : 'MANUAL_RELEASE');
+    };
+
     const handleUpdateTitle = async (nextTitle: string) => {
         const examId = useExamStore.getState().examId ?? id;
         const trimmedTitle = nextTitle.trim();
@@ -134,6 +138,7 @@ export function useBuilderWorkspaceActions({
         isUpdatingTitle: updateExamMutation.isPending,
         handleToggleExamSetting,
         handleToggleLobbyAdmissionMode,
+        handleToggleReleaseScoreMode,
         handleUpdateTitle,
         handleSave,
         handlePublish,

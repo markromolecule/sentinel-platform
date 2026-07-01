@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect } from 'react';
 import { useExamLobbyCountQuery } from '@sentinel/hooks';
 import { StudentExamLoadingState } from '../_components/student-exam-loading-state';
 import { StudentFlowShell } from '../_components/student-flow-shell';
@@ -15,17 +16,21 @@ import { MonitoringPreloader } from '../_components/monitoring-preloader';
 export default function StudentExamLobbyPage() {
     const { examId, exam, configuration, mediaPipeSandbox, refetchExam, isLoading } =
         useStudentExamData();
-    const { data: lobbyCount, isError } = useExamLobbyCountQuery(examId);
+    const {
+        data: lobbyCount,
+        isError,
+        refetch: refetchLobbyCount,
+    } = useExamLobbyCountQuery(examId);
     const { presenceCount } = useLobbyPresence(examId);
 
     const displayCount =
         typeof lobbyCount?.count === 'number'
             ? lobbyCount.count
-            : isError
-              ? presenceCount > 0
-                  ? presenceCount
-                  : '--'
-              : '--';
+            : presenceCount > 0
+              ? presenceCount
+              : isError
+                ? 'Unavailable'
+                : 'Syncing';
 
     const {
         countdownLabel,
@@ -35,8 +40,8 @@ export default function StudentExamLobbyPage() {
         reopenedUntil,
         storedSession,
         mediaPipeLobbyMessage,
+        admissionStatus,
         isStartingSession,
-        isAdmissionPendingRefresh,
         handleEnterExam,
     } = useLobbyState({
         examId,
@@ -45,6 +50,14 @@ export default function StudentExamLobbyPage() {
         mediaPipeSandbox,
         refetchExam,
     });
+
+    useEffect(() => {
+        if (!admissionStatus) {
+            return;
+        }
+
+        void refetchLobbyCount();
+    }, [admissionStatus, refetchLobbyCount]);
 
     const isRedirectingToHistory = useTurnedInExamRedirect({
         examId,
@@ -73,6 +86,7 @@ export default function StudentExamLobbyPage() {
                     hasCompletedFlow={hasCompletedFlow}
                     accessMessage={runtimeAccess?.message}
                     countdownLabel={countdownLabel}
+                    maxReconnectAttempts={configuration.maxReconnectAttempts}
                     mediaPipeLobbyMessage={mediaPipeLobbyMessage}
                     runtimeAccess={runtimeAccess}
                     reopenedUntil={reopenedUntil}
@@ -80,8 +94,9 @@ export default function StudentExamLobbyPage() {
 
                 <LobbyFooterActions
                     examId={examId}
-                    isStartingSession={isStartingSession || isAdmissionPendingRefresh}
+                    isStartingSession={isStartingSession}
                     runtimeAccess={runtimeAccess}
+                    admissionStatus={admissionStatus}
                     storedSession={storedSession}
                     hasCompletedFlow={hasCompletedFlow}
                     canEnterExam={canEnterExam}

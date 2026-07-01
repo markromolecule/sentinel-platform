@@ -1,5 +1,6 @@
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach as afterEachTest, describe, expect, it, vi } from 'vitest';
+import type { GradingQuestionType } from '@sentinel/shared';
 import { AttemptReportView } from './attempt-report-view';
 
 afterEachTest(() => {
@@ -165,6 +166,69 @@ describe('AttemptReportView', () => {
         expect(screen.queryByLabelText('Override Score')).toBeNull();
     });
 
+    it('can render only the question table for compact student dialogs', () => {
+        render(
+            <AttemptReportView
+                showSummaryCards={false}
+                showActions={false}
+                attempt={{
+                    attemptId: 'attempt-3',
+                    examId: 'exam-3',
+                    examTitle: 'Dialog View',
+                    subjectTitle: 'Science',
+                    studentId: 'student-3',
+                    studentName: 'Mina Cruz',
+                    studentNumber: '2024-0003',
+                    completedAt: '2026-06-26T09:00:00.000Z',
+                    score: 5,
+                    totalScore: 5,
+                    status: 'COMPLETED',
+                    answers: {
+                        'question-1': true,
+                    },
+                    evaluations: {},
+                    feedback: 'Released feedback.',
+                    itemOverrides: {},
+                    grading: {
+                        finalizedAt: '2026-06-26T10:00:00.000Z',
+                        finalizedBy: 'user-1',
+                    },
+                    questionReports: [
+                        {
+                            questionId: 'question-1',
+                            questionType: 'TRUE_FALSE',
+                            prompt: 'Question prompt',
+                            answer: true,
+                            correctAnswer: true,
+                            isCorrect: true,
+                            awardedScore: 5,
+                            maxScore: 5,
+                            evaluation: null,
+                            override: null,
+                        },
+                    ],
+                }}
+                questions={[
+                    {
+                        id: 'question-1',
+                        examId: 'exam-3',
+                        type: 'TRUE_FALSE',
+                        content: {
+                            prompt: 'Question prompt',
+                        },
+                        points: 5,
+                        orderIndex: 0,
+                    } as unknown as GradingQuestionType,
+                ]}
+            />,
+        );
+
+        expect(screen.getByText('Question prompt')).toBeTruthy();
+        expect(screen.queryByText('Final Score')).toBeNull();
+        expect(screen.queryByText('Released feedback.')).toBeNull();
+        expect(screen.queryByRole('button', { name: 'Save Overrides' })).toBeNull();
+    });
+
     it('retains local override drafts when attempt updates while isSubmitting is true', () => {
         const onSubmit = vi.fn();
         const attemptMock = {
@@ -217,7 +281,7 @@ describe('AttemptReportView', () => {
                 isSubmitting={true} // saving is in-flight
                 onSubmit={onSubmit}
                 attempt={attemptMock}
-                questions={questionsMock as any}
+                questions={questionsMock as unknown as GradingQuestionType[]}
             />,
         );
 
@@ -243,7 +307,7 @@ describe('AttemptReportView', () => {
                     ...attemptMock,
                     itemOverrides: {}, // still empty from server
                 }}
-                questions={questionsMock as any}
+                questions={questionsMock as unknown as GradingQuestionType[]}
             />,
         );
 
@@ -273,7 +337,7 @@ describe('AttemptReportView', () => {
                         },
                     },
                 }}
-                questions={questionsMock as any}
+                questions={questionsMock as unknown as GradingQuestionType[]}
             />,
         );
 
@@ -282,6 +346,8 @@ describe('AttemptReportView', () => {
 
         // Check if value is updated with the new server reason
         expect((screen.getByLabelText('Override Score') as HTMLInputElement).value).toBe('3');
-        expect((screen.getByLabelText('Override Reason') as HTMLInputElement).value).toBe('Server Reason');
+        expect((screen.getByLabelText('Override Reason') as HTMLInputElement).value).toBe(
+            'Server Reason',
+        );
     });
 });

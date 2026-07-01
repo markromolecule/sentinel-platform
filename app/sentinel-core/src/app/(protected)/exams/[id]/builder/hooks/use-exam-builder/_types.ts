@@ -55,6 +55,7 @@ export type UseExamBuilderResult = {
     handleImportQuestions: (questions: ExamQuestion[], sectionId?: string) => void;
     handleToggleExamSetting: (key: keyof ExamSettings, value: boolean) => void;
     handleToggleLobbyAdmissionMode: (enabled: boolean) => void;
+    handleToggleReleaseScoreMode: (enabled: boolean) => void;
     handleUpdateTitle: (title: string) => Promise<boolean>;
     handleBackFromBuilder: () => void;
     handleSave: () => Promise<void>;

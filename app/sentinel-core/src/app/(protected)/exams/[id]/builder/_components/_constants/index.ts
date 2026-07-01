@@ -18,7 +18,7 @@ export type ExamRuleToggleOption =
       }
     | {
           kind: 'configuration';
-          key: 'lobbyAdmissionMode';
+          key: 'lobbyAdmissionMode' | 'releaseScoreMode';
           label: string;
       };
 
@@ -28,6 +28,7 @@ export const TOGGLE_OPTIONS: ExamRuleToggleOption[] = [
     { kind: 'setting', key: 'allowReview', label: 'Allow Review' },
     { kind: 'setting', key: 'randomizeChoices', label: 'Randomize Choices' },
     { kind: 'configuration', key: 'lobbyAdmissionMode', label: 'Require Instructor Admit' },
+    { kind: 'configuration', key: 'releaseScoreMode', label: 'Auto Release Scores' },
 ];
 
 export function getExamRuleToggleState(args: {
@@ -36,7 +37,11 @@ export function getExamRuleToggleState(args: {
     configuration: ExamConfiguration;
 }) {
     if (args.option.kind === 'configuration') {
-        return args.configuration.lobbyAdmissionMode === 'INSTRUCTOR_GATED';
+        if (args.option.key === 'lobbyAdmissionMode') {
+            return args.configuration.lobbyAdmissionMode === 'INSTRUCTOR_GATED';
+        }
+
+        return (args.configuration.releaseScoreMode ?? 'AUTO_RELEASE') === 'AUTO_RELEASE';
     }
 
     return args.settings[args.option.key];
@@ -47,9 +52,15 @@ export function applyExamRuleToggle(args: {
     checked: boolean;
     onToggleSetting: (key: keyof ExamSettings, checked: boolean) => void;
     onToggleLobbyAdmissionMode: (checked: boolean) => void;
+    onToggleReleaseScoreMode: (checked: boolean) => void;
 }) {
     if (args.option.kind === 'configuration') {
-        args.onToggleLobbyAdmissionMode(args.checked);
+        if (args.option.key === 'lobbyAdmissionMode') {
+            args.onToggleLobbyAdmissionMode(args.checked);
+            return;
+        }
+
+        args.onToggleReleaseScoreMode(args.checked);
         return;
     }
 
@@ -81,6 +92,14 @@ export function getSystemConfigurationRows(configuration?: ExamConfiguration) {
                     ? 'Instructor admit required'
                     : 'Automatic entry',
             icon: UserCheck,
+        },
+        {
+            label: 'Score Release',
+            value:
+                (configuration.releaseScoreMode ?? 'AUTO_RELEASE') === 'AUTO_RELEASE'
+                    ? 'Immediately after submit'
+                    : 'After instructor finalization',
+            icon: Clock3,
         },
         {
             label: 'Strict Mode',

@@ -8,6 +8,7 @@ import { useLobbyReadiness } from './use-lobby-readiness';
 import { useLobbyActions } from './use-lobby-actions';
 import type { ExamConfig, ExamData } from '@sentinel/shared/types';
 import type { StudentExamMediaPipeSandboxLike } from '../../_lib/student-exam-flow';
+import type { ExamLobbyAdmissionStatus } from '@sentinel/services';
 
 export function useLobbyState(args: {
     examId: string;
@@ -19,6 +20,7 @@ export function useLobbyState(args: {
     const { examId, exam, configuration, mediaPipeSandbox, refetchExam } = args;
     const apiClient = useApi();
     const [isAdmissionPendingRefresh, setIsAdmissionPendingRefresh] = useState(false);
+    const [admissionStatus, setAdmissionStatus] = useState<ExamLobbyAdmissionStatus | null>(null);
 
     // 1. Core Timer
     const { currentTime, countdownLabel } = useLobbyTimer(exam?.runtimeAccess);
@@ -39,7 +41,6 @@ export function useLobbyState(args: {
 
     // 4. Derived Access State
     const runtimeAccess = exam?.runtimeAccess;
-    const canEnterExam = Boolean(runtimeAccess?.canStart || runtimeAccess?.canResume);
     const reopenedUntil = runtimeAccess?.reopenedUntil
         ? new Date(runtimeAccess.reopenedUntil)
         : null;
@@ -48,6 +49,25 @@ export function useLobbyState(args: {
         configuration.lobbyAdmissionMode === 'INSTRUCTOR_GATED' && !runtimeAccess?.canResume;
     const hasResumableAttempt = Boolean(
         runtimeAccess?.canResume && runtimeAccess?.hasActiveAttempt,
+    );
+    const isApprovedRuntimeAccess = runtimeAccess?.state === 'lobby_approved';
+    const isHardRuntimeBlock =
+        runtimeAccess?.state === 'closed' ||
+        runtimeAccess?.state === 'locked' ||
+        runtimeAccess?.state === 'before_start';
+    const hasApprovedInstructorAdmission =
+        admissionStatus === 'APPROVED' ||
+        (admissionStatus === null && isApprovedRuntimeAccess);
+    const hasFreshInstructorAdmission =
+        !requiresInstructorAdmission ||
+        hasResumableAttempt ||
+        (hasApprovedInstructorAdmission && !isHardRuntimeBlock);
+    const canEnterExam = Boolean(
+        hasResumableAttempt ||
+            (hasFreshInstructorAdmission &&
+                (runtimeAccess?.canStart ||
+                    isApprovedRuntimeAccess ||
+                    admissionStatus === 'APPROVED')),
     );
 
     useEffect(() => {
@@ -74,6 +94,8 @@ export function useLobbyState(args: {
                 return;
             }
 
+            setAdmissionStatus(admission.status);
+
             if (admission.status === 'APPROVED') {
                 await refreshApprovedAccess();
             }
@@ -85,8 +107,13 @@ export function useLobbyState(args: {
             };
         }
 
-        if (!requiresInstructorAdmission || runtimeAccess?.canStart) {
+        if (!requiresInstructorAdmission) {
             void checkIntoExamLobby(apiClient, examId)
+                .then((admission) => {
+                    if (isMounted) {
+                        setAdmissionStatus(admission.status);
+                    }
+                })
                 .catch(() => null)
                 .finally(() => {
                     if (isMounted) {
@@ -117,7 +144,6 @@ export function useLobbyState(args: {
         hasResumableAttempt,
         refetchExam,
         requiresInstructorAdmission,
-        runtimeAccess?.canStart,
     ]);
 
     // 5. Actions Orchestration
@@ -139,6 +165,7 @@ export function useLobbyState(args: {
         reopenedUntil,
         storedSession,
         mediaPipeLobbyMessage,
+        admissionStatus,
         isStartingSession,
         isAdmissionPendingRefresh,
         handleEnterExam,

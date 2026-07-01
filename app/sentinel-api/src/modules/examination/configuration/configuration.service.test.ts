@@ -49,6 +49,7 @@ describe('ConfigurationService', () => {
 
             expect(result.configuration).toEqual({
                 lobbyAdmissionMode: 'AUTOMATIC',
+                releaseScoreMode: 'AUTO_RELEASE',
                 maxReconnectAttempts: 3,
                 strictMode: true,
                 screenLock: true,
@@ -96,6 +97,7 @@ describe('ConfigurationService', () => {
                     },
                     configuration: {
                         lobbyAdmissionMode: 'INSTRUCTOR_GATED',
+                        releaseScoreMode: 'MANUAL_RELEASE',
                         maxReconnectAttempts: 5,
                         strictMode: false,
                         screenLock: false,
@@ -136,6 +138,7 @@ describe('ConfigurationService', () => {
 
             expect(updated.configuration).toEqual({
                 lobbyAdmissionMode: 'INSTRUCTOR_GATED',
+                releaseScoreMode: 'MANUAL_RELEASE',
                 maxReconnectAttempts: 5,
                 strictMode: false,
                 screenLock: false,

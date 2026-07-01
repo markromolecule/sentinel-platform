@@ -92,6 +92,7 @@ export function useExamBuilder(): UseExamBuilderResult {
         isUpdatingTitle: workspaceActions.isUpdatingTitle,
         handleToggleExamSetting: workspaceActions.handleToggleExamSetting,
         handleToggleLobbyAdmissionMode: workspaceActions.handleToggleLobbyAdmissionMode,
+        handleToggleReleaseScoreMode: workspaceActions.handleToggleReleaseScoreMode,
         handleUpdateTitle: workspaceActions.handleUpdateTitle,
         handleSave: workspaceActions.handleSave,
         handlePublish: workspaceActions.handlePublish,

@@ -1,21 +1,18 @@
 'use client';
 
-import { render, screen } from '@testing-library/react';
+import { cleanup, render, screen } from '@testing-library/react';
 import type { ReactNode } from 'react';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import StudentExamLobbyPage from './page';
 
-const {
-    mockLobbyCountQuery,
-    mockLobbyPresence,
-    mockStudentExamData,
-    mockLobbyState,
-} = vi.hoisted(() => ({
-    mockLobbyCountQuery: vi.fn(),
-    mockLobbyPresence: vi.fn(),
-    mockStudentExamData: vi.fn(),
-    mockLobbyState: vi.fn(),
-}));
+const { mockLobbyCountQuery, mockLobbyPresence, mockStudentExamData, mockLobbyState } = vi.hoisted(
+    () => ({
+        mockLobbyCountQuery: vi.fn(),
+        mockLobbyPresence: vi.fn(),
+        mockStudentExamData: vi.fn(),
+        mockLobbyState: vi.fn(),
+    }),
+);
 
 vi.mock('@sentinel/hooks', () => ({
     useExamLobbyCountQuery: (examId: string) => mockLobbyCountQuery(examId),
@@ -50,6 +47,10 @@ vi.mock('./_hooks/use-lobby-state', () => ({
 }));
 
 describe('StudentExamLobbyPage', () => {
+    afterEach(() => {
+        cleanup();
+    });
+
     beforeEach(() => {
         vi.clearAllMocks();
 
@@ -92,6 +93,7 @@ describe('StudentExamLobbyPage', () => {
             reopenedUntil: null,
             storedSession: null,
             mediaPipeLobbyMessage: null,
+            admissionStatus: 'WAITING',
             isStartingSession: false,
             isAdmissionPendingRefresh: false,
             handleEnterExam: vi.fn(),
@@ -99,9 +101,11 @@ describe('StudentExamLobbyPage', () => {
     });
 
     it('prefers the API lobby count when presence is higher and shows reconnect used versus remaining', () => {
+        const refetch = vi.fn();
         mockLobbyCountQuery.mockReturnValue({
             data: { count: 3 },
             isError: false,
+            refetch,
         });
         mockLobbyPresence.mockReturnValue({
             presenceCount: 7,
@@ -113,12 +117,17 @@ describe('StudentExamLobbyPage', () => {
         expect(screen.queryByText('7 students')).toBeNull();
         expect(screen.getByText('1 used • 2 left')).toBeTruthy();
         expect(screen.getByText('Reconnect attempts used: 1 of 3. Remaining: 2.')).toBeTruthy();
+        expect(
+            screen.getByRole('button', { name: /waiting for approval/i }).hasAttribute('disabled'),
+        ).toBe(true);
+        expect(refetch).toHaveBeenCalled();
     });
 
     it('falls back to presence only when the API count is unavailable', () => {
         mockLobbyCountQuery.mockReturnValue({
             data: undefined,
             isError: true,
+            refetch: vi.fn(),
         });
         mockLobbyPresence.mockReturnValue({
             presenceCount: 4,
@@ -127,5 +136,194 @@ describe('StudentExamLobbyPage', () => {
         render(<StudentExamLobbyPage />);
 
         expect(screen.getByText('4 students')).toBeTruthy();
+    });
+
+    it('uses presence count immediately while the API count is still loading', () => {
+        mockLobbyCountQuery.mockReturnValue({
+            data: undefined,
+            isError: false,
+            refetch: vi.fn(),
+        });
+        mockLobbyPresence.mockReturnValue({
+            presenceCount: 5,
+        });
+
+        render(<StudentExamLobbyPage />);
+
+        expect(screen.getByText('5 students')).toBeTruthy();
+        expect(screen.queryByText('Syncing')).toBeNull();
+    });
+
+    it('shows a syncing count fallback when neither API nor presence count is available', () => {
+        mockLobbyCountQuery.mockReturnValue({
+            data: undefined,
+            isError: false,
+            refetch: vi.fn(),
+        });
+        mockLobbyPresence.mockReturnValue({
+            presenceCount: 0,
+        });
+
+        render(<StudentExamLobbyPage />);
+
+        expect(screen.getByText('Syncing')).toBeTruthy();
+    });
+
+    it('falls back to configured reconnect policy when runtime access has placeholder zero values', () => {
+        mockLobbyCountQuery.mockReturnValue({
+            data: { count: 2 },
+            isError: false,
+            refetch: vi.fn(),
+        });
+        mockLobbyPresence.mockReturnValue({
+            presenceCount: 2,
+        });
+        mockLobbyState.mockReturnValue({
+            countdownLabel: '00:10:00',
+            hasCompletedFlow: true,
+            runtimeAccess: {
+                state: 'lobby_waiting',
+                reasonCode: 'LOBBY_WAITING',
+                message: 'Waiting for approval.',
+                canStart: false,
+                canResume: false,
+                hasActiveAttempt: false,
+                reconnectAttemptsRemaining: 0,
+                totalReconnectAttempts: 0,
+            },
+            canEnterExam: false,
+            reopenedUntil: null,
+            storedSession: null,
+            mediaPipeLobbyMessage: null,
+            admissionStatus: 'WAITING',
+            isStartingSession: false,
+            isAdmissionPendingRefresh: false,
+            handleEnterExam: vi.fn(),
+        });
+
+        render(<StudentExamLobbyPage />);
+
+        expect(screen.getByText('0 used • 3 left')).toBeTruthy();
+        expect(screen.getByText('Reconnect attempts used: 0 of 3. Remaining: 3.')).toBeTruthy();
+        expect(screen.queryByText('0 used • 0 left')).toBeNull();
+        expect(screen.queryByText('Reconnect attempts used: 0 of 0. Remaining: 0.')).toBeNull();
+    });
+
+    it('enables continue when runtime access allows entry', () => {
+        mockLobbyCountQuery.mockReturnValue({
+            data: { count: 2 },
+            isError: false,
+            refetch: vi.fn(),
+        });
+        mockLobbyPresence.mockReturnValue({
+            presenceCount: 2,
+        });
+        mockLobbyState.mockReturnValue({
+            countdownLabel: '00:10:00',
+            hasCompletedFlow: true,
+            runtimeAccess: {
+                state: 'lobby_approved',
+                reasonCode: 'LOBBY_APPROVED',
+                message: 'Approved for entry.',
+                canStart: true,
+                canResume: false,
+                hasActiveAttempt: false,
+                reconnectAttemptsRemaining: 2,
+                totalReconnectAttempts: 3,
+            },
+            canEnterExam: true,
+            reopenedUntil: null,
+            storedSession: null,
+            mediaPipeLobbyMessage: null,
+            admissionStatus: 'APPROVED',
+            isStartingSession: false,
+            isAdmissionPendingRefresh: false,
+            handleEnterExam: vi.fn(),
+        });
+
+        render(<StudentExamLobbyPage />);
+
+        expect(
+            screen.getByRole('button', { name: /continue to attempt/i }).hasAttribute('disabled'),
+        ).toBe(false);
+    });
+
+    it('keeps continue enabled when approved admission outruns stale lobby runtime access', () => {
+        mockLobbyCountQuery.mockReturnValue({
+            data: { count: 2 },
+            isError: false,
+            refetch: vi.fn(),
+        });
+        mockLobbyPresence.mockReturnValue({
+            presenceCount: 2,
+        });
+        mockLobbyState.mockReturnValue({
+            countdownLabel: '00:10:00',
+            hasCompletedFlow: true,
+            runtimeAccess: {
+                state: 'lobby_waiting',
+                reasonCode: 'LOBBY_WAITING',
+                message: 'Waiting for approval.',
+                canStart: false,
+                canResume: false,
+                hasActiveAttempt: false,
+                reconnectAttemptsRemaining: 2,
+                totalReconnectAttempts: 3,
+            },
+            canEnterExam: true,
+            reopenedUntil: null,
+            storedSession: null,
+            mediaPipeLobbyMessage: null,
+            admissionStatus: 'APPROVED',
+            isStartingSession: false,
+            isAdmissionPendingRefresh: true,
+            handleEnterExam: vi.fn(),
+        });
+
+        render(<StudentExamLobbyPage />);
+
+        expect(
+            screen.getByRole('button', { name: /continue to attempt/i }).hasAttribute('disabled'),
+        ).toBe(false);
+    });
+
+    it('keeps the primary action disabled when admission is waiting despite stale start access', () => {
+        mockLobbyCountQuery.mockReturnValue({
+            data: { count: 2 },
+            isError: false,
+            refetch: vi.fn(),
+        });
+        mockLobbyPresence.mockReturnValue({
+            presenceCount: 2,
+        });
+        mockLobbyState.mockReturnValue({
+            countdownLabel: '00:10:00',
+            hasCompletedFlow: true,
+            runtimeAccess: {
+                state: 'open',
+                reasonCode: 'OPEN',
+                message: 'Exam is open.',
+                canStart: true,
+                canResume: false,
+                hasActiveAttempt: false,
+                reconnectAttemptsRemaining: 2,
+                totalReconnectAttempts: 3,
+            },
+            canEnterExam: true,
+            reopenedUntil: null,
+            storedSession: null,
+            mediaPipeLobbyMessage: null,
+            admissionStatus: 'WAITING',
+            isStartingSession: false,
+            isAdmissionPendingRefresh: false,
+            handleEnterExam: vi.fn(),
+        });
+
+        render(<StudentExamLobbyPage />);
+
+        expect(
+            screen.getByRole('button', { name: /waiting for approval/i }).hasAttribute('disabled'),
+        ).toBe(true);
+        expect(screen.queryByRole('button', { name: /continue to attempt/i })).toBeNull();
     });
 });

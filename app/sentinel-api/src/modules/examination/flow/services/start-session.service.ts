@@ -66,49 +66,50 @@ export async function startSessionService({
         };
     }
 
-    // Telemetry logging and notifications
-    try {
-        await LogsService.createLog(dbClient, {
-            userId: studentId,
-            action: session.isResumed ? 'exam.session_resumed' : 'exam.session_started',
-            resourceType: 'exam_attempt',
-            resourceId: session.sessionId,
-            activeInstitutionId: accessCheck.context.institutionId ?? '',
-            details: {
-                examId,
-                isResumed: session.isResumed,
-            },
-        });
-
-        if (accessCheck.context.institutionId) {
-            const exam = await dbClient
-                .selectFrom('exams')
-                .select(['title'])
-                .where('exam_id', '=', examId)
-                .executeTakeFirst();
-            const examTitle = exam?.title || 'Exam';
-
-            await ActivityNotificationService.notifyInstitutionActivityCreated({
-                dbClient,
-                actorUserId: studentId,
-                institutionId: accessCheck.context.institutionId,
-                targetType: 'EXAM_ATTEMPT',
-                targetId: session.sessionId,
-                targetLabel: examTitle,
-                title: session.isResumed ? 'Exam attempt resumed' : 'Exam attempt started',
-                message: `Exam attempt ${session.isResumed ? 'resumed' : 'started'} for "${examTitle}".`,
-                sourceModule: 'exams',
-                sourceAction: session.isResumed ? 'resume-attempt' : 'start-attempt',
-                metadata: {
+    void (async () => {
+        try {
+            await LogsService.createLog(dbClient, {
+                userId: studentId,
+                action: session.isResumed ? 'exam.session_resumed' : 'exam.session_started',
+                resourceType: 'exam_attempt',
+                resourceId: session.sessionId,
+                activeInstitutionId: accessCheck.context.institutionId ?? '',
+                details: {
                     examId,
                     isResumed: session.isResumed,
-                    attemptId: session.sessionId,
                 },
             });
+
+            if (accessCheck.context.institutionId) {
+                const exam = await dbClient
+                    .selectFrom('exams')
+                    .select(['title'])
+                    .where('exam_id', '=', examId)
+                    .executeTakeFirst();
+                const examTitle = exam?.title || 'Exam';
+
+                await ActivityNotificationService.notifyInstitutionActivityCreated({
+                    dbClient,
+                    actorUserId: studentId,
+                    institutionId: accessCheck.context.institutionId,
+                    targetType: 'EXAM_ATTEMPT',
+                    targetId: session.sessionId,
+                    targetLabel: examTitle,
+                    title: session.isResumed ? 'Exam attempt resumed' : 'Exam attempt started',
+                    message: `Exam attempt ${session.isResumed ? 'resumed' : 'started'} for "${examTitle}".`,
+                    sourceModule: 'exams',
+                    sourceAction: session.isResumed ? 'resume-attempt' : 'start-attempt',
+                    metadata: {
+                        examId,
+                        isResumed: session.isResumed,
+                        attemptId: session.sessionId,
+                    },
+                });
+            }
+        } catch (logErr) {
+            console.error('Failed to log or notify exam session started/resumed:', logErr);
         }
-    } catch (logErr) {
-        console.error('Failed to log or notify exam session started/resumed:', logErr);
-    }
+    })();
 
     return {
         sessionId: session.sessionId,

@@ -1,5 +1,5 @@
-import { fireEvent, render, screen } from '@testing-library/react';
-import { describe, expect, it } from 'vitest';
+import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { afterEach, describe, expect, it } from 'vitest';
 import { FormProvider, useForm, type UseFormReturn } from 'react-hook-form';
 import type { ExamConfigurationState } from '@sentinel/services';
 import { ExamRulesSection } from './exam-rules-section';
@@ -13,6 +13,7 @@ const defaultValues: ExamConfigurationState = {
     },
     configuration: {
         lobbyAdmissionMode: 'AUTOMATIC',
+        releaseScoreMode: 'AUTO_RELEASE',
         maxReconnectAttempts: 3,
         strictMode: true,
         screenLock: true,
@@ -43,6 +44,10 @@ const defaultValues: ExamConfigurationState = {
 };
 
 describe('ExamRulesSection', () => {
+    afterEach(() => {
+        cleanup();
+    });
+
     it('stores instructor admit as a lobby admission mode', () => {
         let formRef: UseFormReturn<ExamConfigurationState> | undefined;
 
@@ -62,5 +67,26 @@ describe('ExamRulesSection', () => {
         fireEvent.click(screen.getByRole('switch', { name: /require instructor admit/i }));
 
         expect(formRef?.getValues('configuration.lobbyAdmissionMode')).toBe('INSTRUCTOR_GATED');
+    });
+
+    it('stores score release mode through the auto release toggle', () => {
+        let formRef: UseFormReturn<ExamConfigurationState> | undefined;
+
+        function Harness() {
+            const form = useForm<ExamConfigurationState>({ defaultValues });
+            formRef = form;
+
+            return (
+                <FormProvider {...form}>
+                    <ExamRulesSection />
+                </FormProvider>
+            );
+        }
+
+        render(<Harness />);
+
+        fireEvent.click(screen.getByRole('switch', { name: /auto-release student score/i }));
+
+        expect(formRef?.getValues('configuration.releaseScoreMode')).toBe('MANUAL_RELEASE');
     });
 });

@@ -39,6 +39,13 @@ const EXAM_RULE_OPTIONS: ExamRuleOption[] = [
         getChecked: (value: unknown) => value === 'INSTRUCTOR_GATED',
         getValue: (checked: boolean) => (checked ? 'INSTRUCTOR_GATED' : 'AUTOMATIC'),
     },
+    {
+        name: 'configuration.releaseScoreMode' as const,
+        label: 'Auto-release student scores',
+        description: 'Immediately release grades to students upon exam submission.',
+        getChecked: (value: unknown) => value !== 'MANUAL_RELEASE',
+        getValue: (checked: boolean) => (checked ? 'AUTO_RELEASE' : 'MANUAL_RELEASE'),
+    },
 ];
 
 export function ExamRulesSection() {

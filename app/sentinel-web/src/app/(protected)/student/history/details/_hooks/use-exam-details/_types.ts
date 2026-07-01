@@ -1,7 +1,8 @@
 import { ExamHistory } from '@sentinel/shared/types';
 import type { AttemptGradingDetailType, GradingQuestionType } from '@sentinel/shared';
 
-export type StudentHistoryReportAvailability = 'available' | 'grading_in_progress' | 'unavailable';
+export type StudentHistoryReportAvailability =
+    'available' | 'grading_in_progress' | 'unavailable' | 'loading_report';
 
 export interface UseExamDetailsReturn {
     examId: string | null;

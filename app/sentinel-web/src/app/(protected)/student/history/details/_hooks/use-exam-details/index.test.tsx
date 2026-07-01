@@ -5,9 +5,10 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { ApiError } from '@sentinel/services';
 import { useExamDetails } from './index';
 
-const { mockSearchParams } = vi.hoisted(() => ({
+const { mockSearchParams, searchParamValues } = vi.hoisted(() => ({
+    searchParamValues: new Map<string, string | null>([['attemptId', 'attempt-1']]),
     mockSearchParams: {
-        get: vi.fn((key: string) => (key === 'attemptId' ? 'attempt-1' : null)),
+        get: vi.fn((key: string) => searchParamValues.get(key) ?? null),
     },
 }));
 
@@ -20,9 +21,9 @@ vi.mock('next/navigation', () => ({
 }));
 
 vi.mock('@sentinel/hooks', () => ({
-    useExamHistoryDetailQuery: (...args: any[]) => mockHistoryDetailQuery(...args),
-    useExamQuery: (...args: any[]) => mockExamQuery(...args),
-    useAttemptReportQuery: (...args: any[]) => mockAttemptReportQuery(...args),
+    useExamHistoryDetailQuery: (...args: unknown[]) => mockHistoryDetailQuery(...args),
+    useExamQuery: (...args: unknown[]) => mockExamQuery(...args),
+    useAttemptReportQuery: (...args: unknown[]) => mockAttemptReportQuery(...args),
 }));
 
 function createWrapper() {
@@ -42,6 +43,8 @@ function createWrapper() {
 describe('useExamDetails', () => {
     beforeEach(() => {
         vi.clearAllMocks();
+        searchParamValues.clear();
+        searchParamValues.set('attemptId', 'attempt-1');
         mockHistoryDetailQuery.mockReturnValue({
             data: {
                 id: 'attempt-1',
@@ -70,6 +73,11 @@ describe('useExamDetails', () => {
         });
         mockExamQuery.mockReturnValue({
             data: undefined,
+            isLoading: false,
+        });
+        mockAttemptReportQuery.mockReturnValue({
+            data: undefined,
+            error: null,
             isLoading: false,
         });
     });
@@ -137,6 +145,77 @@ describe('useExamDetails', () => {
         });
 
         expect(result.current.reportAvailability).toBe('grading_in_progress');
+        expect(result.current.report).toBeUndefined();
+    });
+
+    it('does not require a report request to finish loading when no attempt id exists', async () => {
+        searchParamValues.clear();
+        searchParamValues.set('examId', 'exam-1');
+        mockHistoryDetailQuery.mockReturnValue({
+            data: undefined,
+            isLoading: false,
+        });
+        mockExamQuery.mockReturnValue({
+            data: {
+                id: 'exam-1',
+                attemptId: null,
+                title: 'Upcoming Exam',
+                subject: 'Science',
+                section: null,
+                scheduledDate: '2026-06-26T10:00:00.000Z',
+                publishedAt: null,
+                endDateTime: '2026-06-26T11:00:00.000Z',
+                completedAt: null,
+                score: null,
+                totalScore: null,
+                percentage: null,
+                status: 'upcoming',
+                passingScore: 70,
+                timeSpentMinutes: null,
+                cheated: false,
+                cheatingType: null,
+                incidentCount: 0,
+                duration: 60,
+                room: null,
+            },
+            isLoading: false,
+        });
+        mockAttemptReportQuery.mockReturnValue({
+            data: undefined,
+            error: null,
+            isLoading: true,
+        });
+
+        const { result } = renderHook(() => useExamDetails(), {
+            wrapper: createWrapper(),
+        });
+
+        await waitFor(() => {
+            expect(result.current.isLoading).toBe(false);
+        });
+
+        expect(result.current.attemptId).toBeNull();
+        expect(result.current.historyItem?.examId).toBe('exam-1');
+        expect(result.current.reportAvailability).toBe('unavailable');
+        expect(mockAttemptReportQuery).toHaveBeenCalledWith(null);
+    });
+
+    it('exposes loading_report while the attempt report is still loading', async () => {
+        mockAttemptReportQuery.mockReturnValue({
+            data: undefined,
+            error: null,
+            isLoading: true,
+        });
+
+        const { result } = renderHook(() => useExamDetails(), {
+            wrapper: createWrapper(),
+        });
+
+        await waitFor(() => {
+            expect(result.current.isLoading).toBe(false);
+        });
+
+        expect(result.current.reportAvailability).toBe('loading_report');
         expect(result.current.report).toBeUndefined();
     });
 });

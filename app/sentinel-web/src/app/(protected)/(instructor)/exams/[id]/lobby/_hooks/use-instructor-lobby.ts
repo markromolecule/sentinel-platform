@@ -46,6 +46,18 @@ export function useInstructorLobby(examId: string) {
         }
 
         setIsUpdatingLobbyAdmissions(true);
+        const previousAdmissions = lobbyAdmissions;
+        setLobbyAdmissions((currentAdmissions) =>
+            currentAdmissions.map((student) =>
+                studentIds.includes(student.studentId)
+                    ? {
+                          ...student,
+                          status,
+                          decidedAt: new Date().toISOString(),
+                      }
+                    : student,
+            ),
+        );
 
         try {
             const result = await updateExamLobbyAdmissions(apiClient, {
@@ -59,6 +71,7 @@ export function useInstructorLobby(examId: string) {
             );
             await refreshLobbyAdmissions();
         } catch (error) {
+            setLobbyAdmissions(previousAdmissions);
             const message =
                 error instanceof Error ? error.message : 'Failed to update lobby admissions.';
             toast.error(message);

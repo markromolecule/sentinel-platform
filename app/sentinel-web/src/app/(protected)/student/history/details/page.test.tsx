@@ -1,6 +1,6 @@
 'use client';
 
-import { cleanup, render, screen } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import HistoryDetailsPage from './page';
 
@@ -14,6 +14,11 @@ vi.mock('next/link', () => ({
 
 vi.mock('@/app/(protected)/student/history/details/_hooks/use-exam-details', () => ({
     useExamDetails: () => mockUseExamDetails(),
+}));
+
+vi.mock('@/app/(protected)/student/history/details/_components/attempt-report-dialog', () => ({
+    AttemptReportDialog: ({ open }: { open: boolean }) =>
+        open ? <div>Detailed Report Dialog</div> : null,
 }));
 
 vi.mock('@/app/(protected)/student/history/details/_components/exam-detail-stats', () => ({
@@ -36,10 +41,6 @@ vi.mock('@/components/sidebar/student/CheatingReport', () => ({
     CheatingReport: () => <div>Cheating Report</div>,
 }));
 
-vi.mock('@/features/exams/reports', () => ({
-    AttemptReportView: () => <div>Attempt Report View</div>,
-}));
-
 afterEach(() => {
     cleanup();
 });
@@ -49,7 +50,7 @@ describe('HistoryDetailsPage', () => {
         vi.clearAllMocks();
     });
 
-    it('renders the readonly attempt report when finalized data is available', async () => {
+    it('shows released report copy and opens the report dialog when data is available', async () => {
         mockUseExamDetails.mockReturnValue({
             historyItem: {
                 examTitle: 'Final Exam',
@@ -59,12 +60,12 @@ describe('HistoryDetailsPage', () => {
                 dueAt: null,
                 availableAt: null,
                 timeSpent: 45,
-                score: 90,
-                totalScore: 100,
-                percentage: 90,
+                score: null,
+                totalScore: null,
+                percentage: null,
                 cheated: false,
                 cheatingType: null,
-                result: 'passed',
+                result: null,
             },
             report: {
                 attempt: {},
@@ -76,8 +77,13 @@ describe('HistoryDetailsPage', () => {
 
         render(<HistoryDetailsPage />);
 
-        expect(await screen.findByText('Finalized Report Ready')).toBeTruthy();
-        expect(screen.getByText('Attempt Report View')).toBeTruthy();
+        expect(await screen.findByText('Detailed Report Available')).toBeTruthy();
+        expect(screen.queryByText('Finalized Report Ready')).toBeNull();
+        expect(screen.queryByText('Attempt Report View')).toBeNull();
+
+        fireEvent.click(screen.getByRole('button', { name: /view detailed report/i }));
+
+        expect(screen.getByText('Detailed Report Dialog')).toBeTruthy();
     });
 
     it('shows the in-review state when grading is still in progress', async () => {

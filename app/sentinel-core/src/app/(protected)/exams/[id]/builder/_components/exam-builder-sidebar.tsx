@@ -26,6 +26,7 @@ export function ExamBuilderSidebar({
     configuration,
     handleToggleExamSetting,
     handleToggleLobbyAdmissionMode,
+    handleToggleReleaseScoreMode,
 }: ExamBuilderSidebarProps) {
     const params = useParams();
     const id = params?.id as string;
@@ -67,6 +68,7 @@ export function ExamBuilderSidebar({
                                     checked,
                                     onToggleSetting: handleToggleExamSetting,
                                     onToggleLobbyAdmissionMode: handleToggleLobbyAdmissionMode,
+                                    onToggleReleaseScoreMode: handleToggleReleaseScoreMode,
                                 })
                             }
                         />

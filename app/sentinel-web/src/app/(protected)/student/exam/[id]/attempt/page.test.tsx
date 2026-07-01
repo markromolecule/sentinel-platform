@@ -124,7 +124,11 @@ vi.mock('@/features/exams/_components/engine', () => ({
     type: {},
     hasAnswer: (value: unknown) => value !== null && value !== undefined && value !== '',
     formatTimer: (seconds: number) => `${seconds}s`,
-    getExamContextDetails: () => null,
+    getRuntimePassageDetails: () => ({
+        title: 'Passage',
+        description: '',
+        body: '<p>Passage body</p>',
+    }),
     ExamAttemptRuntimeHeader: ({ onSubmit }: { onSubmit: () => void }) => (
         <button onClick={onSubmit}>Turn in exam</button>
     ),
