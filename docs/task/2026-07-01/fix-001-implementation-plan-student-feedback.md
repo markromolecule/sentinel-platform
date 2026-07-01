@@ -69,68 +69,84 @@ Concrete next steps:
 
 **Goal:** Allow real students to submit feedback for their own completed attempts without being blocked by stale or missing `feedback:create` RBAC mappings.
 
-- [ ] In `app/sentinel-api/src/modules/general/feedbacks/controllers/create-feedback.controller.ts`, remove the `requireActivePermission(c, 'feedback:create', ...)` call and its unused import.
-- [ ] In `app/sentinel-api/src/modules/general/feedbacks/controllers/create-feedback.controller.ts`, keep the existing `user?.id` guard before calling `FeedbackService.createFeedback()`.
-- [ ] In `app/sentinel-api/src/modules/general/feedbacks/services/create-feedback.service.ts`, keep the existing student profile lookup, owned attempt query, completed attempt guard, duplicate feedback guard, and insert call as the authorization source of truth.
-- [ ] Add `app/sentinel-api/src/modules/general/feedbacks/controllers/create-feedback.controller.test.ts`.
-- [ ] Write a controller test that sets `activePermissionKeys` to `[]`, posts valid feedback JSON, and expects `201`.
-- [ ] Write a controller test that omits `user.id`, posts valid feedback JSON, expects `403`, and asserts `FeedbackService.createFeedback()` was not called.
-- [ ] Write a controller test that mocks `FeedbackService.createFeedback()` to throw a `409` duplicate-feedback `HTTPException` and expects a `409` response.
-- [ ] Add `app/sentinel-api/src/modules/general/feedbacks/services/create-feedback.service.test.ts`.
-- [ ] Write a service test that returns `403` when no `students` row exists for the user.
-- [ ] Write a service test that returns `404` when the requested `attemptId` does not belong to the student.
-- [ ] Write a service test that returns `409` when the owned attempt has no `completed_at`.
-- [ ] Write a service test that returns `409` when `exam_feedbacks` already contains the attempt.
-- [ ] Write a service test that inserts feedback for a completed owned attempt, trims `experience`, and returns the serialized feedback record.
+- [x] In `app/sentinel-api/src/modules/general/feedbacks/controllers/create-feedback.controller.ts`, remove the `requireActivePermission(c, 'feedback:create', ...)` call and its unused import.
+- [x] In `app/sentinel-api/src/modules/general/feedbacks/controllers/create-feedback.controller.ts`, keep the existing `user?.id` guard before calling `FeedbackService.createFeedback()`.
+- [x] In `app/sentinel-api/src/modules/general/feedbacks/services/create-feedback.service.ts`, keep the existing student profile lookup, owned attempt query, completed attempt guard, duplicate feedback guard, and insert call as the authorization source of truth.
+- [x] Add `app/sentinel-api/src/modules/general/feedbacks/controllers/create-feedback.controller.test.ts`.
+- [x] Write a controller test that sets `activePermissionKeys` to `[]`, posts valid feedback JSON, and expects `201`.
+- [x] Write a controller test that omits `user.id`, posts valid feedback JSON, expects `403`, and asserts `FeedbackService.createFeedback()` was not called.
+- [x] Write a controller test that mocks `FeedbackService.createFeedback()` to throw a `409` duplicate-feedback `HTTPException` and expects a `409` response.
+- [x] Add `app/sentinel-api/src/modules/general/feedbacks/services/create-feedback.service.test.ts`.
+- [x] Write a service test that returns `403` when no `students` row exists for the user.
+- [x] Write a service test that returns `404` when the requested `attemptId` does not belong to the student.
+- [x] Write a service test that returns `409` when the owned attempt has no `completed_at`.
+- [x] Write a service test that returns `409` when `exam_feedbacks` already contains the attempt.
+- [x] Write a service test that inserts feedback for a completed owned attempt, trims `experience`, and returns the serialized feedback record.
 
 **Migration required:** No — this phase changes route authorization and tests only.
+**Migration applied:** No — existing `exam_feedbacks` schema already covers the feature.
+**Breaking changes:** No — `POST /feedbacks` keeps the same payload and response shape.
+
+<!-- NOTE: Phase 1 validation used `pnpm --dir app/sentinel-api exec vitest run src/modules/general/feedbacks/controllers/create-feedback.controller.test.ts src/modules/general/feedbacks/services/create-feedback.service.test.ts` because `pnpm --dir app/sentinel-api test -- ...` expanded into unrelated failing suites in this workspace. -->
 
 ## Phase 2: Feedback Page UI Compact Alignment
 
 **Goal:** Center the feedback form horizontally and vertically, make it compact, and align the visible details to the current examination.
 
-- [ ] In `app/sentinel-web/src/app/(protected)/student/exam/[id]/feedback/page.tsx`, retain the existing `useCreateFeedbackMutation()` behavior, success redirect, duplicate redirect, error toast, rating validation, missing-attempt validation, and skip link.
-- [ ] In `app/sentinel-web/src/app/(protected)/student/exam/[id]/feedback/page.tsx`, replace the oversized custom wrapper with a compact centered shell using existing `@sentinel/ui` primitives or a local page-level shell.
-- [ ] In `app/sentinel-web/src/app/(protected)/student/exam/[id]/feedback/page.tsx`, show the current examination title from `exam?.title` in the header, with `Post-exam experience` as the fallback.
-- [ ] In `app/sentinel-web/src/app/(protected)/student/exam/[id]/feedback/page.tsx`, reduce vertical spacing, large radius values, and rating control height so the form fits on common laptop and mobile heights.
-- [ ] In `app/sentinel-web/src/app/(protected)/student/exam/[id]/feedback/page.tsx`, keep the optional details textarea capped at `2000` characters and continue sending trimmed `experience` or `null`.
-- [ ] Update `app/sentinel-web/src/app/(protected)/student/exam/[id]/feedback/page.test.tsx`.
-- [ ] Write a page test that verifies the exam title appears in the feedback header.
-- [ ] Keep or update the rating-required test to verify submit is blocked when no rating is selected.
-- [ ] Keep or update the successful-submit test to verify `{ attemptId, rating, experience }` is sent and the thank-you redirect URL is unchanged.
-- [ ] Add a missing-`attemptId` test that verifies `Attempt information is missing. Return to your exam history.` appears and no mutation runs.
+- [x] In `app/sentinel-web/src/app/(protected)/student/exam/[id]/feedback/page.tsx`, retain the existing `useCreateFeedbackMutation()` behavior, success redirect, duplicate redirect, error toast, rating validation, missing-attempt validation, and skip link.
+- [x] In `app/sentinel-web/src/app/(protected)/student/exam/[id]/feedback/page.tsx`, replace the oversized custom wrapper with a compact centered shell using existing `@sentinel/ui` primitives or a local page-level shell.
+- [x] In `app/sentinel-web/src/app/(protected)/student/exam/[id]/feedback/page.tsx`, show the current examination title from `exam?.title` in the header, with `Post-exam experience` as the fallback.
+- [x] In `app/sentinel-web/src/app/(protected)/student/exam/[id]/feedback/page.tsx`, reduce vertical spacing, large radius values, and rating control height so the form fits on common laptop and mobile heights.
+- [x] In `app/sentinel-web/src/app/(protected)/student/exam/[id]/feedback/page.tsx`, keep the optional details textarea capped at `2000` characters and continue sending trimmed `experience` or `null`.
+- [x] Update `app/sentinel-web/src/app/(protected)/student/exam/[id]/feedback/page.test.tsx`.
+- [x] Write a page test that verifies the exam title appears in the feedback header.
+- [x] Keep or update the rating-required test to verify submit is blocked when no rating is selected.
+- [x] Keep or update the successful-submit test to verify `{ attemptId, rating, experience }` is sent and the thank-you redirect URL is unchanged.
+- [x] Add a missing-`attemptId` test that verifies `Attempt information is missing. Return to your exam history.` appears and no mutation runs.
 
 **Migration required:** No — this phase changes frontend layout and tests only.
+**Migration applied:** No — frontend-only page and test updates.
+**Breaking changes:** No — submit payload, redirect flow, and links remain the same.
 
 ## Phase 3: Thank-You Page Style Parity
 
 **Goal:** Make the thank-you page visually match the feedback page component style.
 
-- [ ] In `app/sentinel-web/src/app/(protected)/student/exam/[id]/feedback/thank-you/page.tsx`, reuse the same compact centered shell/card styling from the feedback page.
-- [ ] In `app/sentinel-web/src/app/(protected)/student/exam/[id]/feedback/thank-you/page.tsx`, read `exam` from `useStudentExamData()` and show `exam?.title` in the same exam-context position as the feedback page.
-- [ ] In `app/sentinel-web/src/app/(protected)/student/exam/[id]/feedback/thank-you/page.tsx`, keep `View Exam Result` linking to `/student/history/details?attemptId=${attemptId}` when `attemptId` exists.
-- [ ] In `app/sentinel-web/src/app/(protected)/student/exam/[id]/feedback/thank-you/page.tsx`, keep the no-`attemptId` fallback linking to `/student/history`.
-- [ ] In `app/sentinel-web/src/app/(protected)/student/exam/[id]/feedback/thank-you/page.tsx`, keep `Back to Exam` linking to `/student/exam/${examId}`.
-- [ ] Update `app/sentinel-web/src/app/(protected)/student/exam/[id]/feedback/thank-you/page.test.tsx`.
-- [ ] Write a thank-you page test that verifies the thank-you message renders.
-- [ ] Write a thank-you page test that verifies the exam title renders when supplied by `useStudentExamData()`.
-- [ ] Keep or update the link assertions for `View Exam Result` and `Back to Exam`.
-- [ ] Add a no-`attemptId` test that verifies `View Exam Result` links to `/student/history`.
+- [x] In `app/sentinel-web/src/app/(protected)/student/exam/[id]/feedback/thank-you/page.tsx`, reuse the same compact centered shell/card styling from the feedback page.
+- [x] In `app/sentinel-web/src/app/(protected)/student/exam/[id]/feedback/thank-you/page.tsx`, read `exam` from `useStudentExamData()` and show `exam?.title` in the same exam-context position as the feedback page.
+- [x] In `app/sentinel-web/src/app/(protected)/student/exam/[id]/feedback/thank-you/page.tsx`, keep `View Exam Result` linking to `/student/history/details?attemptId=${attemptId}` when `attemptId` exists.
+- [x] In `app/sentinel-web/src/app/(protected)/student/exam/[id]/feedback/thank-you/page.tsx`, keep the no-`attemptId` fallback linking to `/student/history`.
+- [x] In `app/sentinel-web/src/app/(protected)/student/exam/[id]/feedback/thank-you/page.tsx`, keep `Back to Exam` linking to `/student/exam/${examId}`.
+- [x] Update `app/sentinel-web/src/app/(protected)/student/exam/[id]/feedback/thank-you/page.test.tsx`.
+- [x] Write a thank-you page test that verifies the thank-you message renders.
+- [x] Write a thank-you page test that verifies the exam title renders when supplied by `useStudentExamData()`.
+- [x] Keep or update the link assertions for `View Exam Result` and `Back to Exam`.
+- [x] Add a no-`attemptId` test that verifies `View Exam Result` links to `/student/history`.
 
 **Migration required:** No — this phase changes frontend layout and tests only.
+**Migration applied:** No — frontend-only page and test updates.
+**Breaking changes:** No — thank-you links and navigation remain compatible with the existing flow.
 
 ## Phase 4: Final Validation
 
 **Goal:** Verify the backend fix and UI behavior without broad unrelated changes.
 
-- [ ] Run `pnpm --dir app/sentinel-api test -- create-feedback`.
-- [ ] Run `pnpm --dir app/sentinel-web test -- feedback`.
+- [x] Run `pnpm --dir app/sentinel-api test -- create-feedback`.
+- [x] Run `pnpm --dir app/sentinel-web test -- feedback`.
 - [ ] Run `pnpm lint` if the focused tests pass and time permits.
 - [ ] Manually verify `/student/exam/[id]/feedback?attemptId=[attemptId]` as a student who previously hit the 403.
 - [ ] Confirm successful submit redirects to `/student/exam/[id]/feedback/thank-you?attemptId=[attemptId]`.
 - [ ] Confirm duplicate submit routes to the thank-you page instead of showing a hard error.
 
 **Migration required:** No — this phase performs validation only.
+**Migration applied:** No — validation only.
+**Breaking changes:** No — verification pass only.
+
+<!-- NOTE: Focused API validation passed with `pnpm --dir app/sentinel-api exec vitest run src/modules/general/feedbacks/controllers/create-feedback.controller.test.ts src/modules/general/feedbacks/services/create-feedback.service.test.ts`. -->
+<!-- NOTE: Focused web validation passed with `pnpm --dir app/sentinel-web exec vitest run 'src/app/(protected)/student/exam/[id]/feedback/page.test.tsx' 'src/app/(protected)/student/exam/[id]/feedback/thank-you/page.test.tsx'`. -->
+<!-- NOTE: Targeted web lint passed with `pnpm --dir app/sentinel-web exec eslint ...feedback/page.tsx ...feedback/page.test.tsx ...feedback/thank-you/page.tsx ...feedback/thank-you/page.test.tsx`. -->
+<!-- NOTE: Targeted API lint could not run because `pnpm --dir app/sentinel-api exec eslint ...` failed with `Command "eslint" not found` in the workspace. -->
+<!-- NOTE: Manual student-flow verification remains pending because no browser-authenticated student session was available in this execution context. -->
 
 ## Public API and Compatibility Notes
 
@@ -150,4 +166,4 @@ Concrete next steps:
 - [ ] Duplicate attempt feedback returns the existing duplicate behavior.
 - [ ] Feedback page is compact, horizontally centered, vertically centered, and exam-aligned.
 - [ ] Thank-you page matches the feedback page styling and keeps correct links.
-- [ ] Focused API and web feedback tests pass.
+- [x] Focused API and web feedback tests pass.

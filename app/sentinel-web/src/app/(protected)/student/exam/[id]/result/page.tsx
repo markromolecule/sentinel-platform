@@ -2,9 +2,12 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useQueryClient } from '@tanstack/react-query';
 import { useApi } from '@sentinel/hooks';
 import { completeExamSession } from '@sentinel/services';
 import { Button } from '@sentinel/ui';
+import { EXAM_QUERY_KEYS } from '@sentinel/shared/constants';
+import type { ProctorExam } from '@sentinel/shared/types';
 import { ArrowLeft, ClipboardCheck, AlertTriangle } from 'lucide-react';
 import Link from 'next/link';
 import { toast } from 'sonner';
@@ -23,9 +26,23 @@ function formatPercentage(value: number | null) {
     return typeof value === 'number' ? `${value}%` : '--';
 }
 
+function markExamAsTurnedIn(
+    exam: ProctorExam,
+    attemptId: string,
+    completedAt: string,
+): ProctorExam {
+    return {
+        ...exam,
+        status: 'turned_in',
+        attemptId,
+        completedAt,
+    };
+}
+
 export default function StudentExamResultPage() {
     const router = useRouter();
     const apiClient = useApi();
+    const queryClient = useQueryClient();
     const { examId, exam } = useStudentExamData();
     const [preview, setPreview] = useState<StoredExamTurnInPreview | null>(null);
     const [isTurningIn, setIsTurningIn] = useState(false);
@@ -70,6 +87,36 @@ export default function StudentExamResultPage() {
                 answers: preview.answers,
                 elapsedSeconds: preview.elapsedSeconds,
             });
+
+            queryClient.setQueriesData({ queryKey: EXAM_QUERY_KEYS.all }, (cached) => {
+                if (Array.isArray(cached)) {
+                    return cached.map((cachedExam) =>
+                        cachedExam?.id === examId
+                            ? markExamAsTurnedIn(cachedExam, result.attemptId, result.completedAt)
+                            : cachedExam,
+                    );
+                }
+
+                if (
+                    cached &&
+                    typeof cached === 'object' &&
+                    'id' in cached &&
+                    (cached as ProctorExam).id === examId
+                ) {
+                    return markExamAsTurnedIn(
+                        cached as ProctorExam,
+                        result.attemptId,
+                        result.completedAt,
+                    );
+                }
+
+                return cached;
+            });
+
+            await Promise.all([
+                queryClient.invalidateQueries({ queryKey: EXAM_QUERY_KEYS.all }),
+                queryClient.invalidateQueries({ queryKey: ['exams', 'history'] }),
+            ]);
 
             clearStoredExamTurnInPreview(examId);
             clearStoredExamSession(examId);

@@ -13,6 +13,7 @@ const {
     mockReadStoredExamTurnInPreview,
     mockClearStoredExamTurnInPreview,
     mockClearStoredExamSession,
+    mockQueryClient,
 } = vi.hoisted(() => ({
     mockApiClient: vi.fn(),
     mockRouterReplace: vi.fn(),
@@ -22,6 +23,10 @@ const {
     mockReadStoredExamTurnInPreview: vi.fn(),
     mockClearStoredExamTurnInPreview: vi.fn(),
     mockClearStoredExamSession: vi.fn(),
+    mockQueryClient: {
+        setQueriesData: vi.fn(),
+        invalidateQueries: vi.fn().mockResolvedValue(undefined),
+    },
 }));
 
 vi.mock('next/navigation', () => ({
@@ -38,6 +43,10 @@ vi.mock('next/link', () => ({
 
 vi.mock('@sentinel/hooks', () => ({
     useApi: () => mockApiClient,
+}));
+
+vi.mock('@tanstack/react-query', () => ({
+    useQueryClient: () => mockQueryClient,
 }));
 
 vi.mock('@sentinel/services', () => ({
@@ -104,6 +113,7 @@ vi.mock('../_lib/student-exam-session-feedback', () => ({
 describe('StudentExamResultPage', () => {
     beforeEach(() => {
         vi.clearAllMocks();
+        mockQueryClient.invalidateQueries.mockResolvedValue(undefined);
     });
 
     it('shows a fallback state when no turn-in preview is stored', async () => {
@@ -166,6 +176,13 @@ describe('StudentExamResultPage', () => {
         expect(mockClearStoredExamSession).toHaveBeenCalledWith(
             '11111111-1111-1111-1111-111111111111',
         );
+        expect(mockQueryClient.setQueriesData).toHaveBeenCalled();
+        expect(mockQueryClient.invalidateQueries).toHaveBeenCalledWith({
+            queryKey: ['exams'],
+        });
+        expect(mockQueryClient.invalidateQueries).toHaveBeenCalledWith({
+            queryKey: ['exams', 'history'],
+        });
         expect(mockToastSuccess).toHaveBeenCalledWith('Exam turned in successfully.');
         expect(mockRouterReplace).toHaveBeenCalledWith(
             '/student/exam/11111111-1111-1111-1111-111111111111/feedback?attemptId=33333333-3333-3333-3333-333333333333',

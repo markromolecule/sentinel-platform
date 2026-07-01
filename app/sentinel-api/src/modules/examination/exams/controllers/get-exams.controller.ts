@@ -5,6 +5,7 @@ import {
     resolveAssessmentActorRole,
     resolveAssessmentInstitutionId,
 } from '../../assessment/assessment-access';
+import { EntitlementsRepository } from '../../access/data/entitlements.repository';
 import { getExamsSchema } from '../exam.dto';
 import { ExamService } from '../exam.service';
 
@@ -56,12 +57,15 @@ export const getExamsRouteHandler: AppRouteHandler<typeof getExamsRoute> = async
 
     const departmentId =
         role === 'admin' ? (user?.user_profiles?.department_id ?? undefined) : undefined;
+    const studentProfile = user?.id
+        ? await EntitlementsRepository.getStudentProfileByUserId(c.get('dbClient'), user.id)
+        : null;
 
     const exams = await ExamService.getExams(
         c.get('dbClient'),
         query,
         institutionId,
-        role === 'student' ? user?.id : undefined,
+        studentProfile ? user?.id : undefined,
         departmentId,
         role === 'instructor' ? user?.id : undefined,
     );
