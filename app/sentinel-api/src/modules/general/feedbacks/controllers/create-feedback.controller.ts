@@ -4,7 +4,6 @@ import { type AppRouteHandler } from '../../../../types/hono';
 import { FeedbackService } from '../feedback.service';
 import { createFeedbackRouteSchema } from '../feedback.dto';
 import { HTTPException } from 'hono/http-exception';
-import { requireActivePermission } from '../../../../lib/permissions';
 
 export const createFeedbackRoute = createRoute({
     method: 'post',
@@ -38,12 +37,6 @@ export const createFeedbackRoute = createRoute({
 
 export const createFeedbackRouteHandler: AppRouteHandler<typeof createFeedbackRoute> = async (c) => {
     try {
-        requireActivePermission(
-            c,
-            'feedback:create',
-            'Forbidden. You do not have permission to submit feedback.',
-        );
-
         const user = c.get('user');
 
         if (!user?.id) {

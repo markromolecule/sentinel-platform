@@ -1,12 +1,16 @@
 'use client';
 
-import { render, screen } from '@testing-library/react';
-import { describe, expect, it, vi } from 'vitest';
+import { cleanup, render, screen } from '@testing-library/react';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import StudentExamFeedbackThankYouPage from './page';
+
+const { mockSearchParamsGet } = vi.hoisted(() => ({
+    mockSearchParamsGet: vi.fn(),
+}));
 
 vi.mock('next/navigation', () => ({
     useSearchParams: () => ({
-        get: () => '22222222-2222-2222-2222-222222222222',
+        get: mockSearchParamsGet,
     }),
 }));
 
@@ -16,22 +20,29 @@ vi.mock('next/link', () => ({
     ),
 }));
 
-vi.mock('../../_hooks/use-student-exam-data', () => ({
-    useStudentExamData: () => ({
-        examId: '11111111-1111-1111-1111-111111111111',
-    }),
-}));
-
 describe('StudentExamFeedbackThankYouPage', () => {
-    it('renders the thank-you page with result and exam links', () => {
+    beforeEach(() => {
+        vi.clearAllMocks();
+        cleanup();
+        mockSearchParamsGet.mockReturnValue('22222222-2222-2222-2222-222222222222');
+    });
+
+    it('renders the simplified thank-you page with the result link', () => {
         render(<StudentExamFeedbackThankYouPage />);
 
         expect(screen.getByText('Thank you for the feedback')).toBeTruthy();
         expect(screen.getByRole('link', { name: /view exam result/i }).getAttribute('href')).toBe(
             '/student/history/details?attemptId=22222222-2222-2222-2222-222222222222',
         );
-        expect(screen.getByRole('link', { name: /back to exam/i }).getAttribute('href')).toBe(
-            '/student/exam/11111111-1111-1111-1111-111111111111',
+    });
+
+    it('falls back to student history when attempt id is missing', () => {
+        mockSearchParamsGet.mockReturnValue(null);
+
+        render(<StudentExamFeedbackThankYouPage />);
+
+        expect(screen.getByRole('link', { name: /view exam result/i }).getAttribute('href')).toBe(
+            '/student/history',
         );
     });
 });

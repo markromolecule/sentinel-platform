@@ -65,6 +65,15 @@ describe('StudentExamFeedbackPage', () => {
         cleanup();
     });
 
+    it('shows the current exam title in the feedback header', () => {
+        mockSearchParamsGet.mockReturnValue('22222222-2222-2222-2222-222222222222');
+
+        render(<StudentExamFeedbackPage />);
+
+        expect(screen.getByText('Midterm Exam')).toBeTruthy();
+        expect(screen.getByText('Exam Feedback')).toBeTruthy();
+    });
+
     it('requires a rating before submission', async () => {
         mockSearchParamsGet.mockReturnValue('22222222-2222-2222-2222-222222222222');
 
@@ -101,5 +110,19 @@ describe('StudentExamFeedbackPage', () => {
         expect(mockRouterReplace).toHaveBeenCalledWith(
             '/student/exam/11111111-1111-1111-1111-111111111111/feedback/thank-you?attemptId=22222222-2222-2222-2222-222222222222',
         );
+    });
+
+    it('shows a validation error when attempt information is missing', async () => {
+        mockSearchParamsGet.mockReturnValue(null);
+
+        render(<StudentExamFeedbackPage />);
+
+        fireEvent.click(screen.getByText('Excellent'));
+        fireEvent.click(screen.getByRole('button', { name: 'Submit Feedback' }));
+
+        expect(
+            await screen.findByText('Attempt information is missing. Return to your exam history.'),
+        ).toBeTruthy();
+        expect(mockMutate).not.toHaveBeenCalled();
     });
 });
