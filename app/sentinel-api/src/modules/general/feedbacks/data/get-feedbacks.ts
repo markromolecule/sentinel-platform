@@ -22,15 +22,18 @@ export async function getFeedbacksData(
     const sortBy = args.sortBy ?? 'createdAt';
     const sortOrder = args.sortOrder ?? 'desc';
 
-    const studentNameExpression =
-        sql<string | null>`nullif(trim(concat_ws(' ', up.first_name, up.last_name)), '')`;
+    const studentNameExpression = sql<
+        string | null
+    >`nullif(trim(concat_ws(' ', up.first_name, up.last_name)), '')`;
+    const studentEmailExpression = sql<
+        string | null
+    >`(select u.email from users as u where u.id = s.user_id limit 1)`;
 
     let baseQuery = dbClient
         .selectFrom('exam_feedbacks as ef')
         .leftJoin('exams as e', 'e.exam_id', 'ef.exam_id')
         .leftJoin('students as s', 's.student_id', 'ef.student_id')
-        .leftJoin('users as u', 'u.id', 's.user_id')
-        .leftJoin('user_profiles as up', 'up.user_id', 'u.id')
+        .leftJoin('user_profiles as up', 'up.user_id', 's.user_id')
         .leftJoin('institutions as i', 'i.id', 'ef.institution_id');
 
     if (!args.canViewAllInstitutions && args.institutionId) {
@@ -50,7 +53,7 @@ export async function getFeedbacksData(
         baseQuery = baseQuery.where((eb) =>
             eb.or([
                 eb(studentNameExpression, 'ilike', pattern),
-                eb('u.email', 'ilike', pattern),
+                eb(studentEmailExpression, 'ilike', pattern),
                 eb('s.student_number', 'ilike', pattern),
                 eb('e.title', 'ilike', pattern),
                 eb('i.name', 'ilike', pattern),
@@ -80,8 +83,8 @@ export async function getFeedbacksData(
             'e.title as examTitle',
             's.user_id as studentUserId',
             's.student_number as studentNumber',
-            'u.email as studentEmail',
             'i.name as institutionName',
+            studentEmailExpression.as('studentEmail'),
             studentNameExpression.as('studentName'),
         ])
         .orderBy(sortColumn as any, sortOrder)

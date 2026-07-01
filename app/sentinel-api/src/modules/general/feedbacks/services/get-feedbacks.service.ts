@@ -13,7 +13,7 @@ export async function getFeedbacks(
     const result = await getFeedbacksData(dbClient, args);
 
     return {
-        items: result.items.map((item: FeedbackPage) => serializeFeedbackRecord(item)),
+        items: result.items.map((item) => serializeFeedbackRecord(item)),
         page: result.page,
         pageSize: result.pageSize,
         total: result.total,
