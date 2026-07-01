@@ -11,6 +11,7 @@ export function useExamDetails(): UseExamDetailsReturn {
     const { data: historyItem, isLoading: isHistoryLoading } = useExamHistoryDetailQuery(attemptId);
     const { data: exam, isLoading: isExamLoading } = useExamQuery(examId ?? undefined);
     const reportQuery = useAttemptReportQuery(attemptId);
+    const hasAttemptId = Boolean(attemptId);
 
     const fallbackHistoryItem: ExamHistory | undefined =
         !historyItem && exam
@@ -51,9 +52,11 @@ export function useExamDetails(): UseExamDetailsReturn {
 
     const reportAvailability = reportQuery.data
         ? 'available'
-        : reportQuery.error instanceof ApiError && reportQuery.error.status === 409
-          ? 'grading_in_progress'
-          : 'unavailable';
+        : hasAttemptId && reportQuery.isLoading
+          ? 'loading_report'
+          : reportQuery.error instanceof ApiError && reportQuery.error.status === 409
+            ? 'grading_in_progress'
+            : 'unavailable';
 
     return {
         examId,
@@ -61,8 +64,6 @@ export function useExamDetails(): UseExamDetailsReturn {
         historyItem: historyItem ?? fallbackHistoryItem,
         report: reportQuery.data,
         reportAvailability,
-        isLoading: attemptId
-            ? isHistoryLoading || reportQuery.isLoading
-            : isExamLoading,
+        isLoading: hasAttemptId ? isHistoryLoading : isExamLoading,
     };
 }

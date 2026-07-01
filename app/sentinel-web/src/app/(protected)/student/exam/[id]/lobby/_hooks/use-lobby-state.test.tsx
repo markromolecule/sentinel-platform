@@ -54,7 +54,7 @@ vi.mock('./use-lobby-actions', () => ({
 function createArgs(overrides?: {
     runtimeAccess?: Record<string, unknown>;
     lobbyAdmissionMode?: 'AUTOMATIC' | 'INSTRUCTOR_GATED';
-}) {
+}): Parameters<typeof useLobbyState>[0] {
     return {
         examId: 'exam-1',
         exam: {
@@ -76,7 +76,7 @@ function createArgs(overrides?: {
         },
         mediaPipeSandbox: null,
         refetchExam: vi.fn().mockResolvedValue(undefined),
-    } as any;
+    } as unknown as Parameters<typeof useLobbyState>[0];
 }
 
 describe('useLobbyState', () => {
@@ -168,6 +168,156 @@ describe('useLobbyState', () => {
         expect(mockGetExamLobbyAdmissionStatus).toHaveBeenCalledWith({ api: true }, 'exam-1');
         expect(refetchExam).toHaveBeenCalled();
         expect(result.current.isAdmissionPendingRefresh).toBe(false);
+        expect(result.current.admissionStatus).toBe('APPROVED');
+    });
+
+    it('keeps entry enabled when approved instructor admission is refreshing stale runtime access', async () => {
+        vi.useFakeTimers();
+        let resolveRefetch: (() => void) | undefined;
+        const refetchExam = vi.fn(
+            () =>
+                new Promise<void>((resolve) => {
+                    resolveRefetch = resolve;
+                }),
+        );
+
+        mockCheckIntoExamLobby.mockResolvedValueOnce({
+            status: 'WAITING',
+            checkedInAt: '2026-05-11T00:00:00.000Z',
+        });
+        mockGetExamLobbyAdmissionStatus.mockResolvedValueOnce({
+            status: 'APPROVED',
+            checkedInAt: '2026-05-11T00:00:00.000Z',
+            decidedAt: '2026-05-11T00:00:05.000Z',
+        });
+
+        const args = createArgs({
+            lobbyAdmissionMode: 'INSTRUCTOR_GATED',
+            runtimeAccess: {
+                state: 'lobby_waiting',
+                reasonCode: 'LOBBY_WAITING',
+                message: 'Waiting for instructor approval.',
+                canStart: false,
+                canResume: false,
+                hasActiveAttempt: false,
+            },
+        });
+        args.refetchExam = refetchExam;
+
+        const { result, rerender } = renderHook(({ hookArgs }) => useLobbyState(hookArgs), {
+            initialProps: { hookArgs: args },
+        });
+
+        await act(async () => {
+            await Promise.resolve();
+        });
+
+        await act(async () => {
+            await vi.advanceTimersByTimeAsync(5000);
+            await Promise.resolve();
+        });
+
+        expect(result.current.admissionStatus).toBe('APPROVED');
+        expect(result.current.isAdmissionPendingRefresh).toBe(true);
+        expect(result.current.canEnterExam).toBe(true);
+        expect(mockUseLobbyActions).toHaveBeenLastCalledWith(
+            expect.objectContaining({
+                canEnterExam: true,
+            }),
+        );
+
+        await act(async () => {
+            resolveRefetch?.();
+            await Promise.resolve();
+        });
+
+        rerender({
+            hookArgs: createArgs({
+                lobbyAdmissionMode: 'INSTRUCTOR_GATED',
+                runtimeAccess: {
+                    state: 'lobby_approved',
+                    reasonCode: 'LOBBY_APPROVED',
+                    message: 'Approved for entry.',
+                    canStart: true,
+                    canResume: false,
+                    hasActiveAttempt: false,
+                },
+            }),
+        });
+
+        expect(result.current.canEnterExam).toBe(true);
+    });
+
+    it('continues polling instructor admission when runtime access is open but admission is still waiting', async () => {
+        vi.useFakeTimers();
+        const refetchExam = vi.fn().mockResolvedValue(undefined);
+
+        mockCheckIntoExamLobby.mockResolvedValueOnce({
+            status: 'WAITING',
+            checkedInAt: '2026-05-11T00:00:00.000Z',
+        });
+        mockGetExamLobbyAdmissionStatus.mockResolvedValueOnce({
+            status: 'APPROVED',
+            checkedInAt: '2026-05-11T00:00:00.000Z',
+            decidedAt: '2026-05-11T00:00:05.000Z',
+        });
+
+        const args = createArgs({
+            lobbyAdmissionMode: 'INSTRUCTOR_GATED',
+            runtimeAccess: {
+                state: 'open',
+                reasonCode: 'OPEN',
+                message: 'Exam is open.',
+                canStart: true,
+                canResume: false,
+                hasActiveAttempt: false,
+            },
+        });
+        args.refetchExam = refetchExam;
+
+        const { result } = renderHook(() => useLobbyState(args));
+
+        await act(async () => {
+            await Promise.resolve();
+        });
+
+        expect(result.current.admissionStatus).toBe('WAITING');
+        expect(result.current.canEnterExam).toBe(false);
+
+        await act(async () => {
+            await vi.advanceTimersByTimeAsync(5000);
+            await Promise.resolve();
+        });
+
+        expect(mockGetExamLobbyAdmissionStatus).toHaveBeenCalledWith({ api: true }, 'exam-1');
+        expect(refetchExam).toHaveBeenCalled();
+        expect(result.current.admissionStatus).toBe('APPROVED');
+    });
+
+    it('does not allow instructor-gated entry from open runtime access before approval is known', () => {
+        mockCheckIntoExamLobby.mockImplementation(() => new Promise(() => undefined));
+
+        const args = createArgs({
+            lobbyAdmissionMode: 'INSTRUCTOR_GATED',
+            runtimeAccess: {
+                state: 'open',
+                reasonCode: 'OPEN',
+                message: 'Exam is open.',
+                canStart: true,
+                canResume: false,
+                hasActiveAttempt: false,
+            },
+        });
+
+        const { result } = renderHook(() => useLobbyState(args));
+
+        expect(result.current.admissionStatus).toBeNull();
+        expect(result.current.canEnterExam).toBe(false);
+        expect(mockUseLobbyActions).toHaveBeenLastCalledWith(
+            expect.objectContaining({
+                canEnterExam: false,
+            }),
+        );
     });
 
     it('skips lobby sync entirely when the student already has a resumable active attempt', () => {

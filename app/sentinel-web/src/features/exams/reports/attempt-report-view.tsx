@@ -13,6 +13,9 @@ export type AttemptReportViewProps = {
     attempt: AttemptGradingDetailType;
     questions: GradingQuestionType[];
     editable?: boolean;
+    showSummaryCards?: boolean;
+    showQuestionTable?: boolean;
+    showActions?: boolean;
     isSubmitting?: boolean;
     onSubmit?: (payload: {
         itemOverrides: NonNullable<UpdateGradingAttemptBodyType['itemOverrides']>;
@@ -31,6 +34,9 @@ export function AttemptReportView({
     attempt,
     questions,
     editable = false,
+    showSummaryCards = true,
+    showQuestionTable = true,
+    showActions = true,
     isSubmitting = false,
     onSubmit,
     optimisticScore = null,
@@ -52,22 +58,28 @@ export function AttemptReportView({
 
     return (
         <div className="space-y-6">
-            <AttemptReportSummaryCards attempt={attempt} optimisticScore={optimisticScore} />
+            {showSummaryCards ? (
+                <AttemptReportSummaryCards attempt={attempt} optimisticScore={optimisticScore} />
+            ) : null}
 
-            <AttemptReportTable
-                reportCards={reportCards}
-                editable={isEditable}
-                onRowClick={setSelectedReport}
-            />
+            {showQuestionTable ? (
+                <AttemptReportTable
+                    reportCards={reportCards}
+                    editable={isEditable}
+                    onRowClick={setSelectedReport}
+                />
+            ) : null}
 
-            <AttemptReportActions
-                editable={editable}
-                hasSubmitHandler={Boolean(onSubmit)}
-                isSubmitting={isSubmitting}
-                onSaveOverrides={() => handleSubmit(false)}
-                onSaveAndFinalize={() => handleSubmit(true)}
-                isFinalized={isReportFinalized}
-            />
+            {showActions ? (
+                <AttemptReportActions
+                    editable={editable}
+                    hasSubmitHandler={Boolean(onSubmit)}
+                    isSubmitting={isSubmitting}
+                    onSaveOverrides={() => handleSubmit(false)}
+                    onSaveAndFinalize={() => handleSubmit(true)}
+                    isFinalized={isReportFinalized}
+                />
+            ) : null}
 
             {selectedReport && (
                 <AttemptReportOverrideDialog

@@ -82,6 +82,15 @@ export class LobbyService {
         role?: string | null,
     ) {
         if (userId && role !== 'student') {
+            const student = await EntitlementsRepository.getStudentProfileByUserId(
+                dbClient,
+                userId,
+            );
+
+            if (student) {
+                return await getLobbyCount(dbClient, examId);
+            }
+
             await assertInstructorExamAccess({
                 dbClient,
                 examId,

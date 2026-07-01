@@ -6,6 +6,8 @@ import { SessionRepository } from './data/session.repository';
 import { type DbClient } from '@sentinel/db';
 import { getExamConfigurationState } from '../configuration/configuration.service';
 import { getExamQuestionsData } from '../exams/data/get-exam-questions';
+import { LogsService } from '../../general/logs/logs.service';
+import { ActivityNotificationService } from '../../general/notification/services/activity-notification.service';
 
 // Mock dependencies
 vi.mock('../access/access.service');
@@ -15,6 +17,16 @@ vi.mock('../configuration/configuration.service', () => ({
 }));
 vi.mock('../exams/data/get-exam-questions', () => ({
     getExamQuestionsData: vi.fn(),
+}));
+vi.mock('../../general/logs/logs.service', () => ({
+    LogsService: {
+        createLog: vi.fn(),
+    },
+}));
+vi.mock('../../general/notification/services/activity-notification.service', () => ({
+    ActivityNotificationService: {
+        notifyInstitutionActivityCreated: vi.fn(),
+    },
 }));
 
 describe('Examination Flow Integration', () => {
@@ -74,6 +86,10 @@ describe('Examination Flow Integration', () => {
     beforeEach(() => {
         vi.clearAllMocks();
         vi.mocked(getExamConfigurationState).mockResolvedValue(configSnapshot);
+        vi.mocked(LogsService.createLog).mockResolvedValue({} as never);
+        vi.mocked(ActivityNotificationService.notifyInstitutionActivityCreated).mockResolvedValue(
+            undefined,
+        );
     });
 
     it('denies session start if access gatekeeper determines student is ineligible', async () => {
@@ -162,6 +178,42 @@ describe('Examination Flow Integration', () => {
             accessOverride: null,
             updatedBy: studentId,
         });
+    });
+
+    it('does not block session startup on telemetry delivery', async () => {
+        const mockSessionId = 'session-uuid-telemetry';
+
+        vi.mocked(AccessGatekeeperService.verifyStudentExamEligibility).mockResolvedValue({
+            isEligible: true,
+            context: {
+                examId,
+                studentId: accessStudentId,
+                classroomId: null,
+                subjectId: 'subject-123',
+                sectionId: null,
+                roomId: null,
+                durationMinutes: 60,
+                scheduledDate: new Date().toISOString(),
+                endDateTime: new Date(Date.now() + 60_000).toISOString(),
+                status: 'PUBLISHED',
+                publishedAt: new Date().toISOString(),
+                institutionId: 'institution-123',
+            },
+            runtimeAccess,
+        });
+        vi.mocked(SessionRepository.createSession).mockResolvedValue({
+            sessionId: mockSessionId,
+            isResumed: false,
+        });
+        vi.mocked(LogsService.createLog).mockImplementation(
+            () => new Promise(() => undefined) as never,
+        );
+
+        const result = await SessionManagerService.startSession(mockDb, studentId, examId);
+
+        expect(result.sessionId).toBe(mockSessionId);
+        expect(result.error).toBeUndefined();
+        expect(LogsService.createLog).toHaveBeenCalled();
     });
 
     it('returns a stable conflict payload when the latest attempt is already completed', async () => {

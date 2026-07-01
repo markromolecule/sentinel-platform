@@ -4,6 +4,7 @@ import {
     applyExamRuleToggle,
     getExamRuleToggleKey,
     getExamRuleToggleState,
+    getSystemConfigurationRows,
     TOGGLE_OPTIONS,
 } from './index';
 
@@ -16,6 +17,7 @@ const settings: ExamSettings = {
 
 const configuration: ExamConfiguration = {
     lobbyAdmissionMode: 'INSTRUCTOR_GATED',
+    releaseScoreMode: 'AUTO_RELEASE',
     maxReconnectAttempts: 3,
     strictMode: true,
     screenLock: true,
@@ -68,15 +70,48 @@ describe('exam builder rule toggles', () => {
         const option = TOGGLE_OPTIONS.find((item) => item.key === 'lobbyAdmissionMode');
         const onToggleSetting = vi.fn();
         const onToggleLobbyAdmissionMode = vi.fn();
+        const onToggleReleaseScoreMode = vi.fn();
 
         applyExamRuleToggle({
             option: option!,
             checked: false,
             onToggleSetting,
             onToggleLobbyAdmissionMode,
+            onToggleReleaseScoreMode,
         });
 
         expect(onToggleSetting).not.toHaveBeenCalled();
         expect(onToggleLobbyAdmissionMode).toHaveBeenCalledWith(false);
+    });
+
+    it('routes auto release toggles to the release score handler', () => {
+        const option = TOGGLE_OPTIONS.find((item) => item.key === 'releaseScoreMode');
+        const onToggleSetting = vi.fn();
+        const onToggleLobbyAdmissionMode = vi.fn();
+        const onToggleReleaseScoreMode = vi.fn();
+
+        applyExamRuleToggle({
+            option: option!,
+            checked: false,
+            onToggleSetting,
+            onToggleLobbyAdmissionMode,
+            onToggleReleaseScoreMode,
+        });
+
+        expect(onToggleSetting).not.toHaveBeenCalled();
+        expect(onToggleLobbyAdmissionMode).not.toHaveBeenCalled();
+        expect(onToggleReleaseScoreMode).toHaveBeenCalledWith(false);
+    });
+
+    it('includes score release in the configuration summary rows', () => {
+        const rows = getSystemConfigurationRows({
+            ...configuration,
+            releaseScoreMode: 'MANUAL_RELEASE',
+        });
+
+        expect(rows.some((row) => row.label === 'Score Release')).toBe(true);
+        expect(rows.find((row) => row.label === 'Score Release')?.value).toBe(
+            'After instructor finalization',
+        );
     });
 });

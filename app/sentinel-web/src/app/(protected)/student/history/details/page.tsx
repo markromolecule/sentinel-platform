@@ -1,19 +1,20 @@
 'use client';
 
 import { Button } from '@sentinel/ui';
-import { AlertTriangle } from 'lucide-react';
+import { AlertTriangle, FileText } from 'lucide-react';
 import Link from 'next/link';
-import { Suspense } from 'react';
+import { Suspense, useState } from 'react';
 import { CheatingReport } from '@/components/sidebar/student/CheatingReport';
 import { ExamDetailStats } from '@/app/(protected)/student/history/details/_components/exam-detail-stats';
 import { ExamHeader } from '@/app/(protected)/student/history/details/_components/exam-header';
 import { ExamHeroScore } from '@/app/(protected)/student/history/details/_components/exam-hero-score';
 import { ExamInfo } from '@/app/(protected)/student/history/details/_components/exam-info';
+import { AttemptReportDialog } from '@/app/(protected)/student/history/details/_components/attempt-report-dialog';
 import { useExamDetails } from '@/app/(protected)/student/history/details/_hooks/use-exam-details';
-import { AttemptReportView } from '@/features/exams/reports';
 
 function HistoryDetailsContent() {
     const { historyItem, report, reportAvailability, isLoading } = useExamDetails();
+    const [reportDialogOpen, setReportDialogOpen] = useState(false);
 
     if (isLoading) {
         return (
@@ -71,21 +72,32 @@ function HistoryDetailsContent() {
                     {reportAvailability === 'available' ? (
                         <div className="space-y-4">
                             <div className="border-border/60 bg-muted/30 border p-4">
-                                <p className="text-sm font-semibold">Finalized Report Ready</p>
+                                <p className="text-sm font-semibold">Detailed Report Available</p>
                                 <p className="text-muted-foreground mt-1 text-sm">
-                                    Your instructor has finalized this report.{' '}
+                                    A released report is available for this attempt.{' '}
                                     {report?.questions.length ?? 0} question
-                                    {report?.questions.length === 1 ? '' : 's'} can now be
-                                    reviewed with final grading decisions.
+                                    {report?.questions.length === 1 ? '' : 's'} can be reviewed with
+                                    the currently released grading details.
                                 </p>
+                                {report ? (
+                                    <div className="mt-4">
+                                        <Button
+                                            type="button"
+                                            variant="outline"
+                                            onClick={() => setReportDialogOpen(true)}
+                                        >
+                                            <FileText className="mr-2 h-4 w-4" />
+                                            View Detailed Report
+                                        </Button>
+                                        <AttemptReportDialog
+                                            open={reportDialogOpen}
+                                            onOpenChange={setReportDialogOpen}
+                                            attempt={report.attempt}
+                                            questions={report.questions}
+                                        />
+                                    </div>
+                                ) : null}
                             </div>
-
-                            {report ? (
-                                <AttemptReportView
-                                    attempt={report.attempt}
-                                    questions={report.questions}
-                                />
-                            ) : null}
                         </div>
                     ) : reportAvailability === 'grading_in_progress' ? (
                         <div className="border-border/60 bg-muted/30 border p-4">

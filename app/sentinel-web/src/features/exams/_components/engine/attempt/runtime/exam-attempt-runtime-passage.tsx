@@ -27,9 +27,11 @@ export function ExamAttemptRuntimePassage({
                     <h2 className="text-foreground text-xl font-semibold tracking-tight sm:text-2xl">
                         {currentContext.title}
                     </h2>
-                    <p className="text-muted-foreground mt-2 text-sm leading-6">
-                        {currentContext.description}
-                    </p>
+                    {currentContext.description ? (
+                        <p className="text-muted-foreground mt-2 text-sm leading-6">
+                            {currentContext.description}
+                        </p>
+                    ) : null}
                 </div>
             </div>
 
@@ -41,33 +43,10 @@ export function ExamAttemptRuntimePassage({
                     />
                 ) : (
                     <div className="border-border/70 text-muted-foreground border-l-2 border-dashed pl-4 text-sm leading-7">
-                        This question currently renders without a separate passage. The right panel
-                        stays fully interactive, and the passage panel can be collapsed whenever you
-                        want a wider question area.
+                        No passage is attached to this question yet. The question panel remains
+                        fully interactive, and you can collapse this panel for a wider layout.
                     </div>
                 )}
-            </div>
-
-            <div className="border-border/60 grid gap-0 border-b xl:grid-cols-2">
-                <div className="border-border/60 border-r px-0 py-4 xl:pr-6">
-                    <p className="text-muted-foreground text-xs font-semibold tracking-[0.18em] uppercase">
-                        Source
-                    </p>
-                    <p className="text-foreground mt-2 text-sm font-medium">
-                        {currentQuestion.sourceFileName ?? 'No linked document'}
-                    </p>
-                </div>
-                <div className="px-0 py-4 xl:pl-6">
-                    <p className="text-muted-foreground text-xs font-semibold tracking-[0.18em] uppercase">
-                        Notes
-                    </p>
-                    <p className="text-muted-foreground mt-2 text-sm leading-6">
-                        {currentQuestion.sourcePageNumber !== null &&
-                        currentQuestion.sourcePageNumber !== undefined
-                            ? `Referenced page ${currentQuestion.sourcePageNumber}.`
-                            : 'No page reference was attached for this exam item.'}
-                    </p>
-                </div>
             </div>
         </div>
     );

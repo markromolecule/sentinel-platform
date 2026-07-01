@@ -1,7 +1,7 @@
 'use client';
 
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import StudentExamResultPage from './page';
 
 const {
@@ -111,6 +111,10 @@ vi.mock('../_lib/student-exam-session-feedback', () => ({
 }));
 
 describe('StudentExamResultPage', () => {
+    afterEach(() => {
+        cleanup();
+    });
+
     beforeEach(() => {
         vi.clearAllMocks();
         mockQueryClient.invalidateQueries.mockResolvedValue(undefined);
@@ -133,6 +137,8 @@ describe('StudentExamResultPage', () => {
                 'question-1': 'A',
             },
             elapsedSeconds: 120,
+            releaseScoreMode: 'AUTO_RELEASE',
+            scoreVisible: true,
             summary: {
                 score: 18,
                 totalScore: 20,
@@ -187,5 +193,67 @@ describe('StudentExamResultPage', () => {
         expect(mockRouterReplace).toHaveBeenCalledWith(
             '/student/exam/11111111-1111-1111-1111-111111111111/feedback?attemptId=33333333-3333-3333-3333-333333333333',
         );
+    });
+
+    it('shows pending review labels and hides numeric score details when the exam uses manual release', async () => {
+        mockReadStoredExamTurnInPreview.mockReturnValue({
+            examId: '11111111-1111-1111-1111-111111111111',
+            sessionId: '22222222-2222-2222-2222-222222222222',
+            answers: {
+                'question-1': 'A',
+            },
+            elapsedSeconds: 120,
+            releaseScoreMode: 'MANUAL_RELEASE',
+            scoreVisible: false,
+            summary: {
+                score: null,
+                totalScore: null,
+                percentage: null,
+                answeredCount: 10,
+                autoGradableQuestionCount: 10,
+                manualReviewQuestionCount: 1,
+                requiresManualReview: true,
+            },
+            storedAt: '2026-04-18T10:00:00.000Z',
+        });
+
+        render(<StudentExamResultPage />);
+
+        expect(await screen.findAllByText('Pending Review')).toHaveLength(3);
+        expect(
+            screen.getByText(/scores are hidden for this exam until your instructor/i),
+        ).toBeTruthy();
+        expect(screen.queryByText(/final scores are hidden/i)).toBeNull();
+        expect(screen.queryByText('18 / 20')).toBeNull();
+        expect(screen.queryByText(/^0$/)).toBeNull();
+    });
+
+    it('shows provisional copy when visible scores still require manual review', async () => {
+        mockReadStoredExamTurnInPreview.mockReturnValue({
+            examId: '11111111-1111-1111-1111-111111111111',
+            sessionId: '22222222-2222-2222-2222-222222222222',
+            answers: {
+                'question-1': 'Essay answer',
+            },
+            elapsedSeconds: 120,
+            releaseScoreMode: 'AUTO_RELEASE',
+            scoreVisible: true,
+            summary: {
+                score: 4,
+                totalScore: 10,
+                percentage: 40,
+                answeredCount: 10,
+                autoGradableQuestionCount: 9,
+                manualReviewQuestionCount: 1,
+                requiresManualReview: true,
+            },
+            storedAt: '2026-04-18T10:00:00.000Z',
+        });
+
+        render(<StudentExamResultPage />);
+
+        expect(await screen.findByText('4')).toBeTruthy();
+        expect(screen.getByText('40%')).toBeTruthy();
+        expect(screen.getByText(/remain provisional until grading is completed/i)).toBeTruthy();
     });
 });

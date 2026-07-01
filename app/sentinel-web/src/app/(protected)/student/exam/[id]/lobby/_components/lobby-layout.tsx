@@ -6,6 +6,7 @@ export type LobbyLayoutProps = {
     hasCompletedFlow: boolean;
     accessMessage?: string | null;
     countdownLabel?: string | null;
+    maxReconnectAttempts: number;
     mediaPipeLobbyMessage?: string | null;
     runtimeAccess?: ExamRuntimeAccess | null;
     reopenedUntil?: Date | null;
@@ -15,6 +16,7 @@ export function LobbyLayout({
     hasCompletedFlow,
     accessMessage,
     countdownLabel,
+    maxReconnectAttempts,
     mediaPipeLobbyMessage,
     runtimeAccess,
     reopenedUntil,
@@ -24,6 +26,7 @@ export function LobbyLayout({
             <LobbyStatusInfo
                 readyCount={hasCompletedFlow ? 2 : 0}
                 totalChecks={2}
+                maxReconnectAttempts={maxReconnectAttempts}
                 runtimeAccess={runtimeAccess}
             />
 

@@ -6,6 +6,7 @@ import { assertInstructorExamAccess } from '../assign/services/exam-access';
 import { getMonitoringExamContext } from '../monitoring/services/get-monitoring-exam-context';
 import { checkInLobby } from './services/check-in-lobby';
 import { getAdmissionStatus } from './services/get-admission-status';
+import { getLobbyCount } from './services/get-lobby-count';
 import { getWaitingList } from './services/get-waiting-list';
 import { updateAdmissions } from './services/update-admissions';
 import { LobbyService } from './lobby.service';
@@ -34,6 +35,10 @@ vi.mock('./services/get-admission-status', () => ({
 
 vi.mock('./services/get-waiting-list', () => ({
     getWaitingList: vi.fn(),
+}));
+
+vi.mock('./services/get-lobby-count', () => ({
+    getLobbyCount: vi.fn(),
 }));
 
 vi.mock('./services/update-admissions', () => ({
@@ -160,5 +165,25 @@ describe('LobbyService', () => {
             userId: 'admin-1',
         });
         expect(getWaitingList).toHaveBeenCalledWith(dbClient, 'exam-1');
+    });
+
+    it('counts lobby students through the student path when auth metadata is stale', async () => {
+        vi.mocked(EntitlementsRepository.getStudentProfileByUserId).mockResolvedValue({
+            student_id: 'student-record-1',
+            institution_id: 'institution-1',
+        });
+        vi.mocked(getLobbyCount).mockResolvedValue({ count: 1 });
+
+        const result = await LobbyService.getLobbyCount(
+            dbClient,
+            'exam-1',
+            'auth-user-1',
+            'institution-1',
+            'instructor',
+        );
+
+        expect(result).toEqual({ count: 1 });
+        expect(assertInstructorExamAccess).not.toHaveBeenCalled();
+        expect(getLobbyCount).toHaveBeenCalledWith(dbClient, 'exam-1');
     });
 });

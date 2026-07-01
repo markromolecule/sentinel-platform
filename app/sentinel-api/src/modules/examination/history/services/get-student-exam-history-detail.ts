@@ -1,4 +1,4 @@
-import { type DbClient } from '@sentinel/db';
+import { type DbClient, type question_type } from '@sentinel/db';
 import { HTTPException } from 'hono/http-exception';
 import { sql } from 'kysely';
 import type { ExamHistoryDetail } from '../history.dto';
@@ -21,6 +21,7 @@ export async function getStudentExamHistoryDetail(
         .innerJoin('students as st', 'st.student_id', 'ea.student_id')
         .innerJoin('exams as e', 'e.exam_id', 'ea.exam_id')
         .leftJoin('subjects as s', 's.subject_id', 'e.subject_id')
+        .leftJoin('exam_configurations as ec', 'ec.exam_id', 'e.exam_id')
         .$if(columnSupport.hasRoomId, (qb) => qb.leftJoin('rooms as r', 'r.room_id', 'e.room_id'))
         .select([
             'e.exam_id',
@@ -38,6 +39,14 @@ export async function getStudentExamHistoryDetail(
             'e.updated_at',
             'e.institution_id',
             's.subject_title',
+            'ec.release_score_mode',
+            (eb) =>
+                eb
+                    .selectFrom('exam_questions as q')
+                    .select(sql<number>`count(*)::int`.as('count'))
+                    .whereRef('q.exam_id', '=', 'e.exam_id')
+                    .where('q.question_type', '=', sql<question_type>`'ESSAY'`)
+                    .as('essay_question_count'),
             columnSupport.hasRoomId ? 'e.room_id' : sql<string | null>`null`.as('room_id'),
             columnSupport.hasRoomId
                 ? sql<string | null>`r.room_name`.as('room_name')
@@ -53,6 +62,9 @@ export async function getStudentExamHistoryDetail(
             'ea.score as attempt_score',
             'ea.total_score as attempt_total_score',
             'ea.time_spent_minutes as attempt_time_spent_minutes',
+            sql<string | null>`(ea.answer_snapshot->'_grading'->>'finalizedAt')::text`.as(
+                'attempt_finalized_at',
+            ),
             sql<number>`coalesce((
                 select count(*)::int
                 from flagged_incidents as fi

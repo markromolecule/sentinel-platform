@@ -56,6 +56,37 @@ export function formatTimer(totalSeconds: number) {
     return [minutes, seconds].map((value) => String(value).padStart(2, '0')).join(':');
 }
 
+/**
+ * Builds the passage content shown in the live student attempt. This intentionally
+ * suppresses source metadata so the runtime panel only shows the passage body.
+ */
+export function getRuntimePassageDetails({
+    questionPassageContent,
+    questionPassageType,
+}: {
+    questionPassageContent?: string | null;
+    questionPassageType?: 'plain' | 'html' | null;
+}) {
+    const renderedPassage = renderPassage({
+        passageContent: questionPassageContent,
+        passageType: questionPassageType,
+    });
+
+    if (renderedPassage) {
+        return {
+            title: 'Passage',
+            description: '',
+            body: renderedPassage.html,
+        };
+    }
+
+    return {
+        title: 'Passage',
+        description: '',
+        body: '',
+    };
+}
+
 export function getExamContextDetails({
     questionBody,
     questionPassageContent,

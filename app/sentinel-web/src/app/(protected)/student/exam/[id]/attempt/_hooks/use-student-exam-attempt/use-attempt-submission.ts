@@ -1,12 +1,17 @@
 import { useRouter } from 'next/navigation';
 import { scoreExamAttempt } from '@sentinel/shared';
-import type { ExamAttemptAnswers, ExamQuestion } from '@sentinel/shared/types';
+import type {
+    ExamAttemptAnswers,
+    ExamConfiguration,
+    ExamQuestion,
+} from '@sentinel/shared/types';
 import type { ExamAnswerValue } from '@/features/exams/_components/engine';
 import { writeStoredExamTurnInPreview } from '@/app/(protected)/student/exam/[id]/_lib/exam-turn-in-storage';
 
 export type UseAttemptSubmissionArgs = {
     examId: string;
     sessionId?: string;
+    releaseScoreMode: NonNullable<ExamConfiguration['releaseScoreMode']>;
     questions: ExamQuestion[];
     selectedAnswers: Record<string, ExamAnswerValue>;
     elapsedSeconds: number;
@@ -20,6 +25,7 @@ export type UseAttemptSubmissionArgs = {
 export function useAttemptSubmission({
     examId,
     sessionId,
+    releaseScoreMode,
     questions,
     selectedAnswers,
     elapsedSeconds,
@@ -40,13 +46,21 @@ export function useAttemptSubmission({
             questions,
             answers: selectedAnswers as ExamAttemptAnswers,
         });
+        const scoreVisible = releaseScoreMode === 'AUTO_RELEASE';
 
         writeStoredExamTurnInPreview({
             examId,
             sessionId: sessionId,
             answers: selectedAnswers as ExamAttemptAnswers,
             elapsedSeconds,
-            summary,
+            releaseScoreMode,
+            scoreVisible,
+            summary: {
+                ...summary,
+                score: scoreVisible ? summary.score : null,
+                totalScore: scoreVisible ? summary.totalScore : null,
+                percentage: scoreVisible ? summary.percentage : null,
+            },
             storedAt: new Date().toISOString(),
         });
 

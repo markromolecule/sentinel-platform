@@ -1,24 +1,20 @@
+import { resolveReconnectDisplay } from '../_utils';
 import type { ExamRuntimeAccess } from '@sentinel/shared/types';
 
 export type LobbyStatusInfoProps = {
     readyCount: number;
     totalChecks: number;
+    maxReconnectAttempts: number;
     runtimeAccess?: ExamRuntimeAccess | null;
 };
 
-export function LobbyStatusInfo({ readyCount, totalChecks, runtimeAccess }: LobbyStatusInfoProps) {
-    const reconnectSummary =
-        runtimeAccess?.reconnectAttemptsRemaining !== undefined &&
-        runtimeAccess?.totalReconnectAttempts !== undefined
-            ? {
-                  used: Math.max(
-                      0,
-                      runtimeAccess.totalReconnectAttempts - runtimeAccess.reconnectAttemptsRemaining,
-                  ),
-                  remaining: runtimeAccess.reconnectAttemptsRemaining,
-                  total: runtimeAccess.totalReconnectAttempts,
-              }
-            : null;
+export function LobbyStatusInfo({
+    readyCount,
+    totalChecks,
+    maxReconnectAttempts,
+    runtimeAccess,
+}: LobbyStatusInfoProps) {
+    const reconnectDisplay = resolveReconnectDisplay(runtimeAccess, maxReconnectAttempts);
 
     return (
         <div className="border-border/60 bg-background flex h-full flex-col space-y-4 rounded-2xl border p-4 sm:p-5 lg:rounded-none lg:border-0 lg:bg-transparent lg:p-0">
@@ -35,12 +31,7 @@ export function LobbyStatusInfo({ readyCount, totalChecks, runtimeAccess }: Lobb
                 <p>
                     Current readiness: {readyCount}/{totalChecks} completed.
                 </p>
-                {reconnectSummary ? (
-                    <p>
-                        Reconnect attempts used: {reconnectSummary.used} of{' '}
-                        {reconnectSummary.total}. Remaining: {reconnectSummary.remaining}.
-                    </p>
-                ) : null}
+                {reconnectDisplay.statusMessage ? <p>{reconnectDisplay.statusMessage}</p> : null}
                 {runtimeAccess?.state === 'lobby_waiting' ? (
                     <p>Instructor approval is still required before the attempt can start.</p>
                 ) : null}
