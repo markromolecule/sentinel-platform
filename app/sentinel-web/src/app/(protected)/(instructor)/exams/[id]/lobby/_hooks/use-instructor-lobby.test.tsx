@@ -4,12 +4,14 @@ import { useInstructorLobby } from './use-instructor-lobby';
 
 const {
     mockUseApi,
+    mockUseDebounce,
     mockGetExamLobbyWaitingList,
     mockUpdateExamLobbyAdmissions,
     mockToastSuccess,
     mockToastError,
 } = vi.hoisted(() => ({
     mockUseApi: vi.fn(),
+    mockUseDebounce: vi.fn((value: string) => value),
     mockGetExamLobbyWaitingList: vi.fn(),
     mockUpdateExamLobbyAdmissions: vi.fn(),
     mockToastSuccess: vi.fn(),
@@ -18,6 +20,7 @@ const {
 
 vi.mock('@sentinel/hooks', () => ({
     useApi: () => mockUseApi(),
+    useDebounce: (value: string, delay: number) => mockUseDebounce(value, delay),
 }));
 
 vi.mock('@sentinel/services', () => ({
@@ -36,6 +39,7 @@ describe('useInstructorLobby', () => {
     beforeEach(() => {
         vi.clearAllMocks();
         mockUseApi.mockReturnValue({ api: true });
+        mockUseDebounce.mockImplementation((value: string) => value);
         mockGetExamLobbyWaitingList.mockResolvedValue([
             {
                 admissionId: 'admission-1',
@@ -49,7 +53,51 @@ describe('useInstructorLobby', () => {
                 attemptStatus: null,
                 reconnectCount: 1,
             },
+            {
+                admissionId: 'admission-2',
+                studentId: 'student-2',
+                studentName: 'Alex Learner',
+                studentNumber: '2026-002',
+                status: 'APPROVED',
+                checkedInAt: null,
+                decidedAt: null,
+                hasActiveAttempt: false,
+                attemptStatus: null,
+                reconnectCount: 0,
+            },
         ]);
+    });
+
+    it('debounces the raw lobby search term', async () => {
+        const { result } = renderHook(() => useInstructorLobby('exam-1'));
+
+        await waitFor(() => {
+            expect(result.current.lobbyAdmissions).toHaveLength(2);
+        });
+
+        act(() => {
+            result.current.setSearchTerm('alex');
+        });
+
+        expect(mockUseDebounce).toHaveBeenLastCalledWith('alex', 500);
+    });
+
+    it('returns filtered lobby admission groups', async () => {
+        const { result } = renderHook(() => useInstructorLobby('exam-1'));
+
+        await waitFor(() => {
+            expect(result.current.lobbyAdmissions).toHaveLength(2);
+        });
+
+        act(() => {
+            result.current.setStatusFilter('approved');
+        });
+
+        expect(result.current.lobbyAdmissionGroups.waitingStudents).toHaveLength(0);
+        expect(result.current.lobbyAdmissionGroups.approvedStudents).toHaveLength(1);
+        expect(result.current.lobbyAdmissionGroups.approvedStudents[0]?.studentId).toBe(
+            'student-2',
+        );
     });
 
     it('optimistically updates admissions before reconciling with the server list', async () => {
@@ -65,7 +113,7 @@ describe('useInstructorLobby', () => {
         const { result } = renderHook(() => useInstructorLobby('exam-1'));
 
         await waitFor(() => {
-            expect(result.current.lobbyAdmissions).toHaveLength(1);
+            expect(result.current.lobbyAdmissions).toHaveLength(2);
         });
 
         let pendingUpdate: Promise<void> | undefined;
