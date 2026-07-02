@@ -48,7 +48,7 @@ describe('useTurnedInExamRedirect', () => {
             '11111111-1111-1111-1111-111111111111',
         );
         expect(mockRouterReplace).toHaveBeenCalledWith(
-            '/student/history/details?attemptId=22222222-2222-2222-2222-222222222222',
+            '/student/history/attempts/22222222-2222-2222-2222-222222222222',
         );
     });
 

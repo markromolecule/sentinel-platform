@@ -4,6 +4,11 @@ import type { AttemptGradingDetailType, GradingQuestionType } from '@sentinel/sh
 export type StudentHistoryReportAvailability =
     'available' | 'grading_in_progress' | 'unavailable' | 'loading_report';
 
+export interface UseExamDetailsArgs {
+    attemptId?: string | null;
+    examId?: string | null;
+}
+
 export interface UseExamDetailsReturn {
     examId: string | null;
     attemptId: string | null;

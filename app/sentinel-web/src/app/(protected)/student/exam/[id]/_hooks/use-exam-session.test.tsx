@@ -18,6 +18,8 @@ const {
     mockClearStoredExamTurnInPreview,
     mockReadStoredLobbyEntryMarker,
     mockClearStoredLobbyEntryMarker,
+    mockGetStudentExamSessionAttemptId,
+    mockIsStudentExamAlreadyTurnedInError,
 } = vi.hoisted(() => ({
     mockRouterReplace: vi.fn(),
     mockApiClient: vi.fn(),
@@ -33,6 +35,8 @@ const {
     mockClearStoredExamTurnInPreview: vi.fn(),
     mockReadStoredLobbyEntryMarker: vi.fn(),
     mockClearStoredLobbyEntryMarker: vi.fn(),
+    mockGetStudentExamSessionAttemptId: vi.fn(),
+    mockIsStudentExamAlreadyTurnedInError: vi.fn(() => false),
 }));
 
 vi.mock('next/navigation', () => ({
@@ -72,8 +76,9 @@ vi.mock('../_lib/exam-turn-in-storage', () => ({
 }));
 
 vi.mock('../_lib/student-exam-session-feedback', () => ({
-    getStudentExamSessionAttemptId: vi.fn(),
-    isStudentExamAlreadyTurnedInError: vi.fn(() => false),
+    getStudentExamSessionAttemptId: (...args: unknown[]) => mockGetStudentExamSessionAttemptId(...args),
+    isStudentExamAlreadyTurnedInError: (...args: unknown[]) =>
+        mockIsStudentExamAlreadyTurnedInError(...args),
     resolveStudentExamSessionError: vi.fn(() => 'Failed to prepare the exam session.'),
 }));
 
@@ -104,6 +109,8 @@ describe('useExamSession', () => {
         mockSyncExamProgress.mockResolvedValue({
             message: 'Session progress synced successfully.',
         });
+        mockGetStudentExamSessionAttemptId.mockReturnValue(null);
+        mockIsStudentExamAlreadyTurnedInError.mockReturnValue(false);
     });
 
     it('keeps the stored session when the exam is still open for new starts', async () => {
@@ -259,7 +266,7 @@ describe('useExamSession', () => {
             reopenedUntil: null,
         };
 
-        const { result } = renderHook(() =>
+        renderHook(() =>
             useExamSession({
                 examId: startedSession.examId,
                 runtimeAccess,
@@ -370,6 +377,52 @@ describe('useExamSession', () => {
 
         expect(mockStartExamSession).not.toHaveBeenCalled();
         expect(mockWriteStoredExamSession).not.toHaveBeenCalled();
+    });
+
+    it('redirects already turned-in session starts to the canonical attempt history route', async () => {
+        const error = new Error('Already turned in');
+
+        mockReadStoredExamSession.mockReturnValue(null);
+        mockStartExamSession.mockRejectedValue(error);
+        mockIsStudentExamAlreadyTurnedInError.mockReturnValue(true);
+        mockGetStudentExamSessionAttemptId.mockReturnValue('attempt-789');
+
+        renderHook(() =>
+            useExamSession({
+                examId: '11111111-1111-1111-1111-111111111111',
+                runtimeAccess: {
+                    state: 'open',
+                    reasonCode: 'OPEN',
+                    message: 'This exam is open for students.',
+                    canStart: true,
+                    canResume: false,
+                    hasActiveAttempt: false,
+                    startsAt: null,
+                    endsAt: null,
+                    reopenedUntil: null,
+                },
+                isLoadingData: false,
+                isSessionStartBlocked: false,
+            }),
+        );
+
+        await waitFor(() => {
+            expect(mockStartExamSession).toHaveBeenCalled();
+        });
+
+        await waitFor(() => {
+            expect(mockRouterReplace).toHaveBeenCalledWith(
+                '/student/history/attempts/attempt-789',
+            );
+        });
+
+        expect(mockClearStoredExamTurnInPreview).toHaveBeenCalledWith(
+            '11111111-1111-1111-1111-111111111111',
+        );
+        expect(mockClearStoredExamSession).toHaveBeenCalledWith(
+            '11111111-1111-1111-1111-111111111111',
+        );
+        expect(mockToastError).not.toHaveBeenCalled();
     });
 
     it('redirects to the lobby if the lobby entry marker is missing on the attempt page', async () => {

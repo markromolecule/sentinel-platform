@@ -12,6 +12,7 @@ import {
 import { MoreHorizontal, Share2, Trash2, Pencil, Globe, Lock } from 'lucide-react';
 import { ExamCardProps } from '@sentinel/shared/types';
 import { useRouter } from 'next/navigation';
+import { buildCoreExamAssignHref } from '@/lib/routes/exam-management-routes';
 
 interface ExamCardHeaderProps {
     exam: ExamCardProps['exam'];
@@ -32,7 +33,7 @@ export function ExamCardHeader({
     const router = useRouter();
 
     const handleShare = () => {
-        router.push(`/exams/assign?examId=${exam.id}`);
+        router.push(buildCoreExamAssignHref(exam.id));
     };
 
     return (

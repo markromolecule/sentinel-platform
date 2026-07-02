@@ -23,6 +23,10 @@ import {
 } from '@sentinel/ui';
 import { AssignRoomDialog } from '../dialogs/assign-room-dialog';
 import { PermissionGuard } from '@sentinel/hooks';
+import {
+    buildCoreExamAssignHref,
+    buildCoreExamLogsHref,
+} from '@/lib/routes/exam-management-routes';
 
 
 export type ExamActionCellProps = {
@@ -33,7 +37,7 @@ export function ExamActionCell({ exam }: ExamActionCellProps) {
     const router = useRouter();
     const [isAssignRoomOpen, setIsAssignRoomOpen] = React.useState(false);
     const handleAssign = () => {
-        router.push('/exams?view=assign');
+        router.push(buildCoreExamAssignHref(exam.id));
     };
 
     return (
@@ -103,7 +107,7 @@ export function ExamActionCell({ exam }: ExamActionCellProps) {
                         )}
                         {exam.status !== 'draft' && (
                             <DropdownMenuItem className="cursor-pointer" asChild>
-                                <Link href={`/exams/logs?examId=${exam.id}`}>
+                                <Link href={buildCoreExamLogsHref(exam.id)}>
                                     <ShieldAlert className="mr-2 h-4 w-4" />
                                     Incident Logs
                                 </Link>

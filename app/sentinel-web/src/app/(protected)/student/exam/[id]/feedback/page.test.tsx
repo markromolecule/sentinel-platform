@@ -71,7 +71,10 @@ describe('StudentExamFeedbackPage', () => {
         render(<StudentExamFeedbackPage />);
 
         expect(screen.getByText('Midterm Exam')).toBeTruthy();
-        expect(screen.getByText('Exam Feedback')).toBeTruthy();
+        expect(screen.getByText('How are you feeling?')).toBeTruthy();
+        expect(screen.getByRole('link', { name: /skip for now/i }).getAttribute('href')).toBe(
+            '/student/history/attempts/22222222-2222-2222-2222-222222222222',
+        );
     });
 
     it('requires a rating before submission', async () => {

@@ -2,12 +2,26 @@ import { useSearchParams } from 'next/navigation';
 import { useAttemptReportQuery, useExamHistoryDetailQuery, useExamQuery } from '@sentinel/hooks';
 import { ApiError } from '@sentinel/services';
 import type { ExamHistory } from '@sentinel/shared/types';
-import { UseExamDetailsReturn } from '@/app/(protected)/student/history/details/_hooks/use-exam-details/_types';
+import {
+    UseExamDetailsArgs,
+    UseExamDetailsReturn,
+} from '@/app/(protected)/student/history/details/_hooks/use-exam-details/_types';
 
-export function useExamDetails(): UseExamDetailsReturn {
+/**
+ * Resolves student history detail state from explicit route params, with legacy
+ * search-param support preserved for compatibility redirects.
+ *
+ * @param args - Optional route-derived attempt or exam identifiers.
+ * @returns Student history detail query state and report availability.
+ */
+export function useExamDetails(args: UseExamDetailsArgs = {}): UseExamDetailsReturn {
     const searchParams = useSearchParams();
-    const attemptId = searchParams.get('attemptId');
-    const examId = searchParams.get('examId') ?? searchParams.get('id');
+    const attemptId =
+        args.attemptId !== undefined ? args.attemptId : (searchParams.get('attemptId') ?? null);
+    const examId =
+        args.examId !== undefined
+            ? args.examId
+            : ((searchParams.get('examId') ?? searchParams.get('id')) || null);
     const { data: historyItem, isLoading: isHistoryLoading } = useExamHistoryDetailQuery(attemptId);
     const { data: exam, isLoading: isExamLoading } = useExamQuery(examId ?? undefined);
     const reportQuery = useAttemptReportQuery(attemptId);

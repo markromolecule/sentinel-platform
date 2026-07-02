@@ -3,6 +3,10 @@ import { AlertTriangle, Calendar, ChevronRight, Clock } from 'lucide-react';
 import Link from 'next/link';
 import { HistoryCardProps } from '@sentinel/shared/types';
 import { formatDateTimeLabel } from '@/app/(protected)/student/_lib/student-exam-listing';
+import {
+    buildStudentHistoryAttemptHref,
+    buildStudentHistoryExamHref,
+} from '@/lib/routes/student-history-routes';
 
 function getHistoryHref(item: HistoryCardProps['item']) {
     if (
@@ -14,10 +18,10 @@ function getHistoryHref(item: HistoryCardProps['item']) {
     }
 
     if (item.attemptId) {
-        return `/student/history/details?attemptId=${item.attemptId}`;
+        return buildStudentHistoryAttemptHref(item.attemptId);
     }
 
-    return `/student/history/details?examId=${item.examId}`;
+    return buildStudentHistoryExamHref(item.examId);
 }
 
 export function HistoryCard({ item }: HistoryCardProps) {

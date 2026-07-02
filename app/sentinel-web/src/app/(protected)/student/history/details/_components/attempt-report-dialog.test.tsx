@@ -38,6 +38,7 @@ describe('AttemptReportDialog', () => {
 
         expect(screen.getByRole('dialog')).toBeTruthy();
         expect(screen.getByText('Detailed Report')).toBeTruthy();
+        expect(screen.getByText('1 question')).toBeTruthy();
         expect(screen.getByText('Attempt Report Table')).toBeTruthy();
         expect(mockAttemptReportView).toHaveBeenCalledWith(
             expect.objectContaining({

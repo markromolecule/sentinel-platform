@@ -78,18 +78,24 @@ export async function updateGradingAttempt({
         answers: attempt.answers,
     });
 
+    const questionPointsMap = new Map(questions.map((question) => [question.id, question.points]));
+
+    const mergedOverrides = {
+        ...attempt.itemOverrides,
+        ...itemOverrides,
+    };
+
     // Build the updated evaluations record
     const updatedEvaluations: Record<string, any> = {};
 
     // 3. Score the essay questions using the provided criteria scores
-    const questionPointsMap = new Map(questions.map((question) => [question.id, question.points]));
-
     for (const question of questions) {
         if (question.type === 'ESSAY') {
             const evaluation = evaluations[question.id] ?? detail.attempt.evaluations[question.id];
+            const override = mergedOverrides[question.id];
 
             if (!evaluation) {
-                if (finalize) {
+                if (finalize && typeof override?.awardedScore !== 'number') {
                     throw new HTTPException(400, {
                         message: `Evaluation missing for essay question: ${question.id}`,
                     });
@@ -106,11 +112,6 @@ export async function updateGradingAttempt({
             };
         }
     }
-
-    const mergedOverrides = {
-        ...attempt.itemOverrides,
-        ...itemOverrides,
-    };
 
     const persistedOverrides = Object.entries(mergedOverrides).reduce<Record<string, any>>(
         (acc, [questionId, override]) => {

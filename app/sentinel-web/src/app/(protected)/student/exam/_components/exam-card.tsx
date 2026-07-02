@@ -7,6 +7,7 @@ import { Clock, User, BookOpen } from 'lucide-react';
 import Link from 'next/link';
 import { cn } from '@sentinel/ui';
 import { StudentExamCardProps as ExamCardProps } from '@sentinel/shared/types';
+import { buildStudentHistoryFallbackHref } from '@/lib/routes/student-history-routes';
 
 export function ExamCard({ exam }: ExamCardProps) {
     const isCompleted = exam.status === 'completed' || exam.status === 'turned_in';
@@ -28,9 +29,10 @@ export function ExamCard({ exam }: ExamCardProps) {
                 : 'Open Exam';
 
     const actionHref = isCompleted
-        ? exam.attemptId
-            ? `/student/history/details?attemptId=${exam.attemptId}`
-            : `/student/history/details?examId=${exam.id}`
+        ? buildStudentHistoryFallbackHref({
+              attemptId: exam.attemptId,
+              examId: exam.id,
+          })
         : `/student/exam/${exam.id}/instruction`;
 
     const isActive = isCompleted || isInProgress || isAvailable;

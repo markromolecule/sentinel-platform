@@ -29,6 +29,7 @@ import {
 import { useExamCard } from '@/features/exams/_hooks/use-exam-card';
 import { ExamCardDeleteAlert } from './exam-card/exam-card-delete-alert';
 import { ExamEditDialog } from '@/features/exams/_components/dialogs/exam-edit-dialog';
+import { buildCoreExamAssignHref } from '@/lib/routes/exam-management-routes';
 
 interface ExamListItemProps {
     exam: ProctorExam;
@@ -71,7 +72,7 @@ export function ExamListItem({ exam }: ExamListItemProps) {
                 ? `Created by ${exam.createdByName}`
                 : null;
     const handleShare = () => {
-        router.push(`/exams/assign?examId=${exam.id}`);
+        router.push(buildCoreExamAssignHref(exam.id));
     };
 
     return (

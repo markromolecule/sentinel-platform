@@ -32,7 +32,7 @@ describe('StudentExamFeedbackThankYouPage', () => {
 
         expect(screen.getByText('Thank you for the feedback')).toBeTruthy();
         expect(screen.getByRole('link', { name: /view exam result/i }).getAttribute('href')).toBe(
-            '/student/history/details?attemptId=22222222-2222-2222-2222-222222222222',
+            '/student/history/attempts/22222222-2222-2222-2222-222222222222',
         );
     });
 

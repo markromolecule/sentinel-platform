@@ -24,6 +24,7 @@ import {
     resolveStudentExamSessionError,
 } from '../_lib/student-exam-session-feedback';
 import type { ExamAnswerValue } from '@/features/exams/_components/engine';
+import { buildStudentHistoryAttemptHref } from '@/lib/routes/student-history-routes';
 
 type UseExamSessionArgs = {
     examId: string;
@@ -46,10 +47,18 @@ export function useExamSession({
 }: UseExamSessionArgs) {
     const { replace } = useRouter();
     const apiClient = useApi();
+    const isMountedRef = useRef(true);
+    const sessionStartRequestRef = useRef(0);
     const [examSession, setExamSession] = useState<StoredExamSession | null>(null);
     const [isInitializingSession, setIsInitializingSession] = useState(true);
     const [elapsedSeconds, setElapsedSeconds] = useState(0);
     const processedLobbyEntryExamIdRef = useRef<string | null>(null);
+
+    useEffect(() => {
+        return () => {
+            isMountedRef.current = false;
+        };
+    }, []);
 
     useEffect(() => {
         if (typeof window === 'undefined') return;
@@ -137,7 +146,8 @@ export function useExamSession({
             return;
         }
 
-        let isActive = true;
+        const requestId = sessionStartRequestRef.current + 1;
+        sessionStartRequestRef.current = requestId;
         setIsInitializingSession(true);
 
         const initializeExamSession = async () => {
@@ -158,7 +168,7 @@ export function useExamSession({
                     });
                 }
 
-                if (isActive) {
+                if (isMountedRef.current && sessionStartRequestRef.current === requestId) {
                     setExamSession(storedSession);
 
                     if (session.answers) {
@@ -171,7 +181,7 @@ export function useExamSession({
                     }
                 }
             } catch (error) {
-                if (!isActive) {
+                if (!isMountedRef.current || sessionStartRequestRef.current !== requestId) {
                     return;
                 }
 
@@ -182,7 +192,7 @@ export function useExamSession({
                     clearStoredExamSession(examId);
 
                     if (attemptId) {
-                        replace(`/student/history/details?attemptId=${attemptId}`);
+                        replace(buildStudentHistoryAttemptHref(attemptId));
                         return;
                     }
                 }
@@ -191,17 +201,13 @@ export function useExamSession({
                 clearStoredExamSession(examId);
                 replace(`/student/exam/${examId}/lobby`);
             } finally {
-                if (isActive) {
+                if (isMountedRef.current && sessionStartRequestRef.current === requestId) {
                     setIsInitializingSession(false);
                 }
             }
         };
 
         void initializeExamSession();
-
-        return () => {
-            isActive = false;
-        };
     }, [
         apiClient,
         examId,

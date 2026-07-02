@@ -1,14 +1,17 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 'use client';
 
-import React, { Suspense } from 'react';
+import React from 'react';
 import { act, cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import ExamIncidentLogsPage from './page';
+import { ExamIncidentLogsContent } from './_components/exam-incident-logs-content';
 
 const mockRefetch = vi.fn();
 const mockFetchNextPage = vi.fn();
 const mockReviewIncidents = vi.fn();
 const mockPush = vi.fn();
+const mockRedirect = vi.fn();
 
 const mockSearchParams = vi.hoisted(() => vi.fn());
 
@@ -19,6 +22,7 @@ vi.mock('next/navigation', () => ({
     useRouter: () => ({
         push: mockPush,
     }),
+    redirect: (href: string) => mockRedirect(href),
 }));
 
 vi.mock('@sentinel/hooks', () => ({
@@ -237,7 +241,7 @@ vi.mock('@sentinel/ui', () => ({
             </div>
         );
     },
-    Popover: ({ children, open, onOpenChange }: any) => (
+    Popover: ({ children, open }: any) => (
         <div data-testid="popover-mock" data-open={open}>
             {children}
         </div>
@@ -336,7 +340,7 @@ vi.mock('sonner', () => ({
     },
 }));
 
-describe('ExamIncidentLogsPage Component', () => {
+describe('ExamIncidentLogsContent', () => {
     beforeEach(() => {
         vi.clearAllMocks();
     });
@@ -349,11 +353,7 @@ describe('ExamIncidentLogsPage Component', () => {
     it('renders empty state when no exam is selected', async () => {
         mockSearchParams.mockReturnValue(new URLSearchParams());
 
-        render(
-            <Suspense fallback={<div>Loading...</div>}>
-                <ExamIncidentLogsPage />
-            </Suspense>,
-        );
+        render(<ExamIncidentLogsContent />);
 
         // Verify page header is rendered
         expect(screen.getByText('Incident Logs & Analytics')).toBeTruthy();
@@ -370,11 +370,7 @@ describe('ExamIncidentLogsPage Component', () => {
     it('changes URL search params when selecting an exam from cards grid', async () => {
         mockSearchParams.mockReturnValue(new URLSearchParams());
 
-        render(
-            <Suspense fallback={<div>Loading...</div>}>
-                <ExamIncidentLogsPage />
-            </Suspense>,
-        );
+        render(<ExamIncidentLogsContent />);
 
         // Find the card for 'Midterm Exam' (exam-uuid-123) and click it
         const card = screen.getByTestId('exam-card-exam-uuid-123');
@@ -383,17 +379,13 @@ describe('ExamIncidentLogsPage Component', () => {
             fireEvent.click(card);
         });
 
-        expect(mockPush).toHaveBeenCalledWith('/exams/logs?examId=exam-uuid-123');
+        expect(mockPush).toHaveBeenCalledWith('/exams/exam-uuid-123/logs');
     });
 
     it('renders filters, list logs, and student details when examId exists in URL', async () => {
         mockSearchParams.mockReturnValue(new URLSearchParams({ examId: 'exam-uuid-123' }));
 
-        render(
-            <Suspense fallback={<div>Loading...</div>}>
-                <ExamIncidentLogsPage />
-            </Suspense>,
-        );
+        render(<ExamIncidentLogsContent />);
 
         // Verify students list
         expect(screen.getAllByText('Juan Dela Cruz')[0]).toBeTruthy();
@@ -407,11 +399,7 @@ describe('ExamIncidentLogsPage Component', () => {
     it('groups incidents by student and compiles log summary when toggle is clicked', async () => {
         mockSearchParams.mockReturnValue(new URLSearchParams({ examId: 'exam-uuid-123' }));
 
-        render(
-            <Suspense fallback={<div>Loading...</div>}>
-                <ExamIncidentLogsPage />
-            </Suspense>,
-        );
+        render(<ExamIncidentLogsContent />);
 
         // Before grouping: Verify there are 3 rows in the table body (excluding header row)
         // Since we mock DataTable, let's query row elements in tbody
@@ -441,5 +429,17 @@ describe('ExamIncidentLogsPage Component', () => {
 
         // Maria Clara has 1 compiled alert
         expect(screen.getByText('1 alert')).toBeTruthy();
+    });
+});
+
+describe('ExamIncidentLogsPage', () => {
+    it('redirects legacy query-string log routes to the canonical path', async () => {
+        await ExamIncidentLogsPage({
+            searchParams: Promise.resolve({
+                examId: 'exam-uuid-123',
+            }),
+        });
+
+        expect(mockRedirect).toHaveBeenCalledWith('/exams/exam-uuid-123/logs');
     });
 });

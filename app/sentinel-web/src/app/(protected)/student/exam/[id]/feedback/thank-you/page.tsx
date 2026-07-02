@@ -4,6 +4,7 @@ import { useSearchParams } from 'next/navigation';
 import { Button, Card, CardContent } from '@sentinel/ui';
 import { LineChart } from 'lucide-react';
 import Link from 'next/link';
+import { buildStudentHistoryAttemptHref } from '@/lib/routes/student-history-routes';
 
 export default function StudentExamFeedbackThankYouPage() {
     const searchParams = useSearchParams();
@@ -31,7 +32,7 @@ export default function StudentExamFeedbackThankYouPage() {
                             <Link
                                 href={
                                     attemptId
-                                        ? `/student/history/details?attemptId=${attemptId}`
+                                        ? buildStudentHistoryAttemptHref(attemptId)
                                         : '/student/history'
                                 }
                             >

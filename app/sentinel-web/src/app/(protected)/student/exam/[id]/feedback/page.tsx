@@ -20,6 +20,7 @@ import { ArrowLeft, MessageSquareHeart, Star } from 'lucide-react';
 import Link from 'next/link';
 import { toast } from 'sonner';
 import { useStudentExamData } from '../_hooks/use-student-exam-data';
+import { buildStudentHistoryFallbackHref } from '@/lib/routes/student-history-routes';
 
 const RATING_OPTIONS = [
     { value: '1', label: 'Bad', emoji: '😔', description: 'Difficult end to end.' },
@@ -201,7 +202,11 @@ export default function StudentExamFeedbackPage() {
                             {createFeedbackMutation.isPending ? 'Submitting...' : 'Submit Feedback'}
                         </Button>
                         <Button asChild variant="ghost" className="h-9 w-full rounded-2xl">
-                            <Link href={`/student/history/details?attemptId=${attemptId ?? ''}`}>
+                            <Link
+                                href={buildStudentHistoryFallbackHref({
+                                    attemptId,
+                                })}
+                            >
                                 <ArrowLeft className="mr-2 h-4 w-4" />
                                 Skip for now
                             </Link>
