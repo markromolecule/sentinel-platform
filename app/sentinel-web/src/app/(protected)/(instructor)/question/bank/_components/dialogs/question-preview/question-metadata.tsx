@@ -17,11 +17,11 @@ export function QuestionMetadataSection({
     sourceEvidence,
 }: QuestionMetadataProps) {
     return (
-        <div className="space-y-4">
+        <div className="space-y-3">
             <h4 className="text-sm text-[10px] font-semibold tracking-wider text-zinc-500 uppercase">
                 Metadata
             </h4>
-            <div className="grid gap-4 sm:grid-cols-2">
+            <div className="grid gap-3 sm:grid-cols-2">
                 <div className="space-y-1">
                     <p className="text-[10px] font-bold text-zinc-400 uppercase">Difficulty</p>
                     <div className="flex items-center gap-2">

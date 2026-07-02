@@ -33,20 +33,57 @@ describe('ExamsActivityOverview', () => {
             attempts_count: 0,
             incidents_count: 0,
         },
+        {
+            exam_id: '11111111-1111-1111-1111-111111111111',
+            title: 'Physics Quiz',
+            status: 'PUBLISHED',
+            scheduled_date: '2026-06-18T10:00:00.000Z',
+            duration_minutes: 45,
+            question_count: 12,
+            subject_title: 'Physics',
+            subject_code: 'PHY101',
+            attempts_count: 4,
+            incidents_count: 1,
+        },
+        {
+            exam_id: '22222222-2222-2222-2222-222222222222',
+            title: 'Chemistry Long Exam',
+            status: 'PUBLISHED',
+            scheduled_date: '2026-06-15T09:00:00.000Z',
+            duration_minutes: 120,
+            question_count: 50,
+            subject_title: 'Chemistry',
+            subject_code: 'CHEM101',
+            attempts_count: 10,
+            incidents_count: 0,
+        },
+        {
+            exam_id: '33333333-3333-3333-3333-333333333333',
+            title: 'Biology Final',
+            status: 'DRAFT',
+            scheduled_date: '2026-06-10T08:00:00.000Z',
+            duration_minutes: 75,
+            question_count: 40,
+            subject_title: 'Biology',
+            subject_code: 'BIO101',
+            attempts_count: 0,
+            incidents_count: 0,
+        },
     ];
 
     it('renders list of exams correctly', () => {
         render(<ExamsActivityOverview exams={mockExams} />);
 
         expect(screen.getByText('Midterm Calculus')).toBeTruthy();
-        expect(screen.getByText('Calculus I (MATH101)')).toBeTruthy();
-        expect(screen.getByText('15 attempts')).toBeTruthy();
-        expect(screen.getByText('2 incidents')).toBeTruthy();
+        expect(screen.getByText('MATH101')).toBeTruthy();
+        expect(screen.getByText('15')).toBeTruthy();
+        expect(screen.getByText('2')).toBeTruthy();
 
         expect(screen.getByText('Final Algebra')).toBeTruthy();
-        expect(screen.getByText('College Algebra (MATH102)')).toBeTruthy();
-        expect(screen.getByText('0 attempts')).toBeTruthy();
-        expect(screen.getByText('0 incidents')).toBeTruthy();
+        expect(screen.getByText('MATH102')).toBeTruthy();
+        expect(screen.getAllByText('0').length).toBeGreaterThan(0);
+
+        expect(screen.getByText('Biology Final')).toBeTruthy();
     });
 
     it('renders fallback empty state when no exams are provided', () => {

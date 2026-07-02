@@ -43,4 +43,19 @@ describe('CalendarHeader', () => {
 
         expect(screen.getByRole('button', { name: /add event/i })).toBeDefined();
     });
+
+    it('renders the quiet-month hint when provided', () => {
+        render(
+            <CalendarHeader
+                currentMonth={new Date('2026-06-01T00:00:00.000Z')}
+                onPreviousMonth={vi.fn()}
+                onNextMonth={vi.fn()}
+                onToday={vi.fn()}
+                onAddEvent={vi.fn()}
+                emptyStateHint="No events scheduled this month."
+            />,
+        );
+
+        expect(screen.getByText('No events scheduled this month.')).toBeDefined();
+    });
 });
