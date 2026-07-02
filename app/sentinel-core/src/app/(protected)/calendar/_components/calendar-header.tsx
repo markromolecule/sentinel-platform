@@ -10,6 +10,7 @@ interface CalendarHeaderProps {
     onNextMonth: () => void;
     onToday: () => void;
     onAddEvent: () => void;
+    emptyStateHint?: string;
 }
 
 export function CalendarHeader({
@@ -18,9 +19,13 @@ export function CalendarHeader({
     onNextMonth,
     onToday,
     onAddEvent,
+    emptyStateHint,
 }: CalendarHeaderProps) {
     return (
-        <div className="flex w-full flex-col gap-3 md:flex-row md:items-center md:justify-end">
+        <div className="flex w-full flex-col gap-2 md:flex-row md:items-center md:justify-between">
+            <div className="min-h-5 text-sm text-zinc-500">
+                {emptyStateHint ? <p>{emptyStateHint}</p> : null}
+            </div>
             <div className="flex flex-wrap items-center justify-end gap-2">
                 <div className="bg-card flex items-center rounded-xl border shadow-sm">
                     <Button variant="ghost" size="icon" onClick={onPreviousMonth}>

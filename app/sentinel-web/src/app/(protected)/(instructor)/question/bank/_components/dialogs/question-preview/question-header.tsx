@@ -16,12 +16,12 @@ interface QuestionHeaderProps {
  */
 export function QuestionHeader({ typeLabel, tags, prompt, timeAgo, points }: QuestionHeaderProps) {
     return (
-        <SheetHeader className="px-8 pb-6 text-left">
-            <div className="mb-2 flex items-center gap-2 pt-4">
+        <SheetHeader className="px-5 pb-5 text-left sm:px-6">
+            <div className="mb-2 flex flex-wrap items-center gap-2 pt-4">
                 <Badge variant="secondary" className="text-[10px] tracking-wider uppercase">
                     {typeLabel}
                 </Badge>
-                <div className="flex gap-1">
+                <div className="flex flex-wrap gap-1">
                     {tags.map((tag) => (
                         <Badge
                             key={tag}
@@ -36,10 +36,10 @@ export function QuestionHeader({ typeLabel, tags, prompt, timeAgo, points }: Que
                     )}
                 </div>
             </div>
-            <SheetTitle className="text-xl leading-tight text-zinc-900 dark:text-zinc-50">
+            <SheetTitle className="text-lg leading-tight text-zinc-900 sm:text-xl dark:text-zinc-50">
                 {prompt}
             </SheetTitle>
-            <SheetDescription className="flex items-center gap-4 pt-2">
+            <SheetDescription className="flex flex-wrap items-center gap-3 pt-2">
                 <span className="flex items-center gap-1.5 text-xs text-zinc-500">
                     <Calendar className="h-3.5 w-3.5" />
                     Created {timeAgo}

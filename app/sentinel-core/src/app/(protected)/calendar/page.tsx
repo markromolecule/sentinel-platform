@@ -27,6 +27,10 @@ export default function AdminCalendarPage() {
         handleDeleteEvent,
         getEventsForDate,
     } = useAdminCalendar();
+    const emptyStateHint =
+        !isLoading && calendarDays.every((day) => getEventsForDate(day).length === 0)
+            ? 'No events scheduled this month.'
+            : undefined;
 
     return (
         <div
@@ -43,6 +47,7 @@ export default function AdminCalendarPage() {
                     onNextMonth={handleNextMonth}
                     onToday={handleToday}
                     onAddEvent={() => setIsAddEventOpen(true)}
+                    emptyStateHint={emptyStateHint}
                 />
             </PageHeader>
             <Separator />

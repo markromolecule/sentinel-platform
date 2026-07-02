@@ -49,6 +49,8 @@ export default function ProctorCalendarPage() {
         }));
     }, [data]);
 
+    const emptyStateHint = mappedEvents.length === 0 ? 'No events scheduled this month.' : undefined;
+
     // Re-initialize dynamic getEventsForDate on the fly
     const getEventsForDate = useMemo(() => {
         return (date: Date) => {
@@ -75,6 +77,7 @@ export default function ProctorCalendarPage() {
                     onPreviousMonth={handlePreviousMonth}
                     onNextMonth={handleNextMonth}
                     onToday={handleToday}
+                    emptyStateHint={emptyStateHint}
                 />
             </PageHeader>
             <Separator />
@@ -88,20 +91,12 @@ export default function ProctorCalendarPage() {
                     </div>
                 </div>
             ) : (
-                <>
-                    {mappedEvents.length === 0 && !isLoading && (
-                        <div className="animate-fadeIn mb-4 rounded-xl border border-amber-500/20 bg-amber-500/10 p-4 text-sm font-medium text-amber-600">
-                            No scheduled exams or events found for this month.
-                        </div>
-                    )}
-
-                    <CalendarGrid
-                        currentMonth={currentMonth}
-                        calendarDays={calendarDays}
-                        onDayClick={handleDayClick}
-                        getEventsForDate={getEventsForDate}
-                    />
-                </>
+                <CalendarGrid
+                    currentMonth={currentMonth}
+                    calendarDays={calendarDays}
+                    onDayClick={handleDayClick}
+                    getEventsForDate={getEventsForDate}
+                />
             )}
 
             <DayDetailsSheet

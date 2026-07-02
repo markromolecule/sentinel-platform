@@ -23,7 +23,12 @@ vi.mock('@/features/calendar', () => ({
         handleToday: vi.fn(),
         handleDayClick: vi.fn(),
     }),
-    CalendarHeader: () => <div data-testid="calendar-header">Calendar Header</div>,
+    CalendarHeader: ({ emptyStateHint }: { emptyStateHint?: string }) => (
+        <div data-testid="calendar-header">
+            Calendar Header
+            {emptyStateHint ? <span>{emptyStateHint}</span> : null}
+        </div>
+    ),
     CalendarGrid: ({
         getEventsForDate,
     }: {
@@ -66,6 +71,7 @@ describe('ProctorCalendarPage', () => {
             screen.getByText('View institution events, announcements, and schedules.'),
         ).toBeTruthy();
         expect(screen.getByTestId('calendar-header')).toBeTruthy();
+        expect(screen.getByText('No events scheduled this month.')).toBeTruthy();
         expect(screen.getByTestId('calendar-separator')).toBeTruthy();
     });
 
