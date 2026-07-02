@@ -74,7 +74,17 @@ describe('ExamCard', () => {
 
         const link = button.closest('a');
         expect(link).toBeTruthy();
-        expect(link?.getAttribute('href')).toBe('/student/history/details?attemptId=attempt-id');
+        expect(link?.getAttribute('href')).toBe('/student/history/attempts/attempt-id');
+    });
+
+    it('falls back to the canonical exam history route when a completed exam has no attempt id', () => {
+        render(<ExamCard exam={{ ...defaultExam, status: 'completed' }} />);
+
+        const button = screen.getByRole('button', { name: /review flow/i }) as HTMLButtonElement;
+        const link = button.closest('a');
+
+        expect(link).toBeTruthy();
+        expect(link?.getAttribute('href')).toBe('/student/history/exams/test-id');
     });
 
     it('renders past_due state correctly', () => {
@@ -89,7 +99,11 @@ describe('ExamCard', () => {
     });
 
     it('renders scheduled state correctly', () => {
-        render(<ExamCard exam={{ ...defaultExam, status: 'scheduled' as any }} />);
+        render(
+            <ExamCard
+                exam={{ ...defaultExam, status: 'scheduled' } as StudentExamCardProps['exam']}
+            />,
+        );
         const badge = screen.getByText('scheduled');
         expect(badge).toBeTruthy();
         expect(badge.className).toContain('bg-amber-500');
@@ -100,7 +114,11 @@ describe('ExamCard', () => {
     });
 
     it('renders archived state correctly', () => {
-        render(<ExamCard exam={{ ...defaultExam, status: 'archived' as any }} />);
+        render(
+            <ExamCard
+                exam={{ ...defaultExam, status: 'archived' } as StudentExamCardProps['exam']}
+            />,
+        );
         const badge = screen.getByText('archived');
         expect(badge).toBeTruthy();
         expect(badge.className).toContain('bg-muted');

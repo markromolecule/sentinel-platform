@@ -1,5 +1,6 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { act, renderHook } from '@testing-library/react';
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { useExamIncidentLogs } from './use-exam-incident-logs';
 import { toast } from 'sonner';
 
@@ -141,7 +142,7 @@ describe('useExamIncidentLogs Custom Hook', () => {
             result.current.handleExamChange('exam-1');
         });
 
-        expect(mockPush).toHaveBeenCalledWith('/exams/logs?examId=exam-1');
+        expect(mockPush).toHaveBeenCalledWith('/exams/exam-1/logs');
     });
 
     it('returns incident records when exam is selected', () => {

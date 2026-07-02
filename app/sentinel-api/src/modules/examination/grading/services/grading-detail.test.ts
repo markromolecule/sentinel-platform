@@ -416,7 +416,7 @@ describe('Grading attempt details and update services', () => {
             expect(setSpy).toHaveBeenCalled();
         });
 
-        it('allows saving overrides without essay evaluations if finalize is false, but rejects if finalize is true', async () => {
+        it('allows finalizing essay questions with item overrides instead of rubric evaluations', async () => {
             const mockAttempt = {
                 attemptId: '11111111-1111-1111-1111-111111111111',
                 examId: '22222222-2222-2222-2222-222222222222',
@@ -460,26 +460,72 @@ describe('Grading attempt details and update services', () => {
             const setSpy = vi.fn().mockReturnValue(mockDb);
             mockDb.set = setSpy;
 
-            // Success when finalize is false
-            await expect(
-                updateGradingAttempt({
-                    dbClient: mockDb as DbClient,
-                    attemptId: '11111111-1111-1111-1111-111111111111',
-                    itemOverrides: {
-                        'q-essay-1': { awardedScore: 4, reason: 'Correction' },
-                    },
-                    finalize: false,
-                }),
-            ).resolves.toBeDefined();
+            const result = await updateGradingAttempt({
+                dbClient: mockDb as DbClient,
+                attemptId: '11111111-1111-1111-1111-111111111111',
+                itemOverrides: {
+                    'q-essay-1': { awardedScore: 4, reason: 'Correction' },
+                },
+                finalize: true,
+            });
 
-            // Error when finalize is true
+            const lastCallArgs = setSpy.mock.calls[0][0];
+            expect(result.score).toBe(4);
+            expect(lastCallArgs.status).toBe('COMPLETED');
+            expect(lastCallArgs.answer_snapshot._evaluations).toEqual({});
+            expect(lastCallArgs.answer_snapshot._itemOverrides).toEqual({
+                'q-essay-1': expect.objectContaining({
+                    awardedScore: 4,
+                    reason: 'Correction',
+                }),
+            });
+        });
+
+        it('rejects finalizing essay questions without an evaluation or item override', async () => {
+            const mockAttempt = {
+                attemptId: '11111111-1111-1111-1111-111111111111',
+                examId: '22222222-2222-2222-2222-222222222222',
+                examTitle: 'History Final',
+                subjectTitle: 'History',
+                studentId: '33333333-3333-3333-3333-333333333333',
+                studentNumber: '2026-0001',
+                completedAt: new Date('2026-04-18T09:30:00.000Z'),
+                score: 5,
+                totalScore: 10,
+                status: 'COMPLETED',
+                answerSnapshot: {
+                    'q-essay-1': 'Student essay response text',
+                },
+                studentName: 'Alice Student',
+            };
+
+            const mockQuestions = [
+                {
+                    id: 'q-essay-1',
+                    examId: '22222222-2222-2222-2222-222222222222',
+                    type: 'ESSAY',
+                    content: { prompt: 'Essay Prompt', maxLength: 1000 },
+                    points: 5,
+                    orderIndex: 0,
+                },
+            ];
+
+            mockDb.executeTakeFirst.mockResolvedValue(mockAttempt);
+            mockDb.execute.mockResolvedValue(mockQuestions);
+            vi.mocked(scoreExamAttempt).mockReturnValue({
+                score: 0,
+                totalScore: 5,
+                percentage: 0,
+                answeredCount: 1,
+                autoGradableQuestionCount: 0,
+                manualReviewQuestionCount: 1,
+                requiresManualReview: true,
+            });
+
             await expect(
                 updateGradingAttempt({
                     dbClient: mockDb as DbClient,
                     attemptId: '11111111-1111-1111-1111-111111111111',
-                    itemOverrides: {
-                        'q-essay-1': { awardedScore: 4, reason: 'Correction' },
-                    },
                     finalize: true,
                 }),
             ).rejects.toMatchObject({

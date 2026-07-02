@@ -19,6 +19,7 @@ import {
 } from '../../_lib/student-exam-session-feedback';
 import type { ExamConfig, ExamRuntimeAccess } from '@sentinel/shared/types';
 import { type StoredExamSession } from '../../_lib/exam-session-storage';
+import { buildStudentHistoryAttemptHref } from '@/lib/routes/student-history-routes';
 
 export type UseLobbyActionsArgs = {
     examId: string;
@@ -83,7 +84,7 @@ export function useLobbyActions({
                 clearStoredExamTurnInPreview(examId);
                 clearStoredExamSession(examId);
                 if (attemptId) {
-                    router.replace(`/student/history/details?attemptId=${attemptId}`);
+                    router.replace(buildStudentHistoryAttemptHref(attemptId));
                     return;
                 }
             }

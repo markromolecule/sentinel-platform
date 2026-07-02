@@ -1,9 +1,9 @@
-'use client';
-
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import HistoryDetailsPage from './page';
+import { HistoryDetailsContent } from '@/app/(protected)/student/history/_components/history-details-content';
 
+const mockRedirect = vi.fn();
 const mockUseExamDetails = vi.fn();
 
 vi.mock('next/link', () => ({
@@ -12,8 +12,12 @@ vi.mock('next/link', () => ({
     ),
 }));
 
+vi.mock('next/navigation', () => ({
+    redirect: (href: string) => mockRedirect(href),
+}));
+
 vi.mock('@/app/(protected)/student/history/details/_hooks/use-exam-details', () => ({
-    useExamDetails: () => mockUseExamDetails(),
+    useExamDetails: (...args: unknown[]) => mockUseExamDetails(...args),
 }));
 
 vi.mock('@/app/(protected)/student/history/details/_components/attempt-report-dialog', () => ({
@@ -45,12 +49,12 @@ afterEach(() => {
     cleanup();
 });
 
-describe('HistoryDetailsPage', () => {
+describe('HistoryDetailsContent', () => {
     beforeEach(() => {
         vi.clearAllMocks();
     });
 
-    it('shows released report copy and opens the report dialog when data is available', async () => {
+    it('renders released report content using the provided attempt id', async () => {
         mockUseExamDetails.mockReturnValue({
             historyItem: {
                 examTitle: 'Final Exam',
@@ -75,18 +79,20 @@ describe('HistoryDetailsPage', () => {
             isLoading: false,
         });
 
-        render(<HistoryDetailsPage />);
+        render(<HistoryDetailsContent attemptId="attempt-route-1" />);
 
         expect(await screen.findByText('Detailed Report Available')).toBeTruthy();
-        expect(screen.queryByText('Finalized Report Ready')).toBeNull();
-        expect(screen.queryByText('Attempt Report View')).toBeNull();
+        expect(mockUseExamDetails).toHaveBeenCalledWith({
+            attemptId: 'attempt-route-1',
+            examId: undefined,
+        });
 
         fireEvent.click(screen.getByRole('button', { name: /view detailed report/i }));
 
         expect(screen.getByText('Detailed Report Dialog')).toBeTruthy();
     });
 
-    it('shows the in-review state when grading is still in progress', async () => {
+    it('renders the in-review state using the provided exam id', async () => {
         mockUseExamDetails.mockReturnValue({
             historyItem: {
                 examTitle: 'Essay Exam',
@@ -108,9 +114,56 @@ describe('HistoryDetailsPage', () => {
             isLoading: false,
         });
 
-        render(<HistoryDetailsPage />);
+        render(<HistoryDetailsContent examId="exam-route-1" />);
 
         expect(await screen.findByText('Report In Review')).toBeTruthy();
-        expect(screen.queryByText('Attempt Report View')).toBeNull();
+        expect(mockUseExamDetails).toHaveBeenCalledWith({
+            attemptId: undefined,
+            examId: 'exam-route-1',
+        });
+    });
+});
+
+describe('HistoryDetailsPage', () => {
+    beforeEach(() => {
+        vi.clearAllMocks();
+    });
+
+    it('redirects legacy attempt urls to the canonical attempt route', async () => {
+        await HistoryDetailsPage({
+            searchParams: Promise.resolve({
+                attemptId: 'attempt-1',
+            }),
+        });
+
+        expect(mockRedirect).toHaveBeenCalledWith('/student/history/attempts/attempt-1');
+    });
+
+    it('redirects legacy exam urls and id aliases to the canonical exam route', async () => {
+        await HistoryDetailsPage({
+            searchParams: Promise.resolve({
+                examId: 'exam-1',
+            }),
+        });
+
+        expect(mockRedirect).toHaveBeenCalledWith('/student/history/exams/exam-1');
+
+        vi.clearAllMocks();
+
+        await HistoryDetailsPage({
+            searchParams: Promise.resolve({
+                id: 'exam-2',
+            }),
+        });
+
+        expect(mockRedirect).toHaveBeenCalledWith('/student/history/exams/exam-2');
+    });
+
+    it('redirects missing legacy identifiers to the history index', async () => {
+        await HistoryDetailsPage({
+            searchParams: Promise.resolve({}),
+        });
+
+        expect(mockRedirect).toHaveBeenCalledWith('/student/history');
     });
 });

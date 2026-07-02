@@ -82,7 +82,7 @@ describe('useExamDetails', () => {
         });
     });
 
-    it('marks report availability as available when the attempt report loads', async () => {
+    it('uses the explicit attempt route param when loading an attempt report', async () => {
         mockAttemptReportQuery.mockReturnValue({
             data: {
                 attempt: {
@@ -113,16 +113,22 @@ describe('useExamDetails', () => {
             isLoading: false,
         });
 
-        const { result } = renderHook(() => useExamDetails(), {
-            wrapper: createWrapper(),
-        });
+        const { result } = renderHook(
+            () => useExamDetails({ attemptId: 'attempt-route-1' }),
+            {
+                wrapper: createWrapper(),
+            },
+        );
 
         await waitFor(() => {
             expect(result.current.isLoading).toBe(false);
         });
 
         expect(result.current.reportAvailability).toBe('available');
+        expect(result.current.attemptId).toBe('attempt-route-1');
         expect(result.current.report?.attempt.attemptId).toBe('attempt-1');
+        expect(mockHistoryDetailQuery).toHaveBeenCalledWith('attempt-route-1');
+        expect(mockAttemptReportQuery).toHaveBeenCalledWith('attempt-route-1');
     });
 
     it('marks report availability as grading_in_progress on 409 responses', async () => {
@@ -148,9 +154,9 @@ describe('useExamDetails', () => {
         expect(result.current.report).toBeUndefined();
     });
 
-    it('does not require a report request to finish loading when no attempt id exists', async () => {
+    it('uses the explicit exam route param when no attempt id exists', async () => {
         searchParamValues.clear();
-        searchParamValues.set('examId', 'exam-1');
+        searchParamValues.set('examId', 'search-exam-id');
         mockHistoryDetailQuery.mockReturnValue({
             data: undefined,
             isLoading: false,
@@ -186,7 +192,7 @@ describe('useExamDetails', () => {
             isLoading: true,
         });
 
-        const { result } = renderHook(() => useExamDetails(), {
+        const { result } = renderHook(() => useExamDetails({ examId: 'exam-route-1' }), {
             wrapper: createWrapper(),
         });
 
@@ -195,9 +201,11 @@ describe('useExamDetails', () => {
         });
 
         expect(result.current.attemptId).toBeNull();
+        expect(result.current.examId).toBe('exam-route-1');
         expect(result.current.historyItem?.examId).toBe('exam-1');
         expect(result.current.reportAvailability).toBe('unavailable');
         expect(mockAttemptReportQuery).toHaveBeenCalledWith(null);
+        expect(mockExamQuery).toHaveBeenCalledWith('exam-route-1');
     });
 
     it('exposes loading_report while the attempt report is still loading', async () => {

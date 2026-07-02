@@ -1,7 +1,7 @@
 'use client';
 
-import { useMemo, useState, useEffect } from 'react';
-import { useRouter, usePathname, useSearchParams } from 'next/navigation';
+import { useMemo, useState } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { toast } from 'sonner';
 import {
     useExamIncidentsQuery,
@@ -12,16 +12,16 @@ import {
 } from '@sentinel/hooks';
 import type { ColumnFiltersState } from '@tanstack/react-table';
 import { type ApiGetExamIncidentsQuery, type ApiIncidentLogItem } from '@sentinel/services';
+import { buildCoreExamLogsHref } from '@/lib/routes/exam-management-routes';
 
 /**
  * Custom hook encapsulating state, API queries, data mapping, and action handlers
  * for the exam incident logs view.
  */
-export function useExamIncidentLogs() {
+export function useExamIncidentLogs(initialExamId?: string) {
     const router = useRouter();
-    const pathname = usePathname();
     const searchParams = useSearchParams();
-    const examId = searchParams.get('examId') || '';
+    const examId = initialExamId ?? (searchParams.get('examId') || '');
 
     // Filter states
     const [search, setSearch] = useState('');
@@ -62,11 +62,11 @@ export function useExamIncidentLogs() {
             if (filter.id === 'sectionName') {
                 q.sectionId = firstVal;
             } else if (filter.id === 'severity') {
-                q.severity = firstVal as any;
+                q.severity = firstVal as ApiGetExamIncidentsQuery['severity'];
             } else if (filter.id === 'incidentType') {
                 q.type = firstVal;
             } else if (filter.id === 'status') {
-                q.status = firstVal as any;
+                q.status = firstVal as ApiGetExamIncidentsQuery['status'];
             }
         });
 
@@ -184,10 +184,10 @@ export function useExamIncidentLogs() {
         }));
     }, [incidents, groupMode]);
 
-    // Clear selections when switching grouping views
-    useEffect(() => {
+    const handleGroupModeChange = (nextGroupMode: 'logs' | 'student') => {
         setSelectedIds([]);
-    }, [groupMode]);
+        setGroupMode(nextGroupMode);
+    };
 
     // Extract unique sections of enrolled students from report
     const sections = useMemo(() => {
@@ -205,14 +205,14 @@ export function useExamIncidentLogs() {
 
     // Selector Change Handler
     const handleExamChange = (selectedId: string) => {
-        const params = new URLSearchParams(searchParams.toString());
         if (selectedId && selectedId !== 'NONE') {
-            params.set('examId', selectedId);
-        } else {
-            params.delete('examId');
+            setSelectedIds([]);
+            router.push(buildCoreExamLogsHref(selectedId));
+            return;
         }
+
         setSelectedIds([]);
-        router.push(`${pathname}?${params.toString()}`);
+        router.push('/exams/logs');
     };
 
     // Review Actions
@@ -254,9 +254,12 @@ export function useExamIncidentLogs() {
             targetIds = [];
             selectedIds.forEach((baselineId) => {
                 const groupedItem = displayIncidents.find((item) => item.incidentId === baselineId);
-                if (groupedItem?.details?._incidents) {
-                    groupedItem.details._incidents.forEach((i: any) => {
-                        targetIds.push(i.incidentId);
+                const groupedIncidents = groupedItem?.details?._incidents as
+                    | Array<{ incidentId: string }>
+                    | undefined;
+                if (groupedIncidents) {
+                    groupedIncidents.forEach((incident) => {
+                        targetIds.push(incident.incidentId);
                     });
                 } else {
                     targetIds.push(baselineId);
@@ -285,9 +288,12 @@ export function useExamIncidentLogs() {
             targetIds = [];
             selectedIds.forEach((baselineId) => {
                 const groupedItem = displayIncidents.find((item) => item.incidentId === baselineId);
-                if (groupedItem?.details?._incidents) {
-                    groupedItem.details._incidents.forEach((i: any) => {
-                        targetIds.push(i.incidentId);
+                const groupedIncidents = groupedItem?.details?._incidents as
+                    | Array<{ incidentId: string }>
+                    | undefined;
+                if (groupedIncidents) {
+                    groupedIncidents.forEach((incident) => {
+                        targetIds.push(incident.incidentId);
                     });
                 } else {
                     targetIds.push(baselineId);
@@ -317,7 +323,7 @@ export function useExamIncidentLogs() {
         columnFilters,
         setColumnFilters,
         groupMode,
-        setGroupMode,
+        setGroupMode: handleGroupModeChange,
         selectedIds,
         setSelectedIds,
         selectedIncident,

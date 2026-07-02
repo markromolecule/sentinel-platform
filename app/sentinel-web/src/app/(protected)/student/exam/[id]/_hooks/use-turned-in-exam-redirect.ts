@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import type { ExamRuntimeAccess } from '@sentinel/shared/types';
 import { clearStoredExamSession } from '../_lib/exam-session-storage';
 import { clearStoredExamTurnInPreview } from '../_lib/exam-turn-in-storage';
+import { buildStudentHistoryAttemptHref } from '@/lib/routes/student-history-routes';
 
 type UseTurnedInExamRedirectArgs = {
     examId: string;
@@ -30,7 +31,7 @@ export function useTurnedInExamRedirect({
 
         clearStoredExamTurnInPreview(examId);
         clearStoredExamSession(examId);
-        router.replace(`/student/history/details?attemptId=${attemptId}`);
+        router.replace(buildStudentHistoryAttemptHref(attemptId));
     }, [attemptId, examId, isRedirecting, router]);
 
     return isRedirecting;

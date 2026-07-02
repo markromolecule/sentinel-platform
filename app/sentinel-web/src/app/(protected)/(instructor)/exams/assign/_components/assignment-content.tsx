@@ -19,15 +19,16 @@ import { type ProctorExam } from '@sentinel/shared/types';
 import { ExamsPageShell } from '../../_components/layout';
 import { AddExamSectionAssignmentDialog } from './add-exam-section-assignment-dialog';
 import { ExamSectionAssignmentList } from './exam-section-assignment-list';
+import { buildInstructorExamAssignHref } from '@/lib/routes/exam-management-routes';
 
 /**
  * InstructorAssignmentContent renders the exam selector and section assignment manager.
  */
-export function InstructorAssignmentContent() {
+export function InstructorAssignmentContent({ initialExamId }: { initialExamId?: string }) {
     const router = useRouter();
     const pathname = usePathname();
     const searchParams = useSearchParams();
-    const currentExamId = searchParams.get('examId') || '';
+    const currentExamId = initialExamId ?? (searchParams.get('examId') || '');
     const [isAssignDialogOpen, setIsAssignDialogOpen] = React.useState(false);
     const { profile } = useProfileQuery();
 
@@ -38,14 +39,18 @@ export function InstructorAssignmentContent() {
         useExamSectionAssignmentsQuery(currentExamId);
 
     const handleExamChange = (newExamId: string) => {
-        const params = new URLSearchParams(searchParams.toString());
-
         if (newExamId === 'none') {
-            params.delete('examId');
-        } else {
-            params.set('examId', newExamId);
+            router.push('/exams/assign');
+            return;
         }
 
+        if (initialExamId) {
+            router.push(buildInstructorExamAssignHref(newExamId));
+            return;
+        }
+
+        const params = new URLSearchParams(searchParams.toString());
+        params.set('examId', newExamId);
         const query = params.toString();
         router.push(`${pathname}${query ? `?${query}` : ''}`);
     };

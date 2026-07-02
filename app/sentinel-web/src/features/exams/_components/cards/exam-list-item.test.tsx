@@ -89,6 +89,6 @@ describe('ExamListItem', () => {
 
         fireEvent.click(screen.getByText('Share / Assign'));
 
-        expect(pushMock).toHaveBeenCalledWith('/exams/assign?examId=exam-1');
+        expect(pushMock).toHaveBeenCalledWith('/exams/exam-1/assign');
     });
 });

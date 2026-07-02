@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { startExamSession } from '@sentinel/services';
 import { toast } from 'sonner';
@@ -14,6 +14,7 @@ import {
     resolveStudentExamSessionError,
 } from '../../_lib/student-exam-session-feedback';
 import type { ExamAnswerValue } from '@/features/exams/_components/engine';
+import { buildStudentHistoryAttemptHref } from '@/lib/routes/student-history-routes';
 import { useExamTimer } from './use-exam-timer';
 import { useExamSessionInitialization } from './use-exam-session-initialization';
 import { useExamSessionApi } from './use-exam-session-api';
@@ -29,6 +30,8 @@ export function useExamSession({
     onInitializeElapsedSeconds,
 }: UseExamSessionArgs): UseExamSessionResult {
     const router = useRouter();
+    const isMountedRef = useRef(true);
+    const sessionStartRequestRef = useRef(0);
 
     const { elapsedSeconds, setElapsedSeconds, secondsRemaining } =
         useExamTimer(examDurationMinutes);
@@ -44,6 +47,12 @@ export function useExamSession({
         examId,
         examSession,
     });
+
+    useEffect(() => {
+        return () => {
+            isMountedRef.current = false;
+        };
+    }, []);
 
     // Handle access constraints
     useEffect(() => {
@@ -82,7 +91,8 @@ export function useExamSession({
             return;
         }
 
-        let isActive = true;
+        const requestId = sessionStartRequestRef.current + 1;
+        sessionStartRequestRef.current = requestId;
         setIsInitializingSession(true);
 
         const initializeExamSession = async () => {
@@ -103,7 +113,7 @@ export function useExamSession({
                     });
                 }
 
-                if (isActive) {
+                if (isMountedRef.current && sessionStartRequestRef.current === requestId) {
                     setExamSession(storedSession);
 
                     if (session.answers) {
@@ -116,14 +126,16 @@ export function useExamSession({
                     }
                 }
             } catch (error) {
-                if (!isActive) return;
+                if (!isMountedRef.current || sessionStartRequestRef.current !== requestId) {
+                    return;
+                }
 
                 if (isStudentExamAlreadyTurnedInError(error)) {
                     const attemptId = getStudentExamSessionAttemptId(error);
                     clearStoredExamTurnInPreview(examId);
                     clearStoredExamSession(examId);
                     if (attemptId) {
-                        router.replace(`/student/history/details?attemptId=${attemptId}`);
+                        router.replace(buildStudentHistoryAttemptHref(attemptId));
                         return;
                     }
                 }
@@ -132,17 +144,13 @@ export function useExamSession({
                 clearStoredExamSession(examId);
                 router.replace(`/student/exam/${examId}/lobby`);
             } finally {
-                if (isActive) {
+                if (isMountedRef.current && sessionStartRequestRef.current === requestId) {
                     setIsInitializingSession(false);
                 }
             }
         };
 
         void initializeExamSession();
-
-        return () => {
-            isActive = false;
-        };
     }, [
         apiClient,
         examId,
