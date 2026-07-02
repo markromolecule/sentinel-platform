@@ -1,11 +1,9 @@
 'use client';
 
-import Link from 'next/link';
 import type { ExamRuntimeAccess } from '@sentinel/shared/types';
 import { Badge, Button } from '@sentinel/ui';
-import { ArrowLeft, RefreshCw } from 'lucide-react';
+import { RefreshCw } from 'lucide-react';
 import { MonitoringHeaderProps } from '@sentinel/shared/types';
-import { MonitoringLobbyTabs } from '../../_components/monitoring-lobby-tabs';
 
 function getRuntimeAccessBadgeVariant(
     state?: ExamRuntimeAccess['state'],
@@ -50,7 +48,6 @@ function getRuntimeAccessLabel(state?: ExamRuntimeAccess['state']) {
 }
 
 export function MonitoringHeader({
-    examId,
     examTitle,
     examSubject,
     runtimeAccess,
@@ -66,11 +63,6 @@ export function MonitoringHeader({
         <div className="flex flex-col gap-6">
             <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
                 <div className="flex items-center gap-4">
-                    <Button asChild variant="ghost" size="icon">
-                        <Link href="/exams">
-                            <ArrowLeft className="h-5 w-5" />
-                        </Link>
-                    </Button>
                     <div>
                         <div className="flex flex-wrap items-center gap-2">
                             <h1 className="text-foreground text-2xl font-bold">{examTitle}</h1>
@@ -83,8 +75,6 @@ export function MonitoringHeader({
                         </p>
                     </div>
                 </div>
-
-                <MonitoringLobbyTabs examId={examId} />
             </div>
 
             <div className="flex flex-wrap items-center justify-between gap-4 border-y py-4">

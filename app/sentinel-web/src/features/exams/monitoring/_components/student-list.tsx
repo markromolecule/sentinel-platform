@@ -12,6 +12,12 @@ import {
 import { StudentListProps } from '@sentinel/shared/types';
 import { statusConfig } from '@sentinel/shared/constants';
 import { StudentCard } from './student-card';
+
+/**
+ * StudentList renders live-monitoring student cards with search, status filtering, and pagination.
+ *
+ * @param props - StudentListProps containing students, filters, pagination, and selection handlers.
+ */
 export function StudentList({
     students,
     selectedId,
@@ -42,6 +48,7 @@ export function StudentList({
         : students;
     const showingFrom = totalItems === 0 ? 0 : startIndex + 1;
     const showingTo = totalItems === 0 ? 0 : Math.min(startIndex + currentPageSize, totalItems);
+    const hasActiveFilters = searchQuery.trim().length > 0 || filterStatus !== 'all';
 
     return (
         <div className="space-y-6">
@@ -91,17 +98,25 @@ export function StudentList({
 
             {/* Students Grid */}
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-                {visibleStudents.map((student) => (
-                    <StudentCard
-                        key={student.id}
-                        student={student}
-                        isSelected={selectedId === student.id}
-                        onClick={() => onSelect(student)}
-                        maxReconnectAttempts={maxReconnectAttempts}
-                        isOverridingReconnect={overridingStudentId === student.id}
-                        onOverrideReconnect={onOverrideReconnect}
-                    />
-                ))}
+                {visibleStudents.length === 0 ? (
+                    <div className="border-border/60 text-muted-foreground col-span-full rounded-md border border-dashed px-4 py-10 text-center text-sm">
+                        {hasActiveFilters
+                            ? 'No students match the current search or status filter.'
+                            : 'No students are available for monitoring yet.'}
+                    </div>
+                ) : (
+                    visibleStudents.map((student) => (
+                        <StudentCard
+                            key={student.id}
+                            student={student}
+                            isSelected={selectedId === student.id}
+                            onClick={() => onSelect(student)}
+                            maxReconnectAttempts={maxReconnectAttempts}
+                            isOverridingReconnect={overridingStudentId === student.id}
+                            onOverrideReconnect={onOverrideReconnect}
+                        />
+                    ))
+                )}
             </div>
 
             {/* Pagination */}

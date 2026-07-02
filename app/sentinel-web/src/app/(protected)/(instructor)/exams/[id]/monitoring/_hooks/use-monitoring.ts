@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import {
     useApi,
+    useDebounce,
     useExamMonitoringOverviewQuery,
     useOverrideReconnectLimitMutation,
     useStableValue,
@@ -12,6 +13,11 @@ import { toast } from 'sonner';
 import { RuntimeAccessAction, RuntimeAccessState } from '../_types';
 import { MONITORING_PAGE_SIZE } from '../_constants';
 
+/**
+ * useMonitoring manages instructor live-monitoring filters, actions, and runtime access state.
+ *
+ * @param examId - Exam id whose live monitoring overview should be loaded.
+ */
 export function useMonitoring(examId: string) {
     const apiClient = useApi();
 
@@ -24,6 +30,7 @@ export function useMonitoring(examId: string) {
     const [isReopenDialogOpen, setIsReopenDialogOpen] = useState(false);
     const [reopenMinutes, setReopenMinutes] = useState('30');
     const [overridingStudentId, setOverridingStudentId] = useState<string | null>(null);
+    const debouncedSearchQuery = useDebounce(searchQuery, 500);
 
     // Queries & Mutations
     const {
@@ -48,13 +55,13 @@ export function useMonitoring(examId: string) {
 
         return students.filter((student) => {
             const matchesSearch =
-                student.firstName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                student.lastName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                student.studentNo.toLowerCase().includes(searchQuery.toLowerCase());
+                student.firstName.toLowerCase().includes(debouncedSearchQuery.toLowerCase()) ||
+                student.lastName.toLowerCase().includes(debouncedSearchQuery.toLowerCase()) ||
+                student.studentNo.toLowerCase().includes(debouncedSearchQuery.toLowerCase());
             const matchesFilter = filterStatus === 'all' || student.status === filterStatus;
             return matchesSearch && matchesFilter;
         });
-    }, [monitoring?.students, searchQuery, filterStatus]);
+    }, [monitoring?.students, debouncedSearchQuery, filterStatus]);
 
     // Handlers
     const handleSearchChange = (value: string) => {
