@@ -1,17 +1,51 @@
 'use client';
 
-import { Badge, Button, Card, CardContent, Avatar, AvatarFallback, ScrollArea } from '@sentinel/ui';
+import type { ChangeEvent, ReactNode } from 'react';
+import { Activity, CheckCircle, Clock, Search, XCircle } from 'lucide-react';
+import {
+    Avatar,
+    AvatarFallback,
+    Badge,
+    Button,
+    Input,
+    NativeSelect,
+    NativeSelectOption,
+} from '@sentinel/ui';
 import type { ExamLobbyWaitingStudent } from '@sentinel/services';
-import type { ReactNode } from 'react';
-import { User, Clock, Activity, CheckCircle, Users } from 'lucide-react';
+import type {
+    LobbyAdmissionGroups,
+    LobbyAdmissionStatusFilter,
+} from '../_lib/lobby-admission-filters';
 
 type InstructorLobbyAdmissionPanelProps = {
-    lobbyAdmissions: ExamLobbyWaitingStudent[];
+    lobbyAdmissionGroups: LobbyAdmissionGroups;
+    searchTerm: string;
+    onSearchChange: (value: string) => void;
+    statusFilter: LobbyAdmissionStatusFilter;
+    onStatusFilterChange: (value: LobbyAdmissionStatusFilter) => void;
     isUpdatingLobbyAdmissions: boolean;
     onUpdateLobbyAdmissions: (
         studentIds: string[],
         status: 'APPROVED' | 'REJECTED',
     ) => Promise<void>;
+};
+
+type QueueSectionProps = {
+    title: string;
+    description: string;
+    count: number;
+    icon: ReactNode;
+    students: ExamLobbyWaitingStudent[];
+    emptyLabel: string;
+    children?: (student: ExamLobbyWaitingStudent) => ReactNode;
+};
+
+const STATUS_FILTER_LABELS: Record<LobbyAdmissionStatusFilter, string> = {
+    all: 'All students',
+    waiting: 'Waiting',
+    approved: 'Approved',
+    rejected: 'Rejected',
+    inAttempt: 'In attempt',
 };
 
 function formatCheckedInAt(value: string | null) {
@@ -31,7 +65,7 @@ function getInitials(name: string) {
         .slice(0, 2);
 }
 
-function StudentLobbyCard({
+function StudentLobbyRow({
     student,
     children,
 }: {
@@ -39,207 +73,221 @@ function StudentLobbyCard({
     children?: ReactNode;
 }) {
     return (
-        <div className="bg-card hover:border-primary/20 flex flex-col gap-3 rounded-xl border p-3 transition-all">
-            <div className="flex items-start justify-between gap-3">
-                <div className="flex items-center gap-3">
-                    <Avatar size="sm" className="size-8">
-                        <AvatarFallback className="bg-primary/5 text-primary text-[10px] font-bold">
-                            {getInitials(student.studentName)}
-                        </AvatarFallback>
-                    </Avatar>
-                    <div className="min-w-0">
-                        <p className="truncate text-sm leading-none font-bold">
-                            {student.studentName}
-                        </p>
-                        <div className="text-muted-foreground mt-1.5 flex items-center gap-1.5 text-[10px] font-medium">
-                            <span className="bg-muted rounded px-1 tracking-tighter uppercase">
-                                {student.studentNumber ?? 'N/A'}
-                            </span>
-                            <span>•</span>
-                            <span>{formatCheckedInAt(student.checkedInAt)}</span>
-                        </div>
+        <div className="bg-background hover:border-primary/30 flex flex-col gap-3 rounded-md border p-3 transition-colors sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex min-w-0 items-center gap-3">
+                <Avatar size="sm" className="size-8">
+                    <AvatarFallback className="bg-primary/5 text-primary text-[10px] font-bold">
+                        {getInitials(student.studentName)}
+                    </AvatarFallback>
+                </Avatar>
+                <div className="min-w-0">
+                    <p className="text-foreground truncate text-sm font-semibold">
+                        {student.studentName}
+                    </p>
+                    <div className="text-muted-foreground mt-1 flex flex-wrap items-center gap-1.5 text-xs">
+                        <span>{student.studentNumber ?? 'N/A'}</span>
+                        <span aria-hidden="true">/</span>
+                        <span>{formatCheckedInAt(student.checkedInAt)}</span>
+                        <span aria-hidden="true">/</span>
+                        <span>{student.reconnectCount} reconnects</span>
                     </div>
                 </div>
-                <Badge
-                    variant={student.reconnectCount >= 3 ? 'destructive' : 'outline'}
-                    className="h-fit px-1.5 py-0 text-[9px] font-bold"
-                >
-                    {student.reconnectCount}RC
-                </Badge>
             </div>
-            {children}
+            {children ? <div className="flex shrink-0 gap-2">{children}</div> : null}
         </div>
     );
 }
 
+function QueueSection({
+    title,
+    description,
+    count,
+    icon,
+    students,
+    emptyLabel,
+    children,
+}: QueueSectionProps) {
+    return (
+        <section className="flex min-w-0 flex-col gap-3">
+            <div className="flex items-start justify-between gap-3">
+                <div className="flex items-start gap-2">
+                    <div className="text-muted-foreground mt-0.5">{icon}</div>
+                    <div>
+                        <div className="flex flex-wrap items-center gap-2">
+                            <h2 className="text-sm font-semibold">{title}</h2>
+                            <Badge variant="secondary" className="font-mono text-xs">
+                                {count}
+                            </Badge>
+                        </div>
+                        <p className="text-muted-foreground text-xs">{description}</p>
+                    </div>
+                </div>
+            </div>
+
+            <div className="space-y-2">
+                {students.length === 0 ? (
+                    <div className="text-muted-foreground rounded-md border border-dashed px-4 py-8 text-center text-sm">
+                        {emptyLabel}
+                    </div>
+                ) : (
+                    students.map((student) => (
+                        <StudentLobbyRow key={student.admissionId} student={student}>
+                            {children?.(student)}
+                        </StudentLobbyRow>
+                    ))
+                )}
+            </div>
+        </section>
+    );
+}
+
+/**
+ * InstructorLobbyAdmissionPanel renders searchable lobby queues and admission actions.
+ *
+ * @param props - InstructorLobbyAdmissionPanelProps containing grouped admissions and controls.
+ */
 export function InstructorLobbyAdmissionPanel({
-    lobbyAdmissions,
+    lobbyAdmissionGroups,
+    searchTerm,
+    onSearchChange,
+    statusFilter,
+    onStatusFilterChange,
     isUpdatingLobbyAdmissions,
     onUpdateLobbyAdmissions,
 }: InstructorLobbyAdmissionPanelProps) {
-    const waitingStudents = lobbyAdmissions.filter(
-        (student) => student.status === 'WAITING' && !student.hasActiveAttempt,
-    );
-    const approvedStudents = lobbyAdmissions.filter(
-        (student) => student.status === 'APPROVED' && !student.hasActiveAttempt,
-    );
-    const inAttemptStudents = lobbyAdmissions.filter((student) => student.hasActiveAttempt);
+    const { waitingStudents, approvedStudents, rejectedStudents, inAttemptStudents } =
+        lobbyAdmissionGroups;
+    const hasActiveFilter = searchTerm.trim().length > 0 || statusFilter !== 'all';
+    const waitingStudentIds = waitingStudents.map((student) => student.studentId);
+
+    const handleStatusFilterChange = (event: ChangeEvent<HTMLSelectElement>) => {
+        onStatusFilterChange(event.target.value as LobbyAdmissionStatusFilter);
+    };
 
     return (
-        <div className="grid items-start gap-6 lg:grid-cols-3">
-            {/* Column 1: Waiting */}
-            <Card className="bg-muted/20 flex h-[700px] flex-col gap-0 overflow-hidden rounded-2xl border p-0 shadow-none">
-                <div className="bg-muted/30 flex items-center justify-between border-b px-4 py-3">
-                    <div className="flex items-center gap-2.5">
-                        <Clock className="text-muted-foreground h-4 w-4" />
-                        <span className="text-muted-foreground text-xs font-bold tracking-widest uppercase">
-                            Waiting
-                        </span>
-                        <Badge
-                            variant="secondary"
-                            className="bg-muted/50 h-5 border-none px-1.5 font-mono text-[10px] shadow-none"
-                        >
-                            {waitingStudents.length}
-                        </Badge>
-                    </div>
+        <div className="flex min-w-0 flex-col gap-5">
+            <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+                <div className="relative min-w-0 flex-1 md:max-w-md">
+                    <Search className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
+                    <Input
+                        aria-label="Search lobby students"
+                        placeholder="Search by name or student number"
+                        value={searchTerm}
+                        onChange={(event) => onSearchChange(event.target.value)}
+                        className="bg-background pl-9"
+                    />
+                </div>
+
+                <NativeSelect
+                    aria-label="Filter lobby status"
+                    value={statusFilter}
+                    onChange={handleStatusFilterChange}
+                    className="bg-background w-full md:w-48"
+                >
+                    {Object.entries(STATUS_FILTER_LABELS).map(([value, label]) => (
+                        <NativeSelectOption key={value} value={value}>
+                            {label}
+                        </NativeSelectOption>
+                    ))}
+                </NativeSelect>
+            </div>
+
+            <div className="flex flex-col gap-6">
+                <QueueSection
+                    title="Waiting"
+                    description="Students ready for admission review."
+                    count={waitingStudents.length}
+                    icon={<Clock className="h-4 w-4" />}
+                    students={waitingStudents}
+                    emptyLabel={
+                        hasActiveFilter ? 'No waiting students match this filter.' : 'No students waiting.'
+                    }
+                >
+                    {(student) => (
+                        <>
+                            <Button
+                                size="sm"
+                                disabled={isUpdatingLobbyAdmissions}
+                                onClick={() =>
+                                    void onUpdateLobbyAdmissions([student.studentId], 'APPROVED')
+                                }
+                            >
+                                Admit
+                            </Button>
+                            <Button
+                                size="sm"
+                                variant="outline"
+                                disabled={isUpdatingLobbyAdmissions}
+                                onClick={() =>
+                                    void onUpdateLobbyAdmissions([student.studentId], 'REJECTED')
+                                }
+                            >
+                                Reject
+                            </Button>
+                        </>
+                    )}
+                </QueueSection>
+
+                <div className="flex justify-end">
                     <Button
-                        variant="link"
+                        variant="outline"
                         size="sm"
-                        className="text-primary h-auto p-0 text-[11px] font-bold hover:no-underline"
-                        disabled={isUpdatingLobbyAdmissions || waitingStudents.length === 0}
-                        onClick={() =>
-                            void onUpdateLobbyAdmissions(
-                                waitingStudents.map((student) => student.studentId),
-                                'APPROVED',
-                            )
-                        }
+                        disabled={isUpdatingLobbyAdmissions || waitingStudentIds.length === 0}
+                        onClick={() => void onUpdateLobbyAdmissions(waitingStudentIds, 'APPROVED')}
                     >
                         Admit All
                     </Button>
                 </div>
-                <CardContent className="flex-1 overflow-hidden p-0">
-                    <ScrollArea className="h-full">
-                        <div className="space-y-3 p-3">
-                            {waitingStudents.length === 0 ? (
-                                <div className="text-muted-foreground flex flex-col items-center justify-center py-20 opacity-10">
-                                    <Users className="mb-2 h-10 w-10" />
-                                    <p className="text-[10px] font-bold tracking-widest uppercase">
-                                        Empty
-                                    </p>
-                                </div>
-                            ) : (
-                                waitingStudents.map((student) => (
-                                    <StudentLobbyCard key={student.admissionId} student={student}>
-                                        <div className="mt-1 flex gap-2">
-                                            <Button
-                                                size="sm"
-                                                className="h-7 flex-1 text-[10px] font-bold"
-                                                disabled={isUpdatingLobbyAdmissions}
-                                                onClick={() =>
-                                                    void onUpdateLobbyAdmissions(
-                                                        [student.studentId],
-                                                        'APPROVED',
-                                                    )
-                                                }
-                                            >
-                                                Admit
-                                            </Button>
-                                            <Button
-                                                size="sm"
-                                                variant="outline"
-                                                className="h-7 flex-1 text-[10px] font-bold"
-                                                disabled={isUpdatingLobbyAdmissions}
-                                                onClick={() =>
-                                                    void onUpdateLobbyAdmissions(
-                                                        [student.studentId],
-                                                        'REJECTED',
-                                                    )
-                                                }
-                                            >
-                                                Reject
-                                            </Button>
-                                        </div>
-                                    </StudentLobbyCard>
-                                ))
-                            )}
-                        </div>
-                    </ScrollArea>
-                </CardContent>
-            </Card>
 
-            {/* Column 2: Approved */}
-            <Card className="bg-muted/20 flex h-[700px] flex-col gap-0 overflow-hidden rounded-2xl border p-0 shadow-none">
-                <div className="bg-muted/30 flex items-center gap-2.5 border-b px-4 py-3">
-                    <CheckCircle className="h-4 w-4 text-emerald-500" />
-                    <span className="text-muted-foreground text-xs font-bold tracking-widest uppercase">
-                        Approved
-                    </span>
-                    <Badge
-                        variant="secondary"
-                        className="bg-muted/50 h-5 border-none px-1.5 font-mono text-[10px] shadow-none"
+                <div className="grid gap-6 xl:grid-cols-3">
+                    <QueueSection
+                        title="Approved"
+                        description="Students admitted but not yet in an active attempt."
+                        count={approvedStudents.length}
+                        icon={<CheckCircle className="h-4 w-4 text-emerald-600" />}
+                        students={approvedStudents}
+                        emptyLabel={
+                            hasActiveFilter
+                                ? 'No approved students match this filter.'
+                                : 'No approved students waiting.'
+                        }
+                    />
+
+                    <QueueSection
+                        title="In Attempt"
+                        description="Students currently working in the exam."
+                        count={inAttemptStudents.length}
+                        icon={<Activity className="h-4 w-4 text-cyan-600" />}
+                        students={inAttemptStudents}
+                        emptyLabel={
+                            hasActiveFilter
+                                ? 'No active attempts match this filter.'
+                                : 'No active attempts yet.'
+                        }
                     >
-                        {approvedStudents.length}
-                    </Badge>
-                </div>
-                <CardContent className="flex-1 overflow-hidden p-0">
-                    <ScrollArea className="h-full">
-                        <div className="space-y-3 p-3">
-                            {approvedStudents.length === 0 ? (
-                                <div className="text-muted-foreground flex flex-col items-center justify-center py-20 opacity-10">
-                                    <CheckCircle className="mb-2 h-10 w-10" />
-                                    <p className="text-[10px] font-bold tracking-widest uppercase">
-                                        Empty
-                                    </p>
-                                </div>
-                            ) : (
-                                approvedStudents.map((student) => (
-                                    <StudentLobbyCard key={student.admissionId} student={student} />
-                                ))
-                            )}
-                        </div>
-                    </ScrollArea>
-                </CardContent>
-            </Card>
+                        {(student) => (
+                            <Badge variant="outline">
+                                {student.attemptStatus === 'IN_PROGRESS'
+                                    ? 'Writing'
+                                    : (student.attemptStatus ?? 'In Progress')}
+                            </Badge>
+                        )}
+                    </QueueSection>
 
-            {/* Column 3: In Attempt */}
-            <Card className="flex h-[700px] flex-col gap-0 overflow-hidden rounded-2xl border bg-emerald-500/5 p-0 shadow-none ring-1 ring-emerald-500/10">
-                <div className="flex items-center gap-2.5 border-b bg-emerald-500/10 px-4 py-3">
-                    <Activity className="h-4 w-4 text-emerald-600" />
-                    <span className="text-xs font-bold tracking-widest text-emerald-700 uppercase">
-                        In Attempt
-                    </span>
-                    <Badge className="h-5 border-none bg-emerald-500/20 px-1.5 font-mono text-[10px] text-emerald-800 shadow-none">
-                        {inAttemptStudents.length}
-                    </Badge>
+                    <QueueSection
+                        title="Rejected"
+                        description="Students returned to the lobby queue."
+                        count={rejectedStudents.length}
+                        icon={<XCircle className="h-4 w-4 text-rose-600" />}
+                        students={rejectedStudents}
+                        emptyLabel={
+                            hasActiveFilter
+                                ? 'No rejected students match this filter.'
+                                : 'No rejected admissions.'
+                        }
+                    />
                 </div>
-                <CardContent className="flex-1 overflow-hidden p-0">
-                    <ScrollArea className="h-full">
-                        <div className="space-y-3 p-3">
-                            {inAttemptStudents.length === 0 ? (
-                                <div className="flex flex-col items-center justify-center py-20 text-emerald-600/10">
-                                    <User className="mb-1 h-10 w-10" />
-                                    <p className="text-[10px] font-bold tracking-widest uppercase">
-                                        Empty
-                                    </p>
-                                </div>
-                            ) : (
-                                inAttemptStudents.map((student) => (
-                                    <StudentLobbyCard key={student.admissionId} student={student}>
-                                        <div className="mt-0.5 flex items-center gap-1.5">
-                                            <div className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-500" />
-                                            <p className="text-[10px] leading-none font-bold tracking-widest text-emerald-700 uppercase">
-                                                {student.attemptStatus === 'IN_PROGRESS'
-                                                    ? 'Writing'
-                                                    : (student.attemptStatus ?? 'In Progress')}
-                                            </p>
-                                        </div>
-                                    </StudentLobbyCard>
-                                ))
-                            )}
-                        </div>
-                    </ScrollArea>
-                </CardContent>
-            </Card>
+            </div>
         </div>
     );
 }
