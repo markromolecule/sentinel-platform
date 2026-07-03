@@ -63,7 +63,6 @@ export default function ExamMonitoringPage() {
             <div className="flex min-h-full flex-col space-y-6">
                 <div className="flex flex-col gap-4">
                     <MonitoringHeader
-                        examId={examId}
                         examTitle={monitoring.exam.title}
                         examSubject={monitoring.exam.subject}
                         runtimeAccess={monitoring.exam.runtimeAccess}

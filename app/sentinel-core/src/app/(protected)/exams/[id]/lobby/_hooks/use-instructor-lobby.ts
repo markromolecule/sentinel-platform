@@ -1,18 +1,44 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
-import { useApi } from '@sentinel/hooks';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useApi, useDebounce } from '@sentinel/hooks';
 import {
     getExamLobbyWaitingList,
     updateExamLobbyAdmissions,
     type ExamLobbyWaitingStudent,
 } from '@sentinel/services';
 import { toast } from 'sonner';
+import {
+    filterLobbyAdmissions,
+    getLobbyAdmissionGroups,
+    type LobbyAdmissionStatusFilter,
+} from '../_lib/lobby-admission-filters';
 
+/**
+ * useInstructorLobby manages instructor lobby admission state and controls.
+ *
+ * @param examId - Exam id whose lobby admissions should be loaded and updated.
+ */
 export function useInstructorLobby(examId: string) {
     const apiClient = useApi();
     const [isUpdatingLobbyAdmissions, setIsUpdatingLobbyAdmissions] = useState(false);
     const [lobbyAdmissions, setLobbyAdmissions] = useState<ExamLobbyWaitingStudent[]>([]);
+    const [searchTerm, setSearchTerm] = useState('');
+    const [statusFilter, setStatusFilter] = useState<LobbyAdmissionStatusFilter>('all');
+    const debouncedSearchTerm = useDebounce(searchTerm, 500);
+
+    const filteredLobbyAdmissions = useMemo(
+        () =>
+            filterLobbyAdmissions(lobbyAdmissions, {
+                query: debouncedSearchTerm,
+                statusFilter,
+            }),
+        [debouncedSearchTerm, lobbyAdmissions, statusFilter],
+    );
+    const lobbyAdmissionGroups = useMemo(
+        () => getLobbyAdmissionGroups(filteredLobbyAdmissions),
+        [filteredLobbyAdmissions],
+    );
 
     const refreshLobbyAdmissions = useCallback(async () => {
         try {
@@ -82,6 +108,13 @@ export function useInstructorLobby(examId: string) {
 
     return {
         lobbyAdmissions,
+        filteredLobbyAdmissions,
+        lobbyAdmissionGroups,
+        searchTerm,
+        setSearchTerm,
+        debouncedSearchTerm,
+        statusFilter,
+        setStatusFilter,
         isUpdatingLobbyAdmissions,
         refreshLobbyAdmissions,
         handleUpdateLobbyAdmissions,
