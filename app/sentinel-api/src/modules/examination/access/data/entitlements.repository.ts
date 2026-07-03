@@ -132,9 +132,22 @@ export class EntitlementsRepository {
                 'ea.completed_at',
                 'ea.started_at',
                 'ea.reconnect_attempt_count',
+                'ea.lifecycle_state',
+                'ea.lifecycle_reason',
+                'ea.reopened_until',
+                'ea.closed_at',
+                'ea.superseded_by_attempt_id',
             ])
             .where('ea.student_id', '=', args.studentId)
             .where('ea.exam_id', '=', args.examId)
+            .orderBy((eb) =>
+                eb
+                    .case()
+                    .when('ea.lifecycle_state', '=', 'SUPERSEDED')
+                    .then(1)
+                    .else(0)
+                    .end(),
+            )
             .orderBy('ea.created_at', 'desc')
             .executeTakeFirst();
     }

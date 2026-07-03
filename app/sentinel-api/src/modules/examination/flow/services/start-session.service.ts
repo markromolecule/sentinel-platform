@@ -23,7 +23,11 @@ export type StartSessionResult = {
     maxReconnectAttempts?: number;
     attemptId?: string;
     error?: string;
-    errorCode?: 'ATTEMPT_ALREADY_COMPLETED';
+    errorCode?:
+        | 'ATTEMPT_ALREADY_COMPLETED'
+        | 'ATTEMPT_LOCKED'
+        | 'ATTEMPT_CLOSED'
+        | 'ATTEMPT_SUPERSEDED';
 };
 
 /**
@@ -44,7 +48,22 @@ export async function startSessionService({
     );
 
     if (!accessCheck.isEligible) {
-        return { error: accessCheck.reason || 'Access denied mapping to current exam flow.' };
+        const lifecycleMessage = accessCheck.runtimeAccess?.message?.toLowerCase() ?? '';
+        const errorCode =
+            accessCheck.runtimeAccess?.state === 'locked'
+                ? 'ATTEMPT_LOCKED'
+                : lifecycleMessage.includes('reset') ||
+                    lifecycleMessage.includes('replaced') ||
+                    lifecycleMessage.includes('superseded')
+                  ? 'ATTEMPT_SUPERSEDED'
+                  : accessCheck.runtimeAccess?.state === 'closed'
+                    ? 'ATTEMPT_CLOSED'
+                    : undefined;
+
+        return {
+            error: accessCheck.reason || 'Access denied mapping to current exam flow.',
+            errorCode,
+        };
     }
 
     const configSnapshot = await getExamConfigurationState(dbClient, examId);

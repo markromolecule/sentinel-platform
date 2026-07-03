@@ -12,6 +12,26 @@ export type InternalExamStatus =
     | 'archived';
 
 export type StudentExamStatus = 'upcoming' | 'available' | 'in-progress' | 'past_due' | 'turned_in';
+export type ExamAttemptLifecycleState =
+    | 'IN_PROGRESS'
+    | 'LOCKED'
+    | 'CLOSED'
+    | 'SUBMITTED'
+    | 'SUPERSEDED';
+export type ExamAttemptLifecycleEventType =
+    | 'STARTED'
+    | 'SUBMITTED'
+    | 'LOCKED'
+    | 'REOPENED'
+    | 'RESET'
+    | 'CLOSED'
+    | 'SUPERSEDED'
+    | 'FINALIZED'
+    | 'FINALIZATION_REVISED'
+    | 'MAKEUP_GRANTED'
+    | 'RETAKE_GRANTED'
+    | 'INCIDENT_REVIEWED';
+export type ExamAttemptScoreState = 'DRAFT' | 'FINALIZED' | 'REVISION_REQUIRED';
 export type ExamRuntimeAccessState =
     | 'before_start'
     | 'open'
@@ -30,6 +50,45 @@ export type ExamRuntimeAccessReasonCode =
     | 'REOPENED'
     | 'CLOSED';
 export type StudentExamAccessOverrideType = 'MAKEUP' | 'RETAKE' | 'REOPEN';
+
+export type ExamAttemptLifecycleEvent = {
+    eventId: string;
+    attemptId: string;
+    examId: string;
+    studentId: string;
+    eventType: ExamAttemptLifecycleEventType;
+    previousState: ExamAttemptLifecycleState | null;
+    nextState: ExamAttemptLifecycleState | null;
+    actorUserId: string | null;
+    reasonCode: string | null;
+    notes: string | null;
+    relatedIncidentIds: string[] | null;
+    relatedOverrideId: string | null;
+    metadata: Record<string, unknown> | null;
+    createdAt: string | Date | null;
+};
+
+export type ExamAttemptLifecycleSnapshot = {
+    attemptId: string;
+    examId: string;
+    studentId: string;
+    lifecycleState: ExamAttemptLifecycleState;
+    lifecycleReason: string | null;
+    lifecycleNote: string | null;
+    lockedAt: string | Date | null;
+    lockedBy: string | null;
+    reopenedUntil: string | Date | null;
+    closedAt: string | Date | null;
+    closedBy: string | null;
+    closedReason: string | null;
+    supersededByAttemptId: string | null;
+    supersededAt: string | Date | null;
+    supersededBy: string | null;
+    finalizedAt: string | Date | null;
+    finalizedBy: string | null;
+    scoreState: ExamAttemptScoreState;
+    events: ExamAttemptLifecycleEvent[];
+};
 
 export type ExamRuntimeAccess = {
     state: ExamRuntimeAccessState;

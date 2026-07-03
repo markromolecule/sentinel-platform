@@ -60,6 +60,46 @@ function sortQuestions(exam: ProctorExam | null, settings?: ExamSettings): ExamQ
     return [...exam.questions].sort((left, right) => left.orderIndex - right.orderIndex);
 }
 
+function resolveLifecycleBlockedState(exam: ProctorExam | null) {
+    const runtimeAccess = exam?.runtimeAccess;
+
+    if (!runtimeAccess || runtimeAccess.canStart || runtimeAccess.canResume) {
+        return {
+            isBlocked: false,
+            code: null,
+            title: null,
+            message: null,
+        } as const;
+    }
+
+    if (runtimeAccess.state === 'locked') {
+        return {
+            isBlocked: true,
+            code: 'LOCKED',
+            title: 'Exam Locked',
+            message: runtimeAccess.message,
+        } as const;
+    }
+
+    if (runtimeAccess.state === 'closed') {
+        const isSuperseded = /reset|replaced|superseded/i.test(runtimeAccess.message);
+
+        return {
+            isBlocked: true,
+            code: isSuperseded ? 'SUPERSEDED' : 'CLOSED',
+            title: isSuperseded ? 'Attempt Replaced' : 'Exam Closed',
+            message: runtimeAccess.message,
+        } as const;
+    }
+
+    return {
+        isBlocked: false,
+        code: null,
+        title: null,
+        message: null,
+    } as const;
+}
+
 export function useStudentExamData() {
     const params = useParams();
     const examId = params.id as string;
@@ -71,12 +111,14 @@ export function useStudentExamData() {
     const configuration =
         configurationState?.configuration ?? exam?.configuration ?? DEFAULT_CONFIGURATION;
     const questions = useMemo(() => sortQuestions(exam ?? null, settings), [exam, settings]);
+    const blockedState = useMemo(() => resolveLifecycleBlockedState(exam ?? null), [exam]);
 
     const mediaPipeSandbox = exam?.mediaPipeSandbox ?? DEFAULT_TELEMETRY_SETTINGS.mediaPipeSandbox;
 
     return {
         examId,
         exam: exam ?? null,
+        blockedState,
         settings,
         configuration,
         mediaPipeSandbox,

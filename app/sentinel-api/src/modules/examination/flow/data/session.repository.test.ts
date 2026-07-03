@@ -1,6 +1,12 @@
-import { describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { DbClient } from '@sentinel/db';
 import { SessionRepository } from './session.repository';
+
+vi.mock('../../student-overrides/student-overrides.service', () => ({
+    StudentOverridesService: {
+        markOverrideUsed: vi.fn().mockResolvedValue(undefined),
+    },
+}));
 
 function createExistingAttemptSelect(result: unknown) {
     return {
@@ -13,6 +19,10 @@ function createExistingAttemptSelect(result: unknown) {
 }
 
 describe('SessionRepository.createSession', () => {
+    beforeEach(() => {
+        vi.clearAllMocks();
+    });
+
     it('increments reconnect_attempt_count when resuming an in-progress attempt', async () => {
         const updateBuilder = {
             set: vi.fn().mockReturnThis(),
@@ -25,6 +35,8 @@ describe('SessionRepository.createSession', () => {
                     attempt_id: 'attempt-1',
                     completed_at: null,
                     status: 'IN_PROGRESS',
+                    lifecycle_state: 'IN_PROGRESS',
+                    reopened_until: null,
                     created_at: new Date('2026-04-13T05:00:00.000Z'),
                     answer_snapshot: { 'question-1': 'A' },
                     time_spent_minutes: 4,
@@ -51,6 +63,132 @@ describe('SessionRepository.createSession', () => {
         expect(updateBuilder.set).toHaveBeenCalledWith(
             expect.objectContaining({
                 reconnect_attempt_count: 1,
+            }),
+        );
+    });
+
+    it('resumes the same locked attempt when a reopen override references it', async () => {
+        const updateBuilder = {
+            set: vi.fn().mockReturnThis(),
+            where: vi.fn().mockReturnThis(),
+            execute: vi.fn().mockResolvedValue(undefined),
+        };
+        const dbClient = {
+            selectFrom: vi.fn().mockReturnValue(
+                createExistingAttemptSelect({
+                    attempt_id: 'attempt-locked',
+                    completed_at: null,
+                    status: 'IN_PROGRESS',
+                    lifecycle_state: 'LOCKED',
+                    reopened_until: null,
+                    created_at: new Date('2026-04-13T05:00:00.000Z'),
+                    answer_snapshot: { 'question-1': 'A' },
+                    time_spent_minutes: 4,
+                    reconnect_attempt_count: 1,
+                }),
+            ),
+            updateTable: vi.fn().mockReturnValue(updateBuilder),
+        } as unknown as DbClient;
+
+        const result = await SessionRepository.createSession(dbClient, {
+            examId: 'exam-1',
+            studentId: 'student-1',
+            maxReconnectAttempts: 3,
+            accessOverride: {
+                id: 'override-1',
+                examId: 'exam-1',
+                studentId: 'student-1',
+                grantedBy: 'instructor-1',
+                overrideType: 'REOPEN',
+                availableFrom: '2026-04-13T06:00:00.000Z',
+                availableUntil: '2026-04-13T08:00:00.000Z',
+                allowedAttempts: 1,
+                usedAttempts: 0,
+                usedAttemptIds: [],
+                sourceAttemptId: 'attempt-locked',
+                notes: null,
+                createdAt: '2026-04-13T06:00:00.000Z',
+                updatedAt: '2026-04-13T06:00:00.000Z',
+            },
+        });
+
+        expect(result).toMatchObject({
+            sessionId: 'attempt-locked',
+            isResumed: true,
+            reconnectAttemptCount: 1,
+        });
+        expect(updateBuilder.set).toHaveBeenCalledWith(
+            expect.objectContaining({
+                lifecycle_state: 'IN_PROGRESS',
+            }),
+        );
+    });
+
+    it('creates a fresh attempt for a retake override instead of returning the submitted one', async () => {
+        const existingAttemptSelect = createExistingAttemptSelect({
+            attempt_id: 'attempt-completed',
+            completed_at: new Date('2026-04-13T05:30:00.000Z'),
+            status: 'COMPLETED',
+            lifecycle_state: 'SUBMITTED',
+            reopened_until: null,
+            created_at: new Date('2026-04-13T05:00:00.000Z'),
+            answer_snapshot: {},
+            time_spent_minutes: 12,
+            reconnect_attempt_count: 0,
+        });
+        const attemptCountSelect = {
+            innerJoin: vi.fn().mockReturnThis(),
+            select: vi.fn().mockReturnThis(),
+            where: vi.fn().mockReturnThis(),
+            executeTakeFirst: vi.fn().mockResolvedValue({
+                attempt_count: '2',
+            }),
+        };
+        const insertBuilder = {
+            values: vi.fn().mockReturnThis(),
+            returning: vi.fn().mockReturnThis(),
+            executeTakeFirst: vi.fn().mockResolvedValue({
+                attempt_id: 'attempt-retake',
+            }),
+        };
+        const dbClient = {
+            selectFrom: vi
+                .fn()
+                .mockReturnValueOnce(existingAttemptSelect)
+                .mockReturnValueOnce(attemptCountSelect),
+            insertInto: vi.fn().mockReturnValue(insertBuilder),
+        } as unknown as DbClient;
+
+        const result = await SessionRepository.createSession(dbClient, {
+            examId: 'exam-1',
+            studentId: 'student-1',
+            maxReconnectAttempts: 0,
+            accessOverride: {
+                id: 'override-2',
+                examId: 'exam-1',
+                studentId: 'student-1',
+                grantedBy: 'instructor-1',
+                overrideType: 'RETAKE',
+                availableFrom: '2026-04-13T06:00:00.000Z',
+                availableUntil: '2026-04-13T08:00:00.000Z',
+                allowedAttempts: 1,
+                usedAttempts: 0,
+                usedAttemptIds: [],
+                sourceAttemptId: 'attempt-completed',
+                notes: null,
+                createdAt: '2026-04-13T06:00:00.000Z',
+                updatedAt: '2026-04-13T06:00:00.000Z',
+            },
+        });
+
+        expect(result).toEqual({
+            sessionId: 'attempt-retake',
+            isResumed: false,
+        });
+        expect(insertBuilder.values).toHaveBeenCalledWith(
+            expect.objectContaining({
+                lifecycle_state: 'IN_PROGRESS',
+                status: 'IN_PROGRESS',
             }),
         );
     });

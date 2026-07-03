@@ -101,6 +101,9 @@ describe('StudentExamPrivacyPage', () => {
         });
         mockStudentExamData.mockReturnValue({
             examId: 'exam-1',
+            blockedState: {
+                isBlocked: false,
+            },
             exam: {
                 status: 'published',
                 attemptId: null,
@@ -137,6 +140,9 @@ describe('StudentExamPrivacyPage', () => {
         });
         mockStudentExamData.mockReturnValue({
             examId: 'exam-1',
+            blockedState: {
+                isBlocked: false,
+            },
             exam: {
                 status: 'published',
                 attemptId: null,
@@ -164,5 +170,37 @@ describe('StudentExamPrivacyPage', () => {
         });
         const continueButton = screen.getByRole('button', { name: /continue to checkup/i });
         expect((continueButton as HTMLButtonElement).disabled).toBe(false);
+    });
+
+    it('shows the lifecycle block message and removes the checkup CTA when the exam is closed', () => {
+        mockReadStoredStudentExamFlow.mockReturnValue({
+            privacyAccepted: false,
+        });
+        mockStudentExamData.mockReturnValue({
+            examId: 'exam-1',
+            blockedState: {
+                isBlocked: true,
+                title: 'Exam Closed',
+                message: 'This exam has been closed.',
+            },
+            exam: null,
+            configuration: {
+                aiRules: {
+                    gaze_tracking: true,
+                    face_detection: true,
+                },
+                micRequired: true,
+                webSecurity: {
+                    full_screen_required: true,
+                },
+            },
+            isLoading: false,
+        });
+
+        render(<StudentExamPrivacyPage />);
+
+        expect(screen.getByText('Exam Closed')).toBeTruthy();
+        expect(screen.getByText('This exam has been closed.')).toBeTruthy();
+        expect(screen.queryByRole('button', { name: /continue to checkup/i })).toBeNull();
     });
 });

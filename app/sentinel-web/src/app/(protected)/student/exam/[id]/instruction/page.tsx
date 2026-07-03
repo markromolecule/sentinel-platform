@@ -21,7 +21,8 @@ import {
 } from '@/app/(protected)/(instructor)/exams/[id]/preview/[sessionId]/_constants/preview-constants';
 
 export default function StudentExamInstructionPage() {
-    const { examId, exam, configuration, questions, isLoading } = useStudentExamData();
+    const { examId, exam, blockedState, configuration, questions, isLoading } =
+        useStudentExamData();
     const isRedirectingToHistory = useTurnedInExamRedirect({
         examId,
         status: exam?.status,
@@ -31,6 +32,23 @@ export default function StudentExamInstructionPage() {
 
     if (isLoading || isRedirectingToHistory) {
         return <StudentExamLoadingState />;
+    }
+
+    if (blockedState.isBlocked) {
+        return (
+            <StudentFlowShell
+                maxWidthClassName="max-w-5xl"
+                mainClassName="py-6 sm:py-8"
+                contentClassName="my-auto"
+            >
+                <div className="flex min-h-full flex-col justify-center gap-6">
+                    <StudentFlowPageHeader
+                        title={blockedState.title ?? 'Exam Unavailable'}
+                        description={blockedState.message ?? 'This exam cannot be entered right now.'}
+                    />
+                </div>
+            </StudentFlowShell>
+        );
     }
 
     const highlights = [

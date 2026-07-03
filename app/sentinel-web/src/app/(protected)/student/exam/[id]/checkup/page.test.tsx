@@ -140,6 +140,9 @@ function createStudentExamData(overrides?: Record<string, unknown>) {
                 hasActiveAttempt: false,
             },
         },
+        blockedState: {
+            isBlocked: false,
+        },
         configuration: {
             cameraRequired: true,
             micRequired: true,
@@ -246,6 +249,24 @@ describe('StudentExamCheckupPage', () => {
             (screen.getByRole('button', { name: /finalizing setup/i }) as HTMLButtonElement)
                 .disabled,
         ).toBe(true);
+    });
+
+    it('shows the lifecycle block message and removes the lobby CTA when the exam is locked', () => {
+        mockStudentExamData.mockReturnValue(
+            createStudentExamData({
+                blockedState: {
+                    isBlocked: true,
+                    title: 'Exam Locked',
+                    message: 'This exam attempt is locked right now.',
+                },
+            }),
+        );
+
+        render(<StudentExamCheckupPage />);
+
+        expect(screen.getByText('Exam Locked')).toBeTruthy();
+        expect(screen.getByText('This exam attempt is locked right now.')).toBeTruthy();
+        expect(screen.queryByRole('button', { name: /continue to lobby/i })).toBeNull();
     });
 
     it('keeps checkup MediaPipe disabled when camera AI monitoring is not required for the exam', () => {

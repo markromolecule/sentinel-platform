@@ -1,8 +1,9 @@
 'use client';
 
+import { cleanup } from '@testing-library/react';
 import { render, screen } from '@testing-library/react';
 import type { ReactNode } from 'react';
-import { describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import StudentExamInstructionPage from './page';
 
 const { mockStudentExamData } = vi.hoisted(() => ({
@@ -26,9 +27,17 @@ vi.mock('../_hooks/use-turned-in-exam-redirect', () => ({
 }));
 
 describe('StudentExamInstructionPage', () => {
+    beforeEach(() => {
+        cleanup();
+        vi.clearAllMocks();
+    });
+
     it('renders the streamlined orientation layout and next-step CTA', () => {
         mockStudentExamData.mockReturnValue({
             examId: 'exam-1',
+            blockedState: {
+                isBlocked: false,
+            },
             exam: {
                 title: 'Midterm Exam',
                 subject: 'Ethics',
@@ -54,5 +63,28 @@ describe('StudentExamInstructionPage', () => {
             ),
         ).toBeNull();
         expect(screen.getByRole('link', { name: /continue to privacy/i })).toBeTruthy();
+    });
+
+    it('shows the lifecycle block message and removes attempt navigation when the exam is locked', () => {
+        mockStudentExamData.mockReturnValue({
+            examId: 'exam-1',
+            blockedState: {
+                isBlocked: true,
+                title: 'Exam Locked',
+                message: 'This exam attempt is locked right now.',
+            },
+            exam: null,
+            configuration: {
+                strictMode: true,
+            },
+            questions: [],
+            isLoading: false,
+        });
+
+        render(<StudentExamInstructionPage />);
+
+        expect(screen.getByText('Exam Locked')).toBeTruthy();
+        expect(screen.getByText('This exam attempt is locked right now.')).toBeTruthy();
+        expect(screen.queryByRole('link', { name: /continue to privacy/i })).toBeNull();
     });
 });

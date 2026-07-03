@@ -35,7 +35,8 @@ function formatCalibrationHoldDuration(seconds: number) {
 
 export default function StudentExamCheckupPage() {
     const router = useRouter();
-    const { examId, exam, configuration, mediaPipeSandbox, isLoading } = useStudentExamData();
+    const { examId, exam, blockedState, configuration, mediaPipeSandbox, isLoading } =
+        useStudentExamData();
 
     const effectiveMediaPipeSandbox = useMemo(
         () =>
@@ -152,6 +153,23 @@ export default function StudentExamCheckupPage() {
 
     if (isLoading || isRedirectingToHistory) {
         return <StudentExamLoadingState />;
+    }
+
+    if (blockedState.isBlocked) {
+        return (
+            <StudentFlowShell
+                maxWidthClassName="max-w-5xl"
+                mainClassName="py-5 sm:py-6"
+                contentClassName="my-auto"
+            >
+                <div className="flex min-h-full flex-col justify-center gap-5">
+                    <StudentFlowPageHeader
+                        title={blockedState.title ?? 'Exam Unavailable'}
+                        description={blockedState.message ?? 'This exam cannot be entered right now.'}
+                    />
+                </div>
+            </StudentFlowShell>
+        );
     }
 
     return (

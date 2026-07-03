@@ -24,6 +24,7 @@ import { registerRuntimeAccessRoutes } from '../runtime-access/runtime-access.ro
 import { registerStudentOverridesRoutes } from '../student-overrides/student-overrides.routes';
 import { registerLobbyRoutes } from '../lobby/lobby.routes';
 import { registerIncidentsRoutes } from '../incidents/incidents.routes';
+import { registerLifecycleRoutes } from '../lifecycle/lifecycle.routes';
 import sectionAssignmentsRouter from '../section-assignments/section-assignments.route';
 
 const examsRoutes = new OpenAPIHono<HonoEnv>();
@@ -36,6 +37,7 @@ registerRuntimeAccessRoutes(examsRoutes);
 registerStudentOverridesRoutes(examsRoutes);
 registerLobbyRoutes(examsRoutes);
 registerIncidentsRoutes(examsRoutes);
+registerLifecycleRoutes(examsRoutes);
 
 examsRoutes.route('/:examId/section-assignments', sectionAssignmentsRouter);
 

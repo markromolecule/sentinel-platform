@@ -1,0 +1,88 @@
+import { createRoute } from '@hono/zod-openapi';
+import { HTTPException } from 'hono/http-exception';
+import { requireActivePermission } from '../../../../lib/permissions';
+import { type AppRouteHandler } from '../../../../types/hono';
+import { EntitlementsRepository } from '../../access/data/entitlements.repository';
+import { getReportingExamContext } from '../../reporting/services/get-reporting-exam-context';
+import { StudentOverridesService } from '../../student-overrides/student-overrides.service';
+import { grantMakeupExamWindowSchema } from '../lifecycle.dto';
+
+export const grantMakeupExamWindowRoute = createRoute({
+    method: 'post',
+    path: '/:id/students/:studentId/lifecycle/grant-makeup',
+    tags: ['Exams'],
+    summary: 'Grant a makeup exam window for one student',
+    request: {
+        params: grantMakeupExamWindowSchema.params,
+        body: {
+            content: {
+                'application/json': {
+                    schema: grantMakeupExamWindowSchema.body,
+                },
+            },
+        },
+    },
+    responses: {
+        200: {
+            description: 'Makeup exam window granted successfully',
+            content: {
+                'application/json': {
+                    schema: grantMakeupExamWindowSchema.response,
+                },
+            },
+        },
+    },
+});
+
+export const grantMakeupExamWindowRouteHandler: AppRouteHandler<
+    typeof grantMakeupExamWindowRoute
+> = async (c) => {
+    requireActivePermission(c, 'examinations:update');
+
+    const { id, studentId } = c.req.valid('param');
+    const body = c.req.valid('json');
+    const exam = await getReportingExamContext({
+        dbClient: c.get('dbClient'),
+        examId: id,
+        institutionId: c.get('institutionId'),
+        viewerRole: 'admin',
+        userId: c.get('user')?.id,
+    });
+
+    const isEnrolled = await EntitlementsRepository.hasStudentExamEnrollment(c.get('dbClient'), {
+        studentId,
+        classGroupId: exam.classGroupId,
+        subjectId: exam.subjectId,
+        sectionId: exam.sectionId,
+        sectionIds: exam.assignedSectionIds,
+    });
+
+    if (!isEnrolled) {
+        throw new HTTPException(404, {
+            message: 'Student is not assigned to this exam scope.',
+        });
+    }
+
+    const override = await StudentOverridesService.createStudentExamAccessOverride({
+        dbClient: c.get('dbClient'),
+        examId: id,
+        body: {
+            studentId,
+            overrideType: 'MAKEUP',
+            availableFrom: body.availableFrom,
+            availableUntil: body.availableUntil,
+            allowedAttempts: body.allowedAttempts,
+            sourceAttemptId: null,
+            notes: body.notes ?? null,
+        },
+        grantedBy: c.get('user')?.id ?? null,
+    });
+
+    return c.json({
+        message: 'Makeup exam window granted successfully',
+        data: {
+            override,
+            latestEvent: null,
+        },
+    });
+};
