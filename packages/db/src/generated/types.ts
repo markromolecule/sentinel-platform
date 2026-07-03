@@ -142,6 +142,38 @@ export const exam_status = {
     ACTIVE: 'ACTIVE',
 } as const;
 export type exam_status = (typeof exam_status)[keyof typeof exam_status];
+export const exam_attempt_lifecycle_state = {
+    IN_PROGRESS: 'IN_PROGRESS',
+    LOCKED: 'LOCKED',
+    CLOSED: 'CLOSED',
+    SUBMITTED: 'SUBMITTED',
+    SUPERSEDED: 'SUPERSEDED',
+} as const;
+export type exam_attempt_lifecycle_state =
+    (typeof exam_attempt_lifecycle_state)[keyof typeof exam_attempt_lifecycle_state];
+export const exam_attempt_lifecycle_event_type = {
+    STARTED: 'STARTED',
+    SUBMITTED: 'SUBMITTED',
+    LOCKED: 'LOCKED',
+    REOPENED: 'REOPENED',
+    RESET: 'RESET',
+    CLOSED: 'CLOSED',
+    SUPERSEDED: 'SUPERSEDED',
+    FINALIZED: 'FINALIZED',
+    FINALIZATION_REVISED: 'FINALIZATION_REVISED',
+    MAKEUP_GRANTED: 'MAKEUP_GRANTED',
+    RETAKE_GRANTED: 'RETAKE_GRANTED',
+    INCIDENT_REVIEWED: 'INCIDENT_REVIEWED',
+} as const;
+export type exam_attempt_lifecycle_event_type =
+    (typeof exam_attempt_lifecycle_event_type)[keyof typeof exam_attempt_lifecycle_event_type];
+export const exam_attempt_score_state = {
+    DRAFT: 'DRAFT',
+    FINALIZED: 'FINALIZED',
+    REVISION_REQUIRED: 'REVISION_REQUIRED',
+} as const;
+export type exam_attempt_score_state =
+    (typeof exam_attempt_score_state)[keyof typeof exam_attempt_score_state];
 export const proctor_assignment_status = {
     PENDING: 'PENDING',
     ACCEPTED: 'ACCEPTED',
@@ -521,6 +553,22 @@ export type exam_assigned_sections = {
     section_id: string;
     created_at: Generated<Timestamp | null>;
 };
+export type exam_attempt_lifecycle_events = {
+    event_id: Generated<string>;
+    attempt_id: string;
+    exam_id: string;
+    student_id: string;
+    event_type: exam_attempt_lifecycle_event_type;
+    previous_state: exam_attempt_lifecycle_state | null;
+    next_state: exam_attempt_lifecycle_state | null;
+    actor_user_id: string | null;
+    reason_code: string | null;
+    notes: string | null;
+    related_incident_ids: unknown | null;
+    related_override_id: string | null;
+    metadata: unknown | null;
+    created_at: Generated<Timestamp | null>;
+};
 export type exam_attempts = {
     attempt_id: Generated<string>;
     exam_id: string | null;
@@ -541,6 +589,21 @@ export type exam_attempts = {
     answer_snapshot: unknown | null;
     last_synced_at: Timestamp | null;
     reconnect_attempt_count: Generated<number | null>;
+    lifecycle_state: Generated<exam_attempt_lifecycle_state | null>;
+    lifecycle_reason: string | null;
+    lifecycle_note: string | null;
+    locked_at: Timestamp | null;
+    locked_by: string | null;
+    reopened_until: Timestamp | null;
+    closed_at: Timestamp | null;
+    closed_by: string | null;
+    closed_reason: string | null;
+    superseded_by_attempt_id: string | null;
+    superseded_at: Timestamp | null;
+    superseded_by: string | null;
+    finalized_at: Timestamp | null;
+    finalized_by: string | null;
+    score_state: Generated<exam_attempt_score_state | null>;
 };
 export type exam_configurations = {
     config_id: Generated<string>;
@@ -1348,6 +1411,7 @@ export type DB = {
     enrollment_requests: enrollment_requests;
     enrollments: enrollments;
     exam_assigned_sections: exam_assigned_sections;
+    exam_attempt_lifecycle_events: exam_attempt_lifecycle_events;
     exam_attempts: exam_attempts;
     exam_configurations: exam_configurations;
     exam_feedbacks: exam_feedbacks;

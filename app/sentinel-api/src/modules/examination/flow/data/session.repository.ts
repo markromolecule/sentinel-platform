@@ -36,6 +36,8 @@ export class SessionRepository {
           }
     > {
         const { studentId, examId, maxReconnectAttempts, accessOverride } = args;
+        const isFreshAttemptOverride =
+            accessOverride?.overrideType === 'MAKEUP' || accessOverride?.overrideType === 'RETAKE';
 
         const existingAttempt = await db
             .selectFrom('exam_attempts as ea')
@@ -48,6 +50,8 @@ export class SessionRepository {
                 'ea.answer_snapshot',
                 'ea.time_spent_minutes',
                 'ea.reconnect_attempt_count',
+                'ea.lifecycle_state',
+                'ea.reopened_until',
             ])
             .where('ea.exam_id', '=', examId)
             .where('ea.student_id', '=', studentId)
@@ -57,12 +61,18 @@ export class SessionRepository {
                     sql<boolean>`coalesce(ea.started_at, ea.created_at) >= e.published_at`,
                 ]),
             )
+            .where((eb) =>
+                eb.or([
+                    eb('ea.lifecycle_state', 'is', null),
+                    eb('ea.lifecycle_state', '!=', 'SUPERSEDED'),
+                ]),
+            )
             .orderBy('ea.created_at', 'desc')
             .executeTakeFirst();
 
         if (
             (existingAttempt?.completed_at || existingAttempt?.status === 'COMPLETED') &&
-            !accessOverride
+            !isFreshAttemptOverride
         ) {
             return {
                 attemptId: existingAttempt.attempt_id,
@@ -71,7 +81,24 @@ export class SessionRepository {
             };
         }
 
-        if (existingAttempt?.status === 'IN_PROGRESS') {
+        const reopenedUntil = existingAttempt?.reopened_until
+            ? new Date(existingAttempt.reopened_until)
+            : null;
+        const hasActiveReopenWindow = Boolean(
+            reopenedUntil &&
+                !Number.isNaN(reopenedUntil.getTime()) &&
+                reopenedUntil >= new Date(),
+        );
+        const canResumeLockedAttempt =
+            existingAttempt?.lifecycle_state === 'LOCKED' &&
+            (hasActiveReopenWindow ||
+                (accessOverride?.overrideType === 'REOPEN' &&
+                    accessOverride.sourceAttemptId === existingAttempt.attempt_id));
+        const canResumeSameAttempt =
+            existingAttempt?.status === 'IN_PROGRESS' &&
+            (existingAttempt.lifecycle_state === 'IN_PROGRESS' || canResumeLockedAttempt);
+
+        if (canResumeSameAttempt) {
             const reconnectAttemptCount = Number(existingAttempt.reconnect_attempt_count ?? 0);
 
             if (!accessOverride && reconnectAttemptCount >= maxReconnectAttempts) {
@@ -89,6 +116,7 @@ export class SessionRepository {
                 .set({
                     reconnect_attempt_count: nextReconnectAttemptCount,
                     last_synced_at: new Date(),
+                    lifecycle_state: 'IN_PROGRESS',
                 })
                 .where('attempt_id', '=', existingAttempt.attempt_id)
                 .execute();
@@ -129,7 +157,7 @@ export class SessionRepository {
         const attemptCount = Number(attemptCountRow?.attempt_count ?? 0);
         const maxSessionsAllowed = Math.max(1, maxReconnectAttempts + 1);
 
-        if (attemptCount >= maxSessionsAllowed) {
+        if (!isFreshAttemptOverride && attemptCount >= maxSessionsAllowed) {
             throw new HTTPException(403, {
                 message: 'Maximum reconnect attempts reached for this exam session.',
             });
@@ -141,6 +169,7 @@ export class SessionRepository {
                 exam_id: examId,
                 student_id: studentId,
                 status: 'IN_PROGRESS',
+                lifecycle_state: 'IN_PROGRESS',
                 started_at: new Date(),
                 created_at: new Date(),
                 time_spent_minutes: 0,
@@ -186,6 +215,7 @@ export class SessionRepository {
                 'ea.completed_at',
                 'ea.status',
                 'ea.started_at',
+                'ea.lifecycle_state',
                 'st.institution_id',
             ])
             .where('ea.attempt_id', '=', args.sessionId)
@@ -215,6 +245,8 @@ export class SessionRepository {
                 last_synced_at: new Date(),
                 completed_at: new Date(),
                 status: 'COMPLETED',
+                lifecycle_state: 'SUBMITTED',
+                score_state: 'DRAFT',
             })
             .where('attempt_id', '=', args.sessionId)
             .returning(['attempt_id', 'completed_at'])

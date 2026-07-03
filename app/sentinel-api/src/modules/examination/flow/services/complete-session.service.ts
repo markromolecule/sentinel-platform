@@ -21,6 +21,18 @@ export type CompleteSessionServiceArgs = {
     body: CompleteSessionBody;
 };
 
+function resolveSubmissionLifecycleConflictMessage(lifecycleState?: string | null) {
+    if (lifecycleState === 'LOCKED') {
+        return 'This exam attempt is locked and cannot be submitted right now.';
+    }
+
+    if (lifecycleState === 'SUPERSEDED') {
+        return 'This exam attempt was replaced by a newer attempt and can no longer be submitted.';
+    }
+
+    return 'This exam attempt has been closed and can no longer be submitted.';
+}
+
 /**
  * Completes a student exam session.
  * Fetches questions and configurations, shuffles/randomizes questions and choices,
@@ -52,6 +64,16 @@ export async function completeSessionService({
     if (attempt.status !== 'IN_PROGRESS') {
         throw new HTTPException(409, {
             message: 'This exam session is not active anymore.',
+        });
+    }
+
+    if (
+        attempt.lifecycle_state === 'LOCKED' ||
+        attempt.lifecycle_state === 'CLOSED' ||
+        attempt.lifecycle_state === 'SUPERSEDED'
+    ) {
+        throw new HTTPException(409, {
+            message: resolveSubmissionLifecycleConflictMessage(attempt.lifecycle_state),
         });
     }
 

@@ -56,6 +56,10 @@ describe('StudentExamLobbyPage', () => {
 
         mockStudentExamData.mockReturnValue({
             examId: 'exam-1',
+            blockedState: {
+                isBlocked: false,
+                message: null,
+            },
             exam: {
                 duration: 60,
                 runtimeAccess: {
@@ -324,6 +328,68 @@ describe('StudentExamLobbyPage', () => {
         expect(
             screen.getByRole('button', { name: /waiting for approval/i }).hasAttribute('disabled'),
         ).toBe(true);
+        expect(screen.queryByRole('button', { name: /continue to attempt/i })).toBeNull();
+    });
+
+    it('shows the lifecycle block message when a locked attempt reaches the lobby shell', () => {
+        mockLobbyCountQuery.mockReturnValue({
+            data: { count: 1 },
+            isError: false,
+            refetch: vi.fn(),
+        });
+        mockLobbyPresence.mockReturnValue({
+            presenceCount: 1,
+        });
+        mockStudentExamData.mockReturnValue({
+            examId: 'exam-1',
+            blockedState: {
+                isBlocked: true,
+                message: 'This exam attempt is locked right now.',
+            },
+            exam: {
+                duration: 60,
+                runtimeAccess: {
+                    state: 'locked',
+                    reasonCode: 'LOCKED',
+                    message: 'Stale message',
+                    canStart: false,
+                    canResume: false,
+                    hasActiveAttempt: true,
+                },
+            },
+            configuration: {
+                maxReconnectAttempts: 3,
+            },
+            mediaPipeSandbox: null,
+            refetchExam: vi.fn(),
+            isLoading: false,
+        });
+        mockLobbyState.mockReturnValue({
+            countdownLabel: '00:10:00',
+            hasCompletedFlow: true,
+            runtimeAccess: {
+                state: 'locked',
+                reasonCode: 'LOCKED',
+                message: 'Stale message',
+                canStart: false,
+                canResume: false,
+                hasActiveAttempt: true,
+                reconnectAttemptsRemaining: 2,
+                totalReconnectAttempts: 3,
+            },
+            canEnterExam: false,
+            reopenedUntil: null,
+            storedSession: null,
+            mediaPipeLobbyMessage: null,
+            admissionStatus: null,
+            isStartingSession: false,
+            isAdmissionPendingRefresh: false,
+            handleEnterExam: vi.fn(),
+        });
+
+        render(<StudentExamLobbyPage />);
+
+        expect(screen.getByText('This exam attempt is locked right now.')).toBeTruthy();
         expect(screen.queryByRole('button', { name: /continue to attempt/i })).toBeNull();
     });
 });

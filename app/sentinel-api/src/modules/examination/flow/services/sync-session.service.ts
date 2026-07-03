@@ -11,6 +11,18 @@ export type SyncSessionServiceArgs = {
     body: SyncSessionBody;
 };
 
+function resolveSyncLifecycleConflictMessage(lifecycleState?: string | null) {
+    if (lifecycleState === 'LOCKED') {
+        return 'This exam attempt is locked and cannot accept progress updates right now.';
+    }
+
+    if (lifecycleState === 'SUPERSEDED') {
+        return 'This exam attempt was replaced by a newer attempt and can no longer accept progress updates.';
+    }
+
+    return 'This exam attempt has been closed and can no longer accept progress updates.';
+}
+
 /**
  * Synchronizes the current student exam attempt progress (answers, time elapsed) to database.
  * Logs heartbeat telemetry.
@@ -34,6 +46,16 @@ export async function syncSessionService({
     if (attempt.completed_at || attempt.status === 'COMPLETED') {
         throw new HTTPException(409, {
             message: 'This exam session has already been submitted and cannot be synced.',
+        });
+    }
+
+    if (
+        attempt.lifecycle_state === 'LOCKED' ||
+        attempt.lifecycle_state === 'CLOSED' ||
+        attempt.lifecycle_state === 'SUPERSEDED'
+    ) {
+        throw new HTTPException(409, {
+            message: resolveSyncLifecycleConflictMessage(attempt.lifecycle_state),
         });
     }
 

@@ -416,7 +416,11 @@ export type StartExamSessionResult = {
     maxReconnectAttempts?: number;
     attemptId?: string;
     error?: string;
-    errorCode?: 'ATTEMPT_ALREADY_COMPLETED';
+    errorCode?:
+        | 'ATTEMPT_ALREADY_COMPLETED'
+        | 'ATTEMPT_LOCKED'
+        | 'ATTEMPT_CLOSED'
+        | 'ATTEMPT_SUPERSEDED';
 };
 
 export type CompleteExamSessionPayload = {

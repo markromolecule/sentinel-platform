@@ -17,7 +17,14 @@ export const startSessionSchema = {
             maxReconnectAttempts: z.number().int().min(0).optional(),
             attemptId: z.string().uuid().optional(),
             error: z.string().optional(),
-            errorCode: z.enum(['ATTEMPT_ALREADY_COMPLETED']).optional(),
+            errorCode: z
+                .enum([
+                    'ATTEMPT_ALREADY_COMPLETED',
+                    'ATTEMPT_LOCKED',
+                    'ATTEMPT_CLOSED',
+                    'ATTEMPT_SUPERSEDED',
+                ])
+                .optional(),
         }),
     }),
 };

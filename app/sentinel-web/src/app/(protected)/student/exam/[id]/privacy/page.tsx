@@ -24,7 +24,7 @@ import { PRIVACY_POLICIES } from '@/app/(protected)/(instructor)/exams/[id]/prev
 
 export default function StudentExamPrivacyPage() {
     const router = useRouter();
-    const { examId, exam, configuration, isLoading } = useStudentExamData();
+    const { examId, exam, blockedState, configuration, isLoading } = useStudentExamData();
     const [hasConsented, setHasConsented] = useState(
         () => readStoredStudentExamFlow(examId).privacyAccepted,
     );
@@ -37,6 +37,23 @@ export default function StudentExamPrivacyPage() {
 
     if (isLoading || isRedirectingToHistory) {
         return <StudentExamLoadingState />;
+    }
+
+    if (blockedState.isBlocked) {
+        return (
+            <StudentFlowShell
+                maxWidthClassName="max-w-5xl"
+                mainClassName="py-6 sm:py-8"
+                contentClassName="my-auto"
+            >
+                <div className="flex min-h-full flex-col justify-center gap-6">
+                    <StudentFlowPageHeader
+                        title={blockedState.title ?? 'Exam Unavailable'}
+                        description={blockedState.message ?? 'This exam cannot be entered right now.'}
+                    />
+                </div>
+            </StudentFlowShell>
+        );
     }
 
     const disclosures = [
@@ -81,7 +98,6 @@ export default function StudentExamPrivacyPage() {
                         title="Privacy & Consent"
                         description="Review what may be monitored, how it is protected, and confirm before the device checkup."
                     />
-
                 </section>
 
                 <section className="grid gap-5 lg:grid-cols-[minmax(0,1.05fr)_minmax(320px,0.95fr)] lg:items-start">

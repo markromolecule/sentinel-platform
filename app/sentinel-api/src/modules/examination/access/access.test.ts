@@ -421,6 +421,266 @@ describe('AccessGatekeeperService', () => {
         });
     });
 
+    it('blocks a locked attempt when no reopen window is active', async () => {
+        vi.mocked(EntitlementsRepository.getStudentProfileByUserId).mockResolvedValue({
+            student_id: 'e5c1ca10-c818-4bda-8f95-5255c1d5b1e7',
+            institution_id: 'institution-1',
+        });
+        vi.mocked(EntitlementsRepository.getExamAccessPolicy).mockResolvedValue({
+            exam_id: examId,
+            class_group_id: null,
+            subject_id: 'subject-1',
+            section_id: 'section-1',
+            room_id: null,
+            duration_minutes: 60,
+            scheduled_date: new Date('2026-04-13T05:00:00.000Z'),
+            end_date_time: new Date('2026-04-13T07:00:00.000Z'),
+            status: 'PUBLISHED',
+            published_at: new Date('2026-04-12T06:00:00.000Z'),
+            institution_id: 'institution-1',
+            assigned_room_id: null,
+            room_institution_id: null,
+            assigned_section_ids: null,
+            lobby_admission_mode: 'AUTOMATIC',
+        });
+        vi.mocked(EntitlementsRepository.hasStudentExamEnrollment).mockResolvedValue(true);
+        vi.mocked(EntitlementsRepository.getStudentLatestExamAttempt).mockResolvedValue({
+            attempt_id: 'attempt-locked',
+            status: 'IN_PROGRESS',
+            lifecycle_state: 'LOCKED',
+            lifecycle_reason: 'Instructor paused this attempt.',
+            reopened_until: null,
+            reconnect_attempt_count: 1,
+            completed_at: null,
+        } as never);
+
+        const result = await AccessGatekeeperService.verifyStudentExamEligibility(
+            mockDb,
+            userId,
+            examId,
+            now,
+        );
+
+        expect(result).toMatchObject({
+            isEligible: false,
+            reasonCode: 'LOCKED',
+            runtimeAccess: {
+                state: 'locked',
+                canResume: false,
+                message: 'Instructor paused this attempt.',
+            },
+        });
+    });
+
+    it('allows a reopen override only when it references the latest resumable attempt', async () => {
+        vi.mocked(EntitlementsRepository.getStudentProfileByUserId).mockResolvedValue({
+            student_id: 'e5c1ca10-c818-4bda-8f95-5255c1d5b1e7',
+            institution_id: 'institution-1',
+        });
+        vi.mocked(EntitlementsRepository.getExamAccessPolicy).mockResolvedValue({
+            exam_id: examId,
+            class_group_id: null,
+            subject_id: 'subject-1',
+            section_id: 'section-1',
+            room_id: null,
+            duration_minutes: 60,
+            scheduled_date: new Date('2026-04-13T05:00:00.000Z'),
+            end_date_time: new Date('2026-04-13T07:00:00.000Z'),
+            status: 'PUBLISHED',
+            published_at: new Date('2026-04-12T06:00:00.000Z'),
+            institution_id: 'institution-1',
+            assigned_room_id: null,
+            room_institution_id: null,
+            assigned_section_ids: null,
+            lobby_admission_mode: 'AUTOMATIC',
+        });
+        vi.mocked(EntitlementsRepository.hasStudentExamEnrollment).mockResolvedValue(true);
+        vi.mocked(EntitlementsRepository.getStudentLatestExamAttempt).mockResolvedValue({
+            attempt_id: 'attempt-reopen',
+            status: 'IN_PROGRESS',
+            lifecycle_state: 'LOCKED',
+            lifecycle_reason: 'Needs manual reopen.',
+            reopened_until: null,
+            reconnect_attempt_count: 1,
+            completed_at: null,
+        } as never);
+        vi.mocked(RuntimeAccessService.resolveExamRuntimeAccess).mockResolvedValue({
+            state: 'closed',
+            reasonCode: 'CLOSED',
+            message: 'The scheduled exam window has ended.',
+            canStart: false,
+            canResume: false,
+            hasActiveAttempt: false,
+            startsAt: '2026-04-13T05:00:00.000Z',
+            endsAt: '2026-04-13T07:00:00.000Z',
+            reopenedUntil: null,
+        });
+        vi.mocked(StudentOverridesService.getActiveStudentExamOverride).mockResolvedValue({
+            id: 'reopen-1',
+            examId,
+            studentId: 'e5c1ca10-c818-4bda-8f95-5255c1d5b1e7',
+            grantedBy: 'instructor-1',
+            overrideType: 'REOPEN',
+            availableFrom: '2026-04-13T06:00:00.000Z',
+            availableUntil: '2026-04-13T08:00:00.000Z',
+            allowedAttempts: 1,
+            usedAttempts: 0,
+            usedAttemptIds: [],
+            sourceAttemptId: 'attempt-reopen',
+            notes: 'Resume the paused attempt.',
+            createdAt: '2026-04-13T06:00:00.000Z',
+            updatedAt: '2026-04-13T06:00:00.000Z',
+        });
+
+        const result = await AccessGatekeeperService.verifyStudentExamEligibility(
+            mockDb,
+            userId,
+            examId,
+            new Date('2026-04-13T06:30:00.000Z'),
+        );
+
+        expect(result).toMatchObject({
+            isEligible: true,
+            accessOverride: {
+                overrideType: 'REOPEN',
+                sourceAttemptId: 'attempt-reopen',
+            },
+            runtimeAccess: {
+                state: 'reopened',
+                canResume: true,
+                hasActiveAttempt: true,
+            },
+        });
+    });
+
+    it('blocks a superseded attempt until a replacement override is granted', async () => {
+        vi.mocked(EntitlementsRepository.getStudentProfileByUserId).mockResolvedValue({
+            student_id: 'e5c1ca10-c818-4bda-8f95-5255c1d5b1e7',
+            institution_id: 'institution-1',
+        });
+        vi.mocked(EntitlementsRepository.getExamAccessPolicy).mockResolvedValue({
+            exam_id: examId,
+            class_group_id: null,
+            subject_id: 'subject-1',
+            section_id: 'section-1',
+            room_id: null,
+            duration_minutes: 60,
+            scheduled_date: new Date('2026-04-13T05:00:00.000Z'),
+            end_date_time: new Date('2026-04-13T06:00:00.000Z'),
+            status: 'PUBLISHED',
+            published_at: new Date('2026-04-12T06:00:00.000Z'),
+            institution_id: 'institution-1',
+            assigned_room_id: null,
+            room_institution_id: null,
+            assigned_section_ids: null,
+        });
+        vi.mocked(EntitlementsRepository.hasStudentExamEnrollment).mockResolvedValue(true);
+        vi.mocked(EntitlementsRepository.getStudentLatestExamAttempt).mockResolvedValue({
+            attempt_id: 'attempt-superseded',
+            status: 'COMPLETED',
+            lifecycle_state: 'SUPERSEDED',
+            lifecycle_reason: 'This attempt was reset and replaced.',
+            reopened_until: null,
+            reconnect_attempt_count: 0,
+            completed_at: new Date('2026-04-13T05:45:00.000Z'),
+        } as never);
+
+        const result = await AccessGatekeeperService.verifyStudentExamEligibility(
+            mockDb,
+            userId,
+            examId,
+            new Date('2026-04-13T06:30:00.000Z'),
+        );
+
+        expect(result).toMatchObject({
+            isEligible: false,
+            reasonCode: 'CLOSED',
+            runtimeAccess: {
+                state: 'closed',
+                message: 'This attempt was reset and replaced.',
+            },
+        });
+    });
+
+    it('allows a retake override to create a replacement attempt after a superseded attempt', async () => {
+        vi.mocked(EntitlementsRepository.getStudentProfileByUserId).mockResolvedValue({
+            student_id: 'e5c1ca10-c818-4bda-8f95-5255c1d5b1e7',
+            institution_id: 'institution-1',
+        });
+        vi.mocked(EntitlementsRepository.getExamAccessPolicy).mockResolvedValue({
+            exam_id: examId,
+            class_group_id: null,
+            subject_id: 'subject-1',
+            section_id: 'section-1',
+            room_id: null,
+            duration_minutes: 60,
+            scheduled_date: new Date('2026-04-13T05:00:00.000Z'),
+            end_date_time: new Date('2026-04-13T06:00:00.000Z'),
+            status: 'PUBLISHED',
+            published_at: new Date('2026-04-12T06:00:00.000Z'),
+            institution_id: 'institution-1',
+            assigned_room_id: null,
+            room_institution_id: null,
+            assigned_section_ids: null,
+        });
+        vi.mocked(EntitlementsRepository.hasStudentExamEnrollment).mockResolvedValue(true);
+        vi.mocked(EntitlementsRepository.getStudentLatestExamAttempt).mockResolvedValue({
+            attempt_id: 'attempt-superseded',
+            status: 'COMPLETED',
+            lifecycle_state: 'SUPERSEDED',
+            lifecycle_reason: 'This attempt was reset and replaced.',
+            reopened_until: null,
+            reconnect_attempt_count: 0,
+            completed_at: new Date('2026-04-13T05:45:00.000Z'),
+        } as never);
+        vi.mocked(RuntimeAccessService.resolveExamRuntimeAccess).mockResolvedValue({
+            state: 'closed',
+            reasonCode: 'CLOSED',
+            message: 'This exam window has already closed.',
+            canStart: false,
+            canResume: false,
+            hasActiveAttempt: false,
+            startsAt: '2026-04-13T05:00:00.000Z',
+            endsAt: '2026-04-13T06:00:00.000Z',
+            reopenedUntil: null,
+        });
+        vi.mocked(StudentOverridesService.getActiveStudentExamOverride).mockResolvedValue({
+            id: 'retake-1',
+            examId,
+            studentId: 'e5c1ca10-c818-4bda-8f95-5255c1d5b1e7',
+            grantedBy: 'instructor-1',
+            overrideType: 'RETAKE',
+            availableFrom: '2026-04-13T06:00:00.000Z',
+            availableUntil: '2026-04-13T08:00:00.000Z',
+            allowedAttempts: 1,
+            usedAttempts: 0,
+            usedAttemptIds: [],
+            sourceAttemptId: 'attempt-superseded',
+            notes: 'Approved retake.',
+            createdAt: '2026-04-13T06:00:00.000Z',
+            updatedAt: '2026-04-13T06:00:00.000Z',
+        });
+
+        const result = await AccessGatekeeperService.verifyStudentExamEligibility(
+            mockDb,
+            userId,
+            examId,
+            new Date('2026-04-13T06:30:00.000Z'),
+        );
+
+        expect(result).toMatchObject({
+            isEligible: true,
+            accessOverride: {
+                overrideType: 'RETAKE',
+            },
+            runtimeAccess: {
+                state: 'reopened',
+                canStart: true,
+                canResume: false,
+            },
+        });
+    });
+
     it('allows a student-specific makeup override to bypass the closed exam schedule', async () => {
         vi.mocked(EntitlementsRepository.getStudentProfileByUserId).mockResolvedValue({
             student_id: 'e5c1ca10-c818-4bda-8f95-5255c1d5b1e7',

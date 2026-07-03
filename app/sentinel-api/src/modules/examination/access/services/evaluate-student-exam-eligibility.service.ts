@@ -16,6 +16,109 @@ export type EvaluateStudentExamEligibilityArgs = {
     now?: Date;
 };
 
+function buildAttemptLifecycleRuntimeBlock(args: {
+    lifecycleState?: string | null;
+    reopenedUntil?: string | Date | null;
+    reason?: string | null;
+    now: Date;
+}) {
+    const reopenedUntil = args.reopenedUntil ? new Date(args.reopenedUntil) : null;
+    const hasActiveReopenWindow = Boolean(
+        reopenedUntil && !Number.isNaN(reopenedUntil.getTime()) && reopenedUntil >= args.now,
+    );
+
+    if (args.lifecycleState === 'LOCKED') {
+        return {
+            isBlocked: !hasActiveReopenWindow,
+            isResumable: true,
+            runtimeAccess: {
+                state: 'locked' as const,
+                reasonCode: 'LOCKED' as const,
+                message:
+                    args.reason ??
+                    'This exam attempt is locked right now. Wait for a reopen window before resuming.',
+                canStart: false,
+                canResume: hasActiveReopenWindow,
+                hasActiveAttempt: true,
+                startsAt: null,
+                endsAt: null,
+                reopenedUntil: reopenedUntil?.toISOString() ?? null,
+            },
+        };
+    }
+
+    if (args.lifecycleState === 'CLOSED') {
+        return {
+            isBlocked: true,
+            isResumable: false,
+            runtimeAccess: {
+                state: 'closed' as const,
+                reasonCode: 'CLOSED' as const,
+                message:
+                    args.reason ??
+                    'This exam attempt has been closed and can no longer be resumed.',
+                canStart: false,
+                canResume: false,
+                hasActiveAttempt: false,
+                startsAt: null,
+                endsAt: null,
+                reopenedUntil: null,
+            },
+        };
+    }
+
+    if (args.lifecycleState === 'SUPERSEDED') {
+        return {
+            isBlocked: true,
+            isResumable: false,
+            runtimeAccess: {
+                state: 'closed' as const,
+                reasonCode: 'CLOSED' as const,
+                message:
+                    args.reason ??
+                    'This exam attempt was reset and replaced. Start the replacement attempt instead.',
+                canStart: false,
+                canResume: false,
+                hasActiveAttempt: false,
+                startsAt: null,
+                endsAt: null,
+                reopenedUntil: null,
+            },
+        };
+    }
+
+    return {
+        isBlocked: false,
+        isResumable: args.lifecycleState === 'IN_PROGRESS' || args.lifecycleState === 'LOCKED',
+        runtimeAccess: null,
+    };
+}
+
+function buildEligibilityContext(args: {
+    resolvedExam: NonNullable<Awaited<ReturnType<typeof EntitlementsRepository.getExamAccessPolicy>>>;
+    resolvedStudent: NonNullable<
+        Awaited<ReturnType<typeof EntitlementsRepository.getStudentProfileByUserId>>
+    >;
+}) {
+    const { resolvedExam, resolvedStudent } = args;
+
+    return {
+        examId: resolvedExam.exam_id,
+        studentId: resolvedStudent.student_id,
+        classroomId: resolvedExam.class_group_id,
+        subjectId: resolvedExam.subject_id!,
+        sectionId: resolvedExam.section_id,
+        sectionIds: resolvedExam.assigned_section_ids,
+        roomId: resolvedExam.room_id,
+        durationMinutes: resolvedExam.duration_minutes,
+        scheduledDate: resolvedExam.scheduled_date!,
+        endDateTime: resolvedExam.end_date_time,
+        status: resolvedExam.status,
+        publishedAt: resolvedExam.published_at,
+        institutionId: resolvedExam.institution_id,
+    };
+}
+
 /**
  * Performs core eligibility and access rule evaluations for a student exam access request.
  * Delegates basic constraints and lobby gating checks to modular helpers.
@@ -74,6 +177,12 @@ export async function evaluateStudentExamEligibilityService({
         studentId: resolvedStudent.student_id,
         examId: resolvedExam.exam_id,
     });
+    const latestAttemptLifecycle = buildAttemptLifecycleRuntimeBlock({
+        lifecycleState: latestAttempt?.lifecycle_state,
+        reopenedUntil: latestAttempt?.reopened_until,
+        reason: latestAttempt?.lifecycle_reason,
+        now,
+    });
     const latestLobbyAdmission = await EntitlementsRepository.getStudentLatestLobbyAdmission(
         dbClient,
         {
@@ -85,6 +194,10 @@ export async function evaluateStudentExamEligibilityService({
         dbClient,
         resolvedExam.exam_id,
     );
+    const hasResumableAttempt =
+        latestAttempt?.status === 'IN_PROGRESS' &&
+        latestAttemptLifecycle.isResumable &&
+        latestAttempt?.lifecycle_state !== 'SUPERSEDED';
     const scheduledRuntimeAccess = await RuntimeAccessService.resolveExamRuntimeAccess({
         dbClient,
         examId: resolvedExam.exam_id,
@@ -92,7 +205,7 @@ export async function evaluateStudentExamEligibilityService({
         endDateTime: resolvedExam.end_date_time,
         durationMinutes: resolvedExam.duration_minutes,
         now,
-        hasActiveAttempt: latestAttempt?.status === 'IN_PROGRESS',
+        hasActiveAttempt: hasResumableAttempt,
         reconnectAttemptCount: Number(latestAttempt?.reconnect_attempt_count ?? 0),
         maxReconnectAttempts: resolvedExam.max_reconnect_attempts ?? undefined,
     });
@@ -102,6 +215,11 @@ export async function evaluateStudentExamEligibilityService({
         studentId: resolvedStudent.student_id,
         now,
     });
+    const hasValidReopenOverride =
+        accessOverride?.overrideType === 'REOPEN' &&
+        accessOverride.sourceAttemptId === latestAttempt?.attempt_id &&
+        latestAttempt?.status === 'IN_PROGRESS' &&
+        latestAttemptLifecycle.isResumable;
     const runtimeAccess =
         resolvedExam.lobby_admission_mode === 'INSTRUCTOR_GATED' &&
             !latestAttempt?.completed_at &&
@@ -113,6 +231,58 @@ export async function evaluateStudentExamEligibilityService({
             })
             : scheduledRuntimeAccess;
 
+    if (accessOverride?.overrideType === 'REOPEN' && !hasValidReopenOverride) {
+        return {
+            isEligible: false,
+            reason:
+                'This reopen window no longer applies because the original attempt can no longer be resumed.',
+            reasonCode: 'CLOSED',
+            runtimeAccess: {
+                state: 'closed',
+                reasonCode: 'CLOSED',
+                message:
+                    'This reopen window no longer applies because the original attempt can no longer be resumed.',
+                canStart: false,
+                canResume: false,
+                hasActiveAttempt: false,
+                startsAt,
+                endsAt,
+                reopenedUntil: null,
+            },
+            accessOverride,
+        };
+    }
+
+    if (latestAttemptLifecycle.isBlocked && accessOverride?.overrideType !== 'REOPEN') {
+        if (
+            accessOverride &&
+            (accessOverride.overrideType === 'MAKEUP' || accessOverride.overrideType === 'RETAKE')
+        ) {
+            return {
+                isEligible: true,
+                context: buildEligibilityContext({ resolvedExam, resolvedStudent }),
+                runtimeAccess: buildStudentOverrideRuntimeAccess({
+                    accessOverride,
+                    runtimeAccess: scheduledRuntimeAccess,
+                    hasActiveAttempt: false,
+                }),
+                accessOverride,
+            };
+        }
+
+        return {
+            isEligible: false,
+            reason: latestAttemptLifecycle.runtimeAccess!.message,
+            reasonCode: latestAttemptLifecycle.runtimeAccess!.reasonCode,
+            runtimeAccess: {
+                ...latestAttemptLifecycle.runtimeAccess!,
+                startsAt,
+                endsAt,
+            },
+            accessOverride: accessOverride ?? null,
+        };
+    }
+
     if (
         accessOverride &&
         persistedRuntimeAccess?.state !== 'closed' &&
@@ -121,25 +291,11 @@ export async function evaluateStudentExamEligibilityService({
     ) {
         return {
             isEligible: true,
-            context: {
-                examId: resolvedExam.exam_id,
-                studentId: resolvedStudent.student_id,
-                classroomId: resolvedExam.class_group_id,
-                subjectId: resolvedExam.subject_id!,
-                sectionId: resolvedExam.section_id,
-                sectionIds: resolvedExam.assigned_section_ids,
-                roomId: resolvedExam.room_id,
-                durationMinutes: resolvedExam.duration_minutes,
-                scheduledDate: resolvedExam.scheduled_date!,
-                endDateTime: resolvedExam.end_date_time,
-                status: resolvedExam.status,
-                publishedAt: resolvedExam.published_at,
-                institutionId: resolvedExam.institution_id,
-            },
+            context: buildEligibilityContext({ resolvedExam, resolvedStudent }),
             runtimeAccess: buildStudentOverrideRuntimeAccess({
                 accessOverride,
                 runtimeAccess: scheduledRuntimeAccess,
-                hasActiveAttempt: latestAttempt?.status === 'IN_PROGRESS',
+                hasActiveAttempt: hasValidReopenOverride || hasResumableAttempt,
             }),
             accessOverride,
         };
@@ -157,21 +313,7 @@ export async function evaluateStudentExamEligibilityService({
 
     return {
         isEligible: true,
-        context: {
-            examId: resolvedExam.exam_id,
-            studentId: resolvedStudent.student_id,
-            classroomId: resolvedExam.class_group_id,
-            subjectId: resolvedExam.subject_id!,
-            sectionId: resolvedExam.section_id,
-            sectionIds: resolvedExam.assigned_section_ids,
-            roomId: resolvedExam.room_id,
-            durationMinutes: resolvedExam.duration_minutes,
-            scheduledDate: resolvedExam.scheduled_date!,
-            endDateTime: resolvedExam.end_date_time,
-            status: resolvedExam.status,
-            publishedAt: resolvedExam.published_at,
-            institutionId: resolvedExam.institution_id,
-        },
+        context: buildEligibilityContext({ resolvedExam, resolvedStudent }),
         runtimeAccess,
         accessOverride: accessOverride ?? null,
     };

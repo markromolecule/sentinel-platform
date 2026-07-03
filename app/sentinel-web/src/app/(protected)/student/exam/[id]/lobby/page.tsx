@@ -14,8 +14,15 @@ import { LobbyFooterActions } from './_components/lobby-footer-actions';
 import { MonitoringPreloader } from '../_components/monitoring-preloader';
 
 export default function StudentExamLobbyPage() {
-    const { examId, exam, configuration, mediaPipeSandbox, refetchExam, isLoading } =
-        useStudentExamData();
+    const {
+        examId,
+        exam,
+        blockedState,
+        configuration,
+        mediaPipeSandbox,
+        refetchExam,
+        isLoading,
+    } = useStudentExamData();
     const {
         data: lobbyCount,
         isError,
@@ -84,7 +91,7 @@ export default function StudentExamLobbyPage() {
 
                 <LobbyLayout
                     hasCompletedFlow={hasCompletedFlow}
-                    accessMessage={runtimeAccess?.message}
+                    accessMessage={blockedState.isBlocked ? blockedState.message : runtimeAccess?.message}
                     countdownLabel={countdownLabel}
                     maxReconnectAttempts={configuration.maxReconnectAttempts}
                     mediaPipeLobbyMessage={mediaPipeLobbyMessage}
