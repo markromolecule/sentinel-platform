@@ -1,55 +1,82 @@
 import { describe, expect, it } from 'vitest';
+import type { TelemetryRuleKey } from '@sentinel/shared';
 import { incidentSeverityResolverService } from './incident-severity-resolver.service';
 
 describe('IncidentSeverityResolverService', () => {
     const now = new Date('2026-04-22T08:00:00.000Z');
 
-    it('keeps a first right-click attempt at low severity', () => {
+    function buildMatchingIncidents(totalOccurrenceCount: number) {
+        if (totalOccurrenceCount <= 1) {
+            return [];
+        }
+
+        return [
+            {
+                timestamp: new Date('2026-04-22T07:59:10.000Z'),
+                details: JSON.stringify({ occurrenceCount: totalOccurrenceCount - 1 }),
+            },
+        ];
+    }
+
+    function expectCalibratedSeverity(args: {
+        ruleKey: TelemetryRuleKey;
+        count: number;
+        expectedSeverity: 'LOW' | 'MEDIUM' | 'HIGH';
+        baseSeverity?: 'LOW' | 'MEDIUM' | 'HIGH';
+        currentMetadata?: Record<string, unknown>;
+    }) {
         const resolution = incidentSeverityResolverService.resolveSeverity({
-            ruleKey: 'webSecurity.right_click_disable',
-            baseSeverity: 'LOW',
-            matchingIncidents: [],
+            ruleKey: args.ruleKey,
+            baseSeverity: args.baseSeverity ?? 'LOW',
+            matchingIncidents: buildMatchingIncidents(args.count),
             now,
+            currentMetadata: args.currentMetadata,
         });
 
-        expect(resolution).toEqual({
-            finalSeverity: 'LOW',
-            severityReason: 'default-ladder',
+        expect(resolution).toMatchObject({
+            finalSeverity: args.expectedSeverity,
+            severityReason: args.expectedSeverity === 'LOW' ? 'default-ladder' : 'repeat-escalated',
             severityInputs: {
                 baseSeverity: 'LOW',
                 ladder: ['LOW', 'MEDIUM', 'HIGH'],
-                matchingCount: 1,
-                matchingWindowSeconds: null,
-                repeatThreshold: 2,
+                matchingCount: args.count,
+                matchingWindowSeconds: 600,
+                repeatThreshold: 3,
                 overrideSeverity: null,
             },
         });
-    });
+    }
 
-    it('escalates repeated same-rule behavior based on occurrence history', () => {
-        const resolution = incidentSeverityResolverService.resolveSeverity({
-            ruleKey: 'webSecurity.right_click_disable',
-            baseSeverity: 'LOW',
-            matchingIncidents: [
-                {
-                    timestamp: new Date('2026-04-22T07:59:10.000Z'),
-                    details: JSON.stringify({ occurrenceCount: 1 }),
-                },
-            ],
-            now,
-        });
+    it.each([
+        ['webSecurity.clipboard_control', 'MEDIUM'],
+        ['webSecurity.tab_switching_monitor', 'MEDIUM'],
+        ['webSecurity.right_click_disable', 'LOW'],
+        ['aiRules.gaze_tracking', 'LOW'],
+        ['aiRules.audio_anomaly_detection', 'LOW'],
+    ] as const)('calibrates %s severity from occurrence counts', (ruleKey, baseSeverity) => {
+        for (const count of [1, 2]) {
+            expectCalibratedSeverity({
+                ruleKey,
+                count,
+                expectedSeverity: 'LOW',
+                baseSeverity,
+            });
+        }
 
-        expect(resolution).toEqual({
-            finalSeverity: 'MEDIUM',
-            severityReason: 'repeat-escalated',
-            severityInputs: {
-                baseSeverity: 'LOW',
-                ladder: ['LOW', 'MEDIUM', 'HIGH'],
-                matchingCount: 2,
-                matchingWindowSeconds: 120,
-                repeatThreshold: 2,
-                overrideSeverity: null,
-            },
+        for (const count of [3, 5]) {
+            expectCalibratedSeverity({
+                ruleKey,
+                count,
+                expectedSeverity: 'MEDIUM',
+                baseSeverity,
+            });
+        }
+
+        expectCalibratedSeverity({
+            ruleKey,
+            count: 6,
+            expectedSeverity: 'HIGH',
+            baseSeverity,
         });
     });
 
@@ -71,8 +98,8 @@ describe('IncidentSeverityResolverService', () => {
                 baseSeverity: 'LOW',
                 ladder: ['LOW', 'MEDIUM', 'HIGH'],
                 matchingCount: 1,
-                matchingWindowSeconds: null,
-                repeatThreshold: 2,
+                matchingWindowSeconds: 600,
+                repeatThreshold: 3,
                 overrideSeverity: 'HIGH',
             },
         });
@@ -85,12 +112,12 @@ describe('IncidentSeverityResolverService', () => {
             matchingIncidents: [
                 {
                     timestamp: new Date('2026-04-22T07:59:10.000Z'),
-                    details: JSON.stringify({ occurrenceCount: 1 }),
+                    details: JSON.stringify({ occurrenceCount: 2 }),
                 },
             ],
             now,
             runtimeOverride: {
-                repeatThreshold: 3,
+                repeatThreshold: 4,
             },
         });
 
@@ -100,9 +127,9 @@ describe('IncidentSeverityResolverService', () => {
             severityInputs: {
                 baseSeverity: 'LOW',
                 ladder: ['LOW', 'MEDIUM', 'HIGH'],
-                matchingCount: 1,
-                matchingWindowSeconds: null,
-                repeatThreshold: 3,
+                matchingCount: 3,
+                matchingWindowSeconds: 600,
+                repeatThreshold: 4,
                 overrideSeverity: null,
             },
         });
@@ -135,8 +162,8 @@ describe('IncidentSeverityResolverService', () => {
             severityInputs: {
                 baseSeverity: 'LOW',
                 ladder: ['LOW', 'MEDIUM', 'HIGH'],
-                matchingCount: 1,
-                matchingWindowSeconds: null,
+                matchingCount: 2,
+                matchingWindowSeconds: 600,
                 repeatThreshold: 3,
                 overrideSeverity: null,
             },
@@ -189,8 +216,30 @@ describe('IncidentSeverityResolverService', () => {
                 baseSeverity: 'LOW',
                 ladder: ['LOW', 'MEDIUM', 'HIGH'],
                 matchingCount: 3,
-                matchingWindowSeconds: 300,
+                matchingWindowSeconds: 600,
                 repeatThreshold: 3,
+                overrideSeverity: null,
+            },
+        });
+    });
+
+    it('keeps immediate runtime-boundary events high on first occurrence', () => {
+        const resolution = incidentSeverityResolverService.resolveSeverity({
+            ruleKey: 'webSecurity.print_screen_disable',
+            baseSeverity: 'HIGH',
+            matchingIncidents: [],
+            now,
+        });
+
+        expect(resolution).toMatchObject({
+            finalSeverity: 'HIGH',
+            severityReason: 'immediate-high',
+            severityInputs: {
+                baseSeverity: 'HIGH',
+                ladder: ['HIGH'],
+                matchingCount: 1,
+                matchingWindowSeconds: null,
+                repeatThreshold: null,
                 overrideSeverity: null,
             },
         });

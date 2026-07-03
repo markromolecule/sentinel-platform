@@ -82,20 +82,22 @@ export function useInteractionListeners(args: {
 
     const handleFullscreenChange = useCallback(() => {
         if (
-            !isMonitoringSuspended.current &&
-            shouldMonitorFullscreen &&
-            !document.fullscreenElement
+            isMonitoringSuspended.current ||
+            !shouldMonitorFullscreen ||
+            document.fullscreenElement
         ) {
-            const now = Date.now();
-            if (now - lastFullscreenIncidentAtRef.current < 1000) return;
-
-            lastFullscreenIncidentAtRef.current = now;
-            emitTelemetryEvent('FULL_SCREEN_EXIT');
-            lockExam('fullscreen-exit');
-            toast.warning('Fullscreen is required for this exam.', {
-                description: 'Return to fullscreen to continue under the configured policy.',
-            });
+            return;
         }
+
+        const now = Date.now();
+        if (now - lastFullscreenIncidentAtRef.current < 1000) return;
+
+        lastFullscreenIncidentAtRef.current = now;
+        emitTelemetryEvent('FULL_SCREEN_EXIT');
+        lockExam('fullscreen-exit');
+        toast.warning('Fullscreen is required for this exam.', {
+            description: 'Return to fullscreen to continue under the configured policy.',
+        });
     }, [shouldMonitorFullscreen, emitTelemetryEvent, lockExam, isMonitoringSuspended]);
 
     const handleKeyDown = useCallback(
@@ -180,6 +182,9 @@ export function useInteractionListeners(args: {
                 lastRightClickIncidentAtRef.current = now;
                 emitTelemetryEvent('RIGHT_CLICK_ATTEMPT');
                 lockExam('right-click');
+                toast.warning('Right-click actions are disabled for this exam.', {
+                    description: 'The attempt remains secured while this event is logged.',
+                });
             }
         };
 

@@ -55,30 +55,45 @@ export async function getExamMonitoringStudentDetail({
             sql<number>`coalesce((
                 select count(*)::int
                 from flagged_incidents as fi
+                inner join exam_attempts as incident_attempts
+                    on incident_attempts.attempt_id = fi.attempt_id
                 where fi.attempt_id = ea.attempt_id
+                  and incident_attempts.exam_id = ea.exam_id
             ), 0)`.as('incident_count'),
             sql<number>`coalesce((
                 select count(*)::int
                 from flagged_incidents as fi
+                inner join exam_attempts as incident_attempts
+                    on incident_attempts.attempt_id = fi.attempt_id
                 where fi.attempt_id = ea.attempt_id
+                  and incident_attempts.exam_id = ea.exam_id
                   and coalesce(fi.status, 'PENDING') = 'PENDING'
             ), 0)`.as('open_incident_count'),
             sql<boolean>`coalesce((
                 select bool_or(coalesce(fi.severity::text, 'MEDIUM') = 'HIGH')
                 from flagged_incidents as fi
+                inner join exam_attempts as incident_attempts
+                    on incident_attempts.attempt_id = fi.attempt_id
                 where fi.attempt_id = ea.attempt_id
+                  and incident_attempts.exam_id = ea.exam_id
             ), false)`.as('has_high_severity'),
             sql<string | null>`(
                 select fi.incident_type::text
                 from flagged_incidents as fi
+                inner join exam_attempts as incident_attempts
+                    on incident_attempts.attempt_id = fi.attempt_id
                 where fi.attempt_id = ea.attempt_id
+                  and incident_attempts.exam_id = ea.exam_id
                 order by fi.timestamp desc nulls last
                 limit 1
             )`.as('latest_incident_type'),
             sql<Date | null>`(
                 select max(fi.timestamp)
                 from flagged_incidents as fi
+                inner join exam_attempts as incident_attempts
+                    on incident_attempts.attempt_id = fi.attempt_id
                 where fi.attempt_id = ea.attempt_id
+                  and incident_attempts.exam_id = ea.exam_id
             )`.as('latest_incident_at'),
         ])
         .where('ea.exam_id', '=', examId)

@@ -1,5 +1,9 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { useExamIncidentsQuery, EXAM_INCIDENTS_QUERY_KEY } from './use-exam-incidents-query';
+import {
+    useExamIncidentsQuery,
+    EXAM_INCIDENTS_QUERY_KEY,
+    EXAM_INCIDENTS_REFETCH_INTERVAL_MS,
+} from './use-exam-incidents-query';
 import { useUpdateExamIncidentsMutation } from './use-update-exam-incidents-mutation';
 import { getExamIncidents, reviewIncidents } from '@sentinel/services';
 
@@ -17,6 +21,7 @@ vi.mock('@tanstack/react-query', () => ({
             queryKey: options.queryKey,
             enabled: options.enabled,
             getNextPageParam: options.getNextPageParam,
+            refetchInterval: options.refetchInterval,
         };
     }),
     useMutation: vi.fn((options: any) => {
@@ -70,6 +75,7 @@ describe('Exam Incidents Hooks', () => {
                 page: 1,
             });
             expect(query.enabled).toBe(true);
+            expect(query.refetchInterval).toBe(EXAM_INCIDENTS_REFETCH_INTERVAL_MS);
         });
 
         it('returns correct page parameter from getNextPageParam', () => {

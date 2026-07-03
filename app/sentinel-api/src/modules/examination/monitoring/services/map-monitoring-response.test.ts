@@ -1,5 +1,9 @@
 import { describe, expect, it, vi } from 'vitest';
-import { mapMonitoringIncident, mapMonitoringStudentSummary } from './map-monitoring-response';
+import {
+    mapMonitoringIncident,
+    mapMonitoringStudentDetail,
+    mapMonitoringStudentSummary,
+} from './map-monitoring-response';
 
 describe('map monitoring response', () => {
     it('marks stale in-progress attempts as disconnected when there are no open incidents', () => {
@@ -116,6 +120,126 @@ describe('map monitoring response', () => {
         expect(incident.persistenceTrigger).toBe('repeat-threshold');
         expect(incident.matchingWindowSeconds).toBe(300);
         expect(incident.wasSeverityForced).toBe(false);
+    });
+
+    it('maps first telemetry incidents with occurrence and calibrated severity display data', () => {
+        const incident = mapMonitoringIncident({
+            incidentId: '11111111-1111-4111-8111-111111111111',
+            attemptId: '22222222-2222-4222-8222-222222222222',
+            examId: '33333333-3333-4333-8333-333333333333',
+            examTitle: 'Algorithms Final',
+            institutionId: '44444444-4444-4444-8444-444444444444',
+            studentId: '55555555-5555-4555-8555-555555555555',
+            studentRecordId: '66666666-6666-4666-8666-666666666666',
+            studentName: 'Ana Santos',
+            platform: 'WEB',
+            source: 'CLIENT',
+            ruleKey: 'webSecurity.right_click_disable',
+            incidentType: 'SUSPICIOUS_MOVEMENT',
+            severity: 'LOW',
+            status: 'PENDING',
+            timestamp: '2026-04-20T09:40:00.000Z',
+            evidenceUrl: null,
+            reviewedBy: null,
+            reviewedAt: null,
+            reviewNotes: null,
+            configurationSnapshot: null,
+            sessionContext: null,
+            details: {
+                eventType: 'RIGHT_CLICK_ATTEMPT',
+                occurrenceCount: 1,
+                severityReason: 'default-ladder',
+                previousSeverity: null,
+                severityInputs: {
+                    baseSeverity: 'LOW',
+                    ladder: ['LOW', 'MEDIUM', 'HIGH'],
+                    matchingCount: 1,
+                    matchingWindowSeconds: 300,
+                    repeatThreshold: 3,
+                    overrideSeverity: null,
+                },
+            } as any,
+        });
+
+        expect(incident.description).toBe('Suspicious Movement');
+        expect(incident.severity).toBe('low');
+        expect(incident.rawEventType).toBe('RIGHT_CLICK_ATTEMPT');
+        expect(incident.occurrenceCount).toBe(1);
+        expect(incident.severityReason).toBe('default-ladder');
+        expect(incident.matchingWindowSeconds).toBe(300);
+        expect(incident.wasSeverityForced).toBe(false);
+    });
+
+    it('includes latest occurrence count and severity on student detail flags', () => {
+        const detail = mapMonitoringStudentDetail(
+            {
+                student_user_id: '11111111-1111-4111-8111-111111111111',
+                student_record_id: '22222222-2222-4222-8222-222222222222',
+                student_number: '2024-0001',
+                first_name: 'Ana',
+                last_name: 'Santos',
+                last_seen_at: '2026-04-20T09:53:00.000Z',
+                attempt_id: '33333333-3333-4333-8333-333333333333',
+                attempt_status: 'IN_PROGRESS',
+                started_at: '2026-04-20T09:00:00.000Z',
+                completed_at: null,
+                time_spent_minutes: 30,
+                score: null,
+                total_score: null,
+                incident_count: 1,
+                open_incident_count: 1,
+                has_high_severity: false,
+                latest_incident_type: 'TAB_SWITCH',
+                latest_incident_at: '2026-04-20T09:40:00.000Z',
+            },
+            60,
+            10,
+            [
+                {
+                    incidentId: '77777777-7777-4777-8777-777777777777',
+                    attemptId: '33333333-3333-4333-8333-333333333333',
+                    examId: '88888888-8888-4888-8888-888888888888',
+                    examTitle: 'Algorithms Final',
+                    institutionId: '99999999-9999-4999-8999-999999999999',
+                    studentId: '11111111-1111-4111-8111-111111111111',
+                    studentRecordId: '22222222-2222-4222-8222-222222222222',
+                    studentName: 'Ana Santos',
+                    platform: 'WEB',
+                    source: 'CLIENT',
+                    ruleKey: 'webSecurity.tab_switching_monitor',
+                    incidentType: 'TAB_SWITCH',
+                    severity: 'MEDIUM',
+                    status: 'PENDING',
+                    timestamp: '2026-04-20T09:40:00.000Z',
+                    evidenceUrl: null,
+                    reviewedBy: null,
+                    reviewedAt: null,
+                    reviewNotes: null,
+                    configurationSnapshot: null,
+                    sessionContext: null,
+                    details: {
+                        occurrenceCount: 3,
+                        severityReason: 'repeat-escalated',
+                        severityInputs: {
+                            baseSeverity: 'LOW',
+                            ladder: ['LOW', 'MEDIUM', 'HIGH'],
+                            matchingCount: 3,
+                            matchingWindowSeconds: 300,
+                            repeatThreshold: 3,
+                            overrideSeverity: null,
+                        },
+                    } as any,
+                },
+            ],
+        );
+
+        expect(detail.flags).toHaveLength(1);
+        expect(detail.flags[0]).toMatchObject({
+            occurrenceCount: 3,
+            severity: 'medium',
+            severityReason: 'repeat-escalated',
+            matchingWindowSeconds: 300,
+        });
     });
 
     it('exposes the raw telemetry event when monitoring incidents were normalized for storage', () => {

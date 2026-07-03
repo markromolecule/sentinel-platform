@@ -227,4 +227,45 @@ describe('useStudentExamAttempt', () => {
             '/student/exam/11111111-1111-1111-1111-111111111111/lobby',
         );
     });
+
+    it('suspends security monitoring before navigating to turn-in result review', () => {
+        const suspendSecurityMonitoring = vi.fn();
+        mockUseAttemptMonitoring.mockReturnValue({
+            mediaPipeVideoRef: { current: null },
+            mediaPipeAnalysis: null,
+            mediaPipePhase: 'idle',
+            mediaPipeErrorMessage: null,
+            mediaPipeIncident: null,
+            dismissMediaPipeIncident: vi.fn(),
+            isMediaPipeEnabled: false,
+            audioErrorMessage: null,
+            audioMonitoringPhase: 'idle',
+            isAudioMonitoringEnabled: false,
+            securityLockReason: null,
+            isResumingExam: false,
+            resumeSecuredExam: vi.fn(),
+            fullScreenContainerRef: { current: null },
+            suspendSecurityMonitoring,
+        });
+
+        const { result } = renderHook(() => useStudentExamAttempt());
+
+        act(() => {
+            result.current.questions.forEach((question) => {
+                result.current.handleAnswerChange(question.id, 'A');
+            });
+        });
+
+        act(() => {
+            result.current.handleSubmit();
+        });
+
+        expect(suspendSecurityMonitoring).toHaveBeenCalledTimes(1);
+        expect(mockRouterReplace).toHaveBeenCalledWith(
+            '/student/exam/11111111-1111-1111-1111-111111111111/result',
+        );
+        expect(suspendSecurityMonitoring.mock.invocationCallOrder[0]).toBeLessThan(
+            mockRouterReplace.mock.invocationCallOrder[0],
+        );
+    });
 });

@@ -41,6 +41,33 @@ function formatElapsedTime(seconds: number) {
     return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
 }
 
+function formatSeverityReason(reason?: string | null) {
+    switch (reason) {
+        case 'repeat-escalated':
+            return 'Repeat escalated';
+        case 'forced-override':
+            return 'Forced override';
+        case 'immediate-high':
+            return 'Immediate high';
+        case 'threshold-fixed':
+            return 'Threshold fixed';
+        case 'default-ladder':
+            return 'Default ladder';
+        default:
+            return null;
+    }
+}
+
+function getOccurrenceCount(incident: ApiIncidentLogItem) {
+    const occurrenceCount = incident.details?.occurrenceCount;
+    return typeof occurrenceCount === 'number' && occurrenceCount > 0 ? occurrenceCount : 1;
+}
+
+function formatSeverityLadder(incident: ApiIncidentLogItem) {
+    const ladder = incident.details?.severityInputs?.ladder;
+    return Array.isArray(ladder) && ladder.length > 0 ? ladder.join(' -> ') : null;
+}
+
 export function IncidentDrawer({
     incident,
     isOpen,
@@ -64,6 +91,9 @@ export function IncidentDrawer({
     const formattedType =
         flagLabels[incident.incidentType as keyof typeof flagLabels] ||
         incident.incidentType.replaceAll('_', ' ');
+    const occurrenceCount = getOccurrenceCount(incident);
+    const severityReasonLabel = formatSeverityReason(incident.details?.severityReason);
+    const severityLadderLabel = formatSeverityLadder(incident);
 
     const handleConfirm = () => {
         if (incident.details?._isGrouped && incident.details?._incidents) {
@@ -126,6 +156,17 @@ export function IncidentDrawer({
                         </div>
                         <div className="flex flex-col gap-1">
                             <span className="text-muted-foreground text-[10px] font-bold tracking-wider uppercase">
+                                Occurrences
+                            </span>
+                            <Badge
+                                variant="outline"
+                                className="border-border bg-muted/40 text-foreground font-bold uppercase"
+                            >
+                                {occurrenceCount}
+                            </Badge>
+                        </div>
+                        <div className="flex flex-col gap-1">
+                            <span className="text-muted-foreground text-[10px] font-bold tracking-wider uppercase">
                                 Review Status
                             </span>
                             <Badge
@@ -142,6 +183,31 @@ export function IncidentDrawer({
                             </Badge>
                         </div>
                     </div>
+
+                    {(severityReasonLabel || severityLadderLabel) && (
+                        <div className="border-border bg-muted/20 grid gap-3 rounded-md border p-4 text-xs">
+                            {severityReasonLabel ? (
+                                <div className="flex items-center justify-between gap-3">
+                                    <span className="text-muted-foreground font-bold tracking-wider uppercase">
+                                        Severity Reason
+                                    </span>
+                                    <span className="text-foreground text-right font-semibold">
+                                        {severityReasonLabel}
+                                    </span>
+                                </div>
+                            ) : null}
+                            {severityLadderLabel ? (
+                                <div className="flex items-center justify-between gap-3">
+                                    <span className="text-muted-foreground font-bold tracking-wider uppercase">
+                                        Severity Ladder
+                                    </span>
+                                    <span className="text-foreground text-right font-semibold">
+                                        {severityLadderLabel}
+                                    </span>
+                                </div>
+                            ) : null}
+                        </div>
+                    )}
 
                     {/* Grouped Incidents List vs Single Telemetry view */}
                     {incident.details?._isGrouped && incident.details?._incidents ? (
@@ -165,6 +231,10 @@ export function IncidentDrawer({
                                             flagLabels[
                                                 inc.incidentType as keyof typeof flagLabels
                                             ] || inc.incidentType.replaceAll('_', ' ');
+                                        const incOccurrenceCount = getOccurrenceCount(inc);
+                                        const incSeverityReasonLabel = formatSeverityReason(
+                                            inc.details?.severityReason,
+                                        );
                                         return (
                                             <div
                                                 key={inc.incidentId || index}
@@ -189,6 +259,14 @@ export function IncidentDrawer({
                                                         </div>
                                                         <div className="text-muted-foreground mt-0.5 truncate font-mono text-[10px] uppercase">
                                                             {inc.ruleKey || 'NO_RULE_KEY'}
+                                                        </div>
+                                                        <div className="text-muted-foreground mt-1 flex flex-wrap gap-1 text-[10px] font-semibold uppercase">
+                                                            <span>x{incOccurrenceCount}</span>
+                                                            {incSeverityReasonLabel ? (
+                                                                <span>
+                                                                    {incSeverityReasonLabel}
+                                                                </span>
+                                                            ) : null}
                                                         </div>
                                                     </div>
                                                     <Badge

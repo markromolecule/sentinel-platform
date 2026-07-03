@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import {
     useApi,
     useDebounce,
@@ -12,6 +12,12 @@ import { updateExamRuntimeAccess } from '@sentinel/services';
 import { toast } from 'sonner';
 import { RuntimeAccessAction, RuntimeAccessState } from '../_types';
 import { MONITORING_PAGE_SIZE } from '../_constants';
+
+type IncidentSnapshot = {
+    incidentCount: number;
+    openIncidentCount: number;
+    latestIncidentType: string | null;
+};
 
 /**
  * useMonitoring manages instructor live-monitoring filters, actions, and runtime access state.
@@ -31,6 +37,9 @@ export function useMonitoring(examId: string) {
     const [reopenMinutes, setReopenMinutes] = useState('30');
     const [overridingStudentId, setOverridingStudentId] = useState<string | null>(null);
     const debouncedSearchQuery = useDebounce(searchQuery, 500);
+    const incidentSnapshotsRef = useRef<Map<string, IncidentSnapshot>>(new Map());
+    const hasHydratedIncidentSnapshotsRef = useRef(false);
+    const hydratedExamIdRef = useRef<string | null>(null);
 
     // Queries & Mutations
     const {
@@ -48,6 +57,46 @@ export function useMonitoring(examId: string) {
         },
         onError: (error: Error) => toast.error(error.message),
     });
+
+    useEffect(() => {
+        if (!monitoring?.students) {
+            return;
+        }
+
+        const nextSnapshots = new Map<string, IncidentSnapshot>();
+        const shouldWarn =
+            hasHydratedIncidentSnapshotsRef.current && hydratedExamIdRef.current === examId;
+
+        for (const student of monitoring.students) {
+            const studentKey = student.attemptId;
+            const snapshot = {
+                incidentCount: student.incidentCount ?? 0,
+                openIncidentCount: student.openIncidentCount ?? 0,
+                latestIncidentType: student.latestIncidentType ?? null,
+            };
+            const previous = incidentSnapshotsRef.current.get(studentKey);
+            const hasNewIncident =
+                shouldWarn &&
+                ((previous &&
+                    (snapshot.incidentCount > previous.incidentCount ||
+                        snapshot.openIncidentCount > previous.openIncidentCount)) ||
+                    (!previous && (snapshot.incidentCount > 0 || snapshot.openIncidentCount > 0)));
+
+            if (hasNewIncident) {
+                const fullName = `${student.firstName} ${student.lastName}`.trim();
+                const incidentLabel = snapshot.latestIncidentType ?? 'proctoring incident';
+                toast.warning('New proctoring incident detected.', {
+                    description: `${fullName} received ${incidentLabel}.`,
+                });
+            }
+
+            nextSnapshots.set(studentKey, snapshot);
+        }
+
+        incidentSnapshotsRef.current = nextSnapshots;
+        hasHydratedIncidentSnapshotsRef.current = true;
+        hydratedExamIdRef.current = examId;
+    }, [examId, monitoring?.students]);
 
     // Derived State
     const filteredStudents = useStableValue(() => {

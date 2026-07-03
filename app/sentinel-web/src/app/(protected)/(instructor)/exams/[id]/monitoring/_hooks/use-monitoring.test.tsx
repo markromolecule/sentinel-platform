@@ -1,4 +1,4 @@
-import { act, renderHook } from '@testing-library/react';
+import { act, renderHook, waitFor } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { useMonitoring } from './use-monitoring';
 
@@ -33,10 +33,11 @@ vi.mock('sonner', () => ({
     toast: {
         success: vi.fn(),
         error: vi.fn(),
+        warning: vi.fn(),
     },
 }));
 
-const monitoringOverview = {
+const monitoringOverview: any = {
     exam: {
         id: 'exam-1',
         title: 'Biology Midterm',
@@ -64,6 +65,7 @@ const monitoringOverview = {
             progress: 10,
             incidentCount: 0,
             openIncidentCount: 0,
+            latestIncidentType: null,
             lastActivity: 'Now',
         },
         {
@@ -76,24 +78,28 @@ const monitoringOverview = {
             progress: 20,
             incidentCount: 0,
             openIncidentCount: 0,
+            latestIncidentType: null,
             lastActivity: 'Now',
         },
     ],
 };
 
 describe('useMonitoring', () => {
+    let currentMonitoringOverview: any;
+
     beforeEach(() => {
         vi.clearAllMocks();
+        currentMonitoringOverview = structuredClone(monitoringOverview);
         mockUseApi.mockReturnValue({ api: true });
         mockUseDebounce.mockImplementation((value: string) => value);
         mockUseStableValue.mockImplementation((factory: () => unknown) => factory());
-        mockUseExamMonitoringOverviewQuery.mockReturnValue({
-            data: monitoringOverview,
+        mockUseExamMonitoringOverviewQuery.mockImplementation(() => ({
+            data: currentMonitoringOverview,
             isLoading: false,
             isFetching: false,
             isError: false,
             refetch: vi.fn(),
-        });
+        }));
         mockUseOverrideReconnectLimitMutation.mockReturnValue({
             mutateAsync: vi.fn(),
         });
@@ -134,5 +140,39 @@ describe('useMonitoring', () => {
 
         expect(result.current.searchQuery).toBe('pat');
         expect(result.current.filteredStudents.map((student) => student.id)).toEqual(['student-2']);
+    });
+
+    it('warns only when incident counts increase after the initial load', async () => {
+        const { toast } = await import('sonner');
+        const { rerender } = renderHook(() => useMonitoring('exam-1'));
+
+        expect(toast.warning).not.toHaveBeenCalled();
+
+        currentMonitoringOverview = {
+            ...currentMonitoringOverview,
+            students: currentMonitoringOverview.students.map((student) =>
+                student.attemptId === 'attempt-1'
+                    ? {
+                          ...student,
+                          incidentCount: 1,
+                          openIncidentCount: 1,
+                          latestIncidentType: 'TAB_SWITCH',
+                      }
+                    : student,
+            ),
+        };
+
+        rerender();
+
+        await waitFor(() => {
+            expect(toast.warning).toHaveBeenCalledTimes(1);
+        });
+        expect(toast.warning).toHaveBeenCalledWith('New proctoring incident detected.', {
+            description: 'Pat Student received TAB_SWITCH.',
+        });
+
+        rerender();
+
+        expect(toast.warning).toHaveBeenCalledTimes(1);
     });
 });

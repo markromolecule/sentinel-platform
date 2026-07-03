@@ -1,4 +1,4 @@
-import { act, renderHook } from '@testing-library/react';
+import { act, renderHook, waitFor } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { useIncidentLogs } from './use-incident-logs';
 import { toast } from 'sonner';
@@ -6,80 +6,22 @@ import { toast } from 'sonner';
 const mockRefetch = vi.fn();
 const mockFetchNextPage = vi.fn();
 const mockReviewIncidents = vi.fn();
+const { mockIncidentPages } = vi.hoisted(() => ({
+    mockIncidentPages: { current: null as any },
+}));
 
 vi.mock('sonner', () => ({
     toast: {
         success: vi.fn(),
         error: vi.fn(),
+        warning: vi.fn(),
     },
 }));
 
 vi.mock('@sentinel/hooks', () => ({
     useDebounce: (value: any) => value,
     useExamIncidentsQuery: (examId: string) => ({
-        data:
-            examId === 'exam-1'
-                ? {
-                      pages: [
-                          {
-                              data: [
-                                  {
-                                      incidentId: 'inc-1',
-                                      attemptId: 'attempt-1',
-                                      examId: 'exam-1',
-                                      studentId: 'student-1',
-                                      studentName: 'Juan Dela Cruz',
-                                      studentNo: '2024-1001',
-                                      incidentType: 'TAB_SWITCH',
-                                      severity: 'MEDIUM',
-                                      status: 'PENDING',
-                                      timestamp: '2026-06-11T22:00:00.000Z',
-                                      platform: 'WEB',
-                                      source: 'CLIENT',
-                                      elapsedSeconds: 120,
-                                      evidenceUrl: null,
-                                      details: {},
-                                  },
-                                  {
-                                      incidentId: 'inc-3',
-                                      attemptId: 'attempt-1',
-                                      examId: 'exam-1',
-                                      studentId: 'student-1',
-                                      studentName: 'Juan Dela Cruz',
-                                      studentNo: '2024-1001',
-                                      incidentType: 'LOOKING_AWAY',
-                                      severity: 'HIGH',
-                                      status: 'PENDING',
-                                      timestamp: '2026-06-11T22:01:00.000Z',
-                                      platform: 'WEB',
-                                      source: 'AI',
-                                      elapsedSeconds: 180,
-                                      evidenceUrl: null,
-                                      details: {},
-                                  },
-                                  {
-                                      incidentId: 'inc-2',
-                                      attemptId: 'attempt-2',
-                                      examId: 'exam-1',
-                                      studentId: 'student-2',
-                                      studentName: 'Maria Clara',
-                                      studentNo: '2024-1002',
-                                      incidentType: 'NO_FACE_DETECTED',
-                                      severity: 'HIGH',
-                                      status: 'CONFIRMED',
-                                      timestamp: '2026-06-11T22:05:00.000Z',
-                                      platform: 'WEB',
-                                      source: 'CLIENT',
-                                      elapsedSeconds: 300,
-                                      evidenceUrl: null,
-                                      details: {},
-                                  },
-                              ],
-                              meta: { total: 3, page: 1, limit: 50, totalPages: 1 },
-                          },
-                      ],
-                  }
-                : null,
+        data: examId === 'exam-1' ? mockIncidentPages.current : null,
         isLoading: false,
         isFetching: false,
         isError: false,
@@ -102,9 +44,71 @@ vi.mock('@sentinel/hooks', () => ({
     }),
 }));
 
+const createIncidentPages = () => ({
+    pages: [
+        {
+            data: [
+                {
+                    incidentId: 'inc-1',
+                    attemptId: 'attempt-1',
+                    examId: 'exam-1',
+                    studentId: 'student-1',
+                    studentName: 'Juan Dela Cruz',
+                    studentNo: '2024-1001',
+                    incidentType: 'TAB_SWITCH',
+                    severity: 'MEDIUM',
+                    status: 'PENDING',
+                    timestamp: '2026-06-11T22:00:00.000Z',
+                    platform: 'WEB',
+                    source: 'CLIENT',
+                    elapsedSeconds: 120,
+                    evidenceUrl: null,
+                    details: { occurrenceCount: 1 },
+                },
+                {
+                    incidentId: 'inc-3',
+                    attemptId: 'attempt-1',
+                    examId: 'exam-1',
+                    studentId: 'student-1',
+                    studentName: 'Juan Dela Cruz',
+                    studentNo: '2024-1001',
+                    incidentType: 'LOOKING_AWAY',
+                    severity: 'HIGH',
+                    status: 'PENDING',
+                    timestamp: '2026-06-11T22:01:00.000Z',
+                    platform: 'WEB',
+                    source: 'AI',
+                    elapsedSeconds: 180,
+                    evidenceUrl: null,
+                    details: { occurrenceCount: 1 },
+                },
+                {
+                    incidentId: 'inc-2',
+                    attemptId: 'attempt-2',
+                    examId: 'exam-1',
+                    studentId: 'student-2',
+                    studentName: 'Maria Clara',
+                    studentNo: '2024-1002',
+                    incidentType: 'NO_FACE_DETECTED',
+                    severity: 'HIGH',
+                    status: 'CONFIRMED',
+                    timestamp: '2026-06-11T22:05:00.000Z',
+                    platform: 'WEB',
+                    source: 'CLIENT',
+                    elapsedSeconds: 300,
+                    evidenceUrl: null,
+                    details: { occurrenceCount: 1 },
+                },
+            ],
+            meta: { total: 3, page: 1, limit: 50, totalPages: 1 },
+        },
+    ],
+});
+
 describe('useIncidentLogs Custom Hook', () => {
     beforeEach(() => {
         vi.clearAllMocks();
+        mockIncidentPages.current = createIncidentPages();
     });
 
     it('returns empty states and no incidents when exam ID is empty', () => {
@@ -165,5 +169,74 @@ describe('useIncidentLogs Custom Hook', () => {
     it('derives sections from exam report data', () => {
         const { result } = renderHook(() => useIncidentLogs('exam-1'));
         expect(result.current.sections).toEqual([{ id: 'sec-1', name: 'BSCS 4A' }]);
+    });
+
+    it('warns for newly fetched incident IDs without repeating for the same data', async () => {
+        const { rerender } = renderHook(() => useIncidentLogs('exam-1'));
+
+        expect(toast.warning).not.toHaveBeenCalled();
+
+        mockIncidentPages.current = {
+            pages: [
+                {
+                    ...mockIncidentPages.current.pages[0],
+                    data: [
+                        ...mockIncidentPages.current.pages[0].data,
+                        {
+                            ...mockIncidentPages.current.pages[0].data[0],
+                            incidentId: 'inc-4',
+                            incidentType: 'RIGHT_CLICK_ATTEMPT',
+                            timestamp: '2026-06-11T22:06:00.000Z',
+                        },
+                    ],
+                    meta: { total: 4, page: 1, limit: 50, totalPages: 1 },
+                },
+            ],
+        };
+
+        rerender();
+
+        await waitFor(() => {
+            expect(toast.warning).toHaveBeenCalledTimes(1);
+        });
+        expect(toast.warning).toHaveBeenCalledWith('New proctoring incident logged.', {
+            description: 'Juan Dela Cruz received RIGHT_CLICK_ATTEMPT.',
+        });
+
+        rerender();
+
+        expect(toast.warning).toHaveBeenCalledTimes(1);
+    });
+
+    it('warns once when an existing incident occurrence count increases', async () => {
+        const { rerender } = renderHook(() => useIncidentLogs('exam-1'));
+
+        expect(toast.warning).not.toHaveBeenCalled();
+
+        mockIncidentPages.current = {
+            pages: [
+                {
+                    ...mockIncidentPages.current.pages[0],
+                    data: mockIncidentPages.current.pages[0].data.map((incident: any) =>
+                        incident.incidentId === 'inc-1'
+                            ? { ...incident, details: { occurrenceCount: 2 } }
+                            : incident,
+                    ),
+                },
+            ],
+        };
+
+        rerender();
+
+        await waitFor(() => {
+            expect(toast.warning).toHaveBeenCalledTimes(1);
+        });
+        expect(toast.warning).toHaveBeenCalledWith('Proctoring incident updated.', {
+            description: 'Juan Dela Cruz now has 2 occurrences for TAB_SWITCH.',
+        });
+
+        rerender();
+
+        expect(toast.warning).toHaveBeenCalledTimes(1);
     });
 });

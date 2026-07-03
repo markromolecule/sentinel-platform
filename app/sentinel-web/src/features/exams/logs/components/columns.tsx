@@ -37,6 +37,28 @@ function formatElapsedTime(seconds: number) {
     return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
 }
 
+function formatSeverityReason(reason?: string | null) {
+    switch (reason) {
+        case 'repeat-escalated':
+            return 'Repeat escalated';
+        case 'forced-override':
+            return 'Forced override';
+        case 'immediate-high':
+            return 'Immediate high';
+        case 'threshold-fixed':
+            return 'Threshold fixed';
+        case 'default-ladder':
+            return 'Default ladder';
+        default:
+            return null;
+    }
+}
+
+function getOccurrenceCount(incident: ApiIncidentLogItem) {
+    const occurrenceCount = incident.details?.occurrenceCount;
+    return typeof occurrenceCount === 'number' && occurrenceCount > 0 ? occurrenceCount : 1;
+}
+
 export const columns: ColumnDef<ApiIncidentLogItem>[] = [
     {
         id: 'select',
@@ -114,6 +136,11 @@ export const columns: ColumnDef<ApiIncidentLogItem>[] = [
         header: ({ column }) => <DataTableColumnHeader column={column} title="Incident Type" />,
         cell: ({ row }) => {
             const incident = row.original;
+            const occurrenceCount = getOccurrenceCount(incident);
+            const severityReasonLabel = formatSeverityReason(incident.details?.severityReason);
+            const contextLabel = [incident.ruleKey, severityReasonLabel]
+                .filter(Boolean)
+                .join(' | ');
 
             if (incident.details?._isGrouped) {
                 const uniqueTypes = Array.from(
@@ -157,12 +184,17 @@ export const columns: ColumnDef<ApiIncidentLogItem>[] = [
                             {flagLabels[incident.incidentType as keyof typeof flagLabels] ||
                                 incident.incidentType.replaceAll('_', ' ')}
                         </span>
+                        {occurrenceCount > 1 ? (
+                            <span className="bg-muted text-muted-foreground rounded-full px-1.5 py-0.5 text-[10px] font-bold">
+                                x{occurrenceCount}
+                            </span>
+                        ) : null}
                     </div>
-                    {incident.ruleKey && (
+                    {contextLabel ? (
                         <div className="text-muted-foreground truncate font-mono text-[10px] uppercase">
-                            {incident.ruleKey}
+                            {contextLabel}
                         </div>
-                    )}
+                    ) : null}
                 </div>
             );
         },
