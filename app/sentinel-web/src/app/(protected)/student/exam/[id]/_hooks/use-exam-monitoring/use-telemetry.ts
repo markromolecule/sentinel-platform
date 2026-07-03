@@ -15,7 +15,10 @@ export function useTelemetry(args: {
 
     const emitTelemetryEvent = useCallback(
         (eventType: WebTelemetryEventType) => {
-            if (isMonitoringSuspended.current || !examSessionId || !studentId || isMobile) {
+            const shouldSkipEmission =
+                isMonitoringSuspended.current || !examSessionId || !studentId || isMobile;
+
+            if (shouldSkipEmission) {
                 return;
             }
 

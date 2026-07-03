@@ -50,84 +50,36 @@ export type SeverityResolution = {
 };
 
 type AudioAnomalyType =
-    | 'TALKING'
-    | 'TYPING'
-    | 'TAPPING'
-    | 'MOUTH_BREATHING'
-    | 'BACKGROUND_NOISE'
-    | 'SILENCE_DETECTED';
+    'TALKING' | 'TYPING' | 'TAPPING' | 'MOUTH_BREATHING' | 'BACKGROUND_NOISE' | 'SILENCE_DETECTED';
+
+const CALIBRATED_OCCURRENCE_TIERS: SeverityTier[] = [
+    { severity: 'LOW', minCount: 1, windowSeconds: 600 },
+    { severity: 'MEDIUM', minCount: 3, windowSeconds: 600 },
+    { severity: 'HIGH', minCount: 6, windowSeconds: 600 },
+];
+
+const CALIBRATED_REPEAT_THRESHOLD_TIER_INDEX = 1;
+
+function createCalibratedLadder(): Extract<SeverityStrategy, { kind: 'ladder' }> {
+    return {
+        kind: 'ladder',
+        baseSeverity: 'LOW',
+        repeatThresholdTierIndex: CALIBRATED_REPEAT_THRESHOLD_TIER_INDEX,
+        tiers: CALIBRATED_OCCURRENCE_TIERS,
+    };
+}
 
 const SEVERITY_STRATEGIES: Record<TelemetryRuleKey, SeverityStrategy> = {
-    'aiRules.gaze_tracking': {
-        kind: 'ladder',
-        baseSeverity: 'LOW',
-        repeatThresholdTierIndex: 1,
-        tiers: [
-            { severity: 'LOW', minCount: 1, windowSeconds: null },
-            { severity: 'MEDIUM', minCount: 2, windowSeconds: 120 },
-            { severity: 'HIGH', minCount: 4, windowSeconds: 300 },
-        ],
-    },
-    'aiRules.face_detection': {
-        kind: 'ladder',
-        baseSeverity: 'MEDIUM',
-        repeatThresholdTierIndex: 1,
-        tiers: [
-            { severity: 'MEDIUM', minCount: 1, windowSeconds: null },
-            { severity: 'HIGH', minCount: 2, windowSeconds: 120 },
-        ],
-    },
-    'aiRules.audio_anomaly_detection': {
-        kind: 'ladder',
-        baseSeverity: 'LOW',
-        repeatThresholdTierIndex: 1,
-        tiers: [
-            { severity: 'LOW', minCount: 1, windowSeconds: null },
-            { severity: 'MEDIUM', minCount: 2, windowSeconds: 120 },
-            { severity: 'HIGH', minCount: 4, windowSeconds: 300 },
-        ],
-    },
-    'aiRules.multiple_faces_detection': {
-        kind: 'fixed',
-        baseSeverity: 'HIGH',
-    },
-    'webSecurity.tab_switching_monitor': {
-        kind: 'ladder',
-        baseSeverity: 'MEDIUM',
-        repeatThresholdTierIndex: 1,
-        tiers: [
-            { severity: 'MEDIUM', minCount: 1, windowSeconds: null },
-            { severity: 'HIGH', minCount: 2, windowSeconds: 300 },
-        ],
-    },
-    'webSecurity.full_screen_required': {
-        kind: 'ladder',
-        baseSeverity: 'MEDIUM',
-        repeatThresholdTierIndex: 1,
-        tiers: [
-            { severity: 'MEDIUM', minCount: 1, windowSeconds: null },
-            { severity: 'HIGH', minCount: 2, windowSeconds: 300 },
-        ],
-    },
-    'webSecurity.clipboard_control': {
-        kind: 'ladder',
-        baseSeverity: 'MEDIUM',
-        repeatThresholdTierIndex: 1,
-        tiers: [
-            { severity: 'MEDIUM', minCount: 1, windowSeconds: null },
-            { severity: 'HIGH', minCount: 2, windowSeconds: 300 },
-        ],
-    },
-    'webSecurity.right_click_disable': {
-        kind: 'ladder',
-        baseSeverity: 'LOW',
-        repeatThresholdTierIndex: 1,
-        tiers: [
-            { severity: 'LOW', minCount: 1, windowSeconds: null },
-            { severity: 'MEDIUM', minCount: 2, windowSeconds: 120 },
-            { severity: 'HIGH', minCount: 4, windowSeconds: 300 },
-        ],
-    },
+    'aiRules.gaze_tracking': createCalibratedLadder(),
+    'aiRules.face_detection': createCalibratedLadder(),
+    'aiRules.audio_anomaly_detection': createCalibratedLadder(),
+    'aiRules.multiple_faces_detection': createCalibratedLadder(),
+    'webSecurity.tab_switching_monitor': createCalibratedLadder(),
+    'webSecurity.full_screen_required': createCalibratedLadder(),
+    'webSecurity.clipboard_control': createCalibratedLadder(),
+    'webSecurity.right_click_disable': createCalibratedLadder(),
+    // Screen capture, app pinning, screenshot, and root/jailbreak events remain immediate high
+    // because each event indicates a direct break from the secured runtime boundary.
     'webSecurity.print_screen_disable': {
         kind: 'immediate',
         baseSeverity: 'HIGH',
@@ -136,25 +88,8 @@ const SEVERITY_STRATEGIES: Record<TelemetryRuleKey, SeverityStrategy> = {
         kind: 'immediate',
         baseSeverity: 'HIGH',
     },
-    'mobileSecurity.prevent_backgrounding': {
-        kind: 'ladder',
-        baseSeverity: 'MEDIUM',
-        repeatThresholdTierIndex: 1,
-        tiers: [
-            { severity: 'MEDIUM', minCount: 1, windowSeconds: null },
-            { severity: 'HIGH', minCount: 2, windowSeconds: 300 },
-        ],
-    },
-    'mobileSecurity.notification_block': {
-        kind: 'ladder',
-        baseSeverity: 'LOW',
-        repeatThresholdTierIndex: 1,
-        tiers: [
-            { severity: 'LOW', minCount: 1, windowSeconds: null },
-            { severity: 'MEDIUM', minCount: 2, windowSeconds: 300 },
-            { severity: 'HIGH', minCount: 4, windowSeconds: 600 },
-        ],
-    },
+    'mobileSecurity.prevent_backgrounding': createCalibratedLadder(),
+    'mobileSecurity.notification_block': createCalibratedLadder(),
     'mobileSecurity.screenshot_block': {
         kind: 'immediate',
         baseSeverity: 'HIGH',
@@ -168,12 +103,8 @@ const SEVERITY_STRATEGIES: Record<TelemetryRuleKey, SeverityStrategy> = {
 const SILENCE_AUDIO_SEVERITY_STRATEGY: Extract<SeverityStrategy, { kind: 'ladder' }> = {
     kind: 'ladder',
     baseSeverity: 'LOW',
-    repeatThresholdTierIndex: 1,
-    tiers: [
-        { severity: 'LOW', minCount: 1, windowSeconds: null },
-        { severity: 'MEDIUM', minCount: 3, windowSeconds: 300 },
-        { severity: 'HIGH', minCount: 6, windowSeconds: 600 },
-    ],
+    repeatThresholdTierIndex: CALIBRATED_REPEAT_THRESHOLD_TIER_INDEX,
+    tiers: CALIBRATED_OCCURRENCE_TIERS,
 };
 
 function safeParseDetails(details: unknown): Record<string, unknown> {
@@ -257,17 +188,13 @@ function countOccurrencesWithinWindow(
     now: Date,
     windowSeconds: number | null,
 ): number {
-    if (windowSeconds === null) {
-        return 1;
-    }
-
-    const threshold = now.getTime() - windowSeconds * 1000;
+    const threshold = windowSeconds === null ? null : now.getTime() - windowSeconds * 1000;
 
     return (
         incidents.reduce((total, incident) => {
             const timestamp = normalizeTimestamp(incident.timestamp);
 
-            if (!timestamp || timestamp.getTime() < threshold) {
+            if (!timestamp || (threshold !== null && timestamp.getTime() < threshold)) {
                 return total;
             }
 

@@ -57,6 +57,11 @@ export async function getExamMonitoringOverview({
 
     const incidentSummary = dbClient
         .selectFrom('flagged_incidents as fi')
+        .innerJoin(
+            'exam_attempts as incident_attempts',
+            'incident_attempts.attempt_id',
+            'fi.attempt_id',
+        )
         .select([
             'fi.attempt_id',
             sql<number>`count(*)::int`.as('incident_count'),
@@ -71,6 +76,7 @@ export async function getExamMonitoringOverview({
                 array_agg(fi.incident_type::text order by fi.timestamp desc nulls last)
             )[1]`.as('latest_incident_type'),
         ])
+        .where('incident_attempts.exam_id', '=', examId)
         .groupBy('fi.attempt_id')
         .as('incident_summary');
 
@@ -92,6 +98,7 @@ export async function getExamMonitoringOverview({
             'latest_attempts.completed_at',
             'latest_attempts.time_spent_minutes',
             'latest_attempts.reconnect_attempt_count',
+            'latest_attempts.answered_question_count',
             'latest_attempts.score',
             'latest_attempts.total_score',
             sql<number>`coalesce(incident_summary.incident_count, 0)`.as('incident_count'),

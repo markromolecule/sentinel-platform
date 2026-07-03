@@ -31,7 +31,7 @@ export function mapTelemetryEventToIncident(eventType: PersistableProctoringEven
 }
 
 /**
- * Builds a deterministic key to prevent duplicate ingestion of the same event.
+ * Builds a deterministic stream key for same-rule event deduplication.
  */
 export function buildTelemetryDedupeKey(payload: PersistableProctoringEvent): string {
     return [

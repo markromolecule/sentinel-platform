@@ -306,6 +306,12 @@ describe('use-exam-monitoring', () => {
                 eventType: 'RIGHT_CLICK_ATTEMPT',
             }),
         );
+        expect(mockToastWarning).toHaveBeenCalledWith(
+            'Right-click actions are disabled for this exam.',
+            expect.objectContaining({
+                description: expect.stringContaining('event is logged'),
+            }),
+        );
     });
 
     it('does not emit right-click telemetry when right-click blocking is disabled', async () => {
@@ -360,6 +366,7 @@ describe('use-exam-monitoring', () => {
         await waitFor(() => {
             expect(emitWebTelemetryEvent).toHaveBeenCalledTimes(1);
         });
+        expect(mockToastWarning).toHaveBeenCalledTimes(1);
     });
 
     it('locks the exam and emits telemetry for the PrintScreen key', async () => {

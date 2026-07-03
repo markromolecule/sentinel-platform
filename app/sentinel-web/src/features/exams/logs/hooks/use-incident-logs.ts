@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState, useEffect } from 'react';
+import { useMemo, useState, useEffect, useRef } from 'react';
 import { toast } from 'sonner';
 import {
     useExamIncidentsQuery,
@@ -11,10 +11,19 @@ import {
 import type { ColumnFiltersState } from '@tanstack/react-table';
 import { type ApiGetExamIncidentsQuery, type ApiIncidentLogItem } from '@sentinel/services';
 
+type IncidentLogSnapshot = {
+    occurrenceCount: number;
+};
+
+function getIncidentOccurrenceCount(item: ApiIncidentLogItem) {
+    const occurrenceCount = item.details?.occurrenceCount;
+    return typeof occurrenceCount === 'number' && occurrenceCount > 0 ? occurrenceCount : 1;
+}
+
 /**
  * Custom hook encapsulating state, API queries, data mapping, and action handlers
  * for the exam incident logs view.
- * 
+ *
  * @param examId - The UUID of the exam to fetch incident logs for.
  */
 export function useIncidentLogs(examId: string) {
@@ -27,6 +36,9 @@ export function useIncidentLogs(examId: string) {
     const [selectedIds, setSelectedIds] = useState<string[]>([]);
     const [selectedIncident, setSelectedIncident] = useState<ApiIncidentLogItem | null>(null);
     const [drawerOpen, setDrawerOpen] = useState(false);
+    const incidentSnapshotsRef = useRef<Map<string, IncidentLogSnapshot>>(new Map());
+    const hasHydratedIncidentSnapshotsRef = useRef(false);
+    const hydratedExamIdRef = useRef<string | null>(null);
 
     // Debounce search inputs to limit API requests
     const debouncedSearch = useDebounce(search, 300);
@@ -82,6 +94,33 @@ export function useIncidentLogs(examId: string) {
     const incidents = useMemo(() => {
         return infiniteData?.pages.flatMap((page) => page.data) ?? [];
     }, [infiniteData]);
+
+    useEffect(() => {
+        const nextSnapshots = new Map<string, IncidentLogSnapshot>();
+        const shouldWarn =
+            hasHydratedIncidentSnapshotsRef.current && hydratedExamIdRef.current === examId;
+
+        for (const item of incidents) {
+            const occurrenceCount = getIncidentOccurrenceCount(item);
+            const previous = incidentSnapshotsRef.current.get(item.incidentId);
+
+            if (shouldWarn && !previous) {
+                toast.warning('New proctoring incident logged.', {
+                    description: `${item.studentName ?? 'A student'} received ${item.incidentType}.`,
+                });
+            } else if (shouldWarn && previous && occurrenceCount > previous.occurrenceCount) {
+                toast.warning('Proctoring incident updated.', {
+                    description: `${item.studentName ?? 'A student'} now has ${occurrenceCount} occurrences for ${item.incidentType}.`,
+                });
+            }
+
+            nextSnapshots.set(item.incidentId, { occurrenceCount });
+        }
+
+        incidentSnapshotsRef.current = nextSnapshots;
+        hasHydratedIncidentSnapshotsRef.current = true;
+        hydratedExamIdRef.current = examId;
+    }, [examId, incidents]);
 
     // Group incidents by student if groupMode is set to 'student'
     const displayIncidents = useMemo(() => {

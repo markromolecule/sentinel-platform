@@ -85,6 +85,10 @@ function formatSeverityReason(reason?: Flag['severityReason']) {
     }
 }
 
+function formatOccurrenceLabel(occurrenceCount?: number) {
+    return occurrenceCount && occurrenceCount > 1 ? `x${occurrenceCount}` : null;
+}
+
 const rawEventDetails: Partial<
     Record<
         NonNullable<Flag['rawEventType']>,
@@ -270,6 +274,7 @@ export function FlaggingTimeline({ flags }: FlaggingTimelineProps) {
                     const severityReasonLabel = formatSeverityReason(flag.severityReason);
                     const triggerLabel = formatTrigger(flag.persistenceTrigger);
                     const windowLabel = formatWindow(flag.matchingWindowSeconds);
+                    const occurrenceLabel = formatOccurrenceLabel(flag.occurrenceCount);
                     const anomalyLabel = formatAudioAnomalyLabel(flag.anomalyType);
                     const confidenceLabel =
                         typeof flag.confidenceScore === 'number'
@@ -297,11 +302,11 @@ export function FlaggingTimeline({ flags }: FlaggingTimelineProps) {
                                 <div className="mb-2 flex flex-col justify-between gap-1 sm:flex-row sm:items-center">
                                     <h4 className="text-foreground flex items-center gap-2 text-sm font-bold">
                                         {title}
-                                        {flag.occurrenceCount && flag.occurrenceCount > 1 && (
+                                        {occurrenceLabel ? (
                                             <span className="bg-muted text-muted-foreground ml-1 rounded-full px-2 py-0.5 text-[10px] font-bold">
-                                                x{flag.occurrenceCount}
+                                                {occurrenceLabel}
                                             </span>
-                                        )}
+                                        ) : null}
                                         <span
                                             className={cn(
                                                 'rounded-full px-2 py-0.5 text-[10px] font-bold tracking-wider uppercase',

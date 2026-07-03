@@ -6,7 +6,17 @@ import { testWithDbClient } from '../../../../lib/test-with-db-client';
 import type { PersistableProctoringEvent } from '../../ingestion/ingestion.dto';
 import { IncidentPersistenceService } from './incident-persistence.service';
 
-async function createTelemetryAttemptFixture(dbClient: DbClient) {
+function parseIncidentDetails(details: string | null | undefined) {
+    return JSON.parse(details ?? '{}') as Record<string, unknown>;
+}
+
+async function createTelemetryAttemptFixture(
+    dbClient: DbClient,
+    overrides: {
+        completedAt?: Date | null;
+        status?: 'IN_PROGRESS' | 'COMPLETED';
+    } = {},
+) {
     const suffix = randomUUID().slice(0, 8);
     const userId = randomUUID();
 
@@ -57,8 +67,9 @@ async function createTelemetryAttemptFixture(dbClient: DbClient) {
         .values({
             exam_id: exam.exam_id,
             student_id: student.student_id,
-            status: 'IN_PROGRESS',
+            status: overrides.status ?? 'IN_PROGRESS',
             started_at: new Date('2026-04-22T06:00:00.000Z'),
+            completed_at: overrides.completedAt,
             created_at: new Date('2026-04-22T06:00:00.000Z'),
             time_spent_minutes: 0,
             is_verified: false,
@@ -101,6 +112,64 @@ function buildPayload(
 
 describe('IncidentPersistenceService', () => {
     testWithDbClient(
+        'persists first browser security occurrences as one reviewable row each',
+        async ({ dbClient }) => {
+            const events: Array<{
+                ruleKey: PersistableProctoringEvent['ruleKey'];
+                eventType: PersistableProctoringEvent['eventType'];
+            }> = [
+                {
+                    ruleKey: 'webSecurity.right_click_disable',
+                    eventType: 'RIGHT_CLICK_ATTEMPT',
+                },
+                {
+                    ruleKey: 'webSecurity.clipboard_control',
+                    eventType: 'CLIPBOARD_ATTEMPT',
+                },
+                {
+                    ruleKey: 'webSecurity.tab_switching_monitor',
+                    eventType: 'TAB_SWITCH',
+                },
+                {
+                    ruleKey: 'webSecurity.full_screen_required',
+                    eventType: 'FULL_SCREEN_EXIT',
+                },
+            ];
+
+            for (const event of events) {
+                const fixture = await createTelemetryAttemptFixture(dbClient);
+
+                await IncidentPersistenceService.appendEvent(
+                    dbClient,
+                    buildPayload({
+                        ...fixture,
+                        ...event,
+                    }),
+                );
+
+                const incidents = await dbClient
+                    .selectFrom('flagged_incidents')
+                    .select(['rule_key', 'details'])
+                    .where('attempt_id', '=', fixture.attemptId)
+                    .execute();
+
+                expect(incidents).toHaveLength(1);
+                expect(incidents[0]).toMatchObject({
+                    rule_key: event.ruleKey,
+                });
+                expect(parseIncidentDetails(incidents[0]?.details)).toMatchObject({
+                    eventType: event.eventType,
+                    occurrenceCount: 1,
+                    previousSeverity: null,
+                    lastEvent: {
+                        eventType: event.eventType,
+                    },
+                });
+            }
+        },
+    );
+
+    testWithDbClient(
         'deduplicates same-rule events and does not merge or escalate mixed rules together',
         async ({ dbClient }) => {
             const fixture = await createTelemetryAttemptFixture(dbClient);
@@ -132,25 +201,97 @@ describe('IncidentPersistenceService', () => {
                 (incident) => incident.rule_key === 'webSecurity.right_click_disable',
             );
 
-            expect(clipboardIncident?.severity).toBe('MEDIUM');
-            expect(JSON.parse(clipboardIncident?.details ?? '{}')).toMatchObject({
+            expect(clipboardIncident?.severity).toBe('LOW');
+            expect(parseIncidentDetails(clipboardIncident?.details)).toMatchObject({
                 occurrenceCount: 1,
                 severityReason: 'default-ladder',
-                currentSeverity: 'MEDIUM',
+                currentSeverity: 'LOW',
             });
 
-            expect(rightClickIncident?.severity).toBe('MEDIUM');
-            expect(JSON.parse(rightClickIncident?.details ?? '{}')).toMatchObject({
+            expect(rightClickIncident?.severity).toBe('LOW');
+            expect(parseIncidentDetails(rightClickIncident?.details)).toMatchObject({
                 occurrenceCount: 2,
-                severityReason: 'repeat-escalated',
+                severityReason: 'default-ladder',
                 previousSeverity: 'LOW',
-                currentSeverity: 'MEDIUM',
+                currentSeverity: 'LOW',
                 severityInputs: {
                     baseSeverity: 'LOW',
                     matchingCount: 2,
-                    matchingWindowSeconds: 120,
+                    matchingWindowSeconds: 600,
                 },
             });
+        },
+    );
+
+    testWithDbClient(
+        'escalates deduplicated occurrence counts without jumping to high at count two',
+        async ({ dbClient }) => {
+            const fixture = await createTelemetryAttemptFixture(dbClient);
+
+            for (let index = 0; index < 6; index += 1) {
+                await IncidentPersistenceService.appendEvent(dbClient, buildPayload(fixture));
+            }
+
+            const incident = await dbClient
+                .selectFrom('flagged_incidents')
+                .select(['severity', 'details'])
+                .where('attempt_id', '=', fixture.attemptId)
+                .executeTakeFirstOrThrow();
+
+            const details = parseIncidentDetails(incident.details);
+
+            expect(incident.severity).toBe('HIGH');
+            expect(details).toMatchObject({
+                occurrenceCount: 6,
+                severityReason: 'repeat-escalated',
+                currentSeverity: 'HIGH',
+                severityInputs: {
+                    baseSeverity: 'LOW',
+                    matchingCount: 6,
+                    matchingWindowSeconds: 600,
+                    repeatThreshold: 3,
+                },
+            });
+        },
+    );
+
+    testWithDbClient(
+        'creates a new same-rule row after the dedupe window expires',
+        async ({ dbClient }) => {
+            const fixture = await createTelemetryAttemptFixture(dbClient);
+
+            await IncidentPersistenceService.appendEvent(dbClient, buildPayload(fixture));
+
+            const firstIncident = await dbClient
+                .selectFrom('flagged_incidents')
+                .select(['incident_id'])
+                .where('attempt_id', '=', fixture.attemptId)
+                .executeTakeFirstOrThrow();
+
+            await dbClient
+                .updateTable('flagged_incidents')
+                .set({
+                    timestamp: new Date(Date.now() - 180_000),
+                })
+                .where('incident_id', '=', firstIncident.incident_id)
+                .execute();
+
+            await IncidentPersistenceService.appendEvent(dbClient, buildPayload(fixture));
+
+            const incidents = await dbClient
+                .selectFrom('flagged_incidents')
+                .select(['incident_id', 'details'])
+                .where('attempt_id', '=', fixture.attemptId)
+                .orderBy('timestamp', 'asc')
+                .execute();
+
+            expect(incidents).toHaveLength(2);
+            expect(incidents.map((incident) => parseIncidentDetails(incident.details))).toEqual(
+                expect.arrayContaining([
+                    expect.objectContaining({ occurrenceCount: 1 }),
+                    expect.objectContaining({ occurrenceCount: 1 }),
+                ]),
+            );
         },
     );
 
@@ -180,7 +321,7 @@ describe('IncidentPersistenceService', () => {
                 .executeTakeFirstOrThrow();
 
             expect(incident.severity).toBe('HIGH');
-            expect(JSON.parse(incident.details ?? '{}')).toMatchObject({
+            expect(parseIncidentDetails(incident.details)).toMatchObject({
                 severityReason: 'forced-override',
                 currentSeverity: 'HIGH',
                 severityInputs: {
@@ -238,7 +379,7 @@ describe('IncidentPersistenceService', () => {
                 incident_type: 'SUSPICIOUS_MOVEMENT',
                 severity: 'LOW',
             });
-            expect(JSON.parse(rightClickIncident?.details ?? '{}')).toMatchObject({
+            expect(parseIncidentDetails(rightClickIncident?.details)).toMatchObject({
                 eventType: 'RIGHT_CLICK_ATTEMPT',
                 lastEvent: {
                     eventType: 'RIGHT_CLICK_ATTEMPT',
@@ -251,12 +392,70 @@ describe('IncidentPersistenceService', () => {
                 incident_type: 'SCREENSHOT',
                 severity: 'HIGH',
             });
-            expect(JSON.parse(printScreenIncident?.details ?? '{}')).toMatchObject({
+            expect(parseIncidentDetails(printScreenIncident?.details)).toMatchObject({
                 eventType: 'PRINT_SCREEN_ATTEMPT',
                 lastEvent: {
                     eventType: 'PRINT_SCREEN_ATTEMPT',
                 },
                 occurrenceCount: 1,
+            });
+        },
+    );
+
+    testWithDbClient(
+        'ignores fullscreen exits after an attempt is completed',
+        async ({ dbClient }) => {
+            const fixture = await createTelemetryAttemptFixture(dbClient, {
+                completedAt: new Date(),
+                status: 'COMPLETED',
+            });
+
+            await IncidentPersistenceService.appendEvent(
+                dbClient,
+                buildPayload({
+                    ...fixture,
+                    ruleKey: 'webSecurity.full_screen_required',
+                    eventType: 'FULL_SCREEN_EXIT',
+                }),
+            );
+
+            const incidents = await dbClient
+                .selectFrom('flagged_incidents')
+                .select(['incident_id'])
+                .where('attempt_id', '=', fixture.attemptId)
+                .execute();
+
+            expect(incidents).toHaveLength(0);
+        },
+    );
+
+    testWithDbClient(
+        'persists fullscreen exits while an attempt is active',
+        async ({ dbClient }) => {
+            const fixture = await createTelemetryAttemptFixture(dbClient);
+
+            await IncidentPersistenceService.appendEvent(
+                dbClient,
+                buildPayload({
+                    ...fixture,
+                    ruleKey: 'webSecurity.full_screen_required',
+                    eventType: 'FULL_SCREEN_EXIT',
+                }),
+            );
+
+            const incident = await dbClient
+                .selectFrom('flagged_incidents')
+                .select(['rule_key', 'details'])
+                .where('attempt_id', '=', fixture.attemptId)
+                .executeTakeFirstOrThrow();
+
+            expect(incident.rule_key).toBe('webSecurity.full_screen_required');
+            expect(parseIncidentDetails(incident.details)).toMatchObject({
+                eventType: 'FULL_SCREEN_EXIT',
+                occurrenceCount: 1,
+                lastEvent: {
+                    eventType: 'FULL_SCREEN_EXIT',
+                },
             });
         },
     );

@@ -4,6 +4,13 @@ import { EXAM_QUERY_KEYS } from '@sentinel/shared/constants';
 import { useApi } from '../../api-provider';
 import { useAuthenticatedQueryEnabled } from '../_shared/use-authenticated-query-enabled';
 
+export const EXAM_MONITORING_OVERVIEW_REFETCH_INTERVAL_MS = 2000;
+
+/**
+ * Fetches live monitoring overview data for an instructor exam dashboard.
+ *
+ * @param examId - Exam id whose monitoring overview should be loaded.
+ */
 export function useExamMonitoringOverviewQuery(examId?: string) {
     const apiClient = useApi();
     const isAuthenticatedQueryEnabled = useAuthenticatedQueryEnabled();
@@ -14,7 +21,7 @@ export function useExamMonitoringOverviewQuery(examId?: string) {
             : [...EXAM_QUERY_KEYS.all, 'monitoring'],
         queryFn: () => getExamMonitoringOverview(apiClient, examId as string),
         enabled: Boolean(examId) && isAuthenticatedQueryEnabled,
-        refetchInterval: 5000,
+        refetchInterval: EXAM_MONITORING_OVERVIEW_REFETCH_INTERVAL_MS,
         refetchIntervalInBackground: true,
     });
 }

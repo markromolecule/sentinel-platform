@@ -68,6 +68,16 @@ export class IncidentPersistenceService {
             });
         }
 
+        const isCompletedSession = Boolean(session.completed_at || session.status === 'COMPLETED');
+
+        if (isCompletedSession && payload.eventType === 'FULL_SCREEN_EXIT') {
+            console.warn('[TelemetryStorage] Ignoring post-completion fullscreen telemetry', {
+                attemptId: payload.examSessionId,
+                completedAt: session.completed_at,
+            });
+            return;
+        }
+
         // --- COMPLETION GRACE PERIOD LOGIC ---
         // We allow a small window (e.g., 5 minutes) after completion to ingest final telemetry batches.
         const TELEMETRY_GRACE_PERIOD_MS = 5 * 60 * 1000;
@@ -76,7 +86,7 @@ export class IncidentPersistenceService {
             new Date().getTime() - new Date(session.completed_at).getTime() <
                 TELEMETRY_GRACE_PERIOD_MS;
 
-        if ((session.completed_at || session.status === 'COMPLETED') && !isRecentlyCompleted) {
+        if (isCompletedSession && !isRecentlyCompleted) {
             console.warn(
                 '[TelemetryStorage] Storage rejection: session completed and grace period expired',
                 {
@@ -303,12 +313,6 @@ export class IncidentPersistenceService {
                 console.error('[TelemetryStorage] Batch failure: session completed', { sessionId });
                 continue;
             }
-
-            const configuration =
-                await telemetryConfigurationResolverService.resolveAttemptConfiguration(
-                    db,
-                    sessionId,
-                );
 
             // Process each event in the session group to handle deduplication/scaling
             // For simplicity and correctness with the new logic, we'll process these
