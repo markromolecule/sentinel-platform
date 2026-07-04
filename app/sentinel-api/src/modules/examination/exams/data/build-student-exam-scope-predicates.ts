@@ -156,41 +156,56 @@ export function buildStudentExamVisibilityPredicate(args: {
 }) {
     const { studentUserId, hasSectionId } = args;
 
-    return sql<boolean>`exists (
-        select 1
-        from students as st
-        inner join enrollments as enr on enr.student_id = st.student_id
-        inner join class_groups as student_cg on student_cg.class_group_id = enr.class_group_id
-        left join subject_offerings as student_so
-            on student_so.subject_offering_id = student_cg.subject_offering_id
-        where st.user_id = ${studentUserId}
-          and student_cg.archived_at is null
-          and (
-              (e.class_group_id is not null and enr.class_group_id = e.class_group_id)
-              or ${buildClassroomAssignmentExistsPredicate({
-                  examAlias: 'e',
-                  classroomId: 'student_cg',
-              })}
-              or (
-                  e.class_group_id is null
+    return sql<boolean>`(
+        exists (
+            select 1
+            from exam_remediation_schedules as ers
+            where ers.remediation_exam_id = e.exam_id
+              and ers.student_id = ${studentUserId}
+        )
+        or (
+            not exists (
+                select 1
+                from exam_remediation_schedules as ers
+                where ers.remediation_exam_id = e.exam_id
+            )
+            and exists (
+                select 1
+                from students as st
+                inner join enrollments as enr on enr.student_id = st.student_id
+                inner join class_groups as student_cg on student_cg.class_group_id = enr.class_group_id
+                left join subject_offerings as student_so
+                    on student_so.subject_offering_id = student_cg.subject_offering_id
+                where st.user_id = ${studentUserId}
+                  and student_cg.archived_at is null
                   and (
-                  ${buildSectionAssignmentExistsPredicate({
-                      examAlias: 'e',
-                      sectionAlias: 'student_cg',
-                  })}
-                  or (
-                      e.subject_id is null
-                      or coalesce(student_cg.subject_id, student_so.subject_id) = e.subject_id
+                      (e.class_group_id is not null and enr.class_group_id = e.class_group_id)
+                      or ${buildClassroomAssignmentExistsPredicate({
+                          examAlias: 'e',
+                          classroomId: 'student_cg',
+                      })}
+                      or (
+                          e.class_group_id is null
+                          and (
+                          ${buildSectionAssignmentExistsPredicate({
+                              examAlias: 'e',
+                              sectionAlias: 'student_cg',
+                          })}
+                          or (
+                              e.subject_id is null
+                              or coalesce(student_cg.subject_id, student_so.subject_id) = e.subject_id
+                          )
+                          and (
+                              ${
+                                  hasSectionId
+                                      ? sql`e.section_id is null or student_cg.section_id = e.section_id`
+                                      : sql`true`
+                              }
+                          )
+                          )
+                      )
                   )
-                  and (
-                      ${
-                          hasSectionId
-                              ? sql`e.section_id is null or student_cg.section_id = e.section_id`
-                              : sql`true`
-                      }
-                  )
-                  )
-              )
-          )
+            )
+        )
     )`;
 }

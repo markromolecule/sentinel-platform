@@ -36,8 +36,16 @@ export class SessionRepository {
           }
     > {
         const { studentId, examId, maxReconnectAttempts, accessOverride } = args;
+        const remediationSchedule = await db
+            .selectFrom('exam_remediation_schedules')
+            .select('remediation_id')
+            .where('remediation_exam_id', '=', examId)
+            .executeTakeFirst();
+        const isRemediationExam = Boolean(remediationSchedule);
         const isFreshAttemptOverride =
-            accessOverride?.overrideType === 'MAKEUP' || accessOverride?.overrideType === 'RETAKE';
+            !isRemediationExam &&
+            (accessOverride?.overrideType === 'MAKEUP' ||
+                accessOverride?.overrideType === 'RETAKE');
 
         const existingAttempt = await db
             .selectFrom('exam_attempts as ea')

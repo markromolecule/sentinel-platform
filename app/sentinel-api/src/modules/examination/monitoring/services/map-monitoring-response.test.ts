@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 import {
+    mapMonitoringExam,
     mapMonitoringIncident,
     mapMonitoringStudentDetail,
     mapMonitoringStudentSummary,
@@ -433,5 +434,31 @@ describe('map monitoring response', () => {
         );
 
         expect(student.progress).toBe(40);
+    });
+
+    it('maps remediation context onto the monitoring exam payload', () => {
+        const exam = mapMonitoringExam({
+            examId: '11111111-1111-4111-8111-111111111111',
+            title: 'Final Exam (Retake)',
+            subject: 'Algorithms',
+            scheduledDate: '2026-04-21T09:00:00.000Z',
+            endDateTime: '2026-04-21T10:00:00.000Z',
+            maxReconnectAttempts: 2,
+            remediationContext: {
+                remediationId: '22222222-2222-4222-8222-222222222222',
+                remediationType: 'RETAKE',
+                sourceExamId: '33333333-3333-4333-8333-333333333333',
+                sourceExamTitle: 'Final Exam',
+                sourceAttemptId: '44444444-4444-4444-8444-444444444444',
+            },
+        });
+
+        expect(exam.remediationContext).toEqual({
+            remediationId: '22222222-2222-4222-8222-222222222222',
+            remediationType: 'RETAKE',
+            sourceExamId: '33333333-3333-4333-8333-333333333333',
+            sourceExamTitle: 'Final Exam',
+            sourceAttemptId: '44444444-4444-4444-8444-444444444444',
+        });
     });
 });

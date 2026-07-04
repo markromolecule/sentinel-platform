@@ -12,7 +12,12 @@ import { AttemptSummaryTable } from './_components/attempt-summary-table';
 import { ExamWindowCard } from './_components/exam-window-card';
 import { IncidentBreakdown } from './_components/incident-breakdown';
 import { SummaryCard } from './_components/summary-card';
-import { formatDateTime, formatPercent, grantLifecycleOverride } from './_helpers/report-helpers';
+import {
+    buildGrantSuccessMessage,
+    formatDateTime,
+    formatPercent,
+    grantLifecycleOverride,
+} from './_helpers/report-helpers';
 
 export default function ExamReportPage({ params }: { params: Promise<{ id: string }> }) {
     const { id } = use(params);
@@ -48,7 +53,7 @@ export default function ExamReportPage({ params }: { params: Promise<{ id: strin
         setActiveActionId(item.studentId);
 
         try {
-            await grantLifecycleOverride({
+            const response = await grantLifecycleOverride({
                 apiClient,
                 examId: id,
                 item,
@@ -58,11 +63,7 @@ export default function ExamReportPage({ params }: { params: Promise<{ id: strin
                 notes: notes?.trim() ? notes.trim() : null,
             });
 
-            toast.success(
-                overrideType === 'MAKEUP'
-                    ? 'Makeup window granted successfully.'
-                    : 'Retake window granted successfully.',
-            );
+            toast.success(buildGrantSuccessMessage({ overrideType, response }));
             await refetch();
         } catch (error) {
             toast.error(error instanceof Error ? error.message : 'Failed to grant override.');

@@ -108,6 +108,13 @@ export interface ApiMonitoringExam {
     endDateTime: string | null;
     maxReconnectAttempts: number;
     runtimeAccess?: ExamRuntimeAccess;
+    remediationContext?: {
+        remediationId: string;
+        remediationType: 'RETAKE' | 'MAKEUP';
+        sourceExamId: string;
+        sourceExamTitle: string;
+        sourceAttemptId: string | null;
+    } | null;
 }
 
 export interface ApiMonitoringStats {
@@ -268,6 +275,15 @@ export interface ApiExamReportActionItem {
     firstName: string;
     lastName: string;
     reason: string;
+    remediations?: Array<{
+        remediationId: string;
+        remediationExamId: string;
+        remediationType: 'RETAKE' | 'MAKEUP';
+        scheduledDate: string | null;
+        endDateTime: string | null;
+        title: string;
+        status: string;
+    }>;
 }
 
 export interface ApiExamReportStudentSummary {
@@ -308,6 +324,15 @@ export interface ApiExamReportStudentSummary {
     supersededAt?: string | null;
     supersededBy?: string | null;
     finalizedBy?: string | null;
+    remediations?: Array<{
+        remediationId: string;
+        remediationExamId: string;
+        remediationType: 'RETAKE' | 'MAKEUP';
+        scheduledDate: string | null;
+        endDateTime: string | null;
+        title: string;
+        status: string;
+    }>;
 }
 
 export interface ApiExamReportSummary {

@@ -185,7 +185,7 @@ describe('AccessGatekeeperService', () => {
             now,
         );
 
-        expect(result).toEqual({
+        expect(result).toMatchObject({
             isEligible: true,
             context: {
                 examId,
@@ -201,6 +201,7 @@ describe('AccessGatekeeperService', () => {
                 status: 'PUBLISHED',
                 publishedAt: new Date('2026-04-12T06:00:00.000Z'),
                 institutionId: 'institution-1',
+                remediation: null,
             },
             accessOverride: null,
             runtimeAccess: {
@@ -222,6 +223,119 @@ describe('AccessGatekeeperService', () => {
             sectionId: 'section-1',
             sectionIds: null,
         });
+    });
+
+    it('allows a remediation exam only for the linked student', async () => {
+        vi.mocked(EntitlementsRepository.getStudentProfileByUserId).mockResolvedValue({
+            student_id: 'student-record-1',
+            user_id: userId,
+            institution_id: 'institution-1',
+        });
+        vi.mocked(EntitlementsRepository.getExamAccessPolicy).mockResolvedValue({
+            exam_id: examId,
+            class_group_id: null,
+            subject_id: 'subject-1',
+            section_id: null,
+            room_id: null,
+            duration_minutes: 60,
+            scheduled_date: new Date('2026-04-13T05:00:00.000Z'),
+            end_date_time: new Date('2026-04-13T07:00:00.000Z'),
+            status: 'PUBLISHED',
+            published_at: new Date('2026-04-12T06:00:00.000Z'),
+            institution_id: 'institution-1',
+            assigned_room_id: null,
+            room_institution_id: null,
+            assigned_section_ids: null,
+            lobby_admission_mode: 'AUTOMATIC',
+            remediation_id: 'remediation-1',
+            remediation_source_exam_id: 'source-exam-1',
+            remediation_student_id: userId,
+            remediation_source_attempt_id: 'source-attempt-1',
+            remediation_type: 'RETAKE',
+            remediation_scheduled_date: new Date('2026-04-13T05:00:00.000Z'),
+            remediation_end_date_time: new Date('2026-04-13T07:00:00.000Z'),
+        } as any);
+        vi.mocked(EntitlementsRepository.getStudentLatestExamAttempt).mockResolvedValue(undefined);
+
+        const result = await AccessGatekeeperService.verifyStudentExamEligibility(
+            mockDb,
+            userId,
+            examId,
+            now,
+        );
+
+        expect(result).toMatchObject({
+            isEligible: true,
+            context: {
+                examId,
+                studentId: 'student-record-1',
+                studentUserId: userId,
+                remediation: {
+                    remediationId: 'remediation-1',
+                    sourceExamId: 'source-exam-1',
+                    sourceAttemptId: 'source-attempt-1',
+                    remediationType: 'RETAKE',
+                },
+            },
+        });
+        expect(EntitlementsRepository.hasStudentExamEnrollment).not.toHaveBeenCalled();
+    });
+
+    it('blocks classmates from opening a remediation exam that is not linked to them', async () => {
+        vi.mocked(EntitlementsRepository.getStudentProfileByUserId).mockResolvedValue({
+            student_id: 'student-record-2',
+            user_id: 'classmate-user-2',
+            institution_id: 'institution-1',
+        });
+        vi.mocked(EntitlementsRepository.getExamAccessPolicy).mockResolvedValue({
+            exam_id: examId,
+            class_group_id: null,
+            subject_id: 'subject-1',
+            section_id: null,
+            room_id: null,
+            duration_minutes: 60,
+            scheduled_date: new Date('2026-04-13T05:00:00.000Z'),
+            end_date_time: new Date('2026-04-13T07:00:00.000Z'),
+            status: 'PUBLISHED',
+            published_at: new Date('2026-04-12T06:00:00.000Z'),
+            institution_id: 'institution-1',
+            assigned_room_id: null,
+            room_institution_id: null,
+            assigned_section_ids: null,
+            lobby_admission_mode: 'AUTOMATIC',
+            remediation_id: 'remediation-1',
+            remediation_source_exam_id: 'source-exam-1',
+            remediation_student_id: 'target-user-1',
+            remediation_source_attempt_id: 'source-attempt-1',
+            remediation_type: 'RETAKE',
+            remediation_scheduled_date: new Date('2026-04-13T05:00:00.000Z'),
+            remediation_end_date_time: new Date('2026-04-13T07:00:00.000Z'),
+        } as any);
+
+        const result = await AccessGatekeeperService.verifyStudentExamEligibility(
+            mockDb,
+            userId,
+            examId,
+            now,
+        );
+
+        expect(result).toEqual({
+            isEligible: false,
+            reason: 'This remediation exam is only available to the assigned student.',
+            reasonCode: 'CLOSED',
+            runtimeAccess: {
+                state: 'closed',
+                reasonCode: 'CLOSED',
+                message: 'This remediation exam is only available to the assigned student.',
+                canStart: false,
+                canResume: false,
+                hasActiveAttempt: false,
+                startsAt: new Date('2026-04-13T05:00:00.000Z'),
+                endsAt: new Date('2026-04-13T07:00:00.000Z'),
+                reopenedUntil: null,
+            },
+        });
+        expect(EntitlementsRepository.hasStudentExamEnrollment).not.toHaveBeenCalled();
     });
 
     it('passes merged assigned section ids through the eligibility path', async () => {

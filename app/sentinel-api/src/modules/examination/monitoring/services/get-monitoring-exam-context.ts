@@ -16,6 +16,13 @@ export type MonitoringExamContext = {
     questionCount: number;
     maxReconnectAttempts: number;
     runtimeAccess: ExamRuntimeAccess;
+    remediationContext?: {
+        remediationId: string;
+        remediationType: 'RETAKE' | 'MAKEUP';
+        sourceExamId: string;
+        sourceExamTitle: string;
+        sourceAttemptId: string | null;
+    } | null;
 };
 
 type GetMonitoringExamContextArgs = {
@@ -37,6 +44,12 @@ export async function getMonitoringExamContext({
         .selectFrom('exams as e')
         .leftJoin('subjects as s', 's.subject_id', 'e.subject_id')
         .leftJoin('exam_configurations as ec', 'ec.exam_id', 'e.exam_id')
+        .leftJoin(
+            'exam_remediation_schedules as ers',
+            'ers.remediation_exam_id',
+            'e.exam_id',
+        )
+        .leftJoin('exams as source_exam', 'source_exam.exam_id', 'ers.source_exam_id')
         .select([
             'e.exam_id',
             'e.title',
@@ -45,6 +58,11 @@ export async function getMonitoringExamContext({
             'e.end_date_time',
             'ec.max_reconnect_attempts',
             's.subject_title',
+            'ers.remediation_id',
+            'ers.remediation_type',
+            'ers.source_exam_id',
+            'ers.source_attempt_id',
+            'source_exam.title as source_exam_title',
             sql<number>`coalesce((
                 select count(*)::int
                 from exam_questions as eq
@@ -91,5 +109,14 @@ export async function getMonitoringExamContext({
         questionCount: Number(exam.question_count ?? 0),
         maxReconnectAttempts: Number(exam.max_reconnect_attempts ?? 0),
         runtimeAccess,
+        remediationContext: exam.remediation_id
+            ? {
+                  remediationId: exam.remediation_id,
+                  remediationType: exam.remediation_type!,
+                  sourceExamId: exam.source_exam_id!,
+                  sourceExamTitle: exam.source_exam_title ?? 'Source Exam',
+                  sourceAttemptId: exam.source_attempt_id ?? null,
+              }
+            : null,
     };
 }

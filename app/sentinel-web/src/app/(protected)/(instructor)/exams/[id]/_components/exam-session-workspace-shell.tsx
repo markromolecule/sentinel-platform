@@ -16,7 +16,7 @@ function isRuntimeRoute(pathname: string) {
         return false;
     }
 
-    return parts[2] === 'lobby' || parts[2] === 'monitoring';
+    return parts[2] === 'lobby' || parts[2] === 'monitoring' || parts[2] === 'logs';
 }
 
 /**

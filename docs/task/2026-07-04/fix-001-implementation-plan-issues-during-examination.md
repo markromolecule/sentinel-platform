@@ -176,20 +176,20 @@ Concrete next steps:
 
 **Goal:** Make remediation exams visible and startable only for the target student while preserving instructor traceability from source exam monitoring/reporting.
 
-- [ ] Update `EntitlementsRepository.getExamAccessPolicy()` or the nearest access repository in `app/sentinel-api/src/modules/examination/access/data/entitlements.repository.ts` to load remediation schedule metadata for the requested exam.
-- [ ] Update `evaluateStudentExamEligibilityService()` in `app/sentinel-api/src/modules/examination/access/services/evaluate-student-exam-eligibility.service.ts` so remediation exams are eligible only for the linked `student_id` and only during the remediation exam's scheduled window.
-- [ ] Update `SessionRepository.createSession()` in `app/sentinel-api/src/modules/examination/flow/data/session.repository.ts` so remediation exams create a normal fresh attempt against the remediation `exam_id` and never resume or mutate the source attempt.
-- [ ] Update `get-exams` student-facing data mapping in `app/sentinel-api/src/modules/examination/exams/data/get-exams.ts` or the nearest service so the target student sees the remediation exam in the appropriate upcoming/available state.
-- [ ] Update `app/sentinel-api/src/modules/examination/reporting/services/get-exam-report.ts` and related query helpers so source exam reports can surface linked remediation exams for each action item/student row.
-- [ ] Update `app/sentinel-api/src/modules/examination/monitoring/services/map-monitoring-response.ts` so monitoring detail can show source/remediation context when viewing a remediation attempt.
-- [ ] Update `app/sentinel-web/src/app/(protected)/(instructor)/exams/reports/[examId]/_hooks/use-exam-report/index.ts` so successful grant toasts include the remediation exam schedule and invalidate the action queue.
-- [ ] Mirror the report grant response handling in `app/sentinel-core/src/app/(protected)/exams/[id]/report/page.tsx`.
-- [ ] Update `app/sentinel-web/src/app/(protected)/student/history/_hooks/use-student-history/index.ts` only if remediation exams need a distinct label or badge in student listings.
-- [ ] Write `app/sentinel-api/src/modules/examination/access/access.test.ts` proving only the linked student can access a remediation exam and unrelated enrolled classmates are blocked.
-- [ ] Write `app/sentinel-api/src/modules/examination/flow/data/session.repository.test.ts` proving a remediation exam starts a new attempt against the remediation exam, not the source exam.
-- [ ] Write `app/sentinel-api/src/modules/examination/reporting/services/map-reporting-response.test.ts` proving source reports show linked remediation exam IDs/statuses without counting them as duplicate source attempts.
-- [ ] Write `app/sentinel-api/src/modules/examination/monitoring/services/map-monitoring-response.test.ts` for remediation context mapping.
-- [ ] Write `app/sentinel-web/src/app/(protected)/(instructor)/exams/reports/[examId]/_hooks/use-exam-report/index.test.tsx` and `app/sentinel-core/src/app/(protected)/exams/[id]/report/page.test.tsx` for remediation grant success and queue refresh.
+- [x] Update `EntitlementsRepository.getExamAccessPolicy()` or the nearest access repository in `app/sentinel-api/src/modules/examination/access/data/entitlements.repository.ts` to load remediation schedule metadata for the requested exam.
+- [x] Update `evaluateStudentExamEligibilityService()` in `app/sentinel-api/src/modules/examination/access/services/evaluate-student-exam-eligibility.service.ts` so remediation exams are eligible only for the linked `student_id` and only during the remediation exam's scheduled window.
+- [x] Update `SessionRepository.createSession()` in `app/sentinel-api/src/modules/examination/flow/data/session.repository.ts` so remediation exams create a normal fresh attempt against the remediation `exam_id` and never resume or mutate the source attempt.
+- [x] Update `get-exams` student-facing data mapping in `app/sentinel-api/src/modules/examination/exams/data/get-exams.ts` or the nearest service so the target student sees the remediation exam in the appropriate upcoming/available state.
+- [x] Update `app/sentinel-api/src/modules/examination/reporting/services/get-exam-report.ts` and related query helpers so source exam reports can surface linked remediation exams for each action item/student row.
+- [x] Update `app/sentinel-api/src/modules/examination/monitoring/services/map-monitoring-response.ts` so monitoring detail can show source/remediation context when viewing a remediation attempt.
+- [x] Update `app/sentinel-web/src/app/(protected)/(instructor)/exams/reports/[examId]/_hooks/use-exam-report/index.ts` so successful grant toasts include the remediation exam schedule and invalidate the action queue.
+- [x] Mirror the report grant response handling in `app/sentinel-core/src/app/(protected)/exams/[id]/report/page.tsx`.
+- [x] Update `app/sentinel-web/src/app/(protected)/student/history/_hooks/use-student-history/index.ts` only if remediation exams need a distinct label or badge in student listings.
+- [x] Write `app/sentinel-api/src/modules/examination/access/access.test.ts` proving only the linked student can access a remediation exam and unrelated enrolled classmates are blocked.
+- [x] Write `app/sentinel-api/src/modules/examination/flow/data/session.repository.test.ts` proving a remediation exam starts a new attempt against the remediation exam, not the source exam.
+- [x] Write `app/sentinel-api/src/modules/examination/reporting/services/map-reporting-response.test.ts` proving source reports show linked remediation exam IDs/statuses without counting them as duplicate source attempts.
+- [x] Write `app/sentinel-api/src/modules/examination/monitoring/services/map-monitoring-response.test.ts` for remediation context mapping.
+- [x] Write `app/sentinel-web/src/app/(protected)/(instructor)/exams/reports/[examId]/_hooks/use-exam-report/index.test.tsx` and `app/sentinel-core/src/app/(protected)/exams/[id]/report/page.test.tsx` for remediation grant success and queue refresh.
 
 **Migration required:** No - this phase consumes the Phase 4 remediation schema.
 **Breaking changes:** No - remediation exams are additional exam records with restricted access.
@@ -199,21 +199,21 @@ Concrete next steps:
 
 **Goal:** Add navigation from the monitoring sidebar to existing attempt summary, action queue, and incident log surfaces without creating new pages.
 
-- [ ] Update `ExamSessionSection` and `ExamSessionNavItem` in `app/sentinel-web/src/app/(protected)/(instructor)/exams/[id]/_components/exam-session-nav.tsx` to include `report`, `queue`, and `logs` sections.
-- [ ] Add web nav links in `app/sentinel-web/src/app/(protected)/(instructor)/exams/[id]/_components/exam-session-nav.tsx`:
+- [x] Update `ExamSessionSection` and `ExamSessionNavItem` in `app/sentinel-web/src/app/(protected)/(instructor)/exams/[id]/_components/exam-session-nav.tsx` to include `report`, `queue`, and `logs` sections.
+- [x] Add web nav links in `app/sentinel-web/src/app/(protected)/(instructor)/exams/[id]/_components/exam-session-nav.tsx`:
     - `Attempt Summary` -> `/exams/reports/${examId}?section=attempts`
     - `Action Queue` -> `/exams/reports/${examId}?section=queue`
     - `Incident Logs` -> `/exams/${examId}/logs`
-- [ ] Update `resolveActiveSection()` in the same web nav file to mark `report` active for `/exams/reports/[examId]?section=attempts`, `queue` active for `/exams/reports/[examId]?section=queue`, and `logs` active for `/exams/[id]/logs`.
-- [ ] Update `isRuntimeRoute()` in `app/sentinel-web/src/app/(protected)/(instructor)/exams/[id]/_components/exam-session-workspace-shell.tsx` only if `/exams/[id]/logs` is not already wrapped by the runtime sidebar.
-- [ ] Mirror the nav item additions in `app/sentinel-core/src/app/(protected)/exams/[id]/_components/exam-session-nav.tsx`, using core routes:
+- [x] Update `resolveActiveSection()` in the same web nav file to mark `report` active for `/exams/reports/[examId]?section=attempts`, `queue` active for `/exams/reports/[examId]?section=queue`, and `logs` active for `/exams/[id]/logs`.
+- [x] Update `isRuntimeRoute()` in `app/sentinel-web/src/app/(protected)/(instructor)/exams/[id]/_components/exam-session-workspace-shell.tsx` only if `/exams/[id]/logs` is not already wrapped by the runtime sidebar.
+- [x] Mirror the nav item additions in `app/sentinel-core/src/app/(protected)/exams/[id]/_components/exam-session-nav.tsx`, using core routes:
     - `Attempt Summary` -> `/exams/${examId}/report`
     - `Action Queue` -> `/exams/${examId}/report?section=queue`
     - `Incident Logs` -> `/exams/${examId}/logs`
-- [ ] Update `isRuntimeRoute()` in `app/sentinel-core/src/app/(protected)/exams/[id]/_components/exam-session-workspace-shell.tsx` only if report/log routes should also display the local exam session sidebar.
-- [ ] Write `app/sentinel-web/src/app/(protected)/(instructor)/exams/[id]/_components/exam-session-nav.test.tsx` proving all five links render and active states resolve for monitoring, report attempts, queue, and logs.
-- [ ] Write `app/sentinel-web/src/app/(protected)/(instructor)/exams/[id]/_components/exam-session-workspace-shell.test.tsx` proving logs/report routes receive the sidebar if the shell is expanded.
-- [ ] Write `app/sentinel-core/src/app/(protected)/exams/[id]/_components/exam-session-nav.test.tsx` and `exam-session-workspace-shell.test.tsx` for the mirrored core behavior.
+- [x] Update `isRuntimeRoute()` in `app/sentinel-core/src/app/(protected)/exams/[id]/_components/exam-session-workspace-shell.tsx` only if report/log routes should also display the local exam session sidebar.
+- [x] Write `app/sentinel-web/src/app/(protected)/(instructor)/exams/[id]/_components/exam-session-nav.test.tsx` proving all five links render and active states resolve for monitoring, report attempts, queue, and logs.
+- [x] Write `app/sentinel-web/src/app/(protected)/(instructor)/exams/[id]/_components/exam-session-workspace-shell.test.tsx` proving logs/report routes receive the sidebar if the shell is expanded.
+- [x] Write `app/sentinel-core/src/app/(protected)/exams/[id]/_components/exam-session-nav.test.tsx` and `exam-session-workspace-shell.test.tsx` for the mirrored core behavior.
 
 **Migration required:** No - navigation only links to existing pages.
 **Breaking changes:** No - routes remain unchanged and the sidebar only adds access points.
@@ -223,18 +223,21 @@ Concrete next steps:
 
 **Goal:** Verify the reported examination issues end-to-end before release.
 
-- [ ] Run `pnpm --dir app/sentinel-web exec vitest run --passWithNoTests 'src/app/(protected)/student/exam/[id]/_hooks/use-exam-monitoring.test.ts' 'src/app/(protected)/student/exam/[id]/attempt/_hooks/use-student-exam-attempt/index.test.tsx'`.
-- [ ] Run `pnpm --dir app/sentinel-web exec vitest run --passWithNoTests src/hooks/use-audio-anomaly-worker.test.tsx src/workers/tests/audio-anomaly-engine.test.ts`.
-- [ ] Run `pnpm --dir app/sentinel-web exec vitest run --passWithNoTests 'src/app/(protected)/student/history/_components/history-card.test.tsx' 'src/app/(protected)/student/history/_hooks/use-student-history/index.test.ts'`.
-- [ ] Run `pnpm --dir app/sentinel-web exec vitest run --passWithNoTests 'src/app/(protected)/(instructor)/exams/[id]/_components/exam-session-nav.test.tsx' 'src/app/(protected)/(instructor)/exams/[id]/_components/exam-session-workspace-shell.test.tsx'`.
-- [ ] Run `pnpm --dir app/sentinel-core exec vitest run --passWithNoTests 'src/app/(protected)/exams/[id]/_components/exam-session-nav.test.tsx' 'src/app/(protected)/exams/[id]/_components/exam-session-workspace-shell.test.tsx'`.
+- [x] Run `pnpm --dir app/sentinel-web exec vitest run --passWithNoTests 'src/app/(protected)/student/exam/[id]/_hooks/use-exam-monitoring.test.ts' 'src/app/(protected)/student/exam/[id]/attempt/_hooks/use-student-exam-attempt/index.test.tsx'`.
+- [x] Run `pnpm --dir app/sentinel-web exec vitest run --passWithNoTests src/hooks/use-audio-anomaly-worker.test.tsx src/workers/tests/audio-anomaly-engine.test.ts`.
+- [x] Run `pnpm --dir app/sentinel-web exec vitest run --passWithNoTests 'src/app/(protected)/student/history/_components/history-card.test.tsx' 'src/app/(protected)/student/history/_hooks/use-student-history/index.test.ts'`.
+- [x] Run `pnpm --dir app/sentinel-web exec vitest run --passWithNoTests 'src/app/(protected)/(instructor)/exams/[id]/_components/exam-session-nav.test.tsx' 'src/app/(protected)/(instructor)/exams/[id]/_components/exam-session-workspace-shell.test.tsx'`.
+- [x] Run `pnpm --dir app/sentinel-core exec vitest run --passWithNoTests 'src/app/(protected)/exams/[id]/_components/exam-session-nav.test.tsx' 'src/app/(protected)/exams/[id]/_components/exam-session-workspace-shell.test.tsx'`.
 - [ ] Run `pnpm --dir app/sentinel-api exec vitest run --passWithNoTests src/modules/telemetry/storage/services/incident-persistence.service.test.ts src/modules/telemetry/ingestion/rules/ai-rules.test.ts`.
-- [ ] Run `pnpm --dir app/sentinel-api exec vitest run --passWithNoTests src/modules/examination/lifecycle/services/create-remediation-exam.test.ts src/modules/examination/lifecycle/services/grant-retake-exam-window.test.ts src/modules/examination/lifecycle/services/grant-makeup-exam-window.test.ts src/modules/examination/lifecycle/lifecycle.routes.test.ts`.
-- [ ] Run `pnpm --dir app/sentinel-api exec vitest run --passWithNoTests src/modules/examination/access/access.test.ts src/modules/examination/flow/data/session.repository.test.ts src/modules/examination/reporting/services/map-reporting-response.test.ts src/modules/examination/monitoring/services/map-monitoring-response.test.ts`.
-- [ ] Run `pnpm --dir packages/shared exec vitest run --passWithNoTests src/exams/resolve-exam-status.test.ts src/schema/exams/lifecycle-schema.test.ts`.
-- [ ] Run Prisma validation/generation for `packages/db` after the remediation migration is added.
+<!-- NOTE: This command failed in the current environment because `incident-persistence.service.test.ts` requires a reachable database (`aws-1-ap-northeast-1.pooler.supabase.com`) and `ai-rules.test.ts` attempted a Redis connection to `127.0.0.1:6379`, both unavailable from this sandboxed session. -->
+- [x] Run `pnpm --dir app/sentinel-api exec vitest run --passWithNoTests src/modules/examination/lifecycle/services/create-remediation-exam.test.ts src/modules/examination/lifecycle/services/grant-retake-exam-window.test.ts src/modules/examination/lifecycle/services/grant-makeup-exam-window.test.ts src/modules/examination/lifecycle/lifecycle.routes.test.ts`.
+- [x] Run `pnpm --dir app/sentinel-api exec vitest run --passWithNoTests src/modules/examination/access/access.test.ts src/modules/examination/flow/data/session.repository.test.ts src/modules/examination/reporting/services/map-reporting-response.test.ts src/modules/examination/monitoring/services/map-monitoring-response.test.ts`.
+- [x] Run `pnpm --dir packages/shared exec vitest run --passWithNoTests src/exams/resolve-exam-status.test.ts src/schema/exams/lifecycle-schema.test.ts`.
+- [x] Run Prisma validation/generation for `packages/db` after the remediation migration is added.
 - [ ] Run `pnpm format:check`.
+<!-- NOTE: `pnpm format:check` failed because Prettier reported existing style issues in 31 files across the repository, including files outside the Phase 6/7 scope. -->
 - [ ] Run `pnpm lint`.
+<!-- NOTE: `pnpm lint` failed immediately at `@sentinel/db#lint` because `eslint` was not found in the current environment (`sh: eslint: command not found`). -->
 - [ ] Manually verify submitting a fullscreen exam does not create a `FULL_SCREEN_EXIT` incident after turn-in.
 - [ ] Manually verify one copy/cut/paste action produces one clipboard occurrence count, and the second accepted action increments it to two.
 - [ ] Manually verify shouting/talking during a mic-required, audio-enabled active attempt creates an instructor-visible audio incident.

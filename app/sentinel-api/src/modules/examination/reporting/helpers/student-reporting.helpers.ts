@@ -54,6 +54,7 @@ export function buildActionItemSource(student: ExamReportStudentSummary): Report
 export function buildActionItem(
     row: ReportStudentRow,
     reason: string,
+    remediations?: import('../reporting.dto').ExamReportStudentSummary['remediations'],
 ): import('../reporting.dto').ExamReportActionItem {
     const { firstName, lastName } = resolveStudentNames(row);
 
@@ -67,6 +68,7 @@ export function buildActionItem(
         reason,
         sectionId: row.section_id ?? null,
         sectionName: row.section_name ?? null,
+        remediations: remediations ?? [],
     };
 }
 
@@ -118,6 +120,9 @@ export function resolveSubmissionType(
 export function mapStudentSummary(
     row: ReportStudentRow,
     passingScore: number,
+    options?: {
+        remediations?: ExamReportStudentSummary['remediations'];
+    },
 ): ExamReportStudentSummary {
     const percentage = getPercentage(row);
     const openIncidentCount = toNumber(row.open_incident_count);
@@ -171,5 +176,6 @@ export function mapStudentSummary(
         supersededAt: toIsoDate(row.superseded_at),
         supersededBy: row.superseded_by ?? null,
         finalizedBy: row.finalized_by ?? null,
+        remediations: options?.remediations ?? [],
     };
 }

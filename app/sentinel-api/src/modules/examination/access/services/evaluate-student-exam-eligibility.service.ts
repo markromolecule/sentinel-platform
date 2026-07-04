@@ -107,6 +107,7 @@ function buildEligibilityContext(args: {
     return {
         examId: resolvedExam.exam_id,
         studentId: resolvedStudent.student_id,
+        studentUserId: resolvedStudent.user_id,
         classroomId: resolvedExam.class_group_id,
         subjectId: resolvedExam.subject_id!,
         sectionId: resolvedExam.section_id,
@@ -118,6 +119,16 @@ function buildEligibilityContext(args: {
         status: resolvedExam.status,
         publishedAt: resolvedExam.published_at,
         institutionId: resolvedExam.institution_id,
+        remediation: resolvedExam.remediation_id
+            ? {
+                  remediationId: resolvedExam.remediation_id,
+                  sourceExamId: resolvedExam.remediation_source_exam_id!,
+                  sourceAttemptId: resolvedExam.remediation_source_attempt_id ?? null,
+                  remediationType: resolvedExam.remediation_type!,
+                  scheduledDate: resolvedExam.remediation_scheduled_date ?? null,
+                  endDateTime: resolvedExam.remediation_end_date_time ?? null,
+              }
+            : null,
     };
 }
 
@@ -146,14 +157,39 @@ export async function evaluateStudentExamEligibilityService({
     // Student and Exam are verified non-nullable here by validateBasicEligibility
     const resolvedStudent = student!;
     const resolvedExam = exam!;
+    const isRemediationExam = Boolean(resolvedExam.remediation_id);
+    const isLinkedRemediationStudent =
+        resolvedExam.remediation_student_id === resolvedStudent.user_id ||
+        resolvedExam.remediation_student_id === resolvedStudent.student_id;
 
-    const isEnrolled = await EntitlementsRepository.hasStudentExamEnrollment(dbClient, {
-        studentId: resolvedStudent.student_id,
-        classGroupId: resolvedExam.class_group_id,
-        subjectId: resolvedExam.subject_id!,
-        sectionId: resolvedExam.section_id,
-        sectionIds: resolvedExam.assigned_section_ids,
-    });
+    if (isRemediationExam && !isLinkedRemediationStudent) {
+        return {
+            isEligible: false,
+            reason: 'This remediation exam is only available to the assigned student.',
+            reasonCode: 'CLOSED',
+            runtimeAccess: {
+                state: 'closed',
+                reasonCode: 'CLOSED',
+                message: 'This remediation exam is only available to the assigned student.',
+                canStart: false,
+                canResume: false,
+                hasActiveAttempt: false,
+                startsAt,
+                endsAt,
+                reopenedUntil: null,
+            },
+        };
+    }
+
+    const isEnrolled = isRemediationExam
+        ? true
+        : await EntitlementsRepository.hasStudentExamEnrollment(dbClient, {
+              studentId: resolvedStudent.student_id,
+              classGroupId: resolvedExam.class_group_id,
+              subjectId: resolvedExam.subject_id!,
+              sectionId: resolvedExam.section_id,
+              sectionIds: resolvedExam.assigned_section_ids,
+          });
 
     if (!isEnrolled) {
         return {

@@ -3,6 +3,7 @@
 import { Suspense } from 'react';
 import { act, cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { toast } from 'sonner';
 import ExamReportPage from './page';
 
 const { mockApiClient, mockRefetch } = vi.hoisted(() => ({
@@ -238,6 +239,15 @@ describe('ExamReportPage', () => {
     beforeEach(() => {
         cleanup();
         vi.clearAllMocks();
+        mockApiClient.mockResolvedValue({
+            remediationExam: {
+                examId: 'remediation-exam-1',
+                title: 'Final Exam (Makeup)',
+            },
+            remediationSchedule: {
+                scheduledDate: '2026-04-21T09:00:00.000Z',
+            },
+        });
     });
 
     it('filters the report table by section', async () => {
@@ -292,6 +302,9 @@ describe('ExamReportPage', () => {
                 method: 'POST',
             }),
         );
+        expect(toast.success).toHaveBeenCalledWith(
+            expect.stringContaining('Final Exam (Makeup)'),
+        );
         expect(mockRefetch).toHaveBeenCalled();
     });
 
@@ -323,6 +336,7 @@ describe('ExamReportPage', () => {
                 body: expect.stringContaining('"sourceAttemptId":"attempt-2"'),
             }),
         );
+        expect(toast.success).toHaveBeenCalled();
         expect(mockRefetch).toHaveBeenCalled();
     });
 });

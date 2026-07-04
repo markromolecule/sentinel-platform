@@ -117,9 +117,9 @@ export async function grantMakeupExamWindow(args: {
         remediationExam: {
             examId: remediation.remediationExam.exam_id,
             title: remediation.remediationExam.title,
-            scheduledDate: remediation.remediationExam.scheduled_date,
-            endDateTime: remediation.remediationExam.end_date_time,
-            status: remediation.remediationExam.status,
+            scheduledDate: remediation.remediationExam.scheduled_date!,
+            endDateTime: remediation.remediationExam.end_date_time!,
+            status: remediation.remediationExam.status!,
         },
         remediationSchedule: {
             remediationId: remediation.remediationSchedule.remediation_id,

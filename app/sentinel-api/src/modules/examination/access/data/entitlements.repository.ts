@@ -8,7 +8,7 @@ export class EntitlementsRepository {
     static async getStudentProfileByUserId(db: DbClient, userId: string) {
         return await db
             .selectFrom('students')
-            .select(['student_id', 'institution_id'])
+            .select(['student_id', 'user_id', 'institution_id'])
             .where('user_id', '=', userId)
             .executeTakeFirst();
     }
@@ -32,6 +32,11 @@ export class EntitlementsRepository {
             .selectFrom('exams as e')
             .leftJoin('rooms as r', 'r.room_id', 'e.room_id')
             .leftJoin('exam_configurations as ec', 'ec.exam_id', 'e.exam_id')
+            .leftJoin(
+                'exam_remediation_schedules as ers',
+                'ers.remediation_exam_id',
+                'e.exam_id',
+            )
             .select([
                 'e.exam_id',
                 'e.title',
@@ -49,6 +54,13 @@ export class EntitlementsRepository {
                 'ec.max_reconnect_attempts as max_reconnect_attempts',
                 'r.room_id as assigned_room_id',
                 'r.institution_id as room_institution_id',
+                'ers.remediation_id',
+                'ers.source_exam_id as remediation_source_exam_id',
+                'ers.student_id as remediation_student_id',
+                'ers.source_attempt_id as remediation_source_attempt_id',
+                'ers.remediation_type',
+                'ers.scheduled_date as remediation_scheduled_date',
+                'ers.end_date_time as remediation_end_date_time',
                 buildAssignedSectionIdsSelect({
                     examAlias: 'e',
                 }).as('assigned_section_ids'),

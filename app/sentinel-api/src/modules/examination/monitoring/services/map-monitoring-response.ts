@@ -363,6 +363,7 @@ export function mapMonitoringExam(args: {
     endDateTime: string | null;
     maxReconnectAttempts: number;
     runtimeAccess?: MonitoringExam['runtimeAccess'];
+    remediationContext?: MonitoringExam['remediationContext'];
 }): MonitoringExam {
     return {
         id: args.examId,
@@ -372,6 +373,7 @@ export function mapMonitoringExam(args: {
         endDateTime: args.endDateTime,
         maxReconnectAttempts: args.maxReconnectAttempts,
         runtimeAccess: args.runtimeAccess,
+        remediationContext: args.remediationContext ?? null,
     };
 }
 

@@ -29,7 +29,7 @@ async function grantLifecycleOverride(args: {
             ? `/exams/${args.examId}/students/${args.item.studentId}/lifecycle/grant-makeup`
             : `/exams/${args.examId}/students/${args.item.studentId}/lifecycle/grant-retake`;
 
-    await args.apiClient(endpoint, {
+    return await args.apiClient(endpoint, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -42,6 +42,26 @@ async function grantLifecycleOverride(args: {
             notes: args.notes,
         }),
     });
+}
+
+function buildGrantSuccessMessage(args: {
+    overrideType: 'MAKEUP' | 'RETAKE';
+    response: any;
+}) {
+    const remediationExam = args.response?.remediationExam;
+    const remediationSchedule = args.response?.remediationSchedule;
+    const label = args.overrideType === 'MAKEUP' ? 'Makeup' : 'Retake';
+
+    if (!remediationExam || !remediationSchedule?.scheduledDate) {
+        return `${label} window granted successfully.`;
+    }
+
+    const scheduledDate = new Date(remediationSchedule.scheduledDate);
+    const formattedSchedule = Number.isNaN(scheduledDate.getTime())
+        ? remediationSchedule.scheduledDate
+        : scheduledDate.toLocaleString();
+
+    return `${label} scheduled for ${formattedSchedule} as "${remediationExam.title}".`;
 }
 
 /**
@@ -159,7 +179,7 @@ export function useExamReport({ examId }: UseExamReportOptions): UseExamReportRe
         setActiveActionId(item.studentId);
 
         try {
-            await grantLifecycleOverride({
+            const response = await grantLifecycleOverride({
                 apiClient,
                 examId,
                 item,
@@ -169,11 +189,7 @@ export function useExamReport({ examId }: UseExamReportOptions): UseExamReportRe
                 notes: notes?.trim() ? notes.trim() : null,
             });
 
-            toast.success(
-                overrideType === 'MAKEUP'
-                    ? 'Makeup window granted successfully.'
-                    : 'Retake window granted successfully.',
-            );
+            toast.success(buildGrantSuccessMessage({ overrideType, response }));
             await refetch();
         } catch (error) {
             toast.error(error instanceof Error ? error.message : 'Failed to grant override.');
