@@ -15,7 +15,7 @@ import { ReportError } from './report-error';
  * Resolves dynamic params inside the Suspense boundary owned by the page wrapper.
  */
 export function ExamReportPageContent({ params }: { params: Promise<{ examId: string }> }) {
-    const { examId } = use(params);
+    const examId = use(params).examId;
     const {
         report,
         isLoading,

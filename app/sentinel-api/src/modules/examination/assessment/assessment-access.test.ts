@@ -20,7 +20,9 @@ import {
     normalizeAssessmentRole,
     resolveAssessmentActorRole,
     resolveAssessmentInstitutionId,
+    resolveAssessmentReadScope,
 } from './assessment-access';
+
 
 describe('assessment access', () => {
     const mockDb = {} as DbClient;
@@ -36,6 +38,8 @@ describe('assessment access', () => {
 
     beforeEach(() => {
         vi.clearAllMocks();
+        vi.mocked(EntitlementsRepository.getStudentProfileByUserId).mockResolvedValue(null);
+        vi.mocked(EntitlementsRepository.getInstructorProfileByUserId).mockResolvedValue(null);
     });
 
     it('allows students to use read-only assessment routes', () => {
@@ -150,4 +154,88 @@ describe('assessment access', () => {
             expect(res).toBe('context-1');
         });
     });
+
+    describe('resolveAssessmentReadScope', () => {
+        it('resolves student scope correctly', async () => {
+            vi.mocked(resolveTargetUserRole).mockResolvedValue('student');
+            vi.mocked(EntitlementsRepository.getStudentProfileByUserId).mockResolvedValue({
+                student_id: 'student-1',
+                institution_id: 'institution-1',
+            });
+
+            const res = await resolveAssessmentReadScope({
+                dbClient: mockDb,
+                user: { id: 'user-1' },
+                claimedRole: null,
+                contextInstitutionId: 'institution-1',
+            });
+
+            expect(res).toEqual({
+                role: 'student',
+                institutionId: 'institution-1',
+                studentUserId: 'user-1',
+                departmentId: undefined,
+                instructorUserId: undefined,
+            });
+        });
+
+        it('resolves instructor scope correctly', async () => {
+            vi.mocked(resolveTargetUserRole).mockResolvedValue('instructor');
+
+            const res = await resolveAssessmentReadScope({
+                dbClient: mockDb,
+                user: { id: 'user-2' },
+                claimedRole: 'instructor',
+                contextInstitutionId: 'institution-1',
+            });
+
+            expect(res).toEqual({
+                role: 'instructor',
+                institutionId: 'institution-1',
+                studentUserId: undefined,
+                departmentId: undefined,
+                instructorUserId: 'user-2',
+            });
+        });
+
+        it('resolves admin scope with departmentId correctly', async () => {
+            vi.mocked(resolveTargetUserRole).mockResolvedValue('admin');
+
+            const res = await resolveAssessmentReadScope({
+                dbClient: mockDb,
+                user: { id: 'user-3', user_profiles: { department_id: 'dept-1' } },
+                claimedRole: 'admin',
+                contextInstitutionId: 'institution-1',
+            });
+
+            expect(res).toEqual({
+                role: 'admin',
+                institutionId: 'institution-1',
+                studentUserId: undefined,
+                departmentId: 'dept-1',
+                instructorUserId: 'user-3',
+            });
+        });
+
+        it('resolves cross-tenant support scope correctly', async () => {
+            vi.mocked(resolveTargetUserRole).mockResolvedValue('support');
+
+            const res = await resolveAssessmentReadScope({
+                dbClient: mockDb,
+                user: { id: 'user-4' },
+                claimedRole: 'support',
+                contextInstitutionId: 'institution-1',
+                requestedInstitutionId: 'requested-2',
+            });
+
+            expect(res).toEqual({
+                role: 'support',
+                institutionId: 'requested-2',
+                studentUserId: undefined,
+                departmentId: undefined,
+                instructorUserId: undefined,
+            });
+        });
+    });
 });
+

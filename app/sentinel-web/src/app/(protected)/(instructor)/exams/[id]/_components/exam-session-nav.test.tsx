@@ -30,6 +30,9 @@ describe('ExamSessionNav', () => {
         expect(screen.getByRole('link', { name: 'Monitoring' }).getAttribute('href')).toBe(
             '/exams/exam-1/monitoring',
         );
+        expect(screen.getByRole('link', { name: 'Overview' }).getAttribute('href')).toBe(
+            '/exams/reports/exam-1?section=overview',
+        );
         expect(screen.getByRole('link', { name: 'Attempt Summary' }).getAttribute('href')).toBe(
             '/exams/reports/exam-1?section=attempts',
         );
@@ -59,6 +62,19 @@ describe('ExamSessionNav', () => {
         render(<ExamSessionNav examId="exam-1" />);
 
         const activeLink = screen.getByRole('link', { name: 'Monitoring' });
+        expect(activeLink.className).toContain('bg-accent/50');
+        expect(activeLink.className).toContain('border-r-2');
+    });
+
+    it('marks Overview active for report overview routes', () => {
+        mockPathname.mockReturnValue('/exams/reports/exam-1');
+        mockSearchParams.get.mockImplementation((key: string) =>
+            key === 'section' ? 'overview' : null,
+        );
+
+        render(<ExamSessionNav examId="exam-1" />);
+
+        const activeLink = screen.getByRole('link', { name: 'Overview' });
         expect(activeLink.className).toContain('bg-accent/50');
         expect(activeLink.className).toContain('border-r-2');
     });

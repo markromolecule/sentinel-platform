@@ -1,7 +1,8 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { OpenAPIHono } from '@hono/zod-openapi';
-import { getExamsRoute, getExamsRouteHandler } from './get-exams.controller';
+import { getExamRoute, getExamRouteHandler } from './get-exam.controller';
 import { ExamService } from '../exam.service';
+import { getExamByIdData } from '../data/get-exam-by-id';
 
 vi.mock('../../assessment/assessment-access', async () => {
     const actual = await vi.importActual('../../assessment/assessment-access');
@@ -10,18 +11,25 @@ vi.mock('../../assessment/assessment-access', async () => {
         ...(actual as object),
         assertAssessmentReadAccess: vi.fn(),
         resolveAssessmentReadScope: vi.fn(),
+        assertExamReadScope: vi.fn(),
+        logAssessmentQuery: vi.fn(),
     };
 });
 
+vi.mock('../data/get-exam-by-id', () => ({
+    getExamByIdData: vi.fn(),
+}));
+
 vi.mock('../exam.service', () => ({
     ExamService: {
-        getExams: vi.fn(),
+        getExamById: vi.fn(),
     },
 }));
 
 import {
     assertAssessmentReadAccess,
     resolveAssessmentReadScope,
+    assertExamReadScope,
 } from '../../assessment/assessment-access';
 
 function createApp(
@@ -30,7 +38,17 @@ function createApp(
     const app = new OpenAPIHono();
 
     app.use('*', async (c, next) => {
-        c.set('dbClient', {} as any);
+        c.set('dbClient', {
+            selectFrom: () => ({
+                select: () => ({
+                    where: () => ({
+                        where: () => ({
+                            executeTakeFirst: () => Promise.resolve(null),
+                        }),
+                    }),
+                }),
+            }),
+        } as any);
         c.set('user', user ?? null);
         c.set('institutionId', 'institution-1');
         c.set('supabaseUser', {
@@ -43,12 +61,14 @@ function createApp(
         await next();
     });
 
-    app.openapi(getExamsRoute, getExamsRouteHandler);
+    app.openapi(getExamRoute, getExamRouteHandler);
 
     return app;
 }
 
-describe('getExamsRouteHandler', () => {
+describe('getExamRouteHandler', () => {
+    const examId = '11111111-1111-4111-8111-111111111111';
+
     beforeEach(() => {
         vi.clearAllMocks();
         vi.mocked(resolveAssessmentReadScope).mockResolvedValue({
@@ -58,10 +78,11 @@ describe('getExamsRouteHandler', () => {
             departmentId: undefined,
             instructorUserId: undefined,
         });
-        vi.mocked(ExamService.getExams).mockResolvedValue([]);
+        vi.mocked(ExamService.getExamById).mockResolvedValue({ exam_id: examId } as any);
+        vi.mocked(getExamByIdData).mockResolvedValue({ exam_id: examId, is_public: true } as any);
     });
 
-    it('passes the authenticated user as student context when a student profile exists', async () => {
+    it('fetches exam details for student', async () => {
         vi.mocked(resolveAssessmentReadScope).mockResolvedValue({
             role: 'student',
             institutionId: 'institution-1',
@@ -71,21 +92,25 @@ describe('getExamsRouteHandler', () => {
         });
 
         const app = createApp({ id: 'user-1' });
-        const response = await app.request('/');
-
+        const response = await app.request(`/${examId}`);
         expect(response.status).toBe(200);
+
         expect(assertAssessmentReadAccess).toHaveBeenCalled();
-        expect(ExamService.getExams).toHaveBeenCalledWith(
+        expect(getExamByIdData).toHaveBeenCalledWith({
+            dbClient: expect.anything(),
+            id: examId,
+            institutionId: 'institution-1',
+            studentUserId: 'user-1',
+        });
+        expect(ExamService.getExamById).toHaveBeenCalledWith(
             expect.anything(),
-            {},
+            examId,
             'institution-1',
             'user-1',
-            undefined,
-            undefined,
         );
     });
 
-    it('omits student context when the authenticated user has no student profile', async () => {
+    it('calls assertExamReadScope with correctly resolved parameters', async () => {
         vi.mocked(resolveAssessmentReadScope).mockResolvedValue({
             role: 'instructor',
             institutionId: 'institution-1',
@@ -94,43 +119,18 @@ describe('getExamsRouteHandler', () => {
             instructorUserId: 'user-1',
         });
 
+        const mockExamRecord = { exam_id: examId, is_public: false, created_by: 'user-1' };
+        vi.mocked(getExamByIdData).mockResolvedValue(mockExamRecord as any);
+
         const app = createApp({ id: 'user-1' });
-        const response = await app.request('/');
+        const response = await app.request(`/${examId}`);
 
         expect(response.status).toBe(200);
-        expect(ExamService.getExams).toHaveBeenCalledWith(
-            expect.anything(),
-            {},
-            'institution-1',
-            undefined,
-            undefined,
-            'user-1',
-        );
-    });
-
-    it('passes the instructor/admin user ID as instructorUserId when the actor is an admin', async () => {
-        vi.mocked(resolveAssessmentReadScope).mockResolvedValue({
-            role: 'admin',
-            institutionId: 'institution-1',
-            studentUserId: undefined,
-            departmentId: 'dept-1',
-            instructorUserId: 'admin-1',
+        expect(assertExamReadScope).toHaveBeenCalledWith({
+            role: 'instructor',
+            userId: 'user-1',
+            examRecord: mockExamRecord,
+            isShared: false,
         });
-
-        const app = createApp({
-            id: 'admin-1',
-            user_profiles: { department_id: 'dept-1' },
-        });
-        const response = await app.request('/');
-
-        expect(response.status).toBe(200);
-        expect(ExamService.getExams).toHaveBeenCalledWith(
-            expect.anything(),
-            {},
-            'institution-1',
-            undefined,
-            'dept-1',
-            'admin-1',
-        );
     });
 });

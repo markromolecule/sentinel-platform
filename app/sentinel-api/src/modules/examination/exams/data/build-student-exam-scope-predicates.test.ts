@@ -108,7 +108,7 @@ describe('student exam scope predicates', () => {
         expect(compiled.sql).toContain('esa.class_group_id is null');
         expect(compiled.sql).toContain('coalesce(student_cg.subject_id, student_so.subject_id)');
         expect(compiled.sql).toContain(
-            'and (\n                      e.section_id is null or student_cg.section_id = e.section_id\n                  )',
+            'e.section_id is null or student_cg.section_id = e.section_id',
         );
 
         void db.destroy();

@@ -119,4 +119,17 @@ describe('getStudentExamHistoryDetail', () => {
 
         expect(mapExamHistoryDetailResponse).not.toHaveBeenCalled();
     });
+
+    it('throws a 404 when the attempt is for an unpublished exam', async () => {
+        const builder = createQueryBuilder(undefined);
+        const dbClient = {
+            selectFrom: vi.fn(() => builder),
+        } as any;
+
+        await expect(
+            getStudentExamHistoryDetail(dbClient, 'attempt-1', 'student-user-1'),
+        ).rejects.toThrowError('Exam history record not found.');
+
+        expect(builder.where).toHaveBeenCalledWith('e.published_at', 'is not', null);
+    });
 });

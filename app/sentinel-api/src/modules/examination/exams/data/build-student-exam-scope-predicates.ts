@@ -186,22 +186,30 @@ export function buildStudentExamVisibilityPredicate(args: {
                       })}
                       or (
                           e.class_group_id is null
-                          and (
-                          ${buildSectionAssignmentExistsPredicate({
-                              examAlias: 'e',
-                              sectionAlias: 'student_cg',
-                          })}
-                          or (
-                              e.subject_id is null
-                              or coalesce(student_cg.subject_id, student_so.subject_id) = e.subject_id
+                          and not exists (
+                              select 1
+                              from exam_section_assignments as esa_inner
+                              where esa_inner.exam_id = e.exam_id
+                                and esa_inner.class_group_id is not null
                           )
                           and (
-                              ${
-                                  hasSectionId
-                                      ? sql`e.section_id is null or student_cg.section_id = e.section_id`
-                                      : sql`true`
-                              }
-                          )
+                              ${buildSectionAssignmentExistsPredicate({
+                                  examAlias: 'e',
+                                  sectionAlias: 'student_cg',
+                              })}
+                              or (
+                                  (
+                                      e.subject_id is null
+                                      or coalesce(student_cg.subject_id, student_so.subject_id) = e.subject_id
+                                  )
+                                  and (
+                                      ${
+                                          hasSectionId
+                                              ? sql`e.section_id is null or student_cg.section_id = e.section_id`
+                                              : sql`true`
+                                      }
+                                  )
+                              )
                           )
                       )
                   )

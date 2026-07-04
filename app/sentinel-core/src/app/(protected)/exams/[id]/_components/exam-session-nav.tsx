@@ -1,8 +1,9 @@
 'use client';
 
+import { Fragment } from 'react';
 import Link from 'next/link';
 import { usePathname, useSearchParams } from 'next/navigation';
-import { cn } from '@sentinel/ui';
+import { cn, Separator } from '@sentinel/ui';
 
 type ExamSessionSection = 'lobby' | 'monitoring' | 'report' | 'queue' | 'logs';
 
@@ -90,22 +91,28 @@ export function ExamSessionNav({ examId }: ExamSessionNavProps) {
                 Runtime
             </h3>
 
-            {items.map((item) => {
+            {items.map((item, index) => {
                 const isActive = activeSection === item.id;
 
                 return (
-                    <Link
-                        key={item.id}
-                        href={item.href}
-                        className={cn(
-                            'group flex items-center gap-3 px-4 py-2 text-left text-sm transition-colors',
-                            isActive
-                                ? 'bg-accent/50 border-r-2 border-[#323d8f] font-semibold text-[#323d8f]'
-                                : 'text-muted-foreground hover:bg-accent/30 hover:text-foreground',
+                    <Fragment key={item.id}>
+                        {index === 2 && (
+                            <div className="px-4 py-1">
+                                <Separator className="bg-border/40" />
+                            </div>
                         )}
-                    >
-                        <span className="truncate">{item.label}</span>
-                    </Link>
+                        <Link
+                            href={item.href}
+                            className={cn(
+                                'group flex items-center gap-3 px-4 py-2 text-left text-sm transition-colors',
+                                isActive
+                                    ? 'bg-accent/50 border-r-2 border-[#323d8f] font-semibold text-[#323d8f]'
+                                    : 'text-muted-foreground hover:bg-accent/30 hover:text-foreground',
+                            )}
+                        >
+                            <span className="truncate">{item.label}</span>
+                        </Link>
+                    </Fragment>
                 );
             })}
         </nav>
