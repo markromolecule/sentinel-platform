@@ -8,6 +8,7 @@ const mockRefetch = vi.fn();
 const mockFetchNextPage = vi.fn();
 const mockReviewIncidents = vi.fn();
 const mockPush = vi.fn();
+const mockUseExamReportsListQuery = vi.fn();
 
 const mockSearchParams = vi.hoisted(() => vi.fn());
 
@@ -29,10 +30,7 @@ vi.mock('sonner', () => ({
 
 vi.mock('@sentinel/hooks', () => ({
     useDebounce: (value: any) => value,
-    useExamsQuery: () => ({
-        data: [{ id: 'exam-1', title: 'Midterm Exam', subject: 'CS 101' }],
-        isLoading: false,
-    }),
+    useExamReportsListQuery: (...args: any[]) => mockUseExamReportsListQuery(...args),
     useExamIncidentsQuery: (examId: string) => ({
         data:
             examId === 'exam-1'
@@ -123,6 +121,13 @@ describe('useExamIncidentLogs Custom Hook', () => {
     beforeEach(() => {
         vi.clearAllMocks();
         mockSearchParams.mockReturnValue(new URLSearchParams());
+        mockUseExamReportsListQuery.mockReturnValue({
+            data: {
+                data: [{ id: 'exam-1', title: 'Midterm Exam', subject: 'CS 101' }],
+                meta: { total: 1, page: 1, limit: 6, totalPages: 1 },
+            },
+            isLoading: false,
+        });
     });
 
     it('returns empty states when no exam is selected', () => {
@@ -130,9 +135,35 @@ describe('useExamIncidentLogs Custom Hook', () => {
 
         expect(result.current.examId).toBe('');
         expect(result.current.groupMode).toBe('logs');
+        expect(result.current.reportableExams).toHaveLength(1);
+        expect(result.current.selectorExams).toHaveLength(1);
+        expect(result.current.catalogPage).toBe(1);
+        expect(result.current.catalogPageSize).toBe(6);
         expect(result.current.selectedIds).toEqual([]);
         expect(result.current.selectedIncident).toBeNull();
         expect(result.current.drawerOpen).toBe(false);
+    });
+
+    it('queries reportable exams with backend search and pagination params', () => {
+        const { result } = renderHook(() => useExamIncidentLogs());
+
+        expect(mockUseExamReportsListQuery).toHaveBeenCalledWith({
+            page: 1,
+            limit: 6,
+            search: undefined,
+        });
+
+        act(() => {
+            result.current.setCatalogSearch('midterm');
+        });
+
+        expect(result.current.catalogSearch).toBe('midterm');
+        expect(result.current.catalogPage).toBe(1);
+        expect(mockUseExamReportsListQuery).toHaveBeenLastCalledWith({
+            page: 1,
+            limit: 6,
+            search: 'midterm',
+        });
     });
 
     it('handles exam selection changes by pushing URL search params', () => {

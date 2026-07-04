@@ -24,7 +24,7 @@ const ACTIONS: Array<{
 ];
 
 /**
- * Renders compact per-attempt lifecycle tools for instructor monitoring cards.
+ * Renders compact per-attempt lifecycle tools for instructor monitoring cards in sentinel-core.
  */
 export function AttemptLifecycleActions({
     student,
@@ -33,7 +33,6 @@ export function AttemptLifecycleActions({
 }: AttemptLifecycleActionsProps) {
     const isTerminal =
         student.lifecycleState === 'CLOSED' || student.lifecycleState === 'SUPERSEDED';
-    const studentName = `${student.firstName} ${student.lastName}`.trim() || 'selected student';
 
     return (
         <div className="flex flex-wrap gap-2">
@@ -53,8 +52,6 @@ export function AttemptLifecycleActions({
                         size="sm"
                         disabled={disabled || activeLifecycleActionId === actionId}
                         className="h-8 gap-1.5 px-2.5 text-[11px]"
-                        aria-label={`${label} attempt for ${studentName}`}
-                        title={`${label} attempt for ${studentName}`}
                         onClick={(event) => {
                             event.stopPropagation();
                             onAction?.(student, action);

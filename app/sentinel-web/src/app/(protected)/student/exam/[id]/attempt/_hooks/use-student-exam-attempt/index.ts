@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useEffect } from 'react';
+import { useMemo, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { DEFAULT_AUDIO_ANOMALY_CONFIG } from '@sentinel/shared';
 import { getRuntimePassageDetails, hasAnswer } from '@/features/exams/_components/engine';
@@ -21,8 +21,31 @@ import { useAttemptSubmission } from './use-attempt-submission';
 
 export function useStudentExamAttempt() {
     const { replace } = useRouter();
-    const { examId, exam, configuration, mediaPipeSandbox, questions, isLoading } =
+    const { examId, exam, blockedState, configuration, mediaPipeSandbox, questions, isLoading } =
         useStudentExamData();
+
+    const [localBlockedMessage, setLocalBlockedMessage] = useState<string | null>(null);
+
+    const effectiveBlockedState = useMemo(() => {
+        if (localBlockedMessage) {
+            const isSuperseded = /reset|replaced|superseded/i.test(localBlockedMessage);
+            return {
+                isBlocked: true,
+                code: isSuperseded ? 'SUPERSEDED' : ('LOCKED' as const),
+                title: isSuperseded ? 'Attempt Replaced' : 'Exam Locked',
+                message: localBlockedMessage,
+            };
+        }
+
+        return (
+            blockedState ?? {
+                isBlocked: false,
+                code: null,
+                title: null,
+                message: null,
+            }
+        );
+    }, [blockedState, localBlockedMessage]);
 
     useEffect(() => {
         if (isLoading || !examId) return;
@@ -61,10 +84,12 @@ export function useStudentExamAttempt() {
         isLoadingData: isLoading,
         isSessionStartBlocked:
             exam?.status === 'turned_in' ||
+            effectiveBlockedState.isBlocked ||
             (Boolean(exam?.runtimeAccess) &&
                 !exam?.runtimeAccess?.canStart &&
                 !exam?.runtimeAccess?.canResume),
         onInitializeAnswers: (fn) => answersHook.setSelectedAnswers(fn),
+        onLifecycleBlocked: (msg) => setLocalBlockedMessage(msg),
     });
 
     useAttemptSync({
@@ -134,6 +159,7 @@ export function useStudentExamAttempt() {
         setIsRedirectingToTurnIn: uiHook.setIsRedirectingToTurnIn,
         setIsSubmitDialogOpen: uiHook.setIsSubmitDialogOpen,
         suspendSecurityMonitoring: monitoringHook.suspendSecurityMonitoring,
+        isBlocked: effectiveBlockedState.isBlocked,
     });
 
     const safeQuestionIndex = navigationHook.currentQuestionIndex;
@@ -159,6 +185,7 @@ export function useStudentExamAttempt() {
         isLoading,
         isInitializingSession,
         isRedirectingHistory: isRedirectingToHistory,
+        blockedState: effectiveBlockedState,
         currentQuestion,
         safeQuestionIndex,
         answeredCount: answersHook.answeredCount,

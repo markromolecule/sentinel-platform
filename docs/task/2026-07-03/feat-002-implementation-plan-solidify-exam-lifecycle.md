@@ -228,23 +228,23 @@ Concrete next steps:
 
 **Goal:** Align reports and grading with explicit lifecycle and score-finalization state instead of deriving everything from completed timestamps and incident counts.
 
-- [ ] Update `app/sentinel-api/src/modules/examination/reporting/services/exam-report-queries/query-builders.ts` to select attempt lifecycle fields, score state, finalized fields, and superseded relationships.
-- [ ] Update `app/sentinel-api/src/modules/examination/reporting/services/reporting-response.types.ts` to include lifecycle fields in `ReportStudentRow`.
-- [ ] Update `app/sentinel-api/src/modules/examination/reporting/services/reporting-response.shared.ts` `isSubmitted()`, `needsReview()`, `needsRetake()`, and `resolveAttemptKind()` to use lifecycle and override metadata before fallback heuristics.
-- [ ] Update `app/sentinel-api/src/modules/examination/reporting/helpers/student-reporting.helpers.ts` `resolveStudentStatus()`, `resolveSubmissionType()`, and `mapStudentSummary()` to classify `force_close`, `retake`, `makeup`, `superseded`, `finalized`, and `needsReview` from explicit fields.
-- [ ] Update `app/sentinel-api/src/modules/examination/reporting/services/map-reporting-response.ts` so action queues exclude superseded attempts from official score queues unless explicitly requested.
-- [ ] Update `app/sentinel-api/src/modules/examination/grading/services/get-grading-attempt-detail.ts` to include lifecycle and score state.
-- [ ] Update `app/sentinel-api/src/modules/examination/grading/services/update-grading-attempt.ts` to block ordinary edits when `score_state = 'FINALIZED'` unless a revision flow has set `REVISION_REQUIRED`.
-- [ ] Update `app/sentinel-api/src/modules/examination/grading/services/bulk-finalize-attempts.ts` to call `finalizeExamAttemptScore()` for each eligible attempt instead of writing only `_grading.finalizedAt` JSON metadata.
-- [ ] Update `app/sentinel-api/src/modules/examination/grading/controllers/update-grading-attempt.controller.ts` and `bulk-finalize-attempts.controller.ts` response DTOs to include `scoreState`, `finalizedAt`, and `finalizedBy`.
-- [ ] Update `packages/services/src/api/exams/reporting.ts` and `packages/services/src/api/exams/types.ts` report types with lifecycle and finalization fields.
-- [ ] Update `app/sentinel-web/src/app/(protected)/(instructor)/exams/reports/[examId]/_components/overview-view.tsx`, `attempts-view.tsx`, `action-queue-view.tsx`, `action-queue-panel.tsx`, and `columns.tsx` to show lifecycle, superseded, official score, and finalized badges.
-- [ ] Mirror report lifecycle/finalization display changes in `app/sentinel-core/src/app/(protected)/exams/[id]/report/page.tsx`.
-- [ ] Write `app/sentinel-api/src/modules/examination/reporting/services/map-reporting-response.test.ts` for locked, closed, force-close, makeup, retake, superseded, and finalized attempts.
-- [ ] Write `app/sentinel-api/src/modules/examination/grading/services/update-grading-attempt.test.ts` for finalized edit blocking and revision-required edit allowance.
-- [ ] Write `app/sentinel-api/src/modules/examination/grading/services/bulk-finalize-attempts.test.ts` proving lifecycle events are written for every finalized attempt.
-- [ ] Add or update `app/sentinel-web/src/app/(protected)/(instructor)/exams/reports/[examId]/page.test.tsx`, `_components/overview-view.test.tsx`, `_components/attempts-view.test.tsx`, `_components/action-queue-panel.test.tsx`, and `_components/columns.test.tsx` for lifecycle and finalization badges.
-- [ ] Update `app/sentinel-core/src/app/(protected)/exams/[id]/report/page.test.tsx` for lifecycle and finalization badges.
+- [x] Update `app/sentinel-api/src/modules/examination/reporting/services/exam-report-queries/query-builders.ts` to select attempt lifecycle fields, score state, finalized fields, and superseded relationships.
+- [x] Update `app/sentinel-api/src/modules/examination/reporting/services/reporting-response.types.ts` to include lifecycle fields in `ReportStudentRow`.
+- [x] Update `app/sentinel-api/src/modules/examination/reporting/services/reporting-response.shared.ts` `isSubmitted()`, `needsReview()`, `needsRetake()`, and `resolveAttemptKind()` to use lifecycle and override metadata before fallback heuristics.
+- [x] Update `app/sentinel-api/src/modules/examination/reporting/helpers/student-reporting.helpers.ts` `resolveStudentStatus()`, `resolveSubmissionType()`, and `mapStudentSummary()` to classify `force_close`, `retake`, `makeup`, `superseded`, `finalized`, and `needsReview` from explicit fields.
+- [x] Update `app/sentinel-api/src/modules/examination/reporting/services/map-reporting-response.ts` so action queues exclude superseded attempts from official score queues unless explicitly requested.
+- [x] Update `app/sentinel-api/src/modules/examination/grading/services/get-grading-attempt-detail.ts` to include lifecycle and score state.
+- [x] Update `app/sentinel-api/src/modules/examination/grading/services/update-grading-attempt.ts` to block ordinary edits when `score_state = 'FINALIZED'` unless a revision flow has set `REVISION_REQUIRED`.
+- [x] Update `app/sentinel-api/src/modules/examination/grading/services/bulk-finalize-attempts.ts` to call `finalizeExamAttemptScore()` for each eligible attempt instead of writing only `_grading.finalizedAt` JSON metadata.
+- [x] Update `app/sentinel-api/src/modules/examination/grading/controllers/update-grading-attempt.controller.ts` and `bulk-finalize-attempts.controller.ts` response DTOs to include `scoreState`, `finalizedAt`, and `finalizedBy`.
+- [x] Update `packages/services/src/api/exams/reporting.ts` and `packages/services/src/api/exams/types.ts` report types with lifecycle and finalization fields.
+- [x] Update `app/sentinel-web/src/app/(protected)/(instructor)/exams/reports/[examId]/_components/overview-view.tsx`, `attempts-view.tsx`, `action-queue-view.tsx`, `action-queue-panel.tsx`, and `columns.tsx` to show lifecycle, superseded, official score, and finalized badges.
+- [x] Mirror report lifecycle/finalization display changes in `app/sentinel-core/src/app/(protected)/exams/[id]/report/page.tsx`.
+- [x] Write `app/sentinel-api/src/modules/examination/reporting/services/map-reporting-response.test.ts` for locked, closed, force-close, makeup, retake, superseded, and finalized attempts.
+- [x] Write `app/sentinel-api/src/modules/examination/grading/services/update-grading-attempt.test.ts` for finalized edit blocking and revision-required edit allowance.
+- [x] Write `app/sentinel-api/src/modules/examination/grading/services/bulk-finalize-attempts.test.ts` proving lifecycle events are written for every finalized attempt.
+- [x] Add or update `app/sentinel-web/src/app/(protected)/(instructor)/exams/reports/[examId]/page.test.tsx`, `_components/overview-view.test.tsx`, `_components/attempts-view.test.tsx`, `_components/action-queue-panel.test.tsx`, and `_components/columns.test.tsx` for lifecycle and finalization badges.
+- [x] Update `app/sentinel-core/src/app/(protected)/exams/[id]/report/page.test.tsx` for lifecycle and finalization badges.
 
 **Migration required:** No - this phase consumes lifecycle and finalization columns from Phase 1.
 **Breaking changes:** Report response gets additive fields; score finalization behavior becomes stricter for already-finalized attempts.
@@ -254,16 +254,16 @@ Concrete next steps:
 
 **Goal:** Make students see correct lifecycle-specific states and keep `sentinel-core` monitoring/report behavior aligned with `sentinel-web`.
 
-- [ ] Update `app/sentinel-web/src/app/(protected)/student/exam/[id]/_hooks/use-turned-in-exam-redirect.ts` to respect active `REOPEN`, `MAKEUP`, and `RETAKE` lifecycle windows and avoid redirecting eligible students away from a valid attempt window.
-- [ ] Update `app/sentinel-web/src/app/(protected)/student/exam/[id]/_hooks/use-student-exam-data.ts` to expose lifecycle state and runtime-access messaging to all student flow pages.
-- [ ] Update `app/sentinel-web/src/app/(protected)/student/exam/[id]/instruction/page.tsx`, `privacy/page.tsx`, `checkup/page.tsx`, `lobby/page.tsx`, and `attempt/page.tsx` to render locked, closed, reopened, reset, makeup, and retake messages from the shared runtime access contract.
-- [ ] Update `app/sentinel-web/src/app/(protected)/student/exam/[id]/attempt/_hooks/use-student-exam-attempt/index.ts` to stop autosave/submit actions after lifecycle-blocking errors and surface the API message.
-- [ ] Add `app/sentinel-core/src/features/exams/monitoring/_components/attempt-lifecycle-actions.tsx` and `app/sentinel-core/src/features/exams/monitoring/_components/attempt-lifecycle-badge.tsx` using the same behavior as the `sentinel-web` monitoring lifecycle components.
-- [ ] Update `app/sentinel-core/src/app/(protected)/exams/[id]/monitoring/_hooks/use-monitoring.ts` to use lifecycle mutation hooks and selected-student lifecycle actions.
-- [ ] Update `app/sentinel-core/src/app/(protected)/exams/[id]/monitoring/page.tsx`, `app/sentinel-core/src/features/exams/monitoring/_components/student-list.tsx`, `app/sentinel-core/src/features/exams/monitoring/_components/student-card.tsx`, `app/sentinel-core/src/features/exams/monitoring/_components/student-monitoring-detail.tsx`, and `app/sentinel-core/src/features/exams/monitoring/_components/flagging-timeline.tsx` to show lifecycle badges and controls.
-- [ ] Update `app/sentinel-web/src/app/(protected)/student/exam/[id]/_hooks/use-turned-in-exam-redirect.test.tsx`, `app/sentinel-web/src/app/(protected)/student/exam/[id]/instruction/page.test.tsx`, `app/sentinel-web/src/app/(protected)/student/exam/[id]/privacy/page.test.tsx`, `app/sentinel-web/src/app/(protected)/student/exam/[id]/checkup/page.test.tsx`, and `app/sentinel-web/src/app/(protected)/student/exam/[id]/lobby/page.test.tsx` for locked, closed, reopened, makeup, and retake states.
-- [ ] Write `app/sentinel-web/src/app/(protected)/student/exam/[id]/attempt/_hooks/use-student-exam-attempt/index.test.tsx` for lifecycle-blocking submit/sync errors.
-- [ ] Update `app/sentinel-core/src/app/(protected)/exams/[id]/monitoring/page.test.tsx`, `app/sentinel-core/src/app/(protected)/exams/[id]/monitoring/_hooks/use-monitoring.test.tsx`, `app/sentinel-core/src/features/exams/monitoring/_components/monitoring-header.test.tsx`, `app/sentinel-core/src/features/exams/monitoring/_components/flagging-timeline.test.tsx`, and add `app/sentinel-core/src/features/exams/monitoring/_components/attempt-lifecycle-actions.test.tsx` plus `app/sentinel-core/src/features/exams/monitoring/_components/attempt-lifecycle-badge.test.tsx` matching the `sentinel-web` lifecycle behavior.
+- [x] Update `app/sentinel-web/src/app/(protected)/student/exam/[id]/_hooks/use-turned-in-exam-redirect.ts` to respect active `REOPEN`, `MAKEUP`, and `RETAKE` lifecycle windows and avoid redirecting eligible students away from a valid attempt window.
+- [x] Update `app/sentinel-web/src/app/(protected)/student/exam/[id]/_hooks/use-student-exam-data.ts` to expose lifecycle state and runtime-access messaging to all student flow pages.
+- [x] Update `app/sentinel-web/src/app/(protected)/student/exam/[id]/instruction/page.tsx`, `privacy/page.tsx`, `checkup/page.tsx`, `lobby/page.tsx`, and `attempt/page.tsx` to render locked, closed, reopened, reset, makeup, and retake messages from the shared runtime access contract.
+- [x] Update `app/sentinel-web/src/app/(protected)/student/exam/[id]/attempt/_hooks/use-student-exam-attempt/index.ts` to stop autosave/submit actions after lifecycle-blocking errors and surface the API message.
+- [x] Add `app/sentinel-core/src/features/exams/monitoring/_components/attempt-lifecycle-actions.tsx` and `app/sentinel-core/src/features/exams/monitoring/_components/attempt-lifecycle-badge.tsx` using the same behavior as the `sentinel-web` monitoring lifecycle components.
+- [x] Update `app/sentinel-core/src/app/(protected)/exams/[id]/monitoring/_hooks/use-monitoring.ts` to use lifecycle mutation hooks and selected-student lifecycle actions.
+- [x] Update `app/sentinel-core/src/app/(protected)/exams/[id]/monitoring/page.tsx`, `app/sentinel-core/src/features/exams/monitoring/_components/student-list.tsx`, `app/sentinel-core/src/features/exams/monitoring/_components/student-card.tsx`, `app/sentinel-core/src/features/exams/monitoring/_components/student-monitoring-detail.tsx`, and `app/sentinel-core/src/features/exams/monitoring/_components/flagging-timeline.tsx` to show lifecycle badges and controls.
+- [x] Update `app/sentinel-web/src/app/(protected)/student/exam/[id]/_hooks/use-turned-in-exam-redirect.test.tsx`, `app/sentinel-web/src/app/(protected)/student/exam/[id]/instruction/page.test.tsx`, `app/sentinel-web/src/app/(protected)/student/exam/[id]/privacy/page.test.tsx`, `app/sentinel-web/src/app/(protected)/student/exam/[id]/checkup/page.test.tsx`, and `app/sentinel-web/src/app/(protected)/student/exam/[id]/lobby/page.test.tsx` for locked, closed, reopened, makeup, and retake states.
+- [x] Write `app/sentinel-web/src/app/(protected)/student/exam/[id]/attempt/_hooks/use-student-exam-attempt/index.test.tsx` for lifecycle-blocking submit/sync errors.
+- [x] Update `app/sentinel-core/src/app/(protected)/exams/[id]/monitoring/page.test.tsx`, `app/sentinel-core/src/app/(protected)/exams/[id]/monitoring/_hooks/use-monitoring.test.tsx`, `app/sentinel-core/src/features/exams/monitoring/_components/monitoring-header.test.tsx`, `app/sentinel-core/src/features/exams/monitoring/_components/flagging-timeline.test.tsx`, and add `app/sentinel-core/src/features/exams/monitoring/_components/attempt-lifecycle-actions.test.tsx` plus `app/sentinel-core/src/features/exams/monitoring/_components/attempt-lifecycle-badge.test.tsx` matching the `sentinel-web` lifecycle behavior.
 
 **Migration required:** No - this phase consumes backend lifecycle fields and service clients.
 **Breaking changes:** No - student UI behavior becomes more specific for existing blocked states.
@@ -273,15 +273,15 @@ Concrete next steps:
 
 **Goal:** Ensure every lifecycle action is traceable, permissioned, and visible to the right student/instructor audiences.
 
-- [ ] Update `app/sentinel-api/src/modules/examination/lifecycle/services/lifecycle-event.service.ts` to include previous state, next state, actor, reason, notes, related incidents, and related override ids in every event.
-- [ ] Update `app/sentinel-api/src/modules/general/logs/logs.service.ts` call sites in lifecycle services to create `exam.lifecycle_*` logs for lock, reopen, reset, close, finalize, makeup, retake, and automatic close.
-- [ ] Update `app/sentinel-api/src/modules/general/notification/services/activity-notification.service.ts` usage in lifecycle services to send instructor-facing institution activity notifications that identify the affected student and attempt.
-- [ ] Add `app/sentinel-api/src/modules/examination/lifecycle/services/lifecycle-notification.service.ts` with `notifyAttemptLifecycleStudent()` and `notifyAttemptLifecycleInstructor()` helpers using the existing notification/activity services.
-- [ ] Keep `packages/shared/src/constants/permissions.ts` unchanged in this first slice and use `examinations:update` for lifecycle mutations plus `incidents:review` for incident review follow-up actions.
-- [ ] Update lifecycle controllers under `app/sentinel-api/src/modules/examination/lifecycle/controllers` so only instructors/admin roles with `examinations:update` can mutate lifecycle state.
-- [ ] Add `app/sentinel-api/src/modules/examination/lifecycle/services/lifecycle-audit.test.ts` proving lifecycle actions write logs, notifications, and lifecycle events with correct scope.
-- [ ] Add route-access tests in `app/sentinel-api/src/modules/examination/lifecycle/lifecycle.routes.test.ts` for missing permission, wrong institution, student actor, and valid instructor actor.
-- [ ] Add UI tests in `app/sentinel-web/src/features/exams/monitoring/_components/attempt-lifecycle-actions.test.tsx` proving disabled states and confirmation copy mention the selected student, not the whole exam.
+- [x] Update `app/sentinel-api/src/modules/examination/lifecycle/services/lifecycle-event.service.ts` to include previous state, next state, actor, reason, notes, related incidents, and related override ids in every event.
+- [x] Update `app/sentinel-api/src/modules/general/logs/logs.service.ts` call sites in lifecycle services to create `exam.lifecycle_*` logs for lock, reopen, reset, close, finalize, makeup, retake, and automatic close.
+- [x] Update `app/sentinel-api/src/modules/general/notification/services/activity-notification.service.ts` usage in lifecycle services to send instructor-facing institution activity notifications that identify the affected student and attempt.
+- [x] Add `app/sentinel-api/src/modules/examination/lifecycle/services/lifecycle-notification.service.ts` with `notifyAttemptLifecycleStudent()` and `notifyAttemptLifecycleInstructor()` helpers using the existing notification/activity services.
+- [x] Keep `packages/shared/src/constants/permissions.ts` unchanged in this first slice and use `examinations:update` for lifecycle mutations plus `incidents:review` for incident review follow-up actions.
+- [x] Update lifecycle controllers under `app/sentinel-api/src/modules/examination/lifecycle/controllers` so only instructors/admin roles with `examinations:update` can mutate lifecycle state.
+- [x] Add `app/sentinel-api/src/modules/examination/lifecycle/services/lifecycle-audit.test.ts` proving lifecycle actions write logs, notifications, and lifecycle events with correct scope.
+- [x] Add route-access tests in `app/sentinel-api/src/modules/examination/lifecycle/lifecycle.routes.test.ts` for missing permission, wrong institution, student actor, and valid instructor actor.
+- [x] Add UI tests in `app/sentinel-web/src/features/exams/monitoring/_components/attempt-lifecycle-actions.test.tsx` proving disabled states and confirmation copy mention the selected student, not the whole exam.
 
 **Migration required:** No - this phase uses existing `examinations:update` and `incidents:review` permission constants.
 **Breaking changes:** No.
@@ -292,15 +292,15 @@ Concrete next steps:
 **Goal:** Verify the lifecycle implementation from database migration through student/instructor workflows before merge.
 
 - [ ] Run `pnpm --dir packages/db test -- exam-attempt-lifecycle-schema`.
-- [ ] Run `pnpm --dir packages/shared test -- lifecycle-schema student-override-schema`.
-- [ ] Run `pnpm --dir app/sentinel-api exec vitest run --passWithNoTests src/modules/examination/lifecycle`.
-- [ ] Run `pnpm --dir app/sentinel-api exec vitest run --passWithNoTests src/modules/examination/access src/modules/examination/flow`.
+- [x] Run `pnpm --dir packages/shared test -- lifecycle-schema student-override-schema`.
+- [x] Run `pnpm --dir app/sentinel-api exec vitest run --passWithNoTests src/modules/examination/lifecycle`.
+- [x] Run `pnpm --dir app/sentinel-api exec vitest run --passWithNoTests src/modules/examination/access src/modules/examination/flow`.
 - [ ] Run `pnpm --dir app/sentinel-api exec vitest run --passWithNoTests src/modules/examination/incidents src/modules/telemetry/storage/services/incident-persistence.service.test.ts`.
-- [ ] Run `pnpm --dir app/sentinel-api exec vitest run --passWithNoTests src/modules/examination/monitoring src/modules/examination/reporting src/modules/examination/grading`.
-- [ ] Run `pnpm --dir packages/services test -- exams`.
-- [ ] Run `pnpm --dir packages/hooks test -- exams`.
-- [ ] Run `pnpm --dir app/sentinel-web exec vitest run --passWithNoTests 'src/app/(protected)/student/exam/[id]' 'src/app/(protected)/(instructor)/exams/[id]/monitoring' src/features/exams/monitoring src/features/exams/logs 'src/app/(protected)/(instructor)/exams/reports/[examId]'`.
-- [ ] Run `pnpm --dir app/sentinel-core exec vitest run --passWithNoTests 'src/app/(protected)/exams/[id]/monitoring' src/features/exams/monitoring 'src/app/(protected)/exams/[id]/report/page.test.tsx'`.
+- [x] Run `pnpm --dir app/sentinel-api exec vitest run --passWithNoTests src/modules/examination/monitoring src/modules/examination/reporting src/modules/examination/grading`.
+- [x] Run `pnpm --dir packages/services test -- exams`.
+- [x] Run `pnpm --dir packages/hooks test -- exams`.
+- [x] Run `pnpm --dir app/sentinel-web exec vitest run --passWithNoTests 'src/app/(protected)/student/exam/[id]' 'src/app/(protected)/(instructor)/exams/[id]/monitoring' src/features/exams/monitoring src/features/exams/logs 'src/app/(protected)/(instructor)/exams/reports/[examId]'`.
+- [x] Run `pnpm --dir app/sentinel-core exec vitest run --passWithNoTests 'src/app/(protected)/exams/[id]/monitoring' src/features/exams/monitoring 'src/app/(protected)/exams/[id]/report/page.test.tsx'`.
 - [ ] Run `pnpm lint` or document unrelated existing lint blockers with exact failing workspaces.
 - [ ] Run `pnpm format:check`.
 - [ ] Apply the migration locally with `pnpm db:migrate` against a safe development database and verify backfill on sample attempts.
@@ -312,6 +312,23 @@ Concrete next steps:
 **Migration required:** No - validation only.
 **Breaking changes:** No new changes in this phase.
 **New environment variables:** None.
+
+**Validation notes**
+
+- [x] Focused lifecycle API validation passed with `pnpm --dir app/sentinel-api exec vitest run --passWithNoTests src/modules/examination/lifecycle`.
+- [x] Focused lifecycle monitoring UI validation passed with `pnpm --dir app/sentinel-web exec vitest run --passWithNoTests src/features/exams/monitoring/_components/attempt-lifecycle-actions.test.tsx`.
+- [x] Shared contract validation passed with `pnpm --dir packages/shared test -- lifecycle-schema student-override-schema`.
+- [x] Services client validation passed with `pnpm --dir packages/services test -- exams`.
+- [x] Hooks validation passed with `pnpm --dir packages/hooks test -- exams`.
+- [x] API access/flow validation passed with `pnpm --dir app/sentinel-api exec vitest run --passWithNoTests src/modules/examination/access src/modules/examination/flow`.
+- [x] API monitoring/reporting/grading validation passed with `pnpm --dir app/sentinel-api exec vitest run --passWithNoTests src/modules/examination/monitoring src/modules/examination/reporting src/modules/examination/grading`.
+- [x] `sentinel-web` validation passed with `pnpm --dir app/sentinel-web exec vitest run --passWithNoTests 'src/app/(protected)/student/exam/[id]' 'src/app/(protected)/(instructor)/exams/[id]/monitoring' src/features/exams/monitoring src/features/exams/logs 'src/app/(protected)/(instructor)/exams/reports/[examId]'` after adding a safe fallback for missing blocked-state fixtures in the student attempt hook.
+- [x] `sentinel-core` validation passed with `pnpm --dir app/sentinel-core exec vitest run --passWithNoTests 'src/app/(protected)/exams/[id]/monitoring' src/features/exams/monitoring 'src/app/(protected)/exams/[id]/report/page.test.tsx'` after bringing the monitoring hook test's `@sentinel/hooks` mock up to date with the lifecycle mutation exports.
+- [ ] `packages/db` validation is currently blocked by remote database connectivity. Reproduced with `pnpm --dir packages/db test -- exam-attempt-lifecycle-schema`; the run still executed `src/tests/announcements-schema.test.ts` and `src/tests/roles-migration.test.ts`, both failing with `Can't reach database server at aws-1-ap-northeast-1.pooler.supabase.com`.
+- [ ] Incident review and telemetry persistence validation is currently blocked by the shared DB-backed test harness. Reproduced with `pnpm --dir app/sentinel-api exec vitest run --passWithNoTests src/modules/examination/incidents src/modules/telemetry/storage/services/incident-persistence.service.test.ts`; failures came from `src/lib/test-with-db-client.ts` reaching the same remote Supabase host.
+- [ ] Monorepo lint is currently blocked in `@sentinel/db`. Reproduced with `pnpm lint`; first failing workspace was `packages/db` with `sh: eslint: command not found`.
+- [ ] Monorepo format check still reports unrelated pre-existing files after formatting this lifecycle slice. Reproduced with `pnpm format:check`; 13 files remain, including `app/sentinel-core/next-env.d.ts`, `app/sentinel-support/next-env.d.ts`, `app/sentinel-web/next-env.d.ts`, `app/sentinel-api/src/modules/examination/grading/services/update-grading-attempt.test.ts`, multiple `sentinel-core` monitoring files, `app/sentinel-web/src/app/(protected)/student/exam/[id]/_hooks/use-exam-session.ts`, `app/sentinel-web/src/app/(protected)/student/exam/[id]/attempt/page.tsx`, and several older docs under `docs/task/June/...`.
+- [ ] Full API typecheck is currently blocked by unrelated pre-existing errors outside the lifecycle slice. Reproduced with `NODE_OPTIONS=--max-old-space-size=4096 pnpm --dir app/sentinel-api exec tsc --noEmit`; first failing areas included `src/modules/content/question-bank/question-bank-shares.test.ts`, multiple `src/modules/core/classroom/controllers/*.test.ts`, and existing telemetry test/type issues.
 
 ## Breaking API Changes
 
@@ -334,14 +351,14 @@ Concrete next steps:
 ## Done Criteria
 
 - [ ] `exam_attempts` stores current lifecycle and finalization state separately from `exams.status`.
-- [ ] Every lifecycle mutation writes one `exam_attempt_lifecycle_events` row.
-- [ ] Lock, reopen, reset, close, makeup, and retake are attempt/student-scoped by default.
+- [x] Every lifecycle mutation writes one `exam_attempt_lifecycle_events` row.
+- [x] Lock, reopen, reset, close, makeup, and retake are attempt/student-scoped by default.
 - [ ] Exam-wide runtime access is still available only as an explicit exam-wide control.
 - [ ] Student start/resume/sync/submit paths enforce locked, closed, and superseded states.
 - [ ] Incident confirmation does not mutate attempt lifecycle unless explicitly requested or automatic policy triggers.
-- [ ] Automatic lifecycle close, if enabled, affects only the triggering `attempt_id`.
+- [x] Automatic lifecycle close, if enabled, affects only the triggering `attempt_id`.
 - [ ] Monitoring overview/detail show lifecycle state and per-student controls.
 - [ ] Reports classify primary, makeup, retake, superseded, needs review, needs makeup, needs retake, and finalized states from explicit lifecycle data.
 - [ ] Grading finalization is enforced through `score_state`, `finalized_at`, and lifecycle events.
 - [ ] `sentinel-web` and `sentinel-core` monitoring/report surfaces remain aligned where parity is expected.
-- [ ] Focused API, shared, services, hooks, web, core, migration, lint, and format validations pass or blockers are documented with exact commands.
+- [x] Focused API, shared, services, hooks, web, core, migration, lint, and format validations pass or blockers are documented with exact commands.

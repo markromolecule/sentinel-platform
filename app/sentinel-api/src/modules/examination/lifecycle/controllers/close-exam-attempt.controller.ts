@@ -1,6 +1,6 @@
 import { createRoute } from '@hono/zod-openapi';
-import { requireActivePermission } from '../../../../lib/permissions';
 import { type AppRouteHandler } from '../../../../types/hono';
+import { requireLifecycleMutationAccess } from '../lifecycle-access';
 import { closeExamAttemptLifecycleSchema } from '../lifecycle.dto';
 import { closeExamAttempt } from '../services/close-exam-attempt';
 
@@ -34,7 +34,7 @@ export const closeExamAttemptRoute = createRoute({
 export const closeExamAttemptRouteHandler: AppRouteHandler<typeof closeExamAttemptRoute> = async (
     c,
 ) => {
-    requireActivePermission(c, 'examinations:update');
+    requireLifecycleMutationAccess(c);
 
     const { id, attemptId } = c.req.valid('param');
     const body = c.req.valid('json');

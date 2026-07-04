@@ -1,11 +1,11 @@
 import { createRoute } from '@hono/zod-openapi';
 import { HTTPException } from 'hono/http-exception';
-import { requireActivePermission } from '../../../../lib/permissions';
 import { type AppRouteHandler } from '../../../../types/hono';
 import { EntitlementsRepository } from '../../access/data/entitlements.repository';
 import { getReportingExamContext } from '../../reporting/services/get-reporting-exam-context';
-import { StudentOverridesService } from '../../student-overrides/student-overrides.service';
+import { requireLifecycleMutationAccess } from '../lifecycle-access';
 import { grantMakeupExamWindowSchema } from '../lifecycle.dto';
+import { grantMakeupExamWindow } from '../services/grant-makeup-exam-window';
 
 export const grantMakeupExamWindowRoute = createRoute({
     method: 'post',
@@ -37,7 +37,7 @@ export const grantMakeupExamWindowRoute = createRoute({
 export const grantMakeupExamWindowRouteHandler: AppRouteHandler<
     typeof grantMakeupExamWindowRoute
 > = async (c) => {
-    requireActivePermission(c, 'examinations:update');
+    requireLifecycleMutationAccess(c);
 
     const { id, studentId } = c.req.valid('param');
     const body = c.req.valid('json');
@@ -63,26 +63,21 @@ export const grantMakeupExamWindowRouteHandler: AppRouteHandler<
         });
     }
 
-    const override = await StudentOverridesService.createStudentExamAccessOverride({
+    const result = await grantMakeupExamWindow({
         dbClient: c.get('dbClient'),
         examId: id,
-        body: {
-            studentId,
-            overrideType: 'MAKEUP',
-            availableFrom: body.availableFrom,
-            availableUntil: body.availableUntil,
-            allowedAttempts: body.allowedAttempts,
-            sourceAttemptId: null,
-            notes: body.notes ?? null,
-        },
-        grantedBy: c.get('user')?.id ?? null,
+        studentId,
+        availableFrom: body.availableFrom,
+        availableUntil: body.availableUntil,
+        allowedAttempts: body.allowedAttempts,
+        sourceAttemptId: body.sourceAttemptId ?? null,
+        notes: body.notes ?? null,
+        actorUserId: c.get('user')?.id ?? null,
+        institutionId: c.get('institutionId'),
     });
 
     return c.json({
         message: 'Makeup exam window granted successfully',
-        data: {
-            override,
-            latestEvent: null,
-        },
+        data: result,
     });
 };

@@ -9,15 +9,20 @@ vi.mock('./services/lock-exam-attempt', () => ({
 }));
 
 describe('registerLifecycleRoutes', () => {
-    function createApp(activePermissionKeys: string[] = ['examinations:update']) {
+    function createApp(
+        activePermissionKeys: string[] = ['examinations:update'],
+        role: string = 'admin',
+        institutionId = 'institution-1',
+    ) {
         const app = new OpenAPIHono();
 
         app.use('*', async (c, next) => {
             c.set('dbClient', {} as any);
             c.set('user', { id: 'actor-1' } as any);
-            c.set('supabaseUser', { user_metadata: { role: 'admin' } } as any);
-            c.set('institutionId', 'institution-1');
+            c.set('supabaseUser', { user_metadata: { role } } as any);
+            c.set('institutionId', institutionId);
             c.set('activePermissionKeys', activePermissionKeys);
+            c.set('role', role);
             await next();
         });
 
@@ -31,7 +36,7 @@ describe('registerLifecycleRoutes', () => {
     });
 
     it('returns 403 when the caller lacks examination update permissions', async () => {
-        const app = createApp([]);
+        const app = createApp([], 'admin');
         const response = await app.request(
             '/11111111-1111-4111-8111-111111111111/attempts/22222222-2222-4222-8222-222222222222/lifecycle/lock',
             {
@@ -46,6 +51,89 @@ describe('registerLifecycleRoutes', () => {
         );
 
         expect(response.status).toBe(403);
+    });
+
+    it('returns 403 when a student actor has the permission key', async () => {
+        const app = createApp(['examinations:update'], 'student');
+        const response = await app.request(
+            '/11111111-1111-4111-8111-111111111111/attempts/22222222-2222-4222-8222-222222222222/lifecycle/lock',
+            {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    reasonCode: 'PROCTOR_LOCK',
+                }),
+            },
+        );
+
+        expect(response.status).toBe(403);
+        expect(lockExamAttempt).not.toHaveBeenCalled();
+    });
+
+    it('passes the active institution scope into the lifecycle service', async () => {
+        vi.mocked(lockExamAttempt).mockResolvedValue({
+            attempt: {
+                attemptId: '22222222-2222-4222-8222-222222222222',
+                examId: '11111111-1111-4111-8111-111111111111',
+                studentId: '33333333-3333-4333-8333-333333333333',
+                lifecycleState: 'LOCKED',
+                lifecycleReason: 'PROCTOR_LOCK',
+                lifecycleNote: null,
+                lockedAt: '2026-07-03T16:00:00.000Z',
+                lockedBy: 'actor-1',
+                reopenedUntil: null,
+                closedAt: null,
+                closedBy: null,
+                closedReason: null,
+                supersededByAttemptId: null,
+                supersededAt: null,
+                supersededBy: null,
+                finalizedAt: null,
+                finalizedBy: null,
+                scoreState: 'DRAFT',
+                events: [],
+            },
+            latestEvent: {
+                eventId: 'event-1',
+                attemptId: '22222222-2222-4222-8222-222222222222',
+                examId: '11111111-1111-4111-8111-111111111111',
+                studentId: '33333333-3333-4333-8333-333333333333',
+                eventType: 'LOCKED',
+                previousState: 'IN_PROGRESS',
+                nextState: 'LOCKED',
+                actorUserId: 'actor-1',
+                reasonCode: 'PROCTOR_LOCK',
+                notes: null,
+                relatedIncidentIds: [],
+                relatedOverrideId: null,
+                metadata: null,
+                createdAt: '2026-07-03T16:00:00.000Z',
+            },
+        });
+
+        const app = createApp(['examinations:update'], 'instructor', 'institution-2');
+        const response = await app.request(
+            '/11111111-1111-4111-8111-111111111111/attempts/22222222-2222-4222-8222-222222222222/lifecycle/lock',
+            {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    reasonCode: 'PROCTOR_LOCK',
+                }),
+            },
+        );
+
+        expect(response.status).toBe(200);
+        expect(lockExamAttempt).toHaveBeenCalledWith(
+            expect.objectContaining({
+                institutionId: 'institution-2',
+                actorUserId: 'actor-1',
+            }),
+        );
     });
 
     it('returns 404 when the attempt is not found', async () => {
@@ -96,6 +184,35 @@ describe('registerLifecycleRoutes', () => {
         expect(response.status).toBe(404);
     });
 
+    it('returns 404 when the attempt is outside the active institution', async () => {
+        vi.mocked(lockExamAttempt).mockRejectedValue(
+            new HTTPException(404, {
+                message: 'Exam attempt not found for this exam.',
+            }),
+        );
+
+        const app = createApp(['examinations:update'], 'instructor', 'institution-other');
+        const response = await app.request(
+            '/11111111-1111-4111-8111-111111111111/attempts/22222222-2222-4222-8222-222222222222/lifecycle/lock',
+            {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    reasonCode: 'PROCTOR_LOCK',
+                }),
+            },
+        );
+
+        expect(response.status).toBe(404);
+        expect(lockExamAttempt).toHaveBeenCalledWith(
+            expect.objectContaining({
+                institutionId: 'institution-other',
+            }),
+        );
+    });
+
     it('returns the expected response shape on success', async () => {
         vi.mocked(lockExamAttempt).mockResolvedValue({
             attempt: {
@@ -137,7 +254,7 @@ describe('registerLifecycleRoutes', () => {
             },
         });
 
-        const app = createApp();
+        const app = createApp(['examinations:update'], 'instructor');
         const response = await app.request(
             '/11111111-1111-4111-8111-111111111111/attempts/22222222-2222-4222-8222-222222222222/lifecycle/lock',
             {

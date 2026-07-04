@@ -5,6 +5,7 @@ import { StudentOverridesService } from '../../student-overrides/student-overrid
 import { getLifecycleAttemptContext } from '../data/get-lifecycle-attempt-context';
 import { appendExamAttemptLifecycleEvent } from './lifecycle-event.service';
 import { transitionExamAttemptLifecycle } from './lifecycle-transition.service';
+import { recordAttemptLifecycleAudit } from './lifecycle-audit.service';
 
 function resolveResetWindow(args: { endDateTime?: string | null; durationMinutes?: number }) {
     const now = new Date();
@@ -81,25 +82,12 @@ export async function resetExamAttempt(args: {
         .where('exam_id', '=', args.examId)
         .executeTakeFirst();
 
-    const resetEvent = await appendExamAttemptLifecycleEvent({
-        dbClient: args.dbClient,
-        attemptId: args.attemptId,
-        examId: args.examId,
-        studentId: context.student.id,
-        eventType: 'RESET',
-        previousState: context.attempt.lifecycleState,
-        nextState: context.attempt.lifecycleState,
-        actorUserId: args.actorUserId ?? null,
-        reasonCode: args.reasonCode ?? 'ATTEMPT_RESET',
-        notes: args.notes ?? null,
-    });
-
     const overrideWindow = resolveResetWindow({
         endDateTime: context.exam.endDateTime,
         durationMinutes: context.exam.durationMinutes,
     });
 
-    await StudentOverridesService.createStudentExamAccessOverride({
+    const override = await StudentOverridesService.createStudentExamAccessOverride({
         dbClient: args.dbClient,
         examId: args.examId,
         body: {
@@ -114,6 +102,20 @@ export async function resetExamAttempt(args: {
         grantedBy: args.actorUserId ?? null,
     });
 
+    const resetEvent = await appendExamAttemptLifecycleEvent({
+        dbClient: args.dbClient,
+        attemptId: args.attemptId,
+        examId: args.examId,
+        studentId: context.student.id,
+        eventType: 'RESET',
+        previousState: context.attempt.lifecycleState,
+        nextState: context.attempt.lifecycleState,
+        actorUserId: args.actorUserId ?? null,
+        reasonCode: args.reasonCode ?? 'ATTEMPT_RESET',
+        notes: args.notes ?? null,
+        relatedOverrideId: override.id,
+    });
+
     const latestEvent = await appendExamAttemptLifecycleEvent({
         dbClient: args.dbClient,
         attemptId: args.attemptId,
@@ -125,6 +127,24 @@ export async function resetExamAttempt(args: {
         actorUserId: args.actorUserId ?? null,
         reasonCode: args.reasonCode ?? 'ATTEMPT_RESET',
         notes: args.notes ?? null,
+        relatedOverrideId: override.id,
+    });
+
+    const resolvedInstId = args.institutionId || context.exam.institutionId || '';
+
+    await recordAttemptLifecycleAudit({
+        dbClient: args.dbClient,
+        attemptId: args.attemptId,
+        examId: args.examId,
+        studentId: context.student.id,
+        eventType: 'RESET',
+        actorUserId: args.actorUserId ?? null,
+        institutionId: resolvedInstId || null,
+        reasonCode: args.reasonCode ?? 'ATTEMPT_RESET',
+        notes: args.notes ?? null,
+        previousState: context.attempt.lifecycleState,
+        nextState: 'SUPERSEDED',
+        relatedOverrideId: override.id,
     });
 
     return {

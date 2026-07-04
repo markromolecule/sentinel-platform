@@ -8,12 +8,24 @@ const {
     mockUseStableValue,
     mockUseExamMonitoringOverviewQuery,
     mockUseOverrideReconnectLimitMutation,
+    mockUseLockExamAttemptMutation,
+    mockUseReopenExamAttemptMutation,
+    mockUseResetExamAttemptMutation,
+    mockUseCloseExamAttemptMutation,
+    mockUseGrantMakeupExamWindowMutation,
+    mockUseGrantRetakeExamWindowMutation,
 } = vi.hoisted(() => ({
     mockUseApi: vi.fn(),
     mockUseDebounce: vi.fn((value: string) => value),
     mockUseStableValue: vi.fn((factory: () => unknown) => factory()),
     mockUseExamMonitoringOverviewQuery: vi.fn(),
     mockUseOverrideReconnectLimitMutation: vi.fn(),
+    mockUseLockExamAttemptMutation: vi.fn(),
+    mockUseReopenExamAttemptMutation: vi.fn(),
+    mockUseResetExamAttemptMutation: vi.fn(),
+    mockUseCloseExamAttemptMutation: vi.fn(),
+    mockUseGrantMakeupExamWindowMutation: vi.fn(),
+    mockUseGrantRetakeExamWindowMutation: vi.fn(),
 }));
 
 vi.mock('@sentinel/hooks', () => ({
@@ -23,6 +35,12 @@ vi.mock('@sentinel/hooks', () => ({
     useExamMonitoringOverviewQuery: (examId: string) => mockUseExamMonitoringOverviewQuery(examId),
     useOverrideReconnectLimitMutation: (options: unknown) =>
         mockUseOverrideReconnectLimitMutation(options),
+    useLockExamAttemptMutation: () => mockUseLockExamAttemptMutation(),
+    useReopenExamAttemptMutation: () => mockUseReopenExamAttemptMutation(),
+    useResetExamAttemptMutation: () => mockUseResetExamAttemptMutation(),
+    useCloseExamAttemptMutation: () => mockUseCloseExamAttemptMutation(),
+    useGrantMakeupExamWindowMutation: () => mockUseGrantMakeupExamWindowMutation(),
+    useGrantRetakeExamWindowMutation: () => mockUseGrantRetakeExamWindowMutation(),
 }));
 
 vi.mock('@sentinel/services', () => ({
@@ -97,6 +115,15 @@ describe('useMonitoring', () => {
         mockUseOverrideReconnectLimitMutation.mockReturnValue({
             mutateAsync: vi.fn(),
         });
+        const inertMutation = {
+            mutateAsync: vi.fn(),
+        };
+        mockUseLockExamAttemptMutation.mockReturnValue(inertMutation);
+        mockUseReopenExamAttemptMutation.mockReturnValue(inertMutation);
+        mockUseResetExamAttemptMutation.mockReturnValue(inertMutation);
+        mockUseCloseExamAttemptMutation.mockReturnValue(inertMutation);
+        mockUseGrantMakeupExamWindowMutation.mockReturnValue(inertMutation);
+        mockUseGrantRetakeExamWindowMutation.mockReturnValue(inertMutation);
     });
 
     it('debounces the monitoring search query', () => {

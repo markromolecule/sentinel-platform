@@ -33,6 +33,7 @@ export async function resolveAutomaticLifecyclePolicy(args: {
 
     if (
         !attempt ||
+        !attempt.exam_id ||
         !['IN_PROGRESS', 'LOCKED', 'SUBMITTED'].includes(attempt.lifecycle_state ?? '')
     ) {
         return {

@@ -9,6 +9,7 @@ import { IncidentTable } from './incident-table';
 import { IncidentDrawer } from './incident-drawer';
 import { BulkActions } from './bulk-actions';
 import { ExamsPageShell } from '../../_components/layout';
+import { ExamsPagination } from '@/features/exams/_components/views/exams-pagination';
 import { useExamIncidentLogs } from '../_hooks/use-exam-incident-logs';
 
 export function ExamIncidentLogsContent({ initialExamId }: { initialExamId?: string }) {
@@ -16,8 +17,13 @@ export function ExamIncidentLogsContent({ initialExamId }: { initialExamId?: str
         examId,
         search,
         setSearch,
-        examSearch,
-        setExamSearch,
+        catalogSearch,
+        setCatalogSearch,
+        catalogPage,
+        setCatalogPage,
+        catalogPageSize,
+        catalogPageCount,
+        catalogTotalCount,
         columnFilters,
         setColumnFilters,
         groupMode,
@@ -28,10 +34,11 @@ export function ExamIncidentLogsContent({ initialExamId }: { initialExamId?: str
         setSelectedIncident,
         drawerOpen,
         setDrawerOpen,
-        exams,
+        reportableExams,
+        selectorExams,
         displayIncidents,
         sections,
-        isExamsLoading,
+        isCatalogLoading,
         isIncidentsLoading,
         isFetching,
         isError,
@@ -49,20 +56,20 @@ export function ExamIncidentLogsContent({ initialExamId }: { initialExamId?: str
 
     return (
         <ExamsPageShell className="min-h-full">
-            <div className="space-y-2">
-                <PageHeader
-                    title="Incident Logs & Analytics"
-                    description="Review, confirm, or dismiss proctoring telemetry alerts recorded during examinations."
-                    className="px-0"
-                >
-                    {examId && (
+            {examId ? (
+                <div className="space-y-2">
+                    <PageHeader
+                        title="Incident Logs & Analytics"
+                        description="Review, confirm, or dismiss proctoring telemetry alerts recorded during examinations."
+                        className="px-0"
+                    >
                         <div className="flex items-center gap-3">
                             <ExamCombobox
-                                exams={exams || []}
+                                exams={selectorExams || []}
                                 selectedExamId={examId}
                                 onSelectExam={handleExamChange}
-                                searchValue={examSearch}
-                                onSearchChange={setExamSearch}
+                                searchValue={catalogSearch}
+                                onSearchChange={setCatalogSearch}
                             />
                             <Button
                                 variant="outline"
@@ -76,14 +83,14 @@ export function ExamIncidentLogsContent({ initialExamId }: { initialExamId?: str
                                 Refresh Logs
                             </Button>
                         </div>
-                    )}
-                </PageHeader>
-                <Separator />
-            </div>
+                    </PageHeader>
+                    <Separator />
+                </div>
+            ) : null}
 
             {!examId ? (
-                <div className="flex flex-col gap-4">
-                    {isExamsLoading ? (
+                <div className="mx-auto flex w-full max-w-6xl flex-col gap-6 self-center">
+                    {isCatalogLoading ? (
                         <div className="border-border bg-card flex min-h-[350px] items-center justify-center rounded-md border shadow-sm">
                             <div className="flex flex-col items-center gap-3">
                                 <Spinner className="text-primary h-8 w-8" />
@@ -93,12 +100,23 @@ export function ExamIncidentLogsContent({ initialExamId }: { initialExamId?: str
                             </div>
                         </div>
                     ) : (
-                        <ExamCardsGrid
-                            exams={exams || []}
-                            onSelectExam={handleExamChange}
-                            searchValue={examSearch}
-                            onSearchChange={setExamSearch}
-                        />
+                        <>
+                            <ExamCardsGrid
+                                exams={reportableExams || []}
+                                onSelectExam={handleExamChange}
+                                searchValue={catalogSearch}
+                                onSearchChange={setCatalogSearch}
+                            />
+                            {reportableExams.length > 0 ? (
+                                <ExamsPagination
+                                    page={catalogPage}
+                                    pageCount={catalogPageCount}
+                                    pageSize={catalogPageSize}
+                                    totalCount={catalogTotalCount}
+                                    onPageChange={setCatalogPage}
+                                />
+                            ) : null}
+                        </>
                     )}
                 </div>
             ) : isIncidentsLoading ? (

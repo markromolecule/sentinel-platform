@@ -2,6 +2,7 @@ import { type DbClient } from '@sentinel/db';
 import { HTTPException } from 'hono/http-exception';
 import { StudentOverridesService } from '../../student-overrides/student-overrides.service';
 import { getLifecycleAttemptContext } from '../data/get-lifecycle-attempt-context';
+import { recordAttemptLifecycleAudit } from './lifecycle-audit.service';
 
 /**
  * Grants a reopen window tied to one locked or closed attempt so the student
@@ -52,6 +53,26 @@ export async function grantReopenAttemptWindow(args: {
             notes: args.notes ?? null,
         },
         grantedBy: args.actorUserId ?? null,
+    });
+
+    const resolvedInstId = args.institutionId || context.exam?.institutionId || '';
+
+    await recordAttemptLifecycleAudit({
+        dbClient: args.dbClient,
+        attemptId: args.attemptId,
+        examId: args.examId,
+        studentId: context.student.id,
+        eventType: 'REOPENED',
+        actorUserId: args.actorUserId ?? null,
+        institutionId: resolvedInstId || null,
+        notes: args.notes ?? null,
+        previousState: context.attempt.lifecycleState,
+        nextState: context.attempt.lifecycleState,
+        relatedOverrideId: override.id,
+        details: {
+            availableFrom: args.availableFrom,
+            availableUntil: args.availableUntil,
+        },
     });
 
     return {

@@ -4,6 +4,7 @@ import { StudentOverridesService } from '../../student-overrides/student-overrid
 import { getLifecycleAttemptContext } from '../data/get-lifecycle-attempt-context';
 import { appendExamAttemptLifecycleEvent } from './lifecycle-event.service';
 import { transitionExamAttemptLifecycle } from './lifecycle-transition.service';
+import { recordAttemptLifecycleAudit } from './lifecycle-audit.service';
 
 /**
  * Grants a retake window for one student and records the grant against the
@@ -67,6 +68,28 @@ export async function grantRetakeExamWindow(args: {
         reasonCode: 'RETAKE_GRANTED',
         notes: args.notes ?? null,
         relatedOverrideId: override.id,
+    });
+
+    const resolvedInstId = args.institutionId || context.exam?.institutionId || '';
+
+    await recordAttemptLifecycleAudit({
+        dbClient: args.dbClient,
+        attemptId: args.sourceAttemptId,
+        examId: args.examId,
+        studentId: args.studentId,
+        eventType: 'RETAKE_GRANTED',
+        actorUserId: args.actorUserId ?? null,
+        institutionId: resolvedInstId || null,
+        reasonCode: 'RETAKE_GRANTED',
+        notes: args.notes ?? null,
+        previousState: context.attempt.lifecycleState,
+        nextState: context.attempt.lifecycleState,
+        relatedOverrideId: override.id,
+        details: {
+            availableFrom: args.availableFrom,
+            availableUntil: args.availableUntil,
+            allowedAttempts: args.allowedAttempts ?? 1,
+        },
     });
 
     return {

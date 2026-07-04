@@ -4,6 +4,7 @@ import { StudentOverridesService } from '../../student-overrides/student-overrid
 import { getLifecycleAttemptContext } from '../data/get-lifecycle-attempt-context';
 import { appendExamAttemptLifecycleEvent } from './lifecycle-event.service';
 import { transitionExamAttemptLifecycle } from './lifecycle-transition.service';
+import { recordAttemptLifecycleAudit } from './lifecycle-audit.service';
 
 /**
  * Grants a makeup window for one student and optionally links it back to a
@@ -87,6 +88,26 @@ export async function grantMakeupExamWindow(args: {
             relatedOverrideId: override.id,
         });
     }
+
+    const resolvedInstId = args.institutionId ?? null;
+
+    await recordAttemptLifecycleAudit({
+        dbClient: args.dbClient,
+        attemptId: args.sourceAttemptId ?? null,
+        examId: args.examId,
+        studentId: args.studentId,
+        eventType: 'MAKEUP_GRANTED',
+        actorUserId: args.actorUserId ?? null,
+        institutionId: resolvedInstId,
+        reasonCode: 'MAKEUP_GRANTED',
+        notes: args.notes ?? null,
+        relatedOverrideId: override.id,
+        details: {
+            availableFrom: args.availableFrom,
+            availableUntil: args.availableUntil,
+            allowedAttempts: args.allowedAttempts ?? 1,
+        },
+    });
 
     return {
         override,

@@ -1,151 +1,122 @@
-import { randomUUID } from 'node:crypto';
-import { describe, expect } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import type { DbClient } from '@sentinel/db';
-import { testWithDbClient } from '../../../../lib/test-with-db-client';
 import { resolveAutomaticLifecyclePolicy } from './resolve-automatic-lifecycle-policy';
 
-async function createAutomaticPolicyFixture(
-    dbClient: DbClient,
-    lifecycleState: 'IN_PROGRESS' | 'CLOSED' = 'IN_PROGRESS',
-) {
-    const suffix = randomUUID().slice(0, 8);
-    const userId = randomUUID();
-
-    await dbClient
-        .insertInto('users')
-        .values({
-            id: userId,
-            email: `policy-${suffix}@sentinel.test`,
-            role: 'student',
-            created_at: new Date(),
-            updated_at: new Date(),
-        })
-        .executeTakeFirst();
-
-    const institution = await dbClient
-        .insertInto('institutions')
-        .values({
-            name: `Automatic Policy Institution ${suffix}`,
-        })
-        .returningAll()
-        .executeTakeFirstOrThrow();
-
-    const student = await dbClient
-        .insertInto('students')
-        .values({
-            user_id: userId,
-            student_number: `policy-${suffix}`,
-            institution_id: institution.id,
-        })
-        .returningAll()
-        .executeTakeFirstOrThrow();
-
-    const exam = await dbClient
-        .insertInto('exams')
-        .values({
-            title: `Automatic Policy Exam ${suffix}`,
-            institution_id: institution.id,
-            duration_minutes: 60,
-            scheduled_date: new Date('2026-07-04T01:00:00.000Z'),
-            end_date_time: new Date('2026-07-04T02:00:00.000Z'),
-            published_at: new Date('2026-07-03T01:00:00.000Z'),
-        })
-        .returningAll()
-        .executeTakeFirstOrThrow();
-
-    const attempt = await dbClient
-        .insertInto('exam_attempts')
-        .values({
-            exam_id: exam.exam_id,
-            student_id: student.student_id,
-            status: 'IN_PROGRESS',
-            lifecycle_state: lifecycleState,
-            started_at: new Date('2026-07-04T01:00:00.000Z'),
-            created_at: new Date('2026-07-04T01:00:00.000Z'),
-            time_spent_minutes: 0,
-            is_verified: false,
-        })
-        .returningAll()
-        .executeTakeFirstOrThrow();
-
+function createPolicyDb(args: {
+    attempt?: {
+        attempt_id: string;
+        exam_id: string | null;
+        lifecycle_state: string | null;
+    } | null;
+    incidents?: Array<{ incident_id: string }>;
+}) {
     return {
-        examId: exam.exam_id,
-        attemptId: attempt.attempt_id,
-    };
-}
+        selectFrom: vi.fn((table: string) => {
+            const builder = {
+                select: vi.fn(() => builder),
+                where: vi.fn(() => builder),
+                orderBy: vi.fn(() => builder),
+                executeTakeFirst: vi.fn(async () =>
+                    table === 'exam_attempts' ? (args.attempt ?? null) : null,
+                ),
+                execute: vi.fn(async () =>
+                    table === 'flagged_incidents' ? (args.incidents ?? []) : [],
+                ),
+            };
 
-async function insertHighIncident(dbClient: DbClient, attemptId: string, minuteOffset: number) {
-    return dbClient
-        .insertInto('flagged_incidents')
-        .values({
-            attempt_id: attemptId,
-            incident_type: 'SCREENSHOT',
-            platform: 'WEB',
-            source: 'CLIENT',
-            rule_key: 'webSecurity.print_screen_disable',
-            severity: 'HIGH',
-            status: 'PENDING',
-            timestamp: new Date(Date.now() - minuteOffset * 60 * 1000),
-            details: JSON.stringify({ eventType: 'PRINT_SCREEN_ATTEMPT' }),
-        })
-        .returning('incident_id')
-        .executeTakeFirstOrThrow();
+            return builder;
+        }),
+    } as unknown as DbClient;
 }
 
 describe('resolveAutomaticLifecyclePolicy', () => {
-    testWithDbClient('returns a close decision once the threshold is met', async ({ dbClient }) => {
-        const fixture = await createAutomaticPolicyFixture(dbClient);
-
-        await insertHighIncident(dbClient, fixture.attemptId, 1);
-        await insertHighIncident(dbClient, fixture.attemptId, 3);
-        const thirdIncident = await insertHighIncident(dbClient, fixture.attemptId, 5);
-
+    it('returns a close decision once the threshold is met', async () => {
         const resolution = await resolveAutomaticLifecyclePolicy({
-            dbClient,
-            attemptId: fixture.attemptId,
+            dbClient: createPolicyDb({
+                attempt: {
+                    attempt_id: 'attempt-1',
+                    exam_id: 'exam-1',
+                    lifecycle_state: 'IN_PROGRESS',
+                },
+                incidents: [
+                    { incident_id: 'incident-1' },
+                    { incident_id: 'incident-2' },
+                    { incident_id: 'incident-3' },
+                ],
+            }),
+            attemptId: 'attempt-1',
         });
 
         expect(resolution).toMatchObject({
             action: 'CLOSE_ATTEMPT',
-            attemptId: fixture.attemptId,
-            examId: fixture.examId,
+            attemptId: 'attempt-1',
+            examId: 'exam-1',
             reasonCode: 'AUTO_HIGH_INCIDENT_THRESHOLD',
+            matchingIncidentIds: ['incident-1', 'incident-2', 'incident-3'],
         });
-        expect(resolution.action === 'CLOSE_ATTEMPT' && resolution.matchingIncidentIds).toContain(
-            thirdIncident.incident_id,
-        );
     });
 
-    testWithDbClient(
-        'returns a no-op when the threshold is not applicable',
-        async ({ dbClient }) => {
-            const thresholdFixture = await createAutomaticPolicyFixture(dbClient);
-            const closedFixture = await createAutomaticPolicyFixture(dbClient, 'CLOSED');
+    it('returns a no-op when the threshold is not applicable', async () => {
+        const thresholdResolution = await resolveAutomaticLifecyclePolicy({
+            dbClient: createPolicyDb({
+                attempt: {
+                    attempt_id: 'attempt-1',
+                    exam_id: 'exam-1',
+                    lifecycle_state: 'IN_PROGRESS',
+                },
+                incidents: [{ incident_id: 'incident-1' }, { incident_id: 'incident-2' }],
+            }),
+            attemptId: 'attempt-1',
+        });
+        const closedResolution = await resolveAutomaticLifecyclePolicy({
+            dbClient: createPolicyDb({
+                attempt: {
+                    attempt_id: 'attempt-2',
+                    exam_id: 'exam-1',
+                    lifecycle_state: 'CLOSED',
+                },
+                incidents: [
+                    { incident_id: 'incident-1' },
+                    { incident_id: 'incident-2' },
+                    { incident_id: 'incident-3' },
+                ],
+            }),
+            attemptId: 'attempt-2',
+        });
 
-            await insertHighIncident(dbClient, thresholdFixture.attemptId, 1);
-            await insertHighIncident(dbClient, thresholdFixture.attemptId, 3);
-            await insertHighIncident(dbClient, closedFixture.attemptId, 1);
-            await insertHighIncident(dbClient, closedFixture.attemptId, 2);
-            await insertHighIncident(dbClient, closedFixture.attemptId, 3);
+        expect(thresholdResolution).toMatchObject({
+            action: 'NONE',
+            attemptId: 'attempt-1',
+            matchingIncidentIds: ['incident-1', 'incident-2'],
+        });
+        expect(closedResolution).toMatchObject({
+            action: 'NONE',
+            attemptId: 'attempt-2',
+            matchingIncidentIds: [],
+        });
+    });
 
-            const thresholdResolution = await resolveAutomaticLifecyclePolicy({
-                dbClient,
-                attemptId: thresholdFixture.attemptId,
-            });
-            const closedResolution = await resolveAutomaticLifecyclePolicy({
-                dbClient,
-                attemptId: closedFixture.attemptId,
-            });
+    it('returns a no-op when the attempt is missing an exam id', async () => {
+        const resolution = await resolveAutomaticLifecyclePolicy({
+            dbClient: createPolicyDb({
+                attempt: {
+                    attempt_id: 'attempt-1',
+                    exam_id: null,
+                    lifecycle_state: 'IN_PROGRESS',
+                },
+                incidents: [
+                    { incident_id: 'incident-1' },
+                    { incident_id: 'incident-2' },
+                    { incident_id: 'incident-3' },
+                ],
+            }),
+            attemptId: 'attempt-1',
+        });
 
-            expect(thresholdResolution).toMatchObject({
-                action: 'NONE',
-                attemptId: thresholdFixture.attemptId,
-            });
-            expect(closedResolution).toMatchObject({
-                action: 'NONE',
-                attemptId: closedFixture.attemptId,
-                matchingIncidentIds: [],
-            });
-        },
-    );
+        expect(resolution).toMatchObject({
+            action: 'NONE',
+            attemptId: 'attempt-1',
+            matchingIncidentIds: [],
+        });
+    });
 });

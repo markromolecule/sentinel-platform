@@ -16,6 +16,7 @@ export type UseAttemptSubmissionArgs = {
     setIsRedirectingToTurnIn: (val: boolean) => void;
     setIsSubmitDialogOpen: (val: boolean) => void;
     suspendSecurityMonitoring: () => void;
+    isBlocked?: boolean;
 };
 
 export function useAttemptSubmission({
@@ -30,11 +31,12 @@ export function useAttemptSubmission({
     setIsRedirectingToTurnIn,
     setIsSubmitDialogOpen,
     suspendSecurityMonitoring,
+    isBlocked,
 }: UseAttemptSubmissionArgs) {
     const router = useRouter();
 
     const proceedToTurnInReview = () => {
-        if (isRedirectingToTurnIn || !sessionId) return;
+        if (isRedirectingToTurnIn || !sessionId || isBlocked) return;
         setIsRedirectingToTurnIn(true);
         suspendSecurityMonitoring();
 
@@ -76,7 +78,7 @@ export function useAttemptSubmission({
     };
 
     const handleSubmit = () => {
-        if (questions.length === 0) return;
+        if (questions.length === 0 || isBlocked) return;
         if (unansweredCount > 0) {
             setIsSubmitDialogOpen(true);
             return;

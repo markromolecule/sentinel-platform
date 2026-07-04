@@ -27,13 +27,94 @@ vi.mock('next/navigation', () => ({
 
 vi.mock('@sentinel/hooks', () => ({
     useDebounce: (value: any) => value,
-    useExamsQuery: () => ({
-        data: [
-            { id: 'exam-uuid-123', title: 'Midterm Exam', subject: 'CS 101' },
-            { id: 'exam-uuid-456', title: 'Final Exam', subject: 'CS 102' },
-        ],
-        isLoading: false,
-    }),
+    useExamReportsListQuery: ({ page = 1, limit = 6, search }: any = {}) => {
+        const allData = [
+            {
+                id: 'exam-uuid-123',
+                title: 'Midterm Exam',
+                subject: 'CS 101',
+                scheduledDate: '2026-06-26T09:00:00.000Z',
+                studentsCount: 12,
+                questionCount: 20,
+                incidentCount: 4,
+            },
+            {
+                id: 'exam-uuid-456',
+                title: 'Final Exam',
+                subject: 'CS 102',
+                scheduledDate: '2026-06-27T09:00:00.000Z',
+                studentsCount: 10,
+                questionCount: 15,
+                incidentCount: 2,
+            },
+            {
+                id: 'exam-uuid-789',
+                title: 'Physics Exam',
+                subject: 'SCI 101',
+                scheduledDate: '2026-06-28T09:00:00.000Z',
+                studentsCount: 8,
+                questionCount: 18,
+                incidentCount: 1,
+            },
+            {
+                id: 'exam-uuid-101',
+                title: 'Chemistry Exam',
+                subject: 'SCI 102',
+                scheduledDate: '2026-06-29T09:00:00.000Z',
+                studentsCount: 7,
+                questionCount: 17,
+                incidentCount: 0,
+            },
+            {
+                id: 'exam-uuid-102',
+                title: 'History Exam',
+                subject: 'HIS 101',
+                scheduledDate: '2026-06-30T09:00:00.000Z',
+                studentsCount: 6,
+                questionCount: 14,
+                incidentCount: 3,
+            },
+            {
+                id: 'exam-uuid-103',
+                title: 'English Exam',
+                subject: 'ENG 101',
+                scheduledDate: '2026-07-01T09:00:00.000Z',
+                studentsCount: 9,
+                questionCount: 13,
+                incidentCount: 2,
+            },
+            {
+                id: 'exam-uuid-104',
+                title: 'Filtered Exam',
+                subject: 'FIL 101',
+                scheduledDate: '2026-07-02T09:00:00.000Z',
+                studentsCount: 5,
+                questionCount: 11,
+                incidentCount: 1,
+            },
+        ];
+
+        const filtered = search
+            ? allData.filter((item) => item.title.toLowerCase().includes(search.toLowerCase()))
+            : allData;
+        const total = filtered.length;
+        const totalPages = Math.ceil(total / limit);
+        const startIndex = (page - 1) * limit;
+        const sliced = filtered.slice(startIndex, startIndex + limit);
+
+        return {
+            data: {
+                data: sliced,
+                meta: {
+                    total,
+                    page,
+                    limit,
+                    totalPages,
+                },
+            },
+            isLoading: false,
+        };
+    },
     useExamIncidentsQuery: (examId: string) => ({
         data:
             examId === 'exam-uuid-123'
@@ -153,6 +234,14 @@ vi.mock('@sentinel/ui', () => ({
             {children}
         </button>
     ),
+    Card: ({ children, className, onClick, ...props }: any) => (
+        <div className={className} onClick={onClick} {...props}>
+            {children}
+        </div>
+    ),
+    CardHeader: ({ children, className }: any) => <div className={className}>{children}</div>,
+    CardContent: ({ children, className }: any) => <div className={className}>{children}</div>,
+    CardTitle: ({ children, className }: any) => <h3 className={className}>{children}</h3>,
     Input: ({
         value,
         onChange,
@@ -333,6 +422,24 @@ vi.mock('@sentinel/ui', () => ({
     ),
 }));
 
+vi.mock('@/features/exams/_components/views/exams-pagination', () => ({
+    ExamsPagination: ({ page, pageCount, onPageChange }: any) => (
+        <div data-testid="catalog-pagination">
+            <span>{`Page ${page} of ${pageCount}`}</span>
+            <button type="button" onClick={() => onPageChange(page - 1)} disabled={page === 1}>
+                Previous
+            </button>
+            <button
+                type="button"
+                onClick={() => onPageChange(page + 1)}
+                disabled={page === pageCount}
+            >
+                Next
+            </button>
+        </div>
+    ),
+}));
+
 vi.mock('sonner', () => ({
     toast: {
         success: vi.fn(),
@@ -355,14 +462,11 @@ describe('ExamIncidentLogsContent', () => {
 
         render(<ExamIncidentLogsContent />);
 
-        // Verify page header is rendered
         expect(screen.getByText('Incident Logs & Analytics')).toBeTruthy();
-
-        // Verify card selection grid is displayed
         expect(screen.getByText('Midterm Exam')).toBeTruthy();
         expect(screen.getByText('Final Exam')).toBeTruthy();
-
-        // Verify combobox is NOT present since no exam is selected yet
+        expect(screen.getByPlaceholderText('Search exam logs...')).toBeTruthy();
+        expect(screen.getByTestId('catalog-pagination')).toBeTruthy();
         const select = screen.queryByRole('combobox');
         expect(select).toBeNull();
     });
@@ -380,6 +484,36 @@ describe('ExamIncidentLogsContent', () => {
         });
 
         expect(mockPush).toHaveBeenCalledWith('/exams/exam-uuid-123/logs');
+    });
+
+    it('filters the backend catalog list from the search input', async () => {
+        mockSearchParams.mockReturnValue(new URLSearchParams());
+
+        render(<ExamIncidentLogsContent />);
+
+        fireEvent.change(screen.getByPlaceholderText('Search exam logs...'), {
+            target: { value: 'Filtered' },
+        });
+
+        expect(screen.getByText('Filtered Exam')).toBeTruthy();
+        expect(screen.queryByText('Midterm Exam')).toBeNull();
+    });
+
+    it('uses backend pagination for the catalog grid', async () => {
+        mockSearchParams.mockReturnValue(new URLSearchParams());
+
+        render(<ExamIncidentLogsContent />);
+
+        expect(screen.getByText('Page 1 of 2')).toBeTruthy();
+        expect(screen.queryByText('Filtered Exam')).toBeNull();
+
+        await act(async () => {
+            fireEvent.click(screen.getByRole('button', { name: 'Next' }));
+        });
+
+        expect(screen.getByText('Page 2 of 2')).toBeTruthy();
+        expect(screen.getByText('Filtered Exam')).toBeTruthy();
+        expect(screen.queryByText('Midterm Exam')).toBeNull();
     });
 
     it('renders filters, list logs, and student details when examId exists in URL', async () => {

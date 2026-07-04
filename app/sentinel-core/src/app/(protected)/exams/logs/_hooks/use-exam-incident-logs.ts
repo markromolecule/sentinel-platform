@@ -7,7 +7,7 @@ import {
     useExamIncidentsQuery,
     useUpdateExamIncidentsMutation,
     useExamReportQuery,
-    useExamsQuery,
+    useExamReportsListQuery,
     useDebounce,
 } from '@sentinel/hooks';
 import type { ColumnFiltersState } from '@tanstack/react-table';
@@ -22,10 +22,12 @@ export function useExamIncidentLogs(initialExamId?: string) {
     const router = useRouter();
     const searchParams = useSearchParams();
     const examId = initialExamId ?? (searchParams.get('examId') || '');
+    const catalogPageSize = 6;
 
     // Filter states
     const [search, setSearch] = useState('');
-    const [examSearch, setExamSearch] = useState('');
+    const [catalogSearch, setCatalogSearch] = useState('');
+    const [catalogPage, setCatalogPage] = useState(1);
     const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
     const [groupMode, setGroupMode] = useState<'logs' | 'student'>('logs');
 
@@ -36,12 +38,23 @@ export function useExamIncidentLogs(initialExamId?: string) {
 
     // Debounce search inputs to limit API requests
     const debouncedSearch = useDebounce(search, 300);
-    const debouncedExamSearch = useDebounce(examSearch, 300);
+    const debouncedCatalogSearch = useDebounce(catalogSearch, 300);
 
-    // Fetch list of all exams
-    const { data: exams, isLoading: isExamsLoading } = useExamsQuery(
-        debouncedExamSearch ? { search: debouncedExamSearch } : undefined,
-    );
+    // Fetch paginated list of reportable exams for the catalog view
+    const { data: catalogData, isLoading: isCatalogLoading } = useExamReportsListQuery({
+        page: catalogPage,
+        limit: catalogPageSize,
+        search: debouncedCatalogSearch.trim() || undefined,
+    });
+
+    const reportableExams = catalogData?.data ?? [];
+    const catalogTotalCount = catalogData?.meta?.total ?? 0;
+    const catalogPageCount = catalogData?.meta?.totalPages ?? 1;
+
+    const handleCatalogSearchChange = (value: string) => {
+        setCatalogSearch(value);
+        setCatalogPage(1);
+    };
 
     // Build API query parameters
     const queryParams = useMemo(() => {
@@ -86,6 +99,25 @@ export function useExamIncidentLogs(initialExamId?: string) {
     } = useExamIncidentsQuery(examId, queryParams);
 
     const { data: report } = useExamReportQuery(examId);
+    const selectorExams = useMemo(() => {
+        if (!report?.exam || reportableExams.some((exam) => exam.id === report.exam.id)) {
+            return reportableExams;
+        }
+
+        return [
+            {
+                id: report.exam.id,
+                title: report.exam.title,
+                subject: report.exam.subject,
+                scheduledDate: report.exam.scheduledDate,
+                endDateTime: report.exam.endDateTime,
+                durationMinutes: report.exam.durationMinutes,
+                passingScore: report.exam.passingScore,
+                studentsCount: report.students?.length ?? 0,
+            },
+            ...reportableExams,
+        ];
+    }, [report, reportableExams]);
 
     const { mutateAsync: reviewIncidents, isPending: isReviewing } =
         useUpdateExamIncidentsMutation(examId);
@@ -316,8 +348,13 @@ export function useExamIncidentLogs(initialExamId?: string) {
         examId,
         search,
         setSearch,
-        examSearch,
-        setExamSearch,
+        catalogSearch,
+        setCatalogSearch: handleCatalogSearchChange,
+        catalogPage,
+        setCatalogPage,
+        catalogPageSize,
+        catalogPageCount,
+        catalogTotalCount,
         columnFilters,
         setColumnFilters,
         groupMode,
@@ -328,10 +365,11 @@ export function useExamIncidentLogs(initialExamId?: string) {
         setSelectedIncident,
         drawerOpen,
         setDrawerOpen,
-        exams,
+        reportableExams,
+        selectorExams,
         displayIncidents,
         sections,
-        isExamsLoading,
+        isCatalogLoading,
         isIncidentsLoading,
         isFetching,
         isError,
