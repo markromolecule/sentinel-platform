@@ -20,11 +20,16 @@ describe('map monitoring response', () => {
                 last_seen_at: '2026-04-20T09:53:00.000Z',
                 attempt_id: '33333333-3333-4333-8333-333333333333',
                 attempt_status: 'IN_PROGRESS',
+                lifecycle_state: 'IN_PROGRESS',
+                score_state: 'DRAFT',
                 started_at: '2026-04-20T09:00:00.000Z',
                 completed_at: null,
                 time_spent_minutes: 30,
                 score: null,
                 total_score: null,
+                closed_reason: null,
+                reopened_until: null,
+                finalized_at: null,
                 incident_count: 0,
                 open_incident_count: 0,
                 has_high_severity: false,
@@ -36,6 +41,7 @@ describe('map monitoring response', () => {
 
         expect(student.status).toBe('disconnected');
         expect(student.progress).toBe(50);
+        expect(student.lifecycleState).toBe('IN_PROGRESS');
 
         vi.useRealTimers();
     });
@@ -51,11 +57,16 @@ describe('map monitoring response', () => {
                 last_seen_at: '2026-04-20T09:59:00.000Z',
                 attempt_id: '33333333-3333-4333-8333-333333333333',
                 attempt_status: 'COMPLETED',
+                lifecycle_state: 'SUBMITTED',
+                score_state: 'DRAFT',
                 started_at: '2026-04-20T09:00:00.000Z',
                 completed_at: '2026-04-20T09:45:00.000Z',
                 time_spent_minutes: 45,
                 score: 85,
                 total_score: 100,
+                closed_reason: null,
+                reopened_until: null,
+                finalized_at: null,
                 incident_count: 2,
                 open_incident_count: 1,
                 has_high_severity: false,
@@ -67,6 +78,44 @@ describe('map monitoring response', () => {
 
         expect(student.status).toBe('flagged');
         expect(student.progress).toBe(100);
+        expect(student.lifecycleState).toBe('SUBMITTED');
+    });
+
+    it('maps lifecycle state, score state, and closure metadata onto summaries', () => {
+        const student = mapMonitoringStudentSummary(
+            {
+                student_user_id: '11111111-1111-4111-8111-111111111111',
+                student_record_id: '22222222-2222-4222-8222-222222222229',
+                student_number: '2024-0009',
+                first_name: 'Nina',
+                last_name: 'Lifecycle',
+                last_seen_at: '2026-04-20T09:59:00.000Z',
+                attempt_id: '33333333-3333-4333-8333-333333333339',
+                attempt_status: 'COMPLETED',
+                lifecycle_state: 'CLOSED',
+                score_state: 'FINALIZED',
+                started_at: '2026-04-20T09:00:00.000Z',
+                completed_at: '2026-04-20T09:30:00.000Z',
+                time_spent_minutes: 30,
+                score: 90,
+                total_score: 100,
+                closed_reason: 'AUTO_HIGH_INCIDENT_THRESHOLD',
+                reopened_until: '2026-04-20T10:15:00.000Z',
+                finalized_at: '2026-04-20T10:00:00.000Z',
+                incident_count: 0,
+                open_incident_count: 0,
+                has_high_severity: false,
+                latest_incident_type: null,
+                latest_incident_at: null,
+            },
+            60,
+        );
+
+        expect(student.lifecycleState).toBe('CLOSED');
+        expect(student.scoreState).toBe('FINALIZED');
+        expect(student.closedReason).toBe('AUTO_HIGH_INCIDENT_THRESHOLD');
+        expect(student.reopenedUntil).toBe('2026-04-20T10:15:00.000Z');
+        expect(student.finalizedAt).toBe('2026-04-20T10:00:00.000Z');
     });
 
     it('maps telemetry incidents into the frontend flag shape', () => {
@@ -181,11 +230,16 @@ describe('map monitoring response', () => {
                 last_seen_at: '2026-04-20T09:53:00.000Z',
                 attempt_id: '33333333-3333-4333-8333-333333333333',
                 attempt_status: 'IN_PROGRESS',
+                lifecycle_state: 'LOCKED',
+                score_state: 'FINALIZED',
                 started_at: '2026-04-20T09:00:00.000Z',
                 completed_at: null,
                 time_spent_minutes: 30,
                 score: null,
                 total_score: null,
+                closed_reason: null,
+                reopened_until: '2026-04-20T10:30:00.000Z',
+                finalized_at: '2026-04-20T10:15:00.000Z',
                 incident_count: 1,
                 open_incident_count: 1,
                 has_high_severity: false,
@@ -231,6 +285,24 @@ describe('map monitoring response', () => {
                     } as any,
                 },
             ],
+            [
+                {
+                    event_id: '77777777-7777-4777-8777-777777777778',
+                    attempt_id: '33333333-3333-4333-8333-333333333333',
+                    exam_id: '88888888-8888-4888-8888-888888888888',
+                    student_id: '22222222-2222-4222-8222-222222222222',
+                    event_type: 'LOCKED',
+                    previous_state: 'IN_PROGRESS',
+                    next_state: 'LOCKED',
+                    actor_user_id: null,
+                    reason_code: 'MANUAL_MONITORING_LOCK',
+                    notes: 'Locked from monitoring',
+                    related_incident_ids: null,
+                    related_override_id: null,
+                    metadata: null,
+                    created_at: '2026-04-20T10:10:00.000Z',
+                },
+            ],
         );
 
         expect(detail.flags).toHaveLength(1);
@@ -239,6 +311,12 @@ describe('map monitoring response', () => {
             severity: 'medium',
             severityReason: 'repeat-escalated',
             matchingWindowSeconds: 300,
+        });
+        expect(detail.lifecycleState).toBe('LOCKED');
+        expect(detail.scoreState).toBe('FINALIZED');
+        expect(detail.lifecycleEvents?.[0]).toMatchObject({
+            eventType: 'LOCKED',
+            reasonCode: 'MANUAL_MONITORING_LOCK',
         });
     });
 
@@ -298,11 +376,16 @@ describe('map monitoring response', () => {
                 last_seen_at: '2026-04-20T10:44:00.000Z',
                 attempt_id: '33333333-3333-4333-8333-333333333333',
                 attempt_status: 'IN_PROGRESS',
+                lifecycle_state: 'IN_PROGRESS',
+                score_state: 'DRAFT',
                 started_at: '2026-04-20T10:15:00.000Z',
                 completed_at: null,
                 time_spent_minutes: 0,
                 score: null,
                 total_score: null,
+                closed_reason: null,
+                reopened_until: null,
+                finalized_at: null,
                 incident_count: 0,
                 open_incident_count: 0,
                 has_high_severity: false,
@@ -328,12 +411,17 @@ describe('map monitoring response', () => {
                 last_seen_at: '2026-04-20T10:44:00.000Z',
                 attempt_id: '33333333-3333-4333-8333-333333333333',
                 attempt_status: 'IN_PROGRESS',
+                lifecycle_state: 'IN_PROGRESS',
+                score_state: 'DRAFT',
                 started_at: '2026-04-20T10:15:00.000Z',
                 completed_at: null,
                 time_spent_minutes: 45,
                 answered_question_count: 2,
                 score: null,
                 total_score: null,
+                closed_reason: null,
+                reopened_until: null,
+                finalized_at: null,
                 incident_count: 0,
                 open_incident_count: 0,
                 has_high_severity: false,

@@ -92,7 +92,13 @@ export default function SharedOfferedSubjectsPage() {
                 canDeleteOfferings,
                 onViewDetails: handleViewDetails,
             }),
-        [courseLabelMap, departmentLabelMap, sectionLabelMap, canDeleteOfferings, handleViewDetails],
+        [
+            courseLabelMap,
+            departmentLabelMap,
+            sectionLabelMap,
+            canDeleteOfferings,
+            handleViewDetails,
+        ],
     );
 
     const actions = (

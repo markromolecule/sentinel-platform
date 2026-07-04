@@ -46,7 +46,9 @@ export function buildAverageScore(students: ExamReportStudentSummary[]) {
 }
 
 export function buildPassRate(students: ExamReportStudentSummary[], passingScore: number) {
-    const submittedStudents = students.filter((student) => isSubmittedSubmissionType(student.submissionType));
+    const submittedStudents = students.filter((student) =>
+        isSubmittedSubmissionType(student.submissionType),
+    );
 
     if (submittedStudents.length === 0) {
         return null;
@@ -76,13 +78,20 @@ export function buildReportSummary(args: {
     incidentBreakdownBySeverity: ReportIncidentSeverityBreakdownRow[];
     actionItems: ExamReportActionItems;
 }): ExamReportCore['summary'] {
-    const { students, passingScore, incidentBreakdownByType, incidentBreakdownBySeverity, actionItems } =
-        args;
+    const {
+        students,
+        passingScore,
+        incidentBreakdownByType,
+        incidentBreakdownBySeverity,
+        actionItems,
+    } = args;
 
     return {
         totalAssignedStudents: students.length,
         totalStarted: students.filter((student) => student.attemptCount > 0).length,
-        totalSubmitted: students.filter((student) => isSubmittedSubmissionType(student.submissionType)).length,
+        totalSubmitted: students.filter((student) =>
+            isSubmittedSubmissionType(student.submissionType),
+        ).length,
         totalAbsent: students.filter((student) => student.status === 'absent').length,
         flaggedStudentsCount: students.filter((student) => student.isFlagged).length,
         averageScore: buildAverageScore(students),

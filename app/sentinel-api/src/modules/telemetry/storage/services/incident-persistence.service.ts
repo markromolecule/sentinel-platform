@@ -6,6 +6,8 @@ import { buildTelemetryIncidentInsertShape } from '../mappers/insert-incident.ma
 import { incidentSeverityResolverService } from './incident-severity-resolver.service';
 import { LogsService } from '../../../general/logs/logs.service';
 import { ActivityNotificationService } from '../../../general/notification/services/activity-notification.service';
+import { resolveAutomaticLifecyclePolicy } from '../../../examination/lifecycle/services/resolve-automatic-lifecycle-policy';
+import { closeExamAttempt } from '../../../examination/lifecycle/services/close-exam-attempt';
 
 function parseDetails(details: unknown): Record<string, unknown> {
     if (!details) {
@@ -28,6 +30,36 @@ function getOccurrenceCount(details: unknown): number {
     const occurrenceCount = parseDetails(details).occurrenceCount;
 
     return typeof occurrenceCount === 'number' && occurrenceCount > 0 ? occurrenceCount : 1;
+}
+
+async function maybeApplyAutomaticLifecyclePolicy(args: {
+    db: DbClient;
+    attemptId: string;
+}): Promise<void> {
+    const resolution = await resolveAutomaticLifecyclePolicy({
+        dbClient: args.db,
+        attemptId: args.attemptId,
+    });
+
+    if (resolution.action !== 'CLOSE_ATTEMPT') {
+        return;
+    }
+
+    try {
+        await closeExamAttempt({
+            dbClient: args.db,
+            examId: resolution.examId,
+            attemptId: resolution.attemptId,
+            reasonCode: resolution.reasonCode,
+            notes: resolution.notes,
+            actorUserId: null,
+        });
+    } catch (error) {
+        console.error('[TelemetryStorage] Automatic lifecycle close failed', {
+            attemptId: args.attemptId,
+            error,
+        });
+    }
 }
 
 export class IncidentPersistenceService {
@@ -186,6 +218,13 @@ export class IncidentPersistenceService {
                 severity: severityResolution.finalSeverity,
                 settingsVersion: payload.runtimeSettingsSnapshot?.version ?? null,
             });
+
+            if (severityResolution.finalSeverity === 'HIGH') {
+                await maybeApplyAutomaticLifecyclePolicy({
+                    db,
+                    attemptId: payload.examSessionId,
+                });
+            }
             return;
         }
 
@@ -237,6 +276,13 @@ export class IncidentPersistenceService {
             severity: severityResolution.finalSeverity,
             settingsVersion: payload.runtimeSettingsSnapshot?.version ?? null,
         });
+
+        if (severityResolution.finalSeverity === 'HIGH') {
+            await maybeApplyAutomaticLifecyclePolicy({
+                db,
+                attemptId: payload.examSessionId,
+            });
+        }
 
         // Telemetry logging and notifications
         if (session.institution_id) {

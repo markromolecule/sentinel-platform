@@ -28,7 +28,6 @@ import {
     buildCoreExamLogsHref,
 } from '@/lib/routes/exam-management-routes';
 
-
 export type ExamActionCellProps = {
     exam: ProctorExam;
 };

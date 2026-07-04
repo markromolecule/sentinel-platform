@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useApi } from '@sentinel/hooks';
-import { startExamSession, syncExamProgress } from '@sentinel/services';
+import { startExamSession, syncExamProgress, ApiError } from '@sentinel/services';
 import type { ExamRuntimeAccess } from '@sentinel/shared/types';
 import { toast } from 'sonner';
 import {
@@ -34,6 +34,7 @@ type UseExamSessionArgs = {
     isSessionStartBlocked?: boolean;
     onInitializeAnswers?: (answers: Record<string, ExamAnswerValue>) => void;
     onInitializeElapsedSeconds?: (seconds: number) => void;
+    onLifecycleBlocked?: (message: string) => void;
 };
 
 export function useExamSession({
@@ -44,6 +45,7 @@ export function useExamSession({
     isSessionStartBlocked,
     onInitializeAnswers,
     onInitializeElapsedSeconds,
+    onLifecycleBlocked,
 }: UseExamSessionArgs) {
     const { replace } = useRouter();
     const apiClient = useApi();
@@ -225,7 +227,7 @@ export function useExamSession({
 
     const saveAnswerDraft = useCallback(
         (answers: Record<string, ExamAnswerValue>, nextElapsedSeconds: number) => {
-            if (!examSession?.sessionId) {
+            if (!examSession?.sessionId || isSessionStartBlocked) {
                 return;
             }
 
@@ -236,7 +238,7 @@ export function useExamSession({
                 elapsedSeconds: nextElapsedSeconds,
             });
         },
-        [examId, examSession?.sessionId],
+        [examId, examSession?.sessionId, isSessionStartBlocked],
     );
 
     const syncProgress = useCallback(
@@ -245,7 +247,7 @@ export function useExamSession({
             answers?: Record<string, ExamAnswerValue>,
             nextElapsedSeconds = elapsedSeconds,
         ) => {
-            if (!examSession?.sessionId) {
+            if (!examSession?.sessionId || isSessionStartBlocked) {
                 return;
             }
 
@@ -262,9 +264,13 @@ export function useExamSession({
                 });
             } catch (error) {
                 console.error('Failed to sync exam progress:', error);
+                if (error instanceof ApiError && error.status === 409) {
+                    const message = resolveStudentExamSessionError(error);
+                    onLifecycleBlocked?.(message);
+                }
             }
         },
-        [apiClient, elapsedSeconds, examSession?.sessionId, saveAnswerDraft],
+        [apiClient, elapsedSeconds, examSession?.sessionId, saveAnswerDraft, isSessionStartBlocked, onLifecycleBlocked],
     );
 
     return {

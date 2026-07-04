@@ -1,10 +1,5 @@
 export type ExamAssignmentStatus =
-    | 'PENDING'
-    | 'ACCEPTED'
-    | 'DECLINED'
-    | 'ACTIVE'
-    | 'COMPLETED'
-    | 'SCHEDULED';
+    'PENDING' | 'ACCEPTED' | 'DECLINED' | 'ACTIVE' | 'COMPLETED' | 'SCHEDULED';
 
 export type ExamAssignmentRelationship = 'INBOUND' | 'OUTBOUND';
 

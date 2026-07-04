@@ -25,12 +25,13 @@ import {
 } from '@sentinel/ui';
 import { type ApiIncidentLogItem } from '@sentinel/services';
 import { flagLabels } from '@sentinel/shared/constants';
+import type { ConfirmIncidentOptions, IncidentLifecycleAction } from '../hooks/use-incident-logs';
 
 interface IncidentDrawerProps {
     incident: ApiIncidentLogItem | null;
     isOpen: boolean;
     onClose: () => void;
-    onConfirm: (incidentIds: string[], notes: string) => Promise<void>;
+    onConfirm: (incidentIds: string[], options: ConfirmIncidentOptions) => Promise<void>;
     onDismiss: (incidentIds: string[], notes: string) => Promise<void>;
     isSubmitting: boolean;
 }
@@ -77,12 +78,18 @@ export function IncidentDrawer({
     isSubmitting,
 }: IncidentDrawerProps) {
     const [notes, setNotes] = useState('');
+    const [lifecycleAction, setLifecycleAction] = useState<IncidentLifecycleAction | null>(null);
+    const [lifecycleNotes, setLifecycleNotes] = useState('');
 
     useEffect(() => {
         if (incident) {
             setNotes(incident.reviewNotes || '');
+            setLifecycleAction(null);
+            setLifecycleNotes('');
         } else {
             setNotes('');
+            setLifecycleAction(null);
+            setLifecycleNotes('');
         }
     }, [incident]);
 
@@ -96,11 +103,24 @@ export function IncidentDrawer({
     const severityLadderLabel = formatSeverityLadder(incident);
 
     const handleConfirm = () => {
+        const lifecycleReasonCode =
+            lifecycleAction === 'LOCK_ATTEMPT'
+                ? 'CONFIRMED_INCIDENT_LOCK'
+                : lifecycleAction === 'CLOSE_ATTEMPT'
+                  ? 'CONFIRMED_INCIDENT_CLOSE'
+                  : null;
+        const confirmOptions: ConfirmIncidentOptions = {
+            reviewNotes: notes,
+            lifecycleAction: lifecycleAction ?? undefined,
+            reasonCode: lifecycleReasonCode,
+            notes: lifecycleAction ? lifecycleNotes || notes : undefined,
+        };
+
         if (incident.details?._isGrouped && incident.details?._incidents) {
             const ids = incident.details._incidents.map((i: any) => i.incidentId);
-            void onConfirm(ids, notes);
+            void onConfirm(ids, confirmOptions);
         } else {
-            void onConfirm([incident.incidentId], notes);
+            void onConfirm([incident.incidentId], confirmOptions);
         }
     };
 
@@ -446,6 +466,62 @@ export function IncidentDrawer({
                             className="min-h-[100px] resize-none rounded-md text-sm"
                             disabled={isSubmitting}
                         />
+                    </div>
+
+                    <div className="space-y-3">
+                        <label className="text-foreground text-xs font-bold tracking-wider uppercase">
+                            After Confirm
+                        </label>
+                        <div className="grid grid-cols-1 gap-2">
+                            <Button
+                                type="button"
+                                variant="outline"
+                                disabled={isSubmitting}
+                                onClick={() => setLifecycleAction(null)}
+                                className={cn(
+                                    'justify-start rounded-md text-left',
+                                    lifecycleAction === null && 'border-primary text-primary',
+                                )}
+                            >
+                                Confirm only
+                            </Button>
+                            <Button
+                                type="button"
+                                variant="outline"
+                                disabled={isSubmitting}
+                                onClick={() => setLifecycleAction('LOCK_ATTEMPT')}
+                                className={cn(
+                                    'justify-start rounded-md text-left',
+                                    lifecycleAction === 'LOCK_ATTEMPT' &&
+                                        'border-primary text-primary',
+                                )}
+                            >
+                                Confirm and lock attempt
+                            </Button>
+                            <Button
+                                type="button"
+                                variant="outline"
+                                disabled={isSubmitting}
+                                onClick={() => setLifecycleAction('CLOSE_ATTEMPT')}
+                                className={cn(
+                                    'justify-start rounded-md text-left',
+                                    lifecycleAction === 'CLOSE_ATTEMPT' &&
+                                        'border-primary text-primary',
+                                )}
+                            >
+                                Confirm and close attempt
+                            </Button>
+                        </div>
+
+                        {lifecycleAction ? (
+                            <Textarea
+                                placeholder="Add follow-up notes for the attempt lifecycle action..."
+                                value={lifecycleNotes}
+                                onChange={(e) => setLifecycleNotes(e.target.value)}
+                                className="min-h-[88px] resize-none rounded-md text-sm"
+                                disabled={isSubmitting}
+                            />
+                        ) : null}
                     </div>
                 </div>
 

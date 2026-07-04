@@ -63,12 +63,7 @@ export type MediaPipeCalibrationSample = {
 };
 
 export type MediaPipeAnalysisStatus =
-    | 'ready'
-    | 'no-face'
-    | 'multiple-faces'
-    | 'off-screen'
-    | 'low-confidence'
-    | 'unsupported';
+    'ready' | 'no-face' | 'multiple-faces' | 'off-screen' | 'low-confidence' | 'unsupported';
 
 export type MediaPipeFrameAnalysis = {
     status: MediaPipeAnalysisStatus;

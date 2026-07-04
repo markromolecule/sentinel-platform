@@ -21,7 +21,6 @@ import { PageHeader, PermissionDeniedState, Separator } from '@sentinel/ui';
 import { Button } from '@sentinel/ui';
 import { Wand2, ChevronLeft, Edit2 } from 'lucide-react';
 
-
 function SupportInstitutionsPageContent() {
     const { hasPermission } = useActivePermissions();
     const canCreateInstitution = hasPermission('institutions:create');

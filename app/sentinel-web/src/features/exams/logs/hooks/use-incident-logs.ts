@@ -15,6 +15,15 @@ type IncidentLogSnapshot = {
     occurrenceCount: number;
 };
 
+export type IncidentLifecycleAction = 'LOCK_ATTEMPT' | 'CLOSE_ATTEMPT';
+
+export type ConfirmIncidentOptions = {
+    reviewNotes: string;
+    lifecycleAction?: IncidentLifecycleAction;
+    reasonCode?: string | null;
+    notes?: string | null;
+};
+
 function getIncidentOccurrenceCount(item: ApiIncidentLogItem) {
     const occurrenceCount = item.details?.occurrenceCount;
     return typeof occurrenceCount === 'number' && occurrenceCount > 0 ? occurrenceCount : 1;
@@ -231,14 +240,24 @@ export function useIncidentLogs(examId: string) {
     }, [report]);
 
     // Review Actions
-    const handleConfirmIncident = async (incidentIds: string[], notes: string) => {
+    const handleConfirmIncident = async (
+        incidentIds: string[],
+        options: ConfirmIncidentOptions,
+    ) => {
         try {
             await reviewIncidents({
                 incidentIds,
                 status: 'CONFIRMED',
-                reviewNotes: notes,
-            });
-            toast.success('Incident confirmed successfully');
+                reviewNotes: options.reviewNotes,
+                lifecycleAction: options.lifecycleAction,
+                reasonCode: options.reasonCode ?? null,
+                notes: options.notes ?? null,
+            } as any);
+            toast.success(
+                options.lifecycleAction
+                    ? 'Incident confirmed and lifecycle action applied'
+                    : 'Incident confirmed successfully',
+            );
             setDrawerOpen(false);
             setSelectedIncident(null);
         } catch (err) {
@@ -252,7 +271,7 @@ export function useIncidentLogs(examId: string) {
                 incidentIds,
                 status: 'DISMISSED',
                 reviewNotes: notes,
-            });
+            } as any);
             toast.success('Incident dismissed successfully');
             setDrawerOpen(false);
             setSelectedIncident(null);
@@ -284,7 +303,7 @@ export function useIncidentLogs(examId: string) {
                 incidentIds: targetIds,
                 status: 'CONFIRMED',
                 reviewNotes: 'Bulk confirmed by instructor',
-            });
+            } as any);
             toast.success(`Successfully confirmed ${targetIds.length} incidents`);
             setSelectedIds([]);
         } catch (err) {
@@ -315,7 +334,7 @@ export function useIncidentLogs(examId: string) {
                 incidentIds: targetIds,
                 status: 'DISMISSED',
                 reviewNotes: 'Bulk dismissed by instructor',
-            });
+            } as any);
             toast.success(`Successfully dismissed ${targetIds.length} incidents`);
             setSelectedIds([]);
         } catch (err) {

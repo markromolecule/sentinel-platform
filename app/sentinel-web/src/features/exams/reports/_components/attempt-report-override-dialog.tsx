@@ -52,15 +52,19 @@ export function AttemptReportOverrideDialog({
                     </DialogDescription>
                 </DialogHeader>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 py-2">
+                <div className="grid grid-cols-1 gap-6 py-2 md:grid-cols-2">
                     <div className="space-y-4">
                         <div className="space-y-2">
-                            <Label className="text-xs text-muted-foreground uppercase tracking-wider">Question Prompt</Label>
+                            <Label className="text-muted-foreground text-xs tracking-wider uppercase">
+                                Question Prompt
+                            </Label>
                             <div className="text-foreground text-sm font-medium">{prompt}</div>
                         </div>
                         <div className="space-y-2">
-                            <Label className="text-xs text-muted-foreground uppercase tracking-wider">Student's Answer</Label>
-                            <div className="bg-slate-50/50 border rounded-lg p-3 text-sm text-slate-800 font-mono whitespace-pre-wrap max-h-60 overflow-y-auto">
+                            <Label className="text-muted-foreground text-xs tracking-wider uppercase">
+                                Student's Answer
+                            </Label>
+                            <div className="max-h-60 overflow-y-auto rounded-lg border bg-slate-50/50 p-3 font-mono text-sm whitespace-pre-wrap text-slate-800">
                                 {formatAnswerValue(selectedReport.answer)}
                             </div>
                         </div>
@@ -112,7 +116,9 @@ export function AttemptReportOverrideDialog({
 
                 <DialogFooter>
                     <DialogClose asChild>
-                        <Button className="bg-[#323d8f] text-white hover:bg-[#323d8f]/90">Done</Button>
+                        <Button className="bg-[#323d8f] text-white hover:bg-[#323d8f]/90">
+                            Done
+                        </Button>
                     </DialogClose>
                 </DialogFooter>
             </DialogContent>

@@ -85,9 +85,7 @@ export class SessionRepository {
             ? new Date(existingAttempt.reopened_until)
             : null;
         const hasActiveReopenWindow = Boolean(
-            reopenedUntil &&
-                !Number.isNaN(reopenedUntil.getTime()) &&
-                reopenedUntil >= new Date(),
+            reopenedUntil && !Number.isNaN(reopenedUntil.getTime()) && reopenedUntil >= new Date(),
         );
         const canResumeLockedAttempt =
             existingAttempt?.lifecycle_state === 'LOCKED' &&

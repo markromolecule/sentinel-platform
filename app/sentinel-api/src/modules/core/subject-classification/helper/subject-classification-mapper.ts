@@ -20,8 +20,7 @@ export function mapClassificationRecord(record: any) {
             record.isOverridden ?? record.is_overridden ?? inheritanceStatus === 'OVERRIDDEN',
         is_hidden: record.isHidden ?? record.is_hidden ?? inheritanceStatus === 'HIDDEN',
         isLocal: record.isLocal ?? record.is_local ?? inheritanceStatus === 'LOCAL',
-        isInherited:
-            record.isInherited ?? record.is_inherited ?? inheritanceStatus === 'INHERITED',
+        isInherited: record.isInherited ?? record.is_inherited ?? inheritanceStatus === 'INHERITED',
         isOverridden:
             record.isOverridden ?? record.is_overridden ?? inheritanceStatus === 'OVERRIDDEN',
         isHidden: record.isHidden ?? record.is_hidden ?? inheritanceStatus === 'HIDDEN',

@@ -45,11 +45,14 @@ export default function StudentClassroomDetailPage() {
     const { data: classrooms, isLoading: isClassroomsLoading } = useStudentClassroomsQuery();
     const classroom = classrooms?.find((c) => c.id === id);
 
-    const { data: exams, isLoading: isExamsLoading } = useExamsQuery({ classroomId: id }, {
-        staleTime: 0,
-        refetchOnMount: 'always',
-        refetchOnWindowFocus: true,
-    });
+    const { data: exams, isLoading: isExamsLoading } = useExamsQuery(
+        { classroomId: id },
+        {
+            staleTime: 0,
+            refetchOnMount: 'always',
+            refetchOnWindowFocus: true,
+        },
+    );
 
     const filteredExams = classroom
         ? (exams

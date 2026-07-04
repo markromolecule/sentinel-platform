@@ -3,26 +3,46 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { useMonitoring } from './use-monitoring';
 
 const {
+    mockUseCloseExamAttemptMutation,
     mockUseApi,
     mockUseDebounce,
     mockUseStableValue,
     mockUseExamMonitoringOverviewQuery,
+    mockUseGrantMakeupExamWindowMutation,
+    mockUseGrantRetakeExamWindowMutation,
+    mockUseLockExamAttemptMutation,
     mockUseOverrideReconnectLimitMutation,
+    mockUseReopenExamAttemptMutation,
+    mockUseResetExamAttemptMutation,
 } = vi.hoisted(() => ({
+    mockUseCloseExamAttemptMutation: vi.fn(),
     mockUseApi: vi.fn(),
     mockUseDebounce: vi.fn((value: string) => value),
     mockUseStableValue: vi.fn((factory: () => unknown) => factory()),
     mockUseExamMonitoringOverviewQuery: vi.fn(),
+    mockUseGrantMakeupExamWindowMutation: vi.fn(),
+    mockUseGrantRetakeExamWindowMutation: vi.fn(),
+    mockUseLockExamAttemptMutation: vi.fn(),
     mockUseOverrideReconnectLimitMutation: vi.fn(),
+    mockUseReopenExamAttemptMutation: vi.fn(),
+    mockUseResetExamAttemptMutation: vi.fn(),
 }));
 
 vi.mock('@sentinel/hooks', () => ({
+    useCloseExamAttemptMutation: (options?: unknown) => mockUseCloseExamAttemptMutation(options),
     useApi: () => mockUseApi(),
     useDebounce: (value: string, delay: number) => mockUseDebounce(value, delay),
     useStableValue: (factory: () => unknown, deps: unknown[]) => mockUseStableValue(factory, deps),
     useExamMonitoringOverviewQuery: (examId: string) => mockUseExamMonitoringOverviewQuery(examId),
+    useGrantMakeupExamWindowMutation: (options?: unknown) =>
+        mockUseGrantMakeupExamWindowMutation(options),
+    useGrantRetakeExamWindowMutation: (options?: unknown) =>
+        mockUseGrantRetakeExamWindowMutation(options),
+    useLockExamAttemptMutation: (options?: unknown) => mockUseLockExamAttemptMutation(options),
     useOverrideReconnectLimitMutation: (options: unknown) =>
         mockUseOverrideReconnectLimitMutation(options),
+    useReopenExamAttemptMutation: (options?: unknown) => mockUseReopenExamAttemptMutation(options),
+    useResetExamAttemptMutation: (options?: unknown) => mockUseResetExamAttemptMutation(options),
 }));
 
 vi.mock('@sentinel/services', () => ({
@@ -67,6 +87,7 @@ const monitoringOverview: any = {
             openIncidentCount: 0,
             latestIncidentType: null,
             lastActivity: 'Now',
+            lifecycleState: 'IN_PROGRESS',
         },
         {
             id: 'student-2',
@@ -80,6 +101,7 @@ const monitoringOverview: any = {
             openIncidentCount: 0,
             latestIncidentType: null,
             lastActivity: 'Now',
+            lifecycleState: 'LOCKED',
         },
     ],
 };
@@ -103,6 +125,18 @@ describe('useMonitoring', () => {
         mockUseOverrideReconnectLimitMutation.mockReturnValue({
             mutateAsync: vi.fn(),
         });
+        for (const mock of [
+            mockUseLockExamAttemptMutation,
+            mockUseReopenExamAttemptMutation,
+            mockUseResetExamAttemptMutation,
+            mockUseCloseExamAttemptMutation,
+            mockUseGrantMakeupExamWindowMutation,
+            mockUseGrantRetakeExamWindowMutation,
+        ]) {
+            mock.mockReturnValue({
+                mutateAsync: vi.fn(),
+            });
+        }
     });
 
     it('debounces the monitoring search query', () => {
@@ -174,5 +208,28 @@ describe('useMonitoring', () => {
         rerender();
 
         expect(toast.warning).toHaveBeenCalledTimes(1);
+    });
+
+    it('routes per-student lifecycle actions through the dedicated mutation hooks', async () => {
+        const lockMutateAsync = vi.fn().mockResolvedValue(undefined);
+        mockUseLockExamAttemptMutation.mockReturnValue({
+            mutateAsync: lockMutateAsync,
+        });
+
+        const { result } = renderHook(() => useMonitoring('exam-1'));
+
+        await act(async () => {
+            await result.current.handleLifecycleAction(
+                currentMonitoringOverview.students[0],
+                'lock',
+            );
+        });
+
+        expect(lockMutateAsync).toHaveBeenCalledWith({
+            id: 'exam-1',
+            attemptId: 'attempt-1',
+            reasonCode: 'MANUAL_MONITORING_LOCK',
+            notes: 'Locked from instructor monitoring.',
+        });
     });
 });

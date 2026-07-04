@@ -34,6 +34,13 @@ export function normalizeIncidentSeverity(
 }
 
 export function isSubmitted(row: ReportStudentRow) {
+    if (row.lifecycle_state) {
+        return (
+            row.lifecycle_state === 'SUBMITTED' ||
+            row.lifecycle_state === 'CLOSED' ||
+            row.lifecycle_state === 'SUPERSEDED'
+        );
+    }
     return Boolean(row.completed_at) || row.attempt_status?.toUpperCase() === 'COMPLETED';
 }
 
@@ -49,6 +56,9 @@ export function getPercentage(row: ReportStudentRow) {
 }
 
 export function needsReview(row: ReportStudentRow) {
+    if (row.lifecycle_state === 'LOCKED') {
+        return true;
+    }
     return (
         toNumber(row.open_incident_count) > 0 ||
         normalizeIncidentSeverity(row.highest_incident_severity) === 'high'
@@ -59,6 +69,10 @@ export function needsRetake(row: ReportStudentRow, passingScore: number) {
     const percentage = getPercentage(row);
 
     if (!isSubmitted(row) || percentage === null) {
+        return false;
+    }
+
+    if (row.lifecycle_state === 'SUPERSEDED') {
         return false;
     }
 
@@ -76,6 +90,10 @@ export function resolveAttemptKind(row: ReportStudentRow): ExamReportStudentSumm
 
     if (row.attempt_kind) {
         return row.attempt_kind;
+    }
+
+    if (row.lifecycle_state === 'SUPERSEDED') {
+        return 'primary';
     }
 
     if (toNumber(row.attempt_count) > 1 && isSubmitted(row)) {

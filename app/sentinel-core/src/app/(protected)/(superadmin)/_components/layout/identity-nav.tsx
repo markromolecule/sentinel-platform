@@ -3,11 +3,7 @@ import { cn, Separator } from '@sentinel/ui';
 import type { CoreRole } from '@/lib/auth/core-role';
 
 export type IdentitySection =
-    | 'administrators'
-    | 'whitelist'
-    | 'students'
-    | 'instructors'
-    | 'student-whitelist';
+    'administrators' | 'whitelist' | 'students' | 'instructors' | 'student-whitelist';
 
 const IDENTITY_NAV_GROUPS = [
     {

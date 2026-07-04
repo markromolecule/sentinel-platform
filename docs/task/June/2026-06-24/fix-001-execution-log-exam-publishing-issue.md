@@ -31,7 +31,7 @@ The main issue was the read layer, not the data model. Several visibility checks
 
 **Goal:** Verify the frontend surfaces the corrected backend visibility behavior.
 
-- [x] Added a regression test in [`app/sentinel-web/src/app/(protected)/student/history/_hooks/use-student-history/index.test.ts`](/Applications/XAMPP/xamppfiles/htdocs/sentinel/app/sentinel-web/src/app/(protected)/student/history/_hooks/use-student-history/index.test.ts) to confirm section-assigned exams remain visible in the available feed.
+- [x] Added a regression test in [`app/sentinel-web/src/app/(protected)/student/history/_hooks/use-student-history/index.test.ts`](</Applications/XAMPP/xamppfiles/htdocs/sentinel/app/sentinel-web/src/app/(protected)/student/history/_hooks/use-student-history/index.test.ts>) to confirm section-assigned exams remain visible in the available feed.
 - [x] Confirmed the student history hook continues to source available exams from `useExamsQuery()` and the corrected backend payload.
 - [x] Confirmed the exam-section-assignment mutation hooks already invalidate the exam query cache, so no cache-layer changes were needed.
 

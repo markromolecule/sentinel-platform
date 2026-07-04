@@ -24,10 +24,7 @@ export async function syncSystemRolePermissions(dbClient: DbClient) {
             .select(['permission_id', 'permission_key'])
             .where('permission_key', 'in', permissionKeys)
             .execute(),
-        dbClient
-            .selectFrom('rbac_role_permissions')
-            .select(['role_id', 'permission_id'])
-            .execute(),
+        dbClient.selectFrom('rbac_role_permissions').select(['role_id', 'permission_id']).execute(),
     ]);
 
     const roleIdByName = new Map(roles.map((role) => [role.role_name, role.role_id]));

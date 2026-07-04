@@ -4,6 +4,7 @@ import { HTTPException } from 'hono/http-exception';
 import { getLifecycleAttemptContext } from '../data/get-lifecycle-attempt-context';
 import { appendExamAttemptLifecycleEvent } from './lifecycle-event.service';
 import { transitionExamAttemptLifecycle } from './lifecycle-transition.service';
+import { recordAttemptLifecycleAudit } from './lifecycle-audit.service';
 
 /**
  * Reopens a previously locked or closed attempt and captures the allowed reopen window.
@@ -65,6 +66,25 @@ export async function reopenExamAttempt(args: {
         actorUserId: args.actorUserId ?? null,
         reasonCode: args.reasonCode ?? null,
         notes: args.notes ?? null,
+    });
+
+    const resolvedInstId = args.institutionId || context.exam.institutionId || '';
+
+    await recordAttemptLifecycleAudit({
+        dbClient: args.dbClient,
+        attemptId: args.attemptId,
+        examId: args.examId,
+        studentId: context.student.id,
+        eventType: 'REOPENED',
+        actorUserId: args.actorUserId ?? null,
+        institutionId: resolvedInstId || null,
+        reasonCode: args.reasonCode ?? null,
+        notes: args.notes ?? null,
+        previousState: context.attempt.lifecycleState,
+        nextState: 'IN_PROGRESS',
+        details: {
+            reopenedUntil: reopenedUntil.toISOString(),
+        },
     });
 
     return {

@@ -10,7 +10,7 @@ point to make the codebase more modular, scalable, readable, and maintainable.
 
 - [x] Read and summarized the task in one sentence (above).
 - [x] Scanned source files: `roles.service.ts` (monolith), `access-control-catalog.service.ts`,
-  `access-control-assignment.service.ts`, controllers (`get-access-control-roles.controller.ts`, etc.).
+      `access-control-assignment.service.ts`, controllers (`get-access-control-roles.controller.ts`, etc.).
 - [x] Identified all files and DB tables touched (no DB tables modified, logic shift only).
 - [x] Prisma migration required: **No** — logic refactoring only.
 
@@ -51,21 +51,21 @@ the monolithic class implementation into clean, testable single-responsibility s
 implement their corresponding operations.
 
 - [ ] Create `app/sentinel-api/src/modules/security/roles/services/validate-role-boundaries.ts`
-  containing the Option A boundary checking validation logic.
+      containing the Option A boundary checking validation logic.
 - [ ] Create `app/sentinel-api/src/modules/security/roles/services/sync-system-roles.service.ts`
-  implementing the `syncSystemRoles` function.
+      implementing the `syncSystemRoles` function.
 - [ ] Create `app/sentinel-api/src/modules/security/roles/services/get-role-record.service.ts`
-  implementing `getRoleRecord`.
+      implementing `getRoleRecord`.
 - [ ] Create `app/sentinel-api/src/modules/security/roles/services/get-roles.service.ts`
-  implementing `getRoles` and the internal `readRoles` helper.
+      implementing `getRoles` and the internal `readRoles` helper.
 - [ ] Create `app/sentinel-api/src/modules/security/roles/services/create-role.service.ts`
-  implementing `createRole`.
+      implementing `createRole`.
 - [ ] Create `app/sentinel-api/src/modules/security/roles/services/update-role.service.ts`
-  implementing `updateRole`.
+      implementing `updateRole`.
 - [ ] Create `app/sentinel-api/src/modules/security/roles/services/delete-role.service.ts`
-  implementing `deleteRole`.
+      implementing `deleteRole`.
 - [ ] Create `app/sentinel-api/src/modules/security/roles/services/replace-role-permissions.service.ts`
-  implementing `replaceRolePermissions`.
+      implementing `replaceRolePermissions`.
 
 **Migration required:** No.
 
@@ -88,19 +88,19 @@ implement their corresponding operations.
 **Goal:** Point all existing callers to the new main entry point file and verify that everything compiles and passes tests.
 
 - [ ] Update imports in:
-  - `access-control-catalog.service.ts`
-  - `access-control-assignment.service.ts`
-  - `replace-access-control-role-permissions.controller.ts`
-  - `get-access-control-roles.controller.ts`
-  - `update-access-control-role.controller.ts`
-  - `delete-access-control-role.controller.ts`
-  - `create-access-control-role.controller.ts`
-  - `roles.service.test.ts`
+    - `access-control-catalog.service.ts`
+    - `access-control-assignment.service.ts`
+    - `replace-access-control-role-permissions.controller.ts`
+    - `get-access-control-roles.controller.ts`
+    - `update-access-control-role.controller.ts`
+    - `delete-access-control-role.controller.ts`
+    - `create-access-control-role.controller.ts`
+    - `roles.service.test.ts`
 - [ ] Run vitest:
-  ```bash
-  pnpm --dir app/sentinel-api test src/modules/security/roles --run
-  ```
-  Ensure all tests pass successfully.
+    ```bash
+    pnpm --dir app/sentinel-api test src/modules/security/roles --run
+    ```
+    Ensure all tests pass successfully.
 
 **Migration required:** No.
 

@@ -249,14 +249,21 @@ export const columns: ColumnDef<ApiIncidentLogItem>[] = [
         cell: ({ row }) => {
             const status = row.getValue('status') as ApiIncidentLogItem['status'];
             return (
-                <Badge
-                    variant="outline"
-                    className={`${getStatusBadgeStyles(
-                        status,
-                    )} px-2 py-0.5 text-[10px] font-bold tracking-wider uppercase`}
-                >
-                    {status === 'PENDING' ? 'Needs Review' : status}
-                </Badge>
+                <div className="space-y-1">
+                    <Badge
+                        variant="outline"
+                        className={`${getStatusBadgeStyles(
+                            status,
+                        )} px-2 py-0.5 text-[10px] font-bold tracking-wider uppercase`}
+                    >
+                        {status === 'PENDING' ? 'Needs Review' : status}
+                    </Badge>
+                    {status === 'PENDING' ? (
+                        <div className="text-muted-foreground text-[10px]">
+                            Review can add attempt follow-up.
+                        </div>
+                    ) : null}
+                </div>
             );
         },
     },

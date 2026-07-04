@@ -23,7 +23,10 @@ export class SubjectClassificationService {
         dbClient: DbClient,
         institutionId?: string,
     ): Promise<string[] | null> {
-        return GetSubjectClassificationsService.getParentVisibleInstitutionIds(dbClient, institutionId);
+        return GetSubjectClassificationsService.getParentVisibleInstitutionIds(
+            dbClient,
+            institutionId,
+        );
     }
 
     /**
@@ -61,7 +64,11 @@ export class SubjectClassificationService {
      * @returns The resolved subject classification, or null if not found.
      */
     static async getSubjectClassification(dbClient: DbClient, id: string, institutionId?: string) {
-        return GetSubjectClassificationsService.getSubjectClassification(dbClient, id, institutionId);
+        return GetSubjectClassificationsService.getSubjectClassification(
+            dbClient,
+            id,
+            institutionId,
+        );
     }
 
     /**
@@ -93,7 +100,12 @@ export class SubjectClassificationService {
         data: UpdateSubjectClassificationPayload,
         institutionId?: string,
     ) {
-        return ManageSubjectClassificationService.updateSubjectClassification(dbClient, id, data, institutionId);
+        return ManageSubjectClassificationService.updateSubjectClassification(
+            dbClient,
+            id,
+            data,
+            institutionId,
+        );
     }
 
     /**

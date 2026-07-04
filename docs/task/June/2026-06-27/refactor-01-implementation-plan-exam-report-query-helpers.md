@@ -3,14 +3,17 @@
 ## 1-3-1 Options Analysis
 
 **Option 1: Split by Functional Layers (Queries vs Domain Logic)**
+
 - **Approach:** Separate Kysely query builders into `exam-report.queries.ts`, and domain logic (overrides, types, data-loading) into `exam-report.domain.ts`.
 - **Tradeoff:** Faster to implement, but `exam-report.domain.ts` might still become bloated as the reporting feature grows.
 
 **Option 2: Split into Granular Utility Modules within a Dedicated Folder (Recommended)**
+
 - **Approach:** Create a folder `exam-report-queries/` containing `types.ts`, `date-utils.ts`, `override-helpers.ts`, `query-builders.ts`, and `data-loader.ts`. Add an `index.ts` to re-export everything.
 - **Tradeoff:** Introduces a new directory and slightly more files, but provides the highest cohesion, readability, and scalability for future reporting features.
 
 **Option 3: Extract Only the Query Builders and Keep the Rest**
+
 - **Approach:** Move the 4 Kysely query builder functions to `exam-report.query-builders.ts` and keep the data loader, date util, and override logic in the original file.
 - **Tradeoff:** Minimal impact on imports, but doesn't fully resolve the modularity and single-responsibility issues of the original file.
 
@@ -20,6 +23,7 @@
 ---
 
 ## Phase 1: Setup and Extraction
+
 **Goal:** Create the new modular structure and extract responsibilities from the original monolithic file.
 
 - [x] Extract types (`ExamContextForReporting`, `EnrichedReportStudentRow`) into `app/sentinel-api/src/modules/examination/reporting/services/exam-report-queries/types.ts`
@@ -35,9 +39,10 @@
 - [x] Extract the data loader orchestrator (`loadExamReportSourceData`) into `app/sentinel-api/src/modules/examination/reporting/services/exam-report-queries/data-loader.ts`
 - [x] Add JSDoc comments to `loadExamReportSourceData`
 - [x] Create barrel file `app/sentinel-api/src/modules/examination/reporting/services/exam-report-queries/index.ts` to export all extracted modules
-**Migration required:** No — purely internal refactoring of TypeScript code.
+      **Migration required:** No — purely internal refactoring of TypeScript code.
 
 ## Phase 2: Integration and Cleanup
+
 **Goal:** Update consuming files to use the new module structure and remove the old monolithic file.
 
 - [x] Update imports in `app/sentinel-api/src/modules/examination/reporting/services/get-exam-report.helpers.ts` to point to `./exam-report-queries`
@@ -46,4 +51,4 @@
 - [x] Delete the deprecated file `app/sentinel-api/src/modules/examination/reporting/services/get-exam-report.query.helpers.ts`
 - [x] Write integration test verification (or ensure existing ones pass) at `app/sentinel-api/src/modules/examination/reporting/services/get-exam-report.test.ts`
 - [x] Run `pnpm test` and `pnpm build` to confirm all tests pass and there are no type errors.
-**Migration required:** No — no database schema changes are required for this refactoring.
+      **Migration required:** No — no database schema changes are required for this refactoring.

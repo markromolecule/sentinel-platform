@@ -29,8 +29,8 @@ export function ReportError({ refetch }: ReportErrorProps) {
             </div>
             <div className="rounded-xl border border-dashed px-4 py-6">
                 <p className="text-muted-foreground text-sm">
-                    Try refreshing the report. If the issue persists, the exam may not be
-                    available in your current scope.
+                    Try refreshing the report. If the issue persists, the exam may not be available
+                    in your current scope.
                 </p>
                 <Button className="mt-4" onClick={() => refetch()}>
                     Retry Report

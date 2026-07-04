@@ -121,7 +121,11 @@ export default function CollectionQuestionsPage() {
                 />
             ) : (
                 <QuestionsEmptyState
-                    onImport={hasPermission('assessments:manage') ? () => setIsImportModalOpen(true) : undefined}
+                    onImport={
+                        hasPermission('assessments:manage')
+                            ? () => setIsImportModalOpen(true)
+                            : undefined
+                    }
                     description="This collection is currently empty. Start by importing questions from a document."
                 />
             )}

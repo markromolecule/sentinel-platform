@@ -1,6 +1,11 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { bulkFinalizeAttempts } from './bulk-finalize-attempts';
 import { HTTPException } from 'hono/http-exception';
+import { finalizeExamAttemptScore } from '../../lifecycle/services/finalize-exam-attempt-score';
+
+vi.mock('../../lifecycle/services/finalize-exam-attempt-score', () => ({
+    finalizeExamAttemptScore: vi.fn().mockResolvedValue({}),
+}));
 
 describe('bulkFinalizeAttempts', () => {
     let mockDb: any;
@@ -11,7 +16,9 @@ describe('bulkFinalizeAttempts', () => {
         mockDb = {
             selectFrom: vi.fn().mockReturnThis(),
             select: vi.fn().mockReturnThis(),
-            where: vi.fn().mockImplementation(function(this: any) { return this; }),
+            where: vi.fn().mockImplementation(function (this: any) {
+                return this;
+            }),
             executeTakeFirst: vi.fn(),
             execute: vi.fn(),
             updateTable: vi.fn().mockReturnThis(),
@@ -27,7 +34,7 @@ describe('bulkFinalizeAttempts', () => {
                 dbClient: mockDb,
                 examId: 'exam-1',
                 actorUserId: 'user-1',
-            })
+            }),
         ).rejects.toThrow(HTTPException);
     });
 
@@ -58,10 +65,7 @@ describe('bulkFinalizeAttempts', () => {
             },
         ]);
         // Second execute call: fetch exam questions
-        mockDb.execute.mockResolvedValueOnce([
-            { points: 5 },
-            { points: 5 },
-        ]);
+        mockDb.execute.mockResolvedValueOnce([{ points: 5 }, { points: 5 }]);
 
         const result = await bulkFinalizeAttempts({
             dbClient: mockDb,
@@ -73,6 +77,9 @@ describe('bulkFinalizeAttempts', () => {
         expect(mockDb.updateTable).toHaveBeenCalledWith('exam_attempts');
         expect(mockDb.set).toHaveBeenCalled();
         expect(mockDb.where).toHaveBeenCalledWith('attempt_id', '=', 'attempt-2');
+        expect(finalizeExamAttemptScore).toHaveBeenCalledWith(
+            expect.objectContaining({ attemptId: 'attempt-2' }),
+        );
     });
 
     it('returns 0 count if all attempts are already finalized', async () => {
@@ -115,9 +122,7 @@ describe('bulkFinalizeAttempts', () => {
             },
         ]);
         // Second execute call: fetch exam questions
-        mockDb.execute.mockResolvedValueOnce([
-            { points: 10 },
-        ]);
+        mockDb.execute.mockResolvedValueOnce([{ points: 10 }]);
 
         const setSpy = vi.fn().mockReturnThis();
         mockDb.set = setSpy;

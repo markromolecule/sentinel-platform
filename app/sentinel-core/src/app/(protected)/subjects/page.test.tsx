@@ -3,7 +3,7 @@ import { describe, expect, it, vi } from 'vitest';
 import SharedSubjectsPage from './page';
 
 vi.mock('@sentinel/hooks', () => ({
-        useServerPagination: () => ({
+    useServerPagination: () => ({
         pagination: { pageIndex: 0, pageSize: 10 },
         setPagination: vi.fn(),
     }),

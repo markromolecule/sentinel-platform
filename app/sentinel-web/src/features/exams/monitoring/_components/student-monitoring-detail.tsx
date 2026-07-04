@@ -50,6 +50,7 @@ export function StudentMonitoringDetail({
                 >
                     <IntegrityTimelineCard
                         flags={student.flags ?? []}
+                        lifecycleEvents={student.lifecycleEvents ?? []}
                         onRefresh={onRefresh}
                         isRefreshing={isRefreshing}
                     />

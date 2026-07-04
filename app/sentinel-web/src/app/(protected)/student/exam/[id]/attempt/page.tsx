@@ -3,12 +3,33 @@
 import { StudentExamLoadingState } from '@/app/(protected)/student/exam/[id]/_components/student-exam-loading-state';
 import { AttemptView } from '@/app/(protected)/student/exam/[id]/attempt/_components/attempt-view';
 import { useStudentExamAttempt } from '@/app/(protected)/student/exam/[id]/attempt/_hooks/use-student-exam-attempt';
+import { StudentFlowShell } from '../_components/student-flow-shell';
+import { StudentFlowPageHeader } from '../../_components/student-flow-primitives';
 
 export default function StudentExamAttemptPage() {
-    const { isLoading, isInitializingSession, isRedirectingHistory } = useStudentExamAttempt();
+    const { isLoading, isInitializingSession, isRedirectingHistory, blockedState } = useStudentExamAttempt();
 
     if (isLoading || isInitializingSession || isRedirectingHistory) {
         return <StudentExamLoadingState />;
+    }
+
+    if (blockedState?.isBlocked) {
+        return (
+            <StudentFlowShell
+                maxWidthClassName="max-w-5xl"
+                mainClassName="py-6 sm:py-8"
+                contentClassName="my-auto"
+            >
+                <div className="flex min-h-full flex-col justify-center gap-6">
+                    <StudentFlowPageHeader
+                        title={blockedState.title ?? 'Exam Unavailable'}
+                        description={
+                            blockedState.message ?? 'This exam cannot be entered right now.'
+                        }
+                    />
+                </div>
+            </StudentFlowShell>
+        );
     }
 
     return <AttemptView />;

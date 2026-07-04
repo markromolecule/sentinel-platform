@@ -1,5 +1,7 @@
 import { type DbClient } from '@sentinel/db';
 import { HTTPException } from 'hono/http-exception';
+import { sql } from 'kysely';
+import { finalizeExamAttemptScore } from '../../lifecycle/services/finalize-exam-attempt-score';
 
 export type BulkFinalizeAttemptsArgs = {
     dbClient: DbClient;
@@ -10,7 +12,7 @@ export type BulkFinalizeAttemptsArgs = {
 
 /**
  * Bulk finalizes all completed attempts for a given exam by adding finalized
- * metadata to their answer snapshot.
+ * metadata to their answer snapshot and updating lifecycle score state.
  *
  * @param args - BulkFinalizeAttemptsArgs
  * @returns The count of finalized attempts.
@@ -22,10 +24,7 @@ export async function bulkFinalizeAttempts({
     institutionId,
 }: BulkFinalizeAttemptsArgs) {
     // 1. Verify exam exists and optional institution constraint
-    let examQuery = dbClient
-        .selectFrom('exams')
-        .select(['exam_id'])
-        .where('exam_id', '=', examId);
+    let examQuery = dbClient.selectFrom('exams').select(['exam_id']).where('exam_id', '=', examId);
 
     if (institutionId) {
         examQuery = examQuery.where('institution_id', '=', institutionId);
@@ -39,12 +38,22 @@ export async function bulkFinalizeAttempts({
     // 2. Fetch all attempts for the exam
     const attempts = await dbClient
         .selectFrom('exam_attempts')
-        .select(['attempt_id', 'status', 'completed_at', 'total_score', 'answer_snapshot'])
+        .select([
+            'attempt_id',
+            'status',
+            'completed_at',
+            'total_score',
+            'answer_snapshot',
+            sql<string | null>`score_state::text`.as('score_state'),
+        ])
         .where('exam_id', '=', examId)
         .execute();
 
     // 3. Filter attempts that are not yet finalized
     const nonFinalizedAttempts = attempts.filter((attempt) => {
+        if (attempt.score_state === 'FINALIZED') {
+            return false;
+        }
         const snapshot = (attempt.answer_snapshot ?? {}) as any;
         const grading = snapshot._grading || {};
         return !grading.finalizedAt;
@@ -56,7 +65,7 @@ export async function bulkFinalizeAttempts({
 
     // 4. Update the answer snapshot for each non-finalized attempt
     const nowStr = new Date().toISOString();
-    
+
     // Fetch total points for the exam to populate total_score if null
     const questions = await dbClient
         .selectFrom('exam_questions')
@@ -98,6 +107,14 @@ export async function bulkFinalizeAttempts({
             .set(updatePayload)
             .where('attempt_id', '=', attempt.attempt_id)
             .execute();
+
+        await finalizeExamAttemptScore({
+            dbClient,
+            examId,
+            attemptId: attempt.attempt_id,
+            actorUserId,
+            institutionId,
+        });
     }
 
     return { count: nonFinalizedAttempts.length };

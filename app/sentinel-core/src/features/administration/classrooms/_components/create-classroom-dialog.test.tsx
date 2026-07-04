@@ -37,8 +37,20 @@ const mockSubjectOfferings = [
         termSemester: '1st Semester',
         termAcademicYear: '2025-2026',
         sections: [
-            { id: 'sec-1', classGroupId: 'class-group-1', sectionId: 'sec-1', name: 'INF232', yearLevel: 3 },
-            { id: 'sec-2', classGroupId: 'class-group-2', sectionId: 'sec-2', name: 'INF233', yearLevel: 3 },
+            {
+                id: 'sec-1',
+                classGroupId: 'class-group-1',
+                sectionId: 'sec-1',
+                name: 'INF232',
+                yearLevel: 3,
+            },
+            {
+                id: 'sec-2',
+                classGroupId: 'class-group-2',
+                sectionId: 'sec-2',
+                name: 'INF233',
+                yearLevel: 3,
+            },
         ],
     },
     {
@@ -47,7 +59,15 @@ const mockSubjectOfferings = [
         subjectTitle: 'COLLEGE ALGEBRA',
         termSemester: '1st Semester',
         termAcademicYear: '2025-2026',
-        sections: [{ id: 'sec-3', classGroupId: 'class-group-3', sectionId: 'sec-3', name: 'M101A', yearLevel: 1 }],
+        sections: [
+            {
+                id: 'sec-3',
+                classGroupId: 'class-group-3',
+                sectionId: 'sec-3',
+                name: 'M101A',
+                yearLevel: 1,
+            },
+        ],
     },
 ];
 

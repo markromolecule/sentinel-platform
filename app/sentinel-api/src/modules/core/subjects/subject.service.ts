@@ -101,6 +101,11 @@ export class SubjectService {
         institutionId?: string,
         actorUserId?: string,
     ) {
-        return ManageSubjectsService.deleteSelectedSubjects(dbClient, ids, institutionId, actorUserId);
+        return ManageSubjectsService.deleteSelectedSubjects(
+            dbClient,
+            ids,
+            institutionId,
+            actorUserId,
+        );
     }
 }

@@ -36,7 +36,9 @@ export const getExamReportsListRoute = createRoute({
  * Handler for the paginated exam reports list endpoint.
  * Restricts access to authorized roles and resolves institution visibility bounds.
  */
-export const getExamReportsListRouteHandler: AppRouteHandler<typeof getExamReportsListRoute> = async (c) => {
+export const getExamReportsListRouteHandler: AppRouteHandler<
+    typeof getExamReportsListRoute
+> = async (c) => {
     const query = c.req.valid('query');
     const supabaseUser = c.get('supabaseUser') as any;
     const user = c.get('user');

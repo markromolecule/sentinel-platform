@@ -8,14 +8,14 @@
 
 ### Files Touched
 
-| File | Change Type |
-|------|-------------|
-| `app/sentinel-api/src/modules/identity/users/data/get-instructor-student-enrollments.ts` | MODIFY |
-| `app/sentinel-api/src/modules/identity/users/data/get-instructor-student-enrollment-detail.ts` | MODIFY |
-| `app/sentinel-api/src/modules/identity/users/data/get-instructor-student-enrollments.test.ts` | MODIFY |
-| `app/sentinel-api/src/modules/identity/users/data/get-instructor-student-enrollment-detail.test.ts` | ADD |
-| `packages/hooks/src/query/classrooms/use-archive-classroom-mutation.ts` | MODIFY |
-| `packages/hooks/src/query/classrooms/use-unarchive-classroom-mutation.ts` | MODIFY |
+| File                                                                                                                  | Change Type                         |
+| --------------------------------------------------------------------------------------------------------------------- | ----------------------------------- |
+| `app/sentinel-api/src/modules/identity/users/data/get-instructor-student-enrollments.ts`                              | MODIFY                              |
+| `app/sentinel-api/src/modules/identity/users/data/get-instructor-student-enrollment-detail.ts`                        | MODIFY                              |
+| `app/sentinel-api/src/modules/identity/users/data/get-instructor-student-enrollments.test.ts`                         | MODIFY                              |
+| `app/sentinel-api/src/modules/identity/users/data/get-instructor-student-enrollment-detail.test.ts`                   | ADD                                 |
+| `packages/hooks/src/query/classrooms/use-archive-classroom-mutation.ts`                                               | MODIFY                              |
+| `packages/hooks/src/query/classrooms/use-unarchive-classroom-mutation.ts`                                             | MODIFY                              |
 | `app/sentinel-web/src/app/(protected)/(instructor)/students/_components/dialogs/student-enrollment-detail-dialog.tsx` | VERIFY / optional minor copy update |
 
 **Migration required:** No. The archive column already exists on `class_groups`.
@@ -60,23 +60,23 @@ As a result:
 **Goal:** Make the students table include only active instructor-scoped classroom enrollments.
 
 - [ ] Modify `getInstructorStudentEnrollmentsData` in `app/sentinel-api/src/modules/identity/users/data/get-instructor-student-enrollments.ts`
-  - add a default filter `cg.archived_at IS NULL`
-  - keep the existing instructor scoping by `class_roles`
-  - preserve the current aggregation behavior for `subject`, `section`, `term`, and `enrollmentIds`
-  - ensure the query naturally drops students whose remaining instructor-scoped enrollments are all archived
+    - add a default filter `cg.archived_at IS NULL`
+    - keep the existing instructor scoping by `class_roles`
+    - preserve the current aggregation behavior for `subject`, `section`, `term`, and `enrollmentIds`
+    - ensure the query naturally drops students whose remaining instructor-scoped enrollments are all archived
 
 - [ ] Verify search still behaves correctly after filtering archived classrooms
-  - search should only match active classroom data
-  - students should not be resurrected by archived classroom subject/section matches
+    - search should only match active classroom data
+    - students should not be resurrected by archived classroom subject/section matches
 
 ### Phase 2: Backend Detail Query — Remove Archived Assignments
 
 **Goal:** Make the student detail dialog show only active classroom/subject assignments.
 
 - [ ] Modify `getStudentEnrollmentDetailData` in `app/sentinel-api/src/modules/identity/users/data/get-instructor-student-enrollment-detail.ts`
-  - add `cg.archived_at IS NULL`
-  - retain instructor scoping via `class_roles` for the instructor variant
-  - keep ordering stable by `subject` and `section`
+    - add `cg.archived_at IS NULL`
+    - retain instructor scoping via `class_roles` for the instructor variant
+    - keep ordering stable by `subject` and `section`
 
 - [ ] Reuse the existing empty-state behavior in the frontend dialog when the filtered result becomes empty
 
@@ -85,32 +85,32 @@ As a result:
 **Goal:** Cover the exact business rule so the bug does not regress.
 
 - [ ] Expand `app/sentinel-api/src/modules/identity/users/data/get-instructor-student-enrollments.test.ts`
-  - assert the compiled SQL includes the archived classroom filter
-  - add a scenario expectation documenting that archived classrooms must not contribute to the aggregated row set
+    - assert the compiled SQL includes the archived classroom filter
+    - add a scenario expectation documenting that archived classrooms must not contribute to the aggregated row set
 
 - [ ] Add `app/sentinel-api/src/modules/identity/users/data/get-instructor-student-enrollment-detail.test.ts`
-  - assert the compiled SQL includes the archived classroom filter
-  - verify the detail query excludes archived classroom assignments
+    - assert the compiled SQL includes the archived classroom filter
+    - verify the detail query excludes archived classroom assignments
 
 ### Phase 4: Frontend Cache Invalidation After Archive / Unarchive
 
 **Goal:** Make the `Students` page update immediately after classroom archive state changes.
 
 - [ ] Modify `packages/hooks/src/query/classrooms/use-archive-classroom-mutation.ts`
-  - invalidate the instructor student list query key: `['instructor-students']`
-  - remove or invalidate instructor student detail queries keyed by `['instructor-student-enrollment-detail', ...]`
+    - invalidate the instructor student list query key: `['instructor-students']`
+    - remove or invalidate instructor student detail queries keyed by `['instructor-student-enrollment-detail', ...]`
 
 - [ ] Modify `packages/hooks/src/query/classrooms/use-unarchive-classroom-mutation.ts`
-  - apply the same invalidation strategy so restored classrooms reappear without a reload
+    - apply the same invalidation strategy so restored classrooms reappear without a reload
 
 ### Phase 5: Frontend Copy Verification
 
 **Goal:** Ensure the UI messaging still reads correctly when a student loses all active classroom assignments.
 
 - [ ] Verify `app/sentinel-web/src/app/(protected)/(instructor)/students/_components/dialogs/student-enrollment-detail-dialog.tsx`
-  - current copy: `No active classroom enrollments found for this student.`
-  - keep as-is if it matches the final filtered behavior
-  - optionally clarify to mention archived classrooms are excluded if product wants stronger wording
+    - current copy: `No active classroom enrollments found for this student.`
+    - keep as-is if it matches the final filtered behavior
+    - optionally clarify to mention archived classrooms are excluded if product wants stronger wording
 
 ---
 

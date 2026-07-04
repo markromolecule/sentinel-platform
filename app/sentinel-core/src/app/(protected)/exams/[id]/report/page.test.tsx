@@ -1,7 +1,7 @@
 'use client';
 
 import { Suspense } from 'react';
-import { act, fireEvent, render, screen } from '@testing-library/react';
+import { act, cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import ExamReportPage from './page';
 
@@ -115,8 +115,28 @@ vi.mock('@sentinel/hooks', () => ({
             ],
             actionItems: {
                 review: [],
-                makeup: [],
-                retake: [],
+                makeup: [
+                    {
+                        id: 'queue-1',
+                        studentId: 'student-record-1',
+                        attemptId: 'attempt-1',
+                        studentNo: '2024-0001',
+                        firstName: 'Ana',
+                        lastName: 'Santos',
+                        reason: 'Needs makeup',
+                    },
+                ],
+                retake: [
+                    {
+                        id: 'queue-2',
+                        studentId: 'student-record-2',
+                        attemptId: 'attempt-2',
+                        studentNo: '2024-0002',
+                        firstName: 'Luis',
+                        lastName: 'Reyes',
+                        reason: 'Needs retake',
+                    },
+                ],
             },
         },
         isLoading: false,
@@ -216,6 +236,7 @@ vi.mock('sonner', () => ({
 
 describe('ExamReportPage', () => {
     beforeEach(() => {
+        cleanup();
         vi.clearAllMocks();
     });
 
@@ -232,15 +253,76 @@ describe('ExamReportPage', () => {
             await params;
         });
 
-        expect(await screen.findByText('Santos, Ana')).toBeTruthy();
-        expect(screen.getByText('Reyes, Luis')).toBeTruthy();
+        expect((await screen.findAllByText('Santos, Ana')).length).toBeGreaterThan(0);
+        expect(screen.getAllByText('Reyes, Luis').length).toBeGreaterThan(0);
 
         fireEvent.change(screen.getAllByRole('combobox')[0], {
             target: { value: 'section-2' },
         });
 
-        expect(screen.queryByText('Santos, Ana')).toBeNull();
-        expect(screen.getByText('Reyes, Luis')).toBeTruthy();
+        expect(screen.getAllByText('Santos, Ana').length).toBe(1);
+        expect(screen.getAllByText('Reyes, Luis').length).toBeGreaterThan(0);
         expect(screen.getAllByText('BSCS 3B').length).toBeGreaterThan(0);
+    });
+
+    it('grants a makeup window through the lifecycle endpoint', async () => {
+        vi.spyOn(window, 'prompt')
+            .mockReturnValueOnce('120')
+            .mockReturnValueOnce('Approved makeup.');
+
+        const params = Promise.resolve({ id: 'exam-1' });
+
+        await act(async () => {
+            render(
+                <Suspense fallback={<div>Loading...</div>}>
+                    <ExamReportPage params={params} />
+                </Suspense>,
+            );
+
+            await params;
+        });
+
+        await act(async () => {
+            fireEvent.click(screen.getAllByRole('button', { name: 'Grant Makeup' })[0]);
+        });
+
+        expect(mockApiClient).toHaveBeenCalledWith(
+            '/exams/exam-1/students/student-record-1/lifecycle/grant-makeup',
+            expect.objectContaining({
+                method: 'POST',
+            }),
+        );
+        expect(mockRefetch).toHaveBeenCalled();
+    });
+
+    it('grants a retake window through the lifecycle endpoint with the source attempt id', async () => {
+        vi.spyOn(window, 'prompt')
+            .mockReturnValueOnce('120')
+            .mockReturnValueOnce('Approved retake.');
+
+        const params = Promise.resolve({ id: 'exam-1' });
+
+        await act(async () => {
+            render(
+                <Suspense fallback={<div>Loading...</div>}>
+                    <ExamReportPage params={params} />
+                </Suspense>,
+            );
+
+            await params;
+        });
+
+        await act(async () => {
+            fireEvent.click(screen.getAllByRole('button', { name: 'Grant Retake' })[0]);
+        });
+
+        expect(mockApiClient).toHaveBeenCalledWith(
+            '/exams/exam-1/students/student-record-2/lifecycle/grant-retake',
+            expect.objectContaining({
+                method: 'POST',
+                body: expect.stringContaining('"sourceAttemptId":"attempt-2"'),
+            }),
+        );
+        expect(mockRefetch).toHaveBeenCalled();
     });
 });

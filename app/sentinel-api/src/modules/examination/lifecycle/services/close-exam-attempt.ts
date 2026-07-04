@@ -4,6 +4,7 @@ import { HTTPException } from 'hono/http-exception';
 import { getLifecycleAttemptContext } from '../data/get-lifecycle-attempt-context';
 import { appendExamAttemptLifecycleEvent } from './lifecycle-event.service';
 import { transitionExamAttemptLifecycle } from './lifecycle-transition.service';
+import { recordAttemptLifecycleAudit } from './lifecycle-audit.service';
 
 /**
  * Closes one exam attempt without altering its captured answer snapshot.
@@ -63,6 +64,25 @@ export async function closeExamAttempt(args: {
         actorUserId: args.actorUserId ?? null,
         reasonCode: args.reasonCode,
         notes: args.notes ?? null,
+        relatedIncidentIds: context.incidents.map((incident) => incident.incidentId),
+    });
+
+    const resolvedInstId = args.institutionId || context.exam.institutionId || '';
+    const isAutomatic = !args.actorUserId;
+
+    await recordAttemptLifecycleAudit({
+        dbClient: args.dbClient,
+        attemptId: args.attemptId,
+        examId: args.examId,
+        studentId: context.student.id,
+        eventType: isAutomatic ? 'AUTOMATIC_CLOSE' : 'CLOSED',
+        actorUserId: args.actorUserId ?? null,
+        institutionId: resolvedInstId || null,
+        reasonCode: args.reasonCode,
+        notes: args.notes ?? null,
+        previousState: context.attempt.lifecycleState,
+        nextState: 'CLOSED',
+        relatedIncidentIds: context.incidents.map((incident) => incident.incidentId),
     });
 
     return {

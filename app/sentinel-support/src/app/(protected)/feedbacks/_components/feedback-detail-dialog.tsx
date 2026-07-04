@@ -33,7 +33,9 @@ export function FeedbackDetailDialog({
                     <div className="space-y-5">
                         <div className="flex flex-wrap items-center gap-2">
                             <Badge variant="secondary">Rating: {feedback.rating}/5</Badge>
-                            {feedback.examTitle ? <Badge variant="outline">{feedback.examTitle}</Badge> : null}
+                            {feedback.examTitle ? (
+                                <Badge variant="outline">{feedback.examTitle}</Badge>
+                            ) : null}
                             {feedback.institutionName ? (
                                 <Badge variant="outline">{feedback.institutionName}</Badge>
                             ) : null}
@@ -42,8 +44,12 @@ export function FeedbackDetailDialog({
                         <div className="grid gap-4 sm:grid-cols-2">
                             <div>
                                 <p className="text-muted-foreground text-xs uppercase">Student</p>
-                                <p className="mt-1 text-sm font-medium">{feedback.studentName ?? 'Unknown student'}</p>
-                                <p className="text-muted-foreground text-sm">{feedback.studentEmail ?? 'No email'}</p>
+                                <p className="mt-1 text-sm font-medium">
+                                    {feedback.studentName ?? 'Unknown student'}
+                                </p>
+                                <p className="text-muted-foreground text-sm">
+                                    {feedback.studentEmail ?? 'No email'}
+                                </p>
                             </div>
                             <div>
                                 <p className="text-muted-foreground text-xs uppercase">Submitted</p>

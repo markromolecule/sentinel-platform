@@ -1,5 +1,6 @@
 import { resolveExamStatus, resolveStudentExamStatus } from '@sentinel/shared';
 import type {
+    ExamAttemptLifecycleEvent,
     ExamRuntimeAccess,
     Flag,
     StudentSession,
@@ -123,6 +124,15 @@ export function mapMonitoringStudent(
         reconnectCount: student.reconnectCount ?? 0,
         score: student.score ?? null,
         totalScore: student.totalScore ?? null,
+        lifecycleState: student.lifecycleState ?? null,
+        scoreState: student.scoreState ?? null,
+        closedReason: student.closedReason ?? null,
+        reopenedUntil: student.reopenedUntil ?? null,
+        finalizedAt: student.finalizedAt ?? null,
+        lifecycleEvents:
+            'lifecycleEvents' in student
+                ? ((student.lifecycleEvents ?? []) as ExamAttemptLifecycleEvent[])
+                : [],
     };
 }
 
@@ -171,6 +181,16 @@ export function mapExamReportStudent(
         needsReview: student.needsReview,
         needsMakeup: student.needsMakeup,
         needsRetake: student.needsRetake,
+        isFinalized: student.isFinalized ?? false,
+        finalizedAt: student.finalizedAt ?? null,
+        lifecycleState: student.lifecycleState ?? null,
+        scoreState: student.scoreState ?? null,
+        closedReason: student.closedReason ?? null,
+        reopenedUntil: student.reopenedUntil ?? null,
+        supersededByAttemptId: student.supersededByAttemptId ?? null,
+        supersededAt: student.supersededAt ?? null,
+        supersededBy: student.supersededBy ?? null,
+        finalizedBy: student.finalizedBy ?? null,
     };
 }
 

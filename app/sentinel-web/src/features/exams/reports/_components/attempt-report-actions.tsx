@@ -24,10 +24,13 @@ export function AttemptReportActions({
     if (isFinalized) {
         return (
             <div className="flex items-center gap-2.5">
-                <Badge variant="outline" className="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20 py-1 px-2.5 font-semibold text-xs">
+                <Badge
+                    variant="outline"
+                    className="border-emerald-500/20 bg-emerald-500/10 px-2.5 py-1 text-xs font-semibold text-emerald-600 dark:text-emerald-400"
+                >
                     Report Finalized
                 </Badge>
-                <span className="text-xs text-muted-foreground">
+                <span className="text-muted-foreground text-xs">
                     This attempt report is locked and cannot be edited.
                 </span>
             </div>

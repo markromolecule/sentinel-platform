@@ -33,7 +33,9 @@ import {
 } from '../../assessment/assessment-access';
 import { EntitlementsRepository } from '../../access/data/entitlements.repository';
 
-function createApp(user?: { id: string; user_profiles?: { department_id?: string | null } } | null) {
+function createApp(
+    user?: { id: string; user_profiles?: { department_id?: string | null } } | null,
+) {
     const app = new OpenAPIHono();
 
     app.use('*', async (c, next) => {

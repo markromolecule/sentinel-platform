@@ -5,12 +5,14 @@ import { act, fireEvent, render, screen } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import ExamReportPage from './page';
 
-const { mockApiClient, mockRefetch, mockUseExamReportQuery, mockSearchParamsGet } = vi.hoisted(() => ({
-    mockApiClient: vi.fn(),
-    mockRefetch: vi.fn(),
-    mockUseExamReportQuery: vi.fn(),
-    mockSearchParamsGet: vi.fn().mockReturnValue(null),
-}));
+const { mockApiClient, mockRefetch, mockUseExamReportQuery, mockSearchParamsGet } = vi.hoisted(
+    () => ({
+        mockApiClient: vi.fn(),
+        mockRefetch: vi.fn(),
+        mockUseExamReportQuery: vi.fn(),
+        mockSearchParamsGet: vi.fn().mockReturnValue(null),
+    }),
+);
 
 vi.mock('next/navigation', () => ({
     useSearchParams: () => ({
@@ -103,13 +105,9 @@ vi.mock('@sentinel/ui', () => ({
     SelectValue: () => null,
     Tabs: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
     TabsList: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
-    TabsTrigger: ({
-        children,
-        value,
-    }: {
-        children: React.ReactNode;
-        value: string;
-    }) => <button type="button">{children ?? value}</button>,
+    TabsTrigger: ({ children, value }: { children: React.ReactNode; value: string }) => (
+        <button type="button">{children ?? value}</button>
+    ),
     TabsContent: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
     Table: ({ children }: { children: React.ReactNode }) => <table>{children}</table>,
     TableBody: ({ children }: { children: React.ReactNode }) => <tbody>{children}</tbody>,
@@ -173,7 +171,9 @@ vi.mock('@sentinel/ui', () => ({
                         {data.map((row: any, i: number) => (
                             <tr key={i}>
                                 {columns.map((c: any, j: number) => {
-                                    const cellContent = c.cell ? c.cell({ row: { original: row } }) : null;
+                                    const cellContent = c.cell
+                                        ? c.cell({ row: { original: row } })
+                                        : null;
                                     return <td key={j}>{cellContent}</td>;
                                 })}
                             </tr>

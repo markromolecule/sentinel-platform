@@ -1,14 +1,11 @@
 import { createRoute } from '@hono/zod-openapi';
 import { HTTPException } from 'hono/http-exception';
-import { requireActivePermission } from '../../../../lib/permissions';
 import { type AppRouteHandler } from '../../../../types/hono';
 import { EntitlementsRepository } from '../../access/data/entitlements.repository';
 import { getReportingExamContext } from '../../reporting/services/get-reporting-exam-context';
-import { StudentOverridesService } from '../../student-overrides/student-overrides.service';
-import { appendExamAttemptLifecycleEvent } from '../services/lifecycle-event.service';
-import { getLifecycleAttemptContext } from '../data/get-lifecycle-attempt-context';
+import { requireLifecycleMutationAccess } from '../lifecycle-access';
 import { grantRetakeExamWindowSchema } from '../lifecycle.dto';
-import { transitionExamAttemptLifecycle } from '../services/lifecycle-transition.service';
+import { grantRetakeExamWindow } from '../services/grant-retake-exam-window';
 
 export const grantRetakeExamWindowRoute = createRoute({
     method: 'post',
@@ -40,7 +37,7 @@ export const grantRetakeExamWindowRoute = createRoute({
 export const grantRetakeExamWindowRouteHandler: AppRouteHandler<
     typeof grantRetakeExamWindowRoute
 > = async (c) => {
-    requireActivePermission(c, 'examinations:update');
+    requireLifecycleMutationAccess(c);
 
     const { id, studentId } = c.req.valid('param');
     const body = c.req.valid('json');
@@ -66,59 +63,21 @@ export const grantRetakeExamWindowRouteHandler: AppRouteHandler<
         });
     }
 
-    const attemptContext = await getLifecycleAttemptContext({
+    const result = await grantRetakeExamWindow({
         dbClient: c.get('dbClient'),
-        examId: id,
-        attemptId: body.sourceAttemptId,
-        institutionId: c.get('institutionId'),
-    });
-
-    if (!attemptContext || attemptContext.student.id !== studentId) {
-        throw new HTTPException(404, {
-            message: 'The selected source attempt does not belong to this student and exam.',
-        });
-    }
-
-    transitionExamAttemptLifecycle({
-        currentState: attemptContext.attempt.lifecycleState,
-        nextState: attemptContext.attempt.lifecycleState,
-        eventType: 'RETAKE_GRANTED',
-    });
-
-    const override = await StudentOverridesService.createStudentExamAccessOverride({
-        dbClient: c.get('dbClient'),
-        examId: id,
-        body: {
-            studentId,
-            overrideType: 'RETAKE',
-            availableFrom: body.availableFrom,
-            availableUntil: body.availableUntil,
-            allowedAttempts: body.allowedAttempts,
-            sourceAttemptId: body.sourceAttemptId,
-            notes: body.notes ?? null,
-        },
-        grantedBy: c.get('user')?.id ?? null,
-    });
-
-    const latestEvent = await appendExamAttemptLifecycleEvent({
-        dbClient: c.get('dbClient'),
-        attemptId: body.sourceAttemptId,
         examId: id,
         studentId,
-        eventType: 'RETAKE_GRANTED',
-        previousState: attemptContext.attempt.lifecycleState,
-        nextState: attemptContext.attempt.lifecycleState,
-        actorUserId: c.get('user')?.id ?? null,
-        reasonCode: 'RETAKE_GRANTED',
+        sourceAttemptId: body.sourceAttemptId,
+        availableFrom: body.availableFrom,
+        availableUntil: body.availableUntil,
+        allowedAttempts: body.allowedAttempts,
         notes: body.notes ?? null,
-        relatedOverrideId: override.id,
+        actorUserId: c.get('user')?.id ?? null,
+        institutionId: c.get('institutionId'),
     });
 
     return c.json({
         message: 'Retake exam window granted successfully',
-        data: {
-            override,
-            latestEvent,
-        },
+        data: result,
     });
 };

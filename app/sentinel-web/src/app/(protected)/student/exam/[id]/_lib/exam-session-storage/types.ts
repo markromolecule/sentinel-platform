@@ -10,10 +10,7 @@ export type StoredExamSession = {
 };
 
 export type SecurityLockReason =
-    | 'focus-loss'
-    | 'fullscreen-exit'
-    | 'right-click'
-    | 'screen-capture';
+    'focus-loss' | 'fullscreen-exit' | 'right-click' | 'screen-capture';
 
 export type StoredSecurityLock = {
     examId: string;

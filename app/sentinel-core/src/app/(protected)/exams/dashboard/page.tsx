@@ -6,7 +6,6 @@ import { PageHeader, Tabs, TabsContent, Button, Separator, Spinner } from '@sent
 import { Plus } from 'lucide-react';
 import { PermissionGuard } from '@sentinel/hooks';
 
-
 import { useExamsDashboard } from './_hooks/use-exams-dashboard';
 import { TAB_CONFIG, type ExamTabKey } from './_constants';
 import { ExamsTabPanel } from './_components/exams-tab-panel';

@@ -1,4 +1,9 @@
-import { useDeleteUserMutation, useDeleteUsersMutation, useStableValue, PermissionGuard } from '@sentinel/hooks';
+import {
+    useDeleteUserMutation,
+    useDeleteUsersMutation,
+    useStableValue,
+    PermissionGuard,
+} from '@sentinel/hooks';
 import { useCallback, useState, useMemo } from 'react';
 import {
     DataTable,

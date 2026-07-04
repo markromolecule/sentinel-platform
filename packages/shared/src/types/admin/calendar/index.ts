@@ -34,11 +34,7 @@ export interface CalendarDay {
 export type CalendarEventType = 'EVENT' | 'ANNOUNCEMENT' | 'MAINTENANCE' | 'HOLIDAY' | 'NOTE';
 
 export type CalendarEventAudience =
-    | 'ALL'
-    | 'STUDENTS'
-    | 'INSTRUCTORS'
-    | 'ADMINS'
-    | 'SPECIFIC_GROUP';
+    'ALL' | 'STUDENTS' | 'INSTRUCTORS' | 'ADMINS' | 'SPECIFIC_GROUP';
 
 export interface CalendarEventResponse {
     eventId: string;

@@ -48,7 +48,6 @@ export async function getExamReportsList(
     };
 }
 
-
 function buildExamReportQueryString(params?: GetExamReportParams) {
     if (!params) {
         return '';

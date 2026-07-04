@@ -21,8 +21,8 @@ export function useTurnedInExamRedirect({
     runtimeAccess,
 }: UseTurnedInExamRedirectArgs) {
     const router = useRouter();
-    const isRetakeAccessible = Boolean(runtimeAccess?.canStart);
-    const isRedirecting = status === 'turned_in' && Boolean(attemptId) && !isRetakeAccessible;
+    const isOverrideActive = Boolean(runtimeAccess?.canStart || runtimeAccess?.canResume);
+    const isRedirecting = status === 'turned_in' && Boolean(attemptId) && !isOverrideActive;
 
     useEffect(() => {
         if (!isRedirecting || !attemptId) {

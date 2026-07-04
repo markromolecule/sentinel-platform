@@ -15,7 +15,9 @@ type ActionQueueColumnsArgs = {
  *
  * @param args - Callback functions and action configuration.
  */
-export const getActionQueueColumns = (args: ActionQueueColumnsArgs): ColumnDef<ExamReportActionItem>[] => [
+export const getActionQueueColumns = (
+    args: ActionQueueColumnsArgs,
+): ColumnDef<ExamReportActionItem>[] => [
     {
         accessorKey: 'lastName',
         header: 'Student',
@@ -26,9 +28,7 @@ export const getActionQueueColumns = (args: ActionQueueColumnsArgs): ColumnDef<E
                     <div className="font-medium">
                         {item.lastName}, {item.firstName}
                     </div>
-                    <div className="text-muted-foreground text-sm">
-                        {item.studentNo}
-                    </div>
+                    <div className="text-muted-foreground text-sm">{item.studentNo}</div>
                 </div>
             );
         },

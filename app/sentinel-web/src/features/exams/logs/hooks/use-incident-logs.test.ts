@@ -155,15 +155,47 @@ describe('useIncidentLogs Custom Hook', () => {
         mockReviewIncidents.mockResolvedValue({});
 
         await act(async () => {
-            await result.current.handleConfirmIncident(['inc-1'], 'confirmed note');
+            await result.current.handleConfirmIncident(['inc-1'], {
+                reviewNotes: 'confirmed note',
+            });
         });
 
         expect(mockReviewIncidents).toHaveBeenCalledWith({
             incidentIds: ['inc-1'],
             status: 'CONFIRMED',
             reviewNotes: 'confirmed note',
+            lifecycleAction: undefined,
+            reasonCode: null,
+            notes: null,
         });
         expect(toast.success).toHaveBeenCalledWith('Incident confirmed successfully');
+    });
+
+    it('confirms incidents with an explicit lifecycle follow-up action', async () => {
+        const { result } = renderHook(() => useIncidentLogs('exam-1'));
+
+        mockReviewIncidents.mockResolvedValue({});
+
+        await act(async () => {
+            await result.current.handleConfirmIncident(['inc-1'], {
+                reviewNotes: 'confirmed note',
+                lifecycleAction: 'CLOSE_ATTEMPT',
+                reasonCode: 'CONFIRMED_INCIDENT_CLOSE',
+                notes: 'close this attempt',
+            });
+        });
+
+        expect(mockReviewIncidents).toHaveBeenCalledWith({
+            incidentIds: ['inc-1'],
+            status: 'CONFIRMED',
+            reviewNotes: 'confirmed note',
+            lifecycleAction: 'CLOSE_ATTEMPT',
+            reasonCode: 'CONFIRMED_INCIDENT_CLOSE',
+            notes: 'close this attempt',
+        });
+        expect(toast.success).toHaveBeenCalledWith(
+            'Incident confirmed and lifecycle action applied',
+        );
     });
 
     it('derives sections from exam report data', () => {

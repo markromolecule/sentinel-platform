@@ -37,6 +37,7 @@ describe('MonitoringHeader', () => {
 
         expect(screen.getByRole('heading', { name: 'Biology Midterm' })).toBeTruthy();
         expect(screen.getByText('Locked')).toBeTruthy();
+        expect(screen.getByText('Exam-wide runtime access')).toBeTruthy();
         expect(screen.queryByRole('link', { name: 'Lobby' })).toBeNull();
         expect(screen.queryByRole('link', { name: 'Monitoring' })).toBeNull();
         expect(screen.queryByRole('link')).toBeNull();

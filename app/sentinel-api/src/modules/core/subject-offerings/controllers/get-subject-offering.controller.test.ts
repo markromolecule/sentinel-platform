@@ -66,7 +66,9 @@ describe('getSubjectOfferingRouteHandler', () => {
             instructors: [],
         };
 
-        vi.mocked(SubjectOfferingsService.getSubjectOfferingById).mockResolvedValue(mockOffering as any);
+        vi.mocked(SubjectOfferingsService.getSubjectOfferingById).mockResolvedValue(
+            mockOffering as any,
+        );
 
         const res = await app.request('/d9b736b7-862d-4530-9b3f-1d8f6d7ab753');
 
@@ -81,7 +83,9 @@ describe('getSubjectOfferingRouteHandler', () => {
     });
 
     it('returns 404 if the subject offering is not found', async () => {
-        vi.mocked(SubjectOfferingsService.getSubjectOfferingById).mockRejectedValue(new Error('No result'));
+        vi.mocked(SubjectOfferingsService.getSubjectOfferingById).mockRejectedValue(
+            new Error('No result'),
+        );
 
         const res = await app.request('/d9b736b7-862d-4530-9b3f-1d8f6d7ab754');
 

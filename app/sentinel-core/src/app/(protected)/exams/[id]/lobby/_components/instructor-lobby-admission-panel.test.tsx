@@ -4,9 +4,7 @@ import type { ExamLobbyWaitingStudent } from '@sentinel/services';
 import { getLobbyAdmissionGroups } from '../_lib/lobby-admission-filters';
 import { InstructorLobbyAdmissionPanel } from './instructor-lobby-admission-panel';
 
-function createAdmission(
-    overrides: Partial<ExamLobbyWaitingStudent>,
-): ExamLobbyWaitingStudent {
+function createAdmission(overrides: Partial<ExamLobbyWaitingStudent>): ExamLobbyWaitingStudent {
     return {
         admissionId: overrides.admissionId ?? 'admission-1',
         studentId: overrides.studentId ?? 'student-1',
@@ -61,7 +59,9 @@ function renderPanel(overrides?: {
     searchTerm?: string;
     statusFilter?: 'all' | 'waiting' | 'approved' | 'rejected' | 'inAttempt';
     onSearchChange?: (value: string) => void;
-    onStatusFilterChange?: (value: 'all' | 'waiting' | 'approved' | 'rejected' | 'inAttempt') => void;
+    onStatusFilterChange?: (
+        value: 'all' | 'waiting' | 'approved' | 'rejected' | 'inAttempt',
+    ) => void;
     onUpdateLobbyAdmissions?: (
         studentIds: string[],
         status: 'APPROVED' | 'REJECTED',

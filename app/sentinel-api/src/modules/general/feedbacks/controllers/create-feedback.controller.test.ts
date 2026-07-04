@@ -1,10 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { OpenAPIHono } from '@hono/zod-openapi';
 import { HTTPException } from 'hono/http-exception';
-import {
-    createFeedbackRoute,
-    createFeedbackRouteHandler,
-} from './create-feedback.controller';
+import { createFeedbackRoute, createFeedbackRouteHandler } from './create-feedback.controller';
 import { FeedbackService } from '../feedback.service';
 
 vi.mock('../feedback.service', () => ({

@@ -3,6 +3,8 @@ export * from './monitoring-header';
 export * from './monitoring-stats';
 export * from './student-card';
 export * from './student-list';
+export * from './attempt-lifecycle-actions';
+export * from './attempt-lifecycle-badge';
 
 // Student Monitoring Detail
 export * from './student-monitoring-detail';

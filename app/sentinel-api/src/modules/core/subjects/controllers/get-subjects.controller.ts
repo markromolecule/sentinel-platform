@@ -64,7 +64,12 @@ export const getSubjectsRouteHandler: AppRouteHandler<typeof getSubjectsRoute> =
         requireActivePermission(c, 'subjects:view', 'Forbidden. Missing subjects:view permission.');
         const role = c.get('role');
 
-        const { search, institutionId: requestedInstitutionId, page, pageSize } = c.req.valid('query');
+        const {
+            search,
+            institutionId: requestedInstitutionId,
+            page,
+            pageSize,
+        } = c.req.valid('query');
         const institutionId = c.get('institutionId');
 
         const scope = buildRequesterAcademicScope({

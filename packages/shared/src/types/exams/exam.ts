@@ -13,11 +13,7 @@ export type InternalExamStatus =
 
 export type StudentExamStatus = 'upcoming' | 'available' | 'in-progress' | 'past_due' | 'turned_in';
 export type ExamAttemptLifecycleState =
-    | 'IN_PROGRESS'
-    | 'LOCKED'
-    | 'CLOSED'
-    | 'SUBMITTED'
-    | 'SUPERSEDED';
+    'IN_PROGRESS' | 'LOCKED' | 'CLOSED' | 'SUBMITTED' | 'SUPERSEDED';
 export type ExamAttemptLifecycleEventType =
     | 'STARTED'
     | 'SUBMITTED'
@@ -33,13 +29,7 @@ export type ExamAttemptLifecycleEventType =
     | 'INCIDENT_REVIEWED';
 export type ExamAttemptScoreState = 'DRAFT' | 'FINALIZED' | 'REVISION_REQUIRED';
 export type ExamRuntimeAccessState =
-    | 'before_start'
-    | 'open'
-    | 'lobby_approved'
-    | 'lobby_waiting'
-    | 'locked'
-    | 'reopened'
-    | 'closed';
+    'before_start' | 'open' | 'lobby_approved' | 'lobby_waiting' | 'locked' | 'reopened' | 'closed';
 export type ExamRuntimeAccessReasonCode =
     | 'NOT_STARTED'
     | 'OPEN'
@@ -123,12 +113,7 @@ export type StudentExamAccessOverride = {
 
 export type ExamStatus = InternalExamStatus | StudentExamStatus;
 export type ExamHistoryCheatingType =
-    | 'gaze'
-    | 'audio'
-    | 'tab_switch'
-    | 'screenshot'
-    | 'screen_record'
-    | 'multiple';
+    'gaze' | 'audio' | 'tab_switch' | 'screenshot' | 'screen_record' | 'multiple';
 
 export type QuestionType =
     | 'MULTIPLE_CHOICE'
@@ -188,13 +173,7 @@ export type MatchingPair = {
 };
 
 export type ExamAttemptAnswerValue =
-    | string
-    | number
-    | boolean
-    | (string | number)[]
-    | Record<string, string>
-    | null
-    | undefined;
+    string | number | boolean | (string | number)[] | Record<string, string> | null | undefined;
 
 export type ExamAttemptAnswers = Record<string, ExamAttemptAnswerValue>;
 

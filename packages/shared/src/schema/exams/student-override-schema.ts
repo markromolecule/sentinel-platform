@@ -72,8 +72,28 @@ export const createStudentExamAccessOverrideBodySchema = z
         }
     });
 
+export const createAttemptScopedStudentExamAccessOverrideBodySchema =
+    createStudentExamAccessOverrideBodySchema.superRefine((value, context) => {
+        if (
+            (value.overrideType === 'RETAKE' || value.overrideType === 'REOPEN') &&
+            !value.sourceAttemptId
+        ) {
+            context.addIssue({
+                code: z.ZodIssueCode.custom,
+                path: ['sourceAttemptId'],
+                message:
+                    value.overrideType === 'REOPEN'
+                        ? 'Provide the original attempt when granting a reopen window.'
+                        : 'Provide the original attempt when granting a retake.',
+            });
+        }
+    });
+
 export type StudentExamAccessOverrideTypeType = z.infer<typeof studentExamAccessOverrideTypeSchema>;
 export type StudentExamAccessOverrideSchemaType = z.infer<typeof studentExamAccessOverrideSchema>;
 export type CreateStudentExamAccessOverrideBodyType = z.infer<
     typeof createStudentExamAccessOverrideBodySchema
+>;
+export type CreateAttemptScopedStudentExamAccessOverrideBodyType = z.infer<
+    typeof createAttemptScopedStudentExamAccessOverrideBodySchema
 >;

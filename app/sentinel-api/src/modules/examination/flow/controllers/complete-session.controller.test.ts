@@ -1,10 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { OpenAPIHono } from '@hono/zod-openapi';
 import { HTTPException } from 'hono/http-exception';
-import {
-    completeSessionRoute,
-    completeSessionRouteHandler,
-} from './complete-session.controller';
+import { completeSessionRoute, completeSessionRouteHandler } from './complete-session.controller';
 import { SessionManagerService } from '../flow.service';
 import { EntitlementsRepository } from '../../access/data/entitlements.repository';
 

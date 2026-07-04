@@ -5,7 +5,11 @@ import type { AssessmentAllowedRole } from '../../assessment/assessment-access';
 import { TelemetryStorageService } from '../../../telemetry/storage/storage.service';
 import type { MonitoringStudentDetail } from '../monitoring.dto';
 import { getMonitoringExamContext } from './get-monitoring-exam-context';
-import { mapMonitoringStudentDetail, type MonitoringStudentRow } from './map-monitoring-response';
+import {
+    mapMonitoringStudentDetail,
+    type MonitoringLifecycleEventRow,
+    type MonitoringStudentRow,
+} from './map-monitoring-response';
 
 type GetExamMonitoringStudentDetailArgs = {
     dbClient: DbClient;
@@ -46,12 +50,17 @@ export async function getExamMonitoringStudentDetail({
             'up.last_seen_at',
             'ea.attempt_id',
             sql<string | null>`ea.status::text`.as('attempt_status'),
+            sql<string | null>`ea.lifecycle_state::text`.as('lifecycle_state'),
+            sql<string | null>`ea.score_state::text`.as('score_state'),
             'ea.started_at',
             'ea.completed_at',
             'ea.time_spent_minutes',
             'ea.answered_question_count',
             'ea.score',
             'ea.total_score',
+            'ea.closed_reason',
+            'ea.reopened_until',
+            'ea.finalized_at',
             sql<number>`coalesce((
                 select count(*)::int
                 from flagged_incidents as fi
@@ -117,10 +126,33 @@ export async function getExamMonitoringStudentDetail({
         institutionId,
     );
 
+    const lifecycleEvents = await dbClient
+        .selectFrom('exam_attempt_lifecycle_events')
+        .select([
+            'event_id',
+            'attempt_id',
+            'exam_id',
+            'student_id',
+            'event_type',
+            'previous_state',
+            'next_state',
+            'actor_user_id',
+            'reason_code',
+            'notes',
+            'related_incident_ids',
+            'related_override_id',
+            'metadata',
+            'created_at',
+        ])
+        .where('attempt_id', '=', latestAttempt.attempt_id)
+        .orderBy('created_at', 'desc')
+        .execute();
+
     return mapMonitoringStudentDetail(
         latestAttempt,
         exam.durationMinutes,
         exam.questionCount,
         incidents,
+        lifecycleEvents as MonitoringLifecycleEventRow[],
     );
 }

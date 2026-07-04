@@ -4,7 +4,10 @@ import { FEEDBACK_QUERY_KEYS } from '@sentinel/shared/constants';
 import { useApi } from '../../api-provider';
 import { useAuthenticatedQueryEnabled } from '../_shared/use-authenticated-query-enabled';
 
-export type UseFeedbacksQueryArgs = Omit<UseQueryOptions<FeedbackPage, Error>, 'queryKey' | 'queryFn'> & {
+export type UseFeedbacksQueryArgs = Omit<
+    UseQueryOptions<FeedbackPage, Error>,
+    'queryKey' | 'queryFn'
+> & {
     params?: Partial<GetFeedbacksQuery>;
 };
 

@@ -11,7 +11,15 @@ import {
 } from '../services/reporting-response.shared';
 import { toIsoDate, toNumber } from '../services/reporting-response.types';
 
-export { getPercentage, needsRetake, needsReview, normalizeIncidentSeverity, resolveAttemptKind, resolveStudentNames, isSubmitted } from '../services/reporting-response.shared';
+export {
+    getPercentage,
+    needsRetake,
+    needsReview,
+    normalizeIncidentSeverity,
+    resolveAttemptKind,
+    resolveStudentNames,
+    isSubmitted,
+} from '../services/reporting-response.shared';
 
 export function buildActionItemSource(student: ExamReportStudentSummary): ReportStudentRow {
     return {
@@ -70,6 +78,10 @@ export function resolveStudentStatus(
         return 'absent';
     }
 
+    if (row.lifecycle_state === 'SUPERSEDED') {
+        return 'submitted';
+    }
+
     if (needsReview(row)) {
         return 'flagged';
     }
@@ -81,9 +93,15 @@ export function resolveStudentStatus(
     return 'in_progress';
 }
 
-export function resolveSubmissionType(row: ReportStudentRow): ExamReportStudentSummary['submissionType'] {
+export function resolveSubmissionType(
+    row: ReportStudentRow,
+): ExamReportStudentSummary['submissionType'] {
     if (!row.attempt_id) {
         return 'absent';
+    }
+
+    if (row.lifecycle_state === 'CLOSED') {
+        return 'force_close';
     }
 
     if (resolveAttemptKind(row) === 'retake' && isSubmitted(row)) {
@@ -143,7 +161,15 @@ export function mapStudentSummary(
         needsReview: reviewRequired,
         needsMakeup: makeupRequired && row.active_override_type !== 'MAKEUP',
         needsRetake: retakeRequired,
-        isFinalized: row.attempt_finalized_at != null,
-        finalizedAt: toIsoDate(row.attempt_finalized_at),
+        isFinalized: row.attempt_finalized_at != null || row.score_state === 'FINALIZED',
+        finalizedAt: toIsoDate(row.attempt_finalized_at ?? row.finalized_at),
+        lifecycleState: row.lifecycle_state ?? null,
+        scoreState: row.score_state ?? null,
+        closedReason: row.closed_reason ?? null,
+        reopenedUntil: toIsoDate(row.reopened_until),
+        supersededByAttemptId: row.superseded_by_attempt_id ?? null,
+        supersededAt: toIsoDate(row.superseded_at),
+        supersededBy: row.superseded_by ?? null,
+        finalizedBy: row.finalized_by ?? null,
     };
 }

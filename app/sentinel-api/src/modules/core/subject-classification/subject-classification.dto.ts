@@ -47,7 +47,11 @@ export const getSubjectClassificationsSchema = {
         query: z
             .object({
                 search: z.string().optional().openapi({ description: 'Search term' }),
-                institutionId: z.string().uuid().optional().openapi({ description: 'Institution ID' }),
+                institutionId: z
+                    .string()
+                    .uuid()
+                    .optional()
+                    .openapi({ description: 'Institution ID' }),
             })
             .merge(paginationQuerySchema),
     },

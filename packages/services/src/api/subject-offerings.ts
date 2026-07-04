@@ -345,8 +345,6 @@ export async function getSubjectOffering(
     apiClient: ApiClientType,
     id: string,
 ): Promise<SubjectOffering> {
-    const response: ApiResponse<ApiSubjectOffering> = await apiClient(
-        `/subject-offerings/${id}`,
-    );
+    const response: ApiResponse<ApiSubjectOffering> = await apiClient(`/subject-offerings/${id}`);
     return mapSubjectOffering(response.data);
 }

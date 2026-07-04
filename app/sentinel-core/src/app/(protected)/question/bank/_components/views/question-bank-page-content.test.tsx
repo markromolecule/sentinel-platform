@@ -15,8 +15,7 @@ const pageState = {
     questionTypes: [{ value: 'MULTIPLE_CHOICE', label: 'Multiple Choice' }],
     activeQuestionType: null as string | null,
     activeQuestionTypeDefinition: undefined as
-        | { value: string; label: string; description?: string }
-        | undefined,
+        { value: string; label: string; description?: string } | undefined,
     isQuestionBuilderOpen: false,
     isTypeSelectorOpen: false,
     isQuestionTypesLoading: false,

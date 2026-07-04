@@ -74,6 +74,7 @@ It matches the intended workflow, fixes the current ambiguity, and avoids a disr
 - [x] Add a migration rollback note: drop the `class_group_id` foreign key, index, and column; no existing section-based assignment rows are deleted.
 - [x] Add a migration verification test or schema compatibility assertion if the repo has a DB-schema test pattern for generated types.
 - **Migration required:** Yes — the current table cannot represent an exact classroom assignment.
+
 <!-- NOTE: Rollback for Phase 1: drop constraint `exam_section_assignments_class_group_id_fkey`, drop index `exam_section_assignments_class_group_id_idx`, then drop column `class_group_id`. Existing section-based assignment rows remain intact. -->
 <!-- NOTE: Schema compatibility assertion for Phase 1 uses `prisma validate` plus committed Kysely type regeneration because no dedicated DB-schema test pattern was found in the scanned files. -->
 <!-- NOTE: `pnpm exec prisma migrate dev --name add_exam_assignment_class_group_id --create-only` reached the configured remote datasource but returned a schema engine error, so the migration SQL was authored manually and then checked with `prisma validate` and `prisma generate`. -->
@@ -90,6 +91,7 @@ It matches the intended workflow, fixes the current ambiguity, and avoids a disr
 - [x] Add or update tests for `createExamSectionAssignmentsBatch` to assert `class_group_id` is persisted with `section_id`.
 - [x] Add or update tests for `getExamSectionAssignments` to assert `classGroupId` is returned and legacy rows with null `class_group_id` still read successfully.
 - **Migration required:** No additional migration in this phase — it consumes the Phase 1 schema.
+
 <!-- NOTE: Phase 2 validation passed for targeted Vitest coverage in `create-exam-section-assignments-batch.test.ts` and `get-exam-section-assignments.test.ts`, plus `packages/shared` and `packages/services` TypeScript builds. -->
 <!-- NOTE: `pnpm --dir app/sentinel-api run typecheck` still reports many pre-existing workspace errors, including older controller tests under `src/modules/examination/section-assignments/tests`, but it did not surface errors in the Phase 2 source files changed here. -->
 
@@ -105,6 +107,7 @@ It matches the intended workflow, fixes the current ambiguity, and avoids a disr
 - [x] Add tests in `build-student-exam-scope-predicates.test.ts` for exact `class_group_id` assignment, legacy section fallback, and non-matching classroom hidden.
 - [x] Add or update tests in `access.test.ts` to prove a student enrolled in the assigned classroom is eligible and a student in another classroom with the same section is not.
 - **Migration required:** No additional migration — query behavior uses the new nullable column.
+
 <!-- NOTE: Phase 3 kept `buildAssignedSectionIdsSelect()` as-is because student/access consumers only needed exact-classroom matching in predicates; no assigned-classroom response payload was required yet. -->
 <!-- NOTE: `get-exams.ts` and `get-exam-by-id.ts` already route student/classroom visibility through the shared predicate helper, so no source edits were needed there after review. -->
 <!-- NOTE: `EntitlementsRepository.hasStudentExamEnrollment()` already gives `classGroupId` precedence over section fallback, so no repository code change was needed in Phase 3; access tests were updated to lock that behavior in. -->
@@ -134,6 +137,7 @@ It matches the intended workflow, fixes the current ambiguity, and avoids a disr
 - [x] Run `pnpm --dir app/sentinel-web exec vitest run "src/app/(protected)/(instructor)/exams/assign/_components/exam-section-assignment-list.test.tsx" "src/app/(protected)/student/classroom/[id]/page.test.tsx" "src/app/(protected)/student/history/_hooks/use-student-history/index.test.ts" --reporter=verbose`.
 - [x] Document that pre-existing section-only rows remain supported, but previously misassigned rows should be deleted and recreated so they receive `class_group_id`.
 - **Migration required:** No additional migration — validation and operational guidance only.
+
 <!-- NOTE: Regression validation passed with the targeted API Vitest suite for predicate, access, and student feed coverage, and the targeted web Vitest suite for instructor assignment UI, classroom page, and available-history surfaces. -->
 <!-- NOTE: Pre-existing section-only rows remain readable because Phase 3 preserves `section_id` fallback when `class_group_id` is null. Rows that were historically assigned to the wrong classroom should be deleted and recreated so the new `class_group_id` column is populated with the exact classroom. -->
 

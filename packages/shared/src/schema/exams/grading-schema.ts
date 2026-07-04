@@ -78,6 +78,8 @@ export const attemptGradingDetailSchema = z.object({
         finalizedAt: z.string().nullable().optional(),
         finalizedBy: z.string().uuid().nullable().optional(),
     }),
+    lifecycleState: z.string().nullable().optional(),
+    scoreState: z.string().nullable().optional(),
     questionReports: z.array(
         z.object({
             questionId: z.string().uuid(),

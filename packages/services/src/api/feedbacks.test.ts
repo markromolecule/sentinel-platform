@@ -1,10 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import {
-    buildFeedbacksQueryString,
-    createFeedback,
-    getFeedback,
-    getFeedbacks,
-} from './feedbacks';
+import { buildFeedbacksQueryString, createFeedback, getFeedback, getFeedbacks } from './feedbacks';
 
 describe('feedbacks api', () => {
     it('builds the feedback query string while skipping empty values', () => {
@@ -30,7 +25,10 @@ describe('feedbacks api', () => {
             rating: 5,
         });
 
-        expect(apiClient).toHaveBeenCalledWith('/feedbacks', expect.objectContaining({ method: 'POST' }));
+        expect(apiClient).toHaveBeenCalledWith(
+            '/feedbacks',
+            expect.objectContaining({ method: 'POST' }),
+        );
         expect(result).toEqual({ feedbackId: 'abc' });
     });
 

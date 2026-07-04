@@ -49,7 +49,7 @@ export function FloatingActionBar({
                             size="sm"
                             onClick={onAssign}
                             disabled={isPending}
-                            className="text-[#323d8f] hover:bg-[#323d8f]/10 h-9 gap-2 rounded-xl"
+                            className="h-9 gap-2 rounded-xl text-[#323d8f] hover:bg-[#323d8f]/10"
                         >
                             <UserPlus className="h-4 w-4" />
                             Assign to Instructor

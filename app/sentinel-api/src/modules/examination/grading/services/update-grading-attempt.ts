@@ -6,6 +6,7 @@ import {
 } from '@sentinel/shared';
 import { HTTPException } from 'hono/http-exception';
 import { getGradingAttemptDetail } from './get-grading-attempt-detail';
+import { appendExamAttemptLifecycleEvent } from '../../lifecycle/services/lifecycle-event.service';
 
 export type UpdateGradingAttemptArgs = {
     dbClient: DbClient;
@@ -61,6 +62,12 @@ export async function updateGradingAttempt({
     });
 
     const { attempt, questions } = detail;
+
+    if (attempt.scoreState === 'FINALIZED') {
+        throw new HTTPException(400, {
+            message: 'Cannot edit grading for a finalized attempt score.',
+        });
+    }
 
     // 2. Score the auto-gradable (objective) questions
     const mappedQuestions = questions.map((q) => ({
@@ -160,10 +167,10 @@ export async function updateGradingAttempt({
         typeof attempt.grading === 'object' && attempt.grading !== null ? attempt.grading : {};
     const updatedGradingMetadata = finalize
         ? {
-            ...existingGradingMetadata,
-            finalizedAt: new Date().toISOString(),
-            finalizedBy: actorUserId ?? null,
-        }
+              ...existingGradingMetadata,
+              finalizedAt: new Date().toISOString(),
+              finalizedBy: actorUserId ?? null,
+          }
         : existingGradingMetadata;
 
     // 5. Build updated answer snapshot with metadata prefixed with "_"
@@ -186,6 +193,9 @@ export async function updateGradingAttempt({
 
     if (finalize) {
         updatePayload.status = 'COMPLETED';
+        updatePayload.score_state = 'FINALIZED';
+        updatePayload.finalized_at = new Date();
+        updatePayload.finalized_by = actorUserId ?? null;
         if (!attempt.completedAt) {
             updatePayload.completed_at = new Date();
         }
@@ -208,9 +218,28 @@ export async function updateGradingAttempt({
         .where('attempt_id', '=', attemptId)
         .execute();
 
+    if (finalize) {
+        await appendExamAttemptLifecycleEvent({
+            dbClient,
+            attemptId,
+            examId: attempt.examId ?? '',
+            studentId: attempt.studentId ?? '',
+            eventType: 'FINALIZED',
+            previousState: attempt.lifecycleState as any,
+            nextState: attempt.lifecycleState as any,
+            actorUserId: actorUserId ?? null,
+            notes: 'Finalized from grading update',
+        });
+    }
+
     return {
         attemptId,
         score: roundedScore,
         totalScore: finalTotalScore,
+        scoreState: finalize ? 'FINALIZED' : (attempt.scoreState ?? 'DRAFT'),
+        finalizedAt: finalize
+            ? updatePayload.finalized_at.toISOString()
+            : (attempt.grading?.finalizedAt ?? null),
+        finalizedBy: finalize ? (actorUserId ?? null) : (attempt.grading?.finalizedBy ?? null),
     };
 }

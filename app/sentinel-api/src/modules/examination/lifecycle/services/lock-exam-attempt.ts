@@ -4,6 +4,7 @@ import { HTTPException } from 'hono/http-exception';
 import { getLifecycleAttemptContext } from '../data/get-lifecycle-attempt-context';
 import { appendExamAttemptLifecycleEvent } from './lifecycle-event.service';
 import { transitionExamAttemptLifecycle } from './lifecycle-transition.service';
+import { recordAttemptLifecycleAudit } from './lifecycle-audit.service';
 
 /**
  * Locks one attempt in place and records the change in the lifecycle audit log.
@@ -62,6 +63,23 @@ export async function lockExamAttempt(args: {
         actorUserId: args.actorUserId ?? null,
         reasonCode: args.reasonCode,
         notes: args.notes ?? null,
+        relatedIncidentIds: context.incidents.map((incident) => incident.incidentId),
+    });
+
+    const resolvedInstId = args.institutionId || context.exam.institutionId || '';
+
+    await recordAttemptLifecycleAudit({
+        dbClient: args.dbClient,
+        attemptId: args.attemptId,
+        examId: args.examId,
+        studentId: context.student.id,
+        eventType: 'LOCKED',
+        actorUserId: args.actorUserId ?? null,
+        institutionId: resolvedInstId || null,
+        reasonCode: args.reasonCode,
+        notes: args.notes ?? null,
+        previousState: context.attempt.lifecycleState,
+        nextState: 'LOCKED',
         relatedIncidentIds: context.incidents.map((incident) => incident.incidentId),
     });
 

@@ -1,7 +1,10 @@
 import { type DbClient } from '@sentinel/db';
 import type { GetQuestionCollectionsQuery } from '../question-collection.dto';
 import { getQuestionCollectionsData } from '../data/get-question-collections';
-import { mapQuestionCollectionResponse, type RawCollectionRecord } from './map-question-collection-response.service';
+import {
+    mapQuestionCollectionResponse,
+    type RawCollectionRecord,
+} from './map-question-collection-response.service';
 import type { QuestionCollectionPageRecord } from '../question-collection.dto';
 
 /**

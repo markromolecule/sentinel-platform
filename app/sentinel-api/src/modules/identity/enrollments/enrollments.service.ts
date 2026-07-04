@@ -198,6 +198,11 @@ export class EnrollmentService {
         subjectOfferingId: string,
         approvedBy: string,
     ) {
-        return assignOfferedSubjectService({ dbClient, instructorId, subjectOfferingId, approvedBy });
+        return assignOfferedSubjectService({
+            dbClient,
+            instructorId,
+            subjectOfferingId,
+            approvedBy,
+        });
     }
 }

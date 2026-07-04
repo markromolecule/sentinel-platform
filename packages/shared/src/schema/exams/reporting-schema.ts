@@ -95,6 +95,14 @@ export const examReportStudentSummarySchema = z.object({
     needsRetake: z.boolean(),
     isFinalized: z.boolean().optional(),
     finalizedAt: nullableDateTimeSchema.optional(),
+    lifecycleState: z.string().nullable().optional(),
+    scoreState: z.string().nullable().optional(),
+    closedReason: z.string().nullable().optional(),
+    reopenedUntil: nullableDateTimeSchema.optional(),
+    supersededByAttemptId: z.string().uuid().nullable().optional(),
+    supersededAt: nullableDateTimeSchema.optional(),
+    supersededBy: z.string().uuid().nullable().optional(),
+    finalizedBy: z.string().uuid().nullable().optional(),
 });
 
 export const examReportSummarySchema = z.object({
@@ -160,8 +168,6 @@ export type ExamReportSectionOptionType = z.infer<typeof examReportSectionOption
 export type ExamReportStudentSummaryType = z.infer<typeof examReportStudentSummarySchema>;
 export type ExamReportSummaryType = z.infer<typeof examReportSummarySchema>;
 export type ExamReportActionItemsType = z.infer<typeof examReportActionItemsSchema>;
-export type ExamReportStudentsPaginationType = z.infer<
-    typeof examReportStudentsPaginationSchema
->;
+export type ExamReportStudentsPaginationType = z.infer<typeof examReportStudentsPaginationSchema>;
 export type GetExamReportQueryType = z.infer<typeof getExamReportQuerySchema>;
 export type ExamReportType = z.infer<typeof examReportSchema>;

@@ -15,7 +15,7 @@ interface IncidentLogsViewProps {
 /**
  * IncidentLogsView renders the incident log table, filter controls,
  * and review sheet/actions for a specific examination.
- * 
+ *
  * @param examId - The UUID of the exam to manage logs for.
  */
 export function IncidentLogsView({ examId }: IncidentLogsViewProps) {
@@ -85,7 +85,8 @@ export function IncidentLogsView({ examId }: IncidentLogsViewProps) {
                 <div className="space-y-1">
                     <h2 className="text-xl font-semibold">Incident Logs & Analytics</h2>
                     <p className="text-muted-foreground text-sm">
-                        Review, confirm, or dismiss proctoring telemetry alerts recorded during examinations.
+                        Review, confirm, or dismiss proctoring telemetry alerts recorded during
+                        examinations.
                     </p>
                 </div>
                 <div className="flex items-center gap-3">
@@ -95,9 +96,7 @@ export function IncidentLogsView({ examId }: IncidentLogsViewProps) {
                         disabled={isFetching}
                         className="h-10 gap-2"
                     >
-                        <RefreshCw
-                            className={`h-4 w-4 ${isFetching ? 'animate-spin' : ''}`}
-                        />
+                        <RefreshCw className={`h-4 w-4 ${isFetching ? 'animate-spin' : ''}`} />
                         Refresh Logs
                     </Button>
                 </div>

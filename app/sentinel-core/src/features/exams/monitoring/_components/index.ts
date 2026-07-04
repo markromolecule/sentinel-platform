@@ -10,3 +10,5 @@ export * from './student-detail-header';
 export * from './student-identity-card';
 export * from './live-feed-monitor';
 export * from './integrity-timeline-card';
+export * from './attempt-lifecycle-actions';
+export * from './attempt-lifecycle-badge';

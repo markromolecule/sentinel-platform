@@ -27,7 +27,9 @@ export function useBulkDeleteClassroomStudentsMutation(
         onSuccess: async (data, variables, context) => {
             await queryClient.invalidateQueries({ queryKey: CLASSROOM_QUERY_KEYS.all });
 
-            const classroomIds = Array.from(new Set(variables.map((variable) => variable.classroomId)));
+            const classroomIds = Array.from(
+                new Set(variables.map((variable) => variable.classroomId)),
+            );
             await Promise.all(
                 classroomIds.map((classroomId) =>
                     queryClient.invalidateQueries({

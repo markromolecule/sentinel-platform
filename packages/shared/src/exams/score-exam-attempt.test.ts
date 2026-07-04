@@ -1,8 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import {
-    buildExamAttemptQuestionReports,
-    scoreExamAttempt,
-} from './score-exam-attempt';
+import { buildExamAttemptQuestionReports, scoreExamAttempt } from './score-exam-attempt';
 import type { ExamAttemptAnswers, ExamQuestion } from '../types';
 import type { EssayQuestionEvaluation } from '../schema/exams/assessment-schema';
 

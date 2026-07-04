@@ -42,6 +42,10 @@ export async function getGradingAttemptDetail({
             'e.title as examTitle',
             's.subject_title as subjectTitle',
             sql<string>`trim(concat(up.first_name, ' ', up.last_name))`.as('studentName'),
+            sql<string | null>`ea.lifecycle_state::text`.as('lifecycleState'),
+            sql<string | null>`ea.score_state::text`.as('scoreState'),
+            'ea.finalized_at as finalizedAt',
+            'ea.finalized_by as finalizedBy',
         ])
         .where('ea.attempt_id', '=', attemptId)
         .$if(Boolean(institutionId), (qb) => qb.where('e.institution_id', '=', institutionId!))
@@ -133,11 +137,17 @@ export async function getGradingAttemptDetail({
             feedback: overallFeedback,
             itemOverrides,
             grading: {
-                finalizedAt:
-                    typeof grading.finalizedAt === 'string' ? grading.finalizedAt : null,
+                finalizedAt: attemptRow.finalizedAt
+                    ? attemptRow.finalizedAt.toISOString()
+                    : typeof grading.finalizedAt === 'string'
+                      ? grading.finalizedAt
+                      : null,
                 finalizedBy:
-                    typeof grading.finalizedBy === 'string' ? grading.finalizedBy : null,
+                    attemptRow.finalizedBy ??
+                    (typeof grading.finalizedBy === 'string' ? grading.finalizedBy : null),
             },
+            lifecycleState: attemptRow.lifecycleState ?? null,
+            scoreState: attemptRow.scoreState ?? null,
             questionReports,
         },
         questions: questions.map((q) => ({

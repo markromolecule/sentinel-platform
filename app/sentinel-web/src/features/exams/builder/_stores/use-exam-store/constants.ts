@@ -11,8 +11,7 @@ export const DEFAULT_EXAM_SETTINGS: ExamSettings = {
 
 export const DEFAULT_EXAM_CONFIGURATION: ExamConfiguration = {
     lobbyAdmissionMode: DEFAULT_EXAMINATION_GLOBAL_SETTINGS.defaultLobbyAdmissionMode as
-        | 'AUTOMATIC'
-        | 'INSTRUCTOR_GATED',
+        'AUTOMATIC' | 'INSTRUCTOR_GATED',
     releaseScoreMode: 'AUTO_RELEASE',
     maxReconnectAttempts: DEFAULT_EXAMINATION_GLOBAL_SETTINGS.defaultMaxReconnectAttempts,
     strictMode: DEFAULT_EXAMINATION_GLOBAL_SETTINGS.defaultStrictMode,

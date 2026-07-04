@@ -13,10 +13,7 @@ export function buildPublishedStudentExamPredicate(args: { examAlias: string }) 
     )`;
 }
 
-function buildClassroomAssignmentExistsPredicate(args: {
-    examAlias: string;
-    classroomId: string;
-}) {
+function buildClassroomAssignmentExistsPredicate(args: { examAlias: string; classroomId: string }) {
     const { examAlias, classroomId } = args;
 
     return sql<boolean>`exists (
@@ -27,10 +24,7 @@ function buildClassroomAssignmentExistsPredicate(args: {
     )`;
 }
 
-function buildSectionAssignmentExistsPredicate(args: {
-    examAlias: string;
-    sectionAlias: string;
-}) {
+function buildSectionAssignmentExistsPredicate(args: { examAlias: string; sectionAlias: string }) {
     const { examAlias, sectionAlias } = args;
 
     return sql<boolean>`(

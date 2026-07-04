@@ -8,14 +8,14 @@
 
 ### Files Touched
 
-| File | Change Type |
-|------|-------------|
-| `app/sentinel-web/src/app/(protected)/(instructor)/exams/grading/[examId]/page.tsx` | MODIFY |
-| `app/sentinel-web/src/app/(protected)/(instructor)/exams/grading/[examId]/_components/grading-student-list.tsx` | MODIFY |
-| `app/sentinel-web/src/app/(protected)/(instructor)/exams/grading/[examId]/_components/grading-student-list.test.tsx` | MODIFY |
-| `app/sentinel-web/src/app/(protected)/(instructor)/exams/grading/_hooks/use-grading-detail.ts` | MODIFY |
-| `app/sentinel-web/src/app/(protected)/(instructor)/exams/grading/_hooks/use-grading-detail.test.tsx` | MODIFY |
-| `packages/services/src/api/grading.ts` | MODIFY |
+| File                                                                                                                 | Change Type |
+| -------------------------------------------------------------------------------------------------------------------- | ----------- |
+| `app/sentinel-web/src/app/(protected)/(instructor)/exams/grading/[examId]/page.tsx`                                  | MODIFY      |
+| `app/sentinel-web/src/app/(protected)/(instructor)/exams/grading/[examId]/_components/grading-student-list.tsx`      | MODIFY      |
+| `app/sentinel-web/src/app/(protected)/(instructor)/exams/grading/[examId]/_components/grading-student-list.test.tsx` | MODIFY      |
+| `app/sentinel-web/src/app/(protected)/(instructor)/exams/grading/_hooks/use-grading-detail.ts`                       | MODIFY      |
+| `app/sentinel-web/src/app/(protected)/(instructor)/exams/grading/_hooks/use-grading-detail.test.tsx`                 | MODIFY      |
+| `packages/services/src/api/grading.ts`                                                                               | MODIFY      |
 
 **Migration required:** No — no schema changes are involved.
 
@@ -26,35 +26,40 @@
 **Goal:** Allow the frontend to pass a name/studentId search string to the API so filtering happens server-side.
 
 - [ ] Modify `grading.dto.ts` — add optional `search: z.string().optional()` field to `getGradingStudentsSchema.request.query`
-  - File: `app/sentinel-api/src/modules/examination/grading/grading.dto.ts`
+    - File: `app/sentinel-api/src/modules/examination/grading/grading.dto.ts`
 
 - [ ] Modify `buildGetGradingStudentsQuery` in `data/get-grading-students.ts` — accept `search?: string` in `GetGradingStudentsDataArgs` and apply `where` clause:
-  ```ts
-  if (search) {
-      query = query.where((eb) =>
-          eb.or([
-              eb(sql<string>`trim(concat(up.first_name, ' ', up.last_name))`, 'ilike', `%${search}%`),
-              eb('st.student_number', 'ilike', `%${search}%`),
-          ])
-      );
-  }
-  ```
-  - File: `app/sentinel-api/src/modules/examination/grading/data/get-grading-students.ts`
+
+    ```ts
+    if (search) {
+        query = query.where((eb) =>
+            eb.or([
+                eb(
+                    sql<string>`trim(concat(up.first_name, ' ', up.last_name))`,
+                    'ilike',
+                    `%${search}%`,
+                ),
+                eb('st.student_number', 'ilike', `%${search}%`),
+            ]),
+        );
+    }
+    ```
+    - File: `app/sentinel-api/src/modules/examination/grading/data/get-grading-students.ts`
 
 - [ ] Modify `GetGradingStudentsArgs` in `services/get-grading-students.ts` — add `search?: string`, pass it to `getGradingStudentsData`
-  - File: `app/sentinel-api/src/modules/examination/grading/services/get-grading-students.ts`
+    - File: `app/sentinel-api/src/modules/examination/grading/services/get-grading-students.ts`
 
 - [ ] Modify `getGradingStudentsRouteHandler` in `controllers/get-grading-students.controller.ts` — destructure `search` from validated query and pass it to `GradingService.getGradingStudents`
-  - File: `app/sentinel-api/src/modules/examination/grading/controllers/get-grading-students.controller.ts`
+    - File: `app/sentinel-api/src/modules/examination/grading/controllers/get-grading-students.controller.ts`
 
 - [ ] Modify `GradingService.getGradingStudents` in `grading.service.ts` — accept and forward `search`
-  - File: `app/sentinel-api/src/modules/examination/grading/grading.service.ts`
+    - File: `app/sentinel-api/src/modules/examination/grading/grading.service.ts`
 
 - [ ] Write tests for `buildGetGradingStudentsQuery` with `search` param
-  - File: `app/sentinel-api/src/modules/examination/grading/data/grading-visibility.test.ts`
+    - File: `app/sentinel-api/src/modules/examination/grading/data/grading-visibility.test.ts`
 
 - [ ] Write tests for `getGradingStudents` service with `search` param
-  - File: `app/sentinel-api/src/modules/examination/grading/services/get-grading-students.test.ts`
+    - File: `app/sentinel-api/src/modules/examination/grading/services/get-grading-students.test.ts`
 
 ---
 
@@ -64,7 +69,7 @@
 
 - [ ] Modify `GetGradingStudentsParams` in `packages/services/src/api/grading.ts` — add `search?: string`
 - [ ] Modify `buildGradingQueryString` to include `search` when present
-  - File: `packages/services/src/api/grading.ts`
+    - File: `packages/services/src/api/grading.ts`
 
 ---
 
@@ -73,14 +78,14 @@
 **Goal:** Update `useGradingDetail` to accept a `search` string, pass it through to the API, and expose pagination-ready flat student data.
 
 - [ ] Modify `useGradingDetail` in `_hooks/use-grading-detail.ts`:
-  - Accept `search?: string` as a parameter
-  - Include `search` in `queryKey` so React Query refetches on change
-  - Pass `search` to `getGradingStudents(..., { sectionId, search })`
-  - Return `students` as a flat array (it already is — no structural change needed)
-  - File: `app/sentinel-web/src/app/(protected)/(instructor)/exams/grading/_hooks/use-grading-detail.ts`
+    - Accept `search?: string` as a parameter
+    - Include `search` in `queryKey` so React Query refetches on change
+    - Pass `search` to `getGradingStudents(..., { sectionId, search })`
+    - Return `students` as a flat array (it already is — no structural change needed)
+    - File: `app/sentinel-web/src/app/(protected)/(instructor)/exams/grading/_hooks/use-grading-detail.ts`
 
 - [ ] Update `use-grading-detail.test.tsx` to cover `search` param pass-through
-  - File: `app/sentinel-web/src/app/(protected)/(instructor)/exams/grading/_hooks/use-grading-detail.test.tsx`
+    - File: `app/sentinel-web/src/app/(protected)/(instructor)/exams/grading/_hooks/use-grading-detail.test.tsx`
 
 ---
 
@@ -91,50 +96,50 @@
 ### 4a — Remove Card Layout, Use `DataTable`
 
 - [ ] Rewrite `grading-student-list.tsx` to:
-  - Remove all `Card`, `CardHeader`, `CardContent`, `CardTitle` imports and usage
-  - Remove the custom `<Table>`, `<TableHeader>`, `<TableRow>`, `<TableBody>` rendering loop
-  - Import and use `DataTable` from `@sentinel/ui`
-  - Pass `columns` (existing `studentColumns`) and flat `students` data from `useGradingDetail`
-  - Enable built-in pagination (`manualPagination={false}`, default page size 10)
-  - File: `app/sentinel-web/src/app/(protected)/(instructor)/exams/grading/[examId]/_components/grading-student-list.tsx`
+    - Remove all `Card`, `CardHeader`, `CardContent`, `CardTitle` imports and usage
+    - Remove the custom `<Table>`, `<TableHeader>`, `<TableRow>`, `<TableBody>` rendering loop
+    - Import and use `DataTable` from `@sentinel/ui`
+    - Pass `columns` (existing `studentColumns`) and flat `students` data from `useGradingDetail`
+    - Enable built-in pagination (`manualPagination={false}`, default page size 10)
+    - File: `app/sentinel-web/src/app/(protected)/(instructor)/exams/grading/[examId]/_components/grading-student-list.tsx`
 
 ### 4b — Convert Section Filter to Facet
 
 - [ ] Replace the `<Select>` section dropdown with a `DataTableFacet` facet:
-  - Build `sectionFacet: DataTableFacet` object from `availableSections`
-  - Pass `facets={[sectionFacet]}` to `DataTable` — the DataTable's built-in faceted filter renders it next to the search bar automatically
-  - Remove `sectionId` / `onSectionChange` from props (facet state is managed internally by `DataTable`)
-  - Connect `onColumnFiltersChange` callback to derive the selected `sectionId` and call the parent's setter so the backend still receives the filter
-  - File: `app/sentinel-web/src/app/(protected)/(instructor)/exams/grading/[examId]/_components/grading-student-list.tsx`
+    - Build `sectionFacet: DataTableFacet` object from `availableSections`
+    - Pass `facets={[sectionFacet]}` to `DataTable` — the DataTable's built-in faceted filter renders it next to the search bar automatically
+    - Remove `sectionId` / `onSectionChange` from props (facet state is managed internally by `DataTable`)
+    - Connect `onColumnFiltersChange` callback to derive the selected `sectionId` and call the parent's setter so the backend still receives the filter
+    - File: `app/sentinel-web/src/app/(protected)/(instructor)/exams/grading/[examId]/_components/grading-student-list.tsx`
 
 ### 4c — Connect Search Bar to Backend
 
 - [ ] Pass `onSearchChange` debounced handler from `page.tsx` down through `GradingStudentList` to `DataTable` via `onSearchChange` prop
-  - Use a `300ms` debounce on the search value before updating state
-  - Remove client-side `visibleStudents` filtering from `page.tsx` (was doing `studentSearch.trim().toLowerCase()` — now the backend handles it)
-  - File: `app/sentinel-web/src/app/(protected)/(instructor)/exams/grading/[examId]/page.tsx`
+    - Use a `300ms` debounce on the search value before updating state
+    - Remove client-side `visibleStudents` filtering from `page.tsx` (was doing `studentSearch.trim().toLowerCase()` — now the backend handles it)
+    - File: `app/sentinel-web/src/app/(protected)/(instructor)/exams/grading/[examId]/page.tsx`
 
 ### 4d — Export Button Color
 
 - [ ] Change the Export to Excel button styling to use a soft Excel green:
-  ```tsx
-  <Button
-      className="border-[#217346] bg-[#217346]/10 text-[#217346] hover:bg-[#217346]/20"
-      variant="outline"
-      onClick={...}
-  >
-  ```
-  - File: `app/sentinel-web/src/app/(protected)/(instructor)/exams/grading/[examId]/page.tsx`
+    ```tsx
+    <Button
+        className="border-[#217346] bg-[#217346]/10 text-[#217346] hover:bg-[#217346]/20"
+        variant="outline"
+        onClick={...}
+    >
+    ```
+    - File: `app/sentinel-web/src/app/(protected)/(instructor)/exams/grading/[examId]/page.tsx`
 
 ### 4e — `page.tsx` Simplification
 
 - [ ] Remove `visibleStudents`, `visibleSections`, `studentSections`, `sectionId` state and derived memos from `page.tsx`
-  - The `DataTable` + facet now owns section filtering internally
-  - Pass only `students` (flat array) and `search` state to `GradingStudentList`
-  - File: `app/sentinel-web/src/app/(protected)/(instructor)/exams/grading/[examId]/page.tsx`
+    - The `DataTable` + facet now owns section filtering internally
+    - Pass only `students` (flat array) and `search` state to `GradingStudentList`
+    - File: `app/sentinel-web/src/app/(protected)/(instructor)/exams/grading/[examId]/page.tsx`
 
 - [ ] Update `GradingStudentList` tests to match new props interface
-  - File: `app/sentinel-web/src/app/(protected)/(instructor)/exams/grading/[examId]/_components/grading-student-list.test.tsx`
+    - File: `app/sentinel-web/src/app/(protected)/(instructor)/exams/grading/[examId]/_components/grading-student-list.test.tsx`
 
 ---
 

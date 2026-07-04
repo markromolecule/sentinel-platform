@@ -49,7 +49,8 @@ export default function ProctorCalendarPage() {
         }));
     }, [data]);
 
-    const emptyStateHint = mappedEvents.length === 0 ? 'No events scheduled this month.' : undefined;
+    const emptyStateHint =
+        mappedEvents.length === 0 ? 'No events scheduled this month.' : undefined;
 
     // Re-initialize dynamic getEventsForDate on the fly
     const getEventsForDate = useMemo(() => {

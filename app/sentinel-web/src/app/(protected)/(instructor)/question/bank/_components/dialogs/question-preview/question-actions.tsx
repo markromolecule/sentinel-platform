@@ -23,17 +23,13 @@ export function QuestionActions({
             >
                 <Edit className="h-4 w-4" /> Edit Question
             </Button>
-            <Button
-                variant="outline"
-                className="min-h-11 flex-1 gap-2"
-                onClick={onDuplicate}
-            >
+            <Button variant="outline" className="min-h-11 flex-1 gap-2" onClick={onDuplicate}>
                 <Copy className="h-4 w-4" /> Duplicate
             </Button>
             <Button
                 variant="ghost"
                 size="icon"
-                className="text-destructive h-11 w-11 shrink-0 hover:bg-destructive/10"
+                className="text-destructive hover:bg-destructive/10 h-11 w-11 shrink-0"
                 onClick={onDelete}
             >
                 <Trash2 className="h-4 w-4" />

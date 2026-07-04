@@ -15,10 +15,25 @@ export const monitoringStatsSchema = z
 
 export const monitoringStudentSummarySchema = z
     .object(Schema.monitoringStudentSummarySchema.shape)
+    .extend({
+        lifecycleState: Schema.examAttemptLifecycleStateSchema.nullable().optional(),
+        scoreState: Schema.examAttemptScoreStateSchema.nullable().optional(),
+        closedReason: z.string().nullable().optional(),
+        reopenedUntil: z.union([z.string(), z.date()]).nullable().optional(),
+        finalizedAt: z.union([z.string(), z.date()]).nullable().optional(),
+    })
     .openapi('MonitoringStudentSummary');
 
 export const monitoringStudentDetailSchema = z
     .object(Schema.monitoringStudentDetailSchema.shape)
+    .extend({
+        lifecycleState: Schema.examAttemptLifecycleStateSchema.nullable().optional(),
+        scoreState: Schema.examAttemptScoreStateSchema.nullable().optional(),
+        closedReason: z.string().nullable().optional(),
+        reopenedUntil: z.union([z.string(), z.date()]).nullable().optional(),
+        finalizedAt: z.union([z.string(), z.date()]).nullable().optional(),
+        lifecycleEvents: z.array(z.object(Schema.examAttemptLifecycleEventSchema.shape)).optional(),
+    })
     .openapi('MonitoringStudentDetail');
 
 export const monitoringOverviewSchema = z

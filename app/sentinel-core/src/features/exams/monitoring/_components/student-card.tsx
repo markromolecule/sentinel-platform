@@ -7,6 +7,8 @@ import { cn } from '@sentinel/ui';
 import { StudentCardProps } from '@sentinel/shared/types';
 import { statusConfig } from '@sentinel/shared/constants';
 import { useRouter, usePathname } from 'next/navigation';
+import { AttemptLifecycleActions } from './attempt-lifecycle-actions';
+import { AttemptLifecycleBadge } from './attempt-lifecycle-badge';
 
 export function StudentCard({
     student,
@@ -15,13 +17,20 @@ export function StudentCard({
     maxReconnectAttempts = 0,
     isOverridingReconnect,
     onOverrideReconnect,
-}: StudentCardProps) {
+    activeLifecycleActionId,
+    onLifecycleAction,
+}: StudentCardProps & {
+    activeLifecycleActionId?: string | null;
+    onLifecycleAction?: (student: any, action: any) => void;
+}) {
     const router = useRouter();
     const pathname = usePathname();
     const status = statusConfig[student.status];
     const incidentCount = student.incidentCount ?? student.flags?.length ?? 0;
     const reconnectLimitReached =
         maxReconnectAttempts > 0 && (student.reconnectCount ?? 0) >= maxReconnectAttempts;
+    const reconnectOverrideDisabled =
+        student.lifecycleState === 'CLOSED' || student.lifecycleState === 'SUPERSEDED';
 
     return (
         <Card
@@ -44,6 +53,9 @@ export function StudentCard({
                         <p className="text-muted-foreground font-mono text-xs">
                             {student.studentNo}
                         </p>
+                        <div className="mt-2 flex flex-wrap gap-2">
+                            <AttemptLifecycleBadge student={student} />
+                        </div>
                     </div>
                 </div>
                 <Badge className={cn('text-xs', status.color)}>
@@ -77,7 +89,7 @@ export function StudentCard({
                         variant="outline"
                         size="sm"
                         className="h-7 px-2 text-[10px]"
-                        disabled={isOverridingReconnect}
+                        disabled={isOverridingReconnect || reconnectOverrideDisabled}
                         onClick={(e: React.MouseEvent) => {
                             e.stopPropagation();
                             onOverrideReconnect(student);
@@ -116,6 +128,14 @@ export function StudentCard({
                 >
                     View Details
                 </Button>
+            </div>
+
+            <div className="mt-4 border-t pt-3">
+                <AttemptLifecycleActions
+                    student={student}
+                    activeLifecycleActionId={activeLifecycleActionId}
+                    onAction={onLifecycleAction}
+                />
             </div>
         </Card>
     );

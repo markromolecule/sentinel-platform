@@ -1,23 +1,23 @@
 packages:
-  - 'app/*'
-  - 'packages/*'
+    - 'app/*'
+    - 'packages/*'
 overrides:
-  '@prisma/client-runtime-utils': '7.5.0'
-  '@types/pg': '8.11.11'
-  '@types/react': '19.1.17'
-  '@types/react-dom': '19.1.11'
+    '@prisma/client-runtime-utils': '7.5.0'
+    '@types/pg': '8.11.11'
+    '@types/react': '19.1.17'
+    '@types/react-dom': '19.1.11'
 onlyBuiltDependencies:
-  - '@prisma/engines'
-  - prisma
+    - '@prisma/engines'
+    - prisma
 allowBuilds:
-  '@prisma/engines': true
-  bcrypt: true
-  core-js: true
-  esbuild: true
-  msgpackr-extract: true
-  prisma: true
-  sharp: true
-  unrs-resolver: true
+    '@prisma/engines': true
+    bcrypt: true
+    core-js: true
+    esbuild: true
+    msgpackr-extract: true
+    prisma: true
+    sharp: true
+    unrs-resolver: true
 ignoredBuiltDependencies:
-  - sharp
-  - unrs-resolver
+    - sharp
+    - unrs-resolver

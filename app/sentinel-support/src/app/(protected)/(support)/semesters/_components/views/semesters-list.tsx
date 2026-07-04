@@ -1,6 +1,11 @@
 'use client';
 
-import { useInstitutionsQuery, useDeleteSemestersMutation, useStableValue, PermissionGuard } from '@sentinel/hooks';
+import {
+    useInstitutionsQuery,
+    useDeleteSemestersMutation,
+    useStableValue,
+    PermissionGuard,
+} from '@sentinel/hooks';
 import { ApiError } from '@sentinel/services';
 import { Semester } from '@sentinel/shared/types';
 import {

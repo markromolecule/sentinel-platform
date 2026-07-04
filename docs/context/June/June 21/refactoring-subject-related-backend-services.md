@@ -1,4 +1,4 @@
-# Goal 
+# Goal
 
 - To refactor this [services] to make the code more easier to maintain, scale, read, implement, debug
 

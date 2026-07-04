@@ -1,5 +1,8 @@
 import {
     TELEMETRY_INCIDENT_LABELS,
+    type ExamAttemptLifecycleEvent,
+    type ExamAttemptLifecycleState,
+    type ExamAttemptScoreState,
     type TelemetryIncidentRecord,
     type TelemetryIncidentType,
 } from '@sentinel/shared';
@@ -23,6 +26,8 @@ export type MonitoringStudentRow = {
     last_seen_at: Date | string | null;
     attempt_id: string;
     attempt_status: string | null;
+    lifecycle_state: ExamAttemptLifecycleState | null;
+    score_state: ExamAttemptScoreState | null;
     started_at: Date | string | null;
     completed_at: Date | string | null;
     time_spent_minutes: number | null;
@@ -35,6 +40,26 @@ export type MonitoringStudentRow = {
     has_high_severity: boolean | null;
     latest_incident_type: TelemetryIncidentType | null;
     latest_incident_at: Date | string | null;
+    closed_reason: string | null;
+    reopened_until: Date | string | null;
+    finalized_at: Date | string | null;
+};
+
+export type MonitoringLifecycleEventRow = {
+    event_id: string;
+    attempt_id: string;
+    exam_id: string;
+    student_id: string;
+    event_type: ExamAttemptLifecycleEvent['eventType'];
+    previous_state: ExamAttemptLifecycleState | null;
+    next_state: ExamAttemptLifecycleState | null;
+    actor_user_id: string | null;
+    reason_code: string | null;
+    notes: string | null;
+    related_incident_ids: unknown | null;
+    related_override_id: string | null;
+    metadata: unknown | null;
+    created_at: Date | string | null;
 };
 
 function toIsoDate(value: Date | string | null | undefined) {
@@ -219,6 +244,37 @@ export function mapMonitoringStudentSummary(
         reconnectCount: Number(row.reconnect_attempt_count ?? 0),
         score: row.score ?? null,
         totalScore: row.total_score ?? null,
+        lifecycleState: row.lifecycle_state ?? null,
+        scoreState: row.score_state ?? null,
+        closedReason: row.closed_reason ?? null,
+        reopenedUntil: toIsoDate(row.reopened_until),
+        finalizedAt: toIsoDate(row.finalized_at),
+    };
+}
+
+export function mapMonitoringLifecycleEvent(
+    event: MonitoringLifecycleEventRow,
+): ExamAttemptLifecycleEvent {
+    return {
+        eventId: event.event_id,
+        attemptId: event.attempt_id,
+        examId: event.exam_id,
+        studentId: event.student_id,
+        eventType: event.event_type,
+        previousState: event.previous_state,
+        nextState: event.next_state,
+        actorUserId: event.actor_user_id,
+        reasonCode: event.reason_code,
+        notes: event.notes,
+        relatedIncidentIds: Array.isArray(event.related_incident_ids)
+            ? (event.related_incident_ids as string[])
+            : null,
+        relatedOverrideId: event.related_override_id,
+        metadata:
+            event.metadata && typeof event.metadata === 'object'
+                ? (event.metadata as Record<string, unknown>)
+                : null,
+        createdAt: toIsoDate(event.created_at),
     };
 }
 
@@ -254,10 +310,12 @@ export function mapMonitoringStudentDetail(
     durationMinutes: number,
     questionCount: number,
     incidents: TelemetryIncidentRecord[],
+    lifecycleEvents: MonitoringLifecycleEventRow[] = [],
 ): MonitoringStudentDetail {
     return {
         ...mapMonitoringStudentSummary(row, durationMinutes, questionCount),
         flags: incidents.map(mapMonitoringIncident),
+        lifecycleEvents: lifecycleEvents.map(mapMonitoringLifecycleEvent),
     };
 }
 

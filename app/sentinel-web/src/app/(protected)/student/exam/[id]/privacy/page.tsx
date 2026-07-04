@@ -49,7 +49,9 @@ export default function StudentExamPrivacyPage() {
                 <div className="flex min-h-full flex-col justify-center gap-6">
                     <StudentFlowPageHeader
                         title={blockedState.title ?? 'Exam Unavailable'}
-                        description={blockedState.message ?? 'This exam cannot be entered right now.'}
+                        description={
+                            blockedState.message ?? 'This exam cannot be entered right now.'
+                        }
                     />
                 </div>
             </StudentFlowShell>
@@ -103,10 +105,12 @@ export default function StudentExamPrivacyPage() {
                 <section className="grid gap-5 lg:grid-cols-[minmax(0,1.05fr)_minmax(320px,0.95fr)] lg:items-start">
                     <StudentFlowPanel className="space-y-4">
                         <div className="space-y-2">
-                            <h2 className="text-base font-semibold sm:text-lg">Monitored signals</h2>
+                            <h2 className="text-base font-semibold sm:text-lg">
+                                Monitored signals
+                            </h2>
                             <p className="text-muted-foreground text-sm leading-6 sm:text-[15px]">
-                                Only the signals required by your institution are requested for
-                                this exam session.
+                                Only the signals required by your institution are requested for this
+                                exam session.
                             </p>
                         </div>
 

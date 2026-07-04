@@ -157,11 +157,7 @@ export default function SubjectClassificationDetailsPage({ params }: PageProps) 
                             description="This classification group doesn't have any subjects assigned yet. You can manage assignments using the button above."
                             action={
                                 canUpdateClassification && !isInheritedClassification ? (
-                                    <Button
-                                        variant="outline"
-                                        size="sm"
-                                        onClick={handleManageGroup}
-                                    >
+                                    <Button variant="outline" size="sm" onClick={handleManageGroup}>
                                         <Edit2 className="mr-2 h-4 w-4" />
                                         Assign subjects now
                                     </Button>

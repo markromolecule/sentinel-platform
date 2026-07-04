@@ -109,12 +109,14 @@ export class GetSubjectClassificationsService {
                 return paginateItems(records, page, pageSize);
             }
 
-            const records =
-                await GetSubjectClassificationsService.loadEffectiveClassificationRows(dbClient, {
+            const records = await GetSubjectClassificationsService.loadEffectiveClassificationRows(
+                dbClient,
+                {
                     institutionId,
                     search,
                     includeClassificationFields: supportsTables,
-                });
+                },
+            );
 
             return paginateItems(records.map(mapClassificationRecord), page, pageSize);
         } catch (error) {

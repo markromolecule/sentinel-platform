@@ -86,9 +86,7 @@ describe('syncSystemPermissions', () => {
         expect(SYSTEM_ROLE_BLUEPRINTS.superadmin.permissionKeys).toContain(
             'classrooms:enroll_students',
         );
-        expect(SYSTEM_ROLE_BLUEPRINTS.admin.permissionKeys).toContain(
-            'classrooms:enroll_students',
-        );
+        expect(SYSTEM_ROLE_BLUEPRINTS.admin.permissionKeys).toContain('classrooms:enroll_students');
         expect(SYSTEM_ROLE_BLUEPRINTS.instructor.permissionKeys).toContain(
             'classrooms:enroll_students',
         );

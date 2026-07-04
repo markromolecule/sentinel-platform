@@ -33,7 +33,7 @@ describe('buildOverrideRecencyMaps', () => {
     it('builds maps correctly', () => {
         const futureDate = new Date();
         futureDate.setFullYear(futureDate.getFullYear() + 1);
-        
+
         const overrides: StudentExamAccessOverride[] = [
             {
                 id: '1',
@@ -50,7 +50,7 @@ describe('buildOverrideRecencyMaps', () => {
         ];
 
         const { overrideAttemptKindMap, activeOverrideMap } = buildOverrideRecencyMaps(overrides);
-        
+
         expect(overrideAttemptKindMap.get('attempt-1')).toBe('retake');
         expect(activeOverrideMap.get('std1')).toBe('RETAKE');
     });

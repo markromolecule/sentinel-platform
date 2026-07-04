@@ -3,12 +3,7 @@ import type { ApiExamResponse } from './types';
 
 export type ApiExamAssignmentRelationship = 'INBOUND' | 'OUTBOUND';
 export type ApiExamAssignmentStatus =
-    | 'PENDING'
-    | 'ACCEPTED'
-    | 'DECLINED'
-    | 'ACTIVE'
-    | 'COMPLETED'
-    | 'SCHEDULED';
+    'PENDING' | 'ACCEPTED' | 'DECLINED' | 'ACTIVE' | 'COMPLETED' | 'SCHEDULED';
 
 export type ApiExamAssignment = {
     id: string;

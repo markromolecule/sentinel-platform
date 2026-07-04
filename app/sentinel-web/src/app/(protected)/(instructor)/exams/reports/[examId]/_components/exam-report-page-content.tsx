@@ -14,11 +14,7 @@ import { ReportError } from './report-error';
  * Client page content for the instructor detailed exam report route.
  * Resolves dynamic params inside the Suspense boundary owned by the page wrapper.
  */
-export function ExamReportPageContent({
-    params,
-}: {
-    params: Promise<{ examId: string }>;
-}) {
+export function ExamReportPageContent({ params }: { params: Promise<{ examId: string }> }) {
     const { examId } = use(params);
     const {
         report,
@@ -58,18 +54,11 @@ export function ExamReportPageContent({
 
     return (
         <div className="relative flex min-h-[calc(100vh-64px)] flex-col lg:-m-6 lg:flex-row lg:items-stretch">
-            <ReportNavigation
-                activeSection={activeSection}
-                setActiveSection={setActiveSection}
-            />
+            <ReportNavigation activeSection={activeSection} setActiveSection={setActiveSection} />
 
             <main className="min-w-0 flex-1 space-y-6 p-4 md:p-6 lg:p-8">
                 {activeSection === 'overview' && (
-                    <OverviewView
-                        report={report}
-                        refetch={refetch}
-                        isFetching={isFetching}
-                    />
+                    <OverviewView report={report} refetch={refetch} isFetching={isFetching} />
                 )}
 
                 {activeSection === 'attempts' && (

@@ -43,5 +43,8 @@ export type UseExamReportResult = {
         makeup: ExamReportActionItem[];
         retake: ExamReportActionItem[];
     };
-    handleGrantOverride: (item: ExamReportActionItem, overrideType: 'MAKEUP' | 'RETAKE') => Promise<void>;
+    handleGrantOverride: (
+        item: ExamReportActionItem,
+        overrideType: 'MAKEUP' | 'RETAKE',
+    ) => Promise<void>;
 };

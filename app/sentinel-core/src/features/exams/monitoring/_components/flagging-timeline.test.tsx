@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
-import type { Flag } from '@sentinel/shared/types';
+import type { ExamAttemptLifecycleEvent, Flag } from '@sentinel/shared/types';
 import { FlaggingTimeline } from './flagging-timeline';
 
 describe('FlaggingTimeline', () => {
@@ -56,5 +56,24 @@ describe('FlaggingTimeline', () => {
         expect(screen.getByText('Screen Capture Attempt')).toBeTruthy();
         expect(screen.getByText(/screen-capture shortcut/i)).toBeTruthy();
         expect(screen.getByText('Trigger PRINT_SCREEN_ATTEMPT')).toBeTruthy();
+    });
+
+    it('surfaces proctor-initiated student attempt lifecycle changes', () => {
+        const events: ExamAttemptLifecycleEvent[] = [
+            {
+                eventId: 'event-1',
+                attemptId: 'attempt-1',
+                eventType: 'LOCKED',
+                reasonCode: 'SUSPICIOUS_BEHAVIOR',
+                notes: 'Locked due to looking away.',
+                createdAt: '2026-04-23T14:10:40.000Z',
+                createdBy: 'instructor-1',
+            },
+        ];
+
+        render(<FlaggingTimeline flags={[]} lifecycleEvents={events} />);
+
+        expect(screen.getByText('LOCKED')).toBeTruthy();
+        expect(screen.getByText('Locked due to looking away.')).toBeTruthy();
     });
 });

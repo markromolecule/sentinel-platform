@@ -220,4 +220,186 @@ describe('map reporting response', () => {
         expect(student.isFinalized).toBe(true);
         expect(student.finalizedAt).toBe('2026-04-20T10:00:00.000Z');
     });
+
+    it('supports new attempt lifecycle states (LOCKED, CLOSED, SUPERSEDED) and finalized score states', () => {
+        // Locked attempt
+        const lockedStudent = mapReportStudentSummary(
+            {
+                student_user_id: '1111-1111',
+                student_record_id: '2222-2222',
+                student_number: '2024-0010',
+                first_name: 'Locked',
+                last_name: 'User',
+                attempt_id: '3333-3333',
+                attempt_status: 'IN_PROGRESS',
+                started_at: '2026-04-20T09:00:00.000Z',
+                completed_at: null,
+                time_spent_minutes: 10,
+                score: null,
+                total_score: null,
+                attempt_count: 1,
+                incident_count: 3,
+                open_incident_count: 3,
+                pending_incident_count: 3,
+                reviewed_incident_count: 0,
+                confirmed_incident_count: 0,
+                dismissed_incident_count: 0,
+                highest_incident_type: 'TAB_SWITCH',
+                highest_incident_severity: 'HIGH',
+                lifecycle_state: 'LOCKED',
+                score_state: 'DRAFT',
+            },
+            75,
+        );
+        expect(lockedStudent.status).toBe('flagged');
+        expect(lockedStudent.needsReview).toBe(true);
+        expect(lockedStudent.lifecycleState).toBe('LOCKED');
+
+        // Closed attempt
+        const closedStudent = mapReportStudentSummary(
+            {
+                student_user_id: '1111-1111',
+                student_record_id: '2222-2222',
+                student_number: '2024-0011',
+                first_name: 'Closed',
+                last_name: 'User',
+                attempt_id: '3333-3334',
+                attempt_status: 'COMPLETED',
+                started_at: '2026-04-20T09:00:00.000Z',
+                completed_at: '2026-04-20T09:15:00.000Z',
+                time_spent_minutes: 15,
+                score: 50,
+                total_score: 100,
+                attempt_count: 1,
+                incident_count: 0,
+                open_incident_count: 0,
+                pending_incident_count: 0,
+                reviewed_incident_count: 0,
+                confirmed_incident_count: 0,
+                dismissed_incident_count: 0,
+                highest_incident_type: null,
+                highest_incident_severity: null,
+                lifecycle_state: 'CLOSED',
+                score_state: 'DRAFT',
+            },
+            75,
+        );
+        expect(closedStudent.submissionType).toBe('force_close');
+        expect(closedStudent.lifecycleState).toBe('CLOSED');
+
+        // Superseded attempt
+        const supersededStudent = mapReportStudentSummary(
+            {
+                student_user_id: '1111-1111',
+                student_record_id: '2222-2222',
+                student_number: '2024-0012',
+                first_name: 'Superseded',
+                last_name: 'User',
+                attempt_id: '3333-3335',
+                attempt_status: 'COMPLETED',
+                started_at: '2026-04-20T09:00:00.000Z',
+                completed_at: '2026-04-20T09:45:00.000Z',
+                time_spent_minutes: 45,
+                score: 40,
+                total_score: 100,
+                attempt_count: 2,
+                incident_count: 0,
+                open_incident_count: 0,
+                pending_incident_count: 0,
+                reviewed_incident_count: 0,
+                confirmed_incident_count: 0,
+                dismissed_incident_count: 0,
+                highest_incident_type: null,
+                highest_incident_severity: null,
+                lifecycle_state: 'SUPERSEDED',
+                score_state: 'DRAFT',
+            },
+            75,
+        );
+        expect(supersededStudent.needsRetake).toBe(false);
+        expect(supersededStudent.lifecycleState).toBe('SUPERSEDED');
+
+        // Finalized attempt
+        const finalizedStudent = mapReportStudentSummary(
+            {
+                student_user_id: '1111-1111',
+                student_record_id: '2222-2222',
+                student_number: '2024-0013',
+                first_name: 'Finalized',
+                last_name: 'User',
+                attempt_id: '3333-3336',
+                attempt_status: 'COMPLETED',
+                started_at: '2026-04-20T09:00:00.000Z',
+                completed_at: '2026-04-20T09:45:00.000Z',
+                time_spent_minutes: 45,
+                score: 85,
+                total_score: 100,
+                attempt_count: 1,
+                incident_count: 0,
+                open_incident_count: 0,
+                pending_incident_count: 0,
+                reviewed_incident_count: 0,
+                confirmed_incident_count: 0,
+                dismissed_incident_count: 0,
+                highest_incident_type: null,
+                highest_incident_severity: null,
+                lifecycle_state: 'SUBMITTED',
+                score_state: 'FINALIZED',
+                finalized_at: '2026-04-20T10:00:00.000Z',
+            },
+            75,
+        );
+        expect(finalizedStudent.isFinalized).toBe(true);
+        expect(finalizedStudent.scoreState).toBe('FINALIZED');
+    });
+
+    it('excludes superseded attempts from action queues in buildExamReport', () => {
+        const report = buildExamReport({
+            exam: {
+                id: 'exam-123',
+                title: 'Final Exam',
+                subject: 'Algorithms',
+                scheduledDate: '2026-04-20T09:00:00.000Z',
+                endDateTime: '2026-04-20T10:00:00.000Z',
+                durationMinutes: 60,
+                passingScore: 75,
+            },
+            students: [
+                mapReportStudentSummary(
+                    {
+                        student_user_id: '1111-1111',
+                        student_record_id: '2222-2222',
+                        student_number: '2024-0014',
+                        first_name: 'Superseded',
+                        last_name: 'User',
+                        attempt_id: '3333-3337',
+                        attempt_status: 'COMPLETED',
+                        started_at: '2026-04-20T09:00:00.000Z',
+                        completed_at: '2026-04-20T09:45:00.000Z',
+                        time_spent_minutes: 45,
+                        score: 40,
+                        total_score: 100,
+                        attempt_count: 2,
+                        incident_count: 0,
+                        open_incident_count: 0,
+                        pending_incident_count: 0,
+                        reviewed_incident_count: 0,
+                        confirmed_incident_count: 0,
+                        dismissed_incident_count: 0,
+                        highest_incident_type: null,
+                        highest_incident_severity: null,
+                        lifecycle_state: 'SUPERSEDED',
+                        score_state: 'DRAFT',
+                    },
+                    75,
+                ),
+            ],
+            incidentBreakdownByType: [],
+            incidentBreakdownBySeverity: [],
+        });
+
+        // The superseded student is in the student list, but NOT in any action items (review, makeup, retake)
+        expect(report.students).toHaveLength(1);
+        expect(report.actionItems.retake).toHaveLength(0);
+    });
 });

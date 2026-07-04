@@ -1,6 +1,6 @@
 import { createRoute } from '@hono/zod-openapi';
-import { requireActivePermission } from '../../../../lib/permissions';
 import { type AppRouteHandler } from '../../../../types/hono';
+import { requireLifecycleMutationAccess } from '../lifecycle-access';
 import { reviseFinalizedAttemptScoreSchema } from '../lifecycle.dto';
 import { reviseFinalizedAttemptScore } from '../services/revise-finalized-attempt-score';
 
@@ -34,7 +34,7 @@ export const reviseFinalizedAttemptScoreRoute = createRoute({
 export const reviseFinalizedAttemptScoreRouteHandler: AppRouteHandler<
     typeof reviseFinalizedAttemptScoreRoute
 > = async (c) => {
-    requireActivePermission(c, 'examinations:update');
+    requireLifecycleMutationAccess(c);
 
     const { id, attemptId } = c.req.valid('param');
     const body = c.req.valid('json');

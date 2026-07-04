@@ -56,18 +56,15 @@ export function useLobbyState(args: {
         runtimeAccess?.state === 'locked' ||
         runtimeAccess?.state === 'before_start';
     const hasApprovedInstructorAdmission =
-        admissionStatus === 'APPROVED' ||
-        (admissionStatus === null && isApprovedRuntimeAccess);
+        admissionStatus === 'APPROVED' || (admissionStatus === null && isApprovedRuntimeAccess);
     const hasFreshInstructorAdmission =
         !requiresInstructorAdmission ||
         hasResumableAttempt ||
         (hasApprovedInstructorAdmission && !isHardRuntimeBlock);
     const canEnterExam = Boolean(
         hasResumableAttempt ||
-            (hasFreshInstructorAdmission &&
-                (runtimeAccess?.canStart ||
-                    isApprovedRuntimeAccess ||
-                    admissionStatus === 'APPROVED')),
+        (hasFreshInstructorAdmission &&
+            (runtimeAccess?.canStart || isApprovedRuntimeAccess || admissionStatus === 'APPROVED')),
     );
 
     useEffect(() => {
@@ -138,13 +135,7 @@ export function useLobbyState(args: {
                 window.clearInterval(intervalId);
             }
         };
-    }, [
-        apiClient,
-        examId,
-        hasResumableAttempt,
-        refetchExam,
-        requiresInstructorAdmission,
-    ]);
+    }, [apiClient, examId, hasResumableAttempt, refetchExam, requiresInstructorAdmission]);
 
     // 5. Actions Orchestration
     const { isStartingSession, handleEnterExam } = useLobbyActions({

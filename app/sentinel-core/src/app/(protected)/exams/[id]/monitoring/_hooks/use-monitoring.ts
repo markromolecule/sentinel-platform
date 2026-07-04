@@ -7,11 +7,18 @@ import {
     useExamMonitoringOverviewQuery,
     useOverrideReconnectLimitMutation,
     useStableValue,
+    useLockExamAttemptMutation,
+    useReopenExamAttemptMutation,
+    useResetExamAttemptMutation,
+    useCloseExamAttemptMutation,
+    useGrantMakeupExamWindowMutation,
+    useGrantRetakeExamWindowMutation,
 } from '@sentinel/hooks';
 import { updateExamRuntimeAccess } from '@sentinel/services';
 import { toast } from 'sonner';
 import { RuntimeAccessAction, RuntimeAccessState } from '../_types';
 import { MONITORING_PAGE_SIZE } from '../_constants';
+import type { MonitoringLifecycleAction, StudentSession } from '@sentinel/shared/types';
 
 /**
  * useMonitoring manages instructor live-monitoring filters, actions, and runtime access state.
@@ -30,6 +37,7 @@ export function useMonitoring(examId: string) {
     const [isReopenDialogOpen, setIsReopenDialogOpen] = useState(false);
     const [reopenMinutes, setReopenMinutes] = useState('30');
     const [overridingStudentId, setOverridingStudentId] = useState<string | null>(null);
+    const [activeLifecycleActionId, setActiveLifecycleActionId] = useState<string | null>(null);
     const debouncedSearchQuery = useDebounce(searchQuery, 500);
 
     // Queries & Mutations
@@ -48,6 +56,13 @@ export function useMonitoring(examId: string) {
         },
         onError: (error: Error) => toast.error(error.message),
     });
+
+    const lockAttemptMutation = useLockExamAttemptMutation();
+    const reopenAttemptMutation = useReopenExamAttemptMutation();
+    const resetAttemptMutation = useResetExamAttemptMutation();
+    const closeAttemptMutation = useCloseExamAttemptMutation();
+    const grantMakeupMutation = useGrantMakeupExamWindowMutation();
+    const grantRetakeMutation = useGrantRetakeExamWindowMutation();
 
     // Derived State
     const filteredStudents = useStableValue(() => {
@@ -135,6 +150,84 @@ export function useMonitoring(examId: string) {
         }
     };
 
+    const handleLifecycleAction = async (
+        student: StudentSession,
+        action: MonitoringLifecycleAction,
+    ) => {
+        const actionId = `${student.attemptId}:${action}`;
+        setActiveLifecycleActionId(actionId);
+
+        const now = new Date();
+        const twentyFourHoursFromNow = new Date(now.getTime() + 24 * 60 * 60 * 1000);
+
+        try {
+            if (action === 'lock') {
+                await lockAttemptMutation.mutateAsync({
+                    id: examId,
+                    attemptId: student.attemptId,
+                    reasonCode: 'MANUAL_MONITORING_LOCK',
+                    notes: 'Locked from instructor monitoring.',
+                });
+                return;
+            }
+
+            if (action === 'reopen') {
+                await reopenAttemptMutation.mutateAsync({
+                    id: examId,
+                    attemptId: student.attemptId,
+                    reopenedUntil: new Date(Date.now() + 30 * 60_000).toISOString(),
+                    reasonCode: 'MANUAL_MONITORING_REOPEN',
+                    notes: 'Reopened from instructor monitoring for 30 minutes.',
+                });
+                return;
+            }
+
+            if (action === 'reset') {
+                await resetAttemptMutation.mutateAsync({
+                    id: examId,
+                    attemptId: student.attemptId,
+                    reasonCode: 'MANUAL_MONITORING_RESET',
+                    notes: 'Reset from instructor monitoring.',
+                });
+                return;
+            }
+
+            if (action === 'close') {
+                await closeAttemptMutation.mutateAsync({
+                    id: examId,
+                    attemptId: student.attemptId,
+                    reasonCode: 'MANUAL_MONITORING_CLOSE',
+                    notes: 'Closed from instructor monitoring.',
+                });
+                return;
+            }
+
+            if (action === 'makeup') {
+                await grantMakeupMutation.mutateAsync({
+                    id: examId,
+                    studentId: student.studentRecordId ?? student.id,
+                    availableFrom: now.toISOString(),
+                    availableUntil: twentyFourHoursFromNow.toISOString(),
+                    allowedAttempts: 1,
+                    notes: 'Granted from instructor monitoring.',
+                });
+                return;
+            }
+
+            await grantRetakeMutation.mutateAsync({
+                id: examId,
+                studentId: student.studentRecordId ?? student.id,
+                attemptId: student.attemptId,
+                availableFrom: now.toISOString(),
+                availableUntil: twentyFourHoursFromNow.toISOString(),
+                allowedAttempts: 1,
+                notes: 'Granted from instructor monitoring.',
+            });
+        } finally {
+            setActiveLifecycleActionId(null);
+        }
+    };
+
     return {
         // Data
         monitoring,
@@ -153,6 +246,7 @@ export function useMonitoring(examId: string) {
         isReopenDialogOpen,
         reopenMinutes,
         overridingStudentId,
+        activeLifecycleActionId,
 
         // State Setters
         setPendingAction,
@@ -166,6 +260,7 @@ export function useMonitoring(examId: string) {
         handleConfirmAction,
         handleSubmitReopen,
         handleOverrideReconnect,
+        handleLifecycleAction,
         refetch,
     };
 }

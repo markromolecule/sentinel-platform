@@ -1,6 +1,9 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { OpenAPIHono } from '@hono/zod-openapi';
-import { assignOfferedSubjectRoute, assignOfferedSubjectRouteHandler } from './assign-offered-subject.controller';
+import {
+    assignOfferedSubjectRoute,
+    assignOfferedSubjectRouteHandler,
+} from './assign-offered-subject.controller';
 import { EnrollmentService } from '../enrollments.service';
 
 vi.mock('../enrollments.service', () => ({

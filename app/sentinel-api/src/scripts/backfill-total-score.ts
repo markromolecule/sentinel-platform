@@ -23,7 +23,7 @@ export async function backfillTotalScores() {
     console.log(`Found ${attempts.length} attempts to backfill.`);
 
     // 2. Fetch distinct exam IDs to calculate their total points
-    const examIds = Array.from(new Set(attempts.map(a => a.exam_id)));
+    const examIds = Array.from(new Set(attempts.map((a) => a.exam_id)));
     const examPointsMap = new Map<string, number>();
 
     for (const examId of examIds) {
@@ -64,7 +64,7 @@ if (require.main === module) {
             console.log('Backfill execution complete.');
             process.exit(0);
         })
-        .catch(err => {
+        .catch((err) => {
             console.error('Backfill execution failed:', err);
             process.exit(1);
         });

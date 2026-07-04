@@ -23,7 +23,9 @@ export function enrichStudentRows(args: {
 }): EnrichedReportStudentRow[] {
     return args.studentRows.map((row) => ({
         ...row,
-        attempt_kind: row.attempt_id ? (args.overrideAttemptKindMap.get(row.attempt_id) ?? null) : null,
+        attempt_kind: row.attempt_id
+            ? (args.overrideAttemptKindMap.get(row.attempt_id) ?? null)
+            : null,
         active_override_type: args.activeOverrideMap.get(row.student_record_id) ?? null,
     })) as EnrichedReportStudentRow[];
 }

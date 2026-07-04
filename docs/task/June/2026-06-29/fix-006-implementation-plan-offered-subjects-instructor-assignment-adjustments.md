@@ -1,6 +1,7 @@
 # Implementation Plan: Offered Subjects Instructor Assignment & UI Adjustments
 
 This implementation plan details the proposed changes to address:
+
 1. The bug where unassigned offered subjects still show as assigned in the administrator's Offered Subjects view.
 2. The UI adjustment to display department and course codes only (instead of names) in badge/tag format (similar to the Year Levels column).
 3. The success toast message display upon assigning an instructor.
@@ -10,15 +11,18 @@ This implementation plan details the proposed changes to address:
 ## 1. Backend / Database Layer (`app/sentinel-api`)
 
 ### [MODIFY] [unenroll-instructor-subject.ts](file:///Applications/XAMPP/xamppfiles/htdocs/sentinel/app/sentinel-api/src/modules/identity/enrollments/data/unenroll-instructor-subject.ts)
+
 - Update `unenrollInstructorSubjectData` to also delete from `classroom_instructor_assignments` table:
+
 ```typescript
-    // Delete classroom instructor assignments
-    await dbClient
-        .deleteFrom('classroom_instructor_assignments')
-        .where('instructor_user_id', '=', userId)
-        .where('class_group_id', 'in', classGroupIds)
-        .execute();
+// Delete classroom instructor assignments
+await dbClient
+    .deleteFrom('classroom_instructor_assignments')
+    .where('instructor_user_id', '=', userId)
+    .where('class_group_id', 'in', classGroupIds)
+    .execute();
 ```
+
 - This ensures that when an instructor unenrolls / unassigns from the offered subject, their active classroom teaching role is also removed, allowing the list query to reflect that they are no longer assigned.
 
 ---
@@ -26,7 +30,9 @@ This implementation plan details the proposed changes to address:
 ## 2. Frontend Packages & Hooks (`packages/hooks`)
 
 ### [MODIFY] [use-assign-offered-subject-mutation.ts](file:///Applications/XAMPP/xamppfiles/htdocs/sentinel/packages/hooks/src/query/subjects/use-assign-offered-subject-mutation.ts)
+
 - Modify the mutation hook to display a clean success toast message when the assignment is successful:
+
 ```typescript
         onSuccess: (response: any) => {
             queryClient.invalidateQueries({
@@ -43,8 +49,10 @@ This implementation plan details the proposed changes to address:
 
 ## 3. UI Layer (`sentinel-core` & `sentinel-support`)
 
-### [MODIFY] [subject-offering-columns.tsx](file:///Applications/XAMPP/xamppfiles/htdocs/sentinel/app/sentinel-core/src/app/(protected)/subjects/_components/tables/subject-offering-columns.tsx)
+### [MODIFY] [subject-offering-columns.tsx](<file:///Applications/XAMPP/xamppfiles/htdocs/sentinel/app/sentinel-core/src/app/(protected)/subjects/_components/tables/subject-offering-columns.tsx>)
+
 - Update `departments` column to map labels using `row.original.departments.map((d) => d.code?.trim() || d.name)`:
+
 ```typescript
         {
             id: 'departments',
@@ -58,7 +66,9 @@ This implementation plan details the proposed changes to address:
             ),
         },
 ```
+
 - Update `courses` column to map labels using `row.original.courses.map((c) => c.code?.trim() || c.title)`:
+
 ```typescript
         {
             id: 'courses',
@@ -73,7 +83,8 @@ This implementation plan details the proposed changes to address:
         },
 ```
 
-### [MODIFY] [offered-columns.tsx](file:///Applications/XAMPP/xamppfiles/htdocs/sentinel/app/sentinel-support/src/app/(protected)/(support)/subjects/offered/_components/tables/offered-columns.tsx)
+### [MODIFY] [offered-columns.tsx](<file:///Applications/XAMPP/xamppfiles/htdocs/sentinel/app/sentinel-support/src/app/(protected)/(support)/subjects/offered/_components/tables/offered-columns.tsx>)
+
 - Update the `departments` column to format labels using `department.code?.trim() || department.name` to prioritize code over name.
 - Update the `courses` column to format labels using `course.code?.trim() || course.title` to prioritize code over title.
 
@@ -82,12 +93,14 @@ This implementation plan details the proposed changes to address:
 ## Verification Plan
 
 ### Automated Tests
+
 - Run database query / service tests inside `sentinel-api` to ensure no regression in enrollment mutations:
-  ```bash
-  pnpm --dir app/sentinel-api test src/modules/identity/enrollments/data/tests/assign-offered-subject.test.ts
-  ```
+    ```bash
+    pnpm --dir app/sentinel-api test src/modules/identity/enrollments/data/tests/assign-offered-subject.test.ts
+    ```
 
 ### Manual Verification
+
 1. Login as Admin / Support to `http://localhost:3002/subjects/offered`.
 2. Verify the **Departments** and **Courses** columns render only codes as tags/badges.
 3. Select an offered subject, click **Assign to Instructor**, assign an instructor, and verify the success toast says `"Instructor assigned successfully"`.

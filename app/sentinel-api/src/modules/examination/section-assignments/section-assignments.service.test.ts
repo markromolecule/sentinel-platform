@@ -53,7 +53,9 @@ describe('SectionAssignmentsService', () => {
     });
 
     it('syncs the exam row after creating batch assignments', async () => {
-        vi.mocked(createExamSectionAssignmentsBatch).mockResolvedValue([{ id: 'assignment-1' }] as any);
+        vi.mocked(createExamSectionAssignmentsBatch).mockResolvedValue([
+            { id: 'assignment-1' },
+        ] as any);
 
         await SectionAssignmentsService.createExamSectionAssignmentsBatch({
             dbClient,

@@ -9,18 +9,22 @@ Detail the requirements, database query mappings, API contracts, frontend servic
 ### Viable Options to Solve the Problem
 
 #### Option 1: Slide-over Drawer / Detail Sheet (Recommended)
+
 - **Description**: Add a "View Details" action to the actions menu and make the Subject Code clickable. When clicked, load the full metadata and assigned instructors using a new query hook, displaying them in a right-aligned slide-out `Sheet` (re-using the pattern from `QuestionPreviewSheet`).
 - **Tradeoff**: Offers a highly premium, context-preserving user experience without interrupting the table navigation, but has slightly less screen space than a dedicated full-page view.
 
 #### Option 2: Center Modal Dialog
+
 - **Description**: Implement the detailed metadata and instructor list inside a standard centered modal `Dialog` component (like `AssignSubjectToInstructorDialog`).
 - **Tradeoff**: Very simple to layout and implement, but completely blocks the view of the main offered subjects table.
 
 #### Option 3: Dedicated Next.js Page Route
+
 - **Description**: Implement a new route at `/subjects/offered/[id]/page.tsx` containing the detailed metadata, assigned instructors, and related classrooms.
 - **Tradeoff**: Provides bookmarkable, shareable URLs and maximum layout space, but introduces page transition overhead and extra boilerplate code.
 
 ### Selected Best Option
+
 We choose **Option 1 (Slide-over Drawer / Detail Sheet)** as the best option. Slide-out sheets are already established in the codebase for detailed read-only previews (e.g. `QuestionPreviewSheet`), keeping the interface fast and lightweight while allowing the administrator to inspect multiple offerings without losing search/pagination states.
 
 ---
@@ -42,6 +46,7 @@ We choose **Option 1 (Slide-over Drawer / Detail Sheet)** as the best option. Sl
 ## Proposed Changes
 
 ### Phase 1: Database Query & Backend DTOs (`packages/shared` & `app/sentinel-api`)
+
 **Goal:** Expose the assigned instructors list in the subject offering queries and create the schema definition.
 
 - [x] Modify `packages/shared/src/types/index.ts` to add `SubjectOfferingInstructor` interface and `instructors?: SubjectOfferingInstructor[]` to the `SubjectOffering` interface.
@@ -56,6 +61,7 @@ We choose **Option 1 (Slide-over Drawer / Detail Sheet)** as the best option. Sl
 ---
 
 ### Phase 2: Backend API Controller (`app/sentinel-api`)
+
 **Goal:** Create the single subject offering detail retrieval endpoint.
 
 - [x] Create `app/sentinel-api/src/modules/core/subject-offerings/controllers/get-subject-offering.controller.ts` to handle `GET /subject-offerings/:id` with permission check `subject_offerings:view`.
@@ -67,6 +73,7 @@ We choose **Option 1 (Slide-over Drawer / Detail Sheet)** as the best option. Sl
 ---
 
 ### Phase 3: Frontend Client Services & Query Hooks (`packages/services` & `packages/hooks`)
+
 **Goal:** Implement API service call and React Query hooks.
 
 - [x] Modify `packages/services/src/api/subject-offerings.ts` to add `getSubjectOffering(apiClient, id)` API service function.
@@ -79,6 +86,7 @@ We choose **Option 1 (Slide-over Drawer / Detail Sheet)** as the best option. Sl
 ---
 
 ### Phase 4: UI Components & Offered Subjects Page (`app/sentinel-core`)
+
 **Goal:** Implement the slide-out sheet and wire up details viewing in the offered subjects listing.
 
 - [x] Create `app/sentinel-core/src/app/(protected)/subjects/_components/dialogs/subject-offering-details-sheet.tsx` displaying status, metadata (departments, courses, term, etc.), sections, and a detailed list of assigned instructors with their name/email.
@@ -96,20 +104,22 @@ We choose **Option 1 (Slide-over Drawer / Detail Sheet)** as the best option. Sl
 ## Verification Plan
 
 ### Automated Tests
+
 - Run backend tests to verify get subject offering controller:
-  ```bash
-  pnpm --dir app/sentinel-api test src/modules/core/subject-offerings/controllers/get-subject-offering.controller.test.ts
-  ```
+    ```bash
+    pnpm --dir app/sentinel-api test src/modules/core/subject-offerings/controllers/get-subject-offering.controller.test.ts
+    ```
 - Run query hook tests:
-  ```bash
-  pnpm --dir packages/hooks test src/query/subject-offerings/use-subject-offering-query.test.ts
-  ```
+    ```bash
+    pnpm --dir packages/hooks test src/query/subject-offerings/use-subject-offering-query.test.ts
+    ```
 - Run frontend components build/typecheck:
-  ```bash
-  pnpm --dir app/sentinel-core build
-  ```
+    ```bash
+    pnpm --dir app/sentinel-core build
+    ```
 
 ### Manual Verification
+
 1. Log in as an administrator.
 2. Navigate to **Offered Subjects**.
 3. Click on a subject code or select **View Details** from the action dropdown menu of an offered subject.

@@ -27,6 +27,7 @@ export default function ExamMonitoringPage() {
         isReopenDialogOpen,
         reopenMinutes,
         overridingStudentId,
+        activeLifecycleActionId,
         setPendingAction,
         setIsReopenDialogOpen,
         setReopenMinutes,
@@ -36,6 +37,7 @@ export default function ExamMonitoringPage() {
         handleConfirmAction,
         handleSubmitReopen,
         handleOverrideReconnect,
+        handleLifecycleAction,
         refetch,
     } = useMonitoring(examId);
 
@@ -105,6 +107,8 @@ export default function ExamMonitoringPage() {
                     onOverrideReconnect={(student) => {
                         void handleOverrideReconnect(student.id, student.studentRecordId);
                     }}
+                    activeLifecycleActionId={activeLifecycleActionId}
+                    onLifecycleAction={handleLifecycleAction}
                 />
             </div>
 

@@ -21,7 +21,7 @@ export function useExamDetails(args: UseExamDetailsArgs = {}): UseExamDetailsRet
     const examId =
         args.examId !== undefined
             ? args.examId
-            : ((searchParams.get('examId') ?? searchParams.get('id')) || null);
+            : (searchParams.get('examId') ?? searchParams.get('id')) || null;
     const { data: historyItem, isLoading: isHistoryLoading } = useExamHistoryDetailQuery(attemptId);
     const { data: exam, isLoading: isExamLoading } = useExamQuery(examId ?? undefined);
     const reportQuery = useAttemptReportQuery(attemptId);

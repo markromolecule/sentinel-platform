@@ -7,9 +7,17 @@ import {
     type ReportStudentRow,
 } from './reporting-response.types';
 import { mapStudentSummary } from '../helpers/student-reporting.helpers';
-import { buildActionItems, buildReportSummary, sortStudents } from '../helpers/summary-reporting.helpers';
+import {
+    buildActionItems,
+    buildReportSummary,
+    sortStudents,
+} from '../helpers/summary-reporting.helpers';
 
-export type { ReportIncidentSeverityBreakdownRow, ReportIncidentTypeBreakdownRow, ReportStudentRow };
+export type {
+    ReportIncidentSeverityBreakdownRow,
+    ReportIncidentTypeBreakdownRow,
+    ReportStudentRow,
+};
 
 export function mapReportExam(exam: ReportingExamContext): ExamReportExam {
     return {
@@ -37,9 +45,10 @@ export function buildExamReport(args: {
     incidentBreakdownBySeverity: ReportIncidentSeverityBreakdownRow[];
 }): ExamReportCore {
     const students = sortStudents(args.students);
+    const nonSupersededStudents = students.filter((s) => s.lifecycleState !== 'SUPERSEDED');
     const actionItems = {
         review: buildActionItems(
-            students,
+            nonSupersededStudents,
             (student) => student.needsReview,
             (student) =>
                 student.openIncidentCount > 0
@@ -47,12 +56,12 @@ export function buildExamReport(args: {
                     : 'High-severity incident requires review',
         ),
         makeup: buildActionItems(
-            students,
+            nonSupersededStudents,
             (student) => student.needsMakeup,
             () => 'Absent for the scheduled exam window',
         ),
         retake: buildActionItems(
-            students,
+            nonSupersededStudents,
             (student) => student.needsRetake,
             () => `Score is below the passing score of ${args.exam.passingScore}%`,
         ),

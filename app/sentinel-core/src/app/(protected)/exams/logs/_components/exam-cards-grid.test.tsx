@@ -25,6 +25,14 @@ vi.mock('@sentinel/ui', () => ({
         </button>
     ),
     Badge: ({ children, className }: any) => <span className={className}>{children}</span>,
+    Card: ({ children, className, onClick, ...props }: any) => (
+        <div className={className} onClick={onClick} {...props}>
+            {children}
+        </div>
+    ),
+    CardHeader: ({ children, className }: any) => <div className={className}>{children}</div>,
+    CardContent: ({ children, className }: any) => <div className={className}>{children}</div>,
+    CardTitle: ({ children, className }: any) => <h3 className={className}>{children}</h3>,
 }));
 
 const mockExams: ProctorExam[] = [
@@ -66,10 +74,11 @@ describe('ExamCardsGrid Component', () => {
 
         expect(screen.getByText('Algorithms Midterm')).toBeTruthy();
         expect(screen.getByText('Database Final')).toBeTruthy();
-        expect(screen.getByText(/35 students/i, { selector: 'span' })).toBeTruthy();
-        expect(screen.getByText(/50 students/i, { selector: 'span' })).toBeTruthy();
-        expect(screen.getByText(/5 alerts/i, { selector: 'span' })).toBeTruthy();
-        expect(screen.getByText(/0 alerts/i, { selector: 'span' })).toBeTruthy();
+        expect(screen.getByText(/35 student attempts/i, { selector: 'span' })).toBeTruthy();
+        expect(screen.getByText(/50 student attempts/i, { selector: 'span' })).toBeTruthy();
+        expect(screen.getByText(/5 incident alerts/i, { selector: 'span' })).toBeTruthy();
+        expect(screen.getByText(/0 incident alerts/i, { selector: 'span' })).toBeTruthy();
+        expect(screen.getAllByText('Open Incident Logs')).toHaveLength(2);
     });
 
     it('calls onSearchChange when search text is changed', () => {
@@ -107,92 +116,11 @@ describe('ExamCardsGrid Component', () => {
         expect(handleSelect).toHaveBeenCalledWith('exam-1');
     });
 
-    it('paginates exams correctly (6 per page)', () => {
-        const handleSelect = vi.fn();
-        // Generate 8 exams
-        const manyExams: ProctorExam[] = Array.from({ length: 8 }).map((_, idx) => ({
-            id: `exam-${idx + 1}`,
-            title: `Exam Title ${idx + 1}`,
-            subject: 'General',
-            description: `Description ${idx + 1}`,
-            status: 'active',
-            studentsCount: 10,
-            incidentCount: 1,
-            createdAt: '2026-06-11T12:00:00Z',
-            updatedAt: '2026-06-11T12:00:00Z',
-        }));
-
+    it('renders an empty state when no exams are available', () => {
         render(
-            <ExamCardsGrid
-                exams={manyExams}
-                onSelectExam={handleSelect}
-                searchValue=""
-                onSearchChange={vi.fn()}
-            />,
+            <ExamCardsGrid exams={[]} onSelectExam={vi.fn()} searchValue="" onSearchChange={vi.fn()} />,
         );
 
-        // Only first 6 should be visible on page 1
-        expect(screen.getByText('Exam Title 1')).toBeTruthy();
-        expect(screen.getByText('Exam Title 6')).toBeTruthy();
-        expect(screen.queryByText('Exam Title 7')).toBeNull();
-
-        // Click next button
-        const nextButton = screen.getByText('Next');
-        fireEvent.click(nextButton);
-
-        // Only last 2 should be visible on page 2
-        expect(screen.queryByText('Exam Title 1')).toBeNull();
-        expect(screen.getByText('Exam Title 7')).toBeTruthy();
-        expect(screen.getByText('Exam Title 8')).toBeTruthy();
-
-        // Click previous button
-        const prevButton = screen.getByText('Previous');
-        fireEvent.click(prevButton);
-
-        // Back to page 1
-        expect(screen.getByText('Exam Title 1')).toBeTruthy();
-        expect(screen.queryByText('Exam Title 7')).toBeNull();
-    });
-
-    it('resets page to 1 when search text changes', () => {
-        const handleSelect = vi.fn();
-        const manyExams: ProctorExam[] = Array.from({ length: 8 }).map((_, idx) => ({
-            id: `exam-${idx + 1}`,
-            title: `Math Exam ${idx + 1}`,
-            subject: 'Math',
-            description: `Description ${idx + 1}`,
-            status: 'active',
-            studentsCount: 10,
-            incidentCount: 1,
-            createdAt: '2026-06-11T12:00:00Z',
-            updatedAt: '2026-06-11T12:00:00Z',
-        }));
-
-        const { rerender } = render(
-            <ExamCardsGrid
-                exams={manyExams}
-                onSelectExam={handleSelect}
-                searchValue=""
-                onSearchChange={vi.fn()}
-            />,
-        );
-
-        // Click Next to go to Page 2
-        const nextButton = screen.getByText('Next');
-        fireEvent.click(nextButton);
-        expect(screen.getByText('Page 2 of 2')).toBeTruthy();
-
-        // Rerender with a new search value
-        rerender(
-            <ExamCardsGrid
-                exams={manyExams}
-                onSelectExam={handleSelect}
-                searchValue="Math"
-                onSearchChange={vi.fn()}
-            />,
-        );
-
-        // Page should reset to 1
-        expect(screen.getByText('Page 1 of 2')).toBeTruthy();
+        expect(screen.getByText('No exam logs found.')).toBeTruthy();
     });
 });

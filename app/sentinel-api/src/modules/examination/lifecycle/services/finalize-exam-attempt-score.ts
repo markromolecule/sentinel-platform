@@ -4,6 +4,7 @@ import { HTTPException } from 'hono/http-exception';
 import { getLifecycleAttemptContext } from '../data/get-lifecycle-attempt-context';
 import { appendExamAttemptLifecycleEvent } from './lifecycle-event.service';
 import { transitionExamAttemptLifecycle } from './lifecycle-transition.service';
+import { recordAttemptLifecycleAudit } from './lifecycle-audit.service';
 
 /**
  * Marks the current attempt score as finalized without reopening access or changing ownership.
@@ -58,6 +59,24 @@ export async function finalizeExamAttemptScore(args: {
         nextState: context.attempt.lifecycleState,
         actorUserId: args.actorUserId ?? null,
         notes: args.notes ?? null,
+    });
+
+    const resolvedInstId = args.institutionId || context.exam.institutionId || '';
+
+    await recordAttemptLifecycleAudit({
+        dbClient: args.dbClient,
+        attemptId: args.attemptId,
+        examId: args.examId,
+        studentId: context.student.id,
+        eventType: 'FINALIZED',
+        actorUserId: args.actorUserId ?? null,
+        institutionId: resolvedInstId || null,
+        notes: args.notes ?? null,
+        previousState: context.attempt.lifecycleState,
+        nextState: context.attempt.lifecycleState,
+        details: {
+            finalizedAt: finalizedAt.toISOString(),
+        },
     });
 
     return {

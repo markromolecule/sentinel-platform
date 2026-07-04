@@ -7,9 +7,9 @@ import {
 
 describe('studentHistoryRoutes', () => {
     it('builds the canonical attempt history href', () => {
-        expect(
-            buildStudentHistoryAttemptHref('f8af70a2-d9ed-4645-91f4-e5361dae473a'),
-        ).toBe('/student/history/attempts/f8af70a2-d9ed-4645-91f4-e5361dae473a');
+        expect(buildStudentHistoryAttemptHref('f8af70a2-d9ed-4645-91f4-e5361dae473a')).toBe(
+            '/student/history/attempts/f8af70a2-d9ed-4645-91f4-e5361dae473a',
+        );
     });
 
     it('builds the canonical exam history href', () => {

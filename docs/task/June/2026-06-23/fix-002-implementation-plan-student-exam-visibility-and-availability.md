@@ -12,17 +12,17 @@ Published exams assigned to a student's classroom must appear on the student sid
 ## Post-Completion Follow-Up: 2026-06-24
 
 - A follow-up regression was reported after the original completion mark:
-  - Published exams could still disappear from student classroom and Available surfaces.
-  - The instructor Assignments selector still excluded published exams because it queried only `draft` exams.
+    - Published exams could still disappear from student classroom and Available surfaces.
+    - The instructor Assignments selector still excluded published exams because it queried only `draft` exams.
 - Follow-up remediation was applied without adding a migration:
-  - Relaxed explicit assignment visibility predicates so `exam_section_assignments` can make a classroom/student exam visible even when subject linkage is inconsistent.
-  - Added student-side status normalization for raw internal statuses such as `published` before filtering active classroom and Available feeds.
-  - Removed the draft-only filter from the instructor assignment selector so published exams remain manageable on the Assignments page.
-  - Tightened the instructor classroom assignment flow so subject-scoped exams no longer fall back to unrelated classrooms when no subject match exists.
-  - Updated the instructor assignment list to resolve classroom names within the same exam subject scope to reduce section-only ambiguity.
+    - Relaxed explicit assignment visibility predicates so `exam_section_assignments` can make a classroom/student exam visible even when subject linkage is inconsistent.
+    - Added student-side status normalization for raw internal statuses such as `published` before filtering active classroom and Available feeds.
+    - Removed the draft-only filter from the instructor assignment selector so published exams remain manageable on the Assignments page.
+    - Tightened the instructor classroom assignment flow so subject-scoped exams no longer fall back to unrelated classrooms when no subject match exists.
+    - Updated the instructor assignment list to resolve classroom names within the same exam subject scope to reduce section-only ambiguity.
 - Follow-up validation completed:
-  - `pnpm --dir app/sentinel-api exec vitest run src/modules/examination/exams/data/build-student-exam-scope-predicates.test.ts --reporter=verbose`
-  - `pnpm --dir app/sentinel-web exec vitest run "src/app/(protected)/student/history/_hooks/use-student-history/index.test.ts" "src/app/(protected)/student/classroom/[id]/page.test.tsx" "src/app/(protected)/(instructor)/exams/assign/_components/assignment-content.test.tsx" --reporter=verbose`
+    - `pnpm --dir app/sentinel-api exec vitest run src/modules/examination/exams/data/build-student-exam-scope-predicates.test.ts --reporter=verbose`
+    - `pnpm --dir app/sentinel-web exec vitest run "src/app/(protected)/student/history/_hooks/use-student-history/index.test.ts" "src/app/(protected)/student/classroom/[id]/page.test.tsx" "src/app/(protected)/(instructor)/exams/assign/_components/assignment-content.test.tsx" --reporter=verbose`
 
 ## Investigation Summary
 

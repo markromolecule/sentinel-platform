@@ -73,10 +73,7 @@ export function NewAssignmentsBuilder({
     const { data: rooms = [], isLoading: isRoomsLoading } = useRoomsQuery();
     const { data: users = [], isLoading: isUsersLoading } = useUsersQuery({ role: 'instructor' });
 
-    const filteredClassrooms = React.useMemo(
-        () => classrooms as ClassroomSummary[],
-        [classrooms],
-    );
+    const filteredClassrooms = React.useMemo(() => classrooms as ClassroomSummary[], [classrooms]);
 
     const createMutation = useCreateExamSectionAssignmentsBatchMutation({
         onSuccess: () => {

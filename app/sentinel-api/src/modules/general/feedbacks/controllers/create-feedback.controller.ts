@@ -35,7 +35,9 @@ export const createFeedbackRoute = createRoute({
     },
 });
 
-export const createFeedbackRouteHandler: AppRouteHandler<typeof createFeedbackRoute> = async (c) => {
+export const createFeedbackRouteHandler: AppRouteHandler<typeof createFeedbackRoute> = async (
+    c,
+) => {
     try {
         const user = c.get('user');
 
