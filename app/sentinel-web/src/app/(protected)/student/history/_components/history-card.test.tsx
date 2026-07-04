@@ -66,4 +66,46 @@ describe('HistoryCard', () => {
             '/student/history/exams/exam-123',
         );
     });
+
+    it('renders upcoming for upcoming items and Open Exam for available/in-progress items', () => {
+        const { rerender } = render(
+            <HistoryCard
+                item={{
+                    ...baseItem,
+                    status: 'upcoming',
+                }}
+            />,
+        );
+        expect(screen.getAllByText('upcoming')).toHaveLength(2); // one for mobile, one for desktop
+
+        rerender(
+            <HistoryCard
+                item={{
+                    ...baseItem,
+                    status: 'available',
+                }}
+            />,
+        );
+        expect(screen.getAllByText('Open Exam')).toHaveLength(2);
+
+        rerender(
+            <HistoryCard
+                item={{
+                    ...baseItem,
+                    status: 'in-progress',
+                }}
+            />,
+        );
+        expect(screen.getAllByText('Open Exam')).toHaveLength(2);
+
+        rerender(
+            <HistoryCard
+                item={{
+                    ...baseItem,
+                    status: 'turned_in',
+                }}
+            />,
+        );
+        expect(screen.getAllByText('turned in')).toHaveLength(2);
+    });
 });

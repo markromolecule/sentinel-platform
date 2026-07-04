@@ -302,7 +302,9 @@ export async function grantMakeupExamWindowLifecycle(
     apiClient: ApiClientType,
     payload: GrantMakeupExamWindowPayload,
 ): Promise<{
-    override: ApiStudentExamAccessOverride;
+    override?: ApiStudentExamAccessOverride | null;
+    remediationExam?: any;
+    remediationSchedule?: any;
     latestEvent: ExamAttemptLifecycleResponseType['latestEvent'] | null;
 }> {
     const response = await apiClient(
@@ -331,7 +333,9 @@ export async function grantRetakeExamWindowLifecycle(
     apiClient: ApiClientType,
     payload: GrantRetakeExamWindowPayload,
 ): Promise<{
-    override: ApiStudentExamAccessOverride;
+    override?: ApiStudentExamAccessOverride | null;
+    remediationExam?: any;
+    remediationSchedule?: any;
     latestEvent: ExamAttemptLifecycleResponseType['latestEvent'];
 }> {
     const response = await apiClient(

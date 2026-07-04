@@ -77,9 +77,11 @@ export async function appendExamAttemptLifecycleEvent(args: {
             actor_user_id: args.actorUserId ?? null,
             reason_code: args.reasonCode ?? null,
             notes: args.notes ?? null,
-            related_incident_ids: args.relatedIncidentIds ?? null,
+            related_incident_ids: args.relatedIncidentIds
+                ? JSON.stringify(args.relatedIncidentIds)
+                : null,
             related_override_id: args.relatedOverrideId ?? null,
-            metadata: args.metadata ?? null,
+            metadata: args.metadata ? JSON.stringify(args.metadata) : null,
             created_at: new Date(),
         })
         .returningAll()

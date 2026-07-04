@@ -19,6 +19,12 @@ describe('syncSystemRoles', () => {
                     description: 'outdated description',
                     is_system: false,
                 })
+                .onConflict((oc) =>
+                    oc.column('role_name').doUpdateSet({
+                        description: 'outdated description',
+                        is_system: false,
+                    }),
+                )
                 .execute();
 
             await syncSystemRoles(dbClient);

@@ -3,9 +3,31 @@ import { OpenAPIHono } from '@hono/zod-openapi';
 import { HTTPException } from 'hono/http-exception';
 import { registerLifecycleRoutes } from './lifecycle.routes';
 import { lockExamAttempt } from './services/lock-exam-attempt';
+import { getReportingExamContext } from '../reporting/services/get-reporting-exam-context';
+import { EntitlementsRepository } from '../access/data/entitlements.repository';
+import { grantMakeupExamWindow } from './services/grant-makeup-exam-window';
+import { grantRetakeExamWindow } from './services/grant-retake-exam-window';
 
 vi.mock('./services/lock-exam-attempt', () => ({
     lockExamAttempt: vi.fn(),
+}));
+
+vi.mock('../reporting/services/get-reporting-exam-context', () => ({
+    getReportingExamContext: vi.fn(),
+}));
+
+vi.mock('../access/data/entitlements.repository', () => ({
+    EntitlementsRepository: {
+        hasStudentExamEnrollment: vi.fn(),
+    },
+}));
+
+vi.mock('./services/grant-makeup-exam-window', () => ({
+    grantMakeupExamWindow: vi.fn(),
+}));
+
+vi.mock('./services/grant-retake-exam-window', () => ({
+    grantRetakeExamWindow: vi.fn(),
 }));
 
 describe('registerLifecycleRoutes', () => {
@@ -311,6 +333,89 @@ describe('registerLifecycleRoutes', () => {
                     createdAt: '2026-07-03T16:00:00.000Z',
                 },
             },
+        });
+    });
+
+    describe('grant-makeup and grant-retake routes', () => {
+        it('returns 404 if student is not assigned to exam scope', async () => {
+            vi.mocked(getReportingExamContext).mockResolvedValue({
+                classGroupId: 'class-1',
+                subjectId: 'sub-1',
+                sectionId: 'sec-1',
+                assignedSectionIds: ['sec-1'],
+            } as any);
+            vi.mocked(EntitlementsRepository.hasStudentExamEnrollment).mockResolvedValue(false);
+
+            const app = createApp(['examinations:update'], 'admin');
+            const response = await app.request(
+                '/11111111-1111-4111-8111-111111111111/students/33333333-3333-4333-8333-333333333333/lifecycle/grant-makeup',
+                {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        availableFrom: '2026-07-04T08:00:00.000Z',
+                        availableUntil: '2026-07-04T10:00:00.000Z',
+                    }),
+                },
+            );
+
+            expect(response.status).toBe(404);
+            expect(await response.text()).toBe('Student is not assigned to this exam scope.');
+        });
+
+        it('successfully grants makeup window', async () => {
+            vi.mocked(getReportingExamContext).mockResolvedValue({
+                classGroupId: 'class-1',
+                subjectId: 'sub-1',
+                sectionId: 'sec-1',
+                assignedSectionIds: ['sec-1'],
+            } as any);
+            vi.mocked(EntitlementsRepository.hasStudentExamEnrollment).mockResolvedValue(true);
+            vi.mocked(grantMakeupExamWindow).mockResolvedValue({
+                remediationExam: {
+                    exam_id: 'cloned-exam-id',
+                    title: 'Math Cloned',
+                    scheduled_date: '2026-07-04T08:00:00.000Z',
+                    end_date_time: '2026-07-04T10:00:00.000Z',
+                    status: 'PUBLISHED',
+                },
+                remediationSchedule: {
+                    remediation_id: 'remediation-id',
+                    source_exam_id: '11111111-1111-4111-8111-111111111111',
+                    remediation_exam_id: 'cloned-exam-id',
+                    student_id: '33333333-3333-4333-8333-333333333333',
+                    source_attempt_id: null,
+                    remediation_type: 'MAKEUP',
+                    scheduled_date: '2026-07-04T08:00:00.000Z',
+                    end_date_time: '2026-07-04T10:00:00.000Z',
+                    created_by: 'actor-1',
+                    created_at: '2026-07-04T08:00:00.000Z',
+                    notes: null,
+                },
+                override: null,
+                latestEvent: null,
+            } as any);
+
+            const app = createApp(['examinations:update'], 'admin');
+            const response = await app.request(
+                '/11111111-1111-4111-8111-111111111111/students/33333333-3333-4333-8333-333333333333/lifecycle/grant-makeup',
+                {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        availableFrom: '2026-07-04T08:00:00.000Z',
+                        availableUntil: '2026-07-04T10:00:00.000Z',
+                    }),
+                },
+            );
+
+            expect(response.status).toBe(200);
+            const body = await response.json();
+            expect(body.data.remediationExam.exam_id).toBe('cloned-exam-id');
         });
     });
 });

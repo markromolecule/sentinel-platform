@@ -80,14 +80,14 @@ Concrete next steps:
 
 **Goal:** Ensure browser and audio incidents only persist when caused by an active student attempt, with accurate first-occurrence counts.
 
-- [ ] Verify `handleFullscreenChange()` in `app/sentinel-web/src/app/(protected)/student/exam/[id]/_hooks/use-exam-monitoring/use-interaction-listeners.ts` exits early when `isMonitoringSuspended.current` is true before any `FULL_SCREEN_EXIT` telemetry or lock call.
-- [ ] Verify `handleSubmit()` and `suspendSecurityMonitoring()` ordering in `app/sentinel-web/src/app/(protected)/student/exam/[id]/attempt/_hooks/use-student-exam-attempt/index.ts` and `use-attempt-submission.ts` so submission/redirect/fullscreen teardown cannot emit post-submit fullscreen telemetry.
-- [ ] Verify `IncidentPersistenceService.appendEvent()` in `app/sentinel-api/src/modules/telemetry/storage/services/incident-persistence.service.ts` ignores `FULL_SCREEN_EXIT` when the target `exam_attempts` row is already `COMPLETED` or has `completed_at`.
-- [ ] Update `registerClipboardIncident()` in `app/sentinel-web/src/app/(protected)/student/exam/[id]/_hooks/use-exam-monitoring/use-interaction-listeners.ts` only if the keydown and DOM clipboard listeners can still emit two accepted `CLIPBOARD_ATTEMPT` events for one copy/cut/paste burst.
-- [ ] Update `IncidentPersistenceService.appendEvent()` in `app/sentinel-api/src/modules/telemetry/storage/services/incident-persistence.service.ts` only if the first persisted clipboard incident writes `details.occurrenceCount = 2` instead of `1`.
-- [ ] Write or update `app/sentinel-web/src/app/(protected)/student/exam/[id]/_hooks/use-exam-monitoring.test.ts` for active fullscreen exit, suspended fullscreen exit after turn-in, and one clipboard burst producing one telemetry call.
-- [ ] Write or update `app/sentinel-web/src/app/(protected)/student/exam/[id]/attempt/_hooks/use-student-exam-attempt/index.test.tsx` proving turn-in suspends monitoring before route/completion/fullscreen side effects.
-- [ ] Write or update `app/sentinel-api/src/modules/telemetry/storage/services/incident-persistence.service.test.ts` proving first `CLIPBOARD_ATTEMPT` stores `occurrenceCount: 1`, a second accepted occurrence stores `2`, completed attempts reject fullscreen exits, and active attempts still persist student-caused fullscreen exits.
+- [x] Verify `handleFullscreenChange()` in `app/sentinel-web/src/app/(protected)/student/exam/[id]/_hooks/use-exam-monitoring/use-interaction-listeners.ts` exits early when `isMonitoringSuspended.current` is true before any `FULL_SCREEN_EXIT` telemetry or lock call.
+- [x] Verify `handleSubmit()` and `suspendSecurityMonitoring()` ordering in `app/sentinel-web/src/app/(protected)/student/exam/[id]/attempt/_hooks/use-student-exam-attempt/index.ts` and `use-attempt-submission.ts` so submission/redirect/fullscreen teardown cannot emit post-submit fullscreen telemetry.
+- [x] Verify `IncidentPersistenceService.appendEvent()` in `app/sentinel-api/src/modules/telemetry/storage/services/incident-persistence.service.ts` ignores `FULL_SCREEN_EXIT` when the target `exam_attempts` row is already `COMPLETED` or has `completed_at`.
+- [x] Update `registerClipboardIncident()` in `app/sentinel-web/src/app/(protected)/student/exam/[id]/_hooks/use-exam-monitoring/use-interaction-listeners.ts` only if the keydown and DOM clipboard listeners can still emit two accepted `CLIPBOARD_ATTEMPT` events for one copy/cut/paste burst.
+- [x] Update `IncidentPersistenceService.appendEvent()` in `app/sentinel-api/src/modules/telemetry/storage/services/incident-persistence.service.ts` only if the first persisted clipboard incident writes `details.occurrenceCount = 2` instead of `1`.
+- [x] Write or update `app/sentinel-web/src/app/(protected)/student/exam/[id]/_hooks/use-exam-monitoring.test.ts` for active fullscreen exit, suspended fullscreen exit after turn-in, and one clipboard burst producing one telemetry call.
+- [x] Write or update `app/sentinel-web/src/app/(protected)/student/exam/[id]/attempt/_hooks/use-student-exam-attempt/index.test.tsx` proving turn-in suspends monitoring before route/completion/fullscreen side effects.
+- [x] Write or update `app/sentinel-api/src/modules/telemetry/storage/services/incident-persistence.service.test.ts` proving first `CLIPBOARD_ATTEMPT` stores `occurrenceCount: 1`, a second accepted occurrence stores `2`, completed attempts reject fullscreen exits, and active attempts still persist student-caused fullscreen exits.
 
 **Migration required:** No - this phase uses existing `exam_attempts` completion fields and `flagged_incidents.details`.
 **Breaking changes:** No - false-positive and duplicate telemetry are suppressed without changing public DTO shapes.
@@ -97,15 +97,15 @@ Concrete next steps:
 
 **Goal:** Make configured microphone/audio monitoring produce reviewable `AUDIO_ANOMALY` incidents during active attempts.
 
-- [ ] Audit `useAttemptMonitoring()` in `app/sentinel-web/src/app/(protected)/student/exam/[id]/attempt/_hooks/use-student-exam-attempt/use-attempt-monitoring.ts` to confirm `configuration.micRequired`, `configuration.aiRules.audio_anomaly_detection`, `examSessionId`, `studentId`, `audioStream`, and `worker` are all available after checkup and before the attempt starts.
-- [ ] Update `app/sentinel-web/src/workers/audio-anomaly.worker.ts` so capability failure checks match the CPU-backed `AudioAnomalyEngine.initialize()` path and do not block detection solely because WASM is unavailable when CPU inference is the intended backend.
-- [ ] Update `useAudioAnomalyWorker()` in `app/sentinel-web/src/hooks/use-audio-anomaly-worker.ts` to send `runtimeConfig ?? DEFAULT_AUDIO_ANOMALY_CONFIG`, emit one telemetry event per detected anomaly type while active, and suppress emissions after `isSuspended` becomes true.
-- [ ] Review `DEFAULT_AUDIO_ANOMALY_THRESHOLDS` and `DEFAULT_AUDIO_ANOMALY_CONFIG` in `packages/shared/src/audio/audio-anomaly.ts` and document whether shouting/talking should map to `TALKING` at the current threshold or whether the default threshold needs calibration.
-- [ ] Verify `AudioAnomalyRule.evaluate()` in `app/sentinel-api/src/modules/telemetry/ingestion/rules/ai-rules.ts` persists confidence-threshold events for `AUDIO_ANOMALY` and does not require repeat events when `metadata.confidenceScore` crosses the threshold.
-- [ ] Write or update `app/sentinel-web/src/workers/tests/audio-anomaly-engine.test.ts` for a mocked YAMNet talking score crossing threshold after the configured consecutive frames.
-- [ ] Add or update `app/sentinel-web/src/hooks/use-audio-anomaly-worker.test.tsx` proving `ANOMALY_DETECTED` from the worker calls `ingestTelemetryEvent()` with `eventType: 'AUDIO_ANOMALY'`, `ruleKey: 'aiRules.audio_anomaly_detection'`, `anomalyType`, and `confidenceScore`.
-- [ ] Write or update `app/sentinel-api/src/modules/telemetry/ingestion/rules/ai-rules.test.ts` or the nearest ingestion test proving audio confidence above threshold produces a persist decision.
-- [ ] Write or update `app/sentinel-api/src/modules/telemetry/storage/services/incident-persistence.service.test.ts` proving persisted audio incidents map to instructor-visible `AUDIO_DETECTED`/audio anomaly flags with occurrence count and severity metadata.
+- [x] Audit `useAttemptMonitoring()` in `app/sentinel-web/src/app/(protected)/student/exam/[id]/attempt/_hooks/use-student-exam-attempt/use-attempt-monitoring.ts` to confirm `configuration.micRequired`, `configuration.aiRules.audio_anomaly_detection`, `examSessionId`, `studentId`, `audioStream`, and `worker` are all available after checkup and before the attempt starts.
+- [x] Update `app/sentinel-web/src/workers/audio-anomaly.worker.ts` so capability failure checks match the CPU-backed `AudioAnomalyEngine.initialize()` path and do not block detection solely because WASM is unavailable when CPU inference is the intended backend.
+- [x] Update `useAudioAnomalyWorker()` in `app/sentinel-web/src/hooks/use-audio-anomaly-worker.ts` to send `runtimeConfig ?? DEFAULT_AUDIO_ANOMALY_CONFIG`, emit one telemetry event per detected anomaly type while active, and suppress emissions after `isSuspended` becomes true.
+- [x] Review `DEFAULT_AUDIO_ANOMALY_THRESHOLDS` and `DEFAULT_AUDIO_ANOMALY_CONFIG` in `packages/shared/src/audio/audio-anomaly.ts` and document whether shouting/talking should map to `TALKING` at the current threshold or whether the default threshold needs calibration.
+- [x] Verify `AudioAnomalyRule.evaluate()` in `app/sentinel-api/src/modules/telemetry/ingestion/rules/ai-rules.ts` persists confidence-threshold events for `AUDIO_ANOMALY` and does not require repeat events when `metadata.confidenceScore` crosses the threshold.
+- [x] Write or update `app/sentinel-web/src/workers/tests/audio-anomaly-engine.test.ts` for a mocked YAMNet talking score crossing threshold after the configured consecutive frames.
+- [x] Add or update `app/sentinel-web/src/hooks/use-audio-anomaly-worker.test.tsx` proving `ANOMALY_DETECTED` from the worker calls `ingestTelemetryEvent()` with `eventType: 'AUDIO_ANOMALY'`, `ruleKey: 'aiRules.audio_anomaly_detection'`, `anomalyType`, and `confidenceScore`.
+- [x] Write or update `app/sentinel-api/src/modules/telemetry/ingestion/rules/ai-rules.test.ts` or the nearest ingestion test proving audio confidence above threshold produces a persist decision.
+- [x] Write or update `app/sentinel-api/src/modules/telemetry/storage/services/incident-persistence.service.test.ts` proving persisted audio incidents map to instructor-visible `AUDIO_DETECTED`/audio anomaly flags with occurrence count and severity metadata.
 
 **Migration required:** No - audio events already use telemetry ingestion and `flagged_incidents`.
 **Breaking changes:** No - audio telemetry remains additive to the existing incident stream.
@@ -115,13 +115,13 @@ Concrete next steps:
 
 **Goal:** Prevent future scheduled exams from appearing as actionable `Open Exam` items before `scheduled_date`.
 
-- [ ] Update `HistoryCard` in `app/sentinel-web/src/app/(protected)/student/history/_components/history-card.tsx` so `item.status === 'upcoming'` renders `Upcoming`, not `Open Exam`, on mobile and desktop labels.
-- [ ] Update `getHistoryHref()` in `app/sentinel-web/src/app/(protected)/student/history/_components/history-card.tsx` so upcoming exams either route to the existing exam detail/readiness page with access blocked by runtime access or use the same destination as available exams while preserving the non-open label; do not add a new page.
-- [ ] Update `useStudentHistory()` in `app/sentinel-web/src/app/(protected)/student/history/_hooks/use-student-history/index.ts` only if it maps future `scheduledDate` exams to `available` after `normalizeStudentExam()`.
-- [ ] Update `isActiveStudentExamStatus()` in `app/sentinel-web/src/app/(protected)/student/_lib/normalize-student-exam.ts` only if the available feed should continue including upcoming exams while distinguishing their label.
-- [ ] Write or update `app/sentinel-web/src/app/(protected)/student/history/_components/history-card.test.tsx` proving upcoming items render `Upcoming`, available/in-progress items render `Open Exam`, and turned-in/past-due labels remain unchanged.
-- [ ] Write or update `app/sentinel-web/src/app/(protected)/student/history/_hooks/use-student-history/index.test.ts` proving an exam with `scheduledDate` in the future is normalized to `upcoming`, remains visible in the active feed, and does not appear as an open action.
-- [ ] Write or update `packages/shared/src/exams/resolve-exam-status.test.ts` for future `scheduledDate` plus no completed attempt returning `upcoming`.
+- [x] Update `HistoryCard` in `app/sentinel-web/src/app/(protected)/student/history/_components/history-card.tsx` so `item.status === 'upcoming'` renders `Upcoming`, not `Open Exam`, on mobile and desktop labels.
+- [x] Update `getHistoryHref()` in `app/sentinel-web/src/app/(protected)/student/history/_components/history-card.tsx` so upcoming exams either route to the existing exam detail/readiness page with access blocked by runtime access or use the same destination as available exams while preserving the non-open label; do not add a new page.
+- [x] Update `useStudentHistory()` in `app/sentinel-web/src/app/(protected)/student/history/_hooks/use-student-history/index.ts` only if it maps future `scheduledDate` exams to `available` after `normalizeStudentExam()`.
+- [x] Update `isActiveStudentExamStatus()` in `app/sentinel-web/src/app/(protected)/student/_lib/normalize-student-exam.ts` only if the available feed should continue including upcoming exams while distinguishing their label.
+- [x] Write or update `app/sentinel-web/src/app/(protected)/student/history/_components/history-card.test.tsx` proving upcoming items render `Upcoming`, available/in-progress items render `Open Exam`, and turned-in/past-due labels remain unchanged.
+- [x] Write or update `app/sentinel-web/src/app/(protected)/student/history/_hooks/use-student-history/index.test.ts` proving an exam with `scheduledDate` in the future is normalized to `upcoming`, remains visible in the active feed, and does not appear as an open action.
+- [x] Write or update `packages/shared/src/exams/resolve-exam-status.test.ts` for future `scheduledDate` plus no completed attempt returning `upcoming`.
 
 **Migration required:** No - this phase is status mapping and UI label behavior only.
 **Breaking changes:** No - route and API shapes stay the same.
@@ -131,19 +131,19 @@ Concrete next steps:
 
 **Goal:** Represent each retake or makeup as a separate scheduled exam that preserves the original questions and links back to the source evidence.
 
-- [ ] Update `packages/db/prisma/schema.prisma` with a new `exam_remediation_schedules` model containing `remediation_id`, `source_exam_id`, `remediation_exam_id`, `student_id`, `source_attempt_id`, `remediation_type`, `scheduled_date`, `end_date_time`, `created_by`, `created_at`, and `notes`.
-- [ ] Add enum `exam_remediation_type` with `MAKEUP` and `RETAKE` in `packages/db/prisma/schema.prisma`.
-- [ ] Add indexes in `packages/db/prisma/schema.prisma` for `source_exam_id`, `remediation_exam_id`, `student_id`, and `(source_attempt_id, remediation_type)`.
-- [ ] Create a Prisma migration under `packages/db/prisma/migrations/[timestamp]_add_exam_remediation_schedules/migration.sql` with foreign keys to `exams`, `students`, `exam_attempts`, and `users` where appropriate.
-- [ ] Add `app/sentinel-api/src/modules/examination/lifecycle/services/create-remediation-exam.ts` to clone the source `exams` row with new `scheduled_date`, `end_date_time`, `status = 'PUBLISHED'` or the repo's published equivalent, `published_at`, `published_by`, and a title suffix that clearly identifies makeup/retake.
-- [ ] In `createRemediationExam()`, copy `exam_configurations` from the source exam to the remediation exam.
-- [ ] In `createRemediationExam()`, copy `exam_sections` and preserve old-to-new section ID mapping.
-- [ ] In `createRemediationExam()`, copy `exam_questions` to the remediation exam with the same content, points, order, source bank metadata, passage fields, and remapped `exam_section_id`.
-- [ ] In `createRemediationExam()`, copy `exam_section_assignments` and `assigned_sections` only as needed for instructor scope/reporting, then enforce student-only access through the remediation schedule table.
-- [ ] In `createRemediationExam()`, insert one `exam_remediation_schedules` row linking the source exam, new exam, student, source attempt, type, schedule, actor, and notes.
-- [ ] Add JSDoc to exported `createRemediationExam()` explaining that it clones exam structure and restricts runtime access through remediation eligibility.
-- [ ] Write `app/sentinel-api/src/modules/examination/lifecycle/services/create-remediation-exam.test.ts` proving the service clones exam metadata, sections, questions, configuration, and writes the remediation linkage row.
-- [ ] Write `packages/db/src/tests/exam-remediation-schema.test.ts` or the nearest DB schema test proving generated DB types expose `exam_remediation_schedules` and `exam_remediation_type`.
+- [x] Update `packages/db/prisma/schema.prisma` with a new `exam_remediation_schedules` model containing `remediation_id`, `source_exam_id`, `remediation_exam_id`, `student_id`, `source_attempt_id`, `remediation_type`, `scheduled_date`, `end_date_time`, `created_by`, `created_at`, and `notes`.
+- [x] Add enum `exam_remediation_type` with `MAKEUP` and `RETAKE` in `packages/db/prisma/schema.prisma`.
+- [x] Add indexes in `packages/db/prisma/schema.prisma` for `source_exam_id`, `remediation_exam_id`, `student_id`, and `(source_attempt_id, remediation_type)`.
+- [x] Create a Prisma migration under `packages/db/prisma/migrations/[timestamp]_add_exam_remediation_schedules/migration.sql` with foreign keys to `exams`, `students`, `exam_attempts`, and `users` where appropriate.
+- [x] Add `app/sentinel-api/src/modules/examination/lifecycle/services/create-remediation-exam.ts` to clone the source `exams` row with new `scheduled_date`, `end_date_time`, `status = 'PUBLISHED'` or the repo's published equivalent, `published_at`, `published_by`, and a title suffix that clearly identifies makeup/retake.
+- [x] In `createRemediationExam()`, copy `exam_configurations` from the source exam to the remediation exam.
+- [x] In `createRemediationExam()`, copy `exam_sections` and preserve old-to-new section ID mapping.
+- [x] In `createRemediationExam()`, copy `exam_questions` to the remediation exam with the same content, points, order, source bank metadata, passage fields, and remapped `exam_section_id`.
+- [x] In `createRemediationExam()`, copy `exam_section_assignments` and `assigned_sections` only as needed for instructor scope/reporting, then enforce student-only access through the remediation schedule table.
+- [x] In `createRemediationExam()`, insert one `exam_remediation_schedules` row linking the source exam, new exam, student, source attempt, type, schedule, actor, and notes.
+- [x] Add JSDoc to exported `createRemediationExam()` explaining that it clones exam structure and restricts runtime access through remediation eligibility.
+- [x] Write `app/sentinel-api/src/modules/examination/lifecycle/services/create-remediation-exam.test.ts` proving the service clones exam metadata, sections, questions, configuration, and writes the remediation linkage row.
+- [x] Write `packages/db/src/tests/exam-remediation-schema.test.ts` or the nearest DB schema test proving generated DB types expose `exam_remediation_schedules` and `exam_remediation_type`.
 
 **Migration required:** Yes - remediation exams need durable source/target/student/type linkage that cannot be inferred safely from cloned exam titles or `system_settings`.
 **Migration rollback note:** Drop `exam_remediation_schedules` and `exam_remediation_type`; cloned remediation exam rows created after deployment would need manual cleanup before rollback.
@@ -154,19 +154,19 @@ Concrete next steps:
 
 **Goal:** Route instructor retake/makeup grants through the remediation clone model while preserving source-attempt lifecycle audit history.
 
-- [ ] Update `grantRetakeExamWindow()` in `app/sentinel-api/src/modules/examination/lifecycle/services/grant-retake-exam-window.ts` to call `createRemediationExam()` with `remediationType: 'RETAKE'`, required `sourceAttemptId`, and the requested `availableFrom`/`availableUntil` schedule.
-- [ ] Update `grantMakeupExamWindow()` in `app/sentinel-api/src/modules/examination/lifecycle/services/grant-makeup-exam-window.ts` to call `createRemediationExam()` with `remediationType: 'MAKEUP'`, optional `sourceAttemptId`, and the requested `availableFrom`/`availableUntil` schedule.
-- [ ] Keep `StudentOverridesService.createStudentExamAccessOverride()` in `app/sentinel-api/src/modules/examination/student-overrides/student-overrides.service.ts` only for same-attempt reopen/reconnect use, or write a compatibility override that points to the new remediation exam if existing start flow still requires it.
-- [ ] Update `appendExamAttemptLifecycleEvent()` calls in both grant services so source attempts receive `RETAKE_GRANTED` or `MAKEUP_GRANTED` events with `metadata.remediationExamId`, `metadata.remediationId`, `availableFrom`, and `availableUntil`.
-- [ ] Update `app/sentinel-api/src/modules/examination/lifecycle/lifecycle.dto.ts` grant responses to return `remediationExam`, `remediationSchedule`, `override` only if compatibility storage remains, and `latestEvent`.
-- [ ] Update `packages/shared/src/schema/exams/lifecycle-schema.ts` with remediation grant response fields.
-- [ ] Update `packages/services/src/api/exams/core.ts` lifecycle grant client functions and `packages/services/src/api/exams/types.ts` types to include remediation exam IDs.
-- [ ] Update `packages/hooks/src/query/exams/use-exam-attempt-lifecycle-mutation.ts` tests and implementation to invalidate source exam report/monitoring queries and the new remediation exam query key after grants.
-- [ ] Write `app/sentinel-api/src/modules/examination/lifecycle/services/grant-retake-exam-window.test.ts` proving retake requires a source attempt, creates a remediation exam, and appends metadata to the source attempt event.
-- [ ] Write `app/sentinel-api/src/modules/examination/lifecycle/services/grant-makeup-exam-window.test.ts` proving makeup can be granted to an absent student without a source attempt and still creates a remediation exam.
-- [ ] Write `app/sentinel-api/src/modules/examination/lifecycle/lifecycle.routes.test.ts` covering instructor authorization, wrong-institution source attempt rejection, invalid schedule rejection, and successful remediation grant responses.
-- [ ] Write `packages/shared/src/schema/exams/lifecycle-schema.test.ts` for grant request/response validation.
-- [ ] Write `packages/hooks/src/query/exams/use-exam-attempt-lifecycle-mutation.test.ts` for updated grant response handling and invalidations.
+- [x] Update `grantRetakeExamWindow()` in `app/sentinel-api/src/modules/examination/lifecycle/services/grant-retake-exam-window.ts` to call `createRemediationExam()` with `remediationType: 'RETAKE'`, required `sourceAttemptId`, and the requested `availableFrom`/`availableUntil` schedule.
+- [x] Update `grantMakeupExamWindow()` in `app/sentinel-api/src/modules/examination/lifecycle/services/grant-makeup-exam-window.ts` to call `createRemediationExam()` with `remediationType: 'MAKEUP'`, optional `sourceAttemptId`, and the requested `availableFrom`/`availableUntil` schedule.
+- [x] Keep `StudentOverridesService.createStudentExamAccessOverride()` in `app/sentinel-api/src/modules/examination/student-overrides/student-overrides.service.ts` only for same-attempt reopen/reconnect use, or write a compatibility override that points to the new remediation exam if existing start flow still requires it.
+- [x] Update `appendExamAttemptLifecycleEvent()` calls in both grant services so source attempts receive `RETAKE_GRANTED` or `MAKEUP_GRANTED` events with `metadata.remediationExamId`, `metadata.remediationId`, `availableFrom`, and `availableUntil`.
+- [x] Update `app/sentinel-api/src/modules/examination/lifecycle/lifecycle.dto.ts` grant responses to return `remediationExam`, `remediationSchedule`, `override` only if compatibility storage remains, and `latestEvent`.
+- [x] Update `packages/shared/src/schema/exams/lifecycle-schema.ts` with remediation grant response fields.
+- [x] Update `packages/services/src/api/exams/core.ts` lifecycle grant client functions and `packages/services/src/api/exams/types.ts` types to include remediation exam IDs.
+- [x] Update `packages/hooks/src/query/exams/use-exam-attempt-lifecycle-mutation.ts` tests and implementation to invalidate source exam report/monitoring queries and the new remediation exam query key after grants.
+- [x] Write `app/sentinel-api/src/modules/examination/lifecycle/services/grant-retake-exam-window.test.ts` proving retake requires a source attempt, creates a remediation exam, and appends metadata to the source attempt event.
+- [x] Write `app/sentinel-api/src/modules/examination/lifecycle/services/grant-makeup-exam-window.test.ts` proving makeup can be granted to an absent student without a source attempt and still creates a remediation exam.
+- [x] Write `app/sentinel-api/src/modules/examination/lifecycle/lifecycle.routes.test.ts` covering instructor authorization, wrong-institution source attempt rejection, invalid schedule rejection, and successful remediation grant responses.
+- [x] Write `packages/shared/src/schema/exams/lifecycle-schema.test.ts` for grant request/response validation.
+- [x] Write `packages/hooks/src/query/exams/use-exam-attempt-lifecycle-mutation.test.ts` for updated grant response handling and invalidations.
 
 **Migration required:** No - this phase consumes the Phase 4 remediation schema.
 **Breaking changes:** Potential additive response change only. Existing consumers must tolerate the previous `override` field during transition or be updated in the same release.

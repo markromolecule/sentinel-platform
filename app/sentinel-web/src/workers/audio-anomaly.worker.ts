@@ -11,7 +11,7 @@ self.onmessage = async (event: MessageEvent) => {
         case 'INIT':
             try {
                 const capabilities = await checkAudioCapabilities();
-                if (!capabilities.wasmSupported) {
+                if (!capabilities.webAudioSupported) {
                     self.postMessage({ type: 'CAPABILITY_FAILURE', payload: capabilities });
                     return;
                 }
