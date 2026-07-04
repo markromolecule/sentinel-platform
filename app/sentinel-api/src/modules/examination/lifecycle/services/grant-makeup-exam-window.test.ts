@@ -1,15 +1,9 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { type DbClient } from '@sentinel/db';
 import { grantMakeupExamWindow } from './grant-makeup-exam-window';
-import { StudentOverridesService } from '../../student-overrides/student-overrides.service';
 import { getLifecycleAttemptContext } from '../data/get-lifecycle-attempt-context';
 import { appendExamAttemptLifecycleEvent } from './lifecycle-event.service';
-
-vi.mock('../../student-overrides/student-overrides.service', () => ({
-    StudentOverridesService: {
-        createStudentExamAccessOverride: vi.fn(),
-    },
-}));
+import { createRemediationExam } from './create-remediation-exam';
 
 vi.mock('../data/get-lifecycle-attempt-context', () => ({
     getLifecycleAttemptContext: vi.fn(),
@@ -19,14 +13,37 @@ vi.mock('./lifecycle-event.service', () => ({
     appendExamAttemptLifecycleEvent: vi.fn(),
 }));
 
+vi.mock('./create-remediation-exam', () => ({
+    createRemediationExam: vi.fn(),
+}));
+
 describe('grantMakeupExamWindow', () => {
     beforeEach(() => {
         vi.clearAllMocks();
     });
 
-    it('creates a makeup override without mutating unrelated attempts', async () => {
-        vi.mocked(StudentOverridesService.createStudentExamAccessOverride).mockResolvedValue({
-            id: 'override-1',
+    it('creates a makeup remediation exam without mutating unrelated attempts', async () => {
+        vi.mocked(createRemediationExam).mockResolvedValue({
+            remediationExam: {
+                exam_id: 'cloned-exam-2',
+                title: 'Exam Makeup',
+                scheduled_date: '2026-07-04T08:00:00.000Z',
+                end_date_time: '2026-07-04T10:00:00.000Z',
+                status: 'PUBLISHED',
+            },
+            remediationSchedule: {
+                remediation_id: 'remediation-2',
+                source_exam_id: 'exam-1',
+                remediation_exam_id: 'cloned-exam-2',
+                student_id: 'student-1',
+                source_attempt_id: null,
+                remediation_type: 'MAKEUP',
+                scheduled_date: '2026-07-04T08:00:00.000Z',
+                end_date_time: '2026-07-04T10:00:00.000Z',
+                created_by: '00000000-0000-0000-0000-000000000000',
+                created_at: '2026-07-04T08:00:00.000Z',
+                notes: 'Approved makeup.',
+            },
         } as never);
 
         const result = await grantMakeupExamWindow({
@@ -39,9 +56,27 @@ describe('grantMakeupExamWindow', () => {
         });
 
         expect(result).toEqual({
-            override: {
-                id: 'override-1',
+            remediationExam: {
+                examId: 'cloned-exam-2',
+                title: 'Exam Makeup',
+                scheduledDate: '2026-07-04T08:00:00.000Z',
+                endDateTime: '2026-07-04T10:00:00.000Z',
+                status: 'PUBLISHED',
             },
+            remediationSchedule: {
+                remediationId: 'remediation-2',
+                sourceExamId: 'exam-1',
+                remediationExamId: 'cloned-exam-2',
+                studentId: 'student-1',
+                sourceAttemptId: null,
+                remediationType: 'MAKEUP',
+                scheduledDate: '2026-07-04T08:00:00.000Z',
+                endDateTime: '2026-07-04T10:00:00.000Z',
+                createdBy: '00000000-0000-0000-0000-000000000000',
+                createdAt: '2026-07-04T08:00:00.000Z',
+                notes: 'Approved makeup.',
+            },
+            override: null,
             latestEvent: null,
         });
         expect(getLifecycleAttemptContext).not.toHaveBeenCalled();
@@ -57,8 +92,27 @@ describe('grantMakeupExamWindow', () => {
                 id: 'student-1',
             },
         } as never);
-        vi.mocked(StudentOverridesService.createStudentExamAccessOverride).mockResolvedValue({
-            id: 'override-2',
+        vi.mocked(createRemediationExam).mockResolvedValue({
+            remediationExam: {
+                exam_id: 'cloned-exam-3',
+                title: 'Exam Makeup',
+                scheduled_date: '2026-07-04T08:00:00.000Z',
+                end_date_time: '2026-07-04T10:00:00.000Z',
+                status: 'PUBLISHED',
+            },
+            remediationSchedule: {
+                remediation_id: 'remediation-3',
+                source_exam_id: 'exam-1',
+                remediation_exam_id: 'cloned-exam-3',
+                student_id: 'student-1',
+                source_attempt_id: 'attempt-1',
+                remediation_type: 'MAKEUP',
+                scheduled_date: '2026-07-04T08:00:00.000Z',
+                end_date_time: '2026-07-04T10:00:00.000Z',
+                created_by: '00000000-0000-0000-0000-000000000000',
+                created_at: '2026-07-04T08:00:00.000Z',
+                notes: 'Approved makeup.',
+            },
         } as never);
         vi.mocked(appendExamAttemptLifecycleEvent).mockResolvedValue({
             eventId: 'event-1',
@@ -74,26 +128,46 @@ describe('grantMakeupExamWindow', () => {
             notes: 'Approved makeup.',
         });
 
-        expect(StudentOverridesService.createStudentExamAccessOverride).toHaveBeenCalledWith({
+        expect(createRemediationExam).toHaveBeenCalledWith({
             dbClient: expect.anything(),
-            examId: 'exam-1',
-            body: expect.objectContaining({
-                overrideType: 'MAKEUP',
-                sourceAttemptId: 'attempt-1',
-            }),
-            grantedBy: null,
+            sourceExamId: 'exam-1',
+            studentId: 'student-1',
+            sourceAttemptId: 'attempt-1',
+            remediationType: 'MAKEUP',
+            scheduledDate: '2026-07-04T08:00:00.000Z',
+            endDate: '2026-07-04T10:00:00.000Z',
+            createdBy: '00000000-0000-0000-0000-000000000000',
+            notes: 'Approved makeup.',
         });
         expect(appendExamAttemptLifecycleEvent).toHaveBeenCalledWith(
             expect.objectContaining({
                 attemptId: 'attempt-1',
                 eventType: 'MAKEUP_GRANTED',
-                relatedOverrideId: 'override-2',
+                relatedOverrideId: null,
             }),
         );
         expect(result).toEqual({
-            override: {
-                id: 'override-2',
+            remediationExam: {
+                examId: 'cloned-exam-3',
+                title: 'Exam Makeup',
+                scheduledDate: '2026-07-04T08:00:00.000Z',
+                endDateTime: '2026-07-04T10:00:00.000Z',
+                status: 'PUBLISHED',
             },
+            remediationSchedule: {
+                remediationId: 'remediation-3',
+                sourceExamId: 'exam-1',
+                remediationExamId: 'cloned-exam-3',
+                studentId: 'student-1',
+                sourceAttemptId: 'attempt-1',
+                remediationType: 'MAKEUP',
+                scheduledDate: '2026-07-04T08:00:00.000Z',
+                endDateTime: '2026-07-04T10:00:00.000Z',
+                createdBy: '00000000-0000-0000-0000-000000000000',
+                createdAt: '2026-07-04T08:00:00.000Z',
+                notes: 'Approved makeup.',
+            },
+            override: null,
             latestEvent: {
                 eventId: 'event-1',
             },

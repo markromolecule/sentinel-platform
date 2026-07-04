@@ -61,13 +61,23 @@ export type UseCloseExamAttemptMutationArgs = UseMutationOptions<
 >;
 
 export type UseGrantMakeupExamWindowMutationArgs = UseMutationOptions<
-    { override: any; latestEvent: ExamAttemptLifecycleResponseType['latestEvent'] | null },
+    {
+        override?: any | null;
+        remediationExam?: any | null;
+        remediationSchedule?: any | null;
+        latestEvent: ExamAttemptLifecycleResponseType['latestEvent'] | null;
+    },
     Error,
     GrantMakeupExamWindowPayload
 >;
 
 export type UseGrantRetakeExamWindowMutationArgs = UseMutationOptions<
-    { override: any; latestEvent: ExamAttemptLifecycleResponseType['latestEvent'] },
+    {
+        override?: any | null;
+        remediationExam?: any | null;
+        remediationSchedule?: any | null;
+        latestEvent: ExamAttemptLifecycleResponseType['latestEvent'];
+    },
     Error,
     GrantRetakeExamWindowPayload
 >;
@@ -89,11 +99,30 @@ function createLifecycleMutationOptions<TData, TVariables extends LifecycleMutat
         mutationFn: (variables: TVariables) => mutationFn(apiClient, variables),
         onSuccess: async (data, variables, context) => {
             await invalidateMonitoringQueries(queryClient, variables);
-            if (variables.attemptId && !variables.studentId) {
-                await queryClient.invalidateQueries({
-                    queryKey: EXAM_QUERY_KEYS.all,
-                });
+            
+            // Invalidate source exam report
+            await queryClient.invalidateQueries({
+                queryKey: EXAM_QUERY_KEYS.report(variables.id),
+            });
+
+            // If a remediation exam was created, invalidate its details and config
+            const res = data as any;
+            if (res?.remediationExam?.examId) {
+                await Promise.all([
+                    queryClient.invalidateQueries({
+                        queryKey: EXAM_QUERY_KEYS.details(res.remediationExam.examId),
+                    }),
+                    queryClient.invalidateQueries({
+                        queryKey: EXAM_QUERY_KEYS.configuration(res.remediationExam.examId),
+                    }),
+                ]);
             }
+
+            // Always invalidate all/list queries on any lifecycle change to ensure consistency
+            await queryClient.invalidateQueries({
+                queryKey: EXAM_QUERY_KEYS.all,
+            });
+
             toast.success(successMessage);
             (args?.onSuccess as any)?.(data, variables, context);
         },

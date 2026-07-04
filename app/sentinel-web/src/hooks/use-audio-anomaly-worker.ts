@@ -127,7 +127,7 @@ export function useAudioAnomalyWorker({
         };
 
         const handleMessage = (event: MessageEvent) => {
-            if (isDisposed) {
+            if (isDisposed || isSuspended) {
                 return;
             }
 

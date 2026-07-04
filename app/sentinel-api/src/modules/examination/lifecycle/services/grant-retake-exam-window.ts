@@ -1,10 +1,10 @@
 import { type DbClient } from '@sentinel/db';
 import { HTTPException } from 'hono/http-exception';
-import { StudentOverridesService } from '../../student-overrides/student-overrides.service';
 import { getLifecycleAttemptContext } from '../data/get-lifecycle-attempt-context';
 import { appendExamAttemptLifecycleEvent } from './lifecycle-event.service';
 import { transitionExamAttemptLifecycle } from './lifecycle-transition.service';
 import { recordAttemptLifecycleAudit } from './lifecycle-audit.service';
+import { createRemediationExam } from './create-remediation-exam';
 
 /**
  * Grants a retake window for one student and records the grant against the
@@ -41,19 +41,16 @@ export async function grantRetakeExamWindow(args: {
         eventType: 'RETAKE_GRANTED',
     });
 
-    const override = await StudentOverridesService.createStudentExamAccessOverride({
+    const remediation = await createRemediationExam({
         dbClient: args.dbClient,
-        examId: args.examId,
-        body: {
-            studentId: args.studentId,
-            overrideType: 'RETAKE',
-            availableFrom: args.availableFrom,
-            availableUntil: args.availableUntil,
-            allowedAttempts: args.allowedAttempts ?? 1,
-            sourceAttemptId: args.sourceAttemptId,
-            notes: args.notes ?? null,
-        },
-        grantedBy: args.actorUserId ?? null,
+        sourceExamId: args.examId,
+        studentId: args.studentId,
+        sourceAttemptId: args.sourceAttemptId,
+        remediationType: 'RETAKE',
+        scheduledDate: args.availableFrom,
+        endDate: args.availableUntil,
+        createdBy: args.actorUserId || '00000000-0000-0000-0000-000000000000',
+        notes: args.notes,
     });
 
     const latestEvent = await appendExamAttemptLifecycleEvent({
@@ -67,7 +64,13 @@ export async function grantRetakeExamWindow(args: {
         actorUserId: args.actorUserId ?? null,
         reasonCode: 'RETAKE_GRANTED',
         notes: args.notes ?? null,
-        relatedOverrideId: override.id,
+        relatedOverrideId: null,
+        metadata: {
+            remediationExamId: remediation.remediationExam.exam_id,
+            remediationId: remediation.remediationSchedule.remediation_id,
+            availableFrom: args.availableFrom,
+            availableUntil: args.availableUntil,
+        },
     });
 
     const resolvedInstId = args.institutionId || context.exam?.institutionId || '';
@@ -84,16 +87,37 @@ export async function grantRetakeExamWindow(args: {
         notes: args.notes ?? null,
         previousState: context.attempt.lifecycleState,
         nextState: context.attempt.lifecycleState,
-        relatedOverrideId: override.id,
+        relatedOverrideId: null,
         details: {
+            remediationExamId: remediation.remediationExam.exam_id,
+            remediationId: remediation.remediationSchedule.remediation_id,
             availableFrom: args.availableFrom,
             availableUntil: args.availableUntil,
-            allowedAttempts: args.allowedAttempts ?? 1,
         },
     });
 
     return {
-        override,
+        remediationExam: {
+            examId: remediation.remediationExam.exam_id,
+            title: remediation.remediationExam.title,
+            scheduledDate: remediation.remediationExam.scheduled_date,
+            endDateTime: remediation.remediationExam.end_date_time,
+            status: remediation.remediationExam.status,
+        },
+        remediationSchedule: {
+            remediationId: remediation.remediationSchedule.remediation_id,
+            sourceExamId: remediation.remediationSchedule.source_exam_id,
+            remediationExamId: remediation.remediationSchedule.remediation_exam_id,
+            studentId: remediation.remediationSchedule.student_id,
+            sourceAttemptId: remediation.remediationSchedule.source_attempt_id,
+            remediationType: remediation.remediationSchedule.remediation_type,
+            scheduledDate: remediation.remediationSchedule.scheduled_date,
+            endDateTime: remediation.remediationSchedule.end_date_time,
+            createdBy: remediation.remediationSchedule.created_by,
+            createdAt: remediation.remediationSchedule.created_at,
+            notes: remediation.remediationSchedule.notes,
+        },
+        override: null,
         latestEvent,
     };
 }

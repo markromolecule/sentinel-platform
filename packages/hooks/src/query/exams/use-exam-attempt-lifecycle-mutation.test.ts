@@ -19,11 +19,12 @@ vi.mock('@tanstack/react-query', () => ({
     useMutation: vi.fn((options: any) => {
         const mutateAsync = async (variables: any) => {
             try {
+                let result = undefined;
                 if (options.mutationFn) {
-                    await options.mutationFn(variables);
+                    result = await options.mutationFn(variables);
                 }
                 if (options.onSuccess) {
-                    await options.onSuccess(undefined, variables, null);
+                    await options.onSuccess(result, variables, null);
                 }
             } catch (error) {
                 if (options.onError) {
@@ -102,5 +103,40 @@ describe('useExamAttemptLifecycleMutation', () => {
                 availableUntil: '2026-07-04T09:00:00.000Z',
             }),
         ).rejects.toThrow('Invalid window');
+    });
+
+    it('invalidates report and remediation queries on successful grant', async () => {
+        vi.mocked(grantMakeupExamWindowLifecycle).mockResolvedValueOnce({
+            remediationExam: {
+                examId: 'remediation-exam-123',
+                title: 'Math Cloned',
+            },
+            remediationSchedule: {
+                remediationId: 'remediation-id-123',
+            },
+            override: null,
+            latestEvent: null,
+        } as any);
+
+        const mutation = useGrantMakeupExamWindowMutation();
+        await (mutation as any).mutateAsync({
+            id: 'exam-1',
+            studentId: 'student-1',
+            availableFrom: '2026-07-04T08:00:00.000Z',
+            availableUntil: '2026-07-04T10:00:00.000Z',
+        });
+
+        expect(mockInvalidateQueries).toHaveBeenCalledWith({
+            queryKey: ['exams', 'exam-1', 'report'],
+        });
+        expect(mockInvalidateQueries).toHaveBeenCalledWith({
+            queryKey: ['exams', 'remediation-exam-123'],
+        });
+        expect(mockInvalidateQueries).toHaveBeenCalledWith({
+            queryKey: ['exams', 'remediation-exam-123', 'configuration'],
+        });
+        expect(mockInvalidateQueries).toHaveBeenCalledWith({
+            queryKey: ['exams'],
+        });
     });
 });

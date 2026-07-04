@@ -31,6 +31,7 @@ export const grantMakeupExamWindowBodySchema = z.object({
     availableFrom: z.union([z.string(), z.date()]),
     availableUntil: z.union([z.string(), z.date()]),
     allowedAttempts: z.number().int().min(1).default(1),
+    sourceAttemptId: z.string().uuid().nullable().optional(),
     notes: z.string().trim().max(1000).nullable().optional(),
 });
 
@@ -95,13 +96,23 @@ export const reviseFinalizedAttemptScoreSchema = {
     response: examAttemptLifecycleResponseSchema,
 };
 
+export const remediationExamSchema = z
+    .object(Schema.remediationExamSchema.shape)
+    .openapi('RemediationExam');
+
+export const examRemediationScheduleSchema = z
+    .object(Schema.examRemediationScheduleSchema.shape)
+    .openapi('ExamRemediationSchedule');
+
 export const grantMakeupExamWindowSchema = {
     params: lifecycleStudentParamsSchema,
     body: grantMakeupExamWindowBodySchema,
     response: z.object({
         message: z.string(),
         data: z.object({
-            override: z.object(Schema.studentExamAccessOverrideSchema.shape),
+            override: z.object(Schema.studentExamAccessOverrideSchema.shape).nullable(),
+            remediationExam: remediationExamSchema.nullable().optional(),
+            remediationSchedule: examRemediationScheduleSchema.nullable().optional(),
             latestEvent: examAttemptLifecycleEventSchema.nullable(),
         }),
     }),
@@ -113,7 +124,9 @@ export const grantRetakeExamWindowSchema = {
     response: z.object({
         message: z.string(),
         data: z.object({
-            override: z.object(Schema.studentExamAccessOverrideSchema.shape),
+            override: z.object(Schema.studentExamAccessOverrideSchema.shape).nullable(),
+            remediationExam: remediationExamSchema.nullable().optional(),
+            remediationSchedule: examRemediationScheduleSchema.nullable().optional(),
             latestEvent: examAttemptLifecycleEventSchema,
         }),
     }),

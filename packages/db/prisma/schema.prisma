@@ -469,6 +469,8 @@ model users {
   calendar_events_created                                               calendar_events[]                  @relation("calendar_events_created_byTousers")
   calendar_events_updated                                               calendar_events[]                  @relation("calendar_events_updated_byTousers")
   exam_section_assignments                                              exam_section_assignments[]         @relation("exam_section_assignments_instructor")
+  student_remediations                                                  exam_remediation_schedules[]       @relation("student_remediations")
+  creator_remediations                                                  exam_remediation_schedules[]       @relation("creator_remediations")
 
   @@index([instance_id])
   @@index([is_anonymous])
@@ -1309,6 +1311,8 @@ model exams {
   proctor_assignments             proctor_assignments[]
   exam_section_assignments        exam_section_assignments[]
   exam_shares                     exam_shares[]
+  source_remediations             exam_remediation_schedules[] @relation("source_remediations")
+  exam_remediations               exam_remediation_schedules[] @relation("exam_remediations")
 
   @@index([class_group_id])
   @@index([institution_id, status], map: "exams_institution_status_idx")
@@ -1545,6 +1549,7 @@ model exam_attempts {
   lifecycle_events        exam_attempt_lifecycle_events[]
   superseded_by_attempt   exam_attempts?      @relation("exam_attempt_supersession", fields: [superseded_by_attempt_id], references: [attempt_id], onDelete: SetNull, onUpdate: NoAction)
   superseded_attempts     exam_attempts[]     @relation("exam_attempt_supersession")
+  attempt_remediations    exam_remediation_schedules[] @relation("attempt_remediations")
 
   @@index([student_id, exam_id, created_at(sort: Desc)], map: "exam_attempts_student_exam_created_idx")
   @@index([student_id, completed_at(sort: Desc)], map: "exam_attempts_student_completed_idx")
@@ -2299,5 +2304,38 @@ enum release_score_mode {
   AUTO_RELEASE
   MANUAL_RELEASE
 
+  @@schema("public")
+}
+
+enum exam_remediation_type {
+  RETAKE
+  MAKEUP
+
+  @@schema("public")
+}
+
+model exam_remediation_schedules {
+  remediation_id      String                @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  source_exam_id      String                @db.Uuid
+  remediation_exam_id String                @db.Uuid
+  student_id          String                @db.Uuid
+  source_attempt_id   String?               @db.Uuid
+  remediation_type    exam_remediation_type
+  scheduled_date      DateTime              @db.Timestamptz(6)
+  end_date_time       DateTime              @db.Timestamptz(6)
+  created_by          String                @db.Uuid
+  created_at          DateTime              @default(now()) @db.Timestamptz(6)
+  notes               String?
+
+  source_exam      exams          @relation("source_remediations", fields: [source_exam_id], references: [exam_id], onDelete: Cascade)
+  remediation_exam exams          @relation("exam_remediations", fields: [remediation_exam_id], references: [exam_id], onDelete: Cascade)
+  student          users          @relation("student_remediations", fields: [student_id], references: [id], onDelete: Cascade)
+  source_attempt   exam_attempts? @relation("attempt_remediations", fields: [source_attempt_id], references: [attempt_id], onDelete: SetNull)
+  creator          users          @relation("creator_remediations", fields: [created_by], references: [id], onDelete: Cascade)
+
+  @@index([source_exam_id])
+  @@index([remediation_exam_id])
+  @@index([student_id])
+  @@index([source_attempt_id])
   @@schema("public")
 }

@@ -20,7 +20,7 @@ describe('createExamAssignmentRouteHandler', () => {
         c.set('user', { id: 'assigner-1' } as any);
         c.set('supabaseUser', { user_metadata: { role: 'instructor' } } as any);
         c.set('institutionId', 'institution-1');
-        c.set('activePermissionKeys', ['examinations:view']);
+        c.set('activePermissionKeys', ['examinations:view', 'examinations:assign']);
         await next();
     });
 

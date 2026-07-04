@@ -365,6 +365,12 @@ export const release_score_mode = {
     MANUAL_RELEASE: 'MANUAL_RELEASE',
 } as const;
 export type release_score_mode = (typeof release_score_mode)[keyof typeof release_score_mode];
+export const exam_remediation_type = {
+    RETAKE: 'RETAKE',
+    MAKEUP: 'MAKEUP',
+} as const;
+export type exam_remediation_type =
+    (typeof exam_remediation_type)[keyof typeof exam_remediation_type];
 export type analytics_reports = {
     report_id: Generated<string>;
     title: string;
@@ -661,6 +667,19 @@ export type exam_questions = {
     exam_section_id: string | null;
     source_question_bank_question_id: string | null;
     source_collection_id: string | null;
+};
+export type exam_remediation_schedules = {
+    remediation_id: Generated<string>;
+    source_exam_id: string;
+    remediation_exam_id: string;
+    student_id: string;
+    source_attempt_id: string | null;
+    remediation_type: exam_remediation_type;
+    scheduled_date: Timestamp;
+    end_date_time: Timestamp;
+    created_by: string;
+    created_at: Generated<Timestamp>;
+    notes: string | null;
 };
 export type exam_section_assignments = {
     id: Generated<string>;
@@ -1417,6 +1436,7 @@ export type DB = {
     exam_feedbacks: exam_feedbacks;
     exam_lobby_admissions: exam_lobby_admissions;
     exam_questions: exam_questions;
+    exam_remediation_schedules: exam_remediation_schedules;
     exam_section_assignments: exam_section_assignments;
     exam_sections: exam_sections;
     exam_shares: exam_shares;

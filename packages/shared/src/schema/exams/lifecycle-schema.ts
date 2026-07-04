@@ -110,6 +110,30 @@ export const closeExamAttemptLifecycleBodySchema = lifecycleActionBodyBaseSchema
     reasonCode: z.string().trim().min(1).max(100),
 });
 
+export const examRemediationTypeSchema = z.enum(['RETAKE', 'MAKEUP']);
+
+export const examRemediationScheduleSchema = z.object({
+    remediationId: z.string().uuid(),
+    sourceExamId: z.string().uuid(),
+    remediationExamId: z.string().uuid(),
+    studentId: z.string().uuid(),
+    sourceAttemptId: z.string().uuid().nullable(),
+    remediationType: examRemediationTypeSchema,
+    scheduledDate: dateTimeSchema,
+    endDateTime: dateTimeSchema,
+    createdBy: z.string().uuid(),
+    createdAt: dateTimeSchema,
+    notes: z.string().nullable(),
+});
+
+export const remediationExamSchema = z.object({
+    examId: z.string().uuid(),
+    title: z.string(),
+    scheduledDate: dateTimeSchema,
+    endDateTime: dateTimeSchema,
+    status: z.string(),
+});
+
 export const finalizeExamAttemptLifecycleBodySchema = lifecycleActionBodyBaseSchema.extend({
     scoreState: examAttemptScoreStateSchema.default('FINALIZED'),
 });
@@ -136,3 +160,6 @@ export type FinalizeExamAttemptLifecycleBodyType = z.infer<
     typeof finalizeExamAttemptLifecycleBodySchema
 >;
 export type ExamAttemptLifecycleResponseType = z.infer<typeof examAttemptLifecycleResponseSchema>;
+export type ExamRemediationType = z.infer<typeof examRemediationTypeSchema>;
+export type ExamRemediationSchedule = z.infer<typeof examRemediationScheduleSchema>;
+export type RemediationExam = z.infer<typeof remediationExamSchema>;
