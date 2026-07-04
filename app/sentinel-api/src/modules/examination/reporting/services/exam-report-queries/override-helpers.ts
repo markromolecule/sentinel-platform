@@ -38,7 +38,7 @@ export function buildOverrideRecencyMaps(accessOverrides: StudentExamAccessOverr
     const activeOverrideMap = new Map<string, StudentExamAccessOverride['overrideType']>();
     const now = new Date();
 
-    for (const accessOverride of accessOverrides.sort(compareOverrideRecency)) {
+    for (const accessOverride of [...accessOverrides].sort(compareOverrideRecency)) {
         for (const usedAttemptId of accessOverride.usedAttemptIds) {
             if (accessOverride.overrideType === 'MAKEUP') {
                 overrideAttemptKindMap.set(usedAttemptId, 'makeup');
@@ -55,6 +55,7 @@ export function buildOverrideRecencyMaps(accessOverrides: StudentExamAccessOverr
             availableUntil &&
             availableUntil.getTime() >= now.getTime() &&
             accessOverride.usedAttempts < accessOverride.allowedAttempts &&
+            (accessOverride.overrideType !== 'REOPEN' || Boolean(accessOverride.sourceAttemptId)) &&
             !activeOverrideMap.has(accessOverride.studentId)
         ) {
             activeOverrideMap.set(accessOverride.studentId, accessOverride.overrideType);

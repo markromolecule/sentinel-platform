@@ -2,9 +2,7 @@ import { describe, expect, it } from 'vitest';
 import type { ExamLobbyWaitingStudent } from '@sentinel/services';
 import { filterLobbyAdmissions, getLobbyAdmissionGroups } from './lobby-admission-filters';
 
-function createAdmission(
-    overrides: Partial<ExamLobbyWaitingStudent>,
-): ExamLobbyWaitingStudent {
+function createAdmission(overrides: Partial<ExamLobbyWaitingStudent>): ExamLobbyWaitingStudent {
     return {
         admissionId: overrides.admissionId ?? 'admission-1',
         studentId: overrides.studentId ?? 'student-1',

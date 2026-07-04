@@ -55,27 +55,28 @@ export function InstructorSearchCombobox({
                     value={displayValue}
                     onChange={onInputChange}
                     showClear={!!value}
-                    className="w-full bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+                    className="focus:ring-primary w-full rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-2 text-sm focus:ring-2 focus:outline-none dark:border-zinc-800 dark:bg-zinc-900"
                     onFocus={onFocus}
                 />
             </div>
-            <ComboboxContent className="w-[380px] z-50 rounded-md border border-zinc-200 bg-white shadow-lg dark:border-zinc-800 dark:bg-zinc-950">
+            <ComboboxContent className="z-50 w-[380px] rounded-md border border-zinc-200 bg-white shadow-lg dark:border-zinc-800 dark:bg-zinc-950">
                 <ComboboxList className="max-h-60 overflow-y-auto p-1">
                     {searchedInstructors.map((user) => {
                         const name =
-                            [user.firstName, user.lastName].filter(Boolean).join(' ') ||
-                            user.email;
+                            [user.firstName, user.lastName].filter(Boolean).join(' ') || user.email;
                         return (
                             <ComboboxItem
                                 key={user.id}
                                 value={user.id}
-                                className="cursor-pointer hover:bg-zinc-100 dark:hover:bg-zinc-900 rounded p-2"
+                                className="cursor-pointer rounded p-2 hover:bg-zinc-100 dark:hover:bg-zinc-900"
                             >
                                 <div className="flex items-center gap-2 text-left">
-                                    <Avatar className="h-8 w-8 border border-border">
+                                    <Avatar className="border-border h-8 w-8 border">
                                         <AvatarImage src={user.avatarUrl ?? ''} alt={name} />
                                         <AvatarFallback className="bg-primary/10 text-primary text-[10px] font-bold">
-                                            {user.firstName?.charAt(0) || user.email?.charAt(0) || 'I'}
+                                            {user.firstName?.charAt(0) ||
+                                                user.email?.charAt(0) ||
+                                                'I'}
                                         </AvatarFallback>
                                     </Avatar>
                                     <div className="flex flex-col">

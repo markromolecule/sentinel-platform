@@ -162,10 +162,10 @@ export function MessageList({
                         <SkeletonRow />
                         <SkeletonRow />
                     </>
-                    ) : conversations.length === 0 ? (
-                        <div className="text-muted-foreground p-8 text-center text-sm">
-                            No conversations yet. Click the + icon above to start one!
-                        </div>
+                ) : conversations.length === 0 ? (
+                    <div className="text-muted-foreground p-8 text-center text-sm">
+                        No conversations yet. Click the + icon above to start one!
+                    </div>
                 ) : (
                     conversations.map((conversation) => {
                         const participant = conversation.participants[0];

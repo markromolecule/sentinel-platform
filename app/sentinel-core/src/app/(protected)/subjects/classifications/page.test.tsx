@@ -137,9 +137,7 @@ describe('SubjectClassificationPage Permission Gating Test', () => {
         });
 
         expect(handleEditOpen).toHaveBeenCalledTimes(1);
-        expect(handleEditOpen).toHaveBeenCalledWith(
-            expect.objectContaining({ id: 'class-1' }),
-        );
+        expect(handleEditOpen).toHaveBeenCalledWith(expect.objectContaining({ id: 'class-1' }));
     });
 
     it('renders page header and classifications list with create group action', () => {

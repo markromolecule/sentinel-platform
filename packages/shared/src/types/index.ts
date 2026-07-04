@@ -38,12 +38,7 @@ export type TrendDirection = 'up' | 'down' | 'neutral';
 export type ActionType = 'info' | 'warning' | 'error' | 'success';
 export type ExamDifficulty = 'easy' | 'medium' | 'hard';
 export type CheatingType =
-    | 'gaze'
-    | 'audio'
-    | 'tab_switch'
-    | 'screenshot'
-    | 'screen_record'
-    | 'multiple';
+    'gaze' | 'audio' | 'tab_switch' | 'screenshot' | 'screen_record' | 'multiple';
 export * from './exams/exam';
 
 export interface PresenceState {
@@ -875,6 +870,7 @@ export type { MonitoringHeaderProps } from './proctor/exams/[id]/monitoring';
 export type { MonitoringStatsProps } from './proctor/exams/[id]/monitoring';
 export type { StudentListProps } from './proctor/exams/[id]/monitoring';
 export type { StudentCardProps } from './proctor/exams/[id]/monitoring';
+export type { MonitoringLifecycleAction } from './proctor/exams/[id]/monitoring';
 export type { ExamsPageHeaderProps } from './proctor/exams';
 export type { ExamsFilterBarProps } from './proctor/exams';
 export type { ExamsGridProps } from './proctor/exams';

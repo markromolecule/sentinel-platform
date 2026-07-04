@@ -1,4 +1,5 @@
 import { describe, expect, expectTypeOf, it } from 'vitest';
+import type { Selectable } from 'kysely';
 import {
     exam_attempt_lifecycle_event_type,
     exam_attempt_lifecycle_state,
@@ -19,7 +20,7 @@ describe('exam attempt lifecycle schema types', () => {
     });
 
     it('includes lifecycle columns on exam_attempts', () => {
-        const record: exam_attempts = {
+        const record: Selectable<exam_attempts> = {
             attempt_id: 'fcb4774e-698b-4aa9-863b-a50f1062bf4a',
             exam_id: '1fd52d94-e6d9-4519-b38a-b17b6ccddf74',
             student_id: '2d519509-537d-4bfd-af39-76118cbad154',
@@ -58,7 +59,7 @@ describe('exam attempt lifecycle schema types', () => {
     });
 
     it('includes the lifecycle event table in the DB mapping', () => {
-        const event: exam_attempt_lifecycle_events = {
+        const event: Selectable<exam_attempt_lifecycle_events> = {
             event_id: '5c4d4890-c32d-4891-82af-1be9d0f41570',
             attempt_id: 'fcb4774e-698b-4aa9-863b-a50f1062bf4a',
             exam_id: '1fd52d94-e6d9-4519-b38a-b17b6ccddf74',
@@ -76,6 +77,8 @@ describe('exam attempt lifecycle schema types', () => {
         };
 
         expect(event.event_type).toBe('LOCKED');
-        expectTypeOf<DB['exam_attempt_lifecycle_events']>().toEqualTypeOf<exam_attempt_lifecycle_events>();
+        expectTypeOf<
+            DB['exam_attempt_lifecycle_events']
+        >().toEqualTypeOf<exam_attempt_lifecycle_events>();
     });
 });

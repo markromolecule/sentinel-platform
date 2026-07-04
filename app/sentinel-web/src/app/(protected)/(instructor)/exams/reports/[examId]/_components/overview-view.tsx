@@ -112,9 +112,7 @@ export function OverviewView({ report, refetch, isFetching }: OverviewViewProps)
                             </div>
                             <div className="flex items-center justify-between gap-4 px-4 py-3 text-sm">
                                 <span className="text-muted-foreground">Passing Score</span>
-                                <span className="text-right">
-                                    {report.exam.passingScore}%
-                                </span>
+                                <span className="text-right">{report.exam.passingScore}%</span>
                             </div>
                         </div>
                     </div>

@@ -125,7 +125,7 @@ Enhance the Calendar module across both the `sentinel-api` and the frontend apps
 
 ### Manual Verification
 
-- [x]   1. Login as standard Instructor/Student. Try deleting a personal NOTE card. It succeeds.
-- [x]   2. Try deleting a global admin-created EVENT card as Instructor/Student. It returns a 403 Forbidden.
-- [x]   3. Login as Admin under a Parent Institution. Create a calendar event targeting all branches.
-- [x]   4. Verify that child branch users can view that event in their calendars and receive a system activity notification.
+- [x] 1. Login as standard Instructor/Student. Try deleting a personal NOTE card. It succeeds.
+- [x] 2. Try deleting a global admin-created EVENT card as Instructor/Student. It returns a 403 Forbidden.
+- [x] 3. Login as Admin under a Parent Institution. Create a calendar event targeting all branches.
+- [x] 4. Verify that child branch users can view that event in their calendars and receive a system activity notification.

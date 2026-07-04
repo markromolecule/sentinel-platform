@@ -22,7 +22,10 @@ interface SubjectOfferingActionsCellProps {
     onViewDetails?: (offering: SubjectOffering) => void;
 }
 
-export function SubjectOfferingActionsCell({ offering, onViewDetails }: SubjectOfferingActionsCellProps) {
+export function SubjectOfferingActionsCell({
+    offering,
+    onViewDetails,
+}: SubjectOfferingActionsCellProps) {
     const { hasPermission } = useActivePermissions();
     const [offerOpen, setOfferOpen] = useState(false);
     const [editOpen, setEditOpen] = useState(false);

@@ -32,12 +32,7 @@ export interface ProctorExam extends SharedExam {
 }
 
 export type EnrollmentFileColumn =
-    | 'student_no'
-    | 'first_name'
-    | 'last_name'
-    | 'section'
-    | 'subject'
-    | 'term';
+    'student_no' | 'first_name' | 'last_name' | 'section' | 'subject' | 'term';
 
 export type EnrollmentFileResult = {
     success: boolean;

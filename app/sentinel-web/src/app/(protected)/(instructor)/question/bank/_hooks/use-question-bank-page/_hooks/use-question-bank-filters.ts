@@ -14,16 +14,14 @@ export function useQuestionBankFilters() {
     const typeFilter = useStableValue(
         () =>
             columnFilters.find((f: ColumnFilter) => f.id === 'type')?.value as
-                | QuestionType
-                | undefined,
+                QuestionType | undefined,
         [columnFilters],
     );
 
     const difficultyFilter = useStableValue(
         () =>
             columnFilters.find((f: ColumnFilter) => f.id === 'difficulty')?.value as
-                | QuestionDifficulty
-                | undefined,
+                QuestionDifficulty | undefined,
         [columnFilters],
     );
 

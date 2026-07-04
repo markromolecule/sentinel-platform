@@ -76,7 +76,8 @@ vi.mock('../_lib/exam-turn-in-storage', () => ({
 }));
 
 vi.mock('../_lib/student-exam-session-feedback', () => ({
-    getStudentExamSessionAttemptId: (...args: unknown[]) => mockGetStudentExamSessionAttemptId(...args),
+    getStudentExamSessionAttemptId: (...args: unknown[]) =>
+        mockGetStudentExamSessionAttemptId(...args),
     isStudentExamAlreadyTurnedInError: (...args: unknown[]) =>
         mockIsStudentExamAlreadyTurnedInError(...args),
     resolveStudentExamSessionError: vi.fn(() => 'Failed to prepare the exam session.'),
@@ -411,9 +412,7 @@ describe('useExamSession', () => {
         });
 
         await waitFor(() => {
-            expect(mockRouterReplace).toHaveBeenCalledWith(
-                '/student/history/attempts/attempt-789',
-            );
+            expect(mockRouterReplace).toHaveBeenCalledWith('/student/history/attempts/attempt-789');
         });
 
         expect(mockClearStoredExamTurnInPreview).toHaveBeenCalledWith(

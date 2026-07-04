@@ -59,40 +59,40 @@ the `/exams/logs` route.
 
 - [x] Create directory `app/sentinel-web/src/features/exams/logs/`
 - [x] Create `app/sentinel-web/src/features/exams/logs/hooks/use-incident-logs.ts`
-  - Copy logic from `app/sentinel-web/src/app/(protected)/(instructor)/exams/logs/_hooks/use-exam-incident-logs.ts`
-  - Change signature: accept `examId: string` as a parameter instead of reading it
-    from `useSearchParams()`
-  - Remove `handleExamChange` (exam is pre-selected by the report page)
-  - Remove `examSearch`, `setExamSearch`, `debouncedExamSearch`, `useExamsQuery`
-    (exam combobox/selector is gone)
-  - Keep all incident fetching, grouping, section-derivation, and review-action logic
-  - Add JSDoc to the exported function
+    - Copy logic from `app/sentinel-web/src/app/(protected)/(instructor)/exams/logs/_hooks/use-exam-incident-logs.ts`
+    - Change signature: accept `examId: string` as a parameter instead of reading it
+      from `useSearchParams()`
+    - Remove `handleExamChange` (exam is pre-selected by the report page)
+    - Remove `examSearch`, `setExamSearch`, `debouncedExamSearch`, `useExamsQuery`
+      (exam combobox/selector is gone)
+    - Keep all incident fetching, grouping, section-derivation, and review-action logic
+    - Add JSDoc to the exported function
 - [x] Write `app/sentinel-web/src/features/exams/logs/hooks/use-incident-logs.test.ts`
-  - Unit-test: initial state values are correct
-  - Unit-test: `displayIncidents` grouping logic (mocked incidents array)
-  - Unit-test: `sections` derivation from report data
-  - Unit-test: `handleConfirmIncident` calls `reviewIncidents` with `status: 'CONFIRMED'`
-  - Unit-test: `handleDismissIncident` calls `reviewIncidents` with `status: 'DISMISSED'`
-  - Unit-test: bulk confirm/dismiss expand grouped incidents correctly
+    - Unit-test: initial state values are correct
+    - Unit-test: `displayIncidents` grouping logic (mocked incidents array)
+    - Unit-test: `sections` derivation from report data
+    - Unit-test: `handleConfirmIncident` calls `reviewIncidents` with `status: 'CONFIRMED'`
+    - Unit-test: `handleDismissIncident` calls `reviewIncidents` with `status: 'DISMISSED'`
+    - Unit-test: bulk confirm/dismiss expand grouped incidents correctly
 - [x] Create `app/sentinel-web/src/features/exams/logs/components/incident-table.tsx`
-  - Move from `exams/logs/_components/incident-table.tsx`; update import paths only
+    - Move from `exams/logs/_components/incident-table.tsx`; update import paths only
 - [x] Create `app/sentinel-web/src/features/exams/logs/components/incident-drawer.tsx`
-  - Move from `exams/logs/_components/incident-drawer.tsx`; update import paths only
+    - Move from `exams/logs/_components/incident-drawer.tsx`; update import paths only
 - [x] Create `app/sentinel-web/src/features/exams/logs/components/bulk-actions.tsx`
-  - Move from `exams/logs/_components/bulk-actions.tsx`; update import paths only
+    - Move from `exams/logs/_components/bulk-actions.tsx`; update import paths only
 - [x] Create `app/sentinel-web/src/features/exams/logs/components/columns.tsx`
-  - Move from `exams/logs/_components/columns.tsx`; update import paths only
+    - Move from `exams/logs/_components/columns.tsx`; update import paths only
 - [x] Create `app/sentinel-web/src/features/exams/logs/components/incident-logs-view.tsx`
-  - New view component with props `{ examId: string }`
-  - Composes `useIncidentLogs(examId)` + `<IncidentTable>` + `<IncidentDrawer>` +
-    `<BulkActions>`
-  - Renders the loading, error, and table states extracted from the inner JSX of
-    `exams/logs/page.tsx` — **only the table content branch** (no `<ExamCardsGrid>`,
-    no `<ExamCombobox>`)
-  - Includes a `<RefreshCw>` refresh button in its header consistent with current UX
-  - Add JSDoc to the exported component
+    - New view component with props `{ examId: string }`
+    - Composes `useIncidentLogs(examId)` + `<IncidentTable>` + `<IncidentDrawer>` +
+      `<BulkActions>`
+    - Renders the loading, error, and table states extracted from the inner JSX of
+      `exams/logs/page.tsx` — **only the table content branch** (no `<ExamCardsGrid>`,
+      no `<ExamCombobox>`)
+    - Includes a `<RefreshCw>` refresh button in its header consistent with current UX
+    - Add JSDoc to the exported component
 - [x] Create `app/sentinel-web/src/features/exams/logs/index.ts`
-  - Re-export `IncidentLogsView` and `useIncidentLogs`
+    - Re-export `IncidentLogsView` and `useIncidentLogs`
 
 **Migration required:** No — pure frontend refactor, no schema changes.
 
@@ -104,18 +104,18 @@ the `/exams/logs` route.
 incident-review functionality.
 
 - [x] Modify `app/sentinel-web/src/app/(protected)/(instructor)/exams/[id]/report/page.tsx`
-  - Extend `activeSection` union type: `'overview' | 'attempts' | 'queue' | 'logs'`
-  - Add `'logs'` to the `useEffect` that syncs `sectionParam` → `activeSection`
-  - Add **"Incident Logs"** sidebar button (desktop) with `<ShieldAlert>` icon,
-    matching existing button style
-  - Add **"Incident Logs"** mobile navigation tab
-  - Render `<IncidentLogsView examId={id} />` when `activeSection === 'logs'`
-  - Import `IncidentLogsView` from `@/features/exams/logs`
+    - Extend `activeSection` union type: `'overview' | 'attempts' | 'queue' | 'logs'`
+    - Add `'logs'` to the `useEffect` that syncs `sectionParam` → `activeSection`
+    - Add **"Incident Logs"** sidebar button (desktop) with `<ShieldAlert>` icon,
+      matching existing button style
+    - Add **"Incident Logs"** mobile navigation tab
+    - Render `<IncidentLogsView examId={id} />` when `activeSection === 'logs'`
+    - Import `IncidentLogsView` from `@/features/exams/logs`
 - [x] Write / update `app/sentinel-web/src/app/(protected)/(instructor)/exams/[id]/report/page.test.tsx`
-  - Verify "Incident Logs" tab renders in the sidebar
-  - Verify `<IncidentLogsView>` is mounted when `activeSection === 'logs'`
-  - Verify URL `?section=logs` activates the Logs section
-  - Verify other sections (overview, attempts, queue) still render correctly
+    - Verify "Incident Logs" tab renders in the sidebar
+    - Verify `<IncidentLogsView>` is mounted when `activeSection === 'logs'`
+    - Verify URL `?section=logs` activates the Logs section
+    - Verify other sections (overview, attempts, queue) still render correctly
 
 **Migration required:** No.
 
@@ -131,27 +131,27 @@ references to reduce dead code.
 - [x] Delete `app/sentinel-web/src/app/(protected)/(instructor)/exams/logs/_hooks/use-exam-incident-logs.ts`
 - [x] Delete `app/sentinel-web/src/app/(protected)/(instructor)/exams/logs/_hooks/use-exam-incident-logs.test.ts`
 - [x] Delete entire `app/sentinel-web/src/app/(protected)/(instructor)/exams/logs/_components/` directory:
-  - `bulk-actions.tsx`
-  - `columns.tsx`
-  - `exam-cards-grid.tsx`
-  - `exam-cards-grid.test.tsx`
-  - `exam-combobox.tsx`
-  - `exam-combobox.test.tsx`
-  - `incident-drawer.tsx`
-  - `incident-table.tsx`
+    - `bulk-actions.tsx`
+    - `columns.tsx`
+    - `exam-cards-grid.tsx`
+    - `exam-cards-grid.test.tsx`
+    - `exam-combobox.tsx`
+    - `exam-combobox.test.tsx`
+    - `incident-drawer.tsx`
+    - `incident-table.tsx`
 - [x] Modify `app/sentinel-web/src/app/(protected)/(instructor)/exams/_components/layout/exams-nav.tsx`
-  - Remove `{ id: 'logs', label: 'Incident Logs', href: '/exams/logs', icon: ShieldAlert }` from `EXAM_NAV_GROUPS`
-  - Remove `'logs'` from the `ExamSection` type union
-  - Remove the `if (pathname.startsWith('/exams/logs')) return 'logs';` branch from `resolveActiveSection`
-  - Remove unused `ShieldAlert` import if no longer used
+    - Remove `{ id: 'logs', label: 'Incident Logs', href: '/exams/logs', icon: ShieldAlert }` from `EXAM_NAV_GROUPS`
+    - Remove `'logs'` from the `ExamSection` type union
+    - Remove the `if (pathname.startsWith('/exams/logs')) return 'logs';` branch from `resolveActiveSection`
+    - Remove unused `ShieldAlert` import if no longer used
 - [x] Modify `app/sentinel-web/src/app/(protected)/(instructor)/exams/_components/layout/exams-workspace-shell.tsx`
-  - Remove the `if (segment === 'logs') return 'logs';` branch from `getManagedSection`
+    - Remove the `if (segment === 'logs') return 'logs';` branch from `getManagedSection`
 - [x] Write / update `app/sentinel-web/src/app/(protected)/(instructor)/exams/_components/layout/exams-nav.test.tsx`
-  - Assert `logs` nav item no longer appears in the rendered nav
-  - Assert `reports` nav item still appears and is active on `/exams/reports`
+    - Assert `logs` nav item no longer appears in the rendered nav
+    - Assert `reports` nav item still appears and is active on `/exams/reports`
 - [x] Write / update `app/sentinel-web/src/app/(protected)/(instructor)/exams/_components/layout/exams-workspace-shell.test.tsx`
-  - Assert `getManagedSection('/exams/logs')` no longer returns `'logs'`
-  - Assert existing sections (reports, assign, grading) are unaffected
+    - Assert `getManagedSection('/exams/logs')` no longer returns `'logs'`
+    - Assert existing sections (reports, assign, grading) are unaffected
 
 **Migration required:** No.
 
@@ -163,14 +163,14 @@ references to reduce dead code.
 exists, add a direct entry point on the `/exams/reports` card list.
 
 - [x] Modify `app/sentinel-web/src/app/(protected)/(instructor)/exams/reports/page.tsx`
-  - Add a secondary `Button` (`variant="outline"`) on each exam card alongside the
-    existing "Open Report Summary" button
-  - Label: **"Incident Logs"**
-  - `href`: `/exams/${exam.id}/report?section=logs`
-  - Icon: `<ShieldAlert className="h-4 w-4" />`
+    - Add a secondary `Button` (`variant="outline"`) on each exam card alongside the
+      existing "Open Report Summary" button
+    - Label: **"Incident Logs"**
+    - `href`: `/exams/${exam.id}/report?section=logs`
+    - Icon: `<ShieldAlert className="h-4 w-4" />`
 - [x] Write / update `app/sentinel-web/src/app/(protected)/(instructor)/exams/reports/page.test.tsx`
-  - Assert "Incident Logs" button is rendered for each exam card
-  - Assert the button href contains `?section=logs`
+    - Assert "Incident Logs" button is rendered for each exam card
+    - Assert the button href contains `?section=logs`
 
 **Migration required:** No.
 
@@ -183,7 +183,7 @@ exists, add a direct entry point on the `/exams/reports` card list.
 - [x] `pnpm --dir app/sentinel-web test` passes with no skipped or failing cases
 - [x] `/exams/logs` returns 404 in the browser (Next.js page file deleted)
 - [x] `/exams/[id]/report?section=logs` displays the full incident-log table with
-  confirm / dismiss / bulk actions for the given exam
+      confirm / dismiss / bulk actions for the given exam
 - [x] The exams workspace sidebar no longer shows an "Incident Logs" top-level nav item
 - [x] Each exam card on `/exams/reports` shows an "Incident Logs" deep-link button
 - [x] No new npm dependencies introduced

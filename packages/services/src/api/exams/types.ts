@@ -1,4 +1,7 @@
 import {
+    ExamAttemptLifecycleEvent,
+    ExamAttemptLifecycleState,
+    ExamAttemptScoreState,
     ExamAttemptAnswers,
     ExamQuestion,
     ExamStatus,
@@ -134,6 +137,11 @@ export interface ApiMonitoringStudentSummary {
     reconnectCount: number;
     score?: number | null;
     totalScore?: number | null;
+    lifecycleState?: ExamAttemptLifecycleState | null;
+    scoreState?: ExamAttemptScoreState | null;
+    closedReason?: string | null;
+    reopenedUntil?: string | null;
+    finalizedAt?: string | null;
 }
 
 export interface ApiMonitoringIncident {
@@ -157,7 +165,57 @@ export interface ApiMonitoringIncident {
 
 export interface ApiMonitoringStudentDetail extends ApiMonitoringStudentSummary {
     flags: ApiMonitoringIncident[];
+    lifecycleEvents?: ExamAttemptLifecycleEvent[];
 }
+
+export type LockExamAttemptLifecyclePayload = {
+    id: string;
+    attemptId: string;
+    reasonCode: string;
+    notes?: string | null;
+};
+
+export type ReopenExamAttemptLifecyclePayload = {
+    id: string;
+    attemptId: string;
+    reopenedUntil: string;
+    reasonCode?: string | null;
+    notes?: string | null;
+};
+
+export type ResetExamAttemptLifecyclePayload = {
+    id: string;
+    attemptId: string;
+    reasonCode?: string | null;
+    notes?: string | null;
+    createReplacementAttempt?: boolean;
+};
+
+export type CloseExamAttemptLifecyclePayload = {
+    id: string;
+    attemptId: string;
+    reasonCode: string;
+    notes?: string | null;
+};
+
+export type GrantMakeupExamWindowPayload = {
+    id: string;
+    studentId: string;
+    availableFrom: string;
+    availableUntil: string;
+    allowedAttempts?: number;
+    notes?: string | null;
+};
+
+export type GrantRetakeExamWindowPayload = {
+    id: string;
+    studentId: string;
+    attemptId: string;
+    availableFrom: string;
+    availableUntil: string;
+    allowedAttempts?: number;
+    notes?: string | null;
+};
 
 export interface ApiMonitoringOverview {
     exam: ApiMonitoringExam;
@@ -240,6 +298,16 @@ export interface ApiExamReportStudentSummary {
     needsReview: boolean;
     needsMakeup: boolean;
     needsRetake: boolean;
+    lifecycleState?: ExamAttemptLifecycleState | null;
+    scoreState?: ExamAttemptScoreState | null;
+    closedReason?: string | null;
+    reopenedUntil?: string | null;
+    isFinalized?: boolean;
+    finalizedAt?: string | null;
+    supersededByAttemptId?: string | null;
+    supersededAt?: string | null;
+    supersededBy?: string | null;
+    finalizedBy?: string | null;
 }
 
 export interface ApiExamReportSummary {
@@ -300,7 +368,6 @@ export type GetExamReportsParams = {
     limit?: number;
     search?: string;
 };
-
 
 export type CreateExamPayload = {
     title: string;
@@ -417,10 +484,7 @@ export type StartExamSessionResult = {
     attemptId?: string;
     error?: string;
     errorCode?:
-        | 'ATTEMPT_ALREADY_COMPLETED'
-        | 'ATTEMPT_LOCKED'
-        | 'ATTEMPT_CLOSED'
-        | 'ATTEMPT_SUPERSEDED';
+        'ATTEMPT_ALREADY_COMPLETED' | 'ATTEMPT_LOCKED' | 'ATTEMPT_CLOSED' | 'ATTEMPT_SUPERSEDED';
 };
 
 export type CompleteExamSessionPayload = {

@@ -76,8 +76,7 @@ export async function getRooms(
 export async function getRooms(
     apiClient: ApiClientType,
     searchOrParams?:
-        | string
-        | { search?: string; institutionId?: string; page?: number; limit?: number },
+        string | { search?: string; institutionId?: string; page?: number; limit?: number },
     institutionId?: string,
 ): Promise<Room[] | PaginatedApiResponse<Room>> {
     const params =

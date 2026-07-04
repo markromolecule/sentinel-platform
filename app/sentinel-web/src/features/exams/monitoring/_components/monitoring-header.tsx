@@ -78,39 +78,44 @@ export function MonitoringHeader({
             </div>
 
             <div className="flex flex-wrap items-center justify-between gap-4 border-y py-4">
-                <div className="flex flex-wrap gap-2">
-                    <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={onLock}
-                        disabled={!onLock || isUpdatingAccess}
-                    >
-                        Lock
-                    </Button>
-                    <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={onReopen}
-                        disabled={!onReopen || isUpdatingAccess}
-                    >
-                        Reopen
-                    </Button>
-                    <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={onReset}
-                        disabled={!onReset || isUpdatingAccess}
-                    >
-                        Reset
-                    </Button>
-                    <Button
-                        variant="destructive"
-                        size="sm"
-                        onClick={onClose}
-                        disabled={!onClose || isUpdatingAccess}
-                    >
-                        Close
-                    </Button>
+                <div className="space-y-2">
+                    <div className="text-muted-foreground text-[11px] font-semibold tracking-wider uppercase">
+                        Exam-wide runtime access
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={onLock}
+                            disabled={!onLock || isUpdatingAccess}
+                        >
+                            Lock
+                        </Button>
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={onReopen}
+                            disabled={!onReopen || isUpdatingAccess}
+                        >
+                            Reopen
+                        </Button>
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={onReset}
+                            disabled={!onReset || isUpdatingAccess}
+                        >
+                            Reset
+                        </Button>
+                        <Button
+                            variant="destructive"
+                            size="sm"
+                            onClick={onClose}
+                            disabled={!onClose || isUpdatingAccess}
+                        >
+                            Close
+                        </Button>
+                    </div>
                 </div>
 
                 <Button

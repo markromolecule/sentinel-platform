@@ -31,9 +31,9 @@ Provide the analysis using the following structured layout for each module disco
 
 - **Core Responsibilities:** Brief summary of what this module does.
 - **Activity & State Matrix:**
-  | Layer (Controller/Service/Model) | Operation / Activity | Sub-Activity / Lifecycle State | Triggered Event | Required Payload Metadata |
-  | :--- | :--- | :--- | :--- | :--- |
-  | _Example: Controller_ | _User Management_ | _Archive User_ | `user.archived` | `userId`, `actorId`, `reason`, `timestamp` |
+    | Layer (Controller/Service/Model) | Operation / Activity | Sub-Activity / Lifecycle State | Triggered Event | Required Payload Metadata                  |
+    | :------------------------------- | :------------------- | :----------------------------- | :-------------- | :----------------------------------------- |
+    | _Example: Controller_            | _User Management_    | _Archive User_                 | `user.archived` | `userId`, `actorId`, `reason`, `timestamp` |
 - **Traceability Notes:** Any potential blind spots or edge cases where tracking might fail based on the current architecture.
 
 ---

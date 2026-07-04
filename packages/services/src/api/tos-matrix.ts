@@ -1,12 +1,7 @@
 import type { ApiClientType } from '../api-client';
 
 export type BloomLevel =
-    | 'REMEMBERING'
-    | 'UNDERSTANDING'
-    | 'APPLYING'
-    | 'ANALYZING'
-    | 'EVALUATING'
-    | 'CREATING';
+    'REMEMBERING' | 'UNDERSTANDING' | 'APPLYING' | 'ANALYZING' | 'EVALUATING' | 'CREATING';
 
 export interface TosMatrixRow {
     topic: string;

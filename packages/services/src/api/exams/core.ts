@@ -2,9 +2,15 @@ import type { ProctorExam } from '@sentinel/shared/types';
 import type { ApiClientType } from '../../api-client';
 import { mapExam } from './mappers';
 import type {
+    CloseExamAttemptLifecyclePayload,
     ApiExamResponse,
     ApiExamSummary,
     ApiExamDetail,
+    GrantMakeupExamWindowPayload,
+    GrantRetakeExamWindowPayload,
+    LockExamAttemptLifecyclePayload,
+    ReopenExamAttemptLifecyclePayload,
+    ResetExamAttemptLifecyclePayload,
     ApiStudentExamAccessOverride,
     GetExamsParams,
     CreateExamPayload,
@@ -14,6 +20,7 @@ import type {
     UpdateExamRuntimeAccessPayload,
     UpdateExamStatusPayload,
 } from './types';
+import type { ExamAttemptLifecycleResponseType } from '@sentinel/shared';
 
 function buildQueryString(params?: GetExamsParams) {
     if (!params) {
@@ -183,6 +190,163 @@ export async function overrideReconnectLimit(
             },
             body: JSON.stringify({
                 reason: payload.reason ?? undefined,
+            }),
+        },
+    );
+
+    return response.data;
+}
+
+/**
+ * Locks one student attempt through the lifecycle API.
+ */
+export async function lockExamAttemptLifecycle(
+    apiClient: ApiClientType,
+    payload: LockExamAttemptLifecyclePayload,
+): Promise<ExamAttemptLifecycleResponseType> {
+    const response: ApiExamResponse<ExamAttemptLifecycleResponseType> = await apiClient(
+        `/exams/${payload.id}/attempts/${payload.attemptId}/lifecycle/lock`,
+        {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                reasonCode: payload.reasonCode,
+                notes: payload.notes ?? null,
+            }),
+        },
+    );
+
+    return response.data;
+}
+
+/**
+ * Reopens one student attempt through the lifecycle API.
+ */
+export async function reopenExamAttemptLifecycle(
+    apiClient: ApiClientType,
+    payload: ReopenExamAttemptLifecyclePayload,
+): Promise<ExamAttemptLifecycleResponseType> {
+    const response: ApiExamResponse<ExamAttemptLifecycleResponseType> = await apiClient(
+        `/exams/${payload.id}/attempts/${payload.attemptId}/lifecycle/reopen`,
+        {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                reopenedUntil: payload.reopenedUntil,
+                reasonCode: payload.reasonCode ?? null,
+                notes: payload.notes ?? null,
+            }),
+        },
+    );
+
+    return response.data;
+}
+
+/**
+ * Resets one student attempt through the lifecycle API.
+ */
+export async function resetExamAttemptLifecycle(
+    apiClient: ApiClientType,
+    payload: ResetExamAttemptLifecyclePayload,
+): Promise<ExamAttemptLifecycleResponseType> {
+    const response: ApiExamResponse<ExamAttemptLifecycleResponseType> = await apiClient(
+        `/exams/${payload.id}/attempts/${payload.attemptId}/lifecycle/reset`,
+        {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                reasonCode: payload.reasonCode ?? null,
+                notes: payload.notes ?? null,
+                createReplacementAttempt: payload.createReplacementAttempt ?? undefined,
+            }),
+        },
+    );
+
+    return response.data;
+}
+
+/**
+ * Closes one student attempt through the lifecycle API.
+ */
+export async function closeExamAttemptLifecycle(
+    apiClient: ApiClientType,
+    payload: CloseExamAttemptLifecyclePayload,
+): Promise<ExamAttemptLifecycleResponseType> {
+    const response: ApiExamResponse<ExamAttemptLifecycleResponseType> = await apiClient(
+        `/exams/${payload.id}/attempts/${payload.attemptId}/lifecycle/close`,
+        {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                reasonCode: payload.reasonCode,
+                notes: payload.notes ?? null,
+            }),
+        },
+    );
+
+    return response.data;
+}
+
+/**
+ * Grants a makeup window for one student through the lifecycle API.
+ */
+export async function grantMakeupExamWindowLifecycle(
+    apiClient: ApiClientType,
+    payload: GrantMakeupExamWindowPayload,
+): Promise<{
+    override: ApiStudentExamAccessOverride;
+    latestEvent: ExamAttemptLifecycleResponseType['latestEvent'] | null;
+}> {
+    const response = await apiClient(
+        `/exams/${payload.id}/students/${payload.studentId}/lifecycle/grant-makeup`,
+        {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                availableFrom: payload.availableFrom,
+                availableUntil: payload.availableUntil,
+                allowedAttempts: payload.allowedAttempts ?? 1,
+                notes: payload.notes ?? null,
+            }),
+        },
+    );
+
+    return response.data;
+}
+
+/**
+ * Grants a retake window for one student through the lifecycle API.
+ */
+export async function grantRetakeExamWindowLifecycle(
+    apiClient: ApiClientType,
+    payload: GrantRetakeExamWindowPayload,
+): Promise<{
+    override: ApiStudentExamAccessOverride;
+    latestEvent: ExamAttemptLifecycleResponseType['latestEvent'];
+}> {
+    const response = await apiClient(
+        `/exams/${payload.id}/students/${payload.studentId}/lifecycle/grant-retake`,
+        {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                availableFrom: payload.availableFrom,
+                availableUntil: payload.availableUntil,
+                allowedAttempts: payload.allowedAttempts ?? 1,
+                sourceAttemptId: payload.attemptId,
+                notes: payload.notes ?? null,
             }),
         },
     );

@@ -34,7 +34,7 @@ describe('ExamsWorkspaceShell', () => {
 
     it('does not render the Exams sidebar layout for nested report paths', () => {
         mockPathname = '/exams/reports/exam-123/attempt-456';
-        
+
         render(
             <ExamsWorkspaceShell>
                 <div data-testid="shell-child">Content</div>

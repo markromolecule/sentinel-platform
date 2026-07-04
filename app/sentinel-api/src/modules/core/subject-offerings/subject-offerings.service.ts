@@ -3,7 +3,10 @@ import { GetSubjectOfferingsService } from './services/get-subject-offerings.ser
 import { CreateSubjectOfferingService } from './services/create-subject-offering.service';
 import { CreateSubjectOfferingsFromClassificationService } from './services/create-subject-offerings-from-classification.service';
 import { UpdateDeleteSubjectOfferingService } from './services/update-delete-subject-offering.service';
-import { type CreateSubjectOfferingPayload, type UpdateSubjectOfferingPayload } from './services/subject-offering-payload.service';
+import {
+    type CreateSubjectOfferingPayload,
+    type UpdateSubjectOfferingPayload,
+} from './services/subject-offering-payload.service';
 
 type BulkSubjectOfferingPayload = {
     subject_classification_id: string;
@@ -63,7 +66,10 @@ export class SubjectOfferingsService {
         dbClient: DbClient,
         data: BulkSubjectOfferingPayload,
     ) {
-        return CreateSubjectOfferingsFromClassificationService.createSubjectOfferingsFromClassification(dbClient, data);
+        return CreateSubjectOfferingsFromClassificationService.createSubjectOfferingsFromClassification(
+            dbClient,
+            data,
+        );
     }
 
     /**
@@ -85,7 +91,11 @@ export class SubjectOfferingsService {
         id: string,
         institutionId?: string | null,
     ) {
-        return UpdateDeleteSubjectOfferingService.deleteSubjectOffering(dbClient, id, institutionId);
+        return UpdateDeleteSubjectOfferingService.deleteSubjectOffering(
+            dbClient,
+            id,
+            institutionId,
+        );
     }
 
     /**
@@ -96,7 +106,11 @@ export class SubjectOfferingsService {
         ids: string[],
         institutionId?: string | null,
     ) {
-        return UpdateDeleteSubjectOfferingService.deleteSubjectOfferings(dbClient, ids, institutionId);
+        return UpdateDeleteSubjectOfferingService.deleteSubjectOfferings(
+            dbClient,
+            ids,
+            institutionId,
+        );
     }
 }
 export { ensureClassGroupsForSubjectOfferings } from './services/class-groups-helper';

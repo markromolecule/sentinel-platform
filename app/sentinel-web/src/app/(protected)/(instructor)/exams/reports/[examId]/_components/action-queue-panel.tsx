@@ -43,7 +43,9 @@ export function ActionQueuePanel({
         return items.filter((item) => {
             const matchesSearch =
                 !searchValue ||
-                `${item.firstName} ${item.lastName}`.toLowerCase().includes(searchValue.toLowerCase()) ||
+                `${item.firstName} ${item.lastName}`
+                    .toLowerCase()
+                    .includes(searchValue.toLowerCase()) ||
                 item.studentNo.toLowerCase().includes(searchValue.toLowerCase()) ||
                 item.reason.toLowerCase().includes(searchValue.toLowerCase());
 

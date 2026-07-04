@@ -7,6 +7,7 @@
 Connect the instructor exam reports listing page to backend pagination.
 
 **Requirements:**
+
 - The page must not fetch all records at once. It should request a specific page and page size from the backend.
 - Pagination parameters (e.g. `page`, `limit` or `cursor`) must be visible in the Network tab of the browser DevTools — confirm the request URL includes pagination query parameters.
 - The UI must update the displayed records when the user navigates between pages.
@@ -17,10 +18,12 @@ Connect the instructor exam reports listing page to backend pagination.
 ## 2. UI Cleanup — `/exams/reports` (`app/sentinel-web/src/app/(protected)/(instructor)/exams/reports/page.tsx`)
 
 ### 2a. Remove "Back to Exams" Button
+
 - Delete the "Back to Exams" button from the `/exams/reports` page entirely.
 - Do not replace it with another navigation element.
 
 ### 2b. Remove Breadcrumb Navigation
+
 - Remove the `<Breadcrumb />` component (or equivalent) from the `/exams/reports` page.
 - Do not replace it with another breadcrumb or navigation trail.
 
@@ -29,6 +32,7 @@ Connect the instructor exam reports listing page to backend pagination.
 The "Open Report Summary" button inside each report card must always appear at the bottom of the card, regardless of how long the card's title or description is.
 
 **Implementation:**
+
 - Make the card a flex column container: `display: flex; flex-direction: column`.
 - Push the button to the bottom using `margin-top: auto` on the button (or its wrapper).
 - Do not use absolute positioning.
@@ -52,6 +56,7 @@ Redesign this page from a tab-based layout to a **sidebar navigation layout**, c
 The Action Queue section currently uses a nested/secondary tab layout. This must be redesigned.
 
 **Requirements:**
+
 - Remove the nested tab pattern inside the Action Queue entirely.
 - Redesign the Action Queue UI so that its content (queued items, filters, statuses, etc.) is accessible without tabs — for example, using segmented controls, inline filtering, or stacked sections, whichever best fits the existing design system.
 - The goal is to eliminate redundant or nested tab structures. One level of navigation (the sidebar) should be sufficient.
@@ -67,6 +72,7 @@ The Action Queue section currently uses a nested/secondary tab layout. This must
 Every table and paginated card list on the `/exams/[id]/report` page must be connected to backend pagination.
 
 **Requirements:**
+
 - No table or card list should load its full dataset in a single request.
 - Each paginated section must send `page` / `limit` (or equivalent) parameters to the backend and reflect the response correctly.
 - Use the project's existing pagination component. Do not implement a custom one.
@@ -76,13 +82,13 @@ Every table and paginated card list on the `/exams/[id]/report` page must be con
 
 ## Acceptance Criteria Summary
 
-| Area | Check |
-|---|---|
-| `/exams/reports` pagination | Network tab shows paginated request with page/limit params |
-| "Back to Exams" button | Removed, no replacement |
-| Breadcrumb | Removed, no replacement |
-| Report card button position | Button always at bottom regardless of content height |
-| `/exams/[id]/report` layout | Sidebar nav replaces top-level tabs; matches exam/subject page pattern |
-| Action Queue | No nested tabs; content accessible without secondary tab navigation |
-| Attempt Summary table | Uses shared `DataTable` component from `@sentinel/ui`; not wrapped in a card |
-| All tables/lists pagination | Connected to backend; no full-dataset fetches |
+| Area                        | Check                                                                        |
+| --------------------------- | ---------------------------------------------------------------------------- |
+| `/exams/reports` pagination | Network tab shows paginated request with page/limit params                   |
+| "Back to Exams" button      | Removed, no replacement                                                      |
+| Breadcrumb                  | Removed, no replacement                                                      |
+| Report card button position | Button always at bottom regardless of content height                         |
+| `/exams/[id]/report` layout | Sidebar nav replaces top-level tabs; matches exam/subject page pattern       |
+| Action Queue                | No nested tabs; content accessible without secondary tab navigation          |
+| Attempt Summary table       | Uses shared `DataTable` component from `@sentinel/ui`; not wrapped in a card |
+| All tables/lists pagination | Connected to backend; no full-dataset fetches                                |

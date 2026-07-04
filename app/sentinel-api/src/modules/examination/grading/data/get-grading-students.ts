@@ -59,11 +59,7 @@ export async function buildGetGradingStudentsQuery({
         const term = `%${search}%`;
         query = query.where((eb) =>
             eb.or([
-                eb(
-                    sql<string>`trim(concat(up.first_name, ' ', up.last_name))`,
-                    'ilike',
-                    term,
-                ),
+                eb(sql<string>`trim(concat(up.first_name, ' ', up.last_name))`, 'ilike', term),
                 eb('st.student_number', 'ilike', term),
             ]),
         );

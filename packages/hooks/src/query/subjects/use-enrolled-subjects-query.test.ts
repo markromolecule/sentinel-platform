@@ -32,12 +32,7 @@ describe('useEnrolledSubjectsQuery', () => {
         const query = useEnrolledSubjectsQuery('physics') as any;
         const data = await query.queryFn();
 
-        expect(query.queryKey).toEqual([
-            ...SUBJECT_QUERY_KEYS.enrolled,
-            'physics',
-            '',
-            '',
-        ]);
+        expect(query.queryKey).toEqual([...SUBJECT_QUERY_KEYS.enrolled, 'physics', '', '']);
         expect(data).toEqual([{ subject_offering_id: 'offering-1' }]);
     });
 

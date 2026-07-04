@@ -120,28 +120,30 @@ This is the hook point for automatic status transitions.
 Route root: `app/sentinel-web/src/app/(protected)/(instructor)/exams/`
 
 Sub-pages:
-| Route | Purpose |
-|---|---|
-| `/exams` (index) | Exam dashboard — list of exams |
-| `/exams/dashboard` | Dashboard view |
-| `/exams/assign` | Assign exams to classrooms |
-| `/exams/config` | Exam configuration |
-| `/exams/grading/[examId]` | Grading view |
-| `/exams/logs` | Incident logs |
-| `/exams/[id]` | Individual exam detail |
+
+| Route                     | Purpose                        |
+| ------------------------- | ------------------------------ |
+| `/exams` (index)          | Exam dashboard — list of exams |
+| `/exams/dashboard`        | Dashboard view                 |
+| `/exams/assign`           | Assign exams to classrooms     |
+| `/exams/config`           | Exam configuration             |
+| `/exams/grading/[examId]` | Grading view                   |
+| `/exams/logs`             | Incident logs                  |
+| `/exams/[id]`             | Individual exam detail         |
 
 ### 2.5 Question Bank Module (sentinel-web, instructor view)
 
 Route root: `app/sentinel-web/src/app/(protected)/(instructor)/question/`
 
 Sub-pages:
-| Route | Purpose |
-|---|---|
-| `/question` (index) | All questions list |
-| `/question/bank` | Question bank dashboard |
-| `/question/bank/collections` | Collections |
-| `/question/bank/tos` | TOS Matrix |
-| `/question/bank/import` | Import questions |
+
+| Route                        | Purpose                 |
+| ---------------------------- | ----------------------- |
+| `/question` (index)          | All questions list      |
+| `/question/bank`             | Question bank dashboard |
+| `/question/bank/collections` | Collections             |
+| `/question/bank/tos`         | TOS Matrix              |
+| `/question/bank/import`      | Import questions        |
 
 Feature folder: `app/sentinel-web/src/features/questions/`
 

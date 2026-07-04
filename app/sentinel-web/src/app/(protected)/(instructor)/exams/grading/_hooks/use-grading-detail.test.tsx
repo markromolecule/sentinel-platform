@@ -162,12 +162,7 @@ describe('useGradingDetail', () => {
         vi.mocked(getGradingStudents).mockResolvedValue(gradingStudentList);
 
         const { result } = renderHook(
-            () =>
-                useGradingDetail(
-                    '11111111-1111-1111-1111-111111111111',
-                    undefined,
-                    'alice',
-                ),
+            () => useGradingDetail('11111111-1111-1111-1111-111111111111', undefined, 'alice'),
             { wrapper: createWrapper() },
         );
 

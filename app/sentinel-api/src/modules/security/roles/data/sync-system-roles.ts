@@ -48,8 +48,5 @@ export async function syncSystemRoles(dbClient: DbClient) {
         return;
     }
 
-    await dbClient
-        .insertInto('roles')
-        .values(missingRoles)
-        .execute();
+    await dbClient.insertInto('roles').values(missingRoles).execute();
 }

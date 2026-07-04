@@ -19,13 +19,7 @@ export type ExamAttemptGradingMetadata = {
 };
 
 export type ExamQuestionReportCorrectAnswer =
-    | string
-    | number
-    | boolean
-    | string[]
-    | number[]
-    | Record<string, string>
-    | null;
+    string | number | boolean | string[] | number[] | Record<string, string> | null;
 
 export type ExamAttemptQuestionReport = {
     questionId: string;

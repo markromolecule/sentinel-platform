@@ -119,7 +119,11 @@ export class UpdateDeleteSubjectOfferingService {
         institutionId?: string | null,
     ) {
         for (const id of ids) {
-            await UpdateDeleteSubjectOfferingService.deleteSubjectOffering(dbClient, id, institutionId);
+            await UpdateDeleteSubjectOfferingService.deleteSubjectOffering(
+                dbClient,
+                id,
+                institutionId,
+            );
         }
     }
 }

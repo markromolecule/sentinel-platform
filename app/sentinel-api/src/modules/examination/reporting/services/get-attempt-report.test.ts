@@ -19,7 +19,11 @@ describe('getAttemptReport', () => {
             innerJoin: vi.fn().mockReturnThis(),
             select: vi.fn().mockReturnThis(),
             where: vi.fn().mockReturnThis(),
-            $if: vi.fn().mockImplementation(function (this: any, condition: boolean, callback: any) {
+            $if: vi.fn().mockImplementation(function (
+                this: any,
+                condition: boolean,
+                callback: any,
+            ) {
                 if (condition) {
                     return callback(this);
                 }

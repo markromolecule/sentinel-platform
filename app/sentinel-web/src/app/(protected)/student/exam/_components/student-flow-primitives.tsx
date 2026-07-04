@@ -96,7 +96,7 @@ export function StudentFlowHighlightsList({
                         <item.icon className="h-4.5 w-4.5" />
                     </div>
                     <div className="space-y-1">
-                        <p className="text-muted-foreground text-[11px] font-semibold uppercase tracking-[0.18em]">
+                        <p className="text-muted-foreground text-[11px] font-semibold tracking-[0.18em] uppercase">
                             {item.label}
                         </p>
                         <p className="text-foreground text-sm font-semibold sm:text-[15px]">
@@ -156,13 +156,7 @@ export function StudentFlowPanel({
 /**
  * Renders the small section label used on side panels in the checkup flow.
  */
-export function StudentFlowSideLabel({
-    icon: Icon,
-    label,
-}: {
-    icon: LucideIcon;
-    label: string;
-}) {
+export function StudentFlowSideLabel({ icon: Icon, label }: { icon: LucideIcon; label: string }) {
     return (
         <div className="flex items-center gap-2 px-1">
             <Icon className="text-primary h-4 w-4" />

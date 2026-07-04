@@ -5,33 +5,17 @@
         "moduleResolution": "NodeNext",
         "baseUrl": ".",
         "paths": {
-            "@sentinel/db": [
-                "../../packages/db/src"
-            ],
-            "@sentinel/db/*": [
-                "../../packages/db/src/*"
-            ],
-            "@sentinel/shared": [
-                "../../packages/shared/src"
-            ],
-            "@sentinel/shared/*": [
-                "../../packages/shared/src/*"
-            ]
+            "@sentinel/db": ["../../packages/db/src"],
+            "@sentinel/db/*": ["../../packages/db/src/*"],
+            "@sentinel/shared": ["../../packages/shared/src"],
+            "@sentinel/shared/*": ["../../packages/shared/src/*"]
         },
         "strict": true,
         "skipLibCheck": true,
         "forceConsistentCasingInFileNames": true,
         "outDir": "./dist",
-        "types": [
-            "node"
-        ]
+        "types": ["node"]
     },
-    "include": [
-        "src/**/*",
-        "generated/**/*",
-        "prisma.config.ts"
-    ],
-    "exclude": [
-        "node_modules"
-    ]
+    "include": ["src/**/*", "generated/**/*", "prisma.config.ts"],
+    "exclude": ["node_modules"]
 }

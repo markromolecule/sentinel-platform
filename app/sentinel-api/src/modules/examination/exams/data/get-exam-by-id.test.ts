@@ -1,4 +1,10 @@
-import { DummyDriver, Kysely, PostgresAdapter, PostgresIntrospector, PostgresQueryCompiler } from 'kysely';
+import {
+    DummyDriver,
+    Kysely,
+    PostgresAdapter,
+    PostgresIntrospector,
+    PostgresQueryCompiler,
+} from 'kysely';
 import { describe, expect, it, vi } from 'vitest';
 import { getExamByIdData } from './get-exam-by-id';
 

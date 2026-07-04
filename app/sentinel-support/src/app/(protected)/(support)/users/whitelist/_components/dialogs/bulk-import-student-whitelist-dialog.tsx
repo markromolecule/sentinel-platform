@@ -21,7 +21,6 @@ import { IssuesList } from './bulk-import/components/issues-list';
 import { PreviewTable } from './bulk-import/components/preview-table';
 import { useActivePermissions } from '@sentinel/hooks';
 
-
 const MAX_PREVIEW_ROWS_LIMIT = 100;
 
 /**
@@ -72,7 +71,6 @@ export function BulkImportStudentWhitelistDialog() {
     if (!hasPermission('student_whitelist:import')) {
         return null;
     }
-
 
     return (
         <Dialog open={open} onOpenChange={handleOpenChange}>

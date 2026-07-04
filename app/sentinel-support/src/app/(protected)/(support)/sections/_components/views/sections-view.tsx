@@ -142,7 +142,9 @@ export function SectionsView() {
                 {!isViewDenied && (
                     <PermissionGuard permission="sections:create">
                         <div className="flex items-center gap-2">
-                            <BulkCreateSectionsDialog defaultInstitutionId={selectedInstitutionId} />
+                            <BulkCreateSectionsDialog
+                                defaultInstitutionId={selectedInstitutionId}
+                            />
                             <Button
                                 onClick={() => {
                                     setEditingSectionId(null);

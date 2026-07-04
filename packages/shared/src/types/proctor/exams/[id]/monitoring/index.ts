@@ -7,6 +7,11 @@ import type {
 } from '../../../../../schema/telemetry/telemetry-schema';
 import type { AudioAnomalyType } from '../../../../../audio/audio-anomaly';
 import type { ExamRuntimeAccess } from '../../../../exams/exam';
+import type {
+    ExamAttemptLifecycleEvent,
+    ExamAttemptLifecycleState,
+    ExamAttemptScoreState,
+} from '../../../../exams/exam';
 
 export type FlagType = TelemetryIncidentType;
 
@@ -50,6 +55,12 @@ export type StudentSession = {
     reconnectCount?: number;
     score?: number | null;
     totalScore?: number | null;
+    lifecycleState?: ExamAttemptLifecycleState | null;
+    scoreState?: ExamAttemptScoreState | null;
+    closedReason?: string | null;
+    reopenedUntil?: string | null;
+    finalizedAt?: string | null;
+    lifecycleEvents?: ExamAttemptLifecycleEvent[];
 };
 
 export type ExamData = {
@@ -116,6 +127,8 @@ export type StudentListProps = {
     maxReconnectAttempts?: number;
     overridingStudentId?: string | null;
     onOverrideReconnect?: (student: StudentSession) => void;
+    activeLifecycleActionId?: string | null;
+    onLifecycleAction?: (student: StudentSession, action: MonitoringLifecycleAction) => void;
 };
 
 export type StudentCardProps = {
@@ -125,4 +138,8 @@ export type StudentCardProps = {
     maxReconnectAttempts?: number;
     isOverridingReconnect?: boolean;
     onOverrideReconnect?: (student: StudentSession) => void;
+    activeLifecycleActionId?: string | null;
+    onLifecycleAction?: (student: StudentSession, action: MonitoringLifecycleAction) => void;
 };
+
+export type MonitoringLifecycleAction = 'lock' | 'reopen' | 'reset' | 'close' | 'makeup' | 'retake';

@@ -1,29 +1,33 @@
 import { getExamArchiveCutoff, normalizeExamStatus } from '@sentinel/shared';
 import type { ExamAccessEligibility } from '../access.dto';
 
-export type BasicEligibilityStudent = {
-    student_id: string;
-    institution_id: string | null;
-} | undefined;
+export type BasicEligibilityStudent =
+    | {
+          student_id: string;
+          institution_id: string | null;
+      }
+    | undefined;
 
-export type BasicEligibilityExam = {
-    exam_id: string;
-    subject_id: string | null;
-    institution_id: string | null;
-    status: string | null;
-    published_at: Date | string | null;
-    scheduled_date: Date | string | null;
-    end_date_time: Date | string | null;
-    duration_minutes: number;
-    room_id: string | null;
-    assigned_room_id: string | null;
-    room_institution_id: string | null;
-    class_group_id: string | null;
-    section_id: string | null;
-    assigned_section_ids: string[] | null;
-    max_reconnect_attempts: number | null;
-    lobby_admission_mode: string | null;
-} | undefined;
+export type BasicEligibilityExam =
+    | {
+          exam_id: string;
+          subject_id: string | null;
+          institution_id: string | null;
+          status: string | null;
+          published_at: Date | string | null;
+          scheduled_date: Date | string | null;
+          end_date_time: Date | string | null;
+          duration_minutes: number;
+          room_id: string | null;
+          assigned_room_id: string | null;
+          room_institution_id: string | null;
+          class_group_id: string | null;
+          section_id: string | null;
+          assigned_section_ids: string[] | null;
+          max_reconnect_attempts: number | null;
+          lobby_admission_mode: string | null;
+      }
+    | undefined;
 
 export type ValidateBasicEligibilityArgs = {
     student: BasicEligibilityStudent;
@@ -107,8 +111,18 @@ export function validateBasicEligibility({
                     canStart: false,
                     canResume: false,
                     hasActiveAttempt: false,
-                    startsAt: exam.scheduled_date instanceof Date ? exam.scheduled_date : (exam.scheduled_date ? new Date(exam.scheduled_date) : null),
-                    endsAt: exam.end_date_time instanceof Date ? exam.end_date_time : (exam.end_date_time ? new Date(exam.end_date_time) : null),
+                    startsAt:
+                        exam.scheduled_date instanceof Date
+                            ? exam.scheduled_date
+                            : exam.scheduled_date
+                              ? new Date(exam.scheduled_date)
+                              : null,
+                    endsAt:
+                        exam.end_date_time instanceof Date
+                            ? exam.end_date_time
+                            : exam.end_date_time
+                              ? new Date(exam.end_date_time)
+                              : null,
                     reopenedUntil: null,
                 },
             },
@@ -130,8 +144,18 @@ export function validateBasicEligibility({
                     canStart: false,
                     canResume: false,
                     hasActiveAttempt: false,
-                    startsAt: exam.scheduled_date instanceof Date ? exam.scheduled_date : (exam.scheduled_date ? new Date(exam.scheduled_date) : null),
-                    endsAt: exam.end_date_time instanceof Date ? exam.end_date_time : (exam.end_date_time ? new Date(exam.end_date_time) : null),
+                    startsAt:
+                        exam.scheduled_date instanceof Date
+                            ? exam.scheduled_date
+                            : exam.scheduled_date
+                              ? new Date(exam.scheduled_date)
+                              : null,
+                    endsAt:
+                        exam.end_date_time instanceof Date
+                            ? exam.end_date_time
+                            : exam.end_date_time
+                              ? new Date(exam.end_date_time)
+                              : null,
                     reopenedUntil: null,
                 },
             },
@@ -153,7 +177,12 @@ export function validateBasicEligibility({
                     canResume: false,
                     hasActiveAttempt: false,
                     startsAt: null,
-                    endsAt: exam.end_date_time instanceof Date ? exam.end_date_time : (exam.end_date_time ? new Date(exam.end_date_time) : null),
+                    endsAt:
+                        exam.end_date_time instanceof Date
+                            ? exam.end_date_time
+                            : exam.end_date_time
+                              ? new Date(exam.end_date_time)
+                              : null,
                     reopenedUntil: null,
                 },
             },
@@ -161,9 +190,7 @@ export function validateBasicEligibility({
     }
 
     const startsAt =
-        exam.scheduled_date instanceof Date
-            ? exam.scheduled_date
-            : new Date(exam.scheduled_date);
+        exam.scheduled_date instanceof Date ? exam.scheduled_date : new Date(exam.scheduled_date);
     if (Number.isNaN(startsAt.getTime())) {
         return {
             isEligible: false,
@@ -178,8 +205,18 @@ export function validateBasicEligibility({
                     canStart: false,
                     canResume: false,
                     hasActiveAttempt: false,
-                    startsAt: exam.scheduled_date instanceof Date ? exam.scheduled_date : (exam.scheduled_date ? new Date(exam.scheduled_date) : null),
-                    endsAt: exam.end_date_time instanceof Date ? exam.end_date_time : (exam.end_date_time ? new Date(exam.end_date_time) : null),
+                    startsAt:
+                        exam.scheduled_date instanceof Date
+                            ? exam.scheduled_date
+                            : exam.scheduled_date
+                              ? new Date(exam.scheduled_date)
+                              : null,
+                    endsAt:
+                        exam.end_date_time instanceof Date
+                            ? exam.end_date_time
+                            : exam.end_date_time
+                              ? new Date(exam.end_date_time)
+                              : null,
                     reopenedUntil: null,
                 },
             },

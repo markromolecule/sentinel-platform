@@ -4,13 +4,7 @@ import type { Exam, ExamConfiguration, ExamQuestion, ExamSettings } from '@senti
 export type ExamEngineMode = 'preview' | 'runtime';
 
 export type ExamAnswerValue =
-    | string
-    | number
-    | boolean
-    | (string | number)[]
-    | Record<string, string>
-    | null
-    | undefined;
+    string | number | boolean | (string | number)[] | Record<string, string> | null | undefined;
 
 type HardwareStatus = 'success' | 'pending' | 'optional';
 

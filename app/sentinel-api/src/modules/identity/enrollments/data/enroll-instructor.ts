@@ -6,7 +6,6 @@ import {
     resolveEnrollmentRequestTargets,
 } from './enrollment-request-targets';
 
-
 export const enrollInstructorData = async ({
     dbClient,
     userId,
@@ -249,4 +248,3 @@ export const assignOfferedSubjectData = async ({
         classRoleIds,
     };
 };
-

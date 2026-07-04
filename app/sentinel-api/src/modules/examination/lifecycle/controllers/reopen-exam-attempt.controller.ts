@@ -31,9 +31,9 @@ export const reopenExamAttemptRoute = createRoute({
     },
 });
 
-export const reopenExamAttemptRouteHandler: AppRouteHandler<
-    typeof reopenExamAttemptRoute
-> = async (c) => {
+export const reopenExamAttemptRouteHandler: AppRouteHandler<typeof reopenExamAttemptRoute> = async (
+    c,
+) => {
     requireActivePermission(c, 'examinations:update');
 
     const { id, attemptId } = c.req.valid('param');

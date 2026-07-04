@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { mapExam } from './mappers';
+import { mapExam, mapMonitoringStudent } from './mappers';
 
 describe('mapExam', () => {
     it('preserves the public exam flag from the API response', () => {
@@ -192,5 +192,56 @@ describe('mapExam', () => {
 
         expect(exam.scheduledDate).toBe('2099-06-14T08:00:00.000Z');
         expect(exam.endDateTime).toBe('2099-06-14T09:00:00.000Z');
+    });
+
+    it('maps lifecycle-aware monitoring fields onto student sessions', () => {
+        const student = mapMonitoringStudent({
+            id: 'student-1',
+            studentRecordId: 'student-record-1',
+            attemptId: 'attempt-1',
+            studentNo: '2026-001',
+            firstName: 'Pat',
+            lastName: 'Student',
+            status: 'active',
+            progress: 45,
+            incidentCount: 1,
+            openIncidentCount: 1,
+            latestIncidentType: 'TAB_SWITCH',
+            lastActivityAt: '2026-07-04T00:00:00.000Z',
+            startedAt: '2026-07-04T00:00:00.000Z',
+            completedAt: null,
+            timeSpentMinutes: 20,
+            reconnectCount: 1,
+            score: null,
+            totalScore: null,
+            lifecycleState: 'LOCKED',
+            scoreState: 'DRAFT',
+            closedReason: null,
+            reopenedUntil: '2026-07-04T01:00:00.000Z',
+            finalizedAt: null,
+            lifecycleEvents: [
+                {
+                    eventId: '11111111-1111-4111-8111-111111111111',
+                    attemptId: 'attempt-1',
+                    examId: 'exam-1',
+                    studentId: 'student-record-1',
+                    eventType: 'LOCKED',
+                    previousState: 'IN_PROGRESS',
+                    nextState: 'LOCKED',
+                    actorUserId: null,
+                    reasonCode: 'MANUAL_MONITORING_LOCK',
+                    notes: 'Locked from monitoring',
+                    relatedIncidentIds: null,
+                    relatedOverrideId: null,
+                    metadata: null,
+                    createdAt: '2026-07-04T00:30:00.000Z',
+                },
+            ],
+            flags: [],
+        });
+
+        expect(student.lifecycleState).toBe('LOCKED');
+        expect(student.reopenedUntil).toBe('2026-07-04T01:00:00.000Z');
+        expect(student.lifecycleEvents?.[0]?.eventType).toBe('LOCKED');
     });
 });

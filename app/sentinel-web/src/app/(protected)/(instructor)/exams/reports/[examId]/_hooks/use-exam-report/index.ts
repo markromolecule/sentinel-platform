@@ -1,7 +1,7 @@
 import { useDeferredValue, useEffect, useMemo, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { useApi, useExamReportQuery } from '@sentinel/hooks';
-import { createStudentExamAccessOverride, bulkFinalizeAttempts } from '@sentinel/services';
+import { bulkFinalizeAttempts } from '@sentinel/services';
 import type { ExamReportActionItem } from '@sentinel/shared/types';
 import { toast } from 'sonner';
 
@@ -14,6 +14,35 @@ import {
     SECTION_PARAM_KEY,
 } from '../../_constants';
 import type { UseExamReportOptions, UseExamReportResult } from './_types';
+
+async function grantLifecycleOverride(args: {
+    apiClient: ReturnType<typeof useApi>;
+    examId: string;
+    item: ExamReportActionItem;
+    overrideType: 'MAKEUP' | 'RETAKE';
+    availableFrom: string;
+    availableUntil: string;
+    notes: string | null;
+}) {
+    const endpoint =
+        args.overrideType === 'MAKEUP'
+            ? `/exams/${args.examId}/students/${args.item.studentId}/lifecycle/grant-makeup`
+            : `/exams/${args.examId}/students/${args.item.studentId}/lifecycle/grant-retake`;
+
+    await args.apiClient(endpoint, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            availableFrom: args.availableFrom,
+            availableUntil: args.availableUntil,
+            allowedAttempts: 1,
+            sourceAttemptId: args.overrideType === 'RETAKE' ? args.item.attemptId : undefined,
+            notes: args.notes,
+        }),
+    });
+}
 
 /**
  * Custom hook to manage the detailed exam report page state, fetching, and actions.
@@ -28,11 +57,7 @@ export function useExamReport({ examId }: UseExamReportOptions): UseExamReportRe
     const sectionParam = searchParams.get(SECTION_PARAM_KEY);
 
     const [activeSection, setActiveSection] = useState<ExamReportSection>(() => {
-        if (
-            sectionParam === 'attempts' ||
-            sectionParam === 'queue' ||
-            sectionParam === 'logs'
-        ) {
+        if (sectionParam === 'attempts' || sectionParam === 'queue' || sectionParam === 'logs') {
             return sectionParam;
         }
         return DEFAULT_ACTIVE_SECTION;
@@ -71,10 +96,13 @@ export function useExamReport({ examId }: UseExamReportOptions): UseExamReportRe
         [deferredSearchValue, sectionFilter, studentPage],
     );
 
-    const { data: report, isLoading, isError, refetch, isFetching } = useExamReportQuery(
-        examId,
-        reportQuery,
-    );
+    const {
+        data: report,
+        isLoading,
+        isError,
+        refetch,
+        isFetching,
+    } = useExamReportQuery(examId, reportQuery);
 
     useEffect(() => {
         setStudentPage(1);
@@ -89,15 +117,15 @@ export function useExamReport({ examId }: UseExamReportOptions): UseExamReportRe
         () =>
             report
                 ? {
-                    review: report.actionItems.review,
-                    makeup: report.actionItems.makeup,
-                    retake: report.actionItems.retake,
-                }
+                      review: report.actionItems.review,
+                      makeup: report.actionItems.makeup,
+                      retake: report.actionItems.retake,
+                  }
                 : {
-                    review: [],
-                    makeup: [],
-                    retake: [],
-                },
+                      review: [],
+                      makeup: [],
+                      retake: [],
+                  },
         [report],
     );
 
@@ -131,14 +159,13 @@ export function useExamReport({ examId }: UseExamReportOptions): UseExamReportRe
         setActiveActionId(item.studentId);
 
         try {
-            await createStudentExamAccessOverride(apiClient, {
-                id: examId,
-                studentId: item.studentId,
+            await grantLifecycleOverride({
+                apiClient,
+                examId,
+                item,
                 overrideType,
                 availableFrom: new Date().toISOString(),
                 availableUntil: new Date(Date.now() + minutes * 60_000).toISOString(),
-                allowedAttempts: 1,
-                sourceAttemptId: overrideType === 'RETAKE' ? item.attemptId : null,
                 notes: notes?.trim() ? notes.trim() : null,
             });
 

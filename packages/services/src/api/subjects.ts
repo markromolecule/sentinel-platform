@@ -425,4 +425,3 @@ export async function assignOfferedSubject(
     );
     return response;
 }
-

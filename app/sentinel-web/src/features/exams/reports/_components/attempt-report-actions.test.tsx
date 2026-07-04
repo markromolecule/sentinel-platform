@@ -16,7 +16,7 @@ describe('AttemptReportActions', () => {
                 isSubmitting={false}
                 onSaveOverrides={vi.fn()}
                 onSaveAndFinalize={vi.fn()}
-            />
+            />,
         );
         expect(container.firstChild).toBeNull();
     });
@@ -33,7 +33,7 @@ describe('AttemptReportActions', () => {
                 onSaveOverrides={onSaveOverrides}
                 onSaveAndFinalize={onSaveAndFinalize}
                 isFinalized={false}
-            />
+            />,
         );
 
         const saveBtn = getByText('Save Overrides');
@@ -58,7 +58,7 @@ describe('AttemptReportActions', () => {
                 onSaveOverrides={vi.fn()}
                 onSaveAndFinalize={vi.fn()}
                 isFinalized={true}
-            />
+            />,
         );
 
         expect(getByText('Report Finalized')).toBeTruthy();

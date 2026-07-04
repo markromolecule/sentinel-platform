@@ -26,8 +26,12 @@ export async function loadExamReportSourceData(args: {
     examId: string;
     exam: ExamContextForReporting;
 }) {
-    const assignedStudents = buildAssignedStudentsQuery(args.dbClient, args.exam).as('assigned_students');
-    const latestAttempts = buildLatestAttemptsQuery(args.dbClient, args.examId).as('latest_attempts');
+    const assignedStudents = buildAssignedStudentsQuery(args.dbClient, args.exam).as(
+        'assigned_students',
+    );
+    const latestAttempts = buildLatestAttemptsQuery(args.dbClient, args.examId).as(
+        'latest_attempts',
+    );
     const attemptCounts = buildAttemptCountsQuery(args.dbClient, args.examId).as('attempt_counts');
     const incidentSummary = buildIncidentSummaryQuery(args.dbClient).as('incident_summary');
 
@@ -65,6 +69,15 @@ export async function loadExamReportSourceData(args: {
                     'latest_attempts.time_spent_minutes',
                     'latest_attempts.score',
                     'latest_attempts.total_score',
+                    'latest_attempts.lifecycle_state',
+                    'latest_attempts.score_state',
+                    'latest_attempts.closed_reason',
+                    'latest_attempts.reopened_until',
+                    'latest_attempts.superseded_by_attempt_id',
+                    'latest_attempts.superseded_at',
+                    'latest_attempts.superseded_by',
+                    'latest_attempts.finalized_at',
+                    'latest_attempts.finalized_by',
                     sql<number>`coalesce(attempt_counts.attempt_count, 0)`.as('attempt_count'),
                     sql<number>`coalesce(incident_summary.incident_count, 0)`.as('incident_count'),
                     sql<number>`coalesce(incident_summary.open_incident_count, 0)`.as(
@@ -84,8 +97,10 @@ export async function loadExamReportSourceData(args: {
                     ),
                     'incident_summary.highest_incident_type',
                     'incident_summary.highest_incident_severity',
-                    sql<string | null>`(latest_attempts.answer_snapshot->'_grading'->>'finalizedAt')::text`.as(
-                        'attempt_finalized_at'
+                    sql<
+                        string | null
+                    >`coalesce(latest_attempts.finalized_at::text, (latest_attempts.answer_snapshot->'_grading'->>'finalizedAt')::text)`.as(
+                        'attempt_finalized_at',
                     ),
                 ])
                 .orderBy('assigned_students.last_name')

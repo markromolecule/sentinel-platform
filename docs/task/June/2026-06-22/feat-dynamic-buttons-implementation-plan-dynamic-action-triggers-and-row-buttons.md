@@ -7,14 +7,14 @@ Make action triggers (e.g. 'add', 'setup wizard', 'bulk upload', 'create') and r
 ### Three Viable Options
 
 1. **Option 1: Component-level Declarative `<PermissionGuard>` Wrapper (Robust/Scalable)**
-   - Create a reusable `<PermissionGuard>` component in the shared `@sentinel/hooks` package. This component wraps any JSX elements (like buttons or dropdown options) and uses `useActivePermissions` internally to hide elements or show fallback content if permissions are not met.
-   - _Tradeoff:_ Clean, declarative React code and reusable across both apps, but requires creating a new component file in `@sentinel/hooks`.
+    - Create a reusable `<PermissionGuard>` component in the shared `@sentinel/hooks` package. This component wraps any JSX elements (like buttons or dropdown options) and uses `useActivePermissions` internally to hide elements or show fallback content if permissions are not met.
+    - _Tradeoff:_ Clean, declarative React code and reusable across both apps, but requires creating a new component file in `@sentinel/hooks`.
 2. **Option 2: Inline Hook-based Conditional Rendering (Simple/Fast)**
-   - Call the `useActivePermissions` hook directly in each view component and use inline logic checks like `{hasPermission('courses:create') && <AddCourseDialog />}` to show/hide triggers, and passing permissions or results as props down to columns/actions cells.
-   - _Tradeoff:_ Quick to implement without adding any new component wrappers, but results in boilerplate hook calls on every page and forces prop drilling of permissions into plain TS TanStack column definitions.
+    - Call the `useActivePermissions` hook directly in each view component and use inline logic checks like `{hasPermission('courses:create') && <AddCourseDialog />}` to show/hide triggers, and passing permissions or results as props down to columns/actions cells.
+    - _Tradeoff:_ Quick to implement without adding any new component wrappers, but results in boilerplate hook calls on every page and forces prop drilling of permissions into plain TS TanStack column definitions.
 3. **Option 3: Page-level RBAC Route wrapper `PermissionGate` (Creative/Alternative)**
-   - Wrap entire sub-routes or layout-level containers with permission gates, or implement capability maps inside router metadata, redirecting or rendering unauthorized page views entirely.
-   - _Tradeoff:_ Simplifies individual UI code by hiding whole pages, but fails to handle fine-grained row-level actions (e.g. allowing view but hiding edit/delete) as requested by the user.
+    - Wrap entire sub-routes or layout-level containers with permission gates, or implement capability maps inside router metadata, redirecting or rendering unauthorized page views entirely.
+    - _Tradeoff:_ Simplifies individual UI code by hiding whole pages, but fails to handle fine-grained row-level actions (e.g. allowing view but hiding edit/delete) as requested by the user.
 
 ### Recommended Option
 
@@ -38,11 +38,13 @@ None.
 ---
 
 #### [NEW] [permission-guard.tsx](file:///Applications/XAMPP/xamppfiles/htdocs/sentinel/packages/hooks/src/permission-guard.tsx)
+
 - Implement `PermissionGuardProps` and `PermissionGuard` component.
 - Supports checking a single `permission: string`, or an array of `permissions: string[]` with `requireAll?: boolean` mode.
 - Supports an optional `fallback` element.
 
 #### [MODIFY] [index.ts](file:///Applications/XAMPP/xamppfiles/htdocs/sentinel/packages/hooks/src/index.ts)
+
 - Export `PermissionGuard` and `PermissionGuardProps` from `@sentinel/hooks`.
 
 ### Component: Sentinel Support App
@@ -50,52 +52,67 @@ None.
 ---
 
 #### [MODIFY] [bulk-create-departments-dialog.tsx](file:///Applications/XAMPP/xamppfiles/htdocs/sentinel/app/sentinel-support/src/app/%28protected%29/%28support%29/departments/_components/dialogs/bulk-create-departments-dialog.tsx)
+
 - Wrap trigger or return `null` if user does not have `departments:create` permission.
 
 #### [MODIFY] [page.tsx](file:///Applications/XAMPP/xamppfiles/htdocs/sentinel/app/sentinel-support/src/app/%28protected%29/%28support%29/institutions/page.tsx)
+
 - Wrap "Setup Wizard" button to require `institutions:create`.
 - Wrap "Edit Parent" button to require `institutions:update`.
 
 #### [MODIFY] [add-course-dialog.tsx](file:///Applications/XAMPP/xamppfiles/htdocs/sentinel/app/sentinel-support/src/app/%28protected%29/%28support%29/courses/_components/dialogs/add-course-dialog.tsx)
+
 - Return `null` if user does not have `courses:create` permission.
 
 #### [MODIFY] [course-columns.tsx](file:///Applications/XAMPP/xamppfiles/htdocs/sentinel/app/sentinel-support/src/app/%28protected%29/%28support%29/courses/_components/tables/course-columns.tsx)
+
 - Wrap action buttons (Revert, Edit, Delete) in `<PermissionGuard>` with respective permissions: `courses:update` and `courses:delete`.
 
 #### [MODIFY] [courses-view.tsx](file:///Applications/XAMPP/xamppfiles/htdocs/sentinel/app/sentinel-support/src/app/%28protected%29/%28support%29/courses/_components/views/courses-view.tsx)
+
 - Wrap Bulk Delete button in `<PermissionGuard>` for `courses:delete`.
 
 #### [MODIFY] [section-columns.tsx](file:///Applications/XAMPP/xamppfiles/htdocs/sentinel/app/sentinel-support/src/app/%28protected%29/%28support%29/sections/_components/tables/section-columns.tsx)
+
 - Wrap action buttons (Revert, Edit, Delete) in `<PermissionGuard>` with respective permissions: `sections:update` and `sections:delete`.
 
 #### [MODIFY] [sections-view.tsx](file:///Applications/XAMPP/xamppfiles/htdocs/sentinel/app/sentinel-support/src/app/%28protected%29/%28support%29/sections/_components/views/sections-view.tsx)
+
 - Wrap Bulk Create and Add Section triggers in `<PermissionGuard>` for `sections:create`.
 - Wrap Bulk Delete button in `<PermissionGuard>` for `sections:delete`.
 
 #### [MODIFY] [semesters-list.tsx](file:///Applications/XAMPP/xamppfiles/htdocs/sentinel/app/sentinel-support/src/app/%28protected%29/%28support%29/semesters/_components/views/semesters-list.tsx)
+
 - Wrap Bulk Delete button in `<PermissionGuard>` for `semesters:delete`.
 
 #### [MODIFY] [offered-view.tsx](file:///Applications/XAMPP/xamppfiles/htdocs/sentinel/app/sentinel-support/src/app/%28protected%29/%28support%29/subjects/offered/_components/views/offered-view.tsx)
+
 - Wrap Bulk Delete button in `<PermissionGuard>` for `subject_offerings:delete`.
 
 #### [MODIFY] [add-student-whitelist-dialog.tsx](file:///Applications/XAMPP/xamppfiles/htdocs/sentinel/app/sentinel-support/src/app/%28protected%29/%28support%29/users/whitelist/_components/dialogs/add-student-whitelist-dialog.tsx)
+
 - Return `null` if user lacks `student_whitelist:create`.
 
 #### [MODIFY] [bulk-import-student-whitelist-dialog.tsx](file:///Applications/XAMPP/xamppfiles/htdocs/sentinel/app/sentinel-support/src/app/%28protected%29/%28support%29/users/whitelist/_components/dialogs/bulk-import-student-whitelist-dialog.tsx)
+
 - Return `null` if user lacks `student_whitelist:import`.
 
 #### [MODIFY] [whitelist-actions-cell.tsx](file:///Applications/XAMPP/xamppfiles/htdocs/sentinel/app/sentinel-support/src/app/%28protected%29/%28support%29/users/whitelist/_components/tables/whitelist-actions-cell.tsx)
+
 - Guard Reassign/Edit details item with `student_whitelist:update`.
 - Guard Delete item with `student_whitelist:delete`.
 
 #### [MODIFY] [add-admin-dialog.tsx](file:///Applications/XAMPP/xamppfiles/htdocs/sentinel/app/sentinel-support/src/app/%28protected%29/%28support%29/users/_components/dialogs/add-admin-dialog.tsx)
+
 - Return `null` if user lacks the corresponding user create permission depending on the role (`users:create_superadmin`, `users:create_staff`, `users:create_admin`).
 
 #### [MODIFY] [administrator-actions-cell.tsx](file:///Applications/XAMPP/xamppfiles/htdocs/sentinel/app/sentinel-support/src/app/%28protected%29/%28support%29/users/_components/tables/administrator-actions-cell.tsx)
+
 - Guard Edit item with `users:update`.
 - Guard Delete item with `users:delete`.
 
 #### [MODIFY] [administrators-list.tsx](file:///Applications/XAMPP/xamppfiles/htdocs/sentinel/app/sentinel-support/src/app/%28protected%29/%28support%29/users/_components/views/administrators-list.tsx)
+
 - Guard Bulk Delete button with `users:delete`.
 
 ### Component: Sentinel Core App
@@ -103,15 +120,19 @@ None.
 ---
 
 #### [MODIFY] [page.tsx](file:///Applications/XAMPP/xamppfiles/htdocs/sentinel/app/sentinel-core/src/app/%28protected%29/exams/dashboard/page.tsx)
+
 - Wrap "Create Exam" button with `<PermissionGuard>` for `assessments:manage`.
 
 #### [MODIFY] [exam-action-cell.tsx](file:///Applications/XAMPP/xamppfiles/htdocs/sentinel/app/sentinel-core/src/features/exams/_components/tables/exam-action-cell.tsx)
+
 - Wrap "Assign" button, and "Edit", "Assign to Students", "Assign Room", "Delete" dropdown items with `assessments:manage` checks.
 
 #### [MODIFY] [page.tsx](file:///Applications/XAMPP/xamppfiles/htdocs/sentinel/app/sentinel-core/src/app/%28protected%29/question/bank/collections/%5BcollectionId%5D/page.tsx)
+
 - Wrap "Import / Upload" button and `QuestionsEmptyState` `onImport` trigger with `assessments:manage` check.
 
 #### [MODIFY] [questions-table.tsx](file:///Applications/XAMPP/xamppfiles/htdocs/sentinel/app/sentinel-core/src/app/%28protected%29/question/bank/_components/tables/questions-table.tsx)
+
 - Combine the existing `readOnly` flag with `!hasPermission('assessments:manage')` to automatically switch the table and action sheet to read-only when the user lacks management permissions.
 
 ---
@@ -126,9 +147,9 @@ None.
 - [ ] Export `<PermissionGuard>` and its props from `packages/hooks/src/index.ts`.
 - [ ] Create `packages/hooks/src/permission-guard.test.tsx` with comprehensive unit tests checking rendering children/fallback and arrays mode.
 - [ ] Run the hooks test suite:
-  ```bash
-  pnpm --dir packages/hooks test
-  ```
+    ```bash
+    pnpm --dir packages/hooks test
+    ```
 
 **Migration required:** No
 
@@ -152,9 +173,9 @@ None.
 - [ ] Modify `app/sentinel-support/src/app/(protected)/(support)/users/_components/tables/administrator-actions-cell.tsx` to guard edit details/delete dropdown actions with `users:update` / `users:delete`.
 - [ ] Modify `app/sentinel-support/src/app/(protected)/(support)/users/_components/views/administrators-list.tsx` to guard bulk delete with `users:delete`.
 - [ ] Run the support app test suite:
-  ```bash
-  pnpm --dir app/sentinel-support test
-  ```
+    ```bash
+    pnpm --dir app/sentinel-support test
+    ```
 
 **Migration required:** No
 
@@ -167,9 +188,9 @@ None.
 - [ ] Modify `app/sentinel-core/src/app/(protected)/question/bank/collections/[collectionId]/page.tsx` to guard Import / Upload trigger with `assessments:manage`.
 - [ ] Modify `app/sentinel-core/src/app/(protected)/question/bank/_components/tables/questions-table.tsx` to integrate `assessments:manage` permission check into `readOnly` state.
 - [ ] Run the core app test suite:
-  ```bash
-  pnpm --dir app/sentinel-core test
-  ```
+    ```bash
+    pnpm --dir app/sentinel-core test
+    ```
 
 **Migration required:** No
 
@@ -180,20 +201,20 @@ None.
 ### Automated Tests
 
 - Run tests in `@sentinel/hooks`:
-  ```bash
-  pnpm --dir packages/hooks test
-  ```
+    ```bash
+    pnpm --dir packages/hooks test
+    ```
 - Run tests in `sentinel-support` and `sentinel-core`:
-  ```bash
-  pnpm --dir app/sentinel-support test
-  ```
-  ```bash
-  pnpm --dir app/sentinel-core test
-  ```
+    ```bash
+    pnpm --dir app/sentinel-support test
+    ```
+    ```bash
+    pnpm --dir app/sentinel-core test
+    ```
 
 ### Manual Verification
 
 - Log in with different user roles and verify that:
-  - Add/Create and Bulk Upload/Import triggers are completely hidden when lacking permissions.
-  - Dropdown menu options for edit/delete are hidden.
-  - The Question bank transitions to read-only interface if user lacks `assessments:manage`.
+    - Add/Create and Bulk Upload/Import triggers are completely hidden when lacking permissions.
+    - Dropdown menu options for edit/delete are hidden.
+    - The Question bank transitions to read-only interface if user lacks `assessments:manage`.

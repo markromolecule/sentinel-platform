@@ -18,12 +18,7 @@ export async function syncExamAssignmentSummary(args: { dbClient: DbClient; exam
     const primaryAssignment = (await dbClient
         .selectFrom('exam_section_assignments as esa')
         .innerJoin('sections as s', 's.section_id', 'esa.section_id')
-        .select([
-            'esa.class_group_id',
-            'esa.section_id',
-            's.section_name',
-            'esa.room_id',
-        ])
+        .select(['esa.class_group_id', 'esa.section_id', 's.section_name', 'esa.room_id'])
         .where('esa.exam_id', '=', examId)
         .orderBy('esa.created_at', 'asc')
         .orderBy('esa.id', 'asc')

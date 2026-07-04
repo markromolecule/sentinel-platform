@@ -69,13 +69,34 @@ export type ExamReportActionItems = z.infer<typeof examReportActionItemsSchema>;
 export type ExamReportActionItem = z.infer<typeof examReportActionItemSchema>;
 
 export const getExamReportsQuerySchema = z.object({
-    page: z.coerce.number().int().min(1).default(1).optional().openapi({ description: 'Page index to fetch' }),
-    limit: z.coerce.number().int().min(1).max(100).default(9).optional().openapi({ description: 'Number of items per page' }),
-    pageSize: z.coerce.number().int().min(1).max(100).optional().openapi({ description: 'Alternative to limit' }),
+    page: z.coerce
+        .number()
+        .int()
+        .min(1)
+        .default(1)
+        .optional()
+        .openapi({ description: 'Page index to fetch' }),
+    limit: z.coerce
+        .number()
+        .int()
+        .min(1)
+        .max(100)
+        .default(9)
+        .optional()
+        .openapi({ description: 'Number of items per page' }),
+    pageSize: z.coerce
+        .number()
+        .int()
+        .min(1)
+        .max(100)
+        .optional()
+        .openapi({ description: 'Alternative to limit' }),
     search: z.string().optional().openapi({ description: 'Search filter' }),
 });
 
-export const examReportSummaryItemSchema = z.object(Schema.examSummarySchema.shape).openapi('ExamReportSummaryItem');
+export const examReportSummaryItemSchema = z
+    .object(Schema.examSummarySchema.shape)
+    .openapi('ExamReportSummaryItem');
 
 export const getExamReportsSchema = {
     query: getExamReportsQuerySchema,
@@ -92,4 +113,3 @@ export const getExamReportsSchema = {
 };
 
 export type GetExamReportsQuery = z.infer<typeof getExamReportsQuerySchema>;
-

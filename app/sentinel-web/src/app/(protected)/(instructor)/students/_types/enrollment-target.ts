@@ -14,11 +14,7 @@ export type EnrollmentSubjectOption = {
 };
 
 export type StudentImportClaimStatus =
-    | 'CLAIMED'
-    | 'UNCLAIMED'
-    | 'NOT_WHITELISTED'
-    | 'ALREADY_ENROLLED'
-    | 'UNKNOWN';
+    'CLAIMED' | 'UNCLAIMED' | 'NOT_WHITELISTED' | 'ALREADY_ENROLLED' | 'UNKNOWN';
 
 export type StudentImportRow = {
     studentNo: string;

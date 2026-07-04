@@ -33,9 +33,7 @@ const mockAttempt: AttemptGradingDetailType = {
 
 describe('AttemptReportSummaryCards', () => {
     it('renders the cards with default attempt scores when optimisticScore is not provided', () => {
-        const { getByText } = render(
-            <AttemptReportSummaryCards attempt={mockAttempt} />
-        );
+        const { getByText } = render(<AttemptReportSummaryCards attempt={mockAttempt} />);
 
         expect(getByText('Final Score')).toBeTruthy();
         expect(getByText('8')).toBeTruthy();
@@ -46,7 +44,7 @@ describe('AttemptReportSummaryCards', () => {
 
     it('renders the cards with optimisticScore when provided', () => {
         const { getByText, queryByText } = render(
-            <AttemptReportSummaryCards attempt={mockAttempt} optimisticScore={9} />
+            <AttemptReportSummaryCards attempt={mockAttempt} optimisticScore={9} />,
         );
 
         expect(getByText('Final Score')).toBeTruthy();

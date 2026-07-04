@@ -9,11 +9,7 @@ import { getUserActivePermissions } from '../../../../security/permission/data/g
 export type SupportedActorRole = string;
 export type InstitutionLevel = 'PARENT_INSTITUTION' | 'BRANCH_INSTITUTION' | 'ADMIN_OVERRIDE';
 export type GenericOperation =
-    | 'CREATED'
-    | 'UPDATED'
-    | 'DELETED'
-    | 'TRANSACTION_COMPLETED'
-    | 'OVERRIDE_COMPLETED';
+    'CREATED' | 'UPDATED' | 'DELETED' | 'TRANSACTION_COMPLETED' | 'OVERRIDE_COMPLETED';
 
 let cachedNotificationRoleRouting: Record<string, string[]> | null | undefined;
 

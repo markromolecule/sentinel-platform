@@ -14,12 +14,12 @@ This matrix documents the complete telemetry, audit logging, and operational eve
     - **Services scanned:** `auth.service.ts`
     - **Data Layer / Models scanned:** Direct Supabase Client Ingress
     - **Matrix:**
-      | Layer | Operation / Activity | Sub-Activity / Lifecycle State | Triggered Event | Required Payload Metadata |
-      | :--- | :--- | :--- | :--- | :--- |
-      | _Controller_ | User Authentication | Login Attempt Success (Credentials) | `auth.login` | `userId`, `actorId`, `activeInstitutionId`, `details: { email, success: true, method: 'credentials' }`, `ipAddress` |
-      | _Controller_ | User Authentication | Login Attempt Failure | `auth.failed_login` | `userId`, `details: { email, success: false, reason: string }`, `ipAddress` |
-      | _Controller_ | User Authentication | OAuth login event tracking | `auth.login` | `userId`, `actorId`, `activeInstitutionId`, `details: { email, success: true, method: provider }`, `ipAddress` |
-      | _Service_ | User Registration | Client SignUp via Supabase | `auth.register` | `details: { email, role: 'student', firstName, lastName }` |
+        | Layer        | Operation / Activity | Sub-Activity / Lifecycle State      | Triggered Event     | Required Payload Metadata                                                                                           |
+        | :----------- | :------------------- | :---------------------------------- | :------------------ | :------------------------------------------------------------------------------------------------------------------ |
+        | _Controller_ | User Authentication  | Login Attempt Success (Credentials) | `auth.login`        | `userId`, `actorId`, `activeInstitutionId`, `details: { email, success: true, method: 'credentials' }`, `ipAddress` |
+        | _Controller_ | User Authentication  | Login Attempt Failure               | `auth.failed_login` | `userId`, `details: { email, success: false, reason: string }`, `ipAddress`                                         |
+        | _Controller_ | User Authentication  | OAuth login event tracking          | `auth.login`        | `userId`, `actorId`, `activeInstitutionId`, `details: { email, success: true, method: provider }`, `ipAddress`      |
+        | _Service_    | User Registration    | Client SignUp via Supabase          | `auth.register`     | `details: { email, role: 'student', firstName, lastName }`                                                          |
 - **Traceability Notes:** User logouts are handled on the client-side (Supabase token clearing) and do not hit backend ingress controllers, creating an auditing gap.
 
 ### Module: `/modules/identity/users/`
@@ -30,12 +30,12 @@ This matrix documents the complete telemetry, audit logging, and operational eve
     - **Services scanned:** `user-crud.service.ts`, `user-invite.service.ts`, `user-auth.service.ts`
     - **Data Layer / Models scanned:** `create-user.ts`, `delete-user.ts`, `update-user.ts`, `get-users.query.ts`
     - **Matrix:**
-      | Layer | Operation / Activity | Sub-Activity / Lifecycle State | Triggered Event | Required Payload Metadata |
-      | :--- | :--- | :--- | :--- | :--- |
-      | _Controller / Service_| User Management | Invite New User | `user.invited` | `actorId`, `details: { email, role, inviteToken, expiresAt }` |
-      | _Controller / Service_| Profile Setup | Complete User Ingress | `user.created` | `userId`, `actorId`, `details: { email, role, firstName, lastName, departmentId, courseId }` |
-      | _Controller / Service_| Profile Setup | Update Profile Info | `user.updated` | `userId`, `actorId`, `details: { updatedFields }` |
-      | _Controller / Service_| Profile Setup | Purge/Delete User Profile | `user.deleted` | `userId`, `actorId`, `details: { reason }` |
+        | Layer                  | Operation / Activity | Sub-Activity / Lifecycle State | Triggered Event | Required Payload Metadata                                                                    |
+        | :--------------------- | :------------------- | :----------------------------- | :-------------- | :------------------------------------------------------------------------------------------- |
+        | _Controller / Service_ | User Management      | Invite New User                | `user.invited`  | `actorId`, `details: { email, role, inviteToken, expiresAt }`                                |
+        | _Controller / Service_ | Profile Setup        | Complete User Ingress          | `user.created`  | `userId`, `actorId`, `details: { email, role, firstName, lastName, departmentId, courseId }` |
+        | _Controller / Service_ | Profile Setup        | Update Profile Info            | `user.updated`  | `userId`, `actorId`, `details: { updatedFields }`                                            |
+        | _Controller / Service_ | Profile Setup        | Purge/Delete User Profile      | `user.deleted`  | `userId`, `actorId`, `details: { reason }`                                                   |
 - **Traceability Notes:** User modifications are silent at the service layer; no unified `LogsService.createLog` hooks are active.
 
 ### Module: `/modules/identity/enrollments/`
@@ -46,13 +46,13 @@ This matrix documents the complete telemetry, audit logging, and operational eve
     - **Services scanned:** `enrollments.service.ts`
     - **Data Layer / Models scanned:** `approve-enrollment-request.ts`, `unenroll-student.ts`, `enroll-students.ts`
     - **Matrix:**
-      | Layer | Operation / Activity | Sub-Activity / Lifecycle State | Triggered Event | Required Payload Metadata |
-      | :--- | :--- | :--- | :--- | :--- |
-      | _Controller_ | Subject Mapping | Request Enrollment | `enrollment.requested` | `studentId`, `subjectOfferingId`, `details: { academicYear, semester }` |
-      | _Controller / Service_| Enrollment Approval | Approve Request | `enrollment.approved` | `requestId`, `actorId`, `details: { studentId, subjectOfferingId }` |
-      | _Controller / Service_| Enrollment Approval | Reject Request | `enrollment.rejected` | `requestId`, `actorId`, `details: { reason }` |
-      | _Controller / Service_| Subject Mapping | Assign Instructor to Course | `instructor.enrolled` | `instructorId`, `subjectOfferingId`, `actorId` |
-      | _Controller / Service_| Enrollment Purge | Unenroll Student | `enrollment.deleted` | `studentId`, `subjectOfferingId`, `actorId`, `details: { reason }` |
+        | Layer                  | Operation / Activity | Sub-Activity / Lifecycle State | Triggered Event        | Required Payload Metadata                                               |
+        | :--------------------- | :------------------- | :----------------------------- | :--------------------- | :---------------------------------------------------------------------- |
+        | _Controller_           | Subject Mapping      | Request Enrollment             | `enrollment.requested` | `studentId`, `subjectOfferingId`, `details: { academicYear, semester }` |
+        | _Controller / Service_ | Enrollment Approval  | Approve Request                | `enrollment.approved`  | `requestId`, `actorId`, `details: { studentId, subjectOfferingId }`     |
+        | _Controller / Service_ | Enrollment Approval  | Reject Request                 | `enrollment.rejected`  | `requestId`, `actorId`, `details: { reason }`                           |
+        | _Controller / Service_ | Subject Mapping      | Assign Instructor to Course    | `instructor.enrolled`  | `instructorId`, `subjectOfferingId`, `actorId`                          |
+        | _Controller / Service_ | Enrollment Purge     | Unenroll Student               | `enrollment.deleted`   | `studentId`, `subjectOfferingId`, `actorId`, `details: { reason }`      |
 - **Traceability Notes:** Critical enrollment transitions lack logging coverage.
 
 ### Module: `/modules/identity/student-whitelist/`
@@ -63,12 +63,12 @@ This matrix documents the complete telemetry, audit logging, and operational eve
     - **Services scanned:** `student-whitelist.service.ts`
     - **Data Layer / Models scanned:** `create-student-whitelist.ts`, `bulk-import-student-whitelist.ts`, `purge-student-whitelist.ts`
     - **Matrix:**
-      | Layer | Operation / Activity | Sub-Activity / Lifecycle State | Triggered Event | Required Payload Metadata |
-      | :--- | :--- | :--- | :--- | :--- |
-      | _Controller / Service_| Whitelist Access | Create Whitelist Item | `whitelist.created` | `whitelistId`, `actorId`, `details: { studentNumber, departmentId }` |
-      | _Controller / Service_| Whitelist Access | Bulk Import Items | `whitelist.imported` | `actorId`, `details: { importedCount, departmentId }` |
-      | _Controller / Service_| Whitelist Access | Update Whitelist Item | `whitelist.updated` | `whitelistId`, `actorId`, `details: { studentNumber, newDepartmentId }` |
-      | _Controller / Service_| Whitelist Access | Purge Whitelist | `whitelist.purged` | `actorId`, `details: { departmentId, deletedCount }` |
+        | Layer                  | Operation / Activity | Sub-Activity / Lifecycle State | Triggered Event      | Required Payload Metadata                                               |
+        | :--------------------- | :------------------- | :----------------------------- | :------------------- | :---------------------------------------------------------------------- |
+        | _Controller / Service_ | Whitelist Access     | Create Whitelist Item          | `whitelist.created`  | `whitelistId`, `actorId`, `details: { studentNumber, departmentId }`    |
+        | _Controller / Service_ | Whitelist Access     | Bulk Import Items              | `whitelist.imported` | `actorId`, `details: { importedCount, departmentId }`                   |
+        | _Controller / Service_ | Whitelist Access     | Update Whitelist Item          | `whitelist.updated`  | `whitelistId`, `actorId`, `details: { studentNumber, newDepartmentId }` |
+        | _Controller / Service_ | Whitelist Access     | Purge Whitelist                | `whitelist.purged`   | `actorId`, `details: { departmentId, deletedCount }`                    |
 - **Traceability Notes:** Whitelist imports can change candidate registration eligibility; these require strict auditing.
 
 ### Module: `/modules/identity/onboarding/`
@@ -79,9 +79,9 @@ This matrix documents the complete telemetry, audit logging, and operational eve
     - **Services scanned:** `complete-student-onboarding.ts`, `assert-student-onboarding-eligibility.ts`
     - **Data Layer / Models scanned:** `create-student.ts`, `get-departments.ts`
     - **Matrix:**
-      | Layer | Operation / Activity | Sub-Activity / Lifecycle State | Triggered Event | Required Payload Metadata |
-      | :--- | :--- | :--- | :--- | :--- |
-      | _Controller / Service_| User Onboarding | Complete Onboarding | `onboarding.completed` | `userId`, `institutionId`, `details: { studentNumber, courseId, departmentId }` |
+        | Layer                  | Operation / Activity | Sub-Activity / Lifecycle State | Triggered Event        | Required Payload Metadata                                                       |
+        | :--------------------- | :------------------- | :----------------------------- | :--------------------- | :------------------------------------------------------------------------------ |
+        | _Controller / Service_ | User Onboarding      | Complete Onboarding            | `onboarding.completed` | `userId`, `institutionId`, `details: { studentNumber, courseId, departmentId }` |
 - **Traceability Notes:** Failed eligibility onboarding attempts occur silently at the HTTP gateway layer.
 
 ---
@@ -96,12 +96,12 @@ This matrix documents the complete telemetry, audit logging, and operational eve
     - **Services scanned:** `classroom-write.service.ts`, `classroom-instructor-management.service.ts`
     - **Data Layer / Models scanned:** Kysely inserts to `classrooms`, `classroom_instructors`, `classroom_students`
     - **Matrix:**
-      | Layer | Operation / Activity | Sub-Activity / Lifecycle State | Triggered Event | Required Payload Metadata |
-      | :--- | :--- | :--- | :--- | :--- |
-      | _Controller / Service_| Classroom Config | Create Classroom | `classroom.created` | `classroomId`, `actorId`, `details: { name, subjectOfferingId }` |
-      | _Controller / Service_| Classroom Config | Update Classroom Settings | `classroom.updated` | `classroomId`, `actorId`, `details: { updatedFields }` |
-      | _Controller / Service_| Roster Assign | Assign Instructor | `classroom.instructor_assigned` | `classroomId`, `instructorId`, `actorId` |
-      | _Controller / Service_| Roster Assign | Remove Student from Class | `classroom.student_removed` | `classroomId`, `studentId`, `actorId` |
+        | Layer                  | Operation / Activity | Sub-Activity / Lifecycle State | Triggered Event                 | Required Payload Metadata                                        |
+        | :--------------------- | :------------------- | :----------------------------- | :------------------------------ | :--------------------------------------------------------------- |
+        | _Controller / Service_ | Classroom Config     | Create Classroom               | `classroom.created`             | `classroomId`, `actorId`, `details: { name, subjectOfferingId }` |
+        | _Controller / Service_ | Classroom Config     | Update Classroom Settings      | `classroom.updated`             | `classroomId`, `actorId`, `details: { updatedFields }`           |
+        | _Controller / Service_ | Roster Assign        | Assign Instructor              | `classroom.instructor_assigned` | `classroomId`, `instructorId`, `actorId`                         |
+        | _Controller / Service_ | Roster Assign        | Remove Student from Class      | `classroom.student_removed`     | `classroomId`, `studentId`, `actorId`                            |
 - **Traceability Notes:** Roster modifications directly affect who can access examinations.
 
 ### Module: `/modules/core/courses/`
@@ -111,11 +111,11 @@ This matrix documents the complete telemetry, audit logging, and operational eve
     - **Controllers scanned:** `create-course.controller.ts`, `update-course.controller.ts`
     - **Services scanned:** Internal CRUD helpers
     - **Data Layer / Models scanned:** `create-course.ts`, `delete-course.ts`, `update-course.ts`
-      | Layer | Operation / Activity | Sub-Activity / Lifecycle State | Triggered Event | Required Payload Metadata |
-      | :--- | :--- | :--- | :--- | :--- |
-      | _Controller / Data_ | Program Setup | Create Program Course | `course.created` | `courseId`, `actorId`, `details: { courseCode, courseName, departmentId }` |
-      | _Controller / Data_ | Program Setup | Update Program Details | `course.updated` | `courseId`, `actorId`, `details: { changedFields }` |
-      | _Data Layer_ | Program Setup | Purge Course | `course.deleted` | `courseId`, `actorId` |
+        | Layer               | Operation / Activity | Sub-Activity / Lifecycle State | Triggered Event  | Required Payload Metadata                                                  |
+        | :------------------ | :------------------- | :----------------------------- | :--------------- | :------------------------------------------------------------------------- |
+        | _Controller / Data_ | Program Setup        | Create Program Course          | `course.created` | `courseId`, `actorId`, `details: { courseCode, courseName, departmentId }` |
+        | _Controller / Data_ | Program Setup        | Update Program Details         | `course.updated` | `courseId`, `actorId`, `details: { changedFields }`                        |
+        | _Data Layer_        | Program Setup        | Purge Course                   | `course.deleted` | `courseId`, `actorId`                                                      |
 
 ### Module: `/modules/core/departments/`
 
@@ -124,12 +124,12 @@ This matrix documents the complete telemetry, audit logging, and operational eve
     - **Controllers scanned:** `create-department.controller.ts`, `update-department.controller.ts`, `delete-department.controller.ts`, `create-bulk-departments.controller.ts`
     - **Services scanned:** `departments.service.ts`
     - **Data Layer / Models scanned:** `create-department.ts`, `delete-department.ts`, `create-bulk-departments.ts`
-      | Layer | Operation / Activity | Sub-Activity / Lifecycle State | Triggered Event | Required Payload Metadata |
-      | :--- | :--- | :--- | :--- | :--- |
-      | _Controller / Service_| Division Setup | Create Department | `department.created` | `departmentId`, `actorId`, `details: { code, name }` |
-      | _Controller / Service_| Division Setup | Bulk Import Departments | `department.imported` | `actorId`, `details: { count }` |
-      | _Controller / Service_| Division Setup | Update Department | `department.updated` | `departmentId`, `actorId`, `details: { name }` |
-      | _Controller / Service_| Division Setup | Delete Department | `department.deleted` | `departmentId`, `actorId` |
+        | Layer                  | Operation / Activity | Sub-Activity / Lifecycle State | Triggered Event       | Required Payload Metadata                            |
+        | :--------------------- | :------------------- | :----------------------------- | :-------------------- | :--------------------------------------------------- |
+        | _Controller / Service_ | Division Setup       | Create Department              | `department.created`  | `departmentId`, `actorId`, `details: { code, name }` |
+        | _Controller / Service_ | Division Setup       | Bulk Import Departments        | `department.imported` | `actorId`, `details: { count }`                      |
+        | _Controller / Service_ | Division Setup       | Update Department              | `department.updated`  | `departmentId`, `actorId`, `details: { name }`       |
+        | _Controller / Service_ | Division Setup       | Delete Department              | `department.deleted`  | `departmentId`, `actorId`                            |
 
 ### Module: `/modules/core/inheritance/`
 
@@ -138,9 +138,9 @@ This matrix documents the complete telemetry, audit logging, and operational eve
     - **Controllers scanned:** None (Internal Business Helpers)
     - **Services scanned:** `effective-row-loader.ts`, `inheritance-resolver.helper.ts`
     - **Data Layer / Models scanned:** Recursive database scoping queries.
-      | Layer | Operation / Activity | Sub-Activity / Lifecycle State | Triggered Event | Required Payload Metadata |
-      | :--- | :--- | :--- | :--- | :--- |
-      | _Service Layer_ | Configuration Scoping | Resolve Inherited Settings | `inheritance.resolved` | `targetId`, `resolvedSourceId`, `details: { key, value }` |
+        | Layer           | Operation / Activity  | Sub-Activity / Lifecycle State | Triggered Event        | Required Payload Metadata                                 |
+        | :-------------- | :-------------------- | :----------------------------- | :--------------------- | :-------------------------------------------------------- |
+        | _Service Layer_ | Configuration Scoping | Resolve Inherited Settings     | `inheritance.resolved` | `targetId`, `resolvedSourceId`, `details: { key, value }` |
 
 ### Module: `/modules/core/institutions/`
 
@@ -149,12 +149,12 @@ This matrix documents the complete telemetry, audit logging, and operational eve
     - **Controllers scanned:** `create-institution.controller.ts`, `update-institution.controller.ts`, `delete-institution.controller.ts`, `link-institution-branch.controller.ts`, `unlink-institution-branch.controller.ts`, `save-institution-naming-convention.controller.ts`
     - **Services scanned:** `institution-hierarchy.service.ts`
     - **Data Layer / Models scanned:** `create-institution.ts`, `delete-institution.ts`, `save-naming-convention.ts`
-      | Layer | Operation / Activity | Sub-Activity / Lifecycle State | Triggered Event | Required Payload Metadata |
-      | :--- | :--- | :--- | :--- | :--- |
-      | _Controller / Service_| Campus Setup | Create Institution | `institution.created` | `institutionId`, `actorId`, `details: { name, kind: 'PARENT'\|'CHILD' }` |
-      | _Controller / Service_| Hierarchy Link | Link Branch Campus | `institution.branch_linked` | `parentId`, `childId`, `actorId` |
-      | _Controller / Service_| Hierarchy Link | Unlink Branch Campus | `institution.branch_unlinked` | `parentId`, `childId`, `actorId` |
-      | _Controller / Service_| Metadata Custom | Save Naming Convention | `institution.naming_convention_saved`| `institutionId`, `actorId`, `details: { structureSchema }` |
+        | Layer                  | Operation / Activity | Sub-Activity / Lifecycle State | Triggered Event                       | Required Payload Metadata                                                |
+        | :--------------------- | :------------------- | :----------------------------- | :------------------------------------ | :----------------------------------------------------------------------- |
+        | _Controller / Service_ | Campus Setup         | Create Institution             | `institution.created`                 | `institutionId`, `actorId`, `details: { name, kind: 'PARENT'\|'CHILD' }` |
+        | _Controller / Service_ | Hierarchy Link       | Link Branch Campus             | `institution.branch_linked`           | `parentId`, `childId`, `actorId`                                         |
+        | _Controller / Service_ | Hierarchy Link       | Unlink Branch Campus           | `institution.branch_unlinked`         | `parentId`, `childId`, `actorId`                                         |
+        | _Controller / Service_ | Metadata Custom      | Save Naming Convention         | `institution.naming_convention_saved` | `institutionId`, `actorId`, `details: { structureSchema }`               |
 
 ### Module: `/modules/core/rooms/`
 
@@ -163,12 +163,12 @@ This matrix documents the complete telemetry, audit logging, and operational eve
     - **Controllers scanned:** `create-room.controller.ts`, `update-room.controller.ts`, `delete-room.controller.ts`, `bulk-create-rooms.controller.ts`
     - **Services scanned:** `create-room.service.ts`, `update-room.service.ts`, `delete-room.service.ts`, `bulk-create-rooms.service.ts`
     - **Data Layer / Models scanned:** `create-room.ts`, `update-room.ts`, `delete-room.ts`
-      | Layer | Operation / Activity | Sub-Activity / Lifecycle State | Triggered Event | Required Payload Metadata |
-      | :--- | :--- | :--- | :--- | :--- |
-      | _Controller / Service_| Facility Setup | Create Testing Room | `room.created` | `roomId`, `actorId`, `details: { roomName, capacity }` |
-      | _Controller / Service_| Facility Setup | Bulk Create Rooms | `room.imported` | `actorId`, `details: { count }` |
-      | _Controller / Service_| Facility Setup | Update Room Specs | `room.updated` | `roomId`, `actorId`, `details: { changedFields }` |
-      | _Controller / Service_| Facility Setup | Delete Testing Room | `room.deleted` | `roomId`, `actorId` |
+        | Layer                  | Operation / Activity | Sub-Activity / Lifecycle State | Triggered Event | Required Payload Metadata                              |
+        | :--------------------- | :------------------- | :----------------------------- | :-------------- | :----------------------------------------------------- |
+        | _Controller / Service_ | Facility Setup       | Create Testing Room            | `room.created`  | `roomId`, `actorId`, `details: { roomName, capacity }` |
+        | _Controller / Service_ | Facility Setup       | Bulk Create Rooms              | `room.imported` | `actorId`, `details: { count }`                        |
+        | _Controller / Service_ | Facility Setup       | Update Room Specs              | `room.updated`  | `roomId`, `actorId`, `details: { changedFields }`      |
+        | _Controller / Service_ | Facility Setup       | Delete Testing Room            | `room.deleted`  | `roomId`, `actorId`                                    |
 
 ### Module: `/modules/core/sections/`
 
@@ -177,11 +177,11 @@ This matrix documents the complete telemetry, audit logging, and operational eve
     - **Controllers scanned:** `create-section.controller.ts`, `update-section.controller.ts`, `delete-section.controller.ts`, `create-bulk-sections.controller.ts`
     - **Services scanned:** `sections.service.ts`
     - **Data Layer / Models scanned:** `create-section.ts`, `update-section.ts`, `delete-section.ts`
-      | Layer | Operation / Activity | Sub-Activity / Lifecycle State | Triggered Event | Required Payload Metadata |
-      | :--- | :--- | :--- | :--- | :--- |
-      | _Controller / Service_| Roster Group | Create Section | `section.created` | `sectionId`, `actorId`, `details: { code, courseId }` |
-      | _Controller / Service_| Roster Group | Bulk Import Sections | `section.imported` | `actorId`, `details: { count }` |
-      | _Controller / Service_| Roster Group | Delete Section | `section.deleted` | `sectionId`, `actorId` |
+        | Layer                  | Operation / Activity | Sub-Activity / Lifecycle State | Triggered Event    | Required Payload Metadata                             |
+        | :--------------------- | :------------------- | :----------------------------- | :----------------- | :---------------------------------------------------- |
+        | _Controller / Service_ | Roster Group         | Create Section                 | `section.created`  | `sectionId`, `actorId`, `details: { code, courseId }` |
+        | _Controller / Service_ | Roster Group         | Bulk Import Sections           | `section.imported` | `actorId`, `details: { count }`                       |
+        | _Controller / Service_ | Roster Group         | Delete Section                 | `section.deleted`  | `sectionId`, `actorId`                                |
 
 ### Module: `/modules/core/semesters/`
 
@@ -190,11 +190,11 @@ This matrix documents the complete telemetry, audit logging, and operational eve
     - **Controllers scanned:** `create-semester.controller.ts`, `update-semester.controller.ts`, `delete-semester.controller.ts`
     - **Services scanned:** `semesters.service.ts`
     - **Data Layer / Models scanned:** `create-semester.ts`, `update-semester.ts`, `deactivate-institution-semesters.ts`
-      | Layer | Operation / Activity | Sub-Activity / Lifecycle State | Triggered Event | Required Payload Metadata |
-      | :--- | :--- | :--- | :--- | :--- |
-      | _Controller / Service_| Term Setup | Create Semester | `semester.created` | `semesterId`, `actorId`, `details: { termName, startAt, endAt }` |
-      | _Controller / Service_| Term Setup | Update Term details | `semester.updated` | `semesterId`, `actorId`, `details: { changedFields }` |
-      | _Data Layer_ | Term Setup | Deactivate other Semesters | `semester.deactivated` | `institutionId`, `details: { activeSemesterId }` |
+        | Layer                  | Operation / Activity | Sub-Activity / Lifecycle State | Triggered Event        | Required Payload Metadata                                        |
+        | :--------------------- | :------------------- | :----------------------------- | :--------------------- | :--------------------------------------------------------------- |
+        | _Controller / Service_ | Term Setup           | Create Semester                | `semester.created`     | `semesterId`, `actorId`, `details: { termName, startAt, endAt }` |
+        | _Controller / Service_ | Term Setup           | Update Term details            | `semester.updated`     | `semesterId`, `actorId`, `details: { changedFields }`            |
+        | _Data Layer_           | Term Setup           | Deactivate other Semesters     | `semester.deactivated` | `institutionId`, `details: { activeSemesterId }`                 |
 
 ### Module: `/modules/core/subject-classification/`
 
@@ -202,9 +202,9 @@ This matrix documents the complete telemetry, audit logging, and operational eve
 - **Granular Traceability Mapping:**
     - **Controllers scanned:** None (Controlled under database seeding)
     - **Services and Models scanned:** Classified mappings.
-      | Layer | Operation / Activity | Sub-Activity / Lifecycle State | Triggered Event | Required Payload Metadata |
-      | :--- | :--- | :--- | :--- | :--- |
-      | _Data Layer_ | Catalog Class | Seed/Modify Classification | `classification.saved`| `classificationId`, `details: { categoryName }` |
+        | Layer        | Operation / Activity | Sub-Activity / Lifecycle State | Triggered Event        | Required Payload Metadata                       |
+        | :----------- | :------------------- | :----------------------------- | :--------------------- | :---------------------------------------------- |
+        | _Data Layer_ | Catalog Class        | Seed/Modify Classification     | `classification.saved` | `classificationId`, `details: { categoryName }` |
 
 ### Module: `/modules/core/subject-offerings/`
 
@@ -213,11 +213,11 @@ This matrix documents the complete telemetry, audit logging, and operational eve
     - **Controllers scanned:** `create-subject-offering.controller.ts`, `create-subject-offerings-from-classification.controller.ts`, `update-subject-offering.controller.ts`, `delete-subject-offering.controller.ts`
     - **Services scanned:** `subject-offering-payload.service.ts`, `subject-offering-assignments.service.ts`
     - **Data Layer / Models scanned:** `create-subject-offering.ts`, `update-subject-offering.ts`, `delete-subject-offering.ts`
-      | Layer | Operation / Activity | Sub-Activity / Lifecycle State | Triggered Event | Required Payload Metadata |
-      | :--- | :--- | :--- | :--- | :--- |
-      | _Controller / Service_| Course Catalog | Map Course Offering | `subject_offering.created`| `offeringId`, `actorId`, `details: { subjectId, semesterId }` |
-      | _Controller / Service_| Course Catalog | Bulk Map Offerings | `subject_offering.imported`| `actorId`, `details: { count }` |
-      | _Controller / Service_| Course Catalog | Update Map Details | `subject_offering.updated`| `offeringId`, `actorId`, `details: { yearLevels, sectionsCount }` |
+        | Layer                  | Operation / Activity | Sub-Activity / Lifecycle State | Triggered Event             | Required Payload Metadata                                         |
+        | :--------------------- | :------------------- | :----------------------------- | :-------------------------- | :---------------------------------------------------------------- |
+        | _Controller / Service_ | Course Catalog       | Map Course Offering            | `subject_offering.created`  | `offeringId`, `actorId`, `details: { subjectId, semesterId }`     |
+        | _Controller / Service_ | Course Catalog       | Bulk Map Offerings             | `subject_offering.imported` | `actorId`, `details: { count }`                                   |
+        | _Controller / Service_ | Course Catalog       | Update Map Details             | `subject_offering.updated`  | `offeringId`, `actorId`, `details: { yearLevels, sectionsCount }` |
 
 ### Module: `/modules/core/subjects/`
 
@@ -226,11 +226,11 @@ This matrix documents the complete telemetry, audit logging, and operational eve
     - **Controllers scanned:** `create-subject.controller.ts`, `update-subject.controller.ts`, `delete-subject.controller.ts`, `delete-selected-subjects.controller.ts`
     - **Services scanned:** `subject-crud.service.ts`, `subject-assignments.service.ts`
     - **Data Layer / Models scanned:** `create-subject.ts`, `update-subject.ts`, `delete-subject.ts`
-      | Layer | Operation / Activity | Sub-Activity / Lifecycle State | Triggered Event | Required Payload Metadata |
-      | :--- | :--- | :--- | :--- | :--- |
-      | _Controller / Service_| Catalog Setup | Create Course Subject | `subject.created` | `subjectId`, `actorId`, `details: { code, name, units }` |
-      | _Controller / Service_| Catalog Setup | Update Subject Specs | `subject.updated` | `subjectId`, `actorId`, `details: { changedFields }` |
-      | _Controller / Service_| Catalog Setup | Delete Subject | `subject.deleted` | `subjectId`, `actorId` |
+        | Layer                  | Operation / Activity | Sub-Activity / Lifecycle State | Triggered Event   | Required Payload Metadata                                |
+        | :--------------------- | :------------------- | :----------------------------- | :---------------- | :------------------------------------------------------- |
+        | _Controller / Service_ | Catalog Setup        | Create Course Subject          | `subject.created` | `subjectId`, `actorId`, `details: { code, name, units }` |
+        | _Controller / Service_ | Catalog Setup        | Update Subject Specs           | `subject.updated` | `subjectId`, `actorId`, `details: { changedFields }`     |
+        | _Controller / Service_ | Catalog Setup        | Delete Subject                 | `subject.deleted` | `subjectId`, `actorId`                                   |
 
 ---
 
@@ -243,18 +243,18 @@ This matrix documents the complete telemetry, audit logging, and operational eve
     - **Controllers scanned:** `verify-eligibility.controller.ts`
     - **Services scanned:** `access-gatekeeper.service.ts`
     - **Data Layer / Models scanned:** `entitlements.repository.ts`
-      | Layer | Operation / Activity | Sub-Activity / Lifecycle State | Triggered Event | Required Payload Metadata |
-      | :--- | :--- | :--- | :--- | :--- |
-      | _Controller / Service_| Eligibility | Verify Student Access | `exam_access.eligibility_verified`| `studentId`, `examId`, `details: { isEligible, rejectionReasons: [] }` |
+        | Layer                  | Operation / Activity | Sub-Activity / Lifecycle State | Triggered Event                    | Required Payload Metadata                                              |
+        | :--------------------- | :------------------- | :----------------------------- | :--------------------------------- | :--------------------------------------------------------------------- |
+        | _Controller / Service_ | Eligibility          | Verify Student Access          | `exam_access.eligibility_verified` | `studentId`, `examId`, `details: { isEligible, rejectionReasons: [] }` |
 
 ### Module: `/modules/examination/assessment/`
 
 - **Core Responsibilities:** Main API check for candidate test bounds.
 - **Granular Traceability Mapping:**
     - **Controllers/Services scanned:** `assessment-access.ts`
-      | Layer | Operation / Activity | Sub-Activity / Lifecycle State | Triggered Event | Required Payload Metadata |
-      | :--- | :--- | :--- | :--- | :--- |
-      | _Service Layer_ | Assessment Ingress| Fetch Test Structure | `assessment.accessed` | `studentId`, `examId`, `details: { sectionsLoaded, durationAllowed }` |
+        | Layer           | Operation / Activity | Sub-Activity / Lifecycle State | Triggered Event       | Required Payload Metadata                                             |
+        | :-------------- | :------------------- | :----------------------------- | :-------------------- | :-------------------------------------------------------------------- |
+        | _Service Layer_ | Assessment Ingress   | Fetch Test Structure           | `assessment.accessed` | `studentId`, `examId`, `details: { sectionsLoaded, durationAllowed }` |
 
 ### Module: `/modules/examination/assign/`
 
@@ -262,10 +262,10 @@ This matrix documents the complete telemetry, audit logging, and operational eve
 - **Granular Traceability Mapping:**
     - **Controllers/Services scanned:** `create-exam-assignment.ts`, `respond-to-exam-assignment.ts`, `get-exam-assignments.ts`
     - **Data Layer / Models scanned:** `close-other-pending-exam-assignments.ts`, `find-assignee-instructor.ts`
-      | Layer | Operation / Activity | Sub-Activity / Lifecycle State | Triggered Event | Required Payload Metadata |
-      | :--- | :--- | :--- | :--- | :--- |
-      | _Service Layer_ | Roster Assignment | Assign Proctor to Exam | `exam_assign.created` | `examId`, `instructorId`, `actorId`, `details: { role: 'PROCTOR' }` |
-      | _Service Layer_ | Proctor Feedback | Accept/Deny Assignment | `exam_assign.responded` | `examId`, `instructorId`, `details: { response: 'ACCEPTED'\|'DECLINED' }` |
+        | Layer           | Operation / Activity | Sub-Activity / Lifecycle State | Triggered Event         | Required Payload Metadata                                                 |
+        | :-------------- | :------------------- | :----------------------------- | :---------------------- | :------------------------------------------------------------------------ |
+        | _Service Layer_ | Roster Assignment    | Assign Proctor to Exam         | `exam_assign.created`   | `examId`, `instructorId`, `actorId`, `details: { role: 'PROCTOR' }`       |
+        | _Service Layer_ | Proctor Feedback     | Accept/Deny Assignment         | `exam_assign.responded` | `examId`, `instructorId`, `details: { response: 'ACCEPTED'\|'DECLINED' }` |
 
 ### Module: `/modules/examination/builder/`
 
@@ -273,10 +273,10 @@ This matrix documents the complete telemetry, audit logging, and operational eve
 - **Granular Traceability Mapping:**
     - **Controllers scanned:** `save-builder-workspace.controller.ts`, `publish-builder-workspace.controller.ts`
     - **Services scanned:** `builder.service.ts`
-      | Layer | Operation / Activity | Sub-Activity / Lifecycle State | Triggered Event | Required Payload Metadata |
-      | :--- | :--- | :--- | :--- | :--- |
-      | _Controller / Service_| Build Workspace | Save Builder Draft | `builder.draft_saved` | `examId`, `actorId`, `details: { changesSavedCount }` |
-      | _Controller / Service_| Build Workspace | Publish Workspace Builder | `builder.published` | `examId`, `actorId`, `details: { activeQuestionsCount, activeSectionsCount }` |
+        | Layer                  | Operation / Activity | Sub-Activity / Lifecycle State | Triggered Event       | Required Payload Metadata                                                     |
+        | :--------------------- | :------------------- | :----------------------------- | :-------------------- | :---------------------------------------------------------------------------- |
+        | _Controller / Service_ | Build Workspace      | Save Builder Draft             | `builder.draft_saved` | `examId`, `actorId`, `details: { changesSavedCount }`                         |
+        | _Controller / Service_ | Build Workspace      | Publish Workspace Builder      | `builder.published`   | `examId`, `actorId`, `details: { activeQuestionsCount, activeSectionsCount }` |
 
 ### Module: `/modules/examination/configuration/`
 
@@ -285,9 +285,9 @@ This matrix documents the complete telemetry, audit logging, and operational eve
     - **Controllers scanned:** `update-exam-configuration.controller.ts`
     - **Services scanned:** `save-exam-configuration.ts`, `assert-exam-configuration-mutable.ts`
     - **Data Layer / Models scanned:** `get-global-settings.ts`
-      | Layer | Operation / Activity | Sub-Activity / Lifecycle State | Triggered Event | Required Payload Metadata |
-      | :--- | :--- | :--- | :--- | :--- |
-      | _Controller / Service_| Security Specs | Update Exam Configuration | `exam_config.updated` | `examId`, `actorId`, `details: { blockCopyPaste, faceDetectionThreshold, limitDevicesCount }` |
+        | Layer                  | Operation / Activity | Sub-Activity / Lifecycle State | Triggered Event       | Required Payload Metadata                                                                     |
+        | :--------------------- | :------------------- | :----------------------------- | :-------------------- | :-------------------------------------------------------------------------------------------- |
+        | _Controller / Service_ | Security Specs       | Update Exam Configuration      | `exam_config.updated` | `examId`, `actorId`, `details: { blockCopyPaste, faceDetectionThreshold, limitDevicesCount }` |
 
 ### Module: `/modules/examination/flow/`
 
@@ -296,11 +296,11 @@ This matrix documents the complete telemetry, audit logging, and operational eve
     - **Controllers scanned:** `start-session.controller.ts`, `sync-session.controller.ts`, `complete-session.controller.ts`
     - **Services scanned:** `session-manager.service.ts`
     - **Data Layer / Models scanned:** `session.repository.ts` (writes to `exam_attempts` and `exam_responses`)
-      | Layer | Operation / Activity | Sub-Activity / Lifecycle State | Triggered Event | Required Payload Metadata |
-      | :--- | :--- | :--- | :--- | :--- |
-      | _Controller / Service_| Attempt Session | Start Exam Session | `exam_flow.started` | `studentId`, `examId`, `attemptId`, `details: { ipAddress, browserAgent }` |
-      | _Controller / Service_| Ingress Sync | Heartbeat / Answer Sync | `exam_flow.sync` | `attemptId`, `studentId`, `details: { elapsedSeconds, questionsCompletedCount }` |
-      | _Controller / Service_| Attempt Session | Submit Exam Session | `exam_flow.completed` | `attemptId`, `studentId`, `details: { totalDuration, submissionType: 'TIMEOUT'\|'MANUAL' }` |
+        | Layer                  | Operation / Activity | Sub-Activity / Lifecycle State | Triggered Event       | Required Payload Metadata                                                                   |
+        | :--------------------- | :------------------- | :----------------------------- | :-------------------- | :------------------------------------------------------------------------------------------ |
+        | _Controller / Service_ | Attempt Session      | Start Exam Session             | `exam_flow.started`   | `studentId`, `examId`, `attemptId`, `details: { ipAddress, browserAgent }`                  |
+        | _Controller / Service_ | Ingress Sync         | Heartbeat / Answer Sync        | `exam_flow.sync`      | `attemptId`, `studentId`, `details: { elapsedSeconds, questionsCompletedCount }`            |
+        | _Controller / Service_ | Attempt Session      | Submit Exam Session            | `exam_flow.completed` | `attemptId`, `studentId`, `details: { totalDuration, submissionType: 'TIMEOUT'\|'MANUAL' }` |
 
 ### Module: `/modules/examination/grading/`
 
@@ -308,9 +308,9 @@ This matrix documents the complete telemetry, audit logging, and operational eve
 - **Granular Traceability Mapping:**
     - **Controllers scanned:** `get-grading-students.controller.ts`
     - **Services scanned:** `grading.service.ts`
-      | Layer | Operation / Activity | Sub-Activity / Lifecycle State | Triggered Event | Required Payload Metadata |
-      | :--- | :--- | :--- | :--- | :--- |
-      | _Service Layer_ | Score Process | Auto-Grade Submission | `grading.auto_complete` | `attemptId`, `details: { rawScore, percentage, integrityFlagsCount }` |
+        | Layer           | Operation / Activity | Sub-Activity / Lifecycle State | Triggered Event         | Required Payload Metadata                                             |
+        | :-------------- | :------------------- | :----------------------------- | :---------------------- | :-------------------------------------------------------------------- |
+        | _Service Layer_ | Score Process        | Auto-Grade Submission          | `grading.auto_complete` | `attemptId`, `details: { rawScore, percentage, integrityFlagsCount }` |
 
 ### Module: `/modules/examination/history/`
 
@@ -318,9 +318,9 @@ This matrix documents the complete telemetry, audit logging, and operational eve
 - **Granular Traceability Mapping:**
     - **Controllers scanned:** `get-exam-history.controller.ts`, `get-exam-history-detail.controller.ts`
     - **Services scanned:** `get-student-exam-history.ts`, `get-student-exam-history-detail.ts`
-      | Layer | Operation / Activity | Sub-Activity / Lifecycle State | Triggered Event | Required Payload Metadata |
-      | :--- | :--- | :--- | :--- | :--- |
-      | _Controller / Service_| Catalog View | Read Answer Sheet History | `history.viewed` | `attemptId`, `actorId` (student/instructor) |
+        | Layer                  | Operation / Activity | Sub-Activity / Lifecycle State | Triggered Event  | Required Payload Metadata                   |
+        | :--------------------- | :------------------- | :----------------------------- | :--------------- | :------------------------------------------ |
+        | _Controller / Service_ | Catalog View         | Read Answer Sheet History      | `history.viewed` | `attemptId`, `actorId` (student/instructor) |
 
 ### Module: `/modules/examination/lobby/`
 
@@ -328,10 +328,10 @@ This matrix documents the complete telemetry, audit logging, and operational eve
 - **Granular Traceability Mapping:**
     - **Controllers scanned:** `check-in-lobby.controller.ts`, `update-admissions.controller.ts`
     - **Services scanned:** `check-in-lobby.ts`, `update-admissions.ts`
-      | Layer | Operation / Activity | Sub-Activity / Lifecycle State | Triggered Event | Required Payload Metadata |
-      | :--- | :--- | :--- | :--- | :--- |
-      | _Controller / Service_| Queue Entrance | Lobby Entrance Check-in | `lobby.check_in` | `studentId`, `examId`, `details: { deviceApproved, integrityToken }` |
-      | _Controller / Service_| Queue Admission | Proctor Approve Admittance | `lobby.admitted` | `examId`, `studentId`, `actorId`, `details: { decision: 'APPROVED'\|'REJECTED' }` |
+        | Layer                  | Operation / Activity | Sub-Activity / Lifecycle State | Triggered Event  | Required Payload Metadata                                                         |
+        | :--------------------- | :------------------- | :----------------------------- | :--------------- | :-------------------------------------------------------------------------------- |
+        | _Controller / Service_ | Queue Entrance       | Lobby Entrance Check-in        | `lobby.check_in` | `studentId`, `examId`, `details: { deviceApproved, integrityToken }`              |
+        | _Controller / Service_ | Queue Admission      | Proctor Approve Admittance     | `lobby.admitted` | `examId`, `studentId`, `actorId`, `details: { decision: 'APPROVED'\|'REJECTED' }` |
 
 ### Module: `/modules/examination/monitoring/`
 
@@ -339,9 +339,9 @@ This matrix documents the complete telemetry, audit logging, and operational eve
 - **Granular Traceability Mapping:**
     - **Controllers scanned:** `get-exam-monitoring-overview.controller.ts`, `get-exam-monitoring-student.controller.ts`
     - **Services scanned:** `get-exam-monitoring-overview.ts`, `get-exam-monitoring-student-detail.ts`
-      | Layer | Operation / Activity | Sub-Activity / Lifecycle State | Triggered Event | Required Payload Metadata |
-      | :--- | :--- | :--- | :--- | :--- |
-      | _Controller / Service_| Live Monitor | View Active Room Stream | `monitoring.stream_viewed` | `examId`, `actorId` (proctor), `details: { activeWebcamsCount }` |
+        | Layer                  | Operation / Activity | Sub-Activity / Lifecycle State | Triggered Event            | Required Payload Metadata                                        |
+        | :--------------------- | :------------------- | :----------------------------- | :------------------------- | :--------------------------------------------------------------- |
+        | _Controller / Service_ | Live Monitor         | View Active Room Stream        | `monitoring.stream_viewed` | `examId`, `actorId` (proctor), `details: { activeWebcamsCount }` |
 
 ### Module: `/modules/examination/reporting/`
 
@@ -349,18 +349,18 @@ This matrix documents the complete telemetry, audit logging, and operational eve
 - **Granular Traceability Mapping:**
     - **Controllers scanned:** `get-exam-report.controller.ts`
     - **Services scanned:** `get-exam-report.ts`
-      | Layer | Operation / Activity | Sub-Activity / Lifecycle State | Triggered Event | Required Payload Metadata |
-      | :--- | :--- | :--- | :--- | :--- |
-      | _Controller / Service_| Reporting Output | Generate Exam Report | `reporting.exported` | `examId`, `actorId`, `details: { exportFormat: 'PDF'\|'CSV' }` |
+        | Layer                  | Operation / Activity | Sub-Activity / Lifecycle State | Triggered Event      | Required Payload Metadata                                      |
+        | :--------------------- | :------------------- | :----------------------------- | :------------------- | :------------------------------------------------------------- |
+        | _Controller / Service_ | Reporting Output     | Generate Exam Report           | `reporting.exported` | `examId`, `actorId`, `details: { exportFormat: 'PDF'\|'CSV' }` |
 
 ### Module: `/modules/examination/runtime-access/`
 
 - **Core Responsibilities:** Real-time access tokens adjustments.
 - **Granular Traceability Mapping:**
     - **Controllers scanned:** `update-exam-runtime-access.controller.ts`
-      | Layer | Operation / Activity | Sub-Activity / Lifecycle State | Triggered Event | Required Payload Metadata |
-      | :--- | :--- | :--- | :--- | :--- |
-      | _Controller Layer_ | Proctor Override | Update Session Runtime Token| `exam_runtime.access_updated`| `examId`, `studentId`, `actorId`, `details: { bypassKeyGranted }` |
+        | Layer              | Operation / Activity | Sub-Activity / Lifecycle State | Triggered Event               | Required Payload Metadata                                         |
+        | :----------------- | :------------------- | :----------------------------- | :---------------------------- | :---------------------------------------------------------------- |
+        | _Controller Layer_ | Proctor Override     | Update Session Runtime Token   | `exam_runtime.access_updated` | `examId`, `studentId`, `actorId`, `details: { bypassKeyGranted }` |
 
 ### Module: `/modules/examination/student-overrides/`
 
@@ -368,10 +368,10 @@ This matrix documents the complete telemetry, audit logging, and operational eve
 - **Granular Traceability Mapping:**
     - **Controllers scanned:** `create-student-exam-access-override.controller.ts`, `override-reconnect-limit.controller.ts`
     - **Services scanned:** `student-overrides.service.ts`
-      | Layer | Operation / Activity | Sub-Activity / Lifecycle State | Triggered Event | Required Payload Metadata |
-      | :--- | :--- | :--- | :--- | :--- |
-      | _Controller / Service_| Exception Assign | Grant Extra Time Override | `override.time_granted` | `examId`, `studentId`, `actorId`, `details: { extraMinutes }` |
-      | _Controller / Service_| Exception Assign | Adjust Reconnect Attempts | `override.reconnect_adjusted` | `examId`, `studentId`, `actorId`, `details: { allowedAttempts }` |
+        | Layer                  | Operation / Activity | Sub-Activity / Lifecycle State | Triggered Event               | Required Payload Metadata                                        |
+        | :--------------------- | :------------------- | :----------------------------- | :---------------------------- | :--------------------------------------------------------------- |
+        | _Controller / Service_ | Exception Assign     | Grant Extra Time Override      | `override.time_granted`       | `examId`, `studentId`, `actorId`, `details: { extraMinutes }`    |
+        | _Controller / Service_ | Exception Assign     | Adjust Reconnect Attempts      | `override.reconnect_adjusted` | `examId`, `studentId`, `actorId`, `details: { allowedAttempts }` |
 
 ### Module: `/modules/examination/exams/`
 
@@ -380,12 +380,12 @@ This matrix documents the complete telemetry, audit logging, and operational eve
     - **Controllers scanned:** `create-exam.controller.ts`, `update-exam.controller.ts`, `delete-exam.controller.ts`, `update-exam-status.controller.ts`
     - **Services scanned:** `create-exam.ts`, `update-exam.ts`, `delete-exam.ts`, `update-exam-status.ts`
     - **Data Layer / Models scanned:** `create-exam.ts`, `update-exam.ts`, `delete-exam.ts`, `replace-exam-questions.ts`, `replace-exam-sections.ts`
-      | Layer | Operation / Activity | Sub-Activity / Lifecycle State | Triggered Event | Required Payload Metadata |
-      | :--- | :--- | :--- | :--- | :--- |
-      | _Service Layer_ | Exam Control | Create Exam | `exam.create` | `userId`, `actorId`, `resourceId` (exam*id), `activeInstitutionId`, `details: { title, questions, duration }` |
-      | \_Service Layer* | Exam Control | Update Exam Settings | `exam.update` | `userId`, `actorId`, `resourceId` (exam*id), `activeInstitutionId`, `details: { changedFields }` |
-      | \_Service Layer* | Exam Control | Delete Exam | `exam.delete` | `userId`, `actorId`, `resourceId` (exam*id), `activeInstitutionId` |
-      | \_Service Layer* | Exam Control | Toggle Exam Active Status | `exam.status_updated` | `examId`, `actorId`, `details: { newStatus: 'ACTIVE'\|'INACTIVE' }` |
+        | Layer            | Operation / Activity | Sub-Activity / Lifecycle State | Triggered Event       | Required Payload Metadata                                                                                     |
+        | :--------------- | :------------------- | :----------------------------- | :-------------------- | :------------------------------------------------------------------------------------------------------------ |
+        | _Service Layer_  | Exam Control         | Create Exam                    | `exam.create`         | `userId`, `actorId`, `resourceId` (exam*id), `activeInstitutionId`, `details: { title, questions, duration }` |
+        | \_Service Layer* | Exam Control         | Update Exam Settings           | `exam.update`         | `userId`, `actorId`, `resourceId` (exam*id), `activeInstitutionId`, `details: { changedFields }`              |
+        | \_Service Layer* | Exam Control         | Delete Exam                    | `exam.delete`         | `userId`, `actorId`, `resourceId` (exam*id), `activeInstitutionId`                                            |
+        | \_Service Layer* | Exam Control         | Toggle Exam Active Status      | `exam.status_updated` | `examId`, `actorId`, `details: { newStatus: 'ACTIVE'\|'INACTIVE' }`                                           |
 
 ---
 
@@ -398,11 +398,11 @@ This matrix documents the complete telemetry, audit logging, and operational eve
     - **Controllers scanned:** `create-question.controller.ts`, `update-question.controller.ts`, `delete-question.controller.ts`
     - **Services scanned:** `question.service.ts`
     - **Data Layer / Models scanned:** `create-question.ts`, `update-question.ts`, `delete-question.ts`, `archive-questions.ts`
-      | Layer | Operation / Activity | Sub-Activity / Lifecycle State | Triggered Event | Required Payload Metadata |
-      | :--- | :--- | :--- | :--- | :--- |
-      | _Controller / Service_| Question Drafting | Create Test Item Question | `question.created` | `questionId`, `actorId`, `details: { type, difficulty }` |
-      | _Controller / Service_| Question Drafting | Update Question Content | `question.updated` | `questionId`, `actorId`, `details: { updatedFields }` |
-      | _Data Layer_ | Question Drafting | Archive Question | `question.archived` | `questionId`, `actorId` |
+        | Layer                  | Operation / Activity | Sub-Activity / Lifecycle State | Triggered Event     | Required Payload Metadata                                |
+        | :--------------------- | :------------------- | :----------------------------- | :------------------ | :------------------------------------------------------- |
+        | _Controller / Service_ | Question Drafting    | Create Test Item Question      | `question.created`  | `questionId`, `actorId`, `details: { type, difficulty }` |
+        | _Controller / Service_ | Question Drafting    | Update Question Content        | `question.updated`  | `questionId`, `actorId`, `details: { updatedFields }`    |
+        | _Data Layer_           | Question Drafting    | Archive Question               | `question.archived` | `questionId`, `actorId`                                  |
 
 ### Module: `/modules/content/question-bank/`
 
@@ -411,11 +411,11 @@ This matrix documents the complete telemetry, audit logging, and operational eve
     - **Controllers scanned:** `create-question-bank-collection.controller.ts`, `add-question-bank-collection-questions.controller.ts`, `remove-question-bank-collection-questions.controller.ts`, `update-question-bank-collection.controller.ts`, `delete-question-bank-collection.controller.ts`
     - **Services scanned:** `calibrate-question-difficulty.ts`, `check-exposure-threshold.ts`
     - **Data Layer / Models scanned:** `increment-question-usage.ts`, `update-question-actual-difficulty.ts`
-      | Layer | Operation / Activity | Sub-Activity / Lifecycle State | Triggered Event | Required Payload Metadata |
-      | :--- | :--- | :--- | :--- | :--- |
-      | _Controller / Service_| Bank Management | Create Bank Collection | `bank.collection_created` | `bankCollectionId`, `actorId`, `details: { name }` |
-      | _Controller / Service_| Roster Assign | Add Questions to Bank | `bank.questions_added` | `bankCollectionId`, `actorId`, `details: { questionsCount }` |
-      | _Service Layer_ | exposure Control | Calibrate Item Difficulty | `question.calibrated` | `questionId`, `details: { previousDiff, rawSuccessRate, newDiff }` |
+        | Layer                  | Operation / Activity | Sub-Activity / Lifecycle State | Triggered Event           | Required Payload Metadata                                          |
+        | :--------------------- | :------------------- | :----------------------------- | :------------------------ | :----------------------------------------------------------------- |
+        | _Controller / Service_ | Bank Management      | Create Bank Collection         | `bank.collection_created` | `bankCollectionId`, `actorId`, `details: { name }`                 |
+        | _Controller / Service_ | Roster Assign        | Add Questions to Bank          | `bank.questions_added`    | `bankCollectionId`, `actorId`, `details: { questionsCount }`       |
+        | _Service Layer_        | exposure Control     | Calibrate Item Difficulty      | `question.calibrated`     | `questionId`, `details: { previousDiff, rawSuccessRate, newDiff }` |
 
 ### Module: `/modules/content/question-collection/`
 
@@ -423,10 +423,10 @@ This matrix documents the complete telemetry, audit logging, and operational eve
 - **Granular Traceability Mapping:**
     - **Controllers scanned:** `create-question-collection.controller.ts`, `add-question-collection-questions.controller.ts`, `remove-question-collection-questions.controller.ts`, `update-question-collection.controller.ts`, `delete-question-collection.controller.ts`
     - **Services scanned:** `create-question-collection.ts`, `add-questions-to-collection.ts`, `remove-questions-from-collection.ts`
-      | Layer | Operation / Activity | Sub-Activity / Lifecycle State | Triggered Event | Required Payload Metadata |
-      | :--- | :--- | :--- | :--- | :--- |
-      | _Controller / Service_| Set Management | Create Question Collection | `collection.created` | `collectionId`, `actorId`, `details: { folderName }` |
-      | _Controller / Service_| Set Management | Link Questions to Set | `collection.questions_added` | `collectionId`, `actorId`, `details: { questionsCount }` |
+        | Layer                  | Operation / Activity | Sub-Activity / Lifecycle State | Triggered Event              | Required Payload Metadata                                |
+        | :--------------------- | :------------------- | :----------------------------- | :--------------------------- | :------------------------------------------------------- |
+        | _Controller / Service_ | Set Management       | Create Question Collection     | `collection.created`         | `collectionId`, `actorId`, `details: { folderName }`     |
+        | _Controller / Service_ | Set Management       | Link Questions to Set          | `collection.questions_added` | `collectionId`, `actorId`, `details: { questionsCount }` |
 
 ### Module: `/modules/content/question-type/`
 
@@ -434,9 +434,9 @@ This matrix documents the complete telemetry, audit logging, and operational eve
 - **Granular Traceability Mapping:**
     - **Controllers scanned:** `validate-question-type-content.controller.ts`
     - **Services scanned:** `question-type.service.ts`
-      | Layer | Operation / Activity | Sub-Activity / Lifecycle State | Triggered Event | Required Payload Metadata |
-      | :--- | :--- | :--- | :--- | :--- |
-      | _Controller Layer_ | Schema Validate | Validate Question Content | `question_type.validated` | `actorId`, `details: { format: 'ESSAY'\|'CODE', isValid: true }` |
+        | Layer              | Operation / Activity | Sub-Activity / Lifecycle State | Triggered Event           | Required Payload Metadata                                        |
+        | :----------------- | :------------------- | :----------------------------- | :------------------------ | :--------------------------------------------------------------- |
+        | _Controller Layer_ | Schema Validate      | Validate Question Content      | `question_type.validated` | `actorId`, `details: { format: 'ESSAY'\|'CODE', isValid: true }` |
 
 ---
 
@@ -449,9 +449,9 @@ This matrix documents the complete telemetry, audit logging, and operational eve
     - **Controllers scanned:** `update-telemetry-settings.controller.ts`, `get-telemetry-settings.controller.ts`
     - **Services scanned:** `telemetry-settings.service.ts`, `telemetry-settings-authorization.service.ts`
     - **Data Layer / Models scanned:** `upsert-telemetry-settings.ts`, `get-telemetry-settings.ts`
-      | Layer | Operation / Activity | Sub-Activity / Lifecycle State | Triggered Event | Required Payload Metadata |
-      | :--- | :--- | :--- | :--- | :--- |
-      | _Controller / Service_| Rules Setup | Update Telemetry Rules | `telemetry_settings.updated`| `actorId`, `institutionId`, `details: { ruleSensitivity, enabledFeatures }` |
+        | Layer                  | Operation / Activity | Sub-Activity / Lifecycle State | Triggered Event              | Required Payload Metadata                                                   |
+        | :--------------------- | :------------------- | :----------------------------- | :--------------------------- | :-------------------------------------------------------------------------- |
+        | _Controller / Service_ | Rules Setup          | Update Telemetry Rules         | `telemetry_settings.updated` | `actorId`, `institutionId`, `details: { ruleSensitivity, enabledFeatures }` |
 
 ### Module: `/modules/telemetry/ingestion/`
 
@@ -459,10 +459,10 @@ This matrix documents the complete telemetry, audit logging, and operational eve
 - **Granular Traceability Mapping:**
     - **Controllers scanned:** `ingest-event.controller.ts`, `ingest-batch.controller.ts`, `flush-telemetry.controller.ts`
     - **Services scanned:** `ingestion-queue.service.ts`, `telemetry-job-processor.service.ts`, `telemetry-aggregation.service.ts`
-      | Layer | Operation / Activity | Sub-Activity / Lifecycle State | Triggered Event | Required Payload Metadata |
-      | :--- | :--- | :--- | :--- | :--- |
-      | _Controller / Service_| Ingress stream | Ingest Client event | `telemetry.event_received` | `examSessionId`, `studentId`, `eventType`, `ruleKey`, `timestamp` |
-      | _Service Layer_ | queue buffer | Enqueue Event to Worker | `telemetry.enqueued` | `jobId`, `examSessionId`, `details: { eventQueueSize }` |
+        | Layer                  | Operation / Activity | Sub-Activity / Lifecycle State | Triggered Event            | Required Payload Metadata                                         |
+        | :--------------------- | :------------------- | :----------------------------- | :------------------------- | :---------------------------------------------------------------- |
+        | _Controller / Service_ | Ingress stream       | Ingest Client event            | `telemetry.event_received` | `examSessionId`, `studentId`, `eventType`, `ruleKey`, `timestamp` |
+        | _Service Layer_        | queue buffer         | Enqueue Event to Worker        | `telemetry.enqueued`       | `jobId`, `examSessionId`, `details: { eventQueueSize }`           |
 
 ### Module: `/modules/telemetry/storage/`
 
@@ -471,11 +471,11 @@ This matrix documents the complete telemetry, audit logging, and operational eve
     - **Controllers scanned:** `update-incident.controller.ts`
     - **Services scanned:** `incident-persistence.service.ts`, `incident-review.service.ts`, `incident-severity-resolver.service.ts`
     - **Data Layer / Models scanned:** `get-incidents.ts`
-      | Layer | Operation / Activity | Sub-Activity / Lifecycle State | Triggered Event | Required Payload Metadata |
-      | :--- | :--- | :--- | :--- | :--- |
-      | _Service Layer_ | Persistence | Append Proctoring Incident | `telemetry.incident_appended`| `incidentId`, `attemptId`, `incidentType`, `ruleKey`, `severity` |
-      | _Service Layer_ | Dynamic Scale | Deduplicate and Scale Severity| `telemetry.incident_scaled` | `incidentId`, `attemptId`, `details: { previousSeverity, currentSeverity, occurrenceCount }` |
-      | _Controller / Service_| Proctor Review | Review and Dismiss Flag | `telemetry.incident_reviewed`| `incidentId`, `reviewerUserId`, `details: { status: 'RESOLVED'\|'DISMISSED', reviewNotes }` |
+        | Layer                  | Operation / Activity | Sub-Activity / Lifecycle State | Triggered Event               | Required Payload Metadata                                                                    |
+        | :--------------------- | :------------------- | :----------------------------- | :---------------------------- | :------------------------------------------------------------------------------------------- |
+        | _Service Layer_        | Persistence          | Append Proctoring Incident     | `telemetry.incident_appended` | `incidentId`, `attemptId`, `incidentType`, `ruleKey`, `severity`                             |
+        | _Service Layer_        | Dynamic Scale        | Deduplicate and Scale Severity | `telemetry.incident_scaled`   | `incidentId`, `attemptId`, `details: { previousSeverity, currentSeverity, occurrenceCount }` |
+        | _Controller / Service_ | Proctor Review       | Review and Dismiss Flag        | `telemetry.incident_reviewed` | `incidentId`, `reviewerUserId`, `details: { status: 'RESOLVED'\|'DISMISSED', reviewNotes }`  |
 
 ---
 
@@ -486,27 +486,27 @@ This matrix documents the complete telemetry, audit logging, and operational eve
 - **Core Responsibilities:** Authorizing proctored audio streams and handling chunk uploads.
 - **Granular Traceability Mapping:**
     - **Controllers/Services scanned:** `audio-authorization.service.ts`, `audio-resolver.service.ts`
-      | Layer | Operation / Activity | Sub-Activity / Lifecycle State | Triggered Event | Required Payload Metadata |
-      | :--- | :--- | :--- | :--- | :--- |
-      | _Controller Layer_ | Media Ingress | Request Audio Upload | `infrastructure.audio_authorized`| `attemptId`, `studentId`, `details: { fileSize, audioDuration }` |
+        | Layer              | Operation / Activity | Sub-Activity / Lifecycle State | Triggered Event                   | Required Payload Metadata                                        |
+        | :----------------- | :------------------- | :----------------------------- | :-------------------------------- | :--------------------------------------------------------------- |
+        | _Controller Layer_ | Media Ingress        | Request Audio Upload           | `infrastructure.audio_authorized` | `attemptId`, `studentId`, `details: { fileSize, audioDuration }` |
 
 ### Module: `/modules/infrastructure/livekit/`
 
 - **Core Responsibilities:** Dispatching LiveKit tokens.
 - **Granular Traceability Mapping:**
     - **Controllers/Services scanned:** `livekit.routes.ts`, `livekit.service.ts`
-      | Layer | Operation / Activity | Sub-Activity / Lifecycle State | Triggered Event | Required Payload Metadata |
-      | :--- | :--- | :--- | :--- | :--- |
-      | _Controller Layer_ | Realtime stream | Request LiveKit Room Access Token| `infrastructure.rtc_token_granted`| `attemptId`, `actorId`, `details: { roomName, identity }` |
+        | Layer              | Operation / Activity | Sub-Activity / Lifecycle State    | Triggered Event                    | Required Payload Metadata                                 |
+        | :----------------- | :------------------- | :-------------------------------- | :--------------------------------- | :-------------------------------------------------------- |
+        | _Controller Layer_ | Realtime stream      | Request LiveKit Room Access Token | `infrastructure.rtc_token_granted` | `attemptId`, `actorId`, `details: { roomName, identity }` |
 
 ### Module: `/modules/infrastructure/mediapipe/`
 
 - **Core Responsibilities:** Running client landmarks facial evaluations.
 - **Granular Traceability Mapping:**
     - **Services scanned:** `mediapipe.service.ts`
-      | Layer | Operation / Activity | Sub-Activity / Lifecycle State | Triggered Event | Required Payload Metadata |
-      | :--- | :--- | :--- | :--- | :--- |
-      | _Service Layer_ | Landmarks parse | Analyze Landmarks Frame | `infrastructure.face_landmark_analyzed`| `attemptId`, `details: { gazeDirection, headPoseRotation, eyesClosedSecs }` |
+        | Layer           | Operation / Activity | Sub-Activity / Lifecycle State | Triggered Event                         | Required Payload Metadata                                                   |
+        | :-------------- | :------------------- | :----------------------------- | :-------------------------------------- | :-------------------------------------------------------------------------- |
+        | _Service Layer_ | Landmarks parse      | Analyze Landmarks Frame        | `infrastructure.face_landmark_analyzed` | `attemptId`, `details: { gazeDirection, headPoseRotation, eyesClosedSecs }` |
 
 ---
 
@@ -518,9 +518,9 @@ This matrix documents the complete telemetry, audit logging, and operational eve
 - **Granular Traceability Mapping:**
     - **Controllers scanned:** `gemini.controller.ts`
     - **Services scanned:** `gemini.route.ts` (maps prompts to LLM endpoints)
-      | Layer | Operation / Activity | Sub-Activity / Lifecycle State | Triggered Event | Required Payload Metadata |
-      | :--- | :--- | :--- | :--- | :--- |
-      | _Service Layer_ | AI Diagnostic | Execute Gemini Diagnostic scan | `integration.gemini_scan_completed`| `examSessionId`, `details: { anomalyRating, tokenUsage, responseLatencyMs }` |
+        | Layer           | Operation / Activity | Sub-Activity / Lifecycle State | Triggered Event                     | Required Payload Metadata                                                    |
+        | :-------------- | :------------------- | :----------------------------- | :---------------------------------- | :--------------------------------------------------------------------------- |
+        | _Service Layer_ | AI Diagnostic        | Execute Gemini Diagnostic scan | `integration.gemini_scan_completed` | `examSessionId`, `details: { anomalyRating, tokenUsage, responseLatencyMs }` |
 
 ---
 
@@ -533,11 +533,11 @@ This matrix documents the complete telemetry, audit logging, and operational eve
     - **Controllers scanned:** `create-access-control-assignment.controller.ts`, `delete-access-control-assignment.controller.ts`, `update-access-control-examination-settings.controller.ts`
     - **Services scanned:** `access-control-assignment.service.ts`, `access-control-examination-settings.service.ts`
     - **Data Layer / Models scanned:** `upsert-examination-global-settings.ts`
-      | Layer | Operation / Activity | Sub-Activity / Lifecycle State | Triggered Event | Required Payload Metadata |
-      | :--- | :--- | :--- | :--- | :--- |
-      | _Controller / Service_| Global Security | Update Global Exam Settings | `security.global_settings_updated`| `actorId`, `details: { blockVirtualMachines, blockDualMonitors }` |
-      | _Controller / Service_| Scope Assignment | Grant User Scoping Assignment | `security.assignment_created` | `actorId` (admin), `details: { targetUserId, targetRole, scopeInstitutionId }` |
-      | _Controller / Service_| Scope Assignment | Revoke User Assignment | `security.assignment_revoked` | `actorId` (admin), `details: { targetUserId, targetRole }` |
+        | Layer                  | Operation / Activity | Sub-Activity / Lifecycle State | Triggered Event                    | Required Payload Metadata                                                      |
+        | :--------------------- | :------------------- | :----------------------------- | :--------------------------------- | :----------------------------------------------------------------------------- |
+        | _Controller / Service_ | Global Security      | Update Global Exam Settings    | `security.global_settings_updated` | `actorId`, `details: { blockVirtualMachines, blockDualMonitors }`              |
+        | _Controller / Service_ | Scope Assignment     | Grant User Scoping Assignment  | `security.assignment_created`      | `actorId` (admin), `details: { targetUserId, targetRole, scopeInstitutionId }` |
+        | _Controller / Service_ | Scope Assignment     | Revoke User Assignment         | `security.assignment_revoked`      | `actorId` (admin), `details: { targetUserId, targetRole }`                     |
 
 ### Module: `/modules/security/permission/`
 
@@ -545,10 +545,10 @@ This matrix documents the complete telemetry, audit logging, and operational eve
 - **Granular Traceability Mapping:**
     - **Controllers scanned:** `create-access-control-permission.controller.ts`, `update-access-control-permission.controller.ts`, `delete-access-control-permission.controller.ts`
     - **Services scanned:** `permission.service.ts`
-      | Layer | Operation / Activity | Sub-Activity / Lifecycle State | Triggered Event | Required Payload Metadata |
-      | :--- | :--- | :--- | :--- | :--- |
-      | _Controller / Service_| Rights Catalog | Create Permission Node | `security.permission_created` | `permissionId`, `actorId`, `details: { nodeKey, actionKey }` |
-      | _Controller / Service_| Rights Catalog | Update Permission Node | `security.permission_updated` | `permissionId`, `actorId` |
+        | Layer                  | Operation / Activity | Sub-Activity / Lifecycle State | Triggered Event               | Required Payload Metadata                                    |
+        | :--------------------- | :------------------- | :----------------------------- | :---------------------------- | :----------------------------------------------------------- |
+        | _Controller / Service_ | Rights Catalog       | Create Permission Node         | `security.permission_created` | `permissionId`, `actorId`, `details: { nodeKey, actionKey }` |
+        | _Controller / Service_ | Rights Catalog       | Update Permission Node         | `security.permission_updated` | `permissionId`, `actorId`                                    |
 
 ### Module: `/modules/security/roles/`
 
@@ -556,10 +556,10 @@ This matrix documents the complete telemetry, audit logging, and operational eve
 - **Granular Traceability Mapping:**
     - **Controllers scanned:** `create-access-control-role.controller.ts`, `update-access-control-role.controller.ts`, `delete-access-control-role.controller.ts`, `replace-access-control-role-permissions.controller.ts`
     - **Services scanned:** `roles.service.ts`
-      | Layer | Operation / Activity | Sub-Activity / Lifecycle State | Triggered Event | Required Payload Metadata |
-      | :--- | :--- | :--- | :--- | :--- |
-      | _Controller / Service_| Rights Catalog | Create Access Role | `security.role_created` | `roleId`, `actorId`, `details: { roleName, scope }` |
-      | _Controller / Service_| Rights Catalog | Replace Role Permissions | `security.role_permissions_replaced`| `roleId`, `actorId`, `details: { permissionsAdded: [] }` |
+        | Layer                  | Operation / Activity | Sub-Activity / Lifecycle State | Triggered Event                      | Required Payload Metadata                                |
+        | :--------------------- | :------------------- | :----------------------------- | :----------------------------------- | :------------------------------------------------------- |
+        | _Controller / Service_ | Rights Catalog       | Create Access Role             | `security.role_created`              | `roleId`, `actorId`, `details: { roleName, scope }`      |
+        | _Controller / Service_ | Rights Catalog       | Replace Role Permissions       | `security.role_permissions_replaced` | `roleId`, `actorId`, `details: { permissionsAdded: [] }` |
 
 ---
 
@@ -571,9 +571,9 @@ This matrix documents the complete telemetry, audit logging, and operational eve
 - **Granular Traceability Mapping:**
     - **Controllers scanned:** `generate-analytics-report.controller.ts`
     - **Services scanned:** `map-analytics-kpis.ts`
-      | Layer | Operation / Activity | Sub-Activity / Lifecycle State | Triggered Event | Required Payload Metadata |
-      | :--- | :--- | :--- | :--- | :--- |
-      | _Controller / Service_| Data Output | Trigger Report Compilation | `report.generated` | `actorId`, `details: { reportType, scopeFilters, format }` |
+        | Layer                  | Operation / Activity | Sub-Activity / Lifecycle State | Triggered Event    | Required Payload Metadata                                  |
+        | :--------------------- | :------------------- | :----------------------------- | :----------------- | :--------------------------------------------------------- |
+        | _Controller / Service_ | Data Output          | Trigger Report Compilation     | `report.generated` | `actorId`, `details: { reportType, scopeFilters, format }` |
 
 ### Module: `/modules/general/announcements/`
 
@@ -587,19 +587,19 @@ This matrix documents the complete telemetry, audit logging, and operational eve
 - **Granular Traceability Mapping:**
     - **Controllers scanned:** `create-calendar-event.controller.ts`, `update-calendar-event.controller.ts`, `delete-calendar-event.controller.ts`
     - **Services scanned:** `calendar-write.service.ts`
-      | Layer | Operation / Activity | Sub-Activity / Lifecycle State | Triggered Event | Required Payload Metadata |
-      | :--- | :--- | :--- | :--- | :--- |
-      | _Controller / Service_| Calendar schedule | Create Calendar event | `calendar.event_created` | `eventId`, `actorId`, `details: { title, type, targetDate }` |
-      | _Controller / Service_| Calendar schedule | Delete Calendar event | `calendar.event_deleted` | `eventId`, `actorId` |
+        | Layer                  | Operation / Activity | Sub-Activity / Lifecycle State | Triggered Event          | Required Payload Metadata                                    |
+        | :--------------------- | :------------------- | :----------------------------- | :----------------------- | :----------------------------------------------------------- |
+        | _Controller / Service_ | Calendar schedule    | Create Calendar event          | `calendar.event_created` | `eventId`, `actorId`, `details: { title, type, targetDate }` |
+        | _Controller / Service_ | Calendar schedule    | Delete Calendar event          | `calendar.event_deleted` | `eventId`, `actorId`                                         |
 
 ### Module: `/modules/general/logs/`
 
 - **Core Responsibilities:** Logs pipeline, system logs services, and activity logs.
 - **Granular Traceability Mapping:**
     - **Controllers/Services scanned:** `LogsService`, `AuthLogsService`, `ActivityLogsService`, `SystemLogsService`
-      | Layer | Operation / Activity | Sub-Activity / Lifecycle State | Triggered Event | Required Payload Metadata |
-      | :--- | :--- | :--- | :--- | :--- |
-      | _Service Layer_ | Log dispatch | Write Log Row | `LogsService.createLog` | `userId`, `action`, `resourceType`, `resourceId`, `details`, `ipAddress` |
+        | Layer           | Operation / Activity | Sub-Activity / Lifecycle State | Triggered Event         | Required Payload Metadata                                                |
+        | :-------------- | :------------------- | :----------------------------- | :---------------------- | :----------------------------------------------------------------------- |
+        | _Service Layer_ | Log dispatch         | Write Log Row                  | `LogsService.createLog` | `userId`, `action`, `resourceType`, `resourceId`, `details`, `ipAddress` |
 
 ### Module: `/modules/general/messages/`
 
@@ -607,10 +607,10 @@ This matrix documents the complete telemetry, audit logging, and operational eve
 - **Granular Traceability Mapping:**
     - **Controllers scanned:** `create-direct-conversation.controller.ts`, `send-message.controller.ts`
     - **Services scanned:** `message-write.service.ts`
-      | Layer | Operation / Activity | Sub-Activity / Lifecycle State | Triggered Event | Required Payload Metadata |
-      | :--- | :--- | :--- | :--- | :--- |
-      | _Controller / Service_| Message thread | Initiate Conversation thread | `conversation.created` | `conversationId`, `actorId`, `details: { participantIds: [] }` |
-      | _Controller / Service_| Message thread | Send message details | `message.sent` | `conversationId`, `actorId`, `details: { length }` |
+        | Layer                  | Operation / Activity | Sub-Activity / Lifecycle State | Triggered Event        | Required Payload Metadata                                      |
+        | :--------------------- | :------------------- | :----------------------------- | :--------------------- | :------------------------------------------------------------- |
+        | _Controller / Service_ | Message thread       | Initiate Conversation thread   | `conversation.created` | `conversationId`, `actorId`, `details: { participantIds: [] }` |
+        | _Controller / Service_ | Message thread       | Send message details           | `message.sent`         | `conversationId`, `actorId`, `details: { length }`             |
 
 ### Module: `/modules/general/notification/`
 
@@ -618,9 +618,9 @@ This matrix documents the complete telemetry, audit logging, and operational eve
 - **Granular Traceability Mapping:**
     - **Controllers scanned:** `mark-notification-read.controller.ts`
     - **Services scanned:** `activity-notification-base.service.ts`, `notification.service.ts`
-      | Layer | Operation / Activity | Sub-Activity / Lifecycle State | Triggered Event | Required Payload Metadata |
-      | :--- | :--- | :--- | :--- | :--- |
-      | _Controller / Service_| Notification view | Mark Alert read | `notification.marked_read` | `notificationId`, `actorId` |
+        | Layer                  | Operation / Activity | Sub-Activity / Lifecycle State | Triggered Event            | Required Payload Metadata   |
+        | :--------------------- | :------------------- | :----------------------------- | :------------------------- | :-------------------------- |
+        | _Controller / Service_ | Notification view    | Mark Alert read                | `notification.marked_read` | `notificationId`, `actorId` |
 
 ---
 

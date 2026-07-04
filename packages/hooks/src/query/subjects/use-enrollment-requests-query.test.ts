@@ -25,9 +25,7 @@ describe('useEnrollmentRequestsQuery', () => {
     });
 
     it('returns the array response for non-paginated calls', async () => {
-        vi.mocked(getEnrollmentRequests).mockResolvedValue([
-            { request_id: 'request-1' },
-        ] as any);
+        vi.mocked(getEnrollmentRequests).mockResolvedValue([{ request_id: 'request-1' }] as any);
 
         const query = useEnrollmentRequestsQuery('PENDING', 'physics', 'institution-1') as any;
         const data = await query.queryFn();

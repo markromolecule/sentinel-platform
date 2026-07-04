@@ -28,10 +28,13 @@ export function QuestionsTable({
     onDelete,
     onDeleteSelected,
     isDeleting = false,
-    }: QuestionsTableProps) {
+}: QuestionsTableProps) {
     const { hasPermission } = useActivePermissions();
     const effectiveReadOnly = readOnly || !hasPermission('assessments:manage');
-    const columns = useStableValue(() => getQuestionColumns(effectiveReadOnly), [effectiveReadOnly]);
+    const columns = useStableValue(
+        () => getQuestionColumns(effectiveReadOnly),
+        [effectiveReadOnly],
+    );
     const [selectedQuestion, setSelectedQuestion] = useState<QuestionTableItem | null>(null);
     const [isPreviewOpen, setIsPreviewOpen] = useState(false);
     const [rowSelection, setRowSelection] = useState<Record<string, boolean>>({});

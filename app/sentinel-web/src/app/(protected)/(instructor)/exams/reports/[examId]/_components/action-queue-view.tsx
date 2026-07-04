@@ -43,8 +43,8 @@ export function ActionQueueView({
             <div className="space-y-1">
                 <h2 className="text-xl font-semibold">Action Queue</h2>
                 <p className="text-muted-foreground text-sm">
-                    Review, makeup, and retake queues stay on one page and paginate cleanly
-                    for large classes.
+                    Review, makeup, and retake queues stay on one page and paginate cleanly for
+                    large classes.
                 </p>
             </div>
 

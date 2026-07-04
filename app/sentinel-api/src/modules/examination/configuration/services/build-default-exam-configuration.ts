@@ -11,7 +11,6 @@ export function buildDefaultExamConfiguration(
         ...(DEFAULT_EXAMINATION_GLOBAL_SETTINGS as ExamConfigurationDefaults),
         ...overrides,
     };
-    ``;
     return {
         lobbyAdmissionMode: defaults.defaultLobbyAdmissionMode,
         releaseScoreMode: 'AUTO_RELEASE',

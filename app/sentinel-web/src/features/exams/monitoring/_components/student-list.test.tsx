@@ -23,6 +23,7 @@ function createStudent(overrides: Partial<StudentSession>): StudentSession {
         incidentCount: overrides.incidentCount ?? 0,
         openIncidentCount: overrides.openIncidentCount ?? 0,
         lastActivity: overrides.lastActivity ?? 'Now',
+        lifecycleState: overrides.lifecycleState ?? 'IN_PROGRESS',
     };
 }
 
@@ -45,7 +46,9 @@ describe('StudentList', () => {
             />,
         );
 
-        expect(screen.getByText('No students match the current search or status filter.')).toBeTruthy();
+        expect(
+            screen.getByText('No students match the current search or status filter.'),
+        ).toBeTruthy();
     });
 
     it('keeps pagination labels correct for filtered student totals', () => {
@@ -70,7 +73,27 @@ describe('StudentList', () => {
         );
 
         expect(
-            screen.getByText((_, element) => element?.textContent === 'Showing 1 to 2 of 3 students'),
+            screen.getByText(
+                (_, element) => element?.textContent === 'Showing 1 to 2 of 3 students',
+            ),
         ).toBeTruthy();
+    });
+
+    it('still renders lifecycle-aware students in the list', () => {
+        render(
+            <StudentList
+                students={[
+                    createStudent({ id: 'student-1', firstName: 'Pat', lifecycleState: 'CLOSED' }),
+                ]}
+                selectedId={null}
+                onSelect={vi.fn()}
+                searchQuery=""
+                onSearchChange={vi.fn()}
+                filterStatus="all"
+                onFilterChange={vi.fn()}
+            />,
+        );
+
+        expect(screen.getByRole('button', { name: 'Pat Student' })).toBeTruthy();
     });
 });

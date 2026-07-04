@@ -33,6 +33,8 @@ export function StudentList({
     maxReconnectAttempts,
     overridingStudentId,
     onOverrideReconnect,
+    activeLifecycleActionId,
+    onLifecycleAction,
 }: StudentListProps) {
     const canPaginate =
         typeof page === 'number' &&
@@ -114,6 +116,8 @@ export function StudentList({
                             maxReconnectAttempts={maxReconnectAttempts}
                             isOverridingReconnect={overridingStudentId === student.id}
                             onOverrideReconnect={onOverrideReconnect}
+                            activeLifecycleActionId={activeLifecycleActionId}
+                            onLifecycleAction={onLifecycleAction}
                         />
                     ))
                 )}

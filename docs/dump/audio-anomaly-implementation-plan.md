@@ -140,11 +140,7 @@ Create a typed utility that maps raw YAMNet 521-class output arrays to Sentinel 
 // packages/shared/src/audio/yamnet-class-mapper.ts
 
 export type SentinelAnomalyType =
-    | 'TALKING'
-    | 'TYPING'
-    | 'TAPPING'
-    | 'MOUTH_BREATHING'
-    | 'BACKGROUND_NOISE';
+    'TALKING' | 'TYPING' | 'TAPPING' | 'MOUTH_BREATHING' | 'BACKGROUND_NOISE';
 
 export interface AnomalyClassMapping {
     sentinelType: SentinelAnomalyType;

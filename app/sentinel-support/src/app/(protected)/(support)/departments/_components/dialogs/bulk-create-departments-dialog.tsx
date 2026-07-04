@@ -46,7 +46,6 @@ export function BulkCreateDepartmentsDialog({
         return null;
     }
 
-
     return (
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>

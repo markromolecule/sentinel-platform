@@ -50,11 +50,32 @@ export const getExamIncidentsResponseSchema = z.object({
     }),
 });
 
-export const reviewExamIncidentsBodySchema = z.object({
-    incidentIds: z.array(z.string().uuid()).min(1),
-    status: z.enum(['CONFIRMED', 'DISMISSED']),
-    reviewNotes: z.string().trim().max(2000).nullable().optional(),
-});
+export const reviewExamIncidentsBodySchema = z
+    .object({
+        incidentIds: z.array(z.string().uuid()).min(1),
+        status: z.enum(['CONFIRMED', 'DISMISSED']),
+        reviewNotes: z.string().trim().max(2000).nullable().optional(),
+        lifecycleAction: z.enum(['LOCK_ATTEMPT', 'CLOSE_ATTEMPT']).optional(),
+        reasonCode: z.string().trim().min(1).max(120).nullable().optional(),
+        notes: z.string().trim().max(2000).nullable().optional(),
+    })
+    .superRefine((value, ctx) => {
+        if (value.lifecycleAction && value.status !== 'CONFIRMED') {
+            ctx.addIssue({
+                code: z.ZodIssueCode.custom,
+                path: ['lifecycleAction'],
+                message: 'Lifecycle follow-up actions are only available for confirmed incidents.',
+            });
+        }
+
+        if (value.lifecycleAction && !value.reasonCode?.trim()) {
+            ctx.addIssue({
+                code: z.ZodIssueCode.custom,
+                path: ['reasonCode'],
+                message: 'A lifecycle reason code is required when a follow-up action is selected.',
+            });
+        }
+    });
 
 export const reviewExamIncidentsResponseSchema = z.object({
     message: z.string(),

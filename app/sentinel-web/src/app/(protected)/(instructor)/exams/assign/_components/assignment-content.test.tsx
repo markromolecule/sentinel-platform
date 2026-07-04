@@ -33,7 +33,15 @@ vi.mock('./exam-section-assignment-list', () => ({
 
 vi.mock('@sentinel/ui', () => ({
     Label: ({ children }: { children?: ReactNode }) => <label>{children}</label>,
-    PageHeader: ({ children, title, description }: { children?: ReactNode; title: string; description: string }) => (
+    PageHeader: ({
+        children,
+        title,
+        description,
+    }: {
+        children?: ReactNode;
+        title: string;
+        description: string;
+    }) => (
         <div>
             <h1>{title}</h1>
             <p>{description}</p>

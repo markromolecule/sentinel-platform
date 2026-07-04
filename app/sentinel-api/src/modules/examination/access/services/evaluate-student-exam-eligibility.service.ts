@@ -95,7 +95,9 @@ function buildAttemptLifecycleRuntimeBlock(args: {
 }
 
 function buildEligibilityContext(args: {
-    resolvedExam: NonNullable<Awaited<ReturnType<typeof EntitlementsRepository.getExamAccessPolicy>>>;
+    resolvedExam: NonNullable<
+        Awaited<ReturnType<typeof EntitlementsRepository.getExamAccessPolicy>>
+    >;
     resolvedStudent: NonNullable<
         Awaited<ReturnType<typeof EntitlementsRepository.getStudentProfileByUserId>>
     >;
@@ -222,20 +224,19 @@ export async function evaluateStudentExamEligibilityService({
         latestAttemptLifecycle.isResumable;
     const runtimeAccess =
         resolvedExam.lobby_admission_mode === 'INSTRUCTOR_GATED' &&
-            !latestAttempt?.completed_at &&
-            latestAttempt?.status !== 'IN_PROGRESS' &&
-            (scheduledRuntimeAccess.canStart || accessOverride)
+        !latestAttempt?.completed_at &&
+        latestAttempt?.status !== 'IN_PROGRESS' &&
+        (scheduledRuntimeAccess.canStart || accessOverride)
             ? resolveLobbyRuntimeAccess({
-                scheduledRuntimeAccess,
-                admissionStatus: latestLobbyAdmission?.status ?? null,
-            })
+                  scheduledRuntimeAccess,
+                  admissionStatus: latestLobbyAdmission?.status ?? null,
+              })
             : scheduledRuntimeAccess;
 
     if (accessOverride?.overrideType === 'REOPEN' && !hasValidReopenOverride) {
         return {
             isEligible: false,
-            reason:
-                'This reopen window no longer applies because the original attempt can no longer be resumed.',
+            reason: 'This reopen window no longer applies because the original attempt can no longer be resumed.',
             reasonCode: 'CLOSED',
             runtimeAccess: {
                 state: 'closed',

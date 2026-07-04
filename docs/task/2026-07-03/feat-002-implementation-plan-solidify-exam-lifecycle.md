@@ -153,19 +153,19 @@ Concrete next steps:
 
 **Goal:** Preserve existing override behavior while tying each grant to lifecycle state, source attempts, audit events, and access enforcement.
 
-- [ ] Update `app/sentinel-api/src/modules/examination/student-overrides/student-overrides.service.ts` `createStudentExamAccessOverride()` to accept and persist a `sourceAttemptId` for `REOPEN` when reopening an existing attempt.
-- [ ] Update `packages/shared/src/schema/exams/student-override-schema.ts` so `RETAKE` requires `sourceAttemptId`, `REOPEN` requires `sourceAttemptId` when granted from an attempt lifecycle route, and `MAKEUP` continues to allow `sourceAttemptId = null`.
-- [ ] Add `grantMakeupExamWindow()` in `app/sentinel-api/src/modules/examination/lifecycle/services/grant-makeup-exam-window.ts` to create a `MAKEUP` override, append a `MAKEUP_GRANTED` event when a source attempt exists, and avoid mutating unrelated attempts.
-- [ ] Add `grantRetakeExamWindow()` in `app/sentinel-api/src/modules/examination/lifecycle/services/grant-retake-exam-window.ts` to require `attemptId`, create a `RETAKE` override with `sourceAttemptId`, and append a `RETAKE_GRANTED` event.
-- [ ] Add `grantReopenAttemptWindow()` in `app/sentinel-api/src/modules/examination/lifecycle/services/grant-reopen-attempt-window.ts` to create a `REOPEN` override tied to one locked/closed in-progress attempt.
-- [ ] Update `app/sentinel-api/src/modules/examination/student-overrides/student-overrides.service.ts` `markOverrideUsed()` to append `usedAttemptIds` without double-counting resumed `REOPEN` attempts.
-- [ ] Update `app/sentinel-api/src/modules/examination/reporting/services/exam-report-queries/override-helpers.ts` so `MAKEUP`, `RETAKE`, and `REOPEN` are mapped from override metadata and lifecycle events consistently.
-- [ ] Update `app/sentinel-web/src/app/(protected)/(instructor)/exams/reports/[examId]/_hooks/use-exam-report/index.ts` to replace `window.prompt` makeup/retake grants with service calls that use the new lifecycle endpoints while preserving existing queue behavior.
-- [ ] Mirror the report grant changes in `app/sentinel-core/src/app/(protected)/exams/[id]/report/page.tsx`.
-- [ ] Write `packages/shared/src/schema/exams/student-override-schema.test.ts` for `MAKEUP`, `RETAKE`, and `REOPEN` validation.
-- [ ] Write `app/sentinel-api/src/modules/examination/lifecycle/services/grant-makeup-exam-window.test.ts` and `grant-retake-exam-window.test.ts` covering source attempt requirements and override usage.
-- [ ] Write web report hook tests in `app/sentinel-web/src/app/(protected)/(instructor)/exams/reports/[examId]/_hooks/use-exam-report/index.test.tsx` for makeup and retake lifecycle endpoint calls.
-- [ ] Write core report tests in `app/sentinel-core/src/app/(protected)/exams/[id]/report/page.test.tsx` for makeup and retake lifecycle endpoint calls.
+- [x] Update `app/sentinel-api/src/modules/examination/student-overrides/student-overrides.service.ts` `createStudentExamAccessOverride()` to accept and persist a `sourceAttemptId` for `REOPEN` when reopening an existing attempt.
+- [x] Update `packages/shared/src/schema/exams/student-override-schema.ts` so `RETAKE` requires `sourceAttemptId`, `REOPEN` requires `sourceAttemptId` when granted from an attempt lifecycle route, and `MAKEUP` continues to allow `sourceAttemptId = null`.
+- [x] Add `grantMakeupExamWindow()` in `app/sentinel-api/src/modules/examination/lifecycle/services/grant-makeup-exam-window.ts` to create a `MAKEUP` override, append a `MAKEUP_GRANTED` event when a source attempt exists, and avoid mutating unrelated attempts.
+- [x] Add `grantRetakeExamWindow()` in `app/sentinel-api/src/modules/examination/lifecycle/services/grant-retake-exam-window.ts` to require `attemptId`, create a `RETAKE` override with `sourceAttemptId`, and append a `RETAKE_GRANTED` event.
+- [x] Add `grantReopenAttemptWindow()` in `app/sentinel-api/src/modules/examination/lifecycle/services/grant-reopen-attempt-window.ts` to create a `REOPEN` override tied to one locked/closed in-progress attempt.
+- [x] Update `app/sentinel-api/src/modules/examination/student-overrides/student-overrides.service.ts` `markOverrideUsed()` to append `usedAttemptIds` without double-counting resumed `REOPEN` attempts.
+- [x] Update `app/sentinel-api/src/modules/examination/reporting/services/exam-report-queries/override-helpers.ts` so `MAKEUP`, `RETAKE`, and `REOPEN` are mapped from override metadata and lifecycle events consistently.
+- [x] Update `app/sentinel-web/src/app/(protected)/(instructor)/exams/reports/[examId]/_hooks/use-exam-report/index.ts` to replace `window.prompt` makeup/retake grants with service calls that use the new lifecycle endpoints while preserving existing queue behavior.
+- [x] Mirror the report grant changes in `app/sentinel-core/src/app/(protected)/exams/[id]/report/page.tsx`.
+- [x] Write `packages/shared/src/schema/exams/student-override-schema.test.ts` for `MAKEUP`, `RETAKE`, and `REOPEN` validation.
+- [x] Write `app/sentinel-api/src/modules/examination/lifecycle/services/grant-makeup-exam-window.test.ts` and `grant-retake-exam-window.test.ts` covering source attempt requirements and override usage.
+- [x] Write web report hook tests in `app/sentinel-web/src/app/(protected)/(instructor)/exams/reports/[examId]/_hooks/use-exam-report/index.test.tsx` for makeup and retake lifecycle endpoint calls.
+- [x] Write core report tests in `app/sentinel-core/src/app/(protected)/exams/[id]/report/page.test.tsx` for makeup and retake lifecycle endpoint calls.
 
 **Migration required:** No - this phase uses lifecycle events and existing `system_settings` override storage.
 **Breaking changes:** No - existing override endpoints can remain, but report UI should prefer lifecycle grant endpoints.
@@ -175,19 +175,19 @@ Concrete next steps:
 
 **Goal:** Keep incident confirmation as evidence review while enabling explicit or configured lifecycle transitions through the lifecycle service.
 
-- [ ] Update `app/sentinel-api/src/modules/examination/incidents/incidents.dto.ts` to add optional lifecycle follow-up fields to review payloads, such as `lifecycleAction`, `reasonCode`, and `notes`.
-- [ ] Update `app/sentinel-api/src/modules/examination/incidents/incidents.service.ts` `reviewExamIncidentsData()` to return affected `attemptId` values and append `INCIDENT_REVIEWED` lifecycle events without changing attempt state by default.
-- [ ] Update `app/sentinel-api/src/modules/examination/incidents/incidents.service.ts` to call `lockExamAttempt()` or `closeExamAttempt()` only when a lifecycle follow-up action is explicitly requested and all reviewed incidents belong to one target attempt.
-- [ ] Add `app/sentinel-api/src/modules/examination/lifecycle/lifecycle.constants.ts` with the first-slice automatic close policy: close one attempt after 3 committed `HIGH` incidents for that attempt within 15 minutes, with no immediate-close event type in this release.
-- [ ] Add `app/sentinel-api/src/modules/examination/lifecycle/services/resolve-automatic-lifecycle-policy.ts` to convert persisted incident severity/count metadata into automatic close decisions using `AUTOMATIC_ATTEMPT_CLOSE_POLICY`.
-- [ ] Update `app/sentinel-api/src/modules/telemetry/storage/services/incident-persistence.service.ts` to invoke `resolveAutomaticLifecyclePolicy()` after committed high-severity incident updates and call `closeExamAttempt()` only for the triggering `attempt_id`.
-- [ ] Leave `app/sentinel-api/src/modules/examination/configuration/services/build-default-exam-configuration.ts` unchanged in this first slice; document exam-configurable automatic close thresholds as future work in the lifecycle service JSDoc.
-- [ ] Update `app/sentinel-web/src/features/exams/logs/hooks/use-incident-logs.ts`, `app/sentinel-web/src/features/exams/logs/components/columns.tsx`, and `app/sentinel-web/src/features/exams/logs/components/incident-drawer.tsx` to offer lifecycle follow-up actions after confirmed incidents without making confirmation itself close the attempt.
-- [ ] Write `app/sentinel-api/src/modules/examination/incidents/incidents.service.test.ts` proving confirm-only review does not mutate `exam_attempts.lifecycle_state`.
-- [ ] Write `app/sentinel-api/src/modules/examination/incidents/incidents.service.test.ts` proving explicit confirm-and-close affects only the selected attempt.
-- [ ] Write `app/sentinel-api/src/modules/examination/lifecycle/services/resolve-automatic-lifecycle-policy.test.ts` for threshold decisions and no-op decisions.
-- [ ] Write `app/sentinel-api/src/modules/telemetry/storage/services/incident-persistence.service.test.ts` proving automatic closure affects only the triggering `attempt_id`.
-- [ ] Write `app/sentinel-web/src/features/exams/logs/hooks/use-incident-logs.test.ts` and `app/sentinel-web/src/features/exams/logs/components/incident-drawer.test.tsx` for confirm-only and confirm-with-lifecycle-action flows.
+- [x] Update `app/sentinel-api/src/modules/examination/incidents/incidents.dto.ts` to add optional lifecycle follow-up fields to review payloads, such as `lifecycleAction`, `reasonCode`, and `notes`.
+- [x] Update `app/sentinel-api/src/modules/examination/incidents/incidents.service.ts` `reviewExamIncidentsData()` to return affected `attemptId` values and append `INCIDENT_REVIEWED` lifecycle events without changing attempt state by default.
+- [x] Update `app/sentinel-api/src/modules/examination/incidents/incidents.service.ts` to call `lockExamAttempt()` or `closeExamAttempt()` only when a lifecycle follow-up action is explicitly requested and all reviewed incidents belong to one target attempt.
+- [x] Add `app/sentinel-api/src/modules/examination/lifecycle/lifecycle.constants.ts` with the first-slice automatic close policy: close one attempt after 3 committed `HIGH` incidents for that attempt within 15 minutes, with no immediate-close event type in this release.
+- [x] Add `app/sentinel-api/src/modules/examination/lifecycle/services/resolve-automatic-lifecycle-policy.ts` to convert persisted incident severity/count metadata into automatic close decisions using `AUTOMATIC_ATTEMPT_CLOSE_POLICY`.
+- [x] Update `app/sentinel-api/src/modules/telemetry/storage/services/incident-persistence.service.ts` to invoke `resolveAutomaticLifecyclePolicy()` after committed high-severity incident updates and call `closeExamAttempt()` only for the triggering `attempt_id`.
+- [x] Leave `app/sentinel-api/src/modules/examination/configuration/services/build-default-exam-configuration.ts` unchanged in this first slice; document exam-configurable automatic close thresholds as future work in the lifecycle service JSDoc.
+- [x] Update `app/sentinel-web/src/features/exams/logs/hooks/use-incident-logs.ts`, `app/sentinel-web/src/features/exams/logs/components/columns.tsx`, and `app/sentinel-web/src/features/exams/logs/components/incident-drawer.tsx` to offer lifecycle follow-up actions after confirmed incidents without making confirmation itself close the attempt.
+- [x] Write `app/sentinel-api/src/modules/examination/incidents/incidents.service.test.ts` proving confirm-only review does not mutate `exam_attempts.lifecycle_state`.
+- [x] Write `app/sentinel-api/src/modules/examination/incidents/incidents.service.test.ts` proving explicit confirm-and-close affects only the selected attempt.
+- [x] Write `app/sentinel-api/src/modules/examination/lifecycle/services/resolve-automatic-lifecycle-policy.test.ts` for threshold decisions and no-op decisions.
+- [x] Write `app/sentinel-api/src/modules/telemetry/storage/services/incident-persistence.service.test.ts` proving automatic closure affects only the triggering `attempt_id`.
+- [x] Write `app/sentinel-web/src/features/exams/logs/hooks/use-incident-logs.test.ts` and `app/sentinel-web/src/features/exams/logs/components/incident-drawer.test.tsx` for confirm-only and confirm-with-lifecycle-action flows.
 
 **Migration required:** No - automatic close thresholds are system constants in this first slice.
 **Breaking changes:** No - review payload additions must be optional.
@@ -197,26 +197,28 @@ Concrete next steps:
 
 **Goal:** Expose lifecycle state in live monitoring and make per-student controls distinct from exam-wide runtime access controls.
 
-- [ ] Update `app/sentinel-api/src/modules/examination/monitoring/services/get-exam-monitoring-overview.ts` to select lifecycle fields from `exam_attempts`.
-- [ ] Update `app/sentinel-api/src/modules/examination/monitoring/services/get-exam-monitoring-student-detail.ts` to select lifecycle fields and lifecycle event history for the selected attempt.
-- [ ] Update `app/sentinel-api/src/modules/examination/monitoring/services/map-monitoring-response.ts` `MonitoringStudentRow`, `mapMonitoringStudentSummary()`, and `mapMonitoringStudentDetail()` to include `lifecycleState`, `scoreState`, `closedReason`, `reopenedUntil`, `finalizedAt`, and `lifecycleEvents`.
-- [ ] Update `app/sentinel-api/src/modules/examination/monitoring/monitoring.dto.ts` to include lifecycle fields in overview and detail response schemas.
-- [ ] Update `packages/shared/src/types/proctor/exams/[id]/monitoring/index.ts` `StudentSession` with lifecycle fields and add lifecycle-aware monitoring status labels for `locked`, `closed`, and `superseded`.
-- [ ] Update `packages/services/src/api/exams/types.ts` `ApiMonitoringStudentSummary` and `ApiMonitoringStudentDetail` with lifecycle fields.
-- [ ] Update `packages/services/src/api/exams/mappers.ts` `mapMonitoringStudent()` to map lifecycle fields to shared `StudentSession`.
-- [ ] Add lifecycle action service functions in `packages/services/src/api/exams/core.ts`, such as `lockExamAttemptLifecycle()`, `reopenExamAttemptLifecycle()`, `resetExamAttemptLifecycle()`, and `closeExamAttemptLifecycle()`.
-- [ ] Add lifecycle mutation hooks in `packages/hooks/src/query/exams` for lock, reopen, reset, close, makeup, and retake actions.
-- [ ] Update `app/sentinel-web/src/app/(protected)/(instructor)/exams/[id]/monitoring/_hooks/use-monitoring.ts` to manage selected-student lifecycle actions through the new mutation hooks instead of using exam-wide `updateExamRuntimeAccess()` for all buttons.
-- [ ] Update `app/sentinel-web/src/features/exams/monitoring/_components/monitoring-header.tsx` so exam-wide runtime access controls are visually labeled as exam-wide or moved away from per-student controls.
-- [ ] Add `app/sentinel-web/src/features/exams/monitoring/_components/attempt-lifecycle-actions.tsx` with per-student lock, reopen, reset, close, makeup, and retake actions.
-- [ ] Add `app/sentinel-web/src/features/exams/monitoring/_components/attempt-lifecycle-badge.tsx` to render lifecycle state, score state, and closed/finalized cues.
-- [ ] Update `app/sentinel-web/src/features/exams/monitoring/_components/student-list.tsx` to show lifecycle badges and disable reconnect override when the attempt is closed/superseded.
-- [ ] Update `app/sentinel-web/src/features/exams/monitoring/_components/flagging-timeline.tsx` to show lifecycle events next to incident review events when viewing a student detail.
-- [ ] Write `app/sentinel-api/src/modules/examination/monitoring/services/map-monitoring-response.test.ts` cases for locked, closed, submitted, superseded, and finalized lifecycle states.
-- [ ] Write `packages/services/src/api/exams/mappers.test.ts` cases for lifecycle mapping.
-- [ ] Write `packages/hooks/src/query/exams/use-exam-attempt-lifecycle-mutation.test.ts` covering request paths and invalid payload handling.
-- [ ] Write `app/sentinel-web/src/app/(protected)/(instructor)/exams/[id]/monitoring/_hooks/use-monitoring.test.tsx` for selected-student lifecycle actions and no accidental exam-wide mutation.
-- [ ] Write `app/sentinel-web/src/features/exams/monitoring/_components/attempt-lifecycle-actions.test.tsx`, `attempt-lifecycle-badge.test.tsx`, and `student-list.test.tsx` for lifecycle UI states.
+- [x] Update `app/sentinel-api/src/modules/examination/monitoring/services/get-exam-monitoring-overview.ts` to select lifecycle fields from `exam_attempts`.
+- [x] Update `app/sentinel-api/src/modules/examination/monitoring/services/get-exam-monitoring-student-detail.ts` to select lifecycle fields and lifecycle event history for the selected attempt.
+- [x] Update `app/sentinel-api/src/modules/examination/monitoring/services/map-monitoring-response.ts` `MonitoringStudentRow`, `mapMonitoringStudentSummary()`, and `mapMonitoringStudentDetail()` to include `lifecycleState`, `scoreState`, `closedReason`, `reopenedUntil`, `finalizedAt`, and `lifecycleEvents`.
+- [x] Update `app/sentinel-api/src/modules/examination/monitoring/monitoring.dto.ts` to include lifecycle fields in overview and detail response schemas.
+- [x] Update `packages/shared/src/types/proctor/exams/[id]/monitoring/index.ts` `StudentSession` with lifecycle fields and add lifecycle-aware monitoring status labels for `locked`, `closed`, and `superseded`.
+- [x] Update `packages/services/src/api/exams/types.ts` `ApiMonitoringStudentSummary` and `ApiMonitoringStudentDetail` with lifecycle fields.
+- [x] Update `packages/services/src/api/exams/mappers.ts` `mapMonitoringStudent()` to map lifecycle fields to shared `StudentSession`.
+- [x] Add lifecycle action service functions in `packages/services/src/api/exams/core.ts`, such as `lockExamAttemptLifecycle()`, `reopenExamAttemptLifecycle()`, `resetExamAttemptLifecycle()`, and `closeExamAttemptLifecycle()`.
+- [x] Add lifecycle mutation hooks in `packages/hooks/src/query/exams` for lock, reopen, reset, close, makeup, and retake actions.
+- [x] Update `app/sentinel-web/src/app/(protected)/(instructor)/exams/[id]/monitoring/_hooks/use-monitoring.ts` to manage selected-student lifecycle actions through the new mutation hooks instead of using exam-wide `updateExamRuntimeAccess()` for all buttons.
+- [x] Update `app/sentinel-web/src/features/exams/monitoring/_components/monitoring-header.tsx` so exam-wide runtime access controls are visually labeled as exam-wide or moved away from per-student controls.
+- [x] Add `app/sentinel-web/src/features/exams/monitoring/_components/attempt-lifecycle-actions.tsx` with per-student lock, reopen, reset, close, makeup, and retake actions.
+- [x] Add `app/sentinel-web/src/features/exams/monitoring/_components/attempt-lifecycle-badge.tsx` to render lifecycle state, score state, and closed/finalized cues.
+- [x] Update `app/sentinel-web/src/features/exams/monitoring/_components/student-list.tsx` to show lifecycle badges and disable reconnect override when the attempt is closed/superseded.
+- [x] Update `app/sentinel-web/src/features/exams/monitoring/_components/flagging-timeline.tsx` to show lifecycle events next to incident review events when viewing a student detail.
+- [x] Write `app/sentinel-api/src/modules/examination/monitoring/services/map-monitoring-response.test.ts` cases for locked, closed, submitted, superseded, and finalized lifecycle states.
+- [x] Write `packages/services/src/api/exams/mappers.test.ts` cases for lifecycle mapping.
+- [x] Write `packages/hooks/src/query/exams/use-exam-attempt-lifecycle-mutation.test.ts` covering request paths and invalid payload handling.
+- [x] Write `app/sentinel-web/src/app/(protected)/(instructor)/exams/[id]/monitoring/_hooks/use-monitoring.test.tsx` for selected-student lifecycle actions and no accidental exam-wide mutation.
+- [x] Write `app/sentinel-web/src/features/exams/monitoring/_components/attempt-lifecycle-actions.test.tsx`, `attempt-lifecycle-badge.test.tsx`, and `student-list.test.tsx` for lifecycle UI states.
+
+<!-- NOTE: Phase 6 also required small wiring updates in `app/sentinel-web/src/app/(protected)/(instructor)/exams/[id]/monitoring/page.tsx`, `app/sentinel-web/src/features/exams/monitoring/_components/student-card.tsx`, `app/sentinel-web/src/features/exams/monitoring/_components/student-monitoring-detail.tsx`, `app/sentinel-web/src/features/exams/monitoring/_components/integrity-timeline-card.tsx`, and `app/sentinel-web/src/features/exams/monitoring/_components/index.ts` so the listed lifecycle props and timeline data could flow through the existing monitoring UI without changing unrelated behavior. -->
 
 **Migration required:** No - this phase consumes lifecycle fields from Phase 1.
 **Breaking changes:** Monitoring response gets additive fields; existing consumers should continue working.

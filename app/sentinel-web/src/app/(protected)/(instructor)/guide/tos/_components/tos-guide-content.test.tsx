@@ -7,11 +7,9 @@ describe('TosGuideContent', () => {
         render(<TosGuideContent />);
 
         expect(
-            screen.getByRole('heading', { name: /Table of Specifications \(TOS\) Guide/i })
+            screen.getByRole('heading', { name: /Table of Specifications \(TOS\) Guide/i }),
         ).toBeTruthy();
-        expect(
-            screen.getByText(/Learn how the system maps questions to topics/i)
-        ).toBeTruthy();
+        expect(screen.getByText(/Learn how the system maps questions to topics/i)).toBeTruthy();
     });
 
     it('renders the accordion headers', () => {

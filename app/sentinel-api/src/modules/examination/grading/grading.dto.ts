@@ -94,6 +94,9 @@ export const updateGradingAttemptSchema = {
             attemptId: z.string().uuid(),
             score: z.number(),
             totalScore: z.number().nullable(),
+            scoreState: z.string().nullable().optional(),
+            finalizedAt: z.string().nullable().optional(),
+            finalizedBy: z.string().uuid().nullable().optional(),
         }),
     }),
 };
@@ -108,6 +111,9 @@ export const bulkFinalizeAttemptsSchema = {
         message: z.string(),
         data: z.object({
             count: z.number(),
+            scoreState: z.string().nullable().optional(),
+            finalizedAt: z.string().nullable().optional(),
+            finalizedBy: z.string().uuid().nullable().optional(),
         }),
     }),
 };

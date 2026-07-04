@@ -167,7 +167,7 @@ export function useRoleMatrix() {
 
     /**
      * Reconciles and saves modified permissions mapping for a given role ID.
-     * Uses a ref-based pending/confirmed tracking system to avoid race conditions 
+     * Uses a ref-based pending/confirmed tracking system to avoid race conditions
      * during React Query invalidation and subsequent refetches.
      */
     const saveRolePermissions = useCallback(

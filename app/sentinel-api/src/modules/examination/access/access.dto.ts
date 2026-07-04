@@ -37,15 +37,15 @@ export type ExamAccessContext = {
 
 export type ExamAccessEligibility =
     | {
-        isEligible: false;
-        reason: string;
-        reasonCode: z.infer<typeof Schema.examRuntimeAccessReasonCodeSchema>;
-        runtimeAccess: z.infer<typeof Schema.examRuntimeAccessSchema>;
-        accessOverride?: z.infer<typeof Schema.studentExamAccessOverrideSchema> | null;
-    }
+          isEligible: false;
+          reason: string;
+          reasonCode: z.infer<typeof Schema.examRuntimeAccessReasonCodeSchema>;
+          runtimeAccess: z.infer<typeof Schema.examRuntimeAccessSchema>;
+          accessOverride?: z.infer<typeof Schema.studentExamAccessOverrideSchema> | null;
+      }
     | {
-        isEligible: true;
-        context: ExamAccessContext;
-        runtimeAccess: z.infer<typeof Schema.examRuntimeAccessSchema>;
-        accessOverride?: z.infer<typeof Schema.studentExamAccessOverrideSchema> | null;
-    };
+          isEligible: true;
+          context: ExamAccessContext;
+          runtimeAccess: z.infer<typeof Schema.examRuntimeAccessSchema>;
+          accessOverride?: z.infer<typeof Schema.studentExamAccessOverrideSchema> | null;
+      };

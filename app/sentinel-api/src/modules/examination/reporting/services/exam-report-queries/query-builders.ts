@@ -79,6 +79,15 @@ export function buildLatestAttemptsQuery(dbClient: DbClient, examId: string) {
             'ea.total_score',
             'ea.created_at',
             'ea.answer_snapshot',
+            sql<string | null>`ea.lifecycle_state::text`.as('lifecycle_state'),
+            sql<string | null>`ea.score_state::text`.as('score_state'),
+            'ea.closed_reason',
+            'ea.reopened_until',
+            'ea.finalized_at',
+            'ea.finalized_by',
+            'ea.superseded_by_attempt_id',
+            'ea.superseded_at',
+            'ea.superseded_by',
         ])
         .where('ea.exam_id', '=', examId)
         .where('ea.student_id', 'is not', null)

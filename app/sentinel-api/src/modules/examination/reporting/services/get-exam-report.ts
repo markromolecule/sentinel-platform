@@ -55,7 +55,9 @@ export async function getExamReport({
         overrideAttemptKindMap,
         activeOverrideMap,
     });
-    const students = enrichedStudentRows.map((row) => mapReportStudentSummary(row, exam.passingScore));
+    const students = enrichedStudentRows.map((row) =>
+        mapReportStudentSummary(row, exam.passingScore),
+    );
     const baseReport = buildExamReport({
         exam: mapReportExam(exam),
         students,

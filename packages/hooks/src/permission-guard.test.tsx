@@ -29,14 +29,13 @@ describe('PermissionGuard', () => {
         cleanup();
     });
 
-
     it('renders children if user has the required permission', () => {
         mockHasPermission.mockReturnValue(true);
 
         render(
             <PermissionGuard permission="test:permission">
                 <div>Protected Content</div>
-            </PermissionGuard>
+            </PermissionGuard>,
         );
 
         expect(screen.getByText('Protected Content')).toBeDefined();
@@ -47,12 +46,9 @@ describe('PermissionGuard', () => {
         mockHasPermission.mockReturnValue(false);
 
         render(
-            <PermissionGuard
-                permission="test:permission"
-                fallback={<div>Fallback Content</div>}
-            >
+            <PermissionGuard permission="test:permission" fallback={<div>Fallback Content</div>}>
                 <div>Protected Content</div>
-            </PermissionGuard>
+            </PermissionGuard>,
         );
 
         expect(screen.queryByText('Protected Content')).toBeNull();
@@ -66,7 +62,7 @@ describe('PermissionGuard', () => {
         render(
             <PermissionGuard permissions={['p1', 'p2']} requireAll={false}>
                 <div>Protected Content</div>
-            </PermissionGuard>
+            </PermissionGuard>,
         );
 
         expect(screen.getByText('Protected Content')).toBeDefined();
@@ -83,7 +79,7 @@ describe('PermissionGuard', () => {
                 fallback={<div>Fallback Content</div>}
             >
                 <div>Protected Content</div>
-            </PermissionGuard>
+            </PermissionGuard>,
         );
 
         expect(screen.queryByText('Protected Content')).toBeNull();
@@ -97,7 +93,7 @@ describe('PermissionGuard', () => {
         render(
             <PermissionGuard permissions={['p1', 'p2']} requireAll={true}>
                 <div>Protected Content</div>
-            </PermissionGuard>
+            </PermissionGuard>,
         );
 
         expect(screen.getByText('Protected Content')).toBeDefined();
@@ -114,12 +110,11 @@ describe('PermissionGuard', () => {
                 fallback={<div>Fallback Content</div>}
             >
                 <div>Protected Content</div>
-            </PermissionGuard>
+            </PermissionGuard>,
         );
 
         expect(screen.queryByText('Protected Content')).toBeNull();
         expect(screen.getByText('Fallback Content')).toBeDefined();
         expect(mockHasAllPermissions).toHaveBeenCalledWith(['p1', 'p2']);
     });
-
 });

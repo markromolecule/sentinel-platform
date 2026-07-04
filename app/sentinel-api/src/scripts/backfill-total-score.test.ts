@@ -6,7 +6,9 @@ vi.mock('@sentinel/db', () => {
     const mockDb = {
         selectFrom: vi.fn().mockReturnThis(),
         select: vi.fn().mockReturnThis(),
-        where: vi.fn().mockImplementation(function (this: any) { return this; }),
+        where: vi.fn().mockImplementation(function (this: any) {
+            return this;
+        }),
         execute: vi.fn(),
         updateTable: vi.fn().mockReturnThis(),
         set: vi.fn().mockReturnThis(),
@@ -33,10 +35,7 @@ describe('backfillTotalScores', () => {
         ]);
 
         // Second execute call: fetch exam questions for exam-1
-        vi.mocked(dbClient.execute).mockResolvedValueOnce([
-            { points: 5 },
-            { points: 5 },
-        ]);
+        vi.mocked(dbClient.execute).mockResolvedValueOnce([{ points: 5 }, { points: 5 }]);
 
         const setSpy = vi.fn().mockReturnThis();
         dbClient.set = setSpy;

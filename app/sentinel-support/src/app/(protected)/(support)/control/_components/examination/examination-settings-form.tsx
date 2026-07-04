@@ -31,11 +31,7 @@ type ExaminationSettingsFormProps = {
 type NestedRuleSection = 'defaultAiRules' | 'defaultWebSecurity' | 'defaultMobileSecurity';
 
 export type ExaminationSettingsSection =
-    | 'overview'
-    | 'general'
-    | 'behavior'
-    | 'safeguards'
-    | 'monitoring';
+    'overview' | 'general' | 'behavior' | 'safeguards' | 'monitoring';
 
 export function ExaminationSettingsForm({
     record,

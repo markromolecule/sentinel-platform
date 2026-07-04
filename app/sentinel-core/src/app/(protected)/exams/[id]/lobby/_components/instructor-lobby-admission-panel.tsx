@@ -200,7 +200,9 @@ export function InstructorLobbyAdmissionPanel({
                     icon={<Clock className="h-4 w-4" />}
                     students={waitingStudents}
                     emptyLabel={
-                        hasActiveFilter ? 'No waiting students match this filter.' : 'No students waiting.'
+                        hasActiveFilter
+                            ? 'No waiting students match this filter.'
+                            : 'No students waiting.'
                     }
                 >
                     {(student) => (

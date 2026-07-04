@@ -51,7 +51,7 @@ export function ReportNavigation({ activeSection, setActiveSection }: ReportNavi
 
             {/* Mobile Navigation */}
             <div className="px-4 pt-6 lg:hidden">
-                <div className="bg-card/20 rounded-xl border p-1.5 shadow-sm backdrop-blur-sm flex gap-2">
+                <div className="bg-card/20 flex gap-2 rounded-xl border p-1.5 shadow-sm backdrop-blur-sm">
                     {sections.map((section) => (
                         <button
                             key={section.id}
@@ -59,7 +59,7 @@ export function ReportNavigation({ activeSection, setActiveSection }: ReportNavi
                             className={cn(
                                 'flex-1 rounded-lg py-2 text-center text-sm font-medium transition-colors',
                                 activeSection === section.id
-                                    ? 'bg-background shadow text-[#323d8f]'
+                                    ? 'bg-background text-[#323d8f] shadow'
                                     : 'text-muted-foreground hover:text-foreground',
                             )}
                         >

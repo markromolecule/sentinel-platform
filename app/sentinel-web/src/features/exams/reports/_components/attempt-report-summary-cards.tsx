@@ -11,7 +11,10 @@ type AttemptReportSummaryCardsProps = {
  * Renders a row of modular, compact summary cards for an exam attempt report.
  * Includes the final score, finalization status, and overall feedback.
  */
-export function AttemptReportSummaryCards({ attempt, optimisticScore = null }: AttemptReportSummaryCardsProps) {
+export function AttemptReportSummaryCards({
+    attempt,
+    optimisticScore = null,
+}: AttemptReportSummaryCardsProps) {
     return (
         <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3">
             <ScoreCard attempt={attempt} optimisticScore={optimisticScore} />
@@ -34,17 +37,17 @@ function ScoreCard({
     const displayedScore = optimisticScore !== null ? optimisticScore : attempt.score;
 
     return (
-        <Card className="flex flex-row items-center gap-3.5 p-4 py-3 border-border/50 bg-card shadow-none">
+        <Card className="border-border/50 bg-card flex flex-row items-center gap-3.5 p-4 py-3 shadow-none">
             <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-amber-500/10 text-amber-600 dark:text-amber-400">
                 <Trophy className="h-5 w-5" />
             </div>
-            <div className="flex flex-col min-w-0">
-                <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
+            <div className="flex min-w-0 flex-col">
+                <span className="text-muted-foreground text-[10px] font-bold tracking-wider uppercase">
                     Final Score
                 </span>
-                <span className="text-lg font-bold text-foreground">
+                <span className="text-foreground text-lg font-bold">
                     {displayedScore ?? 'N/A'}{' '}
-                    <span className="text-muted-foreground font-normal text-xs">
+                    <span className="text-muted-foreground text-xs font-normal">
                         / {attempt.totalScore ?? 'N/A'}
                     </span>
                 </span>
@@ -60,7 +63,7 @@ function StatusCard({ attempt }: { attempt: AttemptGradingDetailType }) {
     const isFinalized = !!attempt.grading.finalizedAt;
 
     return (
-        <Card className="flex flex-row items-center gap-3.5 p-4 py-3 border-border/50 bg-card shadow-none">
+        <Card className="border-border/50 bg-card flex flex-row items-center gap-3.5 p-4 py-3 shadow-none">
             <div
                 className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg ${
                     isFinalized
@@ -70,19 +73,19 @@ function StatusCard({ attempt }: { attempt: AttemptGradingDetailType }) {
             >
                 {isFinalized ? <Lock className="h-5 w-5" /> : <Unlock className="h-5 w-5" />}
             </div>
-            <div className="flex flex-col min-w-0 w-full gap-0.5">
-                <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
+            <div className="flex w-full min-w-0 flex-col gap-0.5">
+                <span className="text-muted-foreground text-[10px] font-bold tracking-wider uppercase">
                     Finalization
                 </span>
-                <div className="flex items-center gap-2 min-w-0">
+                <div className="flex min-w-0 items-center gap-2">
                     <Badge
                         variant={isFinalized ? 'default' : 'secondary'}
-                        className="h-5 px-1.5 text-[9px] uppercase font-bold tracking-wider shrink-0"
+                        className="h-5 shrink-0 px-1.5 text-[9px] font-bold tracking-wider uppercase"
                     >
                         {isFinalized ? 'Finalized' : 'Draft'}
                     </Badge>
                     <span
-                        className="text-xs text-muted-foreground truncate"
+                        className="text-muted-foreground truncate text-xs"
                         title={
                             isFinalized
                                 ? `Locked at ${new Date(attempt.grading.finalizedAt!).toLocaleString()}`
@@ -104,16 +107,16 @@ function StatusCard({ attempt }: { attempt: AttemptGradingDetailType }) {
  */
 function FeedbackCard({ attempt }: { attempt: AttemptGradingDetailType }) {
     return (
-        <Card className="flex flex-row items-center gap-3.5 p-4 py-3 border-border/50 bg-card shadow-none">
+        <Card className="border-border/50 bg-card flex flex-row items-center gap-3.5 p-4 py-3 shadow-none">
             <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-violet-500/10 text-violet-600 dark:text-violet-400">
                 <MessageSquare className="h-5 w-5" />
             </div>
-            <div className="flex flex-col min-w-0 flex-1">
-                <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
+            <div className="flex min-w-0 flex-1 flex-col">
+                <span className="text-muted-foreground text-[10px] font-bold tracking-wider uppercase">
                     Overall Feedback
                 </span>
                 <p
-                    className="text-xs font-medium text-foreground truncate"
+                    className="text-foreground truncate text-xs font-medium"
                     title={attempt.feedback || 'No overall feedback recorded.'}
                 >
                     {attempt.feedback || 'No overall feedback recorded.'}

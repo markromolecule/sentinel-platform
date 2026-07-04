@@ -6,7 +6,6 @@ import { OriginStatusBadge } from '@/app/(protected)/(support)/_components/origi
 import { getOriginStatusLabel } from '@/app/(protected)/(support)/_components/origin-status-badge';
 import { PermissionGuard } from '@sentinel/hooks';
 
-
 export type CourseColumnsProps = {
     onEdit: (course: Course) => void;
     onDelete: (course: Course) => void;

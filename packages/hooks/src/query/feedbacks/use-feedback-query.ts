@@ -4,7 +4,10 @@ import { FEEDBACK_QUERY_KEYS } from '@sentinel/shared/constants';
 import { useApi } from '../../api-provider';
 import { useAuthenticatedQueryEnabled } from '../_shared/use-authenticated-query-enabled';
 
-export type UseFeedbackQueryArgs = Omit<UseQueryOptions<FeedbackRecord, Error>, 'queryKey' | 'queryFn'> & {
+export type UseFeedbackQueryArgs = Omit<
+    UseQueryOptions<FeedbackRecord, Error>,
+    'queryKey' | 'queryFn'
+> & {
     feedbackId?: string;
 };
 
@@ -14,7 +17,9 @@ export function useFeedbackQuery({ feedbackId, ...options }: UseFeedbackQueryArg
 
     return useQuery<FeedbackRecord, Error>({
         ...options,
-        queryKey: feedbackId ? FEEDBACK_QUERY_KEYS.detail(feedbackId) : FEEDBACK_QUERY_KEYS.details(),
+        queryKey: feedbackId
+            ? FEEDBACK_QUERY_KEYS.detail(feedbackId)
+            : FEEDBACK_QUERY_KEYS.details(),
         queryFn: () => getFeedback(apiClient, feedbackId!),
         enabled: enabled && Boolean(feedbackId) && (options.enabled ?? true),
     });

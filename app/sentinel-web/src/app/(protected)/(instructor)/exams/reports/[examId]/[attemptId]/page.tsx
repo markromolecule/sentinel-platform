@@ -125,19 +125,19 @@ export default function InstructorAttemptReportPage({
                 <nav className="flex-1 space-y-1 p-3">
                     <Link
                         href={`/exams/reports/${examId}?section=overview`}
-                        className="group flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left text-sm font-medium text-muted-foreground hover:bg-accent/30 hover:text-foreground transition-colors"
+                        className="group text-muted-foreground hover:bg-accent/30 hover:text-foreground flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left text-sm font-medium transition-colors"
                     >
                         Overview
                     </Link>
                     <Link
                         href={`/exams/reports/${examId}?section=attempts`}
-                        className="group flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left text-sm font-semibold text-[#323d8f] bg-accent/50 transition-colors"
+                        className="group bg-accent/50 flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left text-sm font-semibold text-[#323d8f] transition-colors"
                     >
                         Attempt Summary
                     </Link>
                     <Link
                         href={`/exams/reports/${examId}?section=queue`}
-                        className="group flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left text-sm font-medium text-muted-foreground hover:bg-accent/30 hover:text-foreground transition-colors"
+                        className="group text-muted-foreground hover:bg-accent/30 hover:text-foreground flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left text-sm font-medium transition-colors"
                     >
                         Action Queue
                     </Link>
@@ -146,22 +146,22 @@ export default function InstructorAttemptReportPage({
 
             {/* Mobile Navigation */}
             <div className="px-4 pt-6 lg:hidden">
-                <div className="bg-card/20 rounded-xl border p-1.5 shadow-sm backdrop-blur-sm flex gap-2">
+                <div className="bg-card/20 flex gap-2 rounded-xl border p-1.5 shadow-sm backdrop-blur-sm">
                     <Link
                         href={`/exams/reports/${examId}?section=overview`}
-                        className="flex-1 rounded-lg py-2 text-center text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+                        className="text-muted-foreground hover:text-foreground flex-1 rounded-lg py-2 text-center text-sm font-medium transition-colors"
                     >
                         Overview
                     </Link>
                     <Link
                         href={`/exams/reports/${examId}?section=attempts`}
-                        className="flex-1 rounded-lg py-2 text-center text-sm font-semibold text-[#323d8f] bg-background shadow transition-colors"
+                        className="bg-background flex-1 rounded-lg py-2 text-center text-sm font-semibold text-[#323d8f] shadow transition-colors"
                     >
                         Attempt Summary
                     </Link>
                     <Link
                         href={`/exams/reports/${examId}?section=queue`}
-                        className="flex-1 rounded-lg py-2 text-center text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+                        className="text-muted-foreground hover:text-foreground flex-1 rounded-lg py-2 text-center text-sm font-medium transition-colors"
                     >
                         Action Queue
                     </Link>

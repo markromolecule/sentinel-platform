@@ -6,14 +6,15 @@ import { getLifecycleAttemptContext } from '../data/get-lifecycle-attempt-contex
 import { appendExamAttemptLifecycleEvent } from './lifecycle-event.service';
 import { transitionExamAttemptLifecycle } from './lifecycle-transition.service';
 
-function resolveResetWindow(args: {
-    endDateTime?: string | null;
-    durationMinutes?: number;
-}) {
+function resolveResetWindow(args: { endDateTime?: string | null; durationMinutes?: number }) {
     const now = new Date();
     const endDateTime = args.endDateTime ? new Date(args.endDateTime) : null;
 
-    if (endDateTime && !Number.isNaN(endDateTime.getTime()) && endDateTime.getTime() > now.getTime()) {
+    if (
+        endDateTime &&
+        !Number.isNaN(endDateTime.getTime()) &&
+        endDateTime.getTime() > now.getTime()
+    ) {
         return {
             availableFrom: now.toISOString(),
             availableUntil: endDateTime.toISOString(),

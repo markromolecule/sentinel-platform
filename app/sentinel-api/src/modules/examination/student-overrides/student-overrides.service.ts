@@ -105,6 +105,20 @@ function isPendingOrActiveOverride(override: StudentExamAccessOverride, now: Dat
     return availableUntil.getTime() >= now.getTime();
 }
 
+function normalizeSourceAttemptId(args: {
+    overrideType: StudentExamAccessOverride['overrideType'];
+    sourceAttemptId?: string | null;
+}) {
+    if (
+        (args.overrideType === 'RETAKE' || args.overrideType === 'REOPEN') &&
+        args.sourceAttemptId
+    ) {
+        return args.sourceAttemptId;
+    }
+
+    return null;
+}
+
 export function buildStudentOverrideRuntimeAccess(args: {
     accessOverride: StudentExamAccessOverride;
     runtimeAccess: ExamRuntimeAccessType;
@@ -202,6 +216,10 @@ export class StudentOverridesService {
     }): Promise<StudentExamAccessOverride> {
         const now = new Date();
         const overrideId = randomUUID();
+        const sourceAttemptId = normalizeSourceAttemptId({
+            overrideType: args.body.overrideType,
+            sourceAttemptId: args.body.sourceAttemptId,
+        });
         const payload: StudentExamAccessOverride = {
             id: overrideId,
             examId: args.examId,
@@ -213,7 +231,7 @@ export class StudentOverridesService {
             allowedAttempts: args.body.allowedAttempts ?? 1,
             usedAttempts: 0,
             usedAttemptIds: [],
-            sourceAttemptId: args.body.sourceAttemptId ?? null,
+            sourceAttemptId,
             notes: args.body.notes ?? null,
             createdAt: now.toISOString(),
             updatedAt: now.toISOString(),
@@ -361,10 +379,17 @@ export class StudentOverridesService {
 
         const now = new Date().toISOString();
         const { settingKey, ...persistedValue } = storedOverride;
+        const hasUsedAttemptId = storedOverride.usedAttemptIds.includes(args.attemptId);
+        const shouldIncrementAttempts =
+            storedOverride.overrideType !== 'REOPEN' || !hasUsedAttemptId;
         const nextValue: StudentExamAccessOverride = {
             ...persistedValue,
-            usedAttempts: storedOverride.usedAttempts + 1,
-            usedAttemptIds: [...storedOverride.usedAttemptIds, args.attemptId],
+            usedAttempts: shouldIncrementAttempts
+                ? storedOverride.usedAttempts + 1
+                : storedOverride.usedAttempts,
+            usedAttemptIds: hasUsedAttemptId
+                ? storedOverride.usedAttemptIds
+                : [...storedOverride.usedAttemptIds, args.attemptId],
             updatedAt: now,
         };
 

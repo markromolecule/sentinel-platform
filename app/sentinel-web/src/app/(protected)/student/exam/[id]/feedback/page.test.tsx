@@ -4,19 +4,14 @@ import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/re
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import StudentExamFeedbackPage from './page';
 
-const {
-    mockRouterReplace,
-    mockMutate,
-    mockToastSuccess,
-    mockToastError,
-    mockSearchParamsGet,
-} = vi.hoisted(() => ({
-    mockRouterReplace: vi.fn(),
-    mockMutate: vi.fn(),
-    mockToastSuccess: vi.fn(),
-    mockToastError: vi.fn(),
-    mockSearchParamsGet: vi.fn(),
-}));
+const { mockRouterReplace, mockMutate, mockToastSuccess, mockToastError, mockSearchParamsGet } =
+    vi.hoisted(() => ({
+        mockRouterReplace: vi.fn(),
+        mockMutate: vi.fn(),
+        mockToastSuccess: vi.fn(),
+        mockToastError: vi.fn(),
+        mockSearchParamsGet: vi.fn(),
+    }));
 
 vi.mock('next/navigation', () => ({
     useRouter: () => ({
@@ -34,7 +29,10 @@ vi.mock('next/link', () => ({
 }));
 
 vi.mock('@sentinel/hooks', () => ({
-    useCreateFeedbackMutation: (args?: { onSuccess?: () => void; onError?: (error: Error) => void }) => ({
+    useCreateFeedbackMutation: (args?: {
+        onSuccess?: () => void;
+        onError?: (error: Error) => void;
+    }) => ({
         mutate: (payload: unknown) => {
             mockMutate(payload);
             args?.onSuccess?.();

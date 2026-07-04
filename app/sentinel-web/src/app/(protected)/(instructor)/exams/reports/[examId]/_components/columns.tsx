@@ -95,9 +95,7 @@ export const getColumns = (examId: string): ColumnDef<StudentRow>[] => [
                     <div className="font-medium">
                         {student.lastName}, {student.firstName}
                     </div>
-                    <div className="text-muted-foreground text-sm">
-                        {student.studentNo}
-                    </div>
+                    <div className="text-muted-foreground text-sm">{student.studentNo}</div>
                     <div className="mt-2 flex flex-wrap gap-2">
                         {student.needsReview && (
                             <Badge variant="destructive">
@@ -105,12 +103,18 @@ export const getColumns = (examId: string): ColumnDef<StudentRow>[] => [
                                 Review
                             </Badge>
                         )}
-                        {student.needsMakeup && (
-                            <Badge variant="secondary">Makeup</Badge>
+                        {student.needsMakeup && <Badge variant="secondary">Makeup</Badge>}
+                        {student.needsRetake && <Badge variant="outline">Retake</Badge>}
+                        {student.lifecycleState === 'LOCKED' && (
+                            <Badge variant="destructive">Locked</Badge>
                         )}
-                        {student.needsRetake && (
-                            <Badge variant="outline">Retake</Badge>
+                        {student.lifecycleState === 'CLOSED' && (
+                            <Badge variant="secondary">Closed</Badge>
                         )}
+                        {student.lifecycleState === 'SUPERSEDED' && (
+                            <Badge variant="outline">Superseded</Badge>
+                        )}
+                        {student.isFinalized && <Badge variant="default">Finalized</Badge>}
                     </div>
                 </div>
             );
@@ -154,9 +158,7 @@ export const getColumns = (examId: string): ColumnDef<StudentRow>[] => [
             const student = row.original;
             return (
                 <div>
-                    <div className="font-medium">
-                        {student.incidentCount} total
-                    </div>
+                    <div className="font-medium">{student.incidentCount} total</div>
                     <div className="text-muted-foreground text-sm">
                         {student.openIncidentCount} open
                     </div>
@@ -196,9 +198,7 @@ export const getColumns = (examId: string): ColumnDef<StudentRow>[] => [
             const student = row.original;
             return (
                 <div>
-                    <div className="text-sm">
-                        Pending {student.incidentOutcomes.pending}
-                    </div>
+                    <div className="text-sm">Pending {student.incidentOutcomes.pending}</div>
                     <div className="text-muted-foreground text-sm">
                         Reviewed {student.incidentOutcomes.reviewed} • Confirmed{' '}
                         {student.incidentOutcomes.confirmed} • Dismissed{' '}
@@ -215,9 +215,7 @@ export const getColumns = (examId: string): ColumnDef<StudentRow>[] => [
             const student = row.original;
             return (
                 <div className="min-w-[14rem] space-y-0.5">
-                    <div className="text-sm">
-                        Started: {formatDateTime(student.startedAt)}
-                    </div>
+                    <div className="text-sm">Started: {formatDateTime(student.startedAt)}</div>
                     <div className="text-muted-foreground text-sm">
                         Completed: {formatDateTime(student.completedAt)}
                     </div>

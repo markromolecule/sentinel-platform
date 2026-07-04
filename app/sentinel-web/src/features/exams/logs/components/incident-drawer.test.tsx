@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 import type { ApiIncidentLogItem } from '@sentinel/services';
 import { IncidentDrawer } from './incident-drawer';
@@ -74,5 +74,36 @@ describe('IncidentDrawer', () => {
         expect(screen.getByText('Repeat escalated')).toBeTruthy();
         expect(screen.getByText('Severity Ladder')).toBeTruthy();
         expect(screen.getByText('LOW -> MEDIUM -> HIGH')).toBeTruthy();
+    });
+
+    it('passes lifecycle follow-up details when confirm-and-close is selected', () => {
+        const onConfirm = vi.fn().mockResolvedValue(undefined);
+
+        render(
+            <IncidentDrawer
+                incident={incident}
+                isOpen
+                onClose={vi.fn()}
+                onConfirm={onConfirm}
+                onDismiss={vi.fn()}
+                isSubmitting={false}
+            />,
+        );
+
+        fireEvent.click(screen.getAllByText('Confirm and close attempt').at(-1)!);
+        fireEvent.change(
+            screen.getByPlaceholderText('Add follow-up notes for the attempt lifecycle action...'),
+            {
+                target: { value: 'close this attempt now' },
+            },
+        );
+        fireEvent.click(screen.getAllByText('Confirm Violation').at(-1)!);
+
+        expect(onConfirm).toHaveBeenCalledWith(['incident-1'], {
+            reviewNotes: '',
+            lifecycleAction: 'CLOSE_ATTEMPT',
+            reasonCode: 'CONFIRMED_INCIDENT_CLOSE',
+            notes: 'close this attempt now',
+        });
     });
 });

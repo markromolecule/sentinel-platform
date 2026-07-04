@@ -255,8 +255,7 @@ export function useExamIncidentLogs(initialExamId?: string) {
             selectedIds.forEach((baselineId) => {
                 const groupedItem = displayIncidents.find((item) => item.incidentId === baselineId);
                 const groupedIncidents = groupedItem?.details?._incidents as
-                    | Array<{ incidentId: string }>
-                    | undefined;
+                    Array<{ incidentId: string }> | undefined;
                 if (groupedIncidents) {
                     groupedIncidents.forEach((incident) => {
                         targetIds.push(incident.incidentId);
@@ -289,8 +288,7 @@ export function useExamIncidentLogs(initialExamId?: string) {
             selectedIds.forEach((baselineId) => {
                 const groupedItem = displayIncidents.find((item) => item.incidentId === baselineId);
                 const groupedIncidents = groupedItem?.details?._incidents as
-                    | Array<{ incidentId: string }>
-                    | undefined;
+                    Array<{ incidentId: string }> | undefined;
                 if (groupedIncidents) {
                     groupedIncidents.forEach((incident) => {
                         targetIds.push(incident.incidentId);

@@ -1,10 +1,6 @@
 import { useRouter } from 'next/navigation';
 import { scoreExamAttempt } from '@sentinel/shared';
-import type {
-    ExamAttemptAnswers,
-    ExamConfiguration,
-    ExamQuestion,
-} from '@sentinel/shared/types';
+import type { ExamAttemptAnswers, ExamConfiguration, ExamQuestion } from '@sentinel/shared/types';
 import type { ExamAnswerValue } from '@/features/exams/_components/engine';
 import { writeStoredExamTurnInPreview } from '@/app/(protected)/student/exam/[id]/_lib/exam-turn-in-storage';
 

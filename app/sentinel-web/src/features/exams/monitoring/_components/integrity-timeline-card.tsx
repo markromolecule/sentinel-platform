@@ -1,17 +1,19 @@
 'use client';
 
-import { Flag } from '@sentinel/shared/types';
+import { type ExamAttemptLifecycleEvent, Flag } from '@sentinel/shared/types';
 import { Card, Button } from '@sentinel/ui';
 import { FlaggingTimeline } from './flagging-timeline';
 
 interface IntegrityTimelineCardProps {
     flags: Flag[];
+    lifecycleEvents?: ExamAttemptLifecycleEvent[];
     onRefresh?: () => void;
     isRefreshing?: boolean;
 }
 
 export function IntegrityTimelineCard({
     flags,
+    lifecycleEvents,
     onRefresh,
     isRefreshing = false,
 }: IntegrityTimelineCardProps) {
@@ -37,7 +39,7 @@ export function IntegrityTimelineCard({
                 </div>
             </div>
             <div className="p-6">
-                <FlaggingTimeline flags={flags} />
+                <FlaggingTimeline flags={flags} lifecycleEvents={lifecycleEvents} />
             </div>
         </Card>
     );

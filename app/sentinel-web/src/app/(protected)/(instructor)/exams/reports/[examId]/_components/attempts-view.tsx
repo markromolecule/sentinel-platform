@@ -59,8 +59,8 @@ export function AttemptsView({
                 <div className="space-y-1">
                     <h2 className="text-xl font-semibold">Attempt Summary Report</h2>
                     <p className="text-muted-foreground text-sm">
-                        Absentees stay in the list so instructors can manage makeup and
-                        retake workflows in one place.
+                        Absentees stay in the list so instructors can manage makeup and retake
+                        workflows in one place.
                     </p>
                 </div>
                 {onFinalizeAll && (
@@ -78,9 +78,9 @@ export function AttemptsView({
                             <AlertDialogHeader>
                                 <AlertDialogTitle>Finalize All Submissions</AlertDialogTitle>
                                 <AlertDialogDescription>
-                                    Are you sure you want to finalize all submitted attempts for this exam? 
-                                    This will release the final grades and feedback to all students. 
-                                    This action cannot be undone.
+                                    Are you sure you want to finalize all submitted attempts for
+                                    this exam? This will release the final grades and feedback to
+                                    all students. This action cannot be undone.
                                 </AlertDialogDescription>
                             </AlertDialogHeader>
                             <AlertDialogFooter>

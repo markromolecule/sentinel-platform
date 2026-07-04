@@ -56,9 +56,9 @@ describe('ExamReportsIndexPage', () => {
 
         expect(screen.getByText('Exam 1')).toBeTruthy();
         expect(screen.queryByText('Exam 10')).toBeNull();
-        expect(screen.getAllByRole('link', { name: 'Report Summary' })[0]?.getAttribute('href')).toBe(
-            '/exams/reports/exam-1',
-        );
+        expect(
+            screen.getAllByRole('link', { name: 'Report Summary' })[0]?.getAttribute('href'),
+        ).toBe('/exams/reports/exam-1');
     });
 
     it('paginates the report cards', async () => {

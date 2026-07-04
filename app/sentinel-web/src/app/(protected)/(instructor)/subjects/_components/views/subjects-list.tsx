@@ -6,7 +6,11 @@ import {
     useBulkUnenrollInstructorSubjectsMutation,
 } from '@sentinel/hooks';
 import { type Subject } from '@sentinel/shared/types';
-import { type ColumnDef, type PaginationState, type RowSelectionState } from '@tanstack/react-table';
+import {
+    type ColumnDef,
+    type PaginationState,
+    type RowSelectionState,
+} from '@tanstack/react-table';
 import { columns as defaultColumns } from '@/app/(protected)/(instructor)/subjects/_components/tables/columns';
 import { SubjectsTable } from '@/app/(protected)/(instructor)/subjects/_components/tables/subjects-table';
 import {
@@ -140,8 +144,11 @@ export function SubjectsList({
                         <AlertDialogHeader>
                             <AlertDialogTitle>Unenroll from selected subjects?</AlertDialogTitle>
                             <AlertDialogDescription>
-                                This will unenroll you from {selectedPayload.length} selected subject
-                                {selectedPayload.length === 1 ? '' : 's'} across all assigned sections. Any pending enrollment requests for these subjects will also be canceled.
+                                This will unenroll you from {selectedPayload.length} selected
+                                subject
+                                {selectedPayload.length === 1 ? '' : 's'} across all assigned
+                                sections. Any pending enrollment requests for these subjects will
+                                also be canceled.
                             </AlertDialogDescription>
                         </AlertDialogHeader>
                         <AlertDialogFooter>

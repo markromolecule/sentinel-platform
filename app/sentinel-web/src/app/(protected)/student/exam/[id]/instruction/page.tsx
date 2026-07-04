@@ -44,7 +44,9 @@ export default function StudentExamInstructionPage() {
                 <div className="flex min-h-full flex-col justify-center gap-6">
                     <StudentFlowPageHeader
                         title={blockedState.title ?? 'Exam Unavailable'}
-                        description={blockedState.message ?? 'This exam cannot be entered right now.'}
+                        description={
+                            blockedState.message ?? 'This exam cannot be entered right now.'
+                        }
                     />
                 </div>
             </StudentFlowShell>
@@ -137,9 +139,9 @@ export default function StudentExamInstructionPage() {
 
                         <div className="rounded-lg bg-blue-50 p-4 text-sm leading-6 text-blue-900 dark:bg-blue-900/20 dark:text-blue-200">
                             <p className="text-blue-800/80 dark:text-blue-200/80">
-                                <span className="font-semibold">Note:</span> The live exam does
-                                not start here. You still have the Privacy, Checkup, and Lobby
-                                steps ahead.
+                                <span className="font-semibold">Note:</span> The live exam does not
+                                start here. You still have the Privacy, Checkup, and Lobby steps
+                                ahead.
                             </p>
                         </div>
                     </StudentFlowPanel>
@@ -157,7 +159,7 @@ export default function StudentExamInstructionPage() {
                         <div className="border-border/60 bg-muted/30 rounded-2xl border p-4">
                             <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-1">
                                 <div className="space-y-1">
-                                    <p className="text-muted-foreground text-[11px] uppercase tracking-[0.16em]">
+                                    <p className="text-muted-foreground text-[11px] tracking-[0.16em] uppercase">
                                         Subject
                                     </p>
                                     <p className="text-sm font-medium">
@@ -165,13 +167,15 @@ export default function StudentExamInstructionPage() {
                                     </p>
                                 </div>
                                 <div className="space-y-1">
-                                    <p className="text-muted-foreground text-[11px] uppercase tracking-[0.16em]">
+                                    <p className="text-muted-foreground text-[11px] tracking-[0.16em] uppercase">
                                         Question Set
                                     </p>
-                                    <p className="text-sm font-medium">{questions.length} total items</p>
+                                    <p className="text-sm font-medium">
+                                        {questions.length} total items
+                                    </p>
                                 </div>
                                 <div className="space-y-1">
-                                    <p className="text-muted-foreground text-[11px] uppercase tracking-[0.16em]">
+                                    <p className="text-muted-foreground text-[11px] tracking-[0.16em] uppercase">
                                         Exam Mode
                                     </p>
                                     <p className="text-sm font-medium">

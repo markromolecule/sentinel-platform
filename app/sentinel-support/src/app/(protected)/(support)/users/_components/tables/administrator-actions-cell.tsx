@@ -16,7 +16,6 @@ import type { AdministratorRole } from '@/app/(protected)/(support)/users/_lib/a
 import { getAdministratorRoleConfig } from '@/app/(protected)/(support)/users/_lib/administrator-role-config';
 import { PermissionGuard } from '@sentinel/hooks';
 
-
 interface AdministratorActionsCellProps {
     administrator: User;
     role: AdministratorRole;

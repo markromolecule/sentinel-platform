@@ -165,7 +165,9 @@ export default function StudentExamCheckupPage() {
                 <div className="flex min-h-full flex-col justify-center gap-5">
                     <StudentFlowPageHeader
                         title={blockedState.title ?? 'Exam Unavailable'}
-                        description={blockedState.message ?? 'This exam cannot be entered right now.'}
+                        description={
+                            blockedState.message ?? 'This exam cannot be entered right now.'
+                        }
                     />
                 </div>
             </StudentFlowShell>
@@ -242,7 +244,7 @@ export default function StudentExamCheckupPage() {
                                                     value={calibrationProgress}
                                                     className="h-1.5 rounded-full"
                                                 />
-                                                <p className="text-foreground/90 text-center text-sm font-medium leading-5">
+                                                <p className="text-foreground/90 text-center text-sm leading-5 font-medium">
                                                     {mediaPipeAnalysis?.status === 'ready'
                                                         ? `Please stay still for ${calibrationHoldDurationLabel}...`
                                                         : 'Center your face in the guide to begin calibration'}

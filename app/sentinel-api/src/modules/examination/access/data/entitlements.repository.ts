@@ -141,12 +141,7 @@ export class EntitlementsRepository {
             .where('ea.student_id', '=', args.studentId)
             .where('ea.exam_id', '=', args.examId)
             .orderBy((eb) =>
-                eb
-                    .case()
-                    .when('ea.lifecycle_state', '=', 'SUPERSEDED')
-                    .then(1)
-                    .else(0)
-                    .end(),
+                eb.case().when('ea.lifecycle_state', '=', 'SUPERSEDED').then(1).else(0).end(),
             )
             .orderBy('ea.created_at', 'desc')
             .executeTakeFirst();

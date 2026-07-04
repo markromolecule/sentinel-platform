@@ -36,15 +36,15 @@ export function normalizeStudentExam(exam: ProctorExam): ProctorExam {
                 exam.status === 'archived' || exam.status === 'past_due'
                     ? exam.status
                     : exam.status === 'completed'
-                    ? 'turned_in'
-                    : resolveStudentExamStatus({
-                          status: exam.status,
-                          scheduledDate: exam.scheduledDate,
-                          endDateTime: exam.endDateTime,
-                          durationMinutes: exam.duration,
-                          attemptCompletedAt: exam.completedAt,
-                          attemptStatus: exam.status,
-                      }),
+                      ? 'turned_in'
+                      : resolveStudentExamStatus({
+                            status: exam.status,
+                            scheduledDate: exam.scheduledDate,
+                            endDateTime: exam.endDateTime,
+                            durationMinutes: exam.duration,
+                            attemptCompletedAt: exam.completedAt,
+                            attemptStatus: exam.status,
+                        }),
         };
     }
 

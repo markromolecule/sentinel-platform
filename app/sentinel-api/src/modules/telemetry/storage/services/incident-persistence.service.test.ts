@@ -459,4 +459,69 @@ describe('IncidentPersistenceService', () => {
             });
         },
     );
+
+    testWithDbClient(
+        'automatically closes only the triggering attempt after three high incidents',
+        async ({ dbClient }) => {
+            const targetFixture = await createTelemetryAttemptFixture(dbClient);
+            const unaffectedFixture = await createTelemetryAttemptFixture(dbClient);
+
+            for (const ruleKey of [
+                'webSecurity.right_click_disable',
+                'webSecurity.clipboard_control',
+                'webSecurity.full_screen_required',
+            ] as const) {
+                await IncidentPersistenceService.appendEvent(
+                    dbClient,
+                    buildPayload({
+                        ...targetFixture,
+                        ruleKey,
+                        runtimeSettingsSnapshot: {
+                            version: DEFAULT_TELEMETRY_SETTINGS.version,
+                            operations: { ...DEFAULT_TELEMETRY_SETTINGS.operations },
+                            ruleOverrideApplied: {
+                                severity: 'HIGH',
+                            },
+                        } as any,
+                    }),
+                );
+            }
+
+            await IncidentPersistenceService.appendEvent(
+                dbClient,
+                buildPayload({
+                    ...unaffectedFixture,
+                    ruleKey: 'webSecurity.right_click_disable',
+                    runtimeSettingsSnapshot: {
+                        version: DEFAULT_TELEMETRY_SETTINGS.version,
+                        operations: { ...DEFAULT_TELEMETRY_SETTINGS.operations },
+                        ruleOverrideApplied: {
+                            severity: 'HIGH',
+                        },
+                    } as any,
+                }),
+            );
+
+            const attempts = await dbClient
+                .selectFrom('exam_attempts')
+                .select(['attempt_id', 'lifecycle_state', 'closed_reason'])
+                .where('attempt_id', 'in', [targetFixture.attemptId, unaffectedFixture.attemptId])
+                .orderBy('attempt_id', 'asc')
+                .execute();
+
+            expect(attempts).toEqual(
+                expect.arrayContaining([
+                    expect.objectContaining({
+                        attempt_id: targetFixture.attemptId,
+                        lifecycle_state: 'CLOSED',
+                        closed_reason: 'AUTO_HIGH_INCIDENT_THRESHOLD',
+                    }),
+                    expect.objectContaining({
+                        attempt_id: unaffectedFixture.attemptId,
+                        lifecycle_state: 'IN_PROGRESS',
+                    }),
+                ]),
+            );
+        },
+    );
 });

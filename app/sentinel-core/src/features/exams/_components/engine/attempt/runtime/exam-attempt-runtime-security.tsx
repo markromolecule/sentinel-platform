@@ -10,10 +10,7 @@ import {
 } from '@sentinel/ui';
 
 export type ExamSecurityLockReason =
-    | 'focus-loss'
-    | 'fullscreen-exit'
-    | 'screen-capture'
-    | 'right-click';
+    'focus-loss' | 'fullscreen-exit' | 'screen-capture' | 'right-click';
 
 type ExamAttemptRuntimeSecurityProps = {
     isSubmitDialogOpen: boolean;

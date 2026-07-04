@@ -113,12 +113,9 @@ describe('useExamDetails', () => {
             isLoading: false,
         });
 
-        const { result } = renderHook(
-            () => useExamDetails({ attemptId: 'attempt-route-1' }),
-            {
-                wrapper: createWrapper(),
-            },
-        );
+        const { result } = renderHook(() => useExamDetails({ attemptId: 'attempt-route-1' }), {
+            wrapper: createWrapper(),
+        });
 
         await waitFor(() => {
             expect(result.current.isLoading).toBe(false);

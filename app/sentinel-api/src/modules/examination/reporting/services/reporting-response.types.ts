@@ -1,7 +1,4 @@
-import type {
-    ExamReport,
-    ExamReportStudentSummary,
-} from '../reporting.dto';
+import type { ExamReport, ExamReportStudentSummary } from '../reporting.dto';
 import type { TelemetryIncidentType } from '@sentinel/shared';
 
 export type ReportStudentRow = {
@@ -31,6 +28,15 @@ export type ReportStudentRow = {
     attempt_kind?: 'primary' | 'makeup' | 'retake' | null;
     active_override_type?: 'MAKEUP' | 'RETAKE' | 'REOPEN' | null;
     attempt_finalized_at?: Date | string | null;
+    lifecycle_state?: string | null;
+    score_state?: string | null;
+    closed_reason?: string | null;
+    reopened_until?: Date | string | null;
+    superseded_by_attempt_id?: string | null;
+    superseded_at?: Date | string | null;
+    superseded_by?: string | null;
+    finalized_at?: Date | string | null;
+    finalized_by?: string | null;
 };
 
 export type ReportIncidentTypeBreakdownRow = {

@@ -40,6 +40,8 @@ export async function getExamMonitoringOverview({
             'ea.attempt_id',
             'ea.student_id',
             sql<string | null>`ea.status::text`.as('attempt_status'),
+            sql<string | null>`ea.lifecycle_state::text`.as('lifecycle_state'),
+            sql<string | null>`ea.score_state::text`.as('score_state'),
             'ea.started_at',
             'ea.completed_at',
             'ea.time_spent_minutes',
@@ -47,6 +49,9 @@ export async function getExamMonitoringOverview({
             'ea.answered_question_count',
             'ea.score',
             'ea.total_score',
+            'ea.closed_reason',
+            'ea.reopened_until',
+            'ea.finalized_at',
             'ea.created_at',
         ])
         .where('ea.exam_id', '=', examId)
@@ -94,6 +99,8 @@ export async function getExamMonitoringOverview({
             'up.last_seen_at',
             'latest_attempts.attempt_id',
             'latest_attempts.attempt_status',
+            'latest_attempts.lifecycle_state',
+            'latest_attempts.score_state',
             'latest_attempts.started_at',
             'latest_attempts.completed_at',
             'latest_attempts.time_spent_minutes',
@@ -101,6 +108,9 @@ export async function getExamMonitoringOverview({
             'latest_attempts.answered_question_count',
             'latest_attempts.score',
             'latest_attempts.total_score',
+            'latest_attempts.closed_reason',
+            'latest_attempts.reopened_until',
+            'latest_attempts.finalized_at',
             sql<number>`coalesce(incident_summary.incident_count, 0)`.as('incident_count'),
             sql<number>`coalesce(incident_summary.open_incident_count, 0)`.as(
                 'open_incident_count',
