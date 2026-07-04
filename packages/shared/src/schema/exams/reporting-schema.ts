@@ -48,6 +48,17 @@ export const examReportActionItemSchema = z.object({
     reason: z.string(),
     sectionId: z.string().uuid().nullable().optional(),
     sectionName: z.string().nullable().optional(),
+    remediations: z.array(
+        z.object({
+            remediationId: z.string().uuid(),
+            remediationExamId: z.string().uuid(),
+            remediationType: z.enum(['RETAKE', 'MAKEUP']),
+            scheduledDate: nullableDateTimeSchema,
+            endDateTime: nullableDateTimeSchema,
+            title: z.string(),
+            status: z.string(),
+        }),
+    ).optional(),
 });
 
 export const examReportExamSchema = z.object({
@@ -103,6 +114,17 @@ export const examReportStudentSummarySchema = z.object({
     supersededAt: nullableDateTimeSchema.optional(),
     supersededBy: z.string().uuid().nullable().optional(),
     finalizedBy: z.string().uuid().nullable().optional(),
+    remediations: z.array(
+        z.object({
+            remediationId: z.string().uuid(),
+            remediationExamId: z.string().uuid(),
+            remediationType: z.enum(['RETAKE', 'MAKEUP']),
+            scheduledDate: nullableDateTimeSchema,
+            endDateTime: nullableDateTimeSchema,
+            title: z.string(),
+            status: z.string(),
+        }),
+    ).optional(),
 });
 
 export const examReportSummarySchema = z.object({

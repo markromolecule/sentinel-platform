@@ -217,6 +217,9 @@ describe('getExamsData', () => {
         expect(compiledQuery.sql).toContain('esa.class_group_id = "student_cg"."class_group_id"');
         expect(compiledQuery.sql).toContain('from exam_assigned_sections as eas');
         expect(compiledQuery.sql).toContain('esa.class_group_id is null');
+        expect(compiledQuery.sql).toContain('from exam_remediation_schedules as ers');
+        expect(compiledQuery.sql).toContain('ers.student_id = $');
+        expect(compiledQuery.sql).toContain('not exists');
     });
 
     it('should include creator/publisher joins, is_public selection, and instructorUserId filters in SQL', async () => {

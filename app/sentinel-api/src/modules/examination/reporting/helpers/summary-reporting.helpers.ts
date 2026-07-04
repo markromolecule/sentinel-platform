@@ -68,7 +68,13 @@ export function buildActionItems(
 ) {
     return students
         .filter(predicate)
-        .map((student) => buildActionItem(buildActionItemSource(student), reasonFor(student)));
+        .map((student) =>
+            buildActionItem(
+                buildActionItemSource(student),
+                reasonFor(student),
+                student.remediations ?? [],
+            ),
+        );
 }
 
 export function buildReportSummary(args: {

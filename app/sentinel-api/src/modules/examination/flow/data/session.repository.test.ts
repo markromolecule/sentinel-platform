@@ -18,6 +18,14 @@ function createExistingAttemptSelect(result: unknown) {
     };
 }
 
+function createRemediationSelect(result: unknown) {
+    return {
+        select: vi.fn().mockReturnThis(),
+        where: vi.fn().mockReturnThis(),
+        executeTakeFirst: vi.fn().mockResolvedValue(result),
+    };
+}
+
 describe('SessionRepository.createSession', () => {
     beforeEach(() => {
         vi.clearAllMocks();
@@ -30,19 +38,22 @@ describe('SessionRepository.createSession', () => {
             execute: vi.fn().mockResolvedValue(undefined),
         };
         const dbClient = {
-            selectFrom: vi.fn().mockReturnValue(
-                createExistingAttemptSelect({
-                    attempt_id: 'attempt-1',
-                    completed_at: null,
-                    status: 'IN_PROGRESS',
-                    lifecycle_state: 'IN_PROGRESS',
-                    reopened_until: null,
-                    created_at: new Date('2026-04-13T05:00:00.000Z'),
-                    answer_snapshot: { 'question-1': 'A' },
-                    time_spent_minutes: 4,
-                    reconnect_attempt_count: 0,
-                }),
-            ),
+            selectFrom: vi
+                .fn()
+                .mockReturnValueOnce(createRemediationSelect(undefined))
+                .mockReturnValueOnce(
+                    createExistingAttemptSelect({
+                        attempt_id: 'attempt-1',
+                        completed_at: null,
+                        status: 'IN_PROGRESS',
+                        lifecycle_state: 'IN_PROGRESS',
+                        reopened_until: null,
+                        created_at: new Date('2026-04-13T05:00:00.000Z'),
+                        answer_snapshot: { 'question-1': 'A' },
+                        time_spent_minutes: 4,
+                        reconnect_attempt_count: 0,
+                    }),
+                ),
             updateTable: vi.fn().mockReturnValue(updateBuilder),
         } as unknown as DbClient;
 
@@ -74,19 +85,22 @@ describe('SessionRepository.createSession', () => {
             execute: vi.fn().mockResolvedValue(undefined),
         };
         const dbClient = {
-            selectFrom: vi.fn().mockReturnValue(
-                createExistingAttemptSelect({
-                    attempt_id: 'attempt-locked',
-                    completed_at: null,
-                    status: 'IN_PROGRESS',
-                    lifecycle_state: 'LOCKED',
-                    reopened_until: null,
-                    created_at: new Date('2026-04-13T05:00:00.000Z'),
-                    answer_snapshot: { 'question-1': 'A' },
-                    time_spent_minutes: 4,
-                    reconnect_attempt_count: 1,
-                }),
-            ),
+            selectFrom: vi
+                .fn()
+                .mockReturnValueOnce(createRemediationSelect(undefined))
+                .mockReturnValueOnce(
+                    createExistingAttemptSelect({
+                        attempt_id: 'attempt-locked',
+                        completed_at: null,
+                        status: 'IN_PROGRESS',
+                        lifecycle_state: 'LOCKED',
+                        reopened_until: null,
+                        created_at: new Date('2026-04-13T05:00:00.000Z'),
+                        answer_snapshot: { 'question-1': 'A' },
+                        time_spent_minutes: 4,
+                        reconnect_attempt_count: 1,
+                    }),
+                ),
             updateTable: vi.fn().mockReturnValue(updateBuilder),
         } as unknown as DbClient;
 
@@ -154,6 +168,7 @@ describe('SessionRepository.createSession', () => {
         const dbClient = {
             selectFrom: vi
                 .fn()
+                .mockReturnValueOnce(createRemediationSelect(undefined))
                 .mockReturnValueOnce(existingAttemptSelect)
                 .mockReturnValueOnce(attemptCountSelect),
             insertInto: vi.fn().mockReturnValue(insertBuilder),
@@ -191,5 +206,54 @@ describe('SessionRepository.createSession', () => {
                 status: 'IN_PROGRESS',
             }),
         );
+    });
+
+    it('does not treat a remediation exam as a same-exam retake override source', async () => {
+        const dbClient = {
+            selectFrom: vi
+                .fn()
+                .mockReturnValueOnce(createRemediationSelect({ remediation_id: 'rem-1' }))
+                .mockReturnValueOnce(
+                    createExistingAttemptSelect({
+                        attempt_id: 'attempt-remediation-complete',
+                        completed_at: new Date('2026-04-13T05:30:00.000Z'),
+                        status: 'COMPLETED',
+                        lifecycle_state: 'SUBMITTED',
+                        reopened_until: null,
+                        created_at: new Date('2026-04-13T05:00:00.000Z'),
+                        answer_snapshot: {},
+                        time_spent_minutes: 12,
+                        reconnect_attempt_count: 0,
+                    }),
+                ),
+        } as unknown as DbClient;
+
+        const result = await SessionRepository.createSession(dbClient, {
+            examId: 'remediation-exam-1',
+            studentId: 'student-1',
+            maxReconnectAttempts: 0,
+            accessOverride: {
+                id: 'override-3',
+                examId: 'remediation-exam-1',
+                studentId: 'student-1',
+                grantedBy: 'instructor-1',
+                overrideType: 'RETAKE',
+                availableFrom: '2026-04-13T06:00:00.000Z',
+                availableUntil: '2026-04-13T08:00:00.000Z',
+                allowedAttempts: 1,
+                usedAttempts: 0,
+                usedAttemptIds: [],
+                sourceAttemptId: 'source-attempt-1',
+                notes: null,
+                createdAt: '2026-04-13T06:00:00.000Z',
+                updatedAt: '2026-04-13T06:00:00.000Z',
+            },
+        });
+
+        expect(result).toEqual({
+            attemptId: 'attempt-remediation-complete',
+            error: 'This exam has already been turned in.',
+            errorCode: 'ATTEMPT_ALREADY_COMPLETED',
+        });
     });
 });

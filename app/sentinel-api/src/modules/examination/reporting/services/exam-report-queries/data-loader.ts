@@ -5,6 +5,7 @@ import type { ExamContextForReporting } from './types';
 import type {
     ReportIncidentSeverityBreakdownRow,
     ReportIncidentTypeBreakdownRow,
+    ReportRemediationRow,
     ReportStudentRow,
 } from '../reporting-response.types';
 import {
@@ -35,7 +36,13 @@ export async function loadExamReportSourceData(args: {
     const attemptCounts = buildAttemptCountsQuery(args.dbClient, args.examId).as('attempt_counts');
     const incidentSummary = buildIncidentSummaryQuery(args.dbClient).as('incident_summary');
 
-    const [studentRows, incidentTypeBreakdown, incidentSeverityBreakdown, accessOverrides] =
+    const [
+        studentRows,
+        incidentTypeBreakdown,
+        incidentSeverityBreakdown,
+        accessOverrides,
+        remediationRows,
+    ] =
         await Promise.all([
             args.dbClient
                 .selectFrom(assignedStudents)
@@ -129,12 +136,41 @@ export async function loadExamReportSourceData(args: {
                 .orderBy(sql`count(*)`, 'desc')
                 .execute() as Promise<ReportIncidentSeverityBreakdownRow[]>,
             StudentOverridesService.listExamOverrides(args.dbClient, args.examId),
+            args.dbClient
+                .selectFrom('exam_remediation_schedules as ers')
+                .innerJoin('exams as remediation_exam', 'remediation_exam.exam_id', 'ers.remediation_exam_id')
+                .select([
+                    'ers.student_id',
+                    'ers.remediation_id',
+                    'ers.remediation_exam_id',
+                    'ers.remediation_type',
+                    'ers.scheduled_date',
+                    'ers.end_date_time',
+                    'remediation_exam.title as remediation_exam_title',
+                    sql<string>`coalesce(remediation_exam.status::text, 'PUBLISHED')`.as(
+                        'remediation_exam_status',
+                    ),
+                ])
+                .where('ers.source_exam_id', '=', args.examId)
+                .orderBy('ers.created_at', 'desc')
+                .execute() as Promise<ReportRemediationRow[]>,
         ]);
+
+    const remediationRowsByStudentId = remediationRows.reduce(
+        (accumulator, row) => {
+            const existingRows = accumulator.get(row.student_id) ?? [];
+            existingRows.push(row);
+            accumulator.set(row.student_id, existingRows);
+            return accumulator;
+        },
+        new Map<string, ReportRemediationRow[]>(),
+    );
 
     return {
         studentRows,
         incidentTypeBreakdown,
         incidentSeverityBreakdown,
         accessOverrides,
+        remediationRowsByStudentId,
     };
 }

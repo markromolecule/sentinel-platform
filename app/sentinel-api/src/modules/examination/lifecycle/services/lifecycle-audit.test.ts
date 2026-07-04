@@ -52,6 +52,31 @@ vi.mock('../../student-overrides/student-overrides.service', () => ({
     },
 }));
 
+vi.mock('./create-remediation-exam', () => ({
+    createRemediationExam: vi.fn().mockResolvedValue({
+        remediationExam: {
+            exam_id: 'cloned-exam-id',
+            title: 'Math Cloned',
+            scheduled_date: new Date(),
+            end_date_time: new Date(),
+            status: 'PUBLISHED',
+        },
+        remediationSchedule: {
+            remediation_id: 'remediation-id',
+            source_exam_id: 'exam-1',
+            remediation_exam_id: 'cloned-exam-id',
+            student_id: 'student-1',
+            source_attempt_id: null,
+            remediation_type: 'MAKEUP',
+            scheduled_date: new Date(),
+            end_date_time: new Date(),
+            created_by: 'actor-1',
+            created_at: new Date(),
+            notes: null,
+        },
+    }),
+}));
+
 function createUpdateBuilder() {
     return {
         set: vi.fn().mockReturnThis(),

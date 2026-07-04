@@ -42,7 +42,13 @@ export async function getExamReport({
         userId,
     });
 
-    const { studentRows, incidentTypeBreakdown, incidentSeverityBreakdown, accessOverrides } =
+    const {
+        studentRows,
+        incidentTypeBreakdown,
+        incidentSeverityBreakdown,
+        accessOverrides,
+        remediationRowsByStudentId,
+    } =
         await loadExamReportSourceData({
             dbClient,
             examId,
@@ -55,9 +61,21 @@ export async function getExamReport({
         overrideAttemptKindMap,
         activeOverrideMap,
     });
-    const students = enrichedStudentRows.map((row) =>
-        mapReportStudentSummary(row, exam.passingScore),
-    );
+    const students = enrichedStudentRows.map((row) => {
+        const studentKey = row.student_user_id ?? row.student_record_id;
+
+        return mapReportStudentSummary(row, exam.passingScore, {
+            remediations: (remediationRowsByStudentId.get(studentKey) ?? []).map((remediation) => ({
+                remediationId: remediation.remediation_id,
+                remediationExamId: remediation.remediation_exam_id,
+                remediationType: remediation.remediation_type,
+                scheduledDate: remediation.scheduled_date,
+                endDateTime: remediation.end_date_time,
+                title: remediation.remediation_exam_title,
+                status: remediation.remediation_exam_status ?? 'PUBLISHED',
+            })),
+        });
+    });
     const baseReport = buildExamReport({
         exam: mapReportExam(exam),
         students,

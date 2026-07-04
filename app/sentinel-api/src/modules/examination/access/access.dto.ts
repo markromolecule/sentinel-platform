@@ -22,6 +22,7 @@ export type VerifyEligibilityResponse = z.infer<typeof verifyEligibilitySchema.r
 export type ExamAccessContext = {
     examId: string;
     studentId: string;
+    studentUserId?: string | null;
     classroomId: string | null;
     subjectId: string;
     sectionId: string | null;
@@ -33,6 +34,14 @@ export type ExamAccessContext = {
     status: string | null;
     publishedAt: Date | string | null;
     institutionId: string | null;
+    remediation?: {
+        remediationId: string;
+        sourceExamId: string;
+        sourceAttemptId: string | null;
+        remediationType: 'RETAKE' | 'MAKEUP';
+        scheduledDate: Date | string | null;
+        endDateTime: Date | string | null;
+    } | null;
 };
 
 export type ExamAccessEligibility =

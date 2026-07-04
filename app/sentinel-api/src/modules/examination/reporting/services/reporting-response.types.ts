@@ -1,6 +1,17 @@
 import type { ExamReport, ExamReportStudentSummary } from '../reporting.dto';
 import type { TelemetryIncidentType } from '@sentinel/shared';
 
+export type ReportRemediationRow = {
+    student_id: string;
+    remediation_id: string;
+    remediation_exam_id: string;
+    remediation_type: 'RETAKE' | 'MAKEUP';
+    scheduled_date: Date | string | null;
+    end_date_time: Date | string | null;
+    remediation_exam_title: string;
+    remediation_exam_status: string | null;
+};
+
 export type ReportStudentRow = {
     student_user_id: string | null;
     student_record_id: string;

@@ -34,8 +34,11 @@ export function mapReportExam(exam: ReportingExamContext): ExamReportExam {
 export function mapReportStudentSummary(
     row: ReportStudentRow,
     passingScore: number,
+    options?: {
+        remediations?: ExamReportStudentSummary['remediations'];
+    },
 ): ExamReportStudentSummary {
-    return mapStudentSummary(row, passingScore);
+    return mapStudentSummary(row, passingScore, options);
 }
 
 export function buildExamReport(args: {

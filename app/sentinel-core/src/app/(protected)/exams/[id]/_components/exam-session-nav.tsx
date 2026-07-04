@@ -1,10 +1,10 @@
 'use client';
 
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useSearchParams } from 'next/navigation';
 import { cn } from '@sentinel/ui';
 
-type ExamSessionSection = 'lobby' | 'monitoring';
+type ExamSessionSection = 'lobby' | 'monitoring' | 'report' | 'queue' | 'logs';
 
 type ExamSessionNavItem = {
     id: ExamSessionSection;
@@ -16,9 +16,13 @@ type ExamSessionNavProps = {
     examId: string;
 };
 
-function resolveActiveSection(pathname: string): ExamSessionSection | null {
+function resolveActiveSection(
+    pathname: string,
+    searchParams: URLSearchParams | ReturnType<typeof useSearchParams>,
+): ExamSessionSection | null {
     const parts = pathname.split('/').filter(Boolean);
     const section = parts[2];
+    const reportSection = searchParams.get('section');
 
     if (parts[0] !== 'exams' || !parts[1]) {
         return null;
@@ -32,6 +36,14 @@ function resolveActiveSection(pathname: string): ExamSessionSection | null {
         return 'monitoring';
     }
 
+    if (section === 'report') {
+        return reportSection === 'queue' ? 'queue' : 'report';
+    }
+
+    if (section === 'logs') {
+        return 'logs';
+    }
+
     return null;
 }
 
@@ -42,7 +54,8 @@ function resolveActiveSection(pathname: string): ExamSessionSection | null {
  */
 export function ExamSessionNav({ examId }: ExamSessionNavProps) {
     const pathname = usePathname() || '';
-    const activeSection = resolveActiveSection(pathname);
+    const searchParams = useSearchParams();
+    const activeSection = resolveActiveSection(pathname, searchParams);
     const items: ExamSessionNavItem[] = [
         {
             id: 'lobby',
@@ -53,6 +66,21 @@ export function ExamSessionNav({ examId }: ExamSessionNavProps) {
             id: 'monitoring',
             label: 'Monitoring',
             href: `/exams/${examId}/monitoring`,
+        },
+        {
+            id: 'report',
+            label: 'Attempt Summary',
+            href: `/exams/${examId}/report`,
+        },
+        {
+            id: 'queue',
+            label: 'Action Queue',
+            href: `/exams/${examId}/report?section=queue`,
+        },
+        {
+            id: 'logs',
+            label: 'Incident Logs',
+            href: `/exams/${examId}/logs`,
         },
     ];
 

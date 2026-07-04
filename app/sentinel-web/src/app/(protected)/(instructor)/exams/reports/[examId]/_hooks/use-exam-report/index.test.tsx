@@ -1,5 +1,6 @@
 import { act, renderHook } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { toast } from 'sonner';
 import { useExamReport } from './index';
 
 const { mockApiClient, mockUseExamReportQuery, mockSearchParamsGet, mockRefetch } = vi.hoisted(
@@ -40,6 +41,15 @@ vi.mock('sonner', () => ({
 describe('useExamReport', () => {
     beforeEach(() => {
         vi.clearAllMocks();
+        mockApiClient.mockResolvedValue({
+            remediationExam: {
+                examId: 'remediation-exam-1',
+                title: 'Final Exam (Makeup)',
+            },
+            remediationSchedule: {
+                scheduledDate: '2026-04-21T09:00:00.000Z',
+            },
+        });
         mockUseExamReportQuery.mockReturnValue({
             data: {
                 sections: [],
@@ -96,6 +106,9 @@ describe('useExamReport', () => {
                 method: 'POST',
             }),
         );
+        expect(toast.success).toHaveBeenCalledWith(
+            expect.stringContaining('Final Exam (Makeup)'),
+        );
         expect(mockRefetch).toHaveBeenCalled();
     });
 
@@ -120,6 +133,7 @@ describe('useExamReport', () => {
                 body: expect.stringContaining('"sourceAttemptId":"attempt-2"'),
             }),
         );
+        expect(toast.success).toHaveBeenCalled();
         expect(mockRefetch).toHaveBeenCalled();
     });
 });

@@ -402,4 +402,53 @@ describe('map reporting response', () => {
         expect(report.students).toHaveLength(1);
         expect(report.actionItems.retake).toHaveLength(0);
     });
+
+    it('keeps linked remediation exam metadata on the mapped student summary', () => {
+        const student = mapReportStudentSummary(
+            {
+                student_user_id: '11111111-1111-4111-8111-111111111111',
+                student_record_id: '22222222-2222-4222-8222-222222222222',
+                student_number: '2024-0011',
+                first_name: 'Remediation',
+                last_name: 'Linked',
+                attempt_id: null,
+                attempt_status: null,
+                started_at: null,
+                completed_at: null,
+                time_spent_minutes: null,
+                score: null,
+                total_score: null,
+                attempt_count: 0,
+                incident_count: 0,
+                open_incident_count: 0,
+                pending_incident_count: 0,
+                reviewed_incident_count: 0,
+                confirmed_incident_count: 0,
+                dismissed_incident_count: 0,
+                highest_incident_type: null,
+                highest_incident_severity: null,
+            },
+            75,
+            {
+                remediations: [
+                    {
+                        remediationId: '33333333-3333-4333-8333-333333333333',
+                        remediationExamId: '44444444-4444-4444-8444-444444444444',
+                        remediationType: 'MAKEUP',
+                        scheduledDate: '2026-04-21T09:00:00.000Z',
+                        endDateTime: '2026-04-21T10:00:00.000Z',
+                        title: 'Final Exam (Makeup)',
+                        status: 'PUBLISHED',
+                    },
+                ],
+            },
+        );
+
+        expect(student.remediations).toEqual([
+            expect.objectContaining({
+                remediationType: 'MAKEUP',
+                remediationExamId: '44444444-4444-4444-8444-444444444444',
+            }),
+        ]);
+    });
 });

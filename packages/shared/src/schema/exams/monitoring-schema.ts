@@ -47,6 +47,16 @@ export const monitoringExamSchema = z.object({
     endDateTime: nullableDateTimeSchema,
     maxReconnectAttempts: z.number().int().min(0),
     runtimeAccess: examRuntimeAccessSchema.optional(),
+    remediationContext: z
+        .object({
+            remediationId: z.string().uuid(),
+            remediationType: z.enum(['RETAKE', 'MAKEUP']),
+            sourceExamId: z.string().uuid(),
+            sourceExamTitle: z.string(),
+            sourceAttemptId: z.string().uuid().nullable(),
+        })
+        .nullable()
+        .optional(),
 });
 
 export const monitoringStatsSchema = z.object({

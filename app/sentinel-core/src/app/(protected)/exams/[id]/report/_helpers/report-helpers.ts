@@ -18,7 +18,7 @@ export async function grantLifecycleOverride(args: {
             ? `/exams/${args.examId}/students/${args.item.studentId}/lifecycle/grant-makeup`
             : `/exams/${args.examId}/students/${args.item.studentId}/lifecycle/grant-retake`;
 
-    await args.apiClient(endpoint, {
+    return await args.apiClient(endpoint, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -31,6 +31,29 @@ export async function grantLifecycleOverride(args: {
             notes: args.notes,
         }),
     });
+}
+
+/**
+ * Formats the grant success state so instructors immediately see the scheduled remediation exam.
+ */
+export function buildGrantSuccessMessage(args: {
+    overrideType: 'MAKEUP' | 'RETAKE';
+    response: any;
+}) {
+    const remediationExam = args.response?.remediationExam;
+    const remediationSchedule = args.response?.remediationSchedule;
+    const label = args.overrideType === 'MAKEUP' ? 'Makeup' : 'Retake';
+
+    if (!remediationExam || !remediationSchedule?.scheduledDate) {
+        return `${label} window granted successfully.`;
+    }
+
+    const scheduledDate = new Date(remediationSchedule.scheduledDate);
+    const formattedSchedule = Number.isNaN(scheduledDate.getTime())
+        ? remediationSchedule.scheduledDate
+        : scheduledDate.toLocaleString();
+
+    return `${label} scheduled for ${formattedSchedule} as "${remediationExam.title}".`;
 }
 
 /**
