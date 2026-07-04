@@ -56,6 +56,23 @@ describe('ExamSessionWorkspaceShell', () => {
         expect(screen.getByTestId('shell-child')).toBeTruthy();
     });
 
+    it('renders the runtime sidebar for reports routes', () => {
+        mockPathname.mockReturnValue('/exams/reports/exam-1');
+        mockUseParams.mockReturnValue({ examId: 'exam-1' });
+
+        render(
+            <ExamSessionWorkspaceShell>
+                <div data-testid="shell-child">Content</div>
+            </ExamSessionWorkspaceShell>,
+        );
+
+        expect(screen.getByRole('heading', { name: 'Exam Session' })).toBeTruthy();
+        expect(screen.getAllByTestId('exam-session-nav')[0]?.getAttribute('data-exam-id')).toBe(
+            'exam-1',
+        );
+        expect(screen.getByTestId('shell-child')).toBeTruthy();
+    });
+
     it('renders children without the runtime sidebar for builder routes', () => {
         mockPathname.mockReturnValue('/exams/exam-1/builder');
         mockUseParams.mockReturnValue({ id: 'exam-1' });

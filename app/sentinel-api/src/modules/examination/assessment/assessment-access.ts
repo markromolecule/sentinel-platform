@@ -131,6 +131,10 @@ export async function resolveAssessmentActorRole(args: {
     return studentProfile ? 'student' : null;
 }
 
+export function isStaffRole(role?: string | null): boolean {
+    return role === 'instructor' || role === 'admin' || role === 'superadmin';
+}
+
 /**
  * Resolves the institution ID for assessment queries.
  * Supports passing `activePermissionKeys` (for dynamic RBAC) or `role` (for backward compatibility).
@@ -139,7 +143,7 @@ export function resolveAssessmentInstitutionId(args: {
     role?: string | null;
     contextInstitutionId?: string | null;
     requestedInstitutionId?: string | null;
-    activePermissionKeys?: Set<string>;
+    activePermissionKeys?: Set<string> | string[];
 }) {
     const { role, contextInstitutionId, requestedInstitutionId, activePermissionKeys } = args;
 
@@ -174,3 +178,96 @@ export async function logAssessmentQuery(
         console.error('Failed to log exam.structure_viewed:', logErr);
     }
 }
+
+/**
+ * Resolves the role, institution ID, student user ID, department ID, and instructor user ID 
+ * for assessment read operations. Centralizes the logic to avoid duplicated ad-hoc role-based checks.
+ *
+ * @param args - Object containing inputs for resolving scope
+ * @param args.dbClient - Database client connection
+ * @param args.user - Current user object
+ * @param args.claimedRole - Claimed role string, if any (e.g. from token user metadata)
+ * @param args.contextInstitutionId - Institution ID resolved from routing context
+ * @param args.requestedInstitutionId - Target institution ID requested by user
+ * @param args.activePermissionKeys - Set of active permission keys from RBAC context
+ */
+export async function resolveAssessmentReadScope(args: {
+    dbClient: DbClient;
+    user?: any;
+    claimedRole?: string | null;
+    contextInstitutionId?: string | null;
+    requestedInstitutionId?: string | null;
+    activePermissionKeys?: Set<string> | string[];
+}) {
+    const { dbClient, user, claimedRole, contextInstitutionId, requestedInstitutionId, activePermissionKeys } = args;
+
+    const role = await resolveAssessmentActorRole({
+        dbClient,
+        userId: user?.id,
+        claimedRole,
+    });
+
+    const institutionId = resolveAssessmentInstitutionId({
+        role,
+        contextInstitutionId,
+        requestedInstitutionId,
+        activePermissionKeys,
+    });
+
+    const studentProfile = user?.id
+        ? await EntitlementsRepository.getStudentProfileByUserId(dbClient, user.id)
+        : null;
+
+    const studentUserId = studentProfile ? user.id : undefined;
+
+    const departmentId =
+        role === 'admin' ? (user?.user_profiles?.department_id ?? undefined) : undefined;
+
+    const instructorUserId = isStaffRole(role) ? user?.id : undefined;
+
+    return {
+        role,
+        institutionId,
+        studentUserId,
+        departmentId,
+        instructorUserId,
+    };
+}
+
+/**
+ * Asserts that the actor has permission to read the specific exam record.
+ * Specifically, checks if an instructor is trying to access a private exam they did not own, 
+ * are not assigned to, and is not shared with them.
+ *
+ * @param args - Inputs for the check
+ * @param args.role - Normalized actor role
+ * @param args.userId - Actor user ID
+ * @param args.examRecord - The retrieved exam record (with is_public, created_by, assigned_instructor_ids)
+ * @param args.isShared - Boolean indicating if the exam is shared with the actor
+ */
+export function assertExamReadScope(args: {
+    role: string | null;
+    userId?: string;
+    examRecord: {
+        is_public?: boolean | null;
+        created_by?: string | null;
+        assigned_instructor_ids?: string[] | null;
+    };
+    isShared: boolean;
+}) {
+    const { role, userId, examRecord, isShared } = args;
+
+    if (
+        role === 'instructor' &&
+        examRecord.is_public === false &&
+        userId !== examRecord.created_by &&
+        !examRecord.assigned_instructor_ids?.includes(userId || '') &&
+        !isShared
+    ) {
+        throw new HTTPException(404, {
+            message: 'Exam not found.',
+        });
+    }
+}
+
+

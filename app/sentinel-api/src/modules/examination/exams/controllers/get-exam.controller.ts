@@ -3,7 +3,8 @@ import { HTTPException } from 'hono/http-exception';
 import { type AppRouteHandler } from '../../../../types/hono';
 import {
     assertAssessmentReadAccess,
-    resolveAssessmentActorRole,
+    resolveAssessmentReadScope,
+    assertExamReadScope,
     logAssessmentQuery,
 } from '../../assessment/assessment-access';
 import { getExamByIdSchema } from '../exam.dto';
@@ -38,58 +39,57 @@ export const getExamRouteHandler: AppRouteHandler<typeof getExamRoute> = async (
     const { id } = c.req.valid('param');
     const supabaseUser = c.get('supabaseUser') as any;
     const user = c.get('user');
-    const role = await resolveAssessmentActorRole({
-        dbClient: c.get('dbClient'),
-        userId: user?.id,
-        claimedRole: supabaseUser?.user_metadata?.role,
-    });
 
     assertAssessmentReadAccess(c);
+
+    const { role, institutionId, studentUserId } =
+        await resolveAssessmentReadScope({
+            dbClient: c.get('dbClient'),
+            user,
+            claimedRole: supabaseUser?.user_metadata?.role,
+            contextInstitutionId: c.get('institutionId'),
+            activePermissionKeys: c.get('activePermissionKeys'),
+        });
 
     const examAccessRecord = requireExamRecord(
         await getExamByIdData({
             dbClient: c.get('dbClient'),
             id,
-            institutionId: c.get('institutionId') || undefined,
-            studentUserId: role === 'student' ? user?.id : undefined,
+            institutionId,
+            studentUserId,
         }),
     );
 
     const isShared = user?.id
         ? await c
-              .get('dbClient')
-              .selectFrom('exam_shares')
-              .select('user_id')
-              .where('exam_id', '=', id)
-              .where('user_id', '=', user.id)
-              .executeTakeFirst()
+            .get('dbClient')
+            .selectFrom('exam_shares')
+            .select('user_id')
+            .where('exam_id', '=', id)
+            .where('user_id', '=', user.id)
+            .executeTakeFirst()
         : null;
 
-    if (
-        role === 'instructor' &&
-        examAccessRecord.is_public === false &&
-        user?.id !== examAccessRecord.created_by &&
-        !examAccessRecord.assigned_instructor_ids?.includes(user?.id) &&
-        !isShared
-    ) {
-        throw new HTTPException(404, {
-            message: 'Exam not found.',
-        });
-    }
+    assertExamReadScope({
+        role,
+        userId: user?.id,
+        examRecord: examAccessRecord,
+        isShared: Boolean(isShared),
+    });
 
     const exam = await ExamService.getExamById(
         c.get('dbClient'),
         id,
-        c.get('institutionId') || undefined,
-        role === 'student' ? user?.id : undefined,
+        institutionId,
+        studentUserId,
     );
 
-    if (user?.id && c.get('institutionId')) {
+    if (user?.id && institutionId) {
         void logAssessmentQuery(
             c.get('dbClient'),
             user.id,
             id,
-            c.get('institutionId')!,
+            institutionId,
             role || 'unknown',
         );
     }

@@ -2,10 +2,8 @@ import { createRoute } from '@hono/zod-openapi';
 import { type AppRouteHandler } from '../../../../types/hono';
 import {
     assertAssessmentReadAccess,
-    resolveAssessmentActorRole,
-    resolveAssessmentInstitutionId,
+    resolveAssessmentReadScope,
 } from '../../assessment/assessment-access';
-import { EntitlementsRepository } from '../../access/data/entitlements.repository';
 import { getExamsSchema } from '../exam.dto';
 import { ExamService } from '../exam.service';
 
@@ -24,50 +22,63 @@ export const getExamsRoute = createRoute({
                 },
             },
         },
+        400: {
+            description: 'Institution context required',
+            content: {
+                'application/json': {
+                    schema: getExamsSchema.response,
+                },
+            },
+        },
     },
 });
 
+interface SupabaseUserMetadata {
+    user_metadata?: {
+        role?: string;
+    };
+}
+
 /**
  * Handles exam list requests and enforces institution-scoped instructor visibility.
+ *
+ * Note: `assertAssessmentReadAccess` checks the context-level `role`/permissions
+ * set by upstream auth middleware — a separate concept from the `role` resolved
+ * below via `resolveAssessmentReadScope`, which is used purely for institution
+ * scoping and query params. Don't conflate the two.
  */
 export const getExamsRouteHandler: AppRouteHandler<typeof getExamsRoute> = async (c) => {
-    const query = c.req.valid('query');
-    const supabaseUser = c.get('supabaseUser') as any;
-    const user = c.get('user');
-    const role = await resolveAssessmentActorRole({
-        dbClient: c.get('dbClient'),
-        userId: user?.id,
-        claimedRole: supabaseUser?.user_metadata?.role,
-    });
-
     assertAssessmentReadAccess(c);
 
-    const institutionId = resolveAssessmentInstitutionId({
-        role,
-        contextInstitutionId: c.get('institutionId'),
-        requestedInstitutionId: query.institutionId,
-    });
+    const query = c.req.valid('query');
+    const dbClient = c.get('dbClient');
+    const user = c.get('user');
+    const supabaseUser = c.get('supabaseUser') as SupabaseUserMetadata | undefined;
+
+    const { role, institutionId, studentUserId, departmentId, instructorUserId } =
+        await resolveAssessmentReadScope({
+            dbClient,
+            user,
+            claimedRole: supabaseUser?.user_metadata?.role,
+            contextInstitutionId: c.get('institutionId'),
+            requestedInstitutionId: query.institutionId,
+            activePermissionKeys: c.get('activePermissionKeys'),
+        });
 
     if (role === 'instructor' && !institutionId) {
-        return c.json({
-            message: 'Institution context required',
-            data: [],
-        });
+        return c.json(
+            { message: 'Institution context required', data: [] },
+            400,
+        );
     }
 
-    const departmentId =
-        role === 'admin' ? (user?.user_profiles?.department_id ?? undefined) : undefined;
-    const studentProfile = user?.id
-        ? await EntitlementsRepository.getStudentProfileByUserId(c.get('dbClient'), user.id)
-        : null;
-
     const exams = await ExamService.getExams(
-        c.get('dbClient'),
+        dbClient,
         query,
         institutionId,
-        studentProfile ? user?.id : undefined,
+        studentUserId,
         departmentId,
-        role === 'instructor' ? user?.id : undefined,
+        instructorUserId,
     );
 
     return c.json({

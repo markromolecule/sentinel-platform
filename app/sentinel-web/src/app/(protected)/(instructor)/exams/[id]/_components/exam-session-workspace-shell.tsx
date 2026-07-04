@@ -16,6 +16,10 @@ function isRuntimeRoute(pathname: string) {
         return false;
     }
 
+    if (parts[1] === 'reports' && parts[2]) {
+        return true;
+    }
+
     return parts[2] === 'lobby' || parts[2] === 'monitoring' || parts[2] === 'logs';
 }
 
@@ -26,8 +30,8 @@ function isRuntimeRoute(pathname: string) {
  */
 export function ExamSessionWorkspaceShell({ children }: ExamSessionWorkspaceShellProps) {
     const pathname = usePathname() || '';
-    const params = useParams<{ id?: string | string[] }>();
-    const idParam = params.id;
+    const params = useParams<{ id?: string | string[]; examId?: string | string[] }>();
+    const idParam = params.id || params.examId;
     const examId = Array.isArray(idParam) ? idParam[0] : idParam;
 
     if (!isRuntimeRoute(pathname) || !examId) {

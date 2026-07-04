@@ -22,7 +22,7 @@ export function ReportNavigation({ activeSection, setActiveSection }: ReportNavi
     return (
         <>
             {/* Desktop Sidebar */}
-            <aside className="bg-background sticky -top-6 hidden w-64 shrink-0 flex-col border-r lg:flex">
+            <aside className="bg-background sticky -top-6 hidden w-64 shrink-0 flex-col border-r">
                 <div className="flex h-14 shrink-0 items-center px-4">
                     <h2 className="text-foreground text-[1.1rem] font-bold tracking-tight">
                         Report Sections
@@ -50,7 +50,7 @@ export function ReportNavigation({ activeSection, setActiveSection }: ReportNavi
             </aside>
 
             {/* Mobile Navigation */}
-            <div className="px-4 pt-6 lg:hidden">
+            <div className="hidden px-4 pt-6">
                 <div className="bg-card/20 flex gap-2 rounded-xl border p-1.5 shadow-sm backdrop-blur-sm">
                     {sections.map((section) => (
                         <button
