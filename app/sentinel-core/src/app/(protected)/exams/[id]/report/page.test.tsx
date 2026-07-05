@@ -152,22 +152,30 @@ vi.mock('@sentinel/services', () => ({
 }));
 
 vi.mock('@sentinel/ui', () => ({
+    Dialog: ({ children, open }: { children: React.ReactNode; open?: boolean }) => open ? <div data-testid="dialog">{children}</div> : null,
+    DialogContent: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+    DialogHeader: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+    DialogTitle: ({ children }: { children: React.ReactNode }) => <h3>{children}</h3>,
+    DialogDescription: ({ children }: { children: React.ReactNode }) => <p>{children}</p>,
+    DialogFooter: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
     Badge: ({ children }: { children: React.ReactNode }) => <span>{children}</span>,
     Button: ({
         children,
         onClick,
         disabled,
         asChild,
+        type = 'button',
     }: {
         children: React.ReactNode;
         onClick?: () => void;
         disabled?: boolean;
         asChild?: boolean;
+        type?: 'button' | 'submit' | 'reset';
     }) =>
         asChild ? (
             <>{children}</>
         ) : (
-            <button type="button" onClick={onClick} disabled={disabled}>
+            <button type={type} onClick={onClick} disabled={disabled}>
                 {children}
             </button>
         ),
@@ -276,10 +284,6 @@ describe('ExamReportPage', () => {
     });
 
     it('grants a makeup window through the lifecycle endpoint', async () => {
-        vi.spyOn(window, 'prompt')
-            .mockReturnValueOnce('120')
-            .mockReturnValueOnce('Approved makeup.');
-
         const params = Promise.resolve({ id: 'exam-1' });
 
         await act(async () => {
@@ -296,6 +300,11 @@ describe('ExamReportPage', () => {
             fireEvent.click(screen.getAllByRole('button', { name: 'Grant Makeup' })[0]);
         });
 
+        await act(async () => {
+            const form = screen.getByText('Start Date & Time').closest('form')!;
+            fireEvent.submit(form);
+        });
+
         expect(mockApiClient).toHaveBeenCalledWith(
             '/exams/exam-1/students/student-record-1/lifecycle/grant-makeup',
             expect.objectContaining({
@@ -307,10 +316,6 @@ describe('ExamReportPage', () => {
     });
 
     it('grants a retake window through the lifecycle endpoint with the source attempt id', async () => {
-        vi.spyOn(window, 'prompt')
-            .mockReturnValueOnce('120')
-            .mockReturnValueOnce('Approved retake.');
-
         const params = Promise.resolve({ id: 'exam-1' });
 
         await act(async () => {
@@ -325,6 +330,11 @@ describe('ExamReportPage', () => {
 
         await act(async () => {
             fireEvent.click(screen.getAllByRole('button', { name: 'Grant Retake' })[0]);
+        });
+
+        await act(async () => {
+            const form = screen.getByText('Start Date & Time').closest('form')!;
+            fireEvent.submit(form);
         });
 
         expect(mockApiClient).toHaveBeenCalledWith(

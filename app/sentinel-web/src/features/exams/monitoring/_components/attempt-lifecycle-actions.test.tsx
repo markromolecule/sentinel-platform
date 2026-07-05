@@ -3,6 +3,22 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { StudentSession } from '@sentinel/shared/types';
 import { AttemptLifecycleActions } from './attempt-lifecycle-actions';
 
+vi.mock('@sentinel/ui', async () => {
+    const actual = await vi.importActual<typeof import('@sentinel/ui')>('@sentinel/ui');
+    return {
+        ...actual,
+        DropdownMenu: ({ children }: any) => <div>{children}</div>,
+        DropdownMenuTrigger: ({ children }: any) => <>{children}</>,
+        DropdownMenuContent: ({ children }: any) => <div>{children}</div>,
+        DropdownMenuItem: ({ children, onClick, disabled, 'aria-label': ariaLabel, title }: any) => (
+            <button onClick={onClick} disabled={disabled} aria-label={ariaLabel} title={title}>
+                {children}
+            </button>
+        ),
+    };
+});
+
+
 const student: StudentSession = {
     id: 'student-1',
     studentRecordId: 'student-record-1',

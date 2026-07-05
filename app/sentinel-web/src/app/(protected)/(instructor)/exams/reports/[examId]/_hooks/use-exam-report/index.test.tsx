@@ -87,16 +87,15 @@ describe('useExamReport', () => {
     });
 
     it('calls the makeup lifecycle endpoint from the report hook', async () => {
-        vi.spyOn(window, 'prompt')
-            .mockReturnValueOnce('120')
-            .mockReturnValueOnce('Approved makeup.');
-
         const { result } = renderHook(() => useExamReport({ examId: 'exam-1' }));
 
         await act(async () => {
             await result.current.handleGrantOverride(
                 result.current.actionQueues.makeup[0],
                 'MAKEUP',
+                '2026-04-21T09:00:00.000Z',
+                '2026-04-21T11:00:00.000Z',
+                'Approved makeup.',
             );
         });
 
@@ -104,6 +103,7 @@ describe('useExamReport', () => {
             '/exams/exam-1/students/student-1/lifecycle/grant-makeup',
             expect.objectContaining({
                 method: 'POST',
+                body: expect.stringContaining('"availableFrom":"2026-04-21T09:00:00.000Z"'),
             }),
         );
         expect(toast.success).toHaveBeenCalledWith(expect.stringContaining('Final Exam (Makeup)'));
@@ -111,16 +111,15 @@ describe('useExamReport', () => {
     });
 
     it('calls the retake lifecycle endpoint with the source attempt id', async () => {
-        vi.spyOn(window, 'prompt')
-            .mockReturnValueOnce('90')
-            .mockReturnValueOnce('Approved retake.');
-
         const { result } = renderHook(() => useExamReport({ examId: 'exam-1' }));
 
         await act(async () => {
             await result.current.handleGrantOverride(
                 result.current.actionQueues.retake[0],
                 'RETAKE',
+                '2026-04-21T09:00:00.000Z',
+                '2026-04-21T10:30:00.000Z',
+                'Approved retake.',
             );
         });
 

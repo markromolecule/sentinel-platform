@@ -151,28 +151,10 @@ export function useExamReport({ examId }: UseExamReportOptions): UseExamReportRe
     const handleGrantOverride = async (
         item: ExamReportActionItem,
         overrideType: 'MAKEUP' | 'RETAKE',
+        availableFrom: string,
+        availableUntil: string,
+        notes: string | null,
     ) => {
-        const minutesInput = window.prompt(
-            `Grant a ${overrideType === 'MAKEUP' ? 'makeup' : 'retake'} window for how many minutes?`,
-            '120',
-        );
-
-        if (!minutesInput) {
-            return;
-        }
-
-        const minutes = Number(minutesInput);
-
-        if (!Number.isFinite(minutes) || minutes <= 0) {
-            toast.error('Enter a valid availability window in minutes.');
-            return;
-        }
-
-        const notes = window.prompt(
-            `Add a note for this ${overrideType === 'MAKEUP' ? 'makeup' : 'retake'} grant.`,
-            overrideType === 'MAKEUP' ? 'Approved makeup window.' : 'Approved retake window.',
-        );
-
         setActiveActionId(item.studentId);
 
         try {
@@ -181,9 +163,9 @@ export function useExamReport({ examId }: UseExamReportOptions): UseExamReportRe
                 examId,
                 item,
                 overrideType,
-                availableFrom: new Date().toISOString(),
-                availableUntil: new Date(Date.now() + minutes * 60_000).toISOString(),
-                notes: notes?.trim() ? notes.trim() : null,
+                availableFrom,
+                availableUntil,
+                notes,
             });
 
             toast.success(buildGrantSuccessMessage({ overrideType, response }));

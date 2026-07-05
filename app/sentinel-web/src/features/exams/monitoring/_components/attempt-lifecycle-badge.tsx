@@ -25,11 +25,11 @@ function getLifecycleBadgeClassName(student: StudentSession) {
 export function AttemptLifecycleBadge({ student }: { student: StudentSession }) {
     return (
         <>
-            <Badge variant="outline" className={getLifecycleBadgeClassName(student)}>
+            <Badge variant="outline" className={`text-[10px] px-1.5 py-0.5 ${getLifecycleBadgeClassName(student)}`}>
                 {student.lifecycleState?.replaceAll('_', ' ') ?? 'IN PROGRESS'}
             </Badge>
             {student.scoreState ? (
-                <Badge variant="outline" className="border-slate-200 bg-slate-50 text-slate-700">
+                <Badge variant="outline" className="text-[10px] px-1.5 py-0.5 border-slate-200 bg-slate-50 text-slate-700">
                     {student.scoreState.replaceAll('_', ' ')}
                 </Badge>
             ) : null}

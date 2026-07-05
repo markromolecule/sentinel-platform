@@ -46,5 +46,8 @@ export type UseExamReportResult = {
     handleGrantOverride: (
         item: ExamReportActionItem,
         overrideType: 'MAKEUP' | 'RETAKE',
+        availableFrom: string,
+        availableUntil: string,
+        notes: string | null,
     ) => Promise<void>;
 };
