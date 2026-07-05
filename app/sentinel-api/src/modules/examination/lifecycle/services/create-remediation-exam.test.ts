@@ -70,9 +70,7 @@ describe('createRemediationExam', () => {
             screen_lock: true,
         };
 
-        const sourceSectionsMock = [
-            { exam_section_id: 'sec-1', title: 'Part A', order_index: 0 },
-        ];
+        const sourceSectionsMock = [{ exam_section_id: 'sec-1', title: 'Part A', order_index: 0 }];
 
         const sourceQuestionsMock = [
             {

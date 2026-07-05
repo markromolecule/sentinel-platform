@@ -28,6 +28,8 @@ describe('exam remediation schema types', () => {
         };
 
         expect(record.remediation_type).toBe('RETAKE');
-        expectTypeOf<DB['exam_remediation_schedules']>().toEqualTypeOf<exam_remediation_schedules>();
+        expectTypeOf<
+            DB['exam_remediation_schedules']
+        >().toEqualTypeOf<exam_remediation_schedules>();
     });
 });

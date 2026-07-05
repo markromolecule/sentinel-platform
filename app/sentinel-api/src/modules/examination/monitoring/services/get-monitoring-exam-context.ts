@@ -44,11 +44,7 @@ export async function getMonitoringExamContext({
         .selectFrom('exams as e')
         .leftJoin('subjects as s', 's.subject_id', 'e.subject_id')
         .leftJoin('exam_configurations as ec', 'ec.exam_id', 'e.exam_id')
-        .leftJoin(
-            'exam_remediation_schedules as ers',
-            'ers.remediation_exam_id',
-            'e.exam_id',
-        )
+        .leftJoin('exam_remediation_schedules as ers', 'ers.remediation_exam_id', 'e.exam_id')
         .leftJoin('exams as source_exam', 'source_exam.exam_id', 'ers.source_exam_id')
         .select([
             'e.exam_id',

@@ -44,10 +44,7 @@ async function grantLifecycleOverride(args: {
     });
 }
 
-function buildGrantSuccessMessage(args: {
-    overrideType: 'MAKEUP' | 'RETAKE';
-    response: any;
-}) {
+function buildGrantSuccessMessage(args: { overrideType: 'MAKEUP' | 'RETAKE'; response: any }) {
     const remediationExam = args.response?.remediationExam;
     const remediationSchedule = args.response?.remediationSchedule;
     const label = args.overrideType === 'MAKEUP' ? 'Makeup' : 'Retake';

@@ -302,9 +302,7 @@ describe('ExamReportPage', () => {
                 method: 'POST',
             }),
         );
-        expect(toast.success).toHaveBeenCalledWith(
-            expect.stringContaining('Final Exam (Makeup)'),
-        );
+        expect(toast.success).toHaveBeenCalledWith(expect.stringContaining('Final Exam (Makeup)'));
         expect(mockRefetch).toHaveBeenCalled();
     });
 

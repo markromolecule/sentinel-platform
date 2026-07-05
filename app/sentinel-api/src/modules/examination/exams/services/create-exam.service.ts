@@ -19,7 +19,10 @@ import { recalculateRoomStatus } from '../../../core/rooms/services/recalculate-
 import {
     resolveInstructorExamAssignmentTargets,
     resolveInstructorLegacyExamAssignment,
+    buildExamSectionAssignmentInputs,
 } from './resolve-classroom-assignment.service';
+import { createExamSectionAssignmentsBatch } from '../../section-assignments/data/create-exam-section-assignments-batch';
+import { syncExamAssignmentSummary } from '../../section-assignments/data/sync-exam-assignment-summary';
 
 export async function createExam(
     dbClient: DbClient,
@@ -41,40 +44,46 @@ export async function createExam(
     const hasSectionTargets = Boolean(
         body.sectionId || (body.sectionIds && body.sectionIds.length > 0),
     );
-    const assignmentTargets = body.classroomId
-        ? await resolveInstructorExamAssignmentTargets({
-              dbClient,
-              classroomId: body.classroomId,
-              userId,
-              institutionId: assignmentInstitutionId,
-              sectionIds: body.sectionIds,
-              role,
-          })
-        : body.subjectId && !hasSectionTargets
-          ? {
-                classroomAssignment: {
-                    classGroupId: null as any,
-                    className: null,
-                    institutionId: assignmentInstitutionId ?? null,
-                    subjectId: body.subjectId,
-                    subjectTitle: null,
-                    sectionId: null,
-                    sectionName: null,
-                },
-                assignedSectionIds: [],
-            }
-          : {
-                classroomAssignment: await resolveInstructorLegacyExamAssignment({
-                    dbClient,
-                    userId,
-                    institutionId: assignmentInstitutionId,
-                    subjectId: body.subjectId,
-                    sectionId: body.sectionId,
-                    sectionIds: body.sectionIds,
-                    role,
-                }),
-                assignedSectionIds: [],
-            };
+    let assignmentTargets: any;
+    if (body.classroomId) {
+        assignmentTargets = await resolveInstructorExamAssignmentTargets({
+            dbClient,
+            classroomId: body.classroomId,
+            userId,
+            institutionId: assignmentInstitutionId,
+            sectionIds: body.sectionIds,
+            role,
+        });
+    } else if (body.subjectId && !hasSectionTargets) {
+        assignmentTargets = {
+            classroomAssignment: {
+                classGroupId: null as any,
+                className: null,
+                institutionId: assignmentInstitutionId ?? null,
+                subjectId: body.subjectId,
+                subjectTitle: null,
+                sectionId: null,
+                sectionName: null,
+            },
+            assignedSectionIds: [],
+            resolvedClassrooms: [],
+        };
+    } else {
+        const classroomAssignment = await resolveInstructorLegacyExamAssignment({
+            dbClient,
+            userId,
+            institutionId: assignmentInstitutionId,
+            subjectId: body.subjectId,
+            sectionId: body.sectionId,
+            sectionIds: body.sectionIds,
+            role,
+        });
+        assignmentTargets = {
+            classroomAssignment,
+            assignedSectionIds: [],
+            resolvedClassrooms: classroomAssignment.classGroupId ? [classroomAssignment] : [],
+        };
+    }
     const { classroomAssignment, assignedSectionIds } = assignmentTargets;
     const targetInstitutionId =
         institutionId ?? body.institutionId ?? classroomAssignment.institutionId ?? undefined;
@@ -117,6 +126,26 @@ export async function createExam(
             questions: body.questions,
         });
 
+        const normalizedAssignments = buildExamSectionAssignmentInputs({
+            targets: assignmentTargets,
+            roomId: body.roomId,
+            startDateTime: body.startDateTime,
+            instructorId: body.instructorId,
+            instructorIds: body.instructorIds,
+        });
+
+        if (normalizedAssignments.length > 0) {
+            await createExamSectionAssignmentsBatch({
+                dbClient: trx,
+                examId: exam.exam_id,
+                assignments: normalizedAssignments,
+            });
+            await syncExamAssignmentSummary({
+                dbClient: trx,
+                examId: exam.exam_id,
+            });
+        }
+
         if (assignedSectionIds.length > 0) {
             await replaceExamAssignedSectionsData({
                 dbClient: trx,
@@ -127,8 +156,8 @@ export async function createExam(
         const normalizedQuestions = questionColumnSupport.hasSourceCollectionId
             ? structure.normalizedQuestions
             : structure.normalizedQuestions.map(
-                  ({ source_collection_id: _sourceCollectionId, ...question }) => question,
-              );
+                ({ source_collection_id: _sourceCollectionId, ...question }) => question,
+            );
 
         await replaceExamSectionsData({
             dbClient: trx,
@@ -153,8 +182,15 @@ export async function createExam(
             },
         });
 
-        if (body.roomId) {
-            await recalculateRoomStatus(trx, body.roomId);
+        const roomIdsToRecalculate = Array.from(
+            new Set(
+                [body.roomId, ...normalizedAssignments.map((a) => a.roomId)].filter(
+                    (id): id is string => Boolean(id),
+                ),
+            ),
+        );
+        for (const rid of roomIdsToRecalculate) {
+            await recalculateRoomStatus(trx, rid);
         }
 
         return exam;

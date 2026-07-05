@@ -65,9 +65,7 @@ describe('ExamSessionNav', () => {
 
     it('marks Attempt Summary active for report routes', () => {
         mockPathname.mockReturnValue('/exams/exam-1/report');
-        mockSearchParams.get.mockImplementation((key: string) =>
-            key === 'section' ? null : null,
-        );
+        mockSearchParams.get.mockImplementation((key: string) => (key === 'section' ? null : null));
 
         render(<ExamSessionNav examId="exam-1" />);
 

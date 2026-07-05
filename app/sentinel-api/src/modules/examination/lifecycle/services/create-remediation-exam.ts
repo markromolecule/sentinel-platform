@@ -97,9 +97,15 @@ export async function createRemediationExam(args: {
                     screen_lock: sourceConfig.screen_lock,
                     auto_submit_timeout_minutes: sourceConfig.auto_submit_timeout_minutes,
                     allowed_devices: sourceConfig.allowed_devices,
-                    ai_rules: sourceConfig.ai_rules ? JSON.stringify(sourceConfig.ai_rules) as any : undefined,
-                    web_security: sourceConfig.web_security ? JSON.stringify(sourceConfig.web_security) as any : undefined,
-                    mobile_security: sourceConfig.mobile_security ? JSON.stringify(sourceConfig.mobile_security) as any : undefined,
+                    ai_rules: sourceConfig.ai_rules
+                        ? (JSON.stringify(sourceConfig.ai_rules) as any)
+                        : undefined,
+                    web_security: sourceConfig.web_security
+                        ? (JSON.stringify(sourceConfig.web_security) as any)
+                        : undefined,
+                    mobile_security: sourceConfig.mobile_security
+                        ? (JSON.stringify(sourceConfig.mobile_security) as any)
+                        : undefined,
                     lobby_admission_mode: sourceConfig.lobby_admission_mode,
                     release_score_mode: sourceConfig.release_score_mode,
                     shuffle_questions: sourceConfig.shuffle_questions,
@@ -151,7 +157,10 @@ export async function createRemediationExam(args: {
                     question_id: newQuestionId,
                     exam_id: newExamId,
                     question_type: q.question_type,
-                    content: typeof q.content === 'string' ? q.content : JSON.stringify(q.content) as any,
+                    content:
+                        typeof q.content === 'string'
+                            ? q.content
+                            : (JSON.stringify(q.content) as any),
                     passage_content: q.passage_content,
                     passage_type: q.passage_type,
                     points: q.points,

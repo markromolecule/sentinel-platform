@@ -2,10 +2,7 @@
 
 import { useMemo, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import {
-    useExamIncidentsQuery,
-    useExamReportQuery,
-} from '@sentinel/hooks';
+import { useExamIncidentsQuery, useExamReportQuery } from '@sentinel/hooks';
 import { type ApiIncidentLogItem } from '@sentinel/services';
 import type { ProctorExam } from '@sentinel/shared';
 import { buildCoreExamLogsHref } from '@/lib/routes/exam-management-routes';
@@ -37,13 +34,8 @@ export function useExamIncidentLogs(initialExamId?: string) {
     } = useExamCatalog(catalogPageSize);
 
     // 2. Filters hook
-    const {
-        search,
-        setSearch,
-        columnFilters,
-        setColumnFilters,
-        queryParams,
-    } = useIncidentFilters();
+    const { search, setSearch, columnFilters, setColumnFilters, queryParams } =
+        useIncidentFilters();
 
     // 3. Selection & Detail states local to container view
     const [selectedIds, setSelectedIds] = useState<string[]>([]);

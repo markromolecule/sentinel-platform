@@ -398,12 +398,15 @@ export type CreateExamPayload = {
     title: string;
     description: string;
     classroomId?: string;
+    classroomIds?: string[];
     classroomName?: string;
     subjectId?: string;
     section?: string;
     sectionId?: string;
     sectionIds?: string[];
     roomId?: string;
+    instructorId?: string | null;
+    instructorIds?: string[];
     startDateTime: string;
     endDateTime: string;
     durationMinutes: number;
@@ -446,12 +449,15 @@ export type UpdateExamPayload = Omit<
     'subjectId' | 'section' | 'sectionId' | 'roomId' | 'classroomId'
 > & {
     classroomId?: string | null;
+    classroomIds?: string[] | null;
     classroomName?: string | null;
     subjectId?: string | null;
     section?: string | null;
     sectionId?: string | null;
     sectionIds?: string[] | null;
     roomId?: string | null;
+    instructorId?: string | null;
+    instructorIds?: string[] | null;
     settings?: ProctorExam['settings'];
     configuration?: ProctorExam['configuration'];
     questionSections?: UpdateExamQuestionSectionPayload[];

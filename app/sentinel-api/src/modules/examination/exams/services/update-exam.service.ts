@@ -4,16 +4,10 @@ import {
     saveExamConfiguration,
 } from '../../configuration/configuration.service';
 import { assertExamConfigurationMutable } from '../../configuration/services/assert-exam-configuration-mutable';
-import { LogsService } from '../../../general/logs/logs.service';
 
 import type { UpdateExamBody } from '../exam.dto';
 import { getExamByIdData } from '../data/get-exam-by-id';
-import { getExamQuestionsData } from '../data/get-exam-questions';
-import { getExamSectionsData } from '../data/get-exam-sections';
-import { replaceExamQuestionsData } from '../data/replace-exam-questions';
-import { replaceExamSectionsData } from '../data/replace-exam-sections';
 import { replaceExamAssignedSectionsData } from '../data/replace-exam-assigned-sections';
-import { updateExamData } from '../data/update-exam';
 import { getExamColumnSupport, getExamQuestionColumnSupport } from '../helper/exam-schema-compat';
 import { assertExamRoomAvailability } from './assert-exam-room-availability.service';
 import { assertExamOwnership } from './assert-exam-ownership.service';
@@ -22,79 +16,24 @@ import { assertExamScheduleWindow } from './assert-exam-schedule-window.service'
 import { buildUpdateExamValues } from './build-exam-write-values.service';
 import { executeExamTransaction } from './execute-exam-transaction.service';
 import { getExamDetail } from './get-exam-detail.service';
-import {
-    mapExamStructureQuestionInput,
-    normalizeExamStructureInput,
-} from './normalize-exam-structure-input.service';
 import { requireExamRecord } from './require-exam-record.service';
-import { resolveInstructorExamAssignmentTargets } from './resolve-classroom-assignment.service';
+import { buildExamSectionAssignmentInputs } from './resolve-classroom-assignment.service';
 import { recalculateRoomStatus } from '../../../core/rooms/services/recalculate-room-status';
+import { createExamSectionAssignmentsBatch } from '../../section-assignments/data/create-exam-section-assignments-batch';
+import { syncExamAssignmentSummary } from '../../section-assignments/data/sync-exam-assignment-summary';
+import { deleteAllExamSectionAssignments } from '../../section-assignments/data/delete-all-exam-section-assignments';
+import { updateExamData } from '../data/update-exam';
 
-async function syncExamStructure(args: {
-    dbClient: DbClient;
-    examId: string;
-    body: UpdateExamBody;
-    institutionId?: string;
-    userId: string;
-    hasSourceCollectionId: boolean;
-}) {
-    const { dbClient, examId, body, institutionId, userId, hasSourceCollectionId } = args;
+// Extracted modular helper services
+import { syncExamStructure } from './sync-exam-structure.service';
+import { resolveAssignmentTargets } from './resolve-assignment-targets.service';
+import { computeAffectedRooms } from './compute-affected-rooms.service';
+import { logExamUpdate } from './log-exam-update.service';
 
-    const currentSections = body.questionSections
-        ? []
-        : await getExamSectionsData({
-              dbClient,
-              examId,
-          });
-    const currentQuestions = body.questions
-        ? []
-        : await getExamQuestionsData({
-              dbClient,
-              examId,
-          });
-    const structure = normalizeExamStructureInput({
-        examId,
-        questionSections:
-            body.questionSections ??
-            currentSections.map((section) => ({
-                id: section.exam_section_id,
-                title: section.title,
-                description: section.description,
-                orderIndex: section.order_index,
-            })),
-        questions: body.questions ?? currentQuestions.map(mapExamStructureQuestionInput),
-    });
-    const normalizedQuestions = hasSourceCollectionId
-        ? structure.normalizedQuestions
-        : structure.normalizedQuestions.map(
-              ({ source_collection_id: _sourceCollectionId, ...question }) => question,
-          );
-
-    await replaceExamSectionsData({
-        dbClient,
-        examId,
-        sections: structure.normalizedSections,
-    });
-
-    await replaceExamQuestionsData({
-        dbClient,
-        examId,
-        questions: normalizedQuestions,
-    });
-
-    await updateExamData({
-        dbClient,
-        id: examId,
-        institutionId,
-        values: {
-            question_count: normalizedQuestions.length,
-            updated_at: new Date(),
-            updated_by: userId,
-        },
-    });
-}
-
-function parseDateTime(value: string | Date | null | undefined) {
+/**
+ * Safely parses a datetime value into a Date object, returning null if invalid.
+ */
+function parseDateTime(value: string | Date | null | undefined): Date | null {
     if (value === null || value === undefined) {
         return null;
     }
@@ -108,10 +47,13 @@ function parseDateTime(value: string | Date | null | undefined) {
     return parsed;
 }
 
+/**
+ * Checks if the start or end datetime of an exam has changed between request and DB.
+ */
 function hasDateTimeChanged(
     nextValue: string | Date | undefined,
     currentValue: string | Date | null,
-) {
+): boolean {
     if (nextValue === undefined) {
         return false;
     }
@@ -147,19 +89,25 @@ export async function updateExam(
         getExamColumnSupport(dbClient),
         getExamQuestionColumnSupport(dbClient),
     ]);
-    const assignmentTargets =
-        body.classroomId === undefined
-            ? undefined
-            : body.classroomId === null
-              ? undefined
-              : await resolveInstructorExamAssignmentTargets({
-                    dbClient,
-                    classroomId: body.classroomId,
-                    userId,
-                    institutionId: targetInstitutionId,
-                    sectionIds: body.sectionIds ?? undefined,
-                    role,
-                });
+
+    const hasAssignmentRelevantChange =
+        body.classroomId !== undefined ||
+        body.classroomIds !== undefined ||
+        body.sectionIds !== undefined ||
+        body.roomId !== undefined ||
+        body.instructorId !== undefined ||
+        body.instructorIds !== undefined ||
+        body.startDateTime !== undefined;
+
+    const assignmentTargets = await resolveAssignmentTargets({
+        dbClient,
+        body,
+        current,
+        userId,
+        targetInstitutionId,
+        role,
+    });
+
     const classroomAssignment = assignmentTargets?.classroomAssignment;
 
     assertExamScheduleWindow({
@@ -183,18 +131,36 @@ export async function updateExam(
         institutionId: targetInstitutionId,
     });
 
-    if (shouldRecheckRoomAvailability) {
-        await assertExamRoomAvailability({
-            dbClient,
-            institutionId: targetInstitutionId,
-            roomId: nextRoomId,
-            startDateTime: nextStartDateTime,
-            endDateTime: nextEndDateTime,
-            excludeExamId: id,
-        });
-    }
+    // Compute assignments once and reuse to avoid drift or duplicate computations.
+    const nextAssignments = (hasAssignmentRelevantChange && assignmentTargets)
+        ? buildExamSectionAssignmentInputs({
+            targets: assignmentTargets,
+            roomId: body.roomId !== undefined ? body.roomId : current.room_id,
+            startDateTime:
+                body.startDateTime !== undefined
+                    ? body.startDateTime
+                    : parseDateTime(current.scheduled_date)?.toISOString() ?? null,
+            instructorId:
+                body.instructorId !== undefined
+                    ? body.instructorId
+                    : (current.created_by ?? null),
+            instructorIds: body.instructorIds !== undefined ? body.instructorIds : null,
+        })
+        : [];
 
     await executeExamTransaction(async (trx) => {
+        // Re-verify room availability inside the transaction to prevent TOCTOU race conditions.
+        if (shouldRecheckRoomAvailability) {
+            await assertExamRoomAvailability({
+                dbClient: trx,
+                institutionId: targetInstitutionId,
+                roomId: nextRoomId,
+                startDateTime: nextStartDateTime,
+                endDateTime: nextEndDateTime,
+                excludeExamId: id,
+            });
+        }
+
         const updateValues = buildUpdateExamValues({
             body,
             institutionId: targetInstitutionId,
@@ -205,6 +171,8 @@ export async function updateExam(
 
         if (body.status) {
             const nextStatus = body.status.toLowerCase();
+            // Only 'published' and 'draft' statuses update/reset the published timestamps.
+            // Other statuses (e.g. 'archived', 'cancelled') do not affect these timestamps.
             if (nextStatus === 'published') {
                 updateValues.published_at = new Date();
                 updateValues.published_by = userId;
@@ -244,6 +212,26 @@ export async function updateExam(
             });
         }
 
+        if (hasAssignmentRelevantChange && assignmentTargets) {
+            await deleteAllExamSectionAssignments({
+                dbClient: trx,
+                examId: id,
+            });
+
+            if (nextAssignments.length > 0) {
+                await createExamSectionAssignmentsBatch({
+                    dbClient: trx,
+                    examId: id,
+                    assignments: nextAssignments,
+                });
+            }
+
+            await syncExamAssignmentSummary({
+                dbClient: trx,
+                examId: id,
+            });
+        }
+
         if (assignmentTargets) {
             await replaceExamAssignedSectionsData({
                 dbClient: trx,
@@ -258,13 +246,8 @@ export async function updateExam(
             });
         }
 
-        const affectedRooms = new Set<string>();
-        if (current.room_id) {
-            affectedRooms.add(current.room_id);
-        }
-        if (nextRoomId) {
-            affectedRooms.add(nextRoomId);
-        }
+        const affectedRooms = computeAffectedRooms(current, nextRoomId, nextAssignments);
+
         if (affectedRooms.size > 0) {
             await recalculateRoomStatus(trx, Array.from(affectedRooms));
         }
@@ -274,21 +257,15 @@ export async function updateExam(
 
     // Real-time Audit Logging integration
     if (updatedExam && targetInstitutionId) {
-        try {
-            await LogsService.createLog(dbClient, {
-                userId,
-                action: 'exam.update',
-                resourceType: 'exam',
-                resourceId: id,
-                activeInstitutionId: targetInstitutionId,
-                details: {
-                    title: body.title || current.title,
-                    status: body.status || current.status,
-                },
-            });
-        } catch (logErr) {
-            console.error('Failed to log exam.update event:', logErr);
-        }
+        await logExamUpdate({
+            dbClient,
+            userId,
+            examId: id,
+            institutionId: targetInstitutionId,
+            currentTitle: current.title,
+            currentStatus: current.status,
+            body,
+        });
     }
 
     return updatedExam;

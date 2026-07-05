@@ -42,14 +42,13 @@ export const getExamRouteHandler: AppRouteHandler<typeof getExamRoute> = async (
 
     assertAssessmentReadAccess(c);
 
-    const { role, institutionId, studentUserId } =
-        await resolveAssessmentReadScope({
-            dbClient: c.get('dbClient'),
-            user,
-            claimedRole: supabaseUser?.user_metadata?.role,
-            contextInstitutionId: c.get('institutionId'),
-            activePermissionKeys: c.get('activePermissionKeys'),
-        });
+    const { role, institutionId, studentUserId } = await resolveAssessmentReadScope({
+        dbClient: c.get('dbClient'),
+        user,
+        claimedRole: supabaseUser?.user_metadata?.role,
+        contextInstitutionId: c.get('institutionId'),
+        activePermissionKeys: c.get('activePermissionKeys'),
+    });
 
     const examAccessRecord = requireExamRecord(
         await getExamByIdData({
@@ -62,12 +61,12 @@ export const getExamRouteHandler: AppRouteHandler<typeof getExamRoute> = async (
 
     const isShared = user?.id
         ? await c
-            .get('dbClient')
-            .selectFrom('exam_shares')
-            .select('user_id')
-            .where('exam_id', '=', id)
-            .where('user_id', '=', user.id)
-            .executeTakeFirst()
+              .get('dbClient')
+              .selectFrom('exam_shares')
+              .select('user_id')
+              .where('exam_id', '=', id)
+              .where('user_id', '=', user.id)
+              .executeTakeFirst()
         : null;
 
     assertExamReadScope({
@@ -77,21 +76,10 @@ export const getExamRouteHandler: AppRouteHandler<typeof getExamRoute> = async (
         isShared: Boolean(isShared),
     });
 
-    const exam = await ExamService.getExamById(
-        c.get('dbClient'),
-        id,
-        institutionId,
-        studentUserId,
-    );
+    const exam = await ExamService.getExamById(c.get('dbClient'), id, institutionId, studentUserId);
 
     if (user?.id && institutionId) {
-        void logAssessmentQuery(
-            c.get('dbClient'),
-            user.id,
-            id,
-            institutionId,
-            role || 'unknown',
-        );
+        void logAssessmentQuery(c.get('dbClient'), user.id, id, institutionId, role || 'unknown');
     }
 
     return c.json({

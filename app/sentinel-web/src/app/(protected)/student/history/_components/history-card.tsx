@@ -26,8 +26,7 @@ function getHistoryHref(item: HistoryCardProps['item']) {
 
 export function HistoryCard({ item }: HistoryCardProps) {
     const href = getHistoryHref(item);
-    const isActive =
-        item.status === 'available' || item.status === 'in-progress';
+    const isActive = item.status === 'available' || item.status === 'in-progress';
 
     return (
         <Link

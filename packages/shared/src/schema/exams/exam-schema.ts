@@ -196,6 +196,7 @@ export const createExamBodySchema = z
             .min(20, { message: 'Description must be at least 20 characters.' })
             .max(250, { message: 'Description cannot exceed 250 characters.' }),
         classroomId: z.string().uuid({ message: 'Select a valid classroom.' }).optional(),
+        classroomIds: z.array(z.string().uuid({ message: 'Select a valid classroom.' })).optional(),
         classroomName: z.string().optional(),
         subjectId: z.string().uuid().optional(),
         institutionId: z.string().uuid().optional(),
@@ -203,6 +204,14 @@ export const createExamBodySchema = z
         sectionId: z.string().uuid().optional(),
         sectionIds: z.array(z.string().uuid()).optional(),
         roomId: z.string().uuid({ message: 'Select a valid room.' }).optional(),
+        instructorId: z
+            .string()
+            .uuid({ message: 'Select a valid instructor.' })
+            .nullable()
+            .optional(),
+        instructorIds: z
+            .array(z.string().uuid({ message: 'Select a valid instructor.' }))
+            .optional(),
         startDateTime: z.string().min(1, { message: 'Start date and time is required.' }),
         endDateTime: z.string().min(1, { message: 'End date and time is required.' }),
         durationMinutes: z
@@ -300,11 +309,14 @@ export const updateExamBodySchema = z.object({
     description: z.string().min(20).max(250).optional(),
     status: examStatusSchema.optional(),
     classroomId: z.string().uuid().nullable().optional(),
+    classroomIds: z.array(z.string().uuid()).nullable().optional(),
     classroomName: z.string().trim().min(1).max(100).nullable().optional(),
     subjectId: z.string().uuid().nullable().optional(),
     sectionId: z.string().uuid().nullable().optional(),
     sectionIds: z.array(z.string().uuid()).optional(),
     roomId: z.string().uuid().nullable().optional(),
+    instructorId: z.string().uuid().nullable().optional(),
+    instructorIds: z.array(z.string().uuid()).nullable().optional(),
     section: z.string().trim().min(1).max(100).nullable().optional(),
     startDateTime: z.string().optional(),
     endDateTime: z.string().optional(),

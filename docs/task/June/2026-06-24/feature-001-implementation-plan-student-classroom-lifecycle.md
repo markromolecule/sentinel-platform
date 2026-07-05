@@ -131,7 +131,7 @@ Why:
 - [x] classroom deletion still deleting the classroom when no exams are attached.
 - [x] Add controller-level regression coverage in `app/sentinel-api/src/modules/core/classroom/controllers/delete-classroom.controller.test.ts` if the service contract or error handling changes.
       <!-- NOTE: No delete-classroom controller test was added in Phase 3 because the controller contract, permission gate, and error handling shape were unchanged; the behavior change is contained within the classroom write service. -->
-          **Migration required:** No for Option 2 — cleanup is enforced in application code. Yes only if the team later upgrades to DB-level cascade.
+      **Migration required:** No for Option 2 — cleanup is enforced in application code. Yes only if the team later upgrades to DB-level cascade.
 
 ## Phase 4: Align Student Exam Visibility With Archived Classroom Rules
 
@@ -160,7 +160,7 @@ Why:
 - [ ] direct visit to archived classroom detail blocked,
 - [ ] deleting a classroom removes its owned exam data.
       <!-- NOTE: Manual verification could not be completed in this session because HTTP checks to localhost:3000 and localhost:3001 were unavailable from the shell environment. -->
-          **Migration required:** No for Option 2.
+      **Migration required:** No for Option 2.
 
 ## Additional Considerations
 

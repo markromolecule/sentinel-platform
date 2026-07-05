@@ -180,7 +180,7 @@ export async function logAssessmentQuery(
 }
 
 /**
- * Resolves the role, institution ID, student user ID, department ID, and instructor user ID 
+ * Resolves the role, institution ID, student user ID, department ID, and instructor user ID
  * for assessment read operations. Centralizes the logic to avoid duplicated ad-hoc role-based checks.
  *
  * @param args - Object containing inputs for resolving scope
@@ -199,7 +199,14 @@ export async function resolveAssessmentReadScope(args: {
     requestedInstitutionId?: string | null;
     activePermissionKeys?: Set<string> | string[];
 }) {
-    const { dbClient, user, claimedRole, contextInstitutionId, requestedInstitutionId, activePermissionKeys } = args;
+    const {
+        dbClient,
+        user,
+        claimedRole,
+        contextInstitutionId,
+        requestedInstitutionId,
+        activePermissionKeys,
+    } = args;
 
     const role = await resolveAssessmentActorRole({
         dbClient,
@@ -236,7 +243,7 @@ export async function resolveAssessmentReadScope(args: {
 
 /**
  * Asserts that the actor has permission to read the specific exam record.
- * Specifically, checks if an instructor is trying to access a private exam they did not own, 
+ * Specifically, checks if an instructor is trying to access a private exam they did not own,
  * are not assigned to, and is not shared with them.
  *
  * @param args - Inputs for the check
@@ -269,5 +276,3 @@ export function assertExamReadScope(args: {
         });
     }
 }
-
-

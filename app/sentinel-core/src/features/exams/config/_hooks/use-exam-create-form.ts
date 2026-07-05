@@ -67,6 +67,11 @@ export function useExamCreateForm(onClose: () => void): {
                 allowReview: data.allowReview,
                 randomizeChoices: data.randomizeChoices,
                 isPublic: data.isPublic,
+                classroomId: data.classroomIds?.[0] || undefined,
+                classroomIds: data.classroomIds || undefined,
+                roomId: data.roomId || undefined,
+                instructorId: data.instructorId || undefined,
+                instructorIds: data.instructorIds || undefined,
             });
 
             form.reset(getExamCreateFormDefaults());

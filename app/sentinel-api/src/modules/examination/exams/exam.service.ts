@@ -32,12 +32,7 @@ export class ExamService {
         institutionId?: string,
         studentUserId?: string,
     ) {
-        return await getExamDetail(
-            dbClient,
-            id,
-            institutionId,
-            studentUserId,
-        );
+        return await getExamDetail(dbClient, id, institutionId, studentUserId);
     }
 
     static async createExam(

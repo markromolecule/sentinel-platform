@@ -28,8 +28,8 @@ function buildEditFormValues(exam: ProctorExam): ExamCreateFormValues {
         title: exam.title || '',
         description: exam.description || '',
         subjectId: exam.subjectId || '',
-        classroomIds: [],
-        roomId: undefined,
+        classroomIds: exam.classroomIds || (exam.classroomId ? [exam.classroomId] : []),
+        roomId: exam.roomId || undefined,
         startDateTime,
         endDateTime,
         durationMinutes:
@@ -42,6 +42,8 @@ function buildEditFormValues(exam: ProctorExam): ExamCreateFormValues {
         allowReview: exam.settings?.allowReview ?? true,
         randomizeChoices: exam.settings?.randomizeChoices ?? true,
         isPublic: exam.isPublic ?? false,
+        instructorId: exam.assignedInstructorIds?.[0] || undefined,
+        instructorIds: exam.assignedInstructorIds || [],
     };
 }
 
@@ -96,9 +98,10 @@ export function useExamEditForm(
             title: data.title,
             description: data.description,
             subjectId: data.subjectId,
-            classroomId: null,
+            classroomId: data.classroomIds?.[0] || null,
+            classroomIds: data.classroomIds || null,
             sectionIds: [],
-            roomId: null,
+            roomId: data.roomId || null,
             startDateTime,
             endDateTime,
             durationMinutes: data.durationMinutes,
@@ -108,6 +111,8 @@ export function useExamEditForm(
             allowReview: data.allowReview,
             randomizeChoices: data.randomizeChoices,
             isPublic: data.isPublic,
+            instructorId: data.instructorId || null,
+            instructorIds: data.instructorIds || null,
         };
 
         if (exam.status === 'archived') {

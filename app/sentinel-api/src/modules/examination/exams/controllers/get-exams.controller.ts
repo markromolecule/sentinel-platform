@@ -66,10 +66,7 @@ export const getExamsRouteHandler: AppRouteHandler<typeof getExamsRoute> = async
         });
 
     if (role === 'instructor' && !institutionId) {
-        return c.json(
-            { message: 'Institution context required', data: [] },
-            400,
-        );
+        return c.json({ message: 'Institution context required', data: [] }, 400);
     }
 
     const exams = await ExamService.getExams(

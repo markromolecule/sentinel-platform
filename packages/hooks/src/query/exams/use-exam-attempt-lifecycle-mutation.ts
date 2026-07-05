@@ -99,7 +99,7 @@ function createLifecycleMutationOptions<TData, TVariables extends LifecycleMutat
         mutationFn: (variables: TVariables) => mutationFn(apiClient, variables),
         onSuccess: async (data, variables, context) => {
             await invalidateMonitoringQueries(queryClient, variables);
-            
+
             // Invalidate source exam report
             await queryClient.invalidateQueries({
                 queryKey: EXAM_QUERY_KEYS.report(variables.id),
