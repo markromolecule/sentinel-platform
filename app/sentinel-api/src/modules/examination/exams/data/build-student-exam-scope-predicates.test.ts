@@ -172,6 +172,28 @@ describe('student exam scope predicates', () => {
         void db.destroy();
     });
 
+    it('keeps private classroom-assigned exams visible through exact class-group assignment matching', () => {
+        const db = createCompilerDb();
+        const compiled = db
+            .selectFrom('exams as e')
+            .select('e.exam_id')
+            .where('e.is_public', '=', false)
+            .where(
+                buildStudentExamVisibilityPredicate({
+                    studentUserId: '4bb7db25-f34f-4a57-b6ae-1db2f898f142',
+                    hasSectionId: true,
+                }),
+            )
+            .compile();
+
+        expect(compiled.sql).toContain('"e"."is_public" = $1');
+        expect(compiled.sql).toContain('esa.class_group_id = "student_cg"."class_group_id"');
+        expect(compiled.sql).toContain('enr.class_group_id = e.class_group_id');
+        expect(compiled.sql).not.toContain('e.is_public = true');
+
+        void db.destroy();
+    });
+
     it('prefers exact classroom assignments over same-section matches from other classrooms', () => {
         const db = createCompilerDb();
         const compiled = db

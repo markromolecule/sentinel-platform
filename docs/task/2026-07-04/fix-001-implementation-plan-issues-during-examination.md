@@ -229,15 +229,21 @@ Concrete next steps:
 - [x] Run `pnpm --dir app/sentinel-web exec vitest run --passWithNoTests 'src/app/(protected)/(instructor)/exams/[id]/_components/exam-session-nav.test.tsx' 'src/app/(protected)/(instructor)/exams/[id]/_components/exam-session-workspace-shell.test.tsx'`.
 - [x] Run `pnpm --dir app/sentinel-core exec vitest run --passWithNoTests 'src/app/(protected)/exams/[id]/_components/exam-session-nav.test.tsx' 'src/app/(protected)/exams/[id]/_components/exam-session-workspace-shell.test.tsx'`.
 - [ ] Run `pnpm --dir app/sentinel-api exec vitest run --passWithNoTests src/modules/telemetry/storage/services/incident-persistence.service.test.ts src/modules/telemetry/ingestion/rules/ai-rules.test.ts`.
+
 <!-- NOTE: This command failed in the current environment because `incident-persistence.service.test.ts` requires a reachable database (`aws-1-ap-northeast-1.pooler.supabase.com`) and `ai-rules.test.ts` attempted a Redis connection to `127.0.0.1:6379`, both unavailable from this sandboxed session. -->
+
 - [x] Run `pnpm --dir app/sentinel-api exec vitest run --passWithNoTests src/modules/examination/lifecycle/services/create-remediation-exam.test.ts src/modules/examination/lifecycle/services/grant-retake-exam-window.test.ts src/modules/examination/lifecycle/services/grant-makeup-exam-window.test.ts src/modules/examination/lifecycle/lifecycle.routes.test.ts`.
 - [x] Run `pnpm --dir app/sentinel-api exec vitest run --passWithNoTests src/modules/examination/access/access.test.ts src/modules/examination/flow/data/session.repository.test.ts src/modules/examination/reporting/services/map-reporting-response.test.ts src/modules/examination/monitoring/services/map-monitoring-response.test.ts`.
 - [x] Run `pnpm --dir packages/shared exec vitest run --passWithNoTests src/exams/resolve-exam-status.test.ts src/schema/exams/lifecycle-schema.test.ts`.
 - [x] Run Prisma validation/generation for `packages/db` after the remediation migration is added.
 - [ ] Run `pnpm format:check`.
+
 <!-- NOTE: `pnpm format:check` failed because Prettier reported existing style issues in 31 files across the repository, including files outside the Phase 6/7 scope. -->
+
 - [ ] Run `pnpm lint`.
+
 <!-- NOTE: `pnpm lint` failed immediately at `@sentinel/db#lint` because `eslint` was not found in the current environment (`sh: eslint: command not found`). -->
+
 - [ ] Manually verify submitting a fullscreen exam does not create a `FULL_SCREEN_EXIT` incident after turn-in.
 - [ ] Manually verify one copy/cut/paste action produces one clipboard occurrence count, and the second accepted action increments it to two.
 - [ ] Manually verify shouting/talking during a mic-required, audio-enabled active attempt creates an instructor-visible audio incident.

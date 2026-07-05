@@ -2,10 +2,10 @@ import { type DbClient } from '@sentinel/db';
 import { HTTPException } from 'hono/http-exception';
 
 export type ResolvedClassroomAssignment = {
-    classGroupId: string;
+    classGroupId: string | null;
     className: string | null;
     institutionId: string | null;
-    subjectId: string;
+    subjectId: string | null;
     subjectTitle: string | null;
     sectionId: string | null;
     sectionName: string | null;
@@ -14,6 +14,7 @@ export type ResolvedClassroomAssignment = {
 export type ResolvedExamAssignmentTargets = {
     classroomAssignment: ResolvedClassroomAssignment;
     assignedSectionIds: string[];
+    resolvedClassrooms: ResolvedClassroomAssignment[];
 };
 
 type RawClassroomAssignmentRecord = {
@@ -146,6 +147,7 @@ export async function resolveInstructorExamAssignmentTargets(args: {
             assignedSectionIds: requestedSectionIds.filter(
                 (sectionId) => sectionId !== classroomAssignment.sectionId,
             ),
+            resolvedClassrooms: classroomAssignment.classGroupId ? [classroomAssignment] : [],
         };
     }
 
@@ -175,11 +177,16 @@ export async function resolveInstructorExamAssignmentTargets(args: {
         });
     }
 
+    const resolvedClassrooms = (accessibleTargets as RawClassroomAssignmentRecord[]).map(
+        mapResolvedClassroomAssignment,
+    );
+
     return {
         classroomAssignment,
         assignedSectionIds: requestedSectionIds.filter(
             (sectionId) => sectionId !== classroomAssignment.sectionId,
         ),
+        resolvedClassrooms,
     };
 }
 
@@ -217,4 +224,50 @@ export async function resolveInstructorLegacyExamAssignment(args: {
     }
 
     return mapResolvedClassroomAssignment(classroom as RawClassroomAssignmentRecord);
+}
+
+/**
+ * Maps resolved exam assignment targets and other assignment details into section assignment inputs.
+ * Pairs the first instructor (from instructorId or instructorIds) with all target classroom rows.
+ *
+ * @param args - Assignment resolution details, room, schedule, and instructors
+ * @returns Array of section assignment input objects
+ */
+export function buildExamSectionAssignmentInputs(args: {
+    targets: ResolvedExamAssignmentTargets;
+    roomId?: string | null;
+    startDateTime?: string | null;
+    instructorId?: string | null;
+    instructorIds?: string[] | null;
+}): Array<{
+    sectionId: string;
+    classGroupId: string | null;
+    roomId: string | null;
+    instructorId: string | null;
+    scheduledAt: string | null;
+}> {
+    const { targets, roomId, startDateTime, instructorId, instructorIds } = args;
+
+    let resolvedInstructorId: string | null = null;
+    if (instructorId) {
+        resolvedInstructorId = instructorId;
+    } else if (instructorIds && instructorIds.length > 0) {
+        resolvedInstructorId = instructorIds[0];
+    }
+
+    const { resolvedClassrooms } = targets;
+
+    if (!resolvedClassrooms || resolvedClassrooms.length === 0) {
+        return [];
+    }
+
+    return resolvedClassrooms
+        .filter((c) => c.classGroupId && c.sectionId)
+        .map((c) => ({
+            sectionId: c.sectionId as string,
+            classGroupId: c.classGroupId,
+            roomId: roomId || null,
+            instructorId: resolvedInstructorId,
+            scheduledAt: startDateTime || null,
+        }));
 }

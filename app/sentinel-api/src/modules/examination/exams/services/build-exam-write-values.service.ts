@@ -91,8 +91,8 @@ export function buildUpdateExamValues(args: {
     userId: string;
     sectionColumnSupport?: ExamSectionColumnSupport;
     classroomAssignment?: {
-        classGroupId: string;
-        subjectId: string;
+        classGroupId: string | null;
+        subjectId: string | null;
         sectionId: string | null;
         sectionName: string | null;
     };

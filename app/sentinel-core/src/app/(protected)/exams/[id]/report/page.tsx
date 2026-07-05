@@ -18,38 +18,25 @@ import {
     formatPercent,
     grantLifecycleOverride,
 } from './_helpers/report-helpers';
+import { RemediationGrantDialog } from './_components/remediation-grant-dialog';
 
 export default function ExamReportPage({ params }: { params: Promise<{ id: string }> }) {
     const { id } = use(params);
     const apiClient = useApi();
     const [activeActionId, setActiveActionId] = useState<string | null>(null);
+    const [remediationTarget, setRemediationTarget] = useState<{
+        item: ExamReportActionItem;
+        type: 'MAKEUP' | 'RETAKE';
+    } | null>(null);
     const { data: report, isLoading, isError, refetch, isFetching } = useExamReportQuery(id);
 
     const handleGrantOverride = async (
         item: ExamReportActionItem,
         overrideType: 'MAKEUP' | 'RETAKE',
+        availableFrom: string,
+        availableUntil: string,
+        notes: string | null,
     ) => {
-        const minutesInput = window.prompt(
-            `Grant a ${overrideType === 'MAKEUP' ? 'makeup' : 'retake'} window for how many minutes?`,
-            '120',
-        );
-
-        if (!minutesInput) {
-            return;
-        }
-
-        const minutes = Number(minutesInput);
-
-        if (!Number.isFinite(minutes) || minutes <= 0) {
-            toast.error('Enter a valid availability window in minutes.');
-            return;
-        }
-
-        const notes = window.prompt(
-            `Add a note for this ${overrideType === 'MAKEUP' ? 'makeup' : 'retake'} grant.`,
-            overrideType === 'MAKEUP' ? 'Approved makeup window.' : 'Approved retake window.',
-        );
-
         setActiveActionId(item.studentId);
 
         try {
@@ -58,9 +45,9 @@ export default function ExamReportPage({ params }: { params: Promise<{ id: strin
                 examId: id,
                 item,
                 overrideType,
-                availableFrom: new Date().toISOString(),
-                availableUntil: new Date(Date.now() + minutes * 60_000).toISOString(),
-                notes: notes?.trim() ? notes.trim() : null,
+                availableFrom,
+                availableUntil,
+                notes,
             });
 
             toast.success(buildGrantSuccessMessage({ overrideType, response }));
@@ -198,7 +185,7 @@ export default function ExamReportPage({ params }: { params: Promise<{ id: strin
                     emptyMessage="No absent students need a makeup workflow."
                     actionLabel="Grant Makeup"
                     onAction={(item) => {
-                        void handleGrantOverride(item, 'MAKEUP');
+                        setRemediationTarget({ item, type: 'MAKEUP' });
                     }}
                     activeActionId={activeActionId}
                 />
@@ -209,7 +196,7 @@ export default function ExamReportPage({ params }: { params: Promise<{ id: strin
                     emptyMessage="No students currently need a retake recommendation."
                     actionLabel="Grant Retake"
                     onAction={(item) => {
-                        void handleGrantOverride(item, 'RETAKE');
+                        setRemediationTarget({ item, type: 'RETAKE' });
                     }}
                     activeActionId={activeActionId}
                 />
@@ -221,6 +208,15 @@ export default function ExamReportPage({ params }: { params: Promise<{ id: strin
             </div>
 
             <AttemptSummaryTable students={report.students} />
+
+            <RemediationGrantDialog
+                isOpen={remediationTarget !== null}
+                onClose={() => setRemediationTarget(null)}
+                item={remediationTarget?.item ?? null}
+                overrideType={remediationTarget?.type ?? null}
+                onConfirm={handleGrantOverride}
+                isLoading={activeActionId !== null}
+            />
         </div>
     );
 }

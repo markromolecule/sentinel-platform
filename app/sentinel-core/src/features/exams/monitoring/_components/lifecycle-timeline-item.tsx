@@ -1,14 +1,6 @@
 'use client';
 
-import {
-    AlertCircle,
-    Award,
-    CheckCircle2,
-    Clock,
-    Lock,
-    LockOpen,
-    RotateCcw,
-} from 'lucide-react';
+import { AlertCircle, Award, CheckCircle2, Clock, Lock, LockOpen, RotateCcw } from 'lucide-react';
 import type { ExamAttemptLifecycleEvent } from '@sentinel/shared/types';
 
 interface LifecycleTimelineItemProps {

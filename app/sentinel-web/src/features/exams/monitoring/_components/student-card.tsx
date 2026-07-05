@@ -32,30 +32,30 @@ export function StudentCard({
     return (
         <Card
             className={cn(
-                'border-border/50 cursor-pointer p-4 transition-all hover:shadow-md',
+                'border-border/50 cursor-pointer p-3 transition-all hover:shadow-md',
                 isSelected && 'ring-2 ring-[#323d8f]',
             )}
             onClick={onClick}
         >
-            <div className="mb-3 flex items-start justify-between">
-                <div className="flex items-center gap-3">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-[#323d8f] to-[#4a5bb8] text-sm font-bold text-white">
+            <div className="mb-2.5 flex items-start justify-between gap-2.5">
+                <div className="flex items-start gap-2.5 min-w-0 flex-1">
+                    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-[#323d8f] to-[#4a5bb8] text-xs font-bold text-white">
                         {student.firstName[0]}
                         {student.lastName[0]}
                     </div>
-                    <div>
-                        <p className="text-foreground font-medium">
+                    <div className="min-w-0 flex-1">
+                        <p className="text-foreground text-sm font-medium truncate" title={`${student.firstName} ${student.lastName}`}>
                             {student.firstName} {student.lastName}
                         </p>
-                        <p className="text-muted-foreground font-mono text-xs">
+                        <p className="text-muted-foreground font-mono text-[10px] leading-none mt-0.5">
                             {student.studentNo}
                         </p>
-                        <div className="mt-2 flex flex-wrap gap-2">
+                        <div className="mt-1.5 flex items-center gap-1.5 flex-nowrap">
                             <AttemptLifecycleBadge student={student} />
                         </div>
                     </div>
                 </div>
-                <Badge className={cn('text-xs', status.color)}>
+                <Badge className={cn('text-[10px] px-1.5 py-0.5 shrink-0', status.color)}>
                     {status.icon}
                     <span className="ml-1">{status.label}</span>
                 </Badge>
@@ -114,25 +114,24 @@ export function StudentCard({
                         </>
                     )}
                 </div>
-                <Button
-                    variant="ghost"
-                    size="sm"
-                    className="text-muted-foreground h-7 px-2 text-[10px] hover:text-[#323d8f]"
-                    onClick={(e: React.MouseEvent) => {
-                        e.stopPropagation();
-                        router.push(`${pathname}/${student.id}`);
-                    }}
-                >
-                    View Details
-                </Button>
-            </div>
-
-            <div className="mt-4 border-t pt-3">
-                <AttemptLifecycleActions
-                    student={student}
-                    activeLifecycleActionId={activeLifecycleActionId}
-                    onAction={onLifecycleAction}
-                />
+                <div className="flex items-center gap-1.5">
+                    <Button
+                        variant="ghost"
+                        size="sm"
+                        className="text-muted-foreground h-7 px-2 text-[10px] hover:text-[#323d8f]"
+                        onClick={(e: React.MouseEvent) => {
+                            e.stopPropagation();
+                            router.push(`${pathname}/${student.id}`);
+                        }}
+                    >
+                        View Details
+                    </Button>
+                    <AttemptLifecycleActions
+                        student={student}
+                        activeLifecycleActionId={activeLifecycleActionId}
+                        onAction={onLifecycleAction}
+                    />
+                </div>
             </div>
         </Card>
     );

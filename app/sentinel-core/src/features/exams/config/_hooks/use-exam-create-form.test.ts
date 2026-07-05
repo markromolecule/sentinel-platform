@@ -38,6 +38,10 @@ describe('useExamCreateForm', () => {
                 'This is a long description with more than twenty characters.',
             );
             result.current.form.setValue('subjectId', 'subject-uuid-1111');
+            result.current.form.setValue('classroomIds', ['classroom-uuid-1111']);
+            result.current.form.setValue('roomId', 'room-uuid-1111');
+            result.current.form.setValue('instructorId', 'instructor-uuid-1111');
+            result.current.form.setValue('instructorIds', ['instructor-uuid-1111']);
             result.current.form.setValue('startDateTime', '2026-06-14T08:00');
             result.current.form.setValue('endDateTime', '2026-06-14T09:00');
             result.current.form.setValue('durationMinutes', 60);
@@ -57,6 +61,11 @@ describe('useExamCreateForm', () => {
             title: 'Exam Title',
             description: 'This is a long description with more than twenty characters.',
             subjectId: 'subject-uuid-1111',
+            classroomId: 'classroom-uuid-1111',
+            classroomIds: ['classroom-uuid-1111'],
+            roomId: 'room-uuid-1111',
+            instructorId: 'instructor-uuid-1111',
+            instructorIds: ['instructor-uuid-1111'],
             startDateTime: new Date('2026-06-14T08:00').toISOString(),
             endDateTime: new Date('2026-06-14T09:00').toISOString(),
             durationMinutes: 60,

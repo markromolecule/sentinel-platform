@@ -398,12 +398,15 @@ export type CreateExamPayload = {
     title: string;
     description: string;
     classroomId?: string;
+    classroomIds?: string[];
     classroomName?: string;
     subjectId?: string;
     section?: string;
     sectionId?: string;
     sectionIds?: string[];
     roomId?: string;
+    instructorId?: string | null;
+    instructorIds?: string[];
     startDateTime: string;
     endDateTime: string;
     durationMinutes: number;
@@ -443,15 +446,29 @@ export type UpdateExamQuestionPayload = {
 
 export type UpdateExamPayload = Omit<
     Partial<CreateExamPayload>,
-    'subjectId' | 'section' | 'sectionId' | 'roomId' | 'classroomId'
+    | 'subjectId'
+    | 'section'
+    | 'sectionId'
+    | 'roomId'
+    | 'classroomId'
+    | 'classroomIds'
+    | 'classroomName'
+    | 'sectionIds'
+    | 'instructorId'
+    | 'instructorIds'
+    | 'settings'
+    | 'configuration'
 > & {
     classroomId?: string | null;
+    classroomIds?: string[] | null;
     classroomName?: string | null;
     subjectId?: string | null;
     section?: string | null;
     sectionId?: string | null;
     sectionIds?: string[] | null;
     roomId?: string | null;
+    instructorId?: string | null;
+    instructorIds?: string[] | null;
     settings?: ProctorExam['settings'];
     configuration?: ProctorExam['configuration'];
     questionSections?: UpdateExamQuestionSectionPayload[];
@@ -509,7 +526,7 @@ export type StartExamSessionResult = {
     attemptId?: string;
     error?: string;
     errorCode?:
-        'ATTEMPT_ALREADY_COMPLETED' | 'ATTEMPT_LOCKED' | 'ATTEMPT_CLOSED' | 'ATTEMPT_SUPERSEDED';
+    'ATTEMPT_ALREADY_COMPLETED' | 'ATTEMPT_LOCKED' | 'ATTEMPT_CLOSED' | 'ATTEMPT_SUPERSEDED';
 };
 
 export type CompleteExamSessionPayload = {

@@ -270,7 +270,14 @@ export function useExamSession({
                 }
             }
         },
-        [apiClient, elapsedSeconds, examSession?.sessionId, saveAnswerDraft, isSessionStartBlocked, onLifecycleBlocked],
+        [
+            apiClient,
+            elapsedSeconds,
+            examSession?.sessionId,
+            saveAnswerDraft,
+            isSessionStartBlocked,
+            onLifecycleBlocked,
+        ],
     );
 
     return {

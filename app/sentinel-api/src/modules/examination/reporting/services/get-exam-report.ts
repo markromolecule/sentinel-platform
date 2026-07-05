@@ -48,12 +48,11 @@ export async function getExamReport({
         incidentSeverityBreakdown,
         accessOverrides,
         remediationRowsByStudentId,
-    } =
-        await loadExamReportSourceData({
-            dbClient,
-            examId,
-            exam,
-        });
+    } = await loadExamReportSourceData({
+        dbClient,
+        examId,
+        exam,
+    });
 
     const { overrideAttemptKindMap, activeOverrideMap } = buildOverrideRecencyMaps(accessOverrides);
     const enrichedStudentRows = enrichStudentRows({

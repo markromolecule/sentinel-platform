@@ -4,6 +4,8 @@ import { normalizeText } from './score-exam-attempt-utils';
 
 // ─── Shared Utilities ────────────────────────────────────────────────────────
 
+const CHOICE_LABEL_PREFIX_REGEX = /^\s*\(?([A-Z])\)?(?:\s*[\.\):-]|\s+-)\s*/i;
+
 function toBoolean(value: unknown): boolean | null {
     if (typeof value === 'boolean') return value;
 
@@ -22,7 +24,29 @@ function toBoolean(value: unknown): boolean | null {
  */
 function resolveOptionToText(value: unknown, options: string[]): string | null {
     if (typeof value === 'number') return normalizeText(options[value] ?? '');
-    if (typeof value === 'string') return normalizeText(value);
+    if (typeof value === 'string') {
+        const normalizedValue = normalizeText(value);
+        const normalizedOptions = options.map((option) => ({
+            raw: option,
+            normalized: normalizeText(option),
+            stripped: normalizeText(option.replace(CHOICE_LABEL_PREFIX_REGEX, '').trim()),
+        }));
+
+        const directMatch = normalizedOptions.find(
+            (option) =>
+                option.normalized === normalizedValue || option.stripped === normalizedValue,
+        );
+        if (directMatch) return directMatch.stripped;
+
+        const labelMatch = value.match(CHOICE_LABEL_PREFIX_REGEX);
+        if (labelMatch?.[1]) {
+            const optionIndex = labelMatch[1].toUpperCase().charCodeAt(0) - 65;
+            const option = normalizedOptions[optionIndex];
+            if (option) return option.stripped;
+        }
+
+        return normalizeText(value.replace(CHOICE_LABEL_PREFIX_REGEX, '').trim());
+    }
     return null;
 }
 

@@ -4,9 +4,10 @@ import { useAudioAnomalyWorker } from './use-audio-anomaly-worker';
 import { ingestTelemetryEvent } from '@sentinel/services';
 import type { ExamConfig } from '@sentinel/shared';
 
-const { mockApiClient, mockAuth } = vi.hoisted(() => ({
+const { mockApiClient, mockAuth, mockToastWarning } = vi.hoisted(() => ({
     mockApiClient: vi.fn(),
     mockAuth: { user: { id: 'student-1' } },
+    mockToastWarning: vi.fn(),
 }));
 
 vi.mock('@sentinel/hooks', () => ({
@@ -20,7 +21,7 @@ vi.mock('@sentinel/services', () => ({
 
 vi.mock('sonner', () => ({
     toast: {
-        warning: vi.fn(),
+        warning: mockToastWarning,
         error: vi.fn(),
     },
 }));
@@ -42,15 +43,17 @@ describe('useAudioAnomalyWorker', () => {
     let mockWorker: MockWorker;
     let mockAudioContext: any;
     let mockStream: any;
+    let mockTrackStop: ReturnType<typeof vi.fn>;
 
     beforeEach(() => {
         cleanup();
         vi.clearAllMocks();
 
         mockWorker = new MockWorker();
+        mockTrackStop = vi.fn();
 
         mockStream = {
-            getTracks: () => [{ stop: vi.fn() }],
+            getTracks: () => [{ stop: mockTrackStop }],
         };
 
         mockAudioContext = {
@@ -110,8 +113,6 @@ describe('useAudioAnomalyWorker', () => {
                 }),
             });
         });
-
-        console.log('MOCKWORKER ONMESSAGE:', mockWorker.onmessage);
         // Simulate INIT_SUCCESS from worker
         act(() => {
             if (mockWorker.onmessage) {
@@ -168,5 +169,160 @@ describe('useAudioAnomalyWorker', () => {
         expect(result.current.isEnabled).toBe(false);
         expect(result.current.phase).toBe('idle');
         expect(mockWorker.postMessage).not.toHaveBeenCalled();
+    });
+
+    it('shows one warning and emits one telemetry event for one accepted anomaly', async () => {
+        renderHook(() =>
+            useAudioAnomalyWorker({
+                configuration: validConfig,
+                examSessionId: 'session-123',
+                isSuspended: false,
+                worker: mockWorker as any,
+            }),
+        );
+
+        await waitFor(() => {
+            expect(mockWorker.postMessage).toHaveBeenCalledWith({
+                type: 'INIT',
+                payload: expect.objectContaining({
+                    config: expect.any(Object),
+                }),
+            });
+        });
+
+        act(() => {
+            mockWorker.onmessage?.({
+                data: { type: 'INIT_SUCCESS' },
+            } as MessageEvent);
+        });
+
+        act(() => {
+            mockWorker.onmessage?.({
+                data: {
+                    type: 'ANOMALY_DETECTED',
+                    payload: {
+                        anomalies: {
+                            TALKING: 0.91,
+                        },
+                    },
+                },
+            } as MessageEvent);
+        });
+
+        await waitFor(() => {
+            expect(ingestTelemetryEvent).toHaveBeenCalledTimes(1);
+        });
+
+        expect(mockToastWarning).toHaveBeenCalledTimes(1);
+        expect(mockToastWarning).toHaveBeenCalledWith(
+            'Audio Anomaly Detected',
+            expect.objectContaining({
+                description: expect.stringContaining('talking'),
+            }),
+        );
+    });
+
+    it('stops anomaly emission after the hook is rerendered into a suspended state', async () => {
+        const { rerender } = renderHook(
+            ({ isSuspended }) =>
+                useAudioAnomalyWorker({
+                    configuration: validConfig,
+                    examSessionId: 'session-123',
+                    isSuspended,
+                    worker: mockWorker as any,
+                }),
+            {
+                initialProps: {
+                    isSuspended: false,
+                },
+            },
+        );
+
+        await waitFor(() => {
+            expect(mockWorker.postMessage).toHaveBeenCalledWith({
+                type: 'INIT',
+                payload: expect.objectContaining({
+                    config: expect.any(Object),
+                }),
+            });
+        });
+
+        act(() => {
+            mockWorker.onmessage?.({
+                data: { type: 'INIT_SUCCESS' },
+            } as MessageEvent);
+        });
+
+        rerender({
+            isSuspended: true,
+        });
+
+        act(() => {
+            mockWorker.onmessage?.({
+                data: {
+                    type: 'ANOMALY_DETECTED',
+                    payload: {
+                        anomalies: {
+                            TALKING: 0.72,
+                        },
+                    },
+                },
+            } as MessageEvent);
+        });
+
+        await waitFor(() => {
+            expect(ingestTelemetryEvent).not.toHaveBeenCalled();
+        });
+
+        expect(mockToastWarning).not.toHaveBeenCalled();
+    });
+
+    it('does not stop a provided checkup audio stream during cleanup', async () => {
+        const { unmount } = renderHook(() =>
+            useAudioAnomalyWorker({
+                configuration: validConfig,
+                examSessionId: 'session-123',
+                isSuspended: false,
+                audioStream: mockStream as MediaStream,
+                worker: mockWorker as any,
+            }),
+        );
+
+        await waitFor(() => {
+            expect(mockWorker.postMessage).toHaveBeenCalledWith({
+                type: 'INIT',
+                payload: expect.objectContaining({
+                    config: expect.any(Object),
+                }),
+            });
+        });
+
+        unmount();
+
+        expect(mockTrackStop).not.toHaveBeenCalled();
+    });
+
+    it('stops a microphone stream opened by the hook during cleanup', async () => {
+        const { unmount } = renderHook(() =>
+            useAudioAnomalyWorker({
+                configuration: validConfig,
+                examSessionId: 'session-123',
+                isSuspended: false,
+                worker: mockWorker as any,
+            }),
+        );
+
+        await waitFor(() => {
+            expect(mockWorker.postMessage).toHaveBeenCalledWith({
+                type: 'INIT',
+                payload: expect.objectContaining({
+                    config: expect.any(Object),
+                }),
+            });
+        });
+
+        unmount();
+
+        expect(mockTrackStop).toHaveBeenCalledTimes(1);
     });
 });

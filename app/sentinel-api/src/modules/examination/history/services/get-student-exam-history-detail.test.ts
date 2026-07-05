@@ -107,6 +107,36 @@ describe('getStudentExamHistoryDetail', () => {
         expect(result.examTitle).toBe('Manual Essay');
     });
 
+    it('passes provisional essay scoring fields through so history mapping can hide unfinished results', async () => {
+        const rawRecord = {
+            exam_id: 'exam-1',
+            attempt_id: 'attempt-1',
+            attempt_status: 'COMPLETED',
+            attempt_score: 0,
+            attempt_total_score: 10,
+            release_score_mode: 'AUTO_RELEASE',
+            essay_question_count: 1,
+            attempt_finalized_at: null,
+        };
+        const builder = createQueryBuilder(rawRecord);
+        const dbClient = {
+            selectFrom: vi.fn(() => builder),
+        } as any;
+
+        await getStudentExamHistoryDetail(dbClient, 'attempt-1', 'student-user-1');
+
+        expect(mapExamHistoryDetailResponse).toHaveBeenCalledWith(
+            expect.objectContaining({
+                attempt_status: 'COMPLETED',
+                attempt_score: 0,
+                attempt_total_score: 10,
+                release_score_mode: 'AUTO_RELEASE',
+                essay_question_count: 1,
+                attempt_finalized_at: null,
+            }),
+        );
+    });
+
     it('throws a 404 when the attempt does not belong to the student', async () => {
         const builder = createQueryBuilder(undefined);
         const dbClient = {

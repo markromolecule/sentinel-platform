@@ -20,40 +20,40 @@ Fix student exam and history visibility so published exams assigned to the stude
 ## Files And Functions To Touch
 
 - `app/sentinel-api/src/modules/examination/assessment/assessment-access.ts`
-  - Add/adjust exported helper functions for assessment actor role classification and exam read-scope construction.
-  - Keep JSDoc on every exported function added or modified.
+    - Add/adjust exported helper functions for assessment actor role classification and exam read-scope construction.
+    - Keep JSDoc on every exported function added or modified.
 - `app/sentinel-api/src/modules/examination/assessment/assessment-access.test.ts`
-  - Cover role resolution and helper behavior without relying on manually typed controller role branches.
+    - Cover role resolution and helper behavior without relying on manually typed controller role branches.
 - `app/sentinel-api/src/modules/examination/exams/controllers/get-exams.controller.ts`
-  - Replace controller-local student/staff branching with helper output from `assessment-access.ts`.
+    - Replace controller-local student/staff branching with helper output from `assessment-access.ts`.
 - `app/sentinel-api/src/modules/examination/exams/controllers/get-exams.controller.test.ts`
-  - Verify student, instructor, admin, support, and missing-institution routing arguments into `ExamService.getExams()`.
+    - Verify student, instructor, admin, support, and missing-institution routing arguments into `ExamService.getExams()`.
 - `app/sentinel-api/src/modules/examination/exams/controllers/get-exam.controller.ts`
-  - Replace controller-local private instructor visibility logic with shared helper/service-level read scope.
+    - Replace controller-local private instructor visibility logic with shared helper/service-level read scope.
 - `app/sentinel-api/src/modules/examination/exams/controllers/get-exam.controller.test.ts`
-  - Add coverage for student detail access and instructor private-exam visibility.
+    - Add coverage for student detail access and instructor private-exam visibility.
 - `app/sentinel-api/src/modules/examination/exams/data/build-student-exam-scope-predicates.ts`
-  - Tighten classroom assignment predicates so exact `exam_section_assignments.class_group_id` matches enrolled classrooms, legacy section fallback only applies when no classroom is assigned, and published/draft gates remain mandatory.
+    - Tighten classroom assignment predicates so exact `exam_section_assignments.class_group_id` matches enrolled classrooms, legacy section fallback only applies when no classroom is assigned, and published/draft gates remain mandatory.
 - `app/sentinel-api/src/modules/examination/exams/data/build-student-exam-scope-predicates.test.ts`
-  - Add SQL compile tests for published classroom-assigned exams, same-section wrong-classroom exclusion, remediation schedule inclusion, and draft/unpublished exclusion.
+    - Add SQL compile tests for published classroom-assigned exams, same-section wrong-classroom exclusion, remediation schedule inclusion, and draft/unpublished exclusion.
 - `app/sentinel-api/src/modules/examination/exams/data/get-exams.ts`
-  - Use the refined predicates and ensure student list queries return only published assigned exams plus allowed remediation exams.
+    - Use the refined predicates and ensure student list queries return only published assigned exams plus allowed remediation exams.
 - `app/sentinel-api/src/modules/examination/exams/data/get-exams.test.ts`
-  - Assert compiled SQL includes the exact classroom assignment paths used by the student exam page.
+    - Assert compiled SQL includes the exact classroom assignment paths used by the student exam page.
 - `app/sentinel-api/src/modules/examination/exams/data/get-exam-by-id.ts`
-  - Use the same refined student visibility predicate for single exam reads.
+    - Use the same refined student visibility predicate for single exam reads.
 - `app/sentinel-api/src/modules/examination/exams/data/get-exam-by-id.test.ts`
-  - Assert detail SQL preserves published gate and exact classroom assignment behavior.
+    - Assert detail SQL preserves published gate and exact classroom assignment behavior.
 - `app/sentinel-api/src/modules/examination/history/services/get-student-exam-history.ts`
-  - Confirm history list uses the corrected `getExamsData()` student scope without introducing separate visibility rules.
+    - Confirm history list uses the corrected `getExamsData()` student scope without introducing separate visibility rules.
 - `app/sentinel-api/src/modules/examination/history/tests/get-exam-history.test.ts`
-  - Add a service-level assertion that the student history list delegates to `getExamsData()` with `studentUserId`.
+    - Add a service-level assertion that the student history list delegates to `getExamsData()` with `studentUserId`.
 - `app/sentinel-api/src/modules/examination/history/services/get-student-exam-history-detail.ts`
-  - Add or align student detail visibility safeguards only if the shared list/detail behavior reveals a gap.
+    - Add or align student detail visibility safeguards only if the shared list/detail behavior reveals a gap.
 - `app/sentinel-api/src/modules/examination/history/services/get-student-exam-history-detail.test.ts`
-  - Cover attempt-owned, published-only detail access and institution scoping.
+    - Cover attempt-owned, published-only detail access and institution scoping.
 - `app/sentinel-web/src/app/(protected)/student/history/_hooks/use-student-history/index.test.ts`
-  - Validate the student exam tab consumes `useExamsQuery()` and the history tabs consume `useInfiniteExamHistoryQuery()` with the expected filters.
+    - Validate the student exam tab consumes `useExamsQuery()` and the history tabs consume `useInfiniteExamHistoryQuery()` with the expected filters.
 
 ## DB Tables In Scope
 
@@ -207,4 +207,3 @@ Why: It fixes the concrete student classroom visibility bug where it belongs, in
 
 - No Prisma migration rollback is required.
 - If implementation regresses visibility, revert the controller/helper/predicate changes and associated tests in the files listed above.
-

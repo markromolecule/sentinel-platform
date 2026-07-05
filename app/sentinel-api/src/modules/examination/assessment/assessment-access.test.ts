@@ -23,7 +23,6 @@ import {
     resolveAssessmentReadScope,
 } from './assessment-access';
 
-
 describe('assessment access', () => {
     const mockDb = {} as DbClient;
 
@@ -238,4 +237,3 @@ describe('assessment access', () => {
         });
     });
 });
-

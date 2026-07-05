@@ -107,6 +107,18 @@ describe('AudioAnomalyEngine', () => {
         });
     });
 
+    it('does not trigger when talking confidence never reaches the configured threshold', async () => {
+        const onAnomalyDetected = vi.fn();
+
+        const frame = new Float32Array(15600);
+        frame[0] = 0.0;
+
+        await engine.processAudioChunk(frame, onAnomalyDetected);
+        await engine.processAudioChunk(frame, onAnomalyDetected);
+
+        expect(onAnomalyDetected).not.toHaveBeenCalled();
+    });
+
     it('resets counter if consecutive streak is broken', async () => {
         const onAnomalyDetected = vi.fn();
 

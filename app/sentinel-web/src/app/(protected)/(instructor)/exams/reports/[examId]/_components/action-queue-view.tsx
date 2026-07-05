@@ -1,8 +1,9 @@
-import * as React from 'react';
+import { useState } from 'react';
 import type { ExamReportActionItem } from '@sentinel/shared/types';
 import { Button, Separator } from '@sentinel/ui';
 import { ShieldAlert, ClipboardList, RotateCcw } from 'lucide-react';
 import { ActionQueuePanel } from './action-queue-panel';
+import { RemediationGrantDialog } from './remediation-grant-dialog';
 
 type ActionQueueType = 'review' | 'makeup' | 'retake';
 
@@ -19,7 +20,13 @@ type ActionQueueViewProps = {
     activeActionId: string | null;
     examId: string;
     sectionOptions: readonly (readonly [string, string])[];
-    onGrantOverride: (item: ExamReportActionItem, type: 'MAKEUP' | 'RETAKE') => Promise<void>;
+    onGrantOverride: (
+        item: ExamReportActionItem,
+        type: 'MAKEUP' | 'RETAKE',
+        availableFrom: string,
+        availableUntil: string,
+        notes: string | null,
+    ) => Promise<void>;
 };
 
 /**
@@ -38,6 +45,11 @@ export function ActionQueueView({
     sectionOptions,
     onGrantOverride,
 }: ActionQueueViewProps) {
+    const [remediationTarget, setRemediationTarget] = useState<{
+        item: ExamReportActionItem;
+        type: 'MAKEUP' | 'RETAKE';
+    } | null>(null);
+
     return (
         <div className="space-y-6">
             <div className="space-y-1">
@@ -101,7 +113,7 @@ export function ActionQueueView({
                     items={actionQueues.makeup}
                     actionLabel="Grant Makeup"
                     onAction={(item) => {
-                        void onGrantOverride(item, 'MAKEUP');
+                        setRemediationTarget({ item, type: 'MAKEUP' });
                     }}
                     page={actionPages.makeup}
                     onPageChange={(page) =>
@@ -121,7 +133,7 @@ export function ActionQueueView({
                     items={actionQueues.retake}
                     actionLabel="Grant Retake"
                     onAction={(item) => {
-                        void onGrantOverride(item, 'RETAKE');
+                        setRemediationTarget({ item, type: 'RETAKE' });
                     }}
                     page={actionPages.retake}
                     onPageChange={(page) =>
@@ -132,6 +144,15 @@ export function ActionQueueView({
                     sectionOptions={sectionOptions}
                 />
             )}
+
+            <RemediationGrantDialog
+                isOpen={remediationTarget !== null}
+                onClose={() => setRemediationTarget(null)}
+                item={remediationTarget?.item ?? null}
+                overrideType={remediationTarget?.type ?? null}
+                onConfirm={onGrantOverride}
+                isLoading={activeActionId !== null}
+            />
         </div>
     );
 }

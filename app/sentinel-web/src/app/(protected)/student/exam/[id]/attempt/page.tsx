@@ -7,7 +7,8 @@ import { StudentFlowShell } from '../_components/student-flow-shell';
 import { StudentFlowPageHeader } from '../../_components/student-flow-primitives';
 
 export default function StudentExamAttemptPage() {
-    const { isLoading, isInitializingSession, isRedirectingHistory, blockedState } = useStudentExamAttempt();
+    const { isLoading, isInitializingSession, isRedirectingHistory, blockedState } =
+        useStudentExamAttempt();
 
     if (isLoading || isInitializingSession || isRedirectingHistory) {
         return <StudentExamLoadingState />;

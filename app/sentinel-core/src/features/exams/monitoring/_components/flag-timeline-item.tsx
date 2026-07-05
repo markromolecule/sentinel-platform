@@ -88,9 +88,7 @@ export function FlagTimelineItem({ flag }: FlagTimelineItemProps) {
                 </div>
 
                 <div className="bg-muted/30 border-border/50 group-hover:border-border/80 rounded-xl border p-4 transition-colors">
-                    <p className="text-muted-foreground text-sm leading-relaxed">
-                        {description}
-                    </p>
+                    <p className="text-muted-foreground text-sm leading-relaxed">{description}</p>
 
                     {normalizationNote ? (
                         <p className="text-foreground/80 mt-2 text-xs leading-relaxed font-medium">
@@ -123,9 +121,7 @@ export function FlagTimelineItem({ flag }: FlagTimelineItemProps) {
                                     className={cn(
                                         'rounded-full border px-2.5 py-1 text-[10px] font-semibold tracking-wider uppercase',
                                         flag.anomalyType
-                                            ? AUDIO_ANOMALY_BADGE_STYLES[
-                                                  flag.anomalyType
-                                              ]
+                                            ? AUDIO_ANOMALY_BADGE_STYLES[flag.anomalyType]
                                             : 'border-slate-200 bg-slate-100 text-slate-700',
                                     )}
                                 >
@@ -159,11 +155,7 @@ export function FlagTimelineItem({ flag }: FlagTimelineItemProps) {
                         <div className="mt-4 flex flex-col gap-3">
                             <div className="border-border/60 bg-muted/50 group-hover:border-border/80 relative aspect-video overflow-hidden rounded-lg border transition-colors">
                                 <div className="absolute inset-0 flex items-center justify-center bg-black/5 opacity-0 transition-opacity group-hover:opacity-100">
-                                    <Button
-                                        variant="secondary"
-                                        size="sm"
-                                        className="h-8 shadow-lg"
-                                    >
+                                    <Button variant="secondary" size="sm" className="h-8 shadow-lg">
                                         <Eye className="mr-2 h-3.5 w-3.5" />
                                         View Full Size
                                     </Button>

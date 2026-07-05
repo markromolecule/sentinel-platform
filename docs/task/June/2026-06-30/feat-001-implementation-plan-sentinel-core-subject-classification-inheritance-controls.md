@@ -83,7 +83,7 @@ Concrete numbered next steps:
 - [x] Add or update a details-page test next to `app/sentinel-core/src/app/(protected)/subjects/classifications/[id]/page.tsx` as `page.test.tsx` to verify inherited records show the proper status and keep `Offer Subjects` while disabling management.
 - [x] Add or update dialog interaction tests for `app/sentinel-core/src/app/(protected)/subjects/_components/dialogs/offer-classification-subjects-dialog.tsx` only if the inherited flow needs explicit coverage to guard against accidental permission regressions.
       <!-- NOTE: No separate dialog-spec test was added because `app/sentinel-core/src/app/(protected)/subjects/classifications/[id]/page.test.tsx` now covers the inherited offer flow and confirms the dialog still opens for inherited records. -->
-    **Migration required:** No — page behavior and tests only.
+      **Migration required:** No — page behavior and tests only.
 
 ### Phase 4: Verification and Regression Sweep
 
@@ -94,7 +94,7 @@ Concrete numbered next steps:
 - [ ] Manually verify in `sentinel-core` that a local classification shows `Local` plus offer/edit/delete actions, while an inherited classification shows `Inherited` plus offer-only behavior on both list and detail pages.
 - [ ] Manually verify a parent-institution user can see inherited classifications that resolve through the parent scope and can open the offer flow without being allowed to edit or delete them.
       <!-- NOTE: Automated verification is complete. Manual browser verification is still pending because no local `sentinel-core` / API instance was running on the expected localhost ports during this execution phase. -->
-    **Migration required:** No — verification only.
+      **Migration required:** No — verification only.
 
 ---
 

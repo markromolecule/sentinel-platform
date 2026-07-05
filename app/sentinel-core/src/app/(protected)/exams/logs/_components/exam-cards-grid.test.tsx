@@ -118,7 +118,12 @@ describe('ExamCardsGrid Component', () => {
 
     it('renders an empty state when no exams are available', () => {
         render(
-            <ExamCardsGrid exams={[]} onSelectExam={vi.fn()} searchValue="" onSearchChange={vi.fn()} />,
+            <ExamCardsGrid
+                exams={[]}
+                onSelectExam={vi.fn()}
+                searchValue=""
+                onSearchChange={vi.fn()}
+            />,
         );
 
         expect(screen.getByText('No exam logs found.')).toBeTruthy();

@@ -32,11 +32,7 @@ export class EntitlementsRepository {
             .selectFrom('exams as e')
             .leftJoin('rooms as r', 'r.room_id', 'e.room_id')
             .leftJoin('exam_configurations as ec', 'ec.exam_id', 'e.exam_id')
-            .leftJoin(
-                'exam_remediation_schedules as ers',
-                'ers.remediation_exam_id',
-                'e.exam_id',
-            )
+            .leftJoin('exam_remediation_schedules as ers', 'ers.remediation_exam_id', 'e.exam_id')
             .select([
                 'e.exam_id',
                 'e.title',
@@ -88,8 +84,8 @@ export class EntitlementsRepository {
             sectionIds && sectionIds.length > 0
                 ? sectionIds
                 : classGroupId
-                    ? []
-                    : [sectionId].filter((value): value is string => Boolean(value));
+                  ? []
+                  : [sectionId].filter((value): value is string => Boolean(value));
 
         if (classGroupId) {
             const directEnrollment = await db

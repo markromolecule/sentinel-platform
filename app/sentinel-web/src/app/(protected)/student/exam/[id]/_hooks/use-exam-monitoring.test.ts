@@ -68,6 +68,7 @@ describe('use-exam-monitoring', () => {
     beforeEach(() => {
         cleanup();
         vi.clearAllMocks();
+        vi.useRealTimers();
         window.sessionStorage.clear();
 
         Object.defineProperty(window.navigator, 'userAgent', {
@@ -276,6 +277,86 @@ describe('use-exam-monitoring', () => {
         });
 
         expect(mockToastWarning).toHaveBeenCalledTimes(1);
+    });
+
+    it('keeps the first clipboard burst at one warning and one telemetry event', async () => {
+        renderHook(() =>
+            useExamMonitoring({
+                configuration: createExamConfiguration({ clipboard_control: true }),
+                examSessionId: '123e4567-e89b-12d3-a456-426614174000',
+                examId: '123e4567-e89b-12d3-a456-426614174999',
+            }),
+        );
+
+        act(() => {
+            document.dispatchEvent(
+                new KeyboardEvent('keydown', {
+                    key: 'c',
+                    ctrlKey: true,
+                    bubbles: true,
+                    cancelable: true,
+                }),
+            );
+            document.dispatchEvent(
+                new Event('copy', {
+                    bubbles: true,
+                    cancelable: true,
+                }),
+            );
+        });
+
+        await waitFor(() => {
+            expect(emitWebTelemetryEvent).toHaveBeenCalledTimes(1);
+        });
+
+        expect(mockToastWarning).toHaveBeenCalledTimes(1);
+    });
+
+    it('counts a second clipboard action after the burst window as a new incident', async () => {
+        vi.useFakeTimers();
+
+        renderHook(() =>
+            useExamMonitoring({
+                configuration: createExamConfiguration({ clipboard_control: true }),
+                examSessionId: '123e4567-e89b-12d3-a456-426614174000',
+                examId: '123e4567-e89b-12d3-a456-426614174999',
+            }),
+        );
+
+        act(() => {
+            document.dispatchEvent(
+                new KeyboardEvent('keydown', {
+                    key: 'c',
+                    ctrlKey: true,
+                    bubbles: true,
+                    cancelable: true,
+                }),
+            );
+            document.dispatchEvent(
+                new Event('copy', {
+                    bubbles: true,
+                    cancelable: true,
+                }),
+            );
+        });
+
+        expect(emitWebTelemetryEvent).toHaveBeenCalledTimes(1);
+        expect(mockToastWarning).toHaveBeenCalledTimes(1);
+
+        act(() => {
+            vi.advanceTimersByTime(801);
+            document.dispatchEvent(
+                new KeyboardEvent('keydown', {
+                    key: 'v',
+                    ctrlKey: true,
+                    bubbles: true,
+                    cancelable: true,
+                }),
+            );
+        });
+
+        expect(emitWebTelemetryEvent).toHaveBeenCalledTimes(2);
+        expect(mockToastWarning).toHaveBeenCalledTimes(2);
     });
 
     it('blocks right-click attempts and raises the shared security alert', async () => {

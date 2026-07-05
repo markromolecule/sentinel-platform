@@ -424,6 +424,93 @@ describe('Examination Flow Integration', () => {
         });
     });
 
+    it('returns a provisional zero score when only essay questions still need manual review', async () => {
+        vi.mocked(SessionRepository.getOwnedSessionAttempt).mockResolvedValue({
+            attempt_id: '8e08d10d-a25f-4d6d-9b5f-8ca176fb8bc6',
+            exam_id: examId,
+            student_id: 'student-profile-1',
+            completed_at: null,
+            status: 'IN_PROGRESS',
+            started_at: new Date('2026-04-18T10:00:00.000Z'),
+        } as never);
+        vi.mocked(getExamQuestionsData).mockResolvedValue([
+            {
+                question_id: 'question-1',
+                exam_id: examId,
+                exam_section_id: null,
+                source_question_bank_question_id: null,
+                source_collection_id: null,
+                question_type: 'TRUE_FALSE',
+                content: {
+                    prompt: 'Sentinel supports browser-based proctoring.',
+                    correctAnswer: true,
+                },
+                points: 5,
+                order_index: 0,
+                created_at: null,
+                updated_at: null,
+                source_origin: null,
+                source_file_name: null,
+                source_page_number: null,
+                source_evidence: null,
+            },
+            {
+                question_id: 'question-2',
+                exam_id: examId,
+                exam_section_id: null,
+                source_question_bank_question_id: null,
+                source_collection_id: null,
+                question_type: 'ESSAY',
+                content: {
+                    prompt: 'Explain your reasoning.',
+                },
+                points: 10,
+                order_index: 1,
+                created_at: null,
+                updated_at: null,
+                source_origin: null,
+                source_file_name: null,
+                source_page_number: null,
+                source_evidence: null,
+            },
+        ] as never);
+        vi.mocked(SessionRepository.completeSession).mockResolvedValue({
+            attempt_id: '8e08d10d-a25f-4d6d-9b5f-8ca176fb8bc6',
+            completed_at: new Date('2026-04-18T10:42:00.000Z'),
+        } as never);
+
+        const result = await SessionManagerService.completeSession(mockDb, studentId, {
+            sessionId: '8e08d10d-a25f-4d6d-9b5f-8ca176fb8bc6',
+            answers: {
+                'question-1': false,
+                'question-2': 'Because arithmetic.',
+            },
+            elapsedSeconds: 121,
+        });
+
+        expect(result).toMatchObject({
+            attemptId: '8e08d10d-a25f-4d6d-9b5f-8ca176fb8bc6',
+            score: 0,
+            totalScore: 15,
+            percentage: 0,
+            answeredCount: 2,
+            autoGradableQuestionCount: 1,
+            manualReviewQuestionCount: 1,
+            requiresManualReview: true,
+        });
+        expect(SessionRepository.completeSession).toHaveBeenCalledWith(mockDb, {
+            sessionId: '8e08d10d-a25f-4d6d-9b5f-8ca176fb8bc6',
+            score: 0,
+            totalScore: 15,
+            timeSpentMinutes: 3,
+            answeredCount: 2,
+            answers: {
+                'question-1': false,
+                'question-2': 'Because arithmetic.',
+            },
+        });
+    });
+
     it('rejects completion when the session already belongs to a submitted attempt', async () => {
         vi.mocked(SessionRepository.getOwnedSessionAttempt).mockResolvedValue({
             attempt_id: '8e08d10d-a25f-4d6d-9b5f-8ca176fb8bc6',

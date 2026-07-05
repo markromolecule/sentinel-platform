@@ -118,4 +118,30 @@ describe('getExamByIdData', () => {
 
         void db.destroy();
     });
+
+    it('keeps published private classroom-assigned exam detail queries scoped to exact classroom assignments', async () => {
+        const { db, executeSpy } = createMockDb(
+            [
+                { column_name: 'section_id' },
+                { column_name: 'section_name' },
+                { column_name: 'room_id' },
+            ],
+            [],
+        );
+
+        await getExamByIdData({
+            dbClient: db as any,
+            id: 'exam-1',
+            institutionId: 'institution-1',
+            studentUserId: 'student-1',
+        });
+
+        const compiledQuery = executeSpy.mock.calls[1][0];
+
+        expect(compiledQuery.sql).toContain('"e"."published_at" is not null');
+        expect(compiledQuery.sql).toContain('esa.class_group_id = "student_cg"."class_group_id"');
+        expect(compiledQuery.sql).not.toContain('"e"."is_public" = true');
+
+        void db.destroy();
+    });
 });

@@ -217,6 +217,54 @@ describe('useStudentHistory', () => {
         });
     });
 
+    it('keeps private classroom-assigned published exams visible in the available feed', () => {
+        vi.mocked(usePathname).mockReturnValue('/student/exam');
+        vi.mocked(useSearchParams).mockReturnValue({
+            get: () => null,
+        } as any);
+
+        vi.mocked(useExamsQuery).mockReturnValue({
+            data: [
+                {
+                    id: 'exam-private-assigned',
+                    title: 'Private Assigned Exam',
+                    subject: 'Physics',
+                    scheduledDate: '2099-06-24T09:00:00Z',
+                    endDateTime: '2099-06-24T11:00:00Z',
+                    status: 'published',
+                    isPublic: false,
+                    duration: 60,
+                    totalScore: 100,
+                    classroomId: null,
+                    classroomIds: ['classroom-1'],
+                    sectionIds: [],
+                },
+            ],
+            isLoading: false,
+        } as any);
+        vi.mocked(useInfiniteExamHistoryQuery).mockReturnValue({
+            data: {
+                pages: [
+                    { items: [], pagination: { page: 1, limit: 10, total: 0, hasMore: false } },
+                ],
+            },
+            isLoading: false,
+            fetchNextPage: vi.fn(),
+            hasNextPage: false,
+            isFetchingNextPage: false,
+        } as any);
+
+        const { result } = renderHook(() => useStudentHistory());
+        const allItems = result.current.groupedHistory.flatMap((group) => group.items);
+
+        expect(result.current.statusFilter).toBe('available');
+        expect(allItems).toHaveLength(1);
+        expect(allItems[0]).toMatchObject({
+            id: 'exam-private-assigned',
+            status: 'upcoming',
+        });
+    });
+
     it('normalizes raw published exams into the available feed for student surfaces', () => {
         vi.mocked(usePathname).mockReturnValue('/student/exam');
         vi.mocked(useSearchParams).mockReturnValue({

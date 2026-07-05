@@ -64,7 +64,11 @@ describe('updateGradingAttempt', () => {
                 attemptId: 'attempt-1',
                 actorUserId: 'user-1',
             }),
-        ).rejects.toThrow(new HTTPException(400, { message: 'Cannot edit grading for a finalized attempt score.' }));
+        ).rejects.toThrow(
+            new HTTPException(400, {
+                message: 'Cannot edit grading for a finalized attempt score.',
+            }),
+        );
     });
 
     it('updates grading successfully if attempt scoreState is DRAFT', async () => {
