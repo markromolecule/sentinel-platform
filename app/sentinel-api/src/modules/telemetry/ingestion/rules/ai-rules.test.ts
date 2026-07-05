@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import {
     AudioAnomalyRule,
     FaceDetectionRule,
@@ -138,6 +138,25 @@ describe('MediaPipe AI ingestion rules', () => {
 
         it('ignores audio anomalies below the relaxed confidence threshold', async () => {
             const rule = new AudioAnomalyRule();
+            const evaluateRepeatThresholdSpy = vi
+                .spyOn(
+                    rule as AudioAnomalyRule & {
+                        evaluateRepeatThreshold: (
+                            payload: typeof BASE_PAYLOAD & {
+                                ruleKey: 'aiRules.audio_anomaly_detection';
+                                eventType: 'AUDIO_ANOMALY';
+                                metadata: {
+                                    anomalyType: 'TYPING';
+                                    confidenceScore: number;
+                                };
+                            },
+                            options: unknown,
+                        ) => Promise<{ action: 'ignore' }>;
+                    },
+                    'evaluateRepeatThreshold',
+                )
+                .mockResolvedValue({ action: 'ignore' });
+
             const decision = await rule.evaluate({
                 ...BASE_PAYLOAD,
                 ruleKey: 'aiRules.audio_anomaly_detection',
@@ -148,8 +167,8 @@ describe('MediaPipe AI ingestion rules', () => {
                 },
             });
 
-            // Should go to repeat threshold check (not persist immediately)
             expect(decision.action).toBe('ignore');
+            expect(evaluateRepeatThresholdSpy).toHaveBeenCalledOnce();
         });
     });
 });

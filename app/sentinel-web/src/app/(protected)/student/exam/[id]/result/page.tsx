@@ -18,6 +18,7 @@ import {
     clearStoredExamTurnInPreview,
     readStoredExamTurnInPreview,
     type StoredExamTurnInPreview,
+    type StoredExamTurnInPreviewSummary,
 } from '../_lib/exam-turn-in-storage';
 import { clearStoredExamSession } from '../_lib/exam-session-storage';
 import { resolveStudentExamSessionError } from '../_lib/student-exam-session-feedback';
@@ -180,12 +181,16 @@ function markExamAsTurnedIn(
     exam: ProctorExam,
     attemptId: string,
     completedAt: string,
+    summary?: StoredExamTurnInPreviewSummary,
 ): ProctorExam {
     return {
         ...exam,
         status: 'turned_in',
         attemptId,
         completedAt,
+        score: summary?.score ?? exam.score ?? null,
+        totalScore: summary?.totalScore ?? exam.totalScore ?? null,
+        percentage: summary?.percentage ?? exam.percentage ?? null,
     };
 }
 
@@ -195,6 +200,8 @@ export default function StudentExamResultPage() {
     const queryClient = useQueryClient();
     const { examId, exam } = useStudentExamData();
     const [preview, setPreview] = useState<StoredExamTurnInPreview | null>(null);
+    const [authoritativeSummary, setAuthoritativeSummary] =
+        useState<StoredExamTurnInPreviewSummary | null>(null);
     const [isTurningIn, setIsTurningIn] = useState(false);
     const isRedirectingToHistory = useTurnedInExamRedirect({
         examId,
@@ -205,9 +212,10 @@ export default function StudentExamResultPage() {
 
     useEffect(() => {
         setPreview(readStoredExamTurnInPreview(examId));
+        setAuthoritativeSummary(null);
     }, [examId]);
 
-    const summary = preview?.summary ?? null;
+    const summary = authoritativeSummary ?? preview?.summary ?? null;
     const scoreVisible = preview?.scoreVisible ?? true;
     const resultCopy = useMemo(() => {
         if (!summary) {
@@ -242,12 +250,28 @@ export default function StudentExamResultPage() {
                 answers: preview.answers,
                 elapsedSeconds: preview.elapsedSeconds,
             });
+            const resolvedSummary: StoredExamTurnInPreviewSummary = {
+                score: scoreVisible ? result.score : null,
+                totalScore: scoreVisible ? result.totalScore : null,
+                percentage: scoreVisible ? result.percentage : null,
+                answeredCount: result.answeredCount,
+                autoGradableQuestionCount: result.autoGradableQuestionCount,
+                manualReviewQuestionCount: result.manualReviewQuestionCount,
+                requiresManualReview: result.requiresManualReview,
+            };
+
+            setAuthoritativeSummary(resolvedSummary);
 
             queryClient.setQueriesData({ queryKey: EXAM_QUERY_KEYS.all }, (cached) => {
                 if (Array.isArray(cached)) {
                     return cached.map((cachedExam) =>
                         cachedExam?.id === examId
-                            ? markExamAsTurnedIn(cachedExam, result.attemptId, result.completedAt)
+                            ? markExamAsTurnedIn(
+                                  cachedExam,
+                                  result.attemptId,
+                                  result.completedAt,
+                                  resolvedSummary,
+                              )
                             : cachedExam,
                     );
                 }
@@ -262,6 +286,7 @@ export default function StudentExamResultPage() {
                         cached as ProctorExam,
                         result.attemptId,
                         result.completedAt,
+                        resolvedSummary,
                     );
                 }
 

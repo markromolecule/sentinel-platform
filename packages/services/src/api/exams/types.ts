@@ -446,7 +446,18 @@ export type UpdateExamQuestionPayload = {
 
 export type UpdateExamPayload = Omit<
     Partial<CreateExamPayload>,
-    'subjectId' | 'section' | 'sectionId' | 'roomId' | 'classroomId'
+    | 'subjectId'
+    | 'section'
+    | 'sectionId'
+    | 'roomId'
+    | 'classroomId'
+    | 'classroomIds'
+    | 'classroomName'
+    | 'sectionIds'
+    | 'instructorId'
+    | 'instructorIds'
+    | 'settings'
+    | 'configuration'
 > & {
     classroomId?: string | null;
     classroomIds?: string[] | null;
@@ -515,7 +526,7 @@ export type StartExamSessionResult = {
     attemptId?: string;
     error?: string;
     errorCode?:
-        'ATTEMPT_ALREADY_COMPLETED' | 'ATTEMPT_LOCKED' | 'ATTEMPT_CLOSED' | 'ATTEMPT_SUPERSEDED';
+    'ATTEMPT_ALREADY_COMPLETED' | 'ATTEMPT_LOCKED' | 'ATTEMPT_CLOSED' | 'ATTEMPT_SUPERSEDED';
 };
 
 export type CompleteExamSessionPayload = {

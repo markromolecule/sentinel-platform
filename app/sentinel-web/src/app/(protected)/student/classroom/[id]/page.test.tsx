@@ -293,6 +293,46 @@ describe('StudentClassroomDetailPage', () => {
         expect(screen.getAllByText('upcoming').length).toBeGreaterThan(0);
     });
 
+    it('keeps private classroom-assigned exams visible when they arrive through classroomIds only', () => {
+        vi.mocked(useStudentClassroomsQuery).mockReturnValue({
+            data: [
+                {
+                    id: 'classroom-1',
+                    subjectId: 'subject-1',
+                    subjectCode: 'GEETH01X',
+                    sectionName: 'INF232',
+                    sectionId: 'section-1',
+                    subjectTitle: 'ETHICS',
+                    instructors: ['Keanna Mae Cloma'],
+                    term: 'AY 2025-2026 1st Semester',
+                },
+            ],
+            isLoading: false,
+        } as any);
+        vi.mocked(useExamsQuery).mockReturnValue({
+            data: [
+                {
+                    id: 'exam-private-assigned',
+                    title: 'Private Assigned Exam',
+                    status: 'published',
+                    isPublic: false,
+                    classroomId: null,
+                    classroomIds: ['classroom-1'],
+                    sectionIds: [],
+                    scheduledDate: '2099-06-24T09:00:00Z',
+                    endDateTime: '2099-06-24T11:00:00Z',
+                    duration: 60,
+                },
+            ],
+            isLoading: false,
+        } as any);
+
+        render(<StudentClassroomDetailPage />);
+
+        expect(screen.getByText('Private Assigned Exam')).toBeTruthy();
+        expect(screen.getAllByText('upcoming').length).toBeGreaterThan(0);
+    });
+
     it('hides exams whose stale active status normalizes to past_due on the classroom page', () => {
         vi.mocked(useStudentClassroomsQuery).mockReturnValue({
             data: [

@@ -52,6 +52,57 @@ describe('scoreExamAttempt', () => {
             requiresManualReview: true,
         });
     });
+
+    it('scores legacy labeled choice data the same as normalized clean choice data', () => {
+        const questions: ExamQuestion[] = [
+            {
+                id: 'legacy-mc',
+                examId: 'exam-1',
+                type: 'MULTIPLE_CHOICE',
+                points: 2,
+                orderIndex: 0,
+                tags: [],
+                content: {
+                    prompt: 'Select the capital of France.',
+                    options: ['A. Paris', 'B. Rome', 'C. Madrid', 'D. Berlin'],
+                    correctAnswer: 'A. Paris',
+                },
+            },
+            {
+                id: 'legacy-mr',
+                examId: 'exam-1',
+                type: 'MULTIPLE_RESPONSE',
+                points: 3,
+                orderIndex: 1,
+                tags: [],
+                content: {
+                    prompt: 'Select the prime numbers.',
+                    options: ['A. Two', 'B) Three', '(C) Four', 'D - Five'],
+                    correctAnswer: ['A. Two', 'B) Three', 'D - Five'],
+                },
+            },
+        ];
+
+        const answers: ExamAttemptAnswers = {
+            'legacy-mc': 'Paris',
+            'legacy-mr': ['Two', 'Three', 'Five'],
+        };
+
+        expect(
+            scoreExamAttempt({
+                questions,
+                answers,
+            }),
+        ).toEqual({
+            score: 5,
+            totalScore: 5,
+            percentage: 100,
+            answeredCount: 2,
+            autoGradableQuestionCount: 2,
+            manualReviewQuestionCount: 0,
+            requiresManualReview: false,
+        });
+    });
 });
 
 describe('buildExamAttemptQuestionReports', () => {

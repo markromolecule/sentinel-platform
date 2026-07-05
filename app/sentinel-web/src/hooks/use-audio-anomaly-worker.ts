@@ -29,6 +29,9 @@ type AudioWorkerResult = {
     phase: AudioWorkerPhase;
 };
 
+/**
+ * Manages the browser audio-anomaly worker lifecycle for a student exam attempt.
+ */
 export function useAudioAnomalyWorker({
     configuration,
     examSessionId,
@@ -45,9 +48,15 @@ export function useAudioAnomalyWorker({
     const workerRef = useRef<Worker | null>(null);
     const audioContextRef = useRef<AudioContext | null>(null);
     const streamRef = useRef<MediaStream | null>(null);
+    const ownsStreamRef = useRef(false);
     const processorRef = useRef<ScriptProcessorNode | null>(null);
     const sourceRef = useRef<MediaStreamAudioSourceNode | null>(null);
     const initTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+    const isSuspendedRef = useRef(isSuspended);
+
+    useEffect(() => {
+        isSuspendedRef.current = isSuspended;
+    }, [isSuspended]);
 
     const isEnabled = Boolean(
         configuration?.micRequired &&
@@ -87,8 +96,11 @@ export function useAudioAnomalyWorker({
             processorRef.current = null;
             sourceRef.current?.disconnect();
             sourceRef.current = null;
-            streamRef.current?.getTracks().forEach((track) => track.stop());
+            if (ownsStreamRef.current) {
+                streamRef.current?.getTracks().forEach((track) => track.stop());
+            }
             streamRef.current = null;
+            ownsStreamRef.current = false;
 
             if (audioContextRef.current) {
                 await audioContextRef.current.close().catch(() => undefined);
@@ -97,10 +109,10 @@ export function useAudioAnomalyWorker({
         };
 
         const emitAudioTelemetry = async (
-            _anomalyType: AudioAnomalyTypeValue,
+            anomalyType: AudioAnomalyTypeValue,
             confidenceScore: number,
         ) => {
-            if (!examSessionId || !studentId) {
+            if (!examSessionId || !studentId || isSuspendedRef.current) {
                 return;
             }
 
@@ -114,10 +126,10 @@ export function useAudioAnomalyWorker({
                 ruleKey: eventDefinition.ruleKey,
                 metadata: {
                     confidenceScore,
-                    anomalyType: _anomalyType,
+                    anomalyType,
                     aggregation: {
                         trigger:
-                            _anomalyType === 'SILENCE_DETECTED'
+                            anomalyType === 'SILENCE_DETECTED'
                                 ? 'duration-threshold'
                                 : 'confidence-threshold',
                         threshold: confidenceScore,
@@ -127,7 +139,7 @@ export function useAudioAnomalyWorker({
         };
 
         const handleMessage = (event: MessageEvent) => {
-            if (isDisposed || isSuspended) {
+            if (isDisposed || isSuspendedRef.current) {
                 return;
             }
 
@@ -178,8 +190,16 @@ export function useAudioAnomalyWorker({
                 typeof payload.anomalies === 'object'
             ) {
                 const anomalies = payload.anomalies as Record<string, number>;
+                const processedAnomalyTypes = new Set<AudioAnomalyTypeValue>();
 
                 for (const [anomalyType, confidenceScore] of Object.entries(anomalies)) {
+                    const typedAnomalyType = anomalyType as AudioAnomalyTypeValue;
+
+                    if (processedAnomalyTypes.has(typedAnomalyType)) {
+                        continue;
+                    }
+                    processedAnomalyTypes.add(typedAnomalyType);
+
                     const anomalyLabel = anomalyType.replace(/_/g, ' ').toLowerCase();
                     const description =
                         anomalyType === 'SILENCE_DETECTED'
@@ -190,16 +210,15 @@ export function useAudioAnomalyWorker({
                         description,
                     });
 
-                    void emitAudioTelemetry(
-                        anomalyType as AudioAnomalyTypeValue,
-                        confidenceScore,
-                    ).catch((error: unknown) => {
-                        console.error('Failed to emit audio anomaly telemetry.', {
-                            anomalyType,
-                            confidenceScore,
-                            error,
-                        });
-                    });
+                    void emitAudioTelemetry(typedAnomalyType, confidenceScore).catch(
+                        (error: unknown) => {
+                            console.error('Failed to emit audio anomaly telemetry.', {
+                                anomalyType,
+                                confidenceScore,
+                                error,
+                            });
+                        },
+                    );
                 }
             }
         };
@@ -226,11 +245,14 @@ export function useAudioAnomalyWorker({
                     audioStream ?? (await navigator.mediaDevices.getUserMedia({ audio: true }));
 
                 if (isDisposed) {
-                    if (!audioStream) stream.getTracks().forEach((track) => track.stop());
+                    if (!audioStream) {
+                        stream.getTracks().forEach((track) => track.stop());
+                    }
                     return;
                 }
 
                 streamRef.current = stream;
+                ownsStreamRef.current = !audioStream;
                 audioContextRef.current = new AudioContext();
                 sourceRef.current = audioContextRef.current.createMediaStreamSource(stream);
                 processorRef.current = audioContextRef.current.createScriptProcessor(4096, 1, 1);

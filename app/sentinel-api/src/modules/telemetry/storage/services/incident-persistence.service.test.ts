@@ -461,6 +461,46 @@ describe('IncidentPersistenceService', () => {
     );
 
     testWithDbClient(
+        'persists first audio anomalies with occurrence count one and anomaly metadata',
+        async ({ dbClient }) => {
+            const fixture = await createTelemetryAttemptFixture(dbClient);
+
+            await IncidentPersistenceService.appendEvent(
+                dbClient,
+                buildPayload({
+                    ...fixture,
+                    ruleKey: 'aiRules.audio_anomaly_detection',
+                    eventType: 'AUDIO_ANOMALY',
+                    metadata: {
+                        anomalyType: 'TALKING',
+                        confidenceScore: 0.82,
+                    },
+                }),
+            );
+
+            const incident = await dbClient
+                .selectFrom('flagged_incidents')
+                .select(['rule_key', 'details'])
+                .where('attempt_id', '=', fixture.attemptId)
+                .executeTakeFirstOrThrow();
+
+            expect(incident.rule_key).toBe('aiRules.audio_anomaly_detection');
+            expect(parseIncidentDetails(incident.details)).toMatchObject({
+                eventType: 'AUDIO_ANOMALY',
+                occurrenceCount: 1,
+                previousSeverity: null,
+                lastEvent: {
+                    eventType: 'AUDIO_ANOMALY',
+                    metadata: {
+                        anomalyType: 'TALKING',
+                        confidenceScore: 0.82,
+                    },
+                },
+            });
+        },
+    );
+
+    testWithDbClient(
         'automatically closes only the triggering attempt after three high incidents',
         async ({ dbClient }) => {
             const targetFixture = await createTelemetryAttemptFixture(dbClient);

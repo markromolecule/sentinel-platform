@@ -12,7 +12,7 @@ export const QUESTION_TYPE_DEFINITIONS: Record<QuestionType, QuestionTypeDefinit
     MULTIPLE_CHOICE: {
         label: 'multiple choice',
         instructions:
-            'Each question must have exactly four distinct options and exactly one correct answer. Store the correct answer string in "correctAnswerText".',
+            'Each question must have exactly four distinct options and exactly one correct answer. Store the correct answer string in "correctAnswerText". Do not prefix options with letters or numbering because the exam UI renders display labels separately.',
         schema: {
             type: 'object',
             properties: {
@@ -26,7 +26,7 @@ export const QUESTION_TYPE_DEFINITIONS: Record<QuestionType, QuestionTypeDefinit
     MULTIPLE_RESPONSE: {
         label: 'multiple response',
         instructions:
-            'Each question must have four to six options and at least two correct answers. Store the array of correct strings in "correctAnswerList".',
+            'Each question must have four to six options and at least two correct answers. Store the array of correct strings in "correctAnswerList". Do not prefix options with letters or numbering because the exam UI renders display labels separately.',
         schema: {
             type: 'object',
             properties: {

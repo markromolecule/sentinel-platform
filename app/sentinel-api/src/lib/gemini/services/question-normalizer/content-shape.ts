@@ -2,6 +2,49 @@ import { Schema } from '@sentinel/shared';
 import { z } from 'zod';
 import { coerceBoolean, coerceString, coerceStringArray } from './coercion';
 
+const CHOICE_LABEL_PREFIX_REGEX = /^\s*\(?([A-Z])\)?(?:\s*[\.\):-]|\s+-)\s*/i;
+
+/**
+ * Removes a generated leading choice label such as `A.`, `B)`, `(C)`, or `D -`.
+ */
+export function stripChoiceLabelPrefix(value: string): string {
+    return value.replace(CHOICE_LABEL_PREFIX_REGEX, '').trim();
+}
+
+function extractChoiceLabel(value: string): string | null {
+    const match = value.match(CHOICE_LABEL_PREFIX_REGEX);
+    return match?.[1]?.toUpperCase() ?? null;
+}
+
+function normalizeChoiceOption(option: string): string {
+    return stripChoiceLabelPrefix(option).trim();
+}
+
+function resolveChoiceAnswerValue(answer: string, options?: string[]): string {
+    const normalizedAnswer = normalizeChoiceOption(answer);
+
+    if (!options?.length) {
+        return normalizedAnswer;
+    }
+
+    const directMatch = options.find(
+        (option) => normalizeChoiceOption(option).toLowerCase() === normalizedAnswer.toLowerCase(),
+    );
+    if (directMatch) {
+        return directMatch;
+    }
+
+    const answerLabel = extractChoiceLabel(answer) ?? extractChoiceLabel(answer.trim() + '.');
+    if (answerLabel) {
+        const optionIndex = answerLabel.charCodeAt(0) - 65;
+        if (optionIndex >= 0 && optionIndex < options.length) {
+            return options[optionIndex];
+        }
+    }
+
+    return normalizedAnswer;
+}
+
 /**
  * Normalizes the internal structure of a question's content based on its type.
  * Maps Gemini-provided field names (e.g., 'stem', 'answer') to internal ones (e.g., 'prompt', 'correctAnswer').
@@ -28,7 +71,7 @@ export function normalizeQuestionContentShape(
 
     switch (type) {
         case 'MULTIPLE_CHOICE': {
-            const options = coerceStringArray(contentRecord.options);
+            const options = coerceStringArray(contentRecord.options)?.map(normalizeChoiceOption);
             if (options) {
                 contentRecord.options = options;
             }
@@ -40,18 +83,15 @@ export function normalizeQuestionContentShape(
 
             if (correctAnswer) {
                 if (options) {
-                    const match = options.find(
-                        (opt) => opt.toLowerCase().trim() === correctAnswer.toLowerCase().trim(),
-                    );
-                    contentRecord.correctAnswer = match ?? correctAnswer;
+                    contentRecord.correctAnswer = resolveChoiceAnswerValue(correctAnswer, options);
                 } else {
-                    contentRecord.correctAnswer = correctAnswer;
+                    contentRecord.correctAnswer = normalizeChoiceOption(correctAnswer);
                 }
             }
             break;
         }
         case 'MULTIPLE_RESPONSE': {
-            const options = coerceStringArray(contentRecord.options);
+            const options = coerceStringArray(contentRecord.options)?.map(normalizeChoiceOption);
             if (options) {
                 contentRecord.options = options;
             }
@@ -63,14 +103,11 @@ export function normalizeQuestionContentShape(
 
             if (correctAnswerList) {
                 if (options) {
-                    contentRecord.correctAnswer = correctAnswerList.map((answer) => {
-                        const match = options.find(
-                            (opt) => opt.toLowerCase().trim() === answer.toLowerCase().trim(),
-                        );
-                        return match ?? answer;
-                    });
+                    contentRecord.correctAnswer = correctAnswerList.map((answer) =>
+                        resolveChoiceAnswerValue(answer, options),
+                    );
                 } else {
-                    contentRecord.correctAnswer = correctAnswerList;
+                    contentRecord.correctAnswer = correctAnswerList.map(normalizeChoiceOption);
                 }
             }
             break;
