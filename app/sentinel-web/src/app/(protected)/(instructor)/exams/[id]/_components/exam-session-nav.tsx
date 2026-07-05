@@ -26,12 +26,21 @@ function resolveActiveSection(
     const reportSection = searchParams.get('section');
 
     if (parts[0] === 'exams' && parts[1] === 'reports' && parts[2]) {
+        // If parts[3] is present, we are on the student attempt page, which belongs to Attempt Summary (report)
+        if (parts[3]) {
+            return 'report';
+        }
+
         if (reportSection === 'queue') {
             return 'queue';
         }
 
         if (reportSection === 'attempts') {
             return 'report';
+        }
+
+        if (reportSection === 'logs') {
+            return 'logs';
         }
 
         if (reportSection === 'overview' || reportSection === null) {
@@ -67,51 +76,79 @@ export function ExamSessionNav({ examId }: ExamSessionNavProps) {
     const pathname = usePathname() || '';
     const searchParams = useSearchParams();
     const activeSection = resolveActiveSection(pathname, searchParams);
-    const items: ExamSessionNavItem[] = [
-        {
-            id: 'lobby',
-            label: 'Lobby',
-            href: `/exams/${examId}/lobby`,
-        },
-        {
-            id: 'monitoring',
-            label: 'Monitoring',
-            href: `/exams/${examId}/monitoring`,
-        },
-        {
-            id: 'overview',
-            label: 'Overview',
-            href: `/exams/reports/${examId}?section=overview`,
-        },
-        {
-            id: 'report',
-            label: 'Attempt Summary',
-            href: `/exams/reports/${examId}?section=attempts`,
-        },
-        {
-            id: 'queue',
-            label: 'Action Queue',
-            href: `/exams/reports/${examId}?section=queue`,
-        },
-        {
-            id: 'logs',
-            label: 'Incident Logs',
-            href: `/exams/${examId}/logs`,
-        },
-    ];
+    const isReportPage = pathname.startsWith('/exams/reports');
+
+    const items: ExamSessionNavItem[] = isReportPage
+        ? [
+            {
+                id: 'overview',
+                label: 'Overview',
+                href: `/exams/reports/${examId}?section=overview`,
+            },
+            {
+                id: 'report',
+                label: 'Attempt Summary',
+                href: `/exams/reports/${examId}?section=attempts`,
+            },
+            {
+                id: 'queue',
+                label: 'Action Queue',
+                href: `/exams/reports/${examId}?section=queue`,
+            },
+            {
+                id: 'logs',
+                label: 'Incident Logs',
+                href: `/exams/reports/${examId}?section=logs`,
+            },
+        ]
+        : [
+            {
+                id: 'lobby',
+                label: 'Lobby',
+                href: `/exams/${examId}/lobby`,
+            },
+            {
+                id: 'monitoring',
+                label: 'Monitoring',
+                href: `/exams/${examId}/monitoring`,
+            },
+            {
+                id: 'overview',
+                label: 'Overview',
+                href: `/exams/reports/${examId}?section=overview`,
+            },
+            {
+                id: 'report',
+                label: 'Attempt Summary',
+                href: `/exams/reports/${examId}?section=attempts`,
+            },
+            {
+                id: 'queue',
+                label: 'Action Queue',
+                href: `/exams/reports/${examId}?section=queue`,
+            },
+            {
+                id: 'logs',
+                label: 'Incident Logs',
+                href: `/exams/${examId}/logs`,
+            },
+        ];
 
     return (
         <nav className="mt-1 flex flex-col gap-1">
-            <h3 className="text-muted-foreground/60 mb-2 px-4 text-xs font-semibold tracking-wider uppercase">
-                Runtime
-            </h3>
+            {!isReportPage && (
+                <h3 className="text-muted-foreground/60 mb-2 px-4 text-xs font-semibold tracking-wider uppercase">
+                    Runtime
+                </h3>
+            )}
 
             {items.map((item, index) => {
                 const isActive = activeSection === item.id;
+                const showSeparator = !isReportPage && index === 2;
 
                 return (
                     <Fragment key={item.id}>
-                        {index === 2 && (
+                        {showSeparator && (
                             <div className="px-4 py-1">
                                 <Separator className="bg-border/40" />
                             </div>

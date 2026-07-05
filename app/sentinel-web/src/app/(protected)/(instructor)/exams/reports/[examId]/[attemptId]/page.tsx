@@ -113,94 +113,37 @@ export default function InstructorAttemptReportPage({
     }
 
     return (
-        <div className="relative flex min-h-[calc(100vh-64px)] flex-col lg:-m-6 lg:flex-row lg:items-stretch">
-            {/* Desktop Sidebar */}
-            <aside className="bg-background sticky -top-6 hidden w-64 shrink-0 flex-col border-r lg:flex">
-                <div className="flex h-14 shrink-0 items-center px-4">
-                    <h2 className="text-foreground text-[1.1rem] font-bold tracking-tight">
-                        Report Sections
-                    </h2>
-                </div>
-                <Separator className="bg-border/40 shrink-0" />
-                <nav className="flex-1 space-y-1 p-3">
-                    <Link
-                        href={`/exams/reports/${examId}?section=overview`}
-                        className="group text-muted-foreground hover:bg-accent/30 hover:text-foreground flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left text-sm font-medium transition-colors"
-                    >
-                        Overview
-                    </Link>
-                    <Link
-                        href={`/exams/reports/${examId}?section=attempts`}
-                        className="group bg-accent/50 flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left text-sm font-semibold text-[#323d8f] transition-colors"
-                    >
-                        Attempt Summary
-                    </Link>
-                    <Link
-                        href={`/exams/reports/${examId}?section=queue`}
-                        className="group text-muted-foreground hover:bg-accent/30 hover:text-foreground flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left text-sm font-medium transition-colors"
-                    >
-                        Action Queue
-                    </Link>
-                </nav>
-            </aside>
-
-            {/* Mobile Navigation */}
-            <div className="px-4 pt-6 lg:hidden">
-                <div className="bg-card/20 flex gap-2 rounded-xl border p-1.5 shadow-sm backdrop-blur-sm">
-                    <Link
-                        href={`/exams/reports/${examId}?section=overview`}
-                        className="text-muted-foreground hover:text-foreground flex-1 rounded-lg py-2 text-center text-sm font-medium transition-colors"
-                    >
-                        Overview
-                    </Link>
-                    <Link
-                        href={`/exams/reports/${examId}?section=attempts`}
-                        className="bg-background flex-1 rounded-lg py-2 text-center text-sm font-semibold text-[#323d8f] shadow transition-colors"
-                    >
-                        Attempt Summary
-                    </Link>
-                    <Link
-                        href={`/exams/reports/${examId}?section=queue`}
-                        className="text-muted-foreground hover:text-foreground flex-1 rounded-lg py-2 text-center text-sm font-medium transition-colors"
-                    >
-                        Action Queue
-                    </Link>
-                </div>
-            </div>
-
-            {/* Main Content Area */}
-            <main className="min-w-0 flex-1 space-y-6 p-4 md:p-6 lg:p-8">
-                <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-                    <div className="space-y-2">
-                        <div className="flex items-center gap-3">
-                            <FileText className="h-6 w-6 text-slate-500" />
-                            <div>
-                                <h1 className="text-3xl font-semibold tracking-tight">
-                                    {data.attempt.studentName}
-                                </h1>
-                                <p className="text-muted-foreground">
-                                    {data.attempt.studentNumber} • {data.attempt.subjectTitle}
-                                </p>
-                            </div>
+        <div className="space-y-6">
+            <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+                <div className="space-y-2">
+                    <div className="flex items-center gap-3">
+                        <FileText className="h-6 w-6 text-slate-500" />
+                        <div>
+                            <h1 className="text-3xl font-semibold tracking-tight">
+                                {data.attempt.studentName}
+                            </h1>
+                            <p className="text-muted-foreground">
+                                {data.attempt.studentNumber} • {data.attempt.subjectTitle}
+                            </p>
                         </div>
                     </div>
-                    <Button variant="outline" asChild>
-                        <Link href={`/exams/reports/${examId}?section=attempts`}>
-                            <ArrowLeft className="mr-2 h-4 w-4" />
-                            Back to Summary
-                        </Link>
-                    </Button>
                 </div>
+                <Button variant="outline" asChild>
+                    <Link href={`/exams/reports/${examId}?section=attempts`}>
+                        <ArrowLeft className="mr-2 h-4 w-4" />
+                        Back to Summary
+                    </Link>
+                </Button>
+            </div>
 
-                <AttemptReportView
-                    attempt={data.attempt}
-                    questions={data.questions}
-                    editable
-                    isSubmitting={saveMutation.isPending}
-                    onSubmit={(payload) => saveMutation.mutate(payload)}
-                    optimisticScore={optimisticScore}
-                />
-            </main>
+            <AttemptReportView
+                attempt={data.attempt}
+                questions={data.questions}
+                editable
+                isSubmitting={saveMutation.isPending}
+                onSubmit={(payload) => saveMutation.mutate(payload)}
+                optimisticScore={optimisticScore}
+            />
         </div>
     );
 }

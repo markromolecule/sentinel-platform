@@ -18,9 +18,7 @@ import {
     Skeleton,
 } from '@sentinel/ui';
 import { useCalendar, CalendarHeader, CalendarGrid, DayDetailsSheet } from '@/features/calendar';
-import { useCalendarEventsQuery } from '@sentinel/hooks';
-import { useCreateCalendarNoteMutation } from '@/hooks/query/calendar/use-create-calendar-note-mutation';
-import { useDeleteCalendarNoteMutation } from '@/hooks/query/calendar/use-delete-calendar-note-mutation';
+import { useCalendarEventsQuery, useCreateCalendarEventMutation, useDeleteCalendarEventMutation } from '@sentinel/hooks';
 
 export default function StudentCalendarPage() {
     const [isAddNoteOpen, setIsAddNoteOpen] = useState(false);
@@ -63,13 +61,13 @@ export default function StudentCalendarPage() {
         isPending: isCreating,
         error: createError,
         isError: isCreateError,
-    } = useCreateCalendarNoteMutation({
+    } = useCreateCalendarEventMutation({
         onSuccess: () => {
             setIsAddNoteOpen(false);
         },
     });
 
-    const { mutate: deleteNote } = useDeleteCalendarNoteMutation();
+    const { mutate: deleteNote } = useDeleteCalendarEventMutation();
 
     // Map CalendarEventResponse[] to CalendarEvent[]
     const mappedEvents = useMemo(() => {
@@ -132,6 +130,8 @@ export default function StudentCalendarPage() {
             startDate: selectedDate.toISOString(),
             startTime: startTime || undefined,
             endTime: endTime || undefined,
+            eventType: 'NOTE',
+            targetAudience: 'STUDENTS',
         });
     };
 

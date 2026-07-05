@@ -1,7 +1,16 @@
 import * as tf from '@tensorflow/tfjs';
-import { type AudioAnomalySettings, getAnomalyConfidence } from '@sentinel/shared';
+import {
+    type AudioAnomalySettings,
+    type AudioAnomalyTypeValue,
+    getAnomalyConfidence,
+} from '@sentinel/shared';
 
 export class AudioAnomalyEngine {
+    // Constants for cooldown and frame thresholds
+    private static readonly SILENCE_MIN_CONSECUTIVE_FRAMES = 5;
+    private static readonly SILENCE_MIN_COOLDOWN_MS = 180_000;
+    private static readonly BACKGROUND_NOISE_MIN_COOLDOWN_MS = 60_000;
+
     private model: tf.GraphModel | null = null;
     private config: AudioAnomalySettings;
     private isDetecting = false;
@@ -11,24 +20,36 @@ export class AudioAnomalyEngine {
     private sampleBuffer: Float32Array = new Float32Array(this.EXPECTED_SAMPLES);
     private bufferIndex = 0;
 
-    private frameCounters: Map<string, number> = new Map();
-    private lastAlertTime: Map<string, number> = new Map();
+    private frameCounters: Map<AudioAnomalyTypeValue, number> = new Map();
+    private lastAlertTime: Map<AudioAnomalyTypeValue, number> = new Map();
 
-    private getRequiredConsecutiveFrames(anomalyType: string): number {
+    private getRequiredConsecutiveFrames(anomalyType: AudioAnomalyTypeValue): number {
         if (anomalyType === 'SILENCE_DETECTED') {
-            return Math.max(this.config.consecutiveFrameThreshold, 5);
+            // Silence requires a higher threshold (min 5 frames, ~5 seconds) to avoid false positives on brief gaps
+            return Math.max(
+                this.config.consecutiveFrameThreshold,
+                AudioAnomalyEngine.SILENCE_MIN_CONSECUTIVE_FRAMES,
+            );
         }
 
         return this.config.consecutiveFrameThreshold;
     }
 
-    private getCooldownMs(anomalyType: string): number {
+    private getCooldownMs(anomalyType: AudioAnomalyTypeValue): number {
         if (anomalyType === 'SILENCE_DETECTED') {
-            return Math.max(this.config.cooldownMs, 180_000);
+            // Cooldowns are longer for silence to prevent spamming notifications while the room is quiet
+            return Math.max(
+                this.config.cooldownMs,
+                AudioAnomalyEngine.SILENCE_MIN_COOLDOWN_MS,
+            );
         }
 
         if (anomalyType === 'BACKGROUND_NOISE') {
-            return Math.max(this.config.cooldownMs, 60_000);
+            // Background noise cooldown is also extended to prevent flooding the database/UI with persistent hum reports
+            return Math.max(
+                this.config.cooldownMs,
+                AudioAnomalyEngine.BACKGROUND_NOISE_MIN_COOLDOWN_MS,
+            );
         }
 
         return this.config.cooldownMs;
@@ -69,14 +90,33 @@ export class AudioAnomalyEngine {
         this.frameCounters.clear();
     }
 
-    updateConfig(newConfig: AudioAnomalySettings): void {
-        this.config = newConfig;
+    dispose(): void {
+        this.stop();
+        this.model?.dispose();
+        this.model = null;
     }
 
-    async processAudioChunk(
+    updateConfig(newConfig: AudioAnomalySettings): void {
+        this.config = newConfig;
+        const enabled = new Set<string>(newConfig.enabledAnomalyTypes);
+
+        // Remove counters and alert timers for any types that were disabled
+        for (const key of this.frameCounters.keys()) {
+            if (!enabled.has(key)) {
+                this.frameCounters.delete(key);
+            }
+        }
+        for (const key of this.lastAlertTime.keys()) {
+            if (!enabled.has(key)) {
+                this.lastAlertTime.delete(key);
+            }
+        }
+    }
+
+    processAudioChunk(
         samples: Float32Array,
-        onAnomalyDetected: (results: Record<string, number>) => void,
-    ): Promise<void> {
+        onAnomalyDetected: (results: Record<AudioAnomalyTypeValue, number>) => void,
+    ): void {
         if (!this.isDetecting || !this.model) return;
 
         // Append incoming samples to our buffer
@@ -102,7 +142,7 @@ export class AudioAnomalyEngine {
 
     private runInference(
         samples: Float32Array,
-        onAnomalyDetected: (results: Record<string, number>) => void,
+        onAnomalyDetected: (results: Record<AudioAnomalyTypeValue, number>) => void,
     ): void {
         try {
             tf.tidy(() => {
@@ -123,8 +163,10 @@ export class AudioAnomalyEngine {
                         );
                     }
                     scoresTensor = match;
-                } else {
+                } else if (output && typeof (output as any).dataSync === 'function') {
                     scoresTensor = output as tf.Tensor;
+                } else {
+                    throw new Error('Unexpected NamedTensorMap output from model.predict()');
                 }
 
                 const scoresArray = scoresTensor.dataSync() as Float32Array;
@@ -136,8 +178,6 @@ export class AudioAnomalyEngine {
                     sumSquares += samples[i] * samples[i];
                 }
                 const rms = Math.sqrt(sumSquares / samples.length);
-
-                const detectedAnomalies: Record<string, number> = {};
 
                 // Evaluate all enabled anomaly types independently
                 for (const anomalyType of this.config.enabledAnomalyTypes) {
@@ -155,7 +195,7 @@ export class AudioAnomalyEngine {
                         // Check YAMNet-based anomalies
                         confidence = getAnomalyConfidence(
                             scoresArray,
-                            anomalyType as any,
+                            anomalyType,
                             this.config,
                         );
                     }
@@ -173,7 +213,7 @@ export class AudioAnomalyEngine {
                         if (count >= requiredConsecutiveFrames && cooldownExpired) {
                             this.frameCounters.set(anomalyType, 0); // reset after triggering
                             this.lastAlertTime.set(anomalyType, now);
-                            onAnomalyDetected({ [anomalyType]: confidence });
+                            onAnomalyDetected({ [anomalyType]: confidence } as Record<AudioAnomalyTypeValue, number>);
                         }
                     } else {
                         // Reset counter for this type because it didn't trigger this frame

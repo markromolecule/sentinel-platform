@@ -1,6 +1,6 @@
 import { type DbClient } from '@sentinel/db';
 import { HTTPException } from 'hono/http-exception';
-import { getGradingAttemptDetail } from '../../grading/services/get-grading-attempt-detail';
+import { getGradingAttemptDetail } from '../../grading/services/get-grading-attempt-detail.service';
 import type { AssessmentAllowedRole } from '../../assessment/assessment-access';
 import type { AttemptReport } from '../reporting.dto';
 

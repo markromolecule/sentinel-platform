@@ -32,6 +32,14 @@ function getManagedSection(pathname: string): ExamSection | null {
     }
     if (segment === 'dashboard' || segment === 'config') return 'dashboard';
 
+    // Handle dynamic routes like /exams/[id]/assign, /exams/[id]/grading, etc.
+    if (parts.length === 3) {
+        const subsegment = parts[2];
+        if (subsegment === 'assign') return 'assign';
+        if (subsegment === 'grading') return 'grading';
+        if (subsegment === 'reports') return 'reports';
+    }
+
     return null;
 }
 

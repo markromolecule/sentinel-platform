@@ -97,4 +97,24 @@ describe('ExamSessionNav', () => {
         expect(activeLink.className).toContain('bg-accent/50');
         expect(activeLink.className).toContain('border-r-2');
     });
+
+    it('filters out Lobby and Monitoring on report routes in sentinel-core', () => {
+        mockPathname.mockReturnValue('/exams/exam-1/report');
+        mockSearchParams.get.mockReturnValue(null);
+
+        render(<ExamSessionNav examId="exam-1" />);
+
+        expect(screen.queryByRole('link', { name: 'Lobby' })).toBeNull();
+        expect(screen.queryByRole('link', { name: 'Monitoring' })).toBeNull();
+        
+        expect(screen.getByRole('link', { name: 'Attempt Summary' }).getAttribute('href')).toBe(
+            '/exams/exam-1/report',
+        );
+        expect(screen.getByRole('link', { name: 'Action Queue' }).getAttribute('href')).toBe(
+            '/exams/exam-1/report?section=queue',
+        );
+        expect(screen.getByRole('link', { name: 'Incident Logs' }).getAttribute('href')).toBe(
+            '/exams/exam-1/logs',
+        );
+    });
 });

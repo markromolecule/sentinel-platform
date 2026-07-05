@@ -5,7 +5,7 @@ import {
     scoreExamAttempt,
 } from '@sentinel/shared';
 import { HTTPException } from 'hono/http-exception';
-import { getGradingAttemptDetail } from './get-grading-attempt-detail';
+import { getGradingAttemptDetail } from './get-grading-attempt-detail.service';
 import { appendExamAttemptLifecycleEvent } from '../../lifecycle/services/lifecycle-event.service';
 
 export type UpdateGradingAttemptArgs = {
@@ -167,10 +167,10 @@ export async function updateGradingAttempt({
         typeof attempt.grading === 'object' && attempt.grading !== null ? attempt.grading : {};
     const updatedGradingMetadata = finalize
         ? {
-              ...existingGradingMetadata,
-              finalizedAt: new Date().toISOString(),
-              finalizedBy: actorUserId ?? null,
-          }
+            ...existingGradingMetadata,
+            finalizedAt: new Date().toISOString(),
+            finalizedBy: actorUserId ?? null,
+        }
         : existingGradingMetadata;
 
     // 5. Build updated answer snapshot with metadata prefixed with "_"

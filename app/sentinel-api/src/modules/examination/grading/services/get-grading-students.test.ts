@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { DbClient } from '@sentinel/db';
-import { getGradingStudents } from './get-grading-students';
+import { getGradingStudents } from './get-grading-students.service';
 import { getGradingStudentsData } from '../data/get-grading-students';
 
 vi.mock('../data/get-grading-students', () => ({

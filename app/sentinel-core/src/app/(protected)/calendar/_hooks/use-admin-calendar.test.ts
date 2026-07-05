@@ -8,14 +8,22 @@ vi.mock('@/data/api/client', () => ({
 }));
 
 // These mocks must be defined before the module imports
-vi.mock('@/hooks/query/calendar/use-calendar-events-query');
-vi.mock('@/hooks/mutations/calendar/use-create-calendar-event-mutation');
-vi.mock('@/hooks/mutations/calendar/use-delete-calendar-event-mutation');
+vi.mock('@sentinel/hooks', async (importOriginal) => {
+    const actual = await importOriginal<typeof import('@sentinel/hooks')>();
+    return {
+        ...actual,
+        useCalendarEventsQuery: vi.fn(),
+        useCreateCalendarEventMutation: vi.fn(),
+        useDeleteCalendarEventMutation: vi.fn(),
+    };
+});
 
 // Import after mocks
-import { useCalendarEventsQuery } from '@/hooks/query/calendar/use-calendar-events-query';
-import { useCreateCalendarEventMutation } from '@/hooks/mutations/calendar/use-create-calendar-event-mutation';
-import { useDeleteCalendarEventMutation } from '@/hooks/mutations/calendar/use-delete-calendar-event-mutation';
+import {
+    useCalendarEventsQuery,
+    useCreateCalendarEventMutation,
+    useDeleteCalendarEventMutation,
+} from '@sentinel/hooks';
 import { useAdminCalendar } from './use-admin-calendar';
 
 const mockDeleteMutate = vi.fn();

@@ -57,46 +57,69 @@ export function ExamSessionNav({ examId }: ExamSessionNavProps) {
     const pathname = usePathname() || '';
     const searchParams = useSearchParams();
     const activeSection = resolveActiveSection(pathname, searchParams);
-    const items: ExamSessionNavItem[] = [
-        {
-            id: 'lobby',
-            label: 'Lobby',
-            href: `/exams/${examId}/lobby`,
-        },
-        {
-            id: 'monitoring',
-            label: 'Monitoring',
-            href: `/exams/${examId}/monitoring`,
-        },
-        {
-            id: 'report',
-            label: 'Attempt Summary',
-            href: `/exams/${examId}/report`,
-        },
-        {
-            id: 'queue',
-            label: 'Action Queue',
-            href: `/exams/${examId}/report?section=queue`,
-        },
-        {
-            id: 'logs',
-            label: 'Incident Logs',
-            href: `/exams/${examId}/logs`,
-        },
-    ];
+    const isReportPage = pathname.includes('/report');
+
+    const items: ExamSessionNavItem[] = isReportPage
+        ? [
+            {
+                id: 'report',
+                label: 'Attempt Summary',
+                href: `/exams/${examId}/report`,
+            },
+            {
+                id: 'queue',
+                label: 'Action Queue',
+                href: `/exams/${examId}/report?section=queue`,
+            },
+            {
+                id: 'logs',
+                label: 'Incident Logs',
+                href: `/exams/${examId}/logs`,
+            },
+        ]
+        : [
+            {
+                id: 'lobby',
+                label: 'Lobby',
+                href: `/exams/${examId}/lobby`,
+            },
+            {
+                id: 'monitoring',
+                label: 'Monitoring',
+                href: `/exams/${examId}/monitoring`,
+            },
+            {
+                id: 'report',
+                label: 'Attempt Summary',
+                href: `/exams/${examId}/report`,
+            },
+            {
+                id: 'queue',
+                label: 'Action Queue',
+                href: `/exams/${examId}/report?section=queue`,
+            },
+            {
+                id: 'logs',
+                label: 'Incident Logs',
+                href: `/exams/${examId}/logs`,
+            },
+        ];
 
     return (
         <nav className="mt-1 flex flex-col gap-1">
-            <h3 className="text-muted-foreground/60 mb-2 px-4 text-xs font-semibold tracking-wider uppercase">
-                Runtime
-            </h3>
+            {!isReportPage && (
+                <h3 className="text-muted-foreground/60 mb-2 px-4 text-xs font-semibold tracking-wider uppercase">
+                    Runtime
+                </h3>
+            )}
 
             {items.map((item, index) => {
                 const isActive = activeSection === item.id;
+                const showSeparator = !isReportPage && index === 2;
 
                 return (
                     <Fragment key={item.id}>
-                        {index === 2 && (
+                        {showSeparator && (
                             <div className="px-4 py-1">
                                 <Separator className="bg-border/40" />
                             </div>
