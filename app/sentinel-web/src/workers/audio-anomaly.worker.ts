@@ -1,4 +1,3 @@
-import { checkAudioCapabilities } from '@sentinel/shared';
 import { AudioAnomalyEngine } from '../workers/audio-anomaly-engine';
 import { type AudioAnomalySettings } from '@sentinel/shared';
 
@@ -10,12 +9,9 @@ self.onmessage = async (event: MessageEvent) => {
     switch (type) {
         case 'INIT':
             try {
-                const capabilities = await checkAudioCapabilities();
-                if (!capabilities.webAudioSupported) {
-                    self.postMessage({ type: 'CAPABILITY_FAILURE', payload: capabilities });
-                    return;
+                if (engine) {
+                    engine.dispose();
                 }
-
                 engine = new AudioAnomalyEngine(payload.config as AudioAnomalySettings);
                 await engine.initialize();
                 self.postMessage({ type: 'INIT_SUCCESS' });
@@ -43,13 +39,19 @@ self.onmessage = async (event: MessageEvent) => {
                 });
             }
             break;
-
         case 'STOP_DETECTION':
             if (engine) engine.stop();
             break;
 
         case 'UPDATE_CONFIG':
             if (engine) engine.updateConfig(payload.config as AudioAnomalySettings);
+            break;
+
+        case 'DISPOSE':
+            if (engine) {
+                engine.dispose();
+                engine = null;
+            }
             break;
     }
 };

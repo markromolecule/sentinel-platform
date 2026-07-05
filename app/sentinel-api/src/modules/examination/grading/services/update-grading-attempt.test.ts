@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { updateGradingAttempt } from './update-grading-attempt';
+import { updateGradingAttempt } from './update-grading-attempt.service';
 import { HTTPException } from 'hono/http-exception';
-import { getGradingAttemptDetail } from './get-grading-attempt-detail';
+import { getGradingAttemptDetail } from './get-grading-attempt-detail.service';
 import { appendExamAttemptLifecycleEvent } from '../../lifecycle/services/lifecycle-event.service';
 
 vi.mock('./get-grading-attempt-detail', () => ({

@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { bulkFinalizeAttempts } from './bulk-finalize-attempts';
+import { bulkFinalizeAttempts } from './bulk-finalize-attempts.service';
 import { HTTPException } from 'hono/http-exception';
 import { finalizeExamAttemptScore } from '../../lifecycle/services/finalize-exam-attempt-score';
 

@@ -115,4 +115,51 @@ describe('ExamSessionNav', () => {
         expect(activeLink.className).toContain('bg-accent/50');
         expect(activeLink.className).toContain('border-r-2');
     });
+
+    it('filters out Lobby and Monitoring, and updates Incident Logs href on report routes', () => {
+        mockPathname.mockReturnValue('/exams/reports/exam-1');
+        mockSearchParams.get.mockReturnValue(null);
+
+        render(<ExamSessionNav examId="exam-1" />);
+
+        expect(screen.queryByRole('link', { name: 'Lobby' })).toBeNull();
+        expect(screen.queryByRole('link', { name: 'Monitoring' })).toBeNull();
+        
+        expect(screen.getByRole('link', { name: 'Overview' }).getAttribute('href')).toBe(
+            '/exams/reports/exam-1?section=overview',
+        );
+        expect(screen.getByRole('link', { name: 'Attempt Summary' }).getAttribute('href')).toBe(
+            '/exams/reports/exam-1?section=attempts',
+        );
+        expect(screen.getByRole('link', { name: 'Action Queue' }).getAttribute('href')).toBe(
+            '/exams/reports/exam-1?section=queue',
+        );
+        expect(screen.getByRole('link', { name: 'Incident Logs' }).getAttribute('href')).toBe(
+            '/exams/reports/exam-1?section=logs',
+        );
+    });
+
+    it('marks Attempt Summary active on detailed attempt routes', () => {
+        mockPathname.mockReturnValue('/exams/reports/exam-1/attempt-1');
+        mockSearchParams.get.mockReturnValue(null);
+
+        render(<ExamSessionNav examId="exam-1" />);
+
+        const activeLink = screen.getByRole('link', { name: 'Attempt Summary' });
+        expect(activeLink.className).toContain('bg-accent/50');
+        expect(activeLink.className).toContain('border-r-2');
+    });
+
+    it('marks Incident Logs active on report logs routes', () => {
+        mockPathname.mockReturnValue('/exams/reports/exam-1');
+        mockSearchParams.get.mockImplementation((key: string) =>
+            key === 'section' ? 'logs' : null,
+        );
+
+        render(<ExamSessionNav examId="exam-1" />);
+
+        const activeLink = screen.getByRole('link', { name: 'Incident Logs' });
+        expect(activeLink.className).toContain('bg-accent/50');
+        expect(activeLink.className).toContain('border-r-2');
+    });
 });

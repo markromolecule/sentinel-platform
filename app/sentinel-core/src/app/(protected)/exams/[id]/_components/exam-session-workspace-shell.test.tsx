@@ -49,7 +49,7 @@ describe('ExamSessionWorkspaceShell', () => {
             </ExamSessionWorkspaceShell>,
         );
 
-        expect(screen.getByRole('heading', { name: 'Exam Session' })).toBeTruthy();
+        expect(screen.getByRole('heading', { name: 'Report Sections' })).toBeTruthy();
         expect(screen.getAllByTestId('exam-session-nav')[0]?.getAttribute('data-exam-id')).toBe(
             'exam-1',
         );

@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { type DbClient } from '@sentinel/db';
 import { HTTPException } from 'hono/http-exception';
 import { getAttemptReport } from './get-attempt-report';
-import { getGradingAttemptDetail } from '../../grading/services/get-grading-attempt-detail';
+import { getGradingAttemptDetail } from '../../grading/services/get-grading-attempt-detail.service';
 
 vi.mock('../../grading/services/get-grading-attempt-detail', () => ({
     getGradingAttemptDetail: vi.fn(),

@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { type DbClient } from '@sentinel/db';
-import { getGradingAttemptDetail } from './get-grading-attempt-detail';
-import { updateGradingAttempt } from './update-grading-attempt';
+import { getGradingAttemptDetail } from './get-grading-attempt-detail.service';
+import { updateGradingAttempt } from './update-grading-attempt.service';
 import { calculateEssayWeightedScore, scoreExamAttempt } from '@sentinel/shared';
 
 vi.mock('@sentinel/shared', async (importOriginal) => {
@@ -172,6 +172,55 @@ describe('Grading attempt details and update services', () => {
                 passageType: 'html',
             });
             expect(result.questions).toHaveLength(2);
+        });
+
+        it('shuffles multiple choice question options when randomize_choices config is true', async () => {
+            const mockAttempt = {
+                attemptId: '11111111-1111-1111-1111-111111111111',
+                examId: '22222222-2222-2222-2222-222222222222',
+                examTitle: 'History Final',
+                subjectTitle: 'History',
+                studentId: '33333333-3333-3333-3333-333333333333',
+                studentNumber: '2026-0001',
+                completedAt: new Date('2026-04-18T09:30:00.000Z'),
+                score: 1,
+                totalScore: 1,
+                status: 'COMPLETED',
+                answerSnapshot: {
+                    'q-obj-1': 1,
+                },
+                studentName: 'Alice Student',
+            };
+
+            const mockQuestions = [
+                {
+                    id: 'q-obj-1',
+                    examId: '22222222-2222-2222-2222-222222222222',
+                    type: 'MULTIPLE_CHOICE',
+                    content: {
+                        prompt: 'Objective Prompt',
+                        options: ['A', 'B'],
+                        correctAnswer: 'B',
+                    },
+                    points: 1,
+                    orderIndex: 0,
+                },
+            ];
+
+            mockDb.executeTakeFirst
+                .mockResolvedValueOnce(mockAttempt)
+                .mockResolvedValueOnce({ randomize_choices: true });
+            mockDb.execute.mockResolvedValue(mockQuestions);
+
+            const result = await getGradingAttemptDetail({
+                dbClient: mockDb as DbClient,
+                attemptId: '11111111-1111-1111-1111-111111111111',
+            });
+
+            expect(result.questions).toHaveLength(1);
+            expect(result.questions[0].content.options).toContain('A');
+            expect(result.questions[0].content.options).toContain('B');
+            expect(result.attempt.questionReports).toHaveLength(1);
         });
     });
 

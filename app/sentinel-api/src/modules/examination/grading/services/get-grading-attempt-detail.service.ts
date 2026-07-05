@@ -1,6 +1,6 @@
 import { type DbClient } from '@sentinel/db';
-import { buildExamAttemptQuestionReports } from '@sentinel/shared';
-import type { PassageType } from '@sentinel/shared/types';
+import { buildExamAttemptQuestionReports, randomizeQuestionChoices } from '@sentinel/shared';
+import type { ExamQuestion, PassageType } from '@sentinel/shared/types';
 import { HTTPException } from 'hono/http-exception';
 import { sql } from 'kysely';
 
@@ -87,6 +87,12 @@ export async function getGradingAttemptDetail({
         .orderBy('eq.order_index', 'asc')
         .execute();
 
+    const config = await dbClient
+        .selectFrom('exam_configurations')
+        .select(['randomize_choices'])
+        .where('exam_id', '=', attemptRow.examId)
+        .executeTakeFirst();
+
     const snapshotObj = (attemptRow.answerSnapshot ?? {}) as Record<string, any>;
     const evaluations = (snapshotObj._evaluations ?? {}) as Record<string, any>;
     const overallFeedback = (snapshotObj._feedback ?? null) as string | null;
@@ -101,7 +107,7 @@ export async function getGradingAttemptDetail({
         }
     }
 
-    const mappedQuestions = questions.map((q) => ({
+    const mappedQuestions: ExamQuestion[] = questions.map((q) => ({
         id: q.id,
         examId: q.examId,
         type: q.type as any,
@@ -111,8 +117,15 @@ export async function getGradingAttemptDetail({
         tags: [],
     }));
 
+    let finalQuestions = mappedQuestions;
+    if (config?.randomize_choices) {
+        finalQuestions = mappedQuestions.map((q) =>
+            randomizeQuestionChoices(q, `${attemptRow.attemptId}-${q.id}`),
+        );
+    }
+
     const questionReports = buildExamAttemptQuestionReports({
-        questions: mappedQuestions,
+        questions: finalQuestions,
         answers,
         evaluations,
         itemOverrides,
@@ -140,8 +153,8 @@ export async function getGradingAttemptDetail({
                 finalizedAt: attemptRow.finalizedAt
                     ? attemptRow.finalizedAt.toISOString()
                     : typeof grading.finalizedAt === 'string'
-                      ? grading.finalizedAt
-                      : null,
+                        ? grading.finalizedAt
+                        : null,
                 finalizedBy:
                     attemptRow.finalizedBy ??
                     (typeof grading.finalizedBy === 'string' ? grading.finalizedBy : null),
@@ -150,18 +163,21 @@ export async function getGradingAttemptDetail({
             scoreState: attemptRow.scoreState ?? null,
             questionReports,
         },
-        questions: questions.map((q) => ({
-            id: q.id,
-            examId: q.examId,
-            type: q.type,
-            sourceFileName: q.sourceFileName ?? null,
-            sourcePageNumber: q.sourcePageNumber ?? null,
-            sourceEvidence: q.sourceEvidence ?? null,
-            passageContent: q.passageContent ?? null,
-            passageType: q.passageType,
-            content: q.content as any,
-            points: q.points,
-            orderIndex: q.orderIndex,
-        })),
+        questions: finalQuestions.map((q) => {
+            const dbQ = questions.find((entry) => entry.id === q.id)!;
+            return {
+                id: q.id,
+                examId: q.examId,
+                type: q.type,
+                sourceFileName: dbQ.sourceFileName ?? null,
+                sourcePageNumber: dbQ.sourcePageNumber ?? null,
+                sourceEvidence: dbQ.sourceEvidence ?? null,
+                passageContent: dbQ.passageContent ?? null,
+                passageType: dbQ.passageType,
+                content: q.content,
+                points: q.points,
+                orderIndex: q.orderIndex,
+            };
+        }),
     };
 }
