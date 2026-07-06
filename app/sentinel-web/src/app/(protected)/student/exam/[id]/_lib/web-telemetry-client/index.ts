@@ -11,6 +11,7 @@ import {
 export * from './_types';
 export * from './_utils/payloads';
 export * from './_utils/context';
+export * from './_utils/action-metadata';
 
 export async function emitWebTelemetryEvent(
     apiClient: ApiClientType,

@@ -164,6 +164,23 @@ export const examConfigurationSchema = z.object({
             screenshot_block: true,
             root_jailbreak_detection: true,
         }),
+
+    // 5. Automatic Close Policy
+    automaticClosePolicy: z
+        .object({
+            enabled: z.boolean().default(true),
+            highIncidentThreshold: z.number().int().min(1).default(3),
+            windowMinutes: z.number().int().min(1).default(15),
+            useOccurrenceCount: z.boolean().default(false),
+            immediateCloseEventTypes: z.array(z.string()).default([]),
+        })
+        .default({
+            enabled: true,
+            highIncidentThreshold: 3,
+            windowMinutes: 15,
+            useOccurrenceCount: false,
+            immediateCloseEventTypes: [],
+        }),
 });
 
 export const examStatusSchema = z.enum(EXAM_STATUSES);

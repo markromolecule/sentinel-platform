@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import type { AttemptMonitoringPhase } from '@/app/(protected)/student/exam/[id]/_hooks/use-exam-monitoring';
 
 export function useAttemptUIState() {
     const [reviewQuestionIds, setReviewQuestionIds] = useState<string[]>([]);
@@ -9,6 +10,7 @@ export function useAttemptUIState() {
     const [crossedOutOptions, setCrossedOutOptions] = useState<Record<string, number[]>>({});
     const [isSubmitDialogOpen, setIsSubmitDialogOpen] = useState(false);
     const [isRedirectingToTurnIn, setIsRedirectingToTurnIn] = useState(false);
+    const [monitoringPhase, setMonitoringPhase] = useState<AttemptMonitoringPhase>('active');
 
     const handleToggleReview = (questionId: string) => {
         setReviewQuestionIds((current) =>
@@ -40,6 +42,8 @@ export function useAttemptUIState() {
         setIsSubmitDialogOpen,
         isRedirectingToTurnIn,
         setIsRedirectingToTurnIn,
+        monitoringPhase,
+        setMonitoringPhase,
         handleToggleReview,
         handleToggleCrossOutOption,
     };

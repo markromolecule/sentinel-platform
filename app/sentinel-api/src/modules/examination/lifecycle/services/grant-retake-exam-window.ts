@@ -5,6 +5,7 @@ import { appendExamAttemptLifecycleEvent } from './lifecycle-event.service';
 import { transitionExamAttemptLifecycle } from './lifecycle-transition.service';
 import { recordAttemptLifecycleAudit } from './lifecycle-audit.service';
 import { createRemediationExam } from './create-remediation-exam';
+import { assertRemediationWindowEligibility } from './remediation-window-eligibility.service';
 
 /**
  * Grants a retake window for one student and records the grant against the
@@ -22,6 +23,16 @@ export async function grantRetakeExamWindow(args: {
     actorUserId?: string | null;
     institutionId?: string;
 }) {
+    await assertRemediationWindowEligibility({
+        dbClient: args.dbClient,
+        remediationType: 'RETAKE',
+        examId: args.examId,
+        studentId: args.studentId,
+        availableFrom: args.availableFrom,
+        availableUntil: args.availableUntil,
+        sourceAttemptId: args.sourceAttemptId,
+    });
+
     const context = await getLifecycleAttemptContext({
         dbClient: args.dbClient,
         examId: args.examId,

@@ -40,7 +40,7 @@ export function MatchingQuestion({
                         <Input
                             value={String(values[pair.left] ?? '')}
                             onChange={(event) => updatePair(pair.left, event.target.value)}
-                            placeholder={pair.right}
+                            placeholder={showCorrectAnswer ? pair.right : 'Type the matching value...'}
                             className="h-12 rounded-md"
                         />
                         {showCorrectAnswer && pair.right ? (

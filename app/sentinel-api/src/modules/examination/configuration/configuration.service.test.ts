@@ -76,6 +76,13 @@ describe('ConfigurationService', () => {
                     screenshot_block: true,
                     root_jailbreak_detection: true,
                 },
+                automaticClosePolicy: {
+                    enabled: true,
+                    highIncidentThreshold: 3,
+                    windowMinutes: 15,
+                    useOccurrenceCount: false,
+                    immediateCloseEventTypes: [],
+                },
             });
         },
     );
@@ -164,6 +171,13 @@ describe('ConfigurationService', () => {
                     notification_block: false,
                     screenshot_block: false,
                     root_jailbreak_detection: false,
+                },
+                automaticClosePolicy: {
+                    enabled: true,
+                    highIncidentThreshold: 3,
+                    windowMinutes: 15,
+                    useOccurrenceCount: false,
+                    immediateCloseEventTypes: [],
                 },
             });
 

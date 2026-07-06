@@ -133,4 +133,23 @@ describe('useExamReport', () => {
         expect(toast.success).toHaveBeenCalled();
         expect(mockRefetch).toHaveBeenCalled();
     });
+
+    it('triggers error toast on API eligibility failure', async () => {
+        const testError = new Error('Ineligible attempt state');
+        mockApiClient.mockRejectedValue(testError);
+
+        const { result } = renderHook(() => useExamReport({ examId: 'exam-1' }));
+
+        await act(async () => {
+            await result.current.handleGrantOverride(
+                result.current.actionQueues.retake[0],
+                'RETAKE',
+                '2026-04-21T09:00:00.000Z',
+                '2026-04-21T10:30:00.000Z',
+                'Approved retake.',
+            );
+        });
+
+        expect(toast.error).toHaveBeenCalledWith('Failed to grant remediation: Ineligible attempt state');
+    });
 });

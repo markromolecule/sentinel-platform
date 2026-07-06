@@ -103,6 +103,9 @@ export function useAudioAnomalyWorker({
             controller.dispose();
             controllerRef.current = null;
         };
+        // NOTE: runtimeConfig is omitted from dependencies because config updates
+        // are dynamically synchronized via the updateConfig call in the effect below.
+        // Adding it here would cause unnecessary stream teardown and restarts.
     }, [isEnabled, audioStream, providedWorker, emitAudioTelemetry]);
 
     // Config Sync Effect: Cheaply sync config changes without restarting the graph

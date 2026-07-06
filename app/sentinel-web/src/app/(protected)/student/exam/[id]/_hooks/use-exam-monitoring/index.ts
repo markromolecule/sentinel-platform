@@ -6,19 +6,28 @@ import { MOBILE_USER_AGENT_REGEX } from '@sentinel/shared/constants';
 import { useTelemetry } from './use-telemetry';
 import { useSecurityLock } from './use-security-lock';
 import { useInteractionListeners } from './use-interaction-listeners';
-import type { UseExamMonitoringArgs, UseExamMonitoringResult } from './_types';
+import type { AttemptMonitoringPhase, UseExamMonitoringArgs, UseExamMonitoringResult } from './_types';
 
 export * from './_types';
 
+/**
+ * Hook to monitor student behavior during an exam.
+ * Handles tab switches, fullscreen checks, and security locking.
+ * 
+ * @param args - Configuration, session info, and suspension/phase controls.
+ * @returns Object containing state (tabSwitches, securityLockReason) and handlers.
+ */
 export function useExamMonitoring({
     configuration,
     examSessionId,
     examId,
     isMonitoringSuspended = false,
+    monitoringPhase = 'active',
 }: UseExamMonitoringArgs): UseExamMonitoringResult {
     const { user } = useAuth();
     const [tabSwitches, setTabSwitches] = useState(0);
     const isMonitoringSuspendedRef = useRef(isMonitoringSuspended);
+    const monitoringPhaseRef = useRef<AttemptMonitoringPhase>(monitoringPhase);
     const studentId = user?.id;
 
     const isMobile =
@@ -30,8 +39,13 @@ export function useExamMonitoring({
         !isMobile && (configuration?.webSecurity.full_screen_required ?? true);
 
     useEffect(() => {
-        isMonitoringSuspendedRef.current = isMonitoringSuspended;
-    }, [isMonitoringSuspended]);
+        monitoringPhaseRef.current = monitoringPhase;
+        isMonitoringSuspendedRef.current =
+            isMonitoringSuspended ||
+            monitoringPhase === 'suspended' ||
+            monitoringPhase === 'submitting' ||
+            monitoringPhase === 'navigating-to-turn-in';
+    }, [isMonitoringSuspended, monitoringPhase]);
 
     const { emitTelemetryEvent } = useTelemetry({
         configuration,
@@ -63,6 +77,7 @@ export function useExamMonitoring({
         emitTelemetryEvent,
         lockExam,
         setTabSwitches,
+        monitoringPhase: monitoringPhaseRef,
     });
 
     return {

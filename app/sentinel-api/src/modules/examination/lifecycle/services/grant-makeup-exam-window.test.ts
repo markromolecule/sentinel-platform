@@ -4,6 +4,7 @@ import { grantMakeupExamWindow } from './grant-makeup-exam-window';
 import { getLifecycleAttemptContext } from '../data/get-lifecycle-attempt-context';
 import { appendExamAttemptLifecycleEvent } from './lifecycle-event.service';
 import { createRemediationExam } from './create-remediation-exam';
+import { assertRemediationWindowEligibility } from './remediation-window-eligibility.service';
 
 vi.mock('../data/get-lifecycle-attempt-context', () => ({
     getLifecycleAttemptContext: vi.fn(),
@@ -15,6 +16,10 @@ vi.mock('./lifecycle-event.service', () => ({
 
 vi.mock('./create-remediation-exam', () => ({
     createRemediationExam: vi.fn(),
+}));
+
+vi.mock('./remediation-window-eligibility.service', () => ({
+    assertRemediationWindowEligibility: vi.fn(),
 }));
 
 describe('grantMakeupExamWindow', () => {
@@ -78,6 +83,15 @@ describe('grantMakeupExamWindow', () => {
             },
             override: null,
             latestEvent: null,
+        });
+        expect(assertRemediationWindowEligibility).toHaveBeenCalledWith({
+            dbClient: expect.anything(),
+            remediationType: 'MAKEUP',
+            examId: 'exam-1',
+            studentId: 'student-1',
+            availableFrom: '2026-07-04T08:00:00.000Z',
+            availableUntil: '2026-07-04T10:00:00.000Z',
+            sourceAttemptId: undefined,
         });
         expect(getLifecycleAttemptContext).not.toHaveBeenCalled();
         expect(appendExamAttemptLifecycleEvent).not.toHaveBeenCalled();
@@ -171,6 +185,15 @@ describe('grantMakeupExamWindow', () => {
             latestEvent: {
                 eventId: 'event-1',
             },
+        });
+        expect(assertRemediationWindowEligibility).toHaveBeenCalledWith({
+            dbClient: expect.anything(),
+            remediationType: 'MAKEUP',
+            examId: 'exam-1',
+            studentId: 'student-1',
+            availableFrom: '2026-07-04T08:00:00.000Z',
+            availableUntil: '2026-07-04T10:00:00.000Z',
+            sourceAttemptId: 'attempt-1',
         });
     });
 });

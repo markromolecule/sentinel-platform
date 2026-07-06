@@ -31,6 +31,9 @@ export function buildWebTelemetryPayload({
     timestamp = new Date().toISOString(),
     metadata,
     sessionContext = buildWebTelemetrySessionContext(),
+    eventId,
+    dedupeKey,
+    clientActionAt,
 }: BuildWebTelemetryPayloadArgs): IngestTelemetryEventPayload {
     const eventDefinition = TELEMETRY_EVENT_DEFINITIONS[eventType];
 
@@ -42,7 +45,12 @@ export function buildWebTelemetryPayload({
         platform: 'WEB',
         source: eventDefinition.source,
         ruleKey: eventDefinition.ruleKey,
-        metadata,
+        metadata: {
+            ...metadata,
+            ...(eventId ? { eventId } : {}),
+            ...(dedupeKey ? { dedupeKey } : {}),
+            clientActionAt: clientActionAt || timestamp,
+        },
         sessionContext,
     };
 }

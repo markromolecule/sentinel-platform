@@ -136,6 +136,7 @@ export function useStudentExamAttempt() {
         isRedirectingToTurnIn: uiHook.isRedirectingToTurnIn,
         mediaPipeSandbox: effectiveMediaPipeSandbox,
         runtimeAccess: exam?.runtimeAccess,
+        monitoringPhase: uiHook.monitoringPhase,
     });
 
     const unansweredQuestions = questions.filter(
@@ -160,6 +161,7 @@ export function useStudentExamAttempt() {
         setIsSubmitDialogOpen: uiHook.setIsSubmitDialogOpen,
         suspendSecurityMonitoring: monitoringHook.suspendSecurityMonitoring,
         isBlocked: effectiveBlockedState.isBlocked,
+        setMonitoringPhase: uiHook.setMonitoringPhase,
     });
 
     const safeQuestionIndex = navigationHook.currentQuestionIndex;

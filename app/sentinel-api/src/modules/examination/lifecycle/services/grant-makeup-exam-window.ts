@@ -5,6 +5,7 @@ import { appendExamAttemptLifecycleEvent } from './lifecycle-event.service';
 import { transitionExamAttemptLifecycle } from './lifecycle-transition.service';
 import { recordAttemptLifecycleAudit } from './lifecycle-audit.service';
 import { createRemediationExam } from './create-remediation-exam';
+import { assertRemediationWindowEligibility } from './remediation-window-eligibility.service';
 
 /**
  * Grants a makeup window for one student and optionally links it back to a
@@ -22,6 +23,16 @@ export async function grantMakeupExamWindow(args: {
     actorUserId?: string | null;
     institutionId?: string;
 }) {
+    await assertRemediationWindowEligibility({
+        dbClient: args.dbClient,
+        remediationType: 'MAKEUP',
+        examId: args.examId,
+        studentId: args.studentId,
+        availableFrom: args.availableFrom,
+        availableUntil: args.availableUntil,
+        sourceAttemptId: args.sourceAttemptId,
+    });
+
     let latestEvent = null;
 
     if (args.sourceAttemptId) {

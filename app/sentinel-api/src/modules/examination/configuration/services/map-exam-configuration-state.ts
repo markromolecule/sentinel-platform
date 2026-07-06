@@ -27,6 +27,7 @@ export function mapExamConfigurationState(
     const aiRules = (record?.ai_rules as any) || defaultConfiguration.aiRules;
     const webSecurity = (record as any)?.web_security || defaultConfiguration.webSecurity;
     const mobileSecurity = (record as any)?.mobile_security || defaultConfiguration.mobileSecurity;
+    const automaticClosePolicy = aiRules.automaticClosePolicy || defaultConfiguration.automaticClosePolicy;
 
     // Handle migration of old tab_switching from aiRules to webSecurity if it exists there and not in webSecurity
     if (
@@ -66,6 +67,7 @@ export function mapExamConfigurationState(
             },
             webSecurity,
             mobileSecurity,
+            automaticClosePolicy,
         }),
     };
 }

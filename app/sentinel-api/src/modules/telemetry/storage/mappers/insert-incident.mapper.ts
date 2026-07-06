@@ -34,6 +34,9 @@ export function mapTelemetryEventToIncident(eventType: PersistableProctoringEven
  * Builds a deterministic stream key for same-rule event deduplication.
  */
 export function buildTelemetryDedupeKey(payload: PersistableProctoringEvent): string {
+    if (payload.metadata?.dedupeKey) {
+        return payload.metadata.dedupeKey;
+    }
     return [
         payload.examSessionId,
         payload.studentId,

@@ -15,7 +15,13 @@ export async function createAudioGraph(
 ): Promise<AudioGraphComponents> {
     const stream = providedStream ?? (await navigator.mediaDevices.getUserMedia({ audio: true }));
     const audioContext = new AudioContext();
+    if (audioContext.state === 'suspended') {
+        await audioContext.resume().catch((err) => {
+            console.error('Failed to resume AudioContext:', err);
+        });
+    }
     const source = audioContext.createMediaStreamSource(stream);
+    // eslint-disable-next-line new-cap
     const processor = audioContext.createScriptProcessor(BUFFER_SIZE, CHANNELS, CHANNELS);
 
     processor.onaudioprocess = (audioEvent) => {

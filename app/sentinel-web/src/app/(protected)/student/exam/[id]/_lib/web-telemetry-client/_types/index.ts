@@ -18,6 +18,9 @@ export type BuildWebTelemetryPayloadArgs = {
     timestamp?: string;
     metadata?: TelemetryMetadata;
     sessionContext?: TelemetrySessionContext;
+    eventId?: string;
+    dedupeKey?: string;
+    clientActionAt?: string;
 };
 
 export type EmitWebTelemetryEventArgs = BuildWebTelemetryPayloadArgs & {

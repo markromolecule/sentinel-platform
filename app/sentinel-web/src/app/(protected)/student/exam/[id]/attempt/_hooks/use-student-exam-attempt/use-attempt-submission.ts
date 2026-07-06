@@ -3,6 +3,7 @@ import { scoreExamAttempt } from '@sentinel/shared';
 import type { ExamAttemptAnswers, ExamConfiguration, ExamQuestion } from '@sentinel/shared/types';
 import type { ExamAnswerValue } from '@/features/exams/_components/engine';
 import { writeStoredExamTurnInPreview } from '@/app/(protected)/student/exam/[id]/_lib/exam-turn-in-storage';
+import type { AttemptMonitoringPhase } from '@/app/(protected)/student/exam/[id]/_hooks/use-exam-monitoring';
 
 export type UseAttemptSubmissionArgs = {
     examId: string;
@@ -17,8 +18,16 @@ export type UseAttemptSubmissionArgs = {
     setIsSubmitDialogOpen: (val: boolean) => void;
     suspendSecurityMonitoring: () => void;
     isBlocked?: boolean;
+    setMonitoringPhase?: (phase: AttemptMonitoringPhase) => void;
 };
 
+/**
+ * Hook to manage the submission process of a student's exam attempt.
+ * Validates unanswered questions, transitions to the turn-in review state, and performs final cleanup before redirection.
+ * 
+ * @param args - Object containing exam, answer, and UI control arguments.
+ * @returns Submit handler and turn-in redirection function.
+ */
 export function useAttemptSubmission({
     examId,
     sessionId,
@@ -32,11 +41,13 @@ export function useAttemptSubmission({
     setIsSubmitDialogOpen,
     suspendSecurityMonitoring,
     isBlocked,
+    setMonitoringPhase,
 }: UseAttemptSubmissionArgs) {
     const router = useRouter();
 
     const proceedToTurnInReview = () => {
         if (isRedirectingToTurnIn || !sessionId || isBlocked) return;
+        setMonitoringPhase?.('submitting');
         setIsRedirectingToTurnIn(true);
         suspendSecurityMonitoring();
 
