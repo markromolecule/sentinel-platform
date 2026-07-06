@@ -417,5 +417,35 @@ describe('registerLifecycleRoutes', () => {
             const body = await response.json();
             expect(body.data.remediationExam.exam_id).toBe('cloned-exam-id');
         });
+
+        it('returns 409 conflict when grantMakeupExamWindow throws 409', async () => {
+            vi.mocked(getReportingExamContext).mockResolvedValue({
+                classGroupId: 'class-1',
+                subjectId: 'sub-1',
+                sectionId: 'sec-1',
+                assignedSectionIds: ['sec-1'],
+            } as any);
+            vi.mocked(EntitlementsRepository.hasStudentExamEnrollment).mockResolvedValue(true);
+            vi.mocked(grantMakeupExamWindow).mockRejectedValue(
+                new HTTPException(409, { message: 'Student already has an active, non-superseded attempt for this exam.' })
+            );
+
+            const app = createApp(['examinations:update'], 'admin');
+            const response = await app.request(
+                '/11111111-1111-4111-8111-111111111111/students/33333333-3333-4333-8333-333333333333/lifecycle/grant-makeup',
+                {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        availableFrom: '2026-07-04T08:00:00.000Z',
+                        availableUntil: '2026-07-04T10:00:00.000Z',
+                    }),
+                },
+            );
+
+            expect(response.status).toBe(409);
+        });
     });
 });

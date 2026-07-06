@@ -27,13 +27,30 @@ export const reviseFinalizedAttemptScoreBodySchema = z.object({
     notes: z.string().trim().max(2000).nullable().optional(),
 });
 
-export const grantMakeupExamWindowBodySchema = z.object({
-    availableFrom: z.union([z.string(), z.date()]),
-    availableUntil: z.union([z.string(), z.date()]),
-    allowedAttempts: z.number().int().min(1).default(1),
-    sourceAttemptId: z.string().uuid().nullable().optional(),
-    notes: z.string().trim().max(1000).nullable().optional(),
-});
+export const grantMakeupExamWindowBodySchema = z
+    .object({
+        availableFrom: z.union([z.string(), z.date()]),
+        availableUntil: z.union([z.string(), z.date()]),
+        allowedAttempts: z.number().int().min(1).default(1),
+        sourceAttemptId: z.string().uuid().nullable().optional(),
+        notes: z.string().trim().max(1000).nullable().optional(),
+    })
+    .superRefine((value, context) => {
+        const availableFrom = new Date(value.availableFrom);
+        const availableUntil = new Date(value.availableUntil);
+
+        if (
+            !Number.isNaN(availableFrom.getTime()) &&
+            !Number.isNaN(availableUntil.getTime()) &&
+            availableUntil.getTime() <= availableFrom.getTime()
+        ) {
+            context.addIssue({
+                code: z.ZodIssueCode.custom,
+                path: ['availableUntil'],
+                message: 'The availability end time must be after the start time.',
+            });
+        }
+    });
 
 export const grantRetakeExamWindowBodySchema = z
     .object({

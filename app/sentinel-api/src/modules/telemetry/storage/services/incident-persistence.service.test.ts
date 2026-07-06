@@ -564,4 +564,141 @@ describe('IncidentPersistenceService', () => {
             );
         },
     );
+
+    testWithDbClient(
+        'proves duplicate dedupeKey leaves occurrenceCount = 1 and a later distinct dedupeKey increments it',
+        async ({ dbClient }) => {
+            const fixture = await createTelemetryAttemptFixture(dbClient);
+            const dedupeKey = 'test-dedupe-key-123';
+
+            // First emission with dedupeKey
+            await IncidentPersistenceService.appendEvent(
+                dbClient,
+                buildPayload({
+                    ...fixture,
+                    ruleKey: 'webSecurity.right_click_disable',
+                    eventType: 'RIGHT_CLICK_ATTEMPT',
+                    metadata: {
+                        dedupeKey,
+                    },
+                }),
+            );
+
+            // Duplicate emission with same dedupeKey (should no-op)
+            await IncidentPersistenceService.appendEvent(
+                dbClient,
+                buildPayload({
+                    ...fixture,
+                    ruleKey: 'webSecurity.right_click_disable',
+                    eventType: 'RIGHT_CLICK_ATTEMPT',
+                    metadata: {
+                        dedupeKey,
+                    },
+                }),
+            );
+
+            const incidents = await dbClient
+                .selectFrom('flagged_incidents')
+                .selectAll()
+                .where('attempt_id', '=', fixture.attemptId)
+                .execute();
+
+            expect(incidents).toHaveLength(1);
+            expect(parseIncidentDetails(incidents[0].details).occurrenceCount).toBe(1);
+
+            // Distinct emission with different dedupeKey (should increment)
+            await IncidentPersistenceService.appendEvent(
+                dbClient,
+                buildPayload({
+                    ...fixture,
+                    ruleKey: 'webSecurity.right_click_disable',
+                    eventType: 'RIGHT_CLICK_ATTEMPT',
+                    metadata: {
+                        dedupeKey: 'different-dedupe-key-456',
+                    },
+                }),
+            );
+
+            const updatedIncidents = await dbClient
+                .selectFrom('flagged_incidents')
+                .selectAll()
+                .where('attempt_id', '=', fixture.attemptId)
+                .execute();
+
+            expect(updatedIncidents).toHaveLength(1);
+            expect(parseIncidentDetails(updatedIncidents[0].details).occurrenceCount).toBe(2);
+        },
+    );
+
+    testWithDbClient(
+        'automatically closes the attempt using the custom configured threshold',
+        async ({ dbClient }) => {
+            const fixture = await createTelemetryAttemptFixture(dbClient);
+
+            const attemptRecord = await dbClient
+                .selectFrom('exam_attempts')
+                .select(['exam_id'])
+                .where('attempt_id', '=', fixture.attemptId)
+                .executeTakeFirstOrThrow();
+
+            await dbClient
+                .insertInto('exam_configurations')
+                .values({
+                    exam_id: attemptRecord.exam_id,
+                    ai_rules: {
+                        automaticClosePolicy: {
+                            enabled: true,
+                            highIncidentThreshold: 2,
+                            windowMinutes: 10,
+                        },
+                    },
+                })
+                .execute();
+
+            await IncidentPersistenceService.appendEvent(
+                dbClient,
+                buildPayload({
+                    ...fixture,
+                    ruleKey: 'webSecurity.right_click_disable',
+                    runtimeSettingsSnapshot: {
+                        version: DEFAULT_TELEMETRY_SETTINGS.version,
+                        operations: { ...DEFAULT_TELEMETRY_SETTINGS.operations },
+                        ruleOverrideApplied: {
+                            severity: 'HIGH',
+                        },
+                    } as any,
+                }),
+            );
+
+            let attempt = await dbClient
+                .selectFrom('exam_attempts')
+                .select(['lifecycle_state'])
+                .where('attempt_id', '=', fixture.attemptId)
+                .executeTakeFirstOrThrow();
+            expect(attempt.lifecycle_state).toBe('IN_PROGRESS');
+
+            await IncidentPersistenceService.appendEvent(
+                dbClient,
+                buildPayload({
+                    ...fixture,
+                    ruleKey: 'webSecurity.clipboard_control',
+                    runtimeSettingsSnapshot: {
+                        version: DEFAULT_TELEMETRY_SETTINGS.version,
+                        operations: { ...DEFAULT_TELEMETRY_SETTINGS.operations },
+                        ruleOverrideApplied: {
+                            severity: 'HIGH',
+                        },
+                    } as any,
+                }),
+            );
+
+            attempt = await dbClient
+                .selectFrom('exam_attempts')
+                .select(['lifecycle_state', 'closed_reason'])
+                .where('attempt_id', '=', fixture.attemptId)
+                .executeTakeFirstOrThrow();
+            expect(attempt.lifecycle_state).toBe('CLOSED');
+            expect(attempt.closed_reason).toBe('AUTO_HIGH_INCIDENT_THRESHOLD');
+        },
+    );
 });

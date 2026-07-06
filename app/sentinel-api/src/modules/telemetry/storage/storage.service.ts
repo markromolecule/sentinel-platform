@@ -19,7 +19,7 @@ export class TelemetryStorageService {
      * Appends a single proctoring event into the incident log.
      */
     static async appendEvent(db: DbClient, payload: PersistableProctoringEvent): Promise<void> {
-        return IncidentPersistenceService.appendEvent(db, payload);
+        await IncidentPersistenceService.appendEvent(db, payload);
     }
 
     /**

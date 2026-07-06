@@ -88,4 +88,31 @@ describe('Examination configuration guards', () => {
             buildDefaultExamConfiguration().lobbyAdmissionMode,
         );
     });
+
+    it('maps automaticClosePolicy from aiRules and fallback to defaults', () => {
+        const defaultConfig = buildDefaultExamConfiguration();
+        const mappedDefault = mapExamConfigurationState(null);
+        expect(mappedDefault.configuration.automaticClosePolicy).toEqual(defaultConfig.automaticClosePolicy);
+
+        const mockRecord = {
+            ai_rules: {
+                automaticClosePolicy: {
+                    enabled: true,
+                    highIncidentThreshold: 5,
+                    windowMinutes: 10,
+                    useOccurrenceCount: true,
+                    immediateCloseEventTypes: ['tab_exit'],
+                },
+            },
+        } as any;
+
+        const mappedCustom = mapExamConfigurationState(mockRecord);
+        expect(mappedCustom.configuration.automaticClosePolicy).toEqual({
+            enabled: true,
+            highIncidentThreshold: 5,
+            windowMinutes: 10,
+            useOccurrenceCount: true,
+            immediateCloseEventTypes: ['tab_exit'],
+        });
+    });
 });

@@ -1639,6 +1639,7 @@ model flagged_incidents {
   dedupe_key             String?            @db.VarChar(255)
   exam_attempts          exam_attempts?     @relation(fields: [attempt_id], references: [attempt_id], onDelete: Cascade, onUpdate: NoAction)
 
+  @@unique([attempt_id, rule_key, platform, dedupe_key], map: "flagged_incidents_dedupe_key_unique", where: raw("(dedupe_key IS NOT NULL)"))
   @@schema("public")
 }
 

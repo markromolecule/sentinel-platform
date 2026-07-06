@@ -53,7 +53,7 @@ describe('useAudioAnomalyWorker', () => {
         mockTrackStop = vi.fn();
 
         mockStream = {
-            getTracks: () => [{ stop: mockTrackStop }],
+            getTracks: () => [{ stop: mockTrackStop, readyState: 'live' }],
         };
 
         mockAudioContext = {
@@ -324,5 +324,64 @@ describe('useAudioAnomalyWorker', () => {
         unmount();
 
         expect(mockTrackStop).toHaveBeenCalledTimes(1);
+    });
+
+    it('resumes AudioContext if it starts in a suspended state', async () => {
+        const mockResume = vi.fn().mockResolvedValue(undefined);
+        const localMockAudioContext = {
+            state: 'suspended',
+            resume: mockResume,
+            close: vi.fn().mockResolvedValue(undefined),
+            createMediaStreamSource: vi.fn().mockReturnValue({
+                connect: vi.fn(),
+                disconnect: vi.fn(),
+            }),
+            createScriptProcessor: vi.fn().mockReturnValue({
+                connect: vi.fn(),
+                disconnect: vi.fn(),
+                onaudioprocess: null,
+            }),
+            destination: {},
+        };
+
+        global.AudioContext = vi.fn().mockImplementation(function (this: any) {
+            return localMockAudioContext;
+        }) as any;
+
+        renderHook(() =>
+            useAudioAnomalyWorker({
+                configuration: validConfig,
+                examSessionId: 'session-123',
+                isSuspended: false,
+                worker: mockWorker as any,
+            }),
+        );
+
+        await waitFor(() => {
+            expect(mockResume).toHaveBeenCalled();
+        });
+    });
+
+    it('reports a recoverable error when no live tracks are available in the provided stream', async () => {
+        const mockDeadTrack = { stop: vi.fn(), readyState: 'ended' };
+        const mockDeadStream = {
+            getTracks: () => [mockDeadTrack],
+            getAudioTracks: () => [mockDeadTrack],
+        };
+
+        const { result } = renderHook(() =>
+            useAudioAnomalyWorker({
+                configuration: validConfig,
+                examSessionId: 'session-123',
+                isSuspended: false,
+                audioStream: mockDeadStream as any,
+                worker: mockWorker as any,
+            }),
+        );
+
+        await waitFor(() => {
+            expect(result.current.phase).toBe('error');
+            expect(result.current.errorMessage).toBe('No live audio tracks available.');
+        });
     });
 });

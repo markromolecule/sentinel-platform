@@ -74,7 +74,19 @@ export class AudioAnomalyController {
                 return;
             }
 
-            // 4. Create Web Audio components
+            // 4. Check if provided stream has live tracks
+            if (this.config.audioStream) {
+                const tracks = this.config.audioStream.getAudioTracks
+                    ? this.config.audioStream.getAudioTracks()
+                    : this.config.audioStream.getTracks();
+                if (!tracks.some((track) => track.readyState === 'live')) {
+                    this.config.onPhaseChange('error');
+                    this.config.onErrorMessage('No live audio tracks available.');
+                    return;
+                }
+            }
+
+            // 4b. Create Web Audio components
             const graph = await createAudioGraph(this.config.audioStream, this.worker, (samples) => {
                 if (this.isDisposed || !this.worker) return;
                 this.worker.postMessage(

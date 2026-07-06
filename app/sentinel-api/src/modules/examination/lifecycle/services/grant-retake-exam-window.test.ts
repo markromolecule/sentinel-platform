@@ -4,6 +4,7 @@ import { grantRetakeExamWindow } from './grant-retake-exam-window';
 import { getLifecycleAttemptContext } from '../data/get-lifecycle-attempt-context';
 import { appendExamAttemptLifecycleEvent } from './lifecycle-event.service';
 import { createRemediationExam } from './create-remediation-exam';
+import { assertRemediationWindowEligibility } from './remediation-window-eligibility.service';
 
 vi.mock('../data/get-lifecycle-attempt-context', () => ({
     getLifecycleAttemptContext: vi.fn(),
@@ -15,6 +16,10 @@ vi.mock('./lifecycle-event.service', () => ({
 
 vi.mock('./create-remediation-exam', () => ({
     createRemediationExam: vi.fn(),
+}));
+
+vi.mock('./remediation-window-eligibility.service', () => ({
+    assertRemediationWindowEligibility: vi.fn(),
 }));
 
 describe('grantRetakeExamWindow', () => {
@@ -39,6 +44,16 @@ describe('grantRetakeExamWindow', () => {
                 availableUntil: '2026-07-04T10:00:00.000Z',
             }),
         ).rejects.toThrow('The selected source attempt does not belong to this student and exam.');
+
+        expect(assertRemediationWindowEligibility).toHaveBeenCalledWith({
+            dbClient: expect.anything(),
+            remediationType: 'RETAKE',
+            examId: 'exam-1',
+            studentId: 'student-1',
+            availableFrom: '2026-07-04T08:00:00.000Z',
+            availableUntil: '2026-07-04T10:00:00.000Z',
+            sourceAttemptId: 'attempt-1',
+        });
     });
 
     it('creates a retake remediation exam and links the lifecycle event to the source attempt', async () => {
@@ -132,6 +147,15 @@ describe('grantRetakeExamWindow', () => {
             latestEvent: {
                 eventId: 'event-2',
             },
+        });
+        expect(assertRemediationWindowEligibility).toHaveBeenCalledWith({
+            dbClient: expect.anything(),
+            remediationType: 'RETAKE',
+            examId: 'exam-1',
+            studentId: 'student-1',
+            availableFrom: '2026-07-04T08:00:00.000Z',
+            availableUntil: '2026-07-04T10:00:00.000Z',
+            sourceAttemptId: 'attempt-1',
         });
     });
 });

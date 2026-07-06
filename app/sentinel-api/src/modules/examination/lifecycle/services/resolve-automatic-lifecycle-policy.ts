@@ -18,17 +18,28 @@ export type AutomaticLifecycleResolution =
 
 /**
  * Resolves whether a persisted incident update should trigger an automatic
- * attempt close. Future work can move the threshold and window into
- * exam-specific configuration instead of relying on a system constant.
+ * attempt close. Reads the exam-specific automatic close configuration, applying
+ * the configured highIncidentThreshold, windowMinutes, useOccurrenceCount,
+ * and immediateCloseEventTypes.
+ * 
+ * @param args - Arguments including the DB client, target attempt ID, and optional triggering event type.
+ * @returns Decision on whether to close the attempt and associated metadata.
  */
 export async function resolveAutomaticLifecyclePolicy(args: {
     dbClient: DbClient;
     attemptId: string;
+    triggeringEventType?: string;
 }): Promise<AutomaticLifecycleResolution> {
     const attempt = await args.dbClient
         .selectFrom('exam_attempts')
-        .select(['attempt_id', 'exam_id', 'lifecycle_state'])
-        .where('attempt_id', '=', args.attemptId)
+        .leftJoin('exam_configurations', 'exam_configurations.exam_id', 'exam_attempts.exam_id')
+        .select([
+            'exam_attempts.attempt_id',
+            'exam_attempts.exam_id',
+            'exam_attempts.lifecycle_state',
+            'exam_configurations.ai_rules',
+        ])
+        .where('exam_attempts.attempt_id', '=', args.attemptId)
         .executeTakeFirst();
 
     if (
@@ -43,21 +54,65 @@ export async function resolveAutomaticLifecyclePolicy(args: {
         };
     }
 
+    // Parse policy from ai_rules JSON
+    const aiRules = attempt.ai_rules ? (attempt.ai_rules as any) : null;
+    const policy = aiRules?.automaticClosePolicy || {};
+
+    const policyEnabled = policy.enabled !== false; // defaults to true
+    if (!policyEnabled) {
+        return {
+            action: 'NONE',
+            attemptId: args.attemptId,
+            matchingIncidentIds: [],
+        };
+    }
+
+    const highIncidentThreshold = policy.highIncidentThreshold ?? AUTOMATIC_ATTEMPT_CLOSE_POLICY.thresholdCount;
+    const windowMinutes = policy.windowMinutes ?? AUTOMATIC_ATTEMPT_CLOSE_POLICY.windowMinutes;
+    const useOccurrenceCount = policy.useOccurrenceCount === true;
+    const immediateCloseEventTypes = policy.immediateCloseEventTypes || [];
+
+    // Check if the triggering event causes an immediate close
+    if (args.triggeringEventType && immediateCloseEventTypes.includes(args.triggeringEventType)) {
+        return {
+            action: 'CLOSE_ATTEMPT',
+            attemptId: args.attemptId,
+            examId: attempt.exam_id,
+            reasonCode: 'AUTO_IMMEDIATE_CLOSE_EVENT',
+            notes: `Automatically closed immediately due to event type "${args.triggeringEventType}".`,
+            matchingIncidentIds: [],
+        };
+    }
+
     const threshold = new Date(
-        Date.now() - AUTOMATIC_ATTEMPT_CLOSE_POLICY.windowMinutes * 60 * 1000,
+        Date.now() - windowMinutes * 60 * 1000,
     );
     const highIncidents = await args.dbClient
         .selectFrom('flagged_incidents')
-        .select(['incident_id'])
+        .select(['incident_id', 'details'])
         .where('attempt_id', '=', args.attemptId)
         .where('severity', '=', 'HIGH')
         .where('timestamp', '>=', threshold)
         .orderBy('timestamp', 'asc')
         .execute();
 
-    const matchingIncidentIds = highIncidents.map((incident) => incident.incident_id);
+    let totalOccurrences = 0;
+    const matchingIncidentIds: string[] = [];
 
-    if (matchingIncidentIds.length < AUTOMATIC_ATTEMPT_CLOSE_POLICY.thresholdCount) {
+    for (const incident of highIncidents) {
+        matchingIncidentIds.push(incident.incident_id);
+        if (useOccurrenceCount) {
+            const details = incident.details as any;
+            const count = typeof details?.occurrenceCount === 'number'
+                ? details.occurrenceCount
+                : 1;
+            totalOccurrences += count;
+        } else {
+            totalOccurrences += 1;
+        }
+    }
+
+    if (totalOccurrences < highIncidentThreshold) {
         return {
             action: 'NONE',
             attemptId: args.attemptId,
@@ -70,7 +125,9 @@ export async function resolveAutomaticLifecyclePolicy(args: {
         attemptId: args.attemptId,
         examId: attempt.exam_id,
         reasonCode: AUTOMATIC_ATTEMPT_CLOSE_POLICY.reasonCode,
-        notes: `Automatically closed after ${AUTOMATIC_ATTEMPT_CLOSE_POLICY.thresholdCount} HIGH incidents within ${AUTOMATIC_ATTEMPT_CLOSE_POLICY.windowMinutes} minutes.`,
+        notes: useOccurrenceCount
+            ? `Automatically closed after ${totalOccurrences} occurrences of HIGH incidents within ${windowMinutes} minutes.`
+            : `Automatically closed after ${matchingIncidentIds.length} HIGH incidents within ${windowMinutes} minutes.`,
         matchingIncidentIds,
     };
 }

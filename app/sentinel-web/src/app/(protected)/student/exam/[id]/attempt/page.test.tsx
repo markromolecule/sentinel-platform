@@ -447,4 +447,38 @@ describe('StudentExamAttemptPage', () => {
 
         expect(resumeSecuredExam).toHaveBeenCalled();
     });
+
+    it('sets monitoringPhase correctly when redirecting to result/turn in', () => {
+        render(<StudentExamAttemptPage />);
+
+        // Initially monitoringPhase is active
+        expect(mockExamMonitoring).toHaveBeenCalledWith(
+            expect.objectContaining({
+                monitoringPhase: 'active',
+            }),
+        );
+
+        // Turn in the exam
+        fireEvent.click(screen.getByRole('button', { name: /answer 4/i }));
+        fireEvent.click(screen.getByRole('button', { name: /turn in exam/i }));
+
+        // It should call useExamMonitoring with phase 'submitting'
+        expect(mockExamMonitoring).toHaveBeenLastCalledWith(
+            expect.objectContaining({
+                monitoringPhase: 'submitting',
+            }),
+        );
+    });
+
+    it('shows a recoverable audio warning when stream recovery fails', () => {
+        mockUseAudioAnomalyWorker.mockReturnValue({
+            errorMessage: 'No live audio tracks available.',
+            isEnabled: true,
+            phase: 'error',
+        });
+
+        render(<StudentExamAttemptPage />);
+
+        expect(screen.getByText(/no live audio tracks available/i)).toBeTruthy();
+    });
 });

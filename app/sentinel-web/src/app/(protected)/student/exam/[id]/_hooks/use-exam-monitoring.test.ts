@@ -29,6 +29,11 @@ vi.mock('sonner', () => ({
 
 vi.mock('../_lib/web-telemetry-client', () => ({
     emitWebTelemetryEvent: vi.fn().mockResolvedValue(true),
+    createTelemetryActionMetadata: (eventType: string) => ({
+        eventId: crypto.randomUUID(),
+        dedupeKey: `${eventType}:${crypto.randomUUID()}`,
+        clientActionAt: new Date().toISOString(),
+    }),
 }));
 
 function createExamConfiguration(overrides: Partial<ExamConfig['webSecurity']> = {}): ExamConfig {
@@ -710,6 +715,171 @@ describe('use-exam-monitoring', () => {
             expect(result.current.securityLockReason).toBeNull();
         });
 
+        expect(emitWebTelemetryEvent).not.toHaveBeenCalled();
+    });
+
+    it('sends metadata eventId, dedupeKey, and clientActionAt when event is emitted', async () => {
+        renderHook(() =>
+            useExamMonitoring({
+                configuration: createExamConfiguration(),
+                examSessionId: '123e4567-e89b-12d3-a456-426614174000',
+                examId: '123e4567-e89b-12d3-a456-426614174999',
+            }),
+        );
+
+        act(() => {
+            document.dispatchEvent(new MouseEvent('contextmenu', { bubbles: true, cancelable: true }));
+        });
+
+        await waitFor(() => {
+            expect(emitWebTelemetryEvent).toHaveBeenCalledWith(
+                mockApiClient,
+                expect.objectContaining({
+                    eventType: 'RIGHT_CLICK_ATTEMPT',
+                    eventId: expect.any(String),
+                    dedupeKey: expect.any(String),
+                    clientActionAt: expect.any(String),
+                }),
+            );
+        });
+    });
+
+    it('applies client burst guards on repeated contextmenu', async () => {
+        renderHook(() =>
+            useExamMonitoring({
+                configuration: createExamConfiguration(),
+                examSessionId: '123e4567-e89b-12d3-a456-426614174000',
+                examId: '123e4567-e89b-12d3-a456-426614174999',
+            }),
+        );
+
+        act(() => {
+            document.dispatchEvent(new MouseEvent('contextmenu', { bubbles: true, cancelable: true }));
+            document.dispatchEvent(new MouseEvent('contextmenu', { bubbles: true, cancelable: true }));
+        });
+
+        await waitFor(() => {
+            expect(emitWebTelemetryEvent).toHaveBeenCalledTimes(1);
+        });
+    });
+
+    it('applies client burst guards on repeated fullscreenchange', async () => {
+        renderHook(() =>
+            useExamMonitoring({
+                configuration: createExamConfiguration({ full_screen_required: true }),
+                examSessionId: '123e4567-e89b-12d3-a456-426614174000',
+                examId: '123e4567-e89b-12d3-a456-426614174999',
+            }),
+        );
+
+        act(() => {
+            document.dispatchEvent(new Event('fullscreenchange'));
+            document.dispatchEvent(new Event('fullscreenchange'));
+        });
+
+        await waitFor(() => {
+            expect(emitWebTelemetryEvent).toHaveBeenCalledTimes(1);
+        });
+    });
+
+    it('handles clipboard keydown and copy/paste event burst guards', async () => {
+        renderHook(() =>
+            useExamMonitoring({
+                configuration: createExamConfiguration(),
+                examSessionId: '123e4567-e89b-12d3-a456-426614174000',
+                examId: '123e4567-e89b-12d3-a456-426614174999',
+            }),
+        );
+
+        act(() => {
+            document.dispatchEvent(new KeyboardEvent('keydown', { key: 'c', ctrlKey: true, bubbles: true }));
+            document.dispatchEvent(new Event('copy', { bubbles: true }));
+        });
+
+        await waitFor(() => {
+            expect(emitWebTelemetryEvent).toHaveBeenCalledTimes(1);
+        });
+    });
+
+    it('handles visibilitychange and blur event burst guards', async () => {
+        renderHook(() =>
+            useExamMonitoring({
+                configuration: createExamConfiguration(),
+                examSessionId: '123e4567-e89b-12d3-a456-426614174000',
+                examId: '123e4567-e89b-12d3-a456-426614174999',
+            }),
+        );
+
+        act(() => {
+            Object.defineProperty(document, 'hidden', { value: true, configurable: true });
+            document.dispatchEvent(new Event('visibilitychange'));
+            window.dispatchEvent(new Event('blur'));
+        });
+
+        await waitFor(() => {
+            expect(emitWebTelemetryEvent).toHaveBeenCalledTimes(1);
+        });
+
+        Object.defineProperty(document, 'hidden', { value: false, configurable: true });
+    });
+
+    it('does not emit fullscreen exit telemetry when phase is submitting', async () => {
+        const { result } = renderHook(() =>
+            useExamMonitoring({
+                configuration: createExamConfiguration({ full_screen_required: true }),
+                examSessionId: '123e4567-e89b-12d3-a456-426614174000',
+                examId: '123e4567-e89b-12d3-a456-426614174999',
+                monitoringPhase: 'submitting',
+            }),
+        );
+
+        act(() => {
+            document.dispatchEvent(new Event('fullscreenchange'));
+        });
+
+        await new Promise((resolve) => setTimeout(resolve, 100));
+
+        expect(result.current.securityLockReason).toBeNull();
+        expect(emitWebTelemetryEvent).not.toHaveBeenCalled();
+    });
+
+    it('does not emit fullscreen exit telemetry when phase is navigating-to-turn-in', async () => {
+        const { result } = renderHook(() =>
+            useExamMonitoring({
+                configuration: createExamConfiguration({ full_screen_required: true }),
+                examSessionId: '123e4567-e89b-12d3-a456-426614174000',
+                examId: '123e4567-e89b-12d3-a456-426614174999',
+                monitoringPhase: 'navigating-to-turn-in',
+            }),
+        );
+
+        act(() => {
+            document.dispatchEvent(new Event('fullscreenchange'));
+        });
+
+        await new Promise((resolve) => setTimeout(resolve, 100));
+
+        expect(result.current.securityLockReason).toBeNull();
+        expect(emitWebTelemetryEvent).not.toHaveBeenCalled();
+    });
+
+    it('does not emit fullscreen exit telemetry when phase is suspended', async () => {
+        const { result } = renderHook(() =>
+            useExamMonitoring({
+                configuration: createExamConfiguration({ full_screen_required: true }),
+                examSessionId: '123e4567-e89b-12d3-a456-426614174000',
+                examId: '123e4567-e89b-12d3-a456-426614174999',
+                monitoringPhase: 'suspended',
+            }),
+        );
+
+        act(() => {
+            document.dispatchEvent(new Event('fullscreenchange'));
+        });
+
+        await new Promise((resolve) => setTimeout(resolve, 100));
+
+        expect(result.current.securityLockReason).toBeNull();
         expect(emitWebTelemetryEvent).not.toHaveBeenCalled();
     });
 });

@@ -136,6 +136,14 @@ export type ExamSettings = {
     randomizeChoices: boolean;
 };
 
+export type AutomaticClosePolicy = {
+    enabled: boolean;
+    highIncidentThreshold: number;
+    windowMinutes: number;
+    useOccurrenceCount: boolean;
+    immediateCloseEventTypes: string[];
+};
+
 export type ExamConfiguration = {
     lobbyAdmissionMode: 'AUTOMATIC' | 'INSTRUCTOR_GATED';
     releaseScoreMode?: 'AUTO_RELEASE' | 'MANUAL_RELEASE';
@@ -165,6 +173,7 @@ export type ExamConfiguration = {
         screenshot_block: boolean;
         root_jailbreak_detection: boolean;
     };
+    automaticClosePolicy?: AutomaticClosePolicy;
 };
 
 export type MatchingPair = {

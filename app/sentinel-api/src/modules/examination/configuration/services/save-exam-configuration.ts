@@ -75,7 +75,16 @@ export async function saveExamConfiguration(args: {
             payload.configuration?.mobileSecurity ??
             (currentRecord as any)?.mobile_security ??
             defaultConfiguration.mobileSecurity,
+        automaticClosePolicy:
+            payload.configuration?.automaticClosePolicy ??
+            currentState.configuration.automaticClosePolicy ??
+            defaultConfiguration.automaticClosePolicy,
     });
+
+    const aiRulesForDb = {
+        ...configuration.aiRules,
+        automaticClosePolicy: configuration.automaticClosePolicy,
+    };
 
     const result = await upsertExamConfigurationData({
         dbClient,
@@ -94,7 +103,7 @@ export async function saveExamConfiguration(args: {
             camera_required: configuration.cameraRequired,
             mic_required: configuration.micRequired,
             auto_submit_timeout_minutes: configuration.autoSubmitTimeoutMinutes,
-            ai_rules: configuration.aiRules,
+            ai_rules: aiRulesForDb,
             web_security: configuration.webSecurity,
             mobile_security: configuration.mobileSecurity,
             created_at: new Date(),
@@ -113,7 +122,7 @@ export async function saveExamConfiguration(args: {
             camera_required: configuration.cameraRequired,
             mic_required: configuration.micRequired,
             auto_submit_timeout_minutes: configuration.autoSubmitTimeoutMinutes,
-            ai_rules: configuration.aiRules,
+            ai_rules: aiRulesForDb,
             web_security: configuration.webSecurity,
             mobile_security: configuration.mobileSecurity,
             updated_at: new Date(),

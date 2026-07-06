@@ -2,17 +2,28 @@ import { useEffect, useCallback, useRef } from 'react';
 import { toast } from 'sonner';
 import type { ExamConfig } from '@sentinel/shared/types';
 import { type SecurityLockReason } from '../../_lib/exam-session-storage';
-import type { WebTelemetryEventType } from '../../_lib/web-telemetry-client';
+import { type WebTelemetryEventType, createTelemetryActionMetadata } from '../../_lib/web-telemetry-client';
+import { type AttemptMonitoringPhase } from './_types';
 
+/**
+ * Hook that sets up document-level and window-level interaction event listeners.
+ * Tracks copy/paste/cut, contextmenu (right-click), printscreen shortcuts, focus loss (window blur, visibilitychange), and fullscreen changes.
+ * 
+ * @param args - Callback functions and flags for enabling/disabling security locks/telemetry.
+ */
 export function useInteractionListeners(args: {
     configuration?: ExamConfig;
     isMonitoringSuspended: React.MutableRefObject<boolean>;
     isMobile: boolean;
     shouldMonitorVisibility: boolean;
     shouldMonitorFullscreen: boolean;
-    emitTelemetryEvent: (eventType: WebTelemetryEventType) => void;
+    emitTelemetryEvent: (
+        eventType: WebTelemetryEventType,
+        metadata?: { eventId?: string; dedupeKey?: string; clientActionAt?: string },
+    ) => void;
     lockExam: (reason: SecurityLockReason) => void;
     setTabSwitches: (fn: (c: number) => number) => void;
+    monitoringPhase?: React.MutableRefObject<AttemptMonitoringPhase>;
 }) {
     const {
         configuration,
@@ -23,6 +34,7 @@ export function useInteractionListeners(args: {
         emitTelemetryEvent,
         lockExam,
         setTabSwitches,
+        monitoringPhase,
     } = args;
 
     const lastFocusIncidentAtRef = useRef(0);
@@ -38,7 +50,8 @@ export function useInteractionListeners(args: {
         if (now - lastClipboardIncidentAtRef.current < 800) return;
 
         lastClipboardIncidentAtRef.current = now;
-        emitTelemetryEvent('CLIPBOARD_ATTEMPT');
+        const metadata = createTelemetryActionMetadata('CLIPBOARD_ATTEMPT');
+        emitTelemetryEvent('CLIPBOARD_ATTEMPT', metadata);
         toast.warning('Clipboard actions are disabled for this exam.');
     }, [emitTelemetryEvent, isMonitoringSuspended]);
 
@@ -56,7 +69,8 @@ export function useInteractionListeners(args: {
             return;
         }
 
-        emitTelemetryEvent('TAB_SWITCH');
+        const metadata = createTelemetryActionMetadata('TAB_SWITCH');
+        emitTelemetryEvent('TAB_SWITCH', metadata);
         lockExam('focus-loss');
         toast.warning('Navigation away from the exam was detected.', {
             description: shortcutNavigationDetected
@@ -66,6 +80,8 @@ export function useInteractionListeners(args: {
     }, [emitTelemetryEvent, isMobile, lockExam, isMonitoringSuspended, setTabSwitches]);
 
     const handleVisibilityChange = useCallback(() => {
+        // Policy: Minimize and window-hidden actions are classified under focus/visibility incidents
+        // and must not be silently reclassified as or remapped to fullscreen exits.
         if (!isMonitoringSuspended.current && shouldMonitorVisibility && document.hidden) {
             registerFocusIncident();
         }
@@ -74,6 +90,7 @@ export function useInteractionListeners(args: {
     const handleWindowBlur = useCallback(() => {
         if (!shouldMonitorVisibility) return;
         setTimeout(() => {
+            // Policy: Window blur/loss of focus is tracked separately from fullscreen state.
             if (!isMonitoringSuspended.current && !document.hasFocus() && !document.hidden) {
                 registerFocusIncident();
             }
@@ -81,10 +98,14 @@ export function useInteractionListeners(args: {
     }, [registerFocusIncident, shouldMonitorVisibility, isMonitoringSuspended]);
 
     const handleFullscreenChange = useCallback(() => {
+        const currentPhase = monitoringPhase?.current;
         if (
             isMonitoringSuspended.current ||
             !shouldMonitorFullscreen ||
-            document.fullscreenElement
+            document.fullscreenElement ||
+            currentPhase === 'submitting' ||
+            currentPhase === 'navigating-to-turn-in' ||
+            currentPhase === 'suspended'
         ) {
             return;
         }
@@ -93,12 +114,13 @@ export function useInteractionListeners(args: {
         if (now - lastFullscreenIncidentAtRef.current < 1000) return;
 
         lastFullscreenIncidentAtRef.current = now;
-        emitTelemetryEvent('FULL_SCREEN_EXIT');
+        const metadata = createTelemetryActionMetadata('FULL_SCREEN_EXIT');
+        emitTelemetryEvent('FULL_SCREEN_EXIT', metadata);
         lockExam('fullscreen-exit');
         toast.warning('Fullscreen is required for this exam.', {
             description: 'Return to fullscreen to continue under the configured policy.',
         });
-    }, [shouldMonitorFullscreen, emitTelemetryEvent, lockExam, isMonitoringSuspended]);
+    }, [shouldMonitorFullscreen, emitTelemetryEvent, lockExam, isMonitoringSuspended, monitoringPhase]);
 
     const handleKeyDown = useCallback(
         (event: KeyboardEvent) => {
@@ -135,7 +157,8 @@ export function useInteractionListeners(args: {
                 if (now - lastPrintScreenIncidentAtRef.current < 800) return;
 
                 lastPrintScreenIncidentAtRef.current = now;
-                emitTelemetryEvent('PRINT_SCREEN_ATTEMPT');
+                const metadata = createTelemetryActionMetadata('PRINT_SCREEN_ATTEMPT');
+                emitTelemetryEvent('PRINT_SCREEN_ATTEMPT', metadata);
                 lockExam('screen-capture');
                 toast.warning('Screen capture shortcuts are blocked or monitored for this exam.', {
                     description: 'Return to the exam only when screen capture tools are closed.',
@@ -180,7 +203,8 @@ export function useInteractionListeners(args: {
                 if (now - lastRightClickIncidentAtRef.current < 800) return;
 
                 lastRightClickIncidentAtRef.current = now;
-                emitTelemetryEvent('RIGHT_CLICK_ATTEMPT');
+                const metadata = createTelemetryActionMetadata('RIGHT_CLICK_ATTEMPT');
+                emitTelemetryEvent('RIGHT_CLICK_ATTEMPT', metadata);
                 lockExam('right-click');
                 toast.warning('Right-click actions are disabled for this exam.', {
                     description: 'The attempt remains secured while this event is logged.',

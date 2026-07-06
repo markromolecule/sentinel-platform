@@ -221,6 +221,9 @@ export const telemetryMetadataSchema = z
         confidenceScore: z.number().min(0).max(1).optional(),
         aggregation: telemetryAggregationMetadataSchema.optional(),
         anomalyType: telemetryAudioMetadataSchema.shape.anomalyType,
+        eventId: z.string().uuid().optional(),
+        dedupeKey: z.string().optional(),
+        clientActionAt: z.string().optional(),
     })
     .strict();
 

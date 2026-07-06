@@ -24,6 +24,7 @@ type StudentExamAudioContextValue = {
     // Audio Anomaly Worker Management
     worker: Worker | null;
     warmupAudioAnomaly: () => void;
+    ensureAudioAccess: (configuration: ExamConfiguration) => Promise<void>;
 };
 
 const DEFAULT_CONTEXT: StudentExamAudioContextValue = {
@@ -36,9 +37,21 @@ const DEFAULT_CONTEXT: StudentExamAudioContextValue = {
     stopAudioStream: () => undefined,
     worker: null,
     warmupAudioAnomaly: () => undefined,
+    ensureAudioAccess: async () => undefined,
 };
 
 const StudentExamAudioContext = createContext<StudentExamAudioContextValue>(DEFAULT_CONTEXT);
+
+/**
+ * Helper to determine if a MediaStream is active and contains at least one live audio track.
+ * 
+ * @param stream - The MediaStream to check.
+ * @returns True if the stream exists and has at least one live track, false otherwise.
+ */
+export function isLiveAudioStream(stream: MediaStream | null): boolean {
+    if (!stream) return false;
+    return stream.getTracks().some((t) => t.kind === 'audio' && t.readyState === 'live');
+}
 
 export function StudentExamAudioProvider({ children }: { children: ReactNode }) {
     const streamRef = useRef<MediaStream | null>(null);
@@ -131,6 +144,16 @@ export function StudentExamAudioProvider({ children }: { children: ReactNode }) 
         [stopAudioStream],
     );
 
+    const ensureAudioAccess = useCallback(
+        async (configuration: ExamConfiguration) => {
+            if (isLiveAudioStream(streamRef.current)) {
+                return;
+            }
+            await requestAudioAccess(configuration);
+        },
+        [requestAudioAccess],
+    );
+
     const value = useMemo(
         () => ({
             audioStream,
@@ -144,6 +167,7 @@ export function StudentExamAudioProvider({ children }: { children: ReactNode }) 
             stopAudioStream,
             worker,
             warmupAudioAnomaly,
+            ensureAudioAccess,
         }),
         [
             audioStream,
@@ -154,6 +178,7 @@ export function StudentExamAudioProvider({ children }: { children: ReactNode }) 
             stopAudioStream,
             worker,
             warmupAudioAnomaly,
+            ensureAudioAccess,
         ],
     );
 

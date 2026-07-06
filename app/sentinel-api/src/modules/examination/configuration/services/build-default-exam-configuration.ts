@@ -29,5 +29,12 @@ export function buildDefaultExamConfiguration(
         mobileSecurity: {
             ...defaults.defaultMobileSecurity,
         },
+        automaticClosePolicy: {
+            enabled: true,
+            highIncidentThreshold: 3,
+            windowMinutes: 15,
+            useOccurrenceCount: false,
+            immediateCloseEventTypes: [],
+        },
     };
 }
