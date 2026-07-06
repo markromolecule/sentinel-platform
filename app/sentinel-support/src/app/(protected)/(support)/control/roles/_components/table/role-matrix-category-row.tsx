@@ -1,4 +1,4 @@
-import { TableRow, TableCell, Badge } from '@sentinel/ui';
+import { TableRow, TableCell } from '@sentinel/ui';
 import { ChevronDown, ChevronRight } from 'lucide-react';
 import type { MatrixCategory, MatrixModule } from './role-matrix-types';
 
@@ -22,10 +22,10 @@ export function RoleMatrixCategoryRow({
     );
 
     return (
-        <TableRow className="border border-r border-l border-[#323d8f]/20 bg-[#f4faff] hover:bg-[#ebf5ff]">
+        <TableRow className="border border-r border-l border-[#323d8f]/20 bg-[#f4faff] hover:bg-[#ebf5ff] dark:bg-slate-900/60 dark:hover:bg-slate-800/80">
             <TableCell
                 colSpan={rolesCount + 1}
-                className="border-muted/50 sticky left-0 z-10 border-r p-0 whitespace-normal"
+                className="border-muted/50 sticky left-0 z-10 border-r p-0 bg-inherit whitespace-normal"
             >
                 <button
                     type="button"

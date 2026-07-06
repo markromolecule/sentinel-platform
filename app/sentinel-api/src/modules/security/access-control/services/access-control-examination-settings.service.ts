@@ -1,5 +1,6 @@
 import { type DbClient } from '@sentinel/db';
 import type {
+    ExaminationGlobalSettings,
     ExaminationGlobalSettingsRecord,
 } from '@sentinel/shared/types';
 import { getExaminationGlobalSettingsData } from '../data/get-examination-global-settings';
