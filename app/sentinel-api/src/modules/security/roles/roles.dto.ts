@@ -72,3 +72,18 @@ export type DeleteRoleResponse = z.infer<typeof deleteRoleSchema.response>;
 export type ReplaceRolePermissionsParams = z.infer<typeof replaceRolePermissionsSchema.params>;
 export type ReplaceRolePermissionsBody = z.infer<typeof replaceRolePermissionsSchema.body>;
 export type ReplaceRolePermissionsResponse = z.infer<typeof replaceRolePermissionsSchema.response>;
+
+export const resetRolePermissionsToBlueprintSchema = {
+    params: accessControlRoleParamsSchema,
+    response: z.object({
+        message: z.string(),
+        data: accessControlRoleSchema,
+    }),
+};
+
+export type ResetRolePermissionsToBlueprintParams = z.infer<
+    typeof resetRolePermissionsToBlueprintSchema.params
+>;
+export type ResetRolePermissionsToBlueprintResponse = z.infer<
+    typeof resetRolePermissionsToBlueprintSchema.response
+>;

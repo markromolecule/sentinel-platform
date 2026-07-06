@@ -89,6 +89,29 @@ describe('Examination configuration guards', () => {
         );
     });
 
+    it('uses global defaults for general exam settings when exam overrides are null', () => {
+        const result = mapExamConfigurationState(
+            {
+                shuffle_questions: null,
+                show_correct_answers: null,
+                allow_review: null,
+                randomize_choices: null,
+            } as any,
+            {
+                ...DEFAULT_EXAMINATION_GLOBAL_SETTINGS,
+                defaultShuffleQuestions: true,
+                defaultAllowReview: true,
+            },
+        );
+
+        expect(result.settings).toEqual({
+            shuffleQuestions: true,
+            showCorrectAnswers: false,
+            allowReview: true,
+            randomizeChoices: false,
+        });
+    });
+
     it('maps automaticClosePolicy from aiRules and fallback to defaults', () => {
         const defaultConfig = buildDefaultExamConfiguration();
         const mappedDefault = mapExamConfigurationState(null);

@@ -410,11 +410,11 @@ export type CreateExamPayload = {
     startDateTime: string;
     endDateTime: string;
     durationMinutes: number;
-    passingScore: number;
-    shuffleQuestions: boolean;
-    showCorrectAnswers: boolean;
-    allowReview: boolean;
-    randomizeChoices: boolean;
+    passingScore?: number;
+    shuffleQuestions?: boolean;
+    showCorrectAnswers?: boolean;
+    allowReview?: boolean;
+    randomizeChoices?: boolean;
     settings?: ProctorExam['settings'];
     configuration?: ProctorExam['configuration'];
     isPublic?: boolean;

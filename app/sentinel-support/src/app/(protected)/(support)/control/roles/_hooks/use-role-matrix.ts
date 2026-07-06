@@ -6,16 +6,13 @@ import {
     useDebounce,
     useDeleteAccessControlRoleMutation,
     useReplaceAccessControlRolePermissionsMutation,
+    useResetAccessControlRolePermissionsToBlueprintMutation,
     useStableValue,
     useUpdateAccessControlRoleMutation,
 } from '@sentinel/hooks';
 import type { AccessControlRole } from '@sentinel/shared/types';
 import { toast } from 'sonner';
 import {
-    formatActionLabel,
-    formatModuleLabel,
-    getPermissionCategoryLabel,
-    getPermissionScopeLabel,
     groupPermissionsByCategoryAndModule,
     sortRolesForReview,
 } from '@/app/(protected)/(support)/control/_lib/control-presenters';
@@ -56,7 +53,11 @@ export function useRoleMatrix() {
     const createRoleMutation = useCreateAccessControlRoleMutation();
     const updateRoleMutation = useUpdateAccessControlRoleMutation();
     const deleteRoleMutation = useDeleteAccessControlRoleMutation();
-    const replacePermissionsMutation = useReplaceAccessControlRolePermissionsMutation();
+    const replacePermissionsMutation = useReplaceAccessControlRolePermissionsMutation({
+        onSuccess: () => {}, // prevent default success toast to allow custom toast
+        onError: (error) => toast.error(error.message),
+    });
+    const resetPermissionsMutation = useResetAccessControlRolePermissionsToBlueprintMutation();
 
     const [editorOpen, setEditorOpen] = useState(false);
     const [selectedRole, setSelectedRole] = useState<AccessControlRole | null>(null);
@@ -101,6 +102,13 @@ export function useRoleMatrix() {
                     arePermissionIdsEqual(pendingPermissionIds, role.permissionIds)
                 ) {
                     delete pendingPermissionIdsByRoleIdRef.current[role.id];
+                }
+
+                if (
+                    confirmedPermissionIds &&
+                    arePermissionIdsEqual(confirmedPermissionIds, role.permissionIds)
+                ) {
+                    delete confirmedPermissionIdsByRoleIdRef.current[role.id];
                 }
             });
 
@@ -193,11 +201,32 @@ export function useRoleMatrix() {
             );
 
             try {
-                await replacePermissionsMutation.mutateAsync({
+                const updatedRole = await replacePermissionsMutation.mutateAsync({
                     roleId,
                     permissionIds,
                 });
-                confirmedPermissionIdsByRoleIdRef.current[roleId] = permissionIds;
+                confirmedPermissionIdsByRoleIdRef.current[roleId] = updatedRole.permissionIds;
+
+                // Reconcile draftPermissionIdsByRoleId immediately
+                setDraftPermissionIdsByRoleId((current) => ({
+                    ...current,
+                    [roleId]: updatedRole.permissionIds,
+                }));
+
+                if (arePermissionIdsEqual(updatedRole.permissionIds, permissionIds)) {
+                    delete pendingPermissionIdsByRoleIdRef.current[roleId];
+                    delete confirmedPermissionIdsByRoleIdRef.current[roleId];
+                }
+
+                if (
+                    currentRole.isSystem &&
+                    currentRole.permissionSyncMode !== 'CUSTOM' &&
+                    updatedRole.permissionSyncMode === 'CUSTOM'
+                ) {
+                    toast.success(`Role "${currentRole.name}" is now Support-customized.`);
+                } else {
+                    toast.success('Role permissions updated successfully.');
+                }
             } catch {
                 delete pendingPermissionIdsByRoleIdRef.current[roleId];
                 delete confirmedPermissionIdsByRoleIdRef.current[roleId];
@@ -215,6 +244,37 @@ export function useRoleMatrix() {
             }
         },
         [replacePermissionsMutation, sortedRoles],
+    );
+
+    const resetRolePermissions = useCallback(
+        async (roleId: number) => {
+            setSavingRoleIds((current) =>
+                current.includes(roleId) ? current : [...current, roleId],
+            );
+            try {
+                const updatedRole = await resetPermissionsMutation.mutateAsync(roleId);
+
+                // Reconcile draft
+                setDraftPermissionIdsByRoleId((current) => ({
+                    ...current,
+                    [roleId]: updatedRole.permissionIds,
+                }));
+
+                // Clear refs
+                delete pendingPermissionIdsByRoleIdRef.current[roleId];
+                delete confirmedPermissionIdsByRoleIdRef.current[roleId];
+
+                toast.success(`Role "${updatedRole.name}" reset to blueprint permissions.`);
+                return updatedRole;
+            } catch (error: unknown) {
+                const message = error instanceof Error ? error.message : 'Failed to reset role permissions.';
+                toast.error(message);
+                return null;
+            } finally {
+                setSavingRoleIds((current) => current.filter((id) => id !== roleId));
+            }
+        },
+        [resetPermissionsMutation],
     );
 
     const handlePermissionToggle = (roleId: number, permissionId: string, checked: boolean) => {
@@ -354,5 +414,6 @@ export function useRoleMatrix() {
         toggleModule,
         startRoleNameEdit,
         submitRoleNameEdit,
+        resetRolePermissions,
     };
 }

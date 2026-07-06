@@ -43,4 +43,11 @@ describe('examCreateFormSchema', () => {
         const result = examCreateFormSchema.safeParse(data);
         expect(result.success).toBe(false);
     });
+
+    it('should keep durationMinutes required for create-form validation', () => {
+        const { durationMinutes: _durationMinutes, ...data } = validBaseData;
+        const result = examCreateFormSchema.safeParse(data);
+
+        expect(result.success).toBe(false);
+    });
 });

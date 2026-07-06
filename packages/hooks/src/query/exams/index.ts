@@ -7,6 +7,7 @@ export * from './use-exam-monitoring-overview-query';
 export * from './use-exam-monitoring-student-query';
 
 export * from './use-exam-configuration-query';
+export * from './use-examination-configuration-defaults-query';
 export * from './use-create-exam-mutation';
 export * from './use-update-exam-mutation';
 export * from './use-update-exam-configuration-mutation';

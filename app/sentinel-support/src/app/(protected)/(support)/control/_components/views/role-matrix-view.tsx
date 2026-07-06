@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import type { AccessControlRole } from '@sentinel/shared/types';
 import { Badge, SearchBar, FacetedFilter } from '@sentinel/ui';
 import {
     AccessControlEmptyState,
@@ -10,6 +11,7 @@ import {
 import { useRoleMatrix } from '../../roles/_hooks/use-role-matrix';
 import { RoleMatrixTable } from '../../roles/_components/role-matrix-table';
 import { DeleteRoleDialog } from '../../roles/_components/dialog/delete-role-dialog';
+import { ResetRolePermissionsDialog } from '../../roles/_components/dialog/reset-role-permissions-dialog';
 
 /**
  * RoleMatrixView renders the Dynamic RBAC Role Matrix.
@@ -51,9 +53,11 @@ export function RoleMatrixView() {
         toggleModule,
         startRoleNameEdit,
         submitRoleNameEdit,
+        resetRolePermissions,
     } = useRoleMatrix();
 
     const [selectedDomains, setSelectedDomains] = useState<Set<string>>(new Set());
+    const [roleToReset, setRoleToReset] = useState<AccessControlRole | null>(null);
 
     if (isBusy) return <AccessControlLoadingState label="Constructing matrix..." />;
     if (pageError) return <AccessControlErrorState message={pageError.message} />;
@@ -168,6 +172,7 @@ export function RoleMatrixView() {
                     onSetEditingRoleId={setEditingRoleId}
                     onSetEditingRoleName={setEditingRoleName}
                     onSetRoleToDelete={setRoleToDelete}
+                    onSetRoleToReset={setRoleToReset}
                 />
             )}
 
@@ -182,6 +187,18 @@ export function RoleMatrixView() {
                     });
                 }}
                 isPending={deleteRoleMutation.isPending}
+            />
+
+            <ResetRolePermissionsDialog
+                role={roleToReset}
+                onClose={() => setRoleToReset(null)}
+                onReset={async (roleId) => {
+                    const updatedRole = await resetRolePermissions(roleId);
+                    if (updatedRole) {
+                        setRoleToReset(null);
+                    }
+                }}
+                isPending={savingRoleIds.includes(roleToReset?.id ?? 0)}
             />
         </div>
     );

@@ -614,23 +614,23 @@ export type exam_attempts = {
 export type exam_configurations = {
     config_id: Generated<string>;
     exam_id: string | null;
-    max_reconnect_attempts: Generated<number | null>;
-    strict_mode: Generated<boolean | null>;
-    camera_required: Generated<boolean | null>;
-    mic_required: Generated<boolean | null>;
-    screen_lock: Generated<boolean | null>;
-    auto_submit_timeout_minutes: Generated<number | null>;
+    max_reconnect_attempts: number | null;
+    strict_mode: boolean | null;
+    camera_required: boolean | null;
+    mic_required: boolean | null;
+    screen_lock: boolean | null;
+    auto_submit_timeout_minutes: number | null;
     allowed_devices: string[];
     ai_rules: Generated<unknown | null>;
     created_at: Generated<Timestamp | null>;
     updated_at: Timestamp | null;
-    shuffle_questions: Generated<boolean | null>;
-    show_correct_answers: Generated<boolean | null>;
-    allow_review: Generated<boolean | null>;
-    randomize_choices: Generated<boolean | null>;
+    shuffle_questions: boolean | null;
+    show_correct_answers: boolean | null;
+    allow_review: boolean | null;
+    randomize_choices: boolean | null;
     web_security: Generated<unknown | null>;
     mobile_security: Generated<unknown | null>;
-    lobby_admission_mode: Generated<exam_lobby_admission_mode | null>;
+    lobby_admission_mode: exam_lobby_admission_mode | null;
     release_score_mode: Generated<release_score_mode | null>;
 };
 export type exam_feedbacks = {
@@ -713,7 +713,7 @@ export type exams = {
     description: string | null;
     duration_minutes: Generated<number>;
     question_count: Generated<number | null>;
-    passing_score: Generated<number | null>;
+    passing_score: number | null;
     difficulty: Generated<exam_difficulty | null>;
     scheduled_date: Timestamp | null;
     status: Generated<exam_status | null>;
@@ -1064,6 +1064,7 @@ export type roles = {
     domain_scope: Generated<string[]>;
     is_active: Generated<boolean>;
     assignable_by: Generated<string[]>;
+    permission_sync_mode: Generated<string>;
     created_at: Generated<Timestamp | null>;
     updated_at: Timestamp | null;
 };

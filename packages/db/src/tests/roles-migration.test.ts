@@ -31,4 +31,14 @@ describe('Roles Migration', () => {
             expect(columnType.data_type).toBe('integer');
         }
     });
+
+    it('should query roles and have permission_sync_mode', async () => {
+        const supportRole = await prisma.roles.findFirst({
+            where: { role_name: 'support' },
+        });
+
+        expect(supportRole).toBeDefined();
+        expect(supportRole?.permission_sync_mode).toBeDefined();
+        expect(['BLUEPRINT', 'CUSTOM']).toContain(supportRole?.permission_sync_mode);
+    });
 });

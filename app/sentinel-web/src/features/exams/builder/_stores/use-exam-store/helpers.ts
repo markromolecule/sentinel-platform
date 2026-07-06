@@ -1,4 +1,5 @@
 import type { SaveBuilderWorkspacePayload } from '@sentinel/services';
+import { DEFAULT_EXAMINATION_GLOBAL_SETTINGS } from '@sentinel/shared/constants';
 import type { ExamQuestion, ExamQuestionSection } from '@sentinel/shared/types';
 import type { ExamStoreState } from './types';
 import {
@@ -154,8 +155,8 @@ export function createDefaultState(): ExamStoreState {
         sectionIds: [],
         startDateTime: null,
         endDateTime: null,
-        durationMinutes: 60,
-        passingScore: 75,
+        durationMinutes: DEFAULT_EXAMINATION_GLOBAL_SETTINGS.defaultDurationMinutes,
+        passingScore: DEFAULT_EXAMINATION_GLOBAL_SETTINGS.defaultPassingScore,
         settings: { ...DEFAULT_EXAM_SETTINGS },
         configuration: { ...DEFAULT_EXAM_CONFIGURATION },
         questionSections: [createQuestionSection(0, DEFAULT_SECTION_TITLE)],

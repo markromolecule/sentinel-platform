@@ -3,10 +3,10 @@ import type { ExamConfiguration, ExamSettings } from '@sentinel/shared/types';
 import type { ExamStoreState } from './types';
 
 export const DEFAULT_EXAM_SETTINGS: ExamSettings = {
-    shuffleQuestions: true,
-    showCorrectAnswers: false,
-    allowReview: true,
-    randomizeChoices: true,
+    shuffleQuestions: DEFAULT_EXAMINATION_GLOBAL_SETTINGS.defaultShuffleQuestions,
+    showCorrectAnswers: DEFAULT_EXAMINATION_GLOBAL_SETTINGS.defaultShowCorrectAnswers,
+    allowReview: DEFAULT_EXAMINATION_GLOBAL_SETTINGS.defaultAllowReview,
+    randomizeChoices: DEFAULT_EXAMINATION_GLOBAL_SETTINGS.defaultRandomizeChoices,
 };
 
 export const DEFAULT_EXAM_CONFIGURATION: ExamConfiguration = {
@@ -41,8 +41,8 @@ export const DEFAULT_EXAM_STORE_STATE: ExamStoreState = {
     sectionIds: [],
     startDateTime: null,
     endDateTime: null,
-    durationMinutes: 60,
-    passingScore: 75,
+    durationMinutes: DEFAULT_EXAMINATION_GLOBAL_SETTINGS.defaultDurationMinutes,
+    passingScore: DEFAULT_EXAMINATION_GLOBAL_SETTINGS.defaultPassingScore,
     settings: { ...DEFAULT_EXAM_SETTINGS },
     configuration: { ...DEFAULT_EXAM_CONFIGURATION },
     questionSections: [],

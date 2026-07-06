@@ -23,6 +23,7 @@ interface RoleMatrixTableProps {
     onSetEditingRoleId: (id: number | null) => void;
     onSetEditingRoleName: (name: string) => void;
     onSetRoleToDelete: (role: AccessControlRole) => void;
+    onSetRoleToReset: (role: AccessControlRole) => void;
 }
 
 export function RoleMatrixTable({
@@ -42,6 +43,7 @@ export function RoleMatrixTable({
     onSetEditingRoleId,
     onSetEditingRoleName,
     onSetRoleToDelete,
+    onSetRoleToReset,
 }: RoleMatrixTableProps) {
     return (
         <div data-lenis-prevent className="max-h-[calc(100svh-20rem)] min-h-[28rem] overflow-auto">
@@ -56,6 +58,7 @@ export function RoleMatrixTable({
                     onSetEditingRoleId={onSetEditingRoleId}
                     onSetEditingRoleName={onSetEditingRoleName}
                     onSetRoleToDelete={onSetRoleToDelete}
+                    onSetRoleToReset={onSetRoleToReset}
                 />
 
                 <TableBody className="border-b border-[#323d8f]/10">

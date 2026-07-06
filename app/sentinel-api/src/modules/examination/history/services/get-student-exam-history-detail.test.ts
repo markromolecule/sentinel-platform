@@ -1,8 +1,13 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { HTTPException } from 'hono/http-exception';
 import { getStudentExamHistoryDetail } from './get-student-exam-history-detail';
+import { resolveExaminationGlobalSettings } from '../../configuration/configuration.service';
 import { getExamColumnSupport } from '../../exams/helper/exam-schema-compat';
 import { mapExamHistoryDetailResponse } from '../../exams/services/map-exam-response.service';
+
+vi.mock('../../configuration/configuration.service', () => ({
+    resolveExaminationGlobalSettings: vi.fn(),
+}));
 
 vi.mock('../../exams/helper/exam-schema-compat', () => ({
     getExamColumnSupport: vi.fn(),
@@ -41,6 +46,10 @@ describe('getStudentExamHistoryDetail', () => {
             hasSectionId: false,
             hasSectionName: false,
         });
+        vi.mocked(resolveExaminationGlobalSettings).mockResolvedValue({
+            defaultDurationMinutes: 60,
+            defaultPassingScore: 68,
+        } as any);
         vi.mocked(mapExamHistoryDetailResponse).mockReturnValue({
             id: 'attempt-1',
             attemptId: 'attempt-1',
@@ -133,6 +142,27 @@ describe('getStudentExamHistoryDetail', () => {
                 release_score_mode: 'AUTO_RELEASE',
                 essay_question_count: 1,
                 attempt_finalized_at: null,
+            }),
+        );
+    });
+
+    it('resolves inherited passing_score through global defaults before mapping history detail', async () => {
+        const rawRecord = {
+            exam_id: 'exam-1',
+            attempt_id: 'attempt-1',
+            duration_minutes: 60,
+            passing_score: null,
+        };
+        const builder = createQueryBuilder(rawRecord);
+        const dbClient = {
+            selectFrom: vi.fn(() => builder),
+        } as any;
+
+        await getStudentExamHistoryDetail(dbClient, 'attempt-1', 'student-user-1');
+
+        expect(mapExamHistoryDetailResponse).toHaveBeenCalledWith(
+            expect.objectContaining({
+                passing_score: 68,
             }),
         );
     });

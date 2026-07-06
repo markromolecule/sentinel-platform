@@ -23,6 +23,7 @@ export const accessControlRoleSchema = z.object({
     domainScope: z.array(z.string()),
     isActive: z.boolean(),
     assignableBy: z.array(z.string()),
+    permissionSyncMode: z.enum(['BLUEPRINT', 'CUSTOM']),
     permissionIds: z.array(z.string().uuid()),
     permissionCount: z.number().int(),
     assignmentCount: z.number().int(),

@@ -29,6 +29,7 @@ export async function getRolesData(dbClient: DbClient, search?: string) {
             'roles.is_system',
             'roles.created_at',
             'roles.updated_at',
+            'roles.permission_sync_mode',
             sql<
                 string[]
             >`COALESCE(ARRAY_AGG(DISTINCT rrp.permission_id) FILTER (WHERE rrp.permission_id IS NOT NULL), ARRAY[]::uuid[])`.as(
@@ -55,6 +56,7 @@ export async function getRolesData(dbClient: DbClient, search?: string) {
             'roles.is_system',
             'roles.created_at',
             'roles.updated_at',
+            'roles.permission_sync_mode',
         ])
         .orderBy('roles.is_system', 'desc')
         .orderBy('roles.role_name', 'asc')

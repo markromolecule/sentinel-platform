@@ -3,6 +3,7 @@ import {
     createAccessControlRole,
     deleteAccessControlRole,
     replaceAccessControlRolePermissions,
+    resetAccessControlRolePermissionsToBlueprint,
     updateAccessControlRole,
 } from '@sentinel/services';
 import { ACCESS_CONTROL_QUERY_KEYS } from '@sentinel/shared/constants';
@@ -94,9 +95,26 @@ export function useReplaceAccessControlRolePermissionsMutation(
         mutationFn: ({ roleId, permissionIds }) =>
             replaceAccessControlRolePermissions(apiClient, roleId, permissionIds),
         onSuccess: async (data, variables, context) => {
-            // Invalidate only the roles query key since permissions catalog and overview details
-            // are unaffected by specific role-to-permission mapping updates.
-            await queryClient.invalidateQueries({ queryKey: ACCESS_CONTROL_QUERY_KEYS.roles() });
+            await invalidateRoleQueries(queryClient);
+            (args.onSuccess as any)?.(data, variables, context);
+        },
+    });
+}
+
+export function useResetAccessControlRolePermissionsToBlueprintMutation(
+    args: RoleMutationOptions<AccessControlRole, number> = {
+        onSuccess: () => toast.success('Role permissions reset to blueprint successfully.'),
+        onError: (error) => toast.error(error.message),
+    },
+) {
+    const apiClient = useApi();
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        ...args,
+        mutationFn: (roleId) => resetAccessControlRolePermissionsToBlueprint(apiClient, roleId),
+        onSuccess: async (data, variables, context) => {
+            await invalidateRoleQueries(queryClient);
             (args.onSuccess as any)?.(data, variables, context);
         },
     });

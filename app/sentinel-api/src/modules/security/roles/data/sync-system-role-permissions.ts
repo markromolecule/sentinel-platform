@@ -16,7 +16,7 @@ export async function syncSystemRolePermissions(dbClient: DbClient) {
     const [roles, permissions, existingMappings] = await Promise.all([
         dbClient
             .selectFrom('roles')
-            .select(['role_id', 'role_name'])
+            .select(['role_id', 'role_name', 'permission_sync_mode'])
             .where('role_name', 'in', roleNames)
             .execute(),
         dbClient
@@ -36,11 +36,16 @@ export async function syncSystemRolePermissions(dbClient: DbClient) {
     );
 
     const mappings = Object.entries(SYSTEM_ROLE_BLUEPRINTS).flatMap(([roleName, blueprint]) => {
-        const roleId = roleIdByName.get(roleName);
-
-        if (!roleId) {
+        const role = roles.find((r) => r.role_name === roleName);
+        if (!role) {
             return [];
         }
+
+        if (role.permission_sync_mode === 'CUSTOM') {
+            return [];
+        }
+
+        const roleId = role.role_id;
 
         return blueprint.permissionKeys
             .map((permissionKey) => permissionIdByKey.get(permissionKey))

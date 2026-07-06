@@ -1,13 +1,13 @@
-import { type DbClient, prisma } from '@sentinel/db';
+import { type DbClient, prisma, transactionStorage } from '@sentinel/db';
 import { test } from 'vitest';
 
 export const testWithDbClient = test.extend<{ dbClient: DbClient }>({
-    dbClient: async ({}, use) => {
+    dbClient: async ({ }, use) => {
         await prisma
             .$transaction(
                 async (tx: any) => {
                     try {
-                        await use(tx.$kysely);
+                        await transactionStorage.run(tx.$kysely, () => use(tx.$kysely));
                     } finally {
                         throw new Error('ROLLBACK_FOR_TESTING');
                     }

@@ -11,6 +11,13 @@ export const examConfigurationStateSchema = z
     })
     .openapi('ExamConfigurationState');
 
+export const examinationConfigurationDefaultsSchema = z
+    .object({
+        message: z.string(),
+        data: Schema.examinationGlobalSettingsValueSchema,
+    })
+    .openapi('ExaminationConfigurationDefaultsResponse');
+
 export const getExamConfigurationSchema = {
     params: Schema.examConfigurationParamsSchema,
     response: z.object({
@@ -28,7 +35,14 @@ export const updateExamConfigurationSchema = {
     }),
 };
 
+export const getExaminationConfigurationDefaultsSchema = {
+    response: examinationConfigurationDefaultsSchema,
+};
+
 export type GetExamConfigurationParams = z.infer<typeof getExamConfigurationSchema.params>;
 export type UpdateExamConfigurationParams = z.infer<typeof updateExamConfigurationSchema.params>;
 export type UpdateExamConfigurationBody = z.infer<typeof updateExamConfigurationSchema.body>;
 export type ExamConfigurationState = z.infer<typeof examConfigurationStateSchema>;
+export type ExaminationConfigurationDefaultsResponse = z.infer<
+    typeof examinationConfigurationDefaultsSchema
+>;

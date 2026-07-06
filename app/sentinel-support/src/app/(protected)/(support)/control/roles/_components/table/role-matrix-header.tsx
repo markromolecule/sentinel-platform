@@ -1,5 +1,5 @@
-import { TableHeader, TableRow, TableHead, Button } from '@sentinel/ui';
-import { Trash2 } from 'lucide-react';
+import { TableHeader, TableRow, TableHead, Button, Badge } from '@sentinel/ui';
+import { Trash2, RotateCcw } from 'lucide-react';
 import type { AccessControlRole } from '@sentinel/shared/types';
 import { formatRoleLabel } from '@/app/(protected)/(support)/control/_lib/control-presenters';
 
@@ -13,6 +13,7 @@ interface RoleMatrixHeaderProps {
     onSetEditingRoleId: (id: number | null) => void;
     onSetEditingRoleName: (name: string) => void;
     onSetRoleToDelete: (role: AccessControlRole) => void;
+    onSetRoleToReset: (role: AccessControlRole) => void;
 }
 
 export function RoleMatrixHeader({
@@ -25,6 +26,7 @@ export function RoleMatrixHeader({
     onSetEditingRoleId,
     onSetEditingRoleName,
     onSetRoleToDelete,
+    onSetRoleToReset,
 }: RoleMatrixHeaderProps) {
     return (
         <TableHeader>
@@ -64,19 +66,29 @@ export function RoleMatrixHeader({
                                         className="border-muted/50 bg-background text-foreground h-8 w-full rounded-none border px-2 text-[13px] font-semibold outline-none"
                                     />
                                 ) : (
-                                    <div className="flex min-h-[32px] items-start gap-1.5">
-                                        <button
-                                            type="button"
-                                            onClick={() => onStartRoleNameEdit(role)}
-                                            className="text-foreground hover:text-primary text-[13px] leading-tight font-semibold transition-colors"
-                                        >
-                                            {formatRoleLabel(role.name)}
-                                        </button>
+                                    <div className="flex flex-col min-h-[32px] items-start gap-1">
+                                        <div className="flex items-start gap-1.5">
+                                            <button
+                                                type="button"
+                                                onClick={() => onStartRoleNameEdit(role)}
+                                                className="text-foreground hover:text-primary text-[13px] leading-tight font-semibold transition-colors text-left"
+                                            >
+                                                {formatRoleLabel(role.name)}
+                                            </button>
+                                            {role.isSystem && (
+                                                <div
+                                                    className="bg-primary mt-1 size-2 shrink-0 rounded-none"
+                                                    title="System Role"
+                                                />
+                                            )}
+                                        </div>
                                         {role.isSystem && (
-                                            <div
-                                                className="bg-primary mt-1 size-2 shrink-0 rounded-none"
-                                                title="System Role"
-                                            />
+                                            <Badge
+                                                variant={role.permissionSyncMode === 'BLUEPRINT' ? 'secondary' : 'default'}
+                                                className="text-[9px] px-1 h-4 rounded-none font-bold uppercase shrink-0"
+                                            >
+                                                {role.permissionSyncMode}
+                                            </Badge>
                                         )}
                                     </div>
                                 )}
@@ -97,6 +109,16 @@ export function RoleMatrixHeader({
                                     >
                                         <Trash2 className="mr-1 h-3 w-3" />
                                         Delete
+                                    </Button>
+                                ) : role.permissionSyncMode === 'CUSTOM' ? (
+                                    <Button
+                                        variant="ghost"
+                                        size="xs"
+                                        className="text-primary hover:bg-primary/5 h-6 rounded-none px-1.5 text-[11px] font-semibold"
+                                        onClick={() => onSetRoleToReset(role)}
+                                    >
+                                        <RotateCcw className="mr-1 h-3 w-3" />
+                                        Reset
                                     </Button>
                                 ) : null}
                             </div>

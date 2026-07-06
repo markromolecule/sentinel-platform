@@ -8,6 +8,44 @@ type ExamSectionColumnSupport = {
     hasRoomId: boolean;
 };
 
+function hasOwnProperty<Value extends object, Key extends PropertyKey>(
+    value: Value | null | undefined,
+    key: Key,
+): value is Value & Record<Key, unknown> {
+    return value != null && Object.prototype.hasOwnProperty.call(value, key);
+}
+
+function readSettingOverride(
+    payload:
+        | Pick<
+              CreateExamBody,
+              | 'shuffleQuestions'
+              | 'showCorrectAnswers'
+              | 'allowReview'
+              | 'randomizeChoices'
+              | 'settings'
+          >
+        | Pick<
+              UpdateExamBody,
+              | 'shuffleQuestions'
+              | 'showCorrectAnswers'
+              | 'allowReview'
+              | 'randomizeChoices'
+              | 'settings'
+          >,
+    key: 'shuffleQuestions' | 'showCorrectAnswers' | 'allowReview' | 'randomizeChoices',
+) {
+    if (hasOwnProperty(payload.settings, key)) {
+        return payload.settings[key];
+    }
+
+    if (hasOwnProperty(payload, key)) {
+        return payload[key];
+    }
+
+    return undefined;
+}
+
 export function buildExamSettingsInput(
     payload:
         | Pick<
@@ -28,11 +66,10 @@ export function buildExamSettingsInput(
           >,
 ) {
     return {
-        shuffleQuestions: payload.settings?.shuffleQuestions ?? payload.shuffleQuestions ?? false,
-        showCorrectAnswers:
-            payload.settings?.showCorrectAnswers ?? payload.showCorrectAnswers ?? false,
-        allowReview: payload.settings?.allowReview ?? payload.allowReview ?? false,
-        randomizeChoices: payload.settings?.randomizeChoices ?? payload.randomizeChoices ?? false,
+        shuffleQuestions: readSettingOverride(payload, 'shuffleQuestions'),
+        showCorrectAnswers: readSettingOverride(payload, 'showCorrectAnswers'),
+        allowReview: readSettingOverride(payload, 'allowReview'),
+        randomizeChoices: readSettingOverride(payload, 'randomizeChoices'),
     };
 }
 
@@ -56,7 +93,7 @@ export function buildCreateExamValues(args: {
         class_group_id: classroomAssignment.classGroupId,
         subject_id: classroomAssignment.subjectId,
         duration_minutes: body.durationMinutes,
-        passing_score: body.passingScore,
+        passing_score: body.passingScore ?? null,
         scheduled_date: body.startDateTime ? new Date(body.startDateTime) : null,
         end_date_time: body.endDateTime ? new Date(body.endDateTime) : null,
         status: 'DRAFT',
@@ -98,6 +135,7 @@ export function buildUpdateExamValues(args: {
     };
 }): Updateable<DB['exams']> {
     const { body, institutionId, userId, sectionColumnSupport, classroomAssignment } = args;
+    const hasPassingScore = hasOwnProperty(body, 'passingScore');
 
     const values: Updateable<DB['exams']> = {
         title: body.title,
@@ -106,7 +144,7 @@ export function buildUpdateExamValues(args: {
         subject_id: classroomAssignment?.subjectId ?? body.subjectId,
         status: body.status ? (body.status.toUpperCase().replace('-', '_') as any) : undefined,
         duration_minutes: body.durationMinutes,
-        passing_score: body.passingScore,
+        passing_score: hasPassingScore ? (body.passingScore ?? null) : undefined,
         scheduled_date: body.startDateTime ? new Date(body.startDateTime) : undefined,
         end_date_time: body.endDateTime ? new Date(body.endDateTime) : undefined,
         updated_by: userId,

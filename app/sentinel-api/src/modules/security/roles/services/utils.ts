@@ -15,6 +15,7 @@ export function mapRoleRow(row: any): AccessControlRole {
         domainScope: row.domain_scope ?? [],
         isActive: Boolean(row.is_active),
         assignableBy: row.assignable_by ?? [],
+        permissionSyncMode: (row.permission_sync_mode ?? 'BLUEPRINT') as 'BLUEPRINT' | 'CUSTOM',
         permissionIds: parseUuidArray(row.permissionIds),
         permissionCount: parseCount(row.permissionCount),
         assignmentCount: parseCount(row.assignmentCount),

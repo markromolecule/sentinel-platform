@@ -1,7 +1,9 @@
 import { type DbClient } from '@sentinel/db';
+import { resolveExaminationGlobalSettings } from '../../configuration/configuration.service';
 import { getExamsData } from '../../exams/data/get-exams';
 import type { ExamHistorySummary } from '../history.dto';
 import { mapExamHistorySummaryResponse } from '../../exams/services/map-exam-response.service';
+import { applyEffectiveExamBaselineToRawRecord } from '../../exams/services/resolve-effective-exam-baseline.service';
 
 export async function getStudentExamHistory(
     dbClient: DbClient,
@@ -14,16 +16,21 @@ export async function getStudentExamHistory(
         search?: string;
     },
 ): Promise<{ items: ExamHistorySummary[]; total: number; hasMore: boolean }> {
-    const records = await getExamsData({
-        dbClient,
-        institutionId,
-        filters: {
-            search: filters?.search,
-        },
-        studentUserId,
-    });
+    const [records, globalSettings] = await Promise.all([
+        getExamsData({
+            dbClient,
+            institutionId,
+            filters: {
+                search: filters?.search,
+            },
+            studentUserId,
+        }),
+        resolveExaminationGlobalSettings(dbClient),
+    ]);
 
-    let items = records.map(mapExamHistorySummaryResponse);
+    let items = records.map((record) =>
+        mapExamHistorySummaryResponse(applyEffectiveExamBaselineToRawRecord(record, globalSettings)),
+    );
 
     if (filters?.status) {
         items = items.filter((item) => item.status === filters.status);

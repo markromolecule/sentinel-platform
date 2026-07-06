@@ -1,5 +1,3 @@
-'use client';
-
 import * as React from 'react';
 import { Badge, Button, Collapsible, CollapsibleContent, Input, Textarea, cn } from '@sentinel/ui';
 import { ChevronDown, Database, GripVertical, Plus, PencilLine, Trash2 } from 'lucide-react';
@@ -178,8 +176,8 @@ export function QuestionSectionCard({
                                 {isInstructionEditorOpen
                                     ? 'Hide Editor'
                                     : hasInstruction
-                                      ? 'Edit Instruction'
-                                      : 'Add Instruction'}
+                                        ? 'Edit Instruction'
+                                        : 'Add Instruction'}
                             </Button>
                         </div>
 
@@ -191,20 +189,22 @@ export function QuestionSectionCard({
                                     : 'max-h-0 opacity-0',
                             )}
                         >
-                            <div className="pt-3">
-                                <Textarea
-                                    aria-label={`${section.title} instructions`}
-                                    value={section.description ?? ''}
-                                    onChange={(event) =>
-                                        onSectionDescriptionChange(event.target.value)
-                                    }
-                                    placeholder="Write plain-text instructions for this section"
-                                    className="bg-background min-h-24 resize-y text-sm shadow-none"
-                                />
-                                <p className="text-muted-foreground mt-2 text-xs">
-                                    Plain text only. Keep the guidance clear and concise.
-                                </p>
-                            </div>
+                            {isInstructionEditorOpen && (
+                                <div className="pt-3">
+                                    <Textarea
+                                        aria-label={`${section.title} instructions`}
+                                        value={section.description ?? ''}
+                                        onChange={(event) =>
+                                            onSectionDescriptionChange(event.target.value)
+                                        }
+                                        placeholder="Write plain-text instructions for this section"
+                                        className="bg-background min-h-24 resize-y text-sm shadow-none"
+                                    />
+                                    <p className="text-muted-foreground mt-2 text-xs">
+                                        Plain text only. Keep the guidance clear and concise.
+                                    </p>
+                                </div>
+                            )}
                         </div>
                     </div>
                 </div>

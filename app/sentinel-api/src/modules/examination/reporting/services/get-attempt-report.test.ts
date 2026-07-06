@@ -4,7 +4,7 @@ import { HTTPException } from 'hono/http-exception';
 import { getAttemptReport } from './get-attempt-report';
 import { getGradingAttemptDetail } from '../../grading/services/get-grading-attempt-detail.service';
 
-vi.mock('../../grading/services/get-grading-attempt-detail', () => ({
+vi.mock('../../grading/services/get-grading-attempt-detail.service', () => ({
     getGradingAttemptDetail: vi.fn(),
 }));
 

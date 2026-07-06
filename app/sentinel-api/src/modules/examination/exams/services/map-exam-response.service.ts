@@ -80,6 +80,10 @@ function resolveMappedExamStatus(record: RawExamRecord, studentView = false) {
     });
 }
 
+function requireResolvedPassingScore(record: RawExamRecord) {
+    return (record.passing_score ?? 0) as number;
+}
+
 function computePercentage(score?: number | null, totalScore?: number | null) {
     if (typeof score !== 'number' || typeof totalScore !== 'number' || totalScore <= 0) {
         return null;
@@ -135,7 +139,7 @@ function resolveHistoryResult(record: RawExamRecord): ExamHistorySummary['result
         return null;
     }
 
-    return percentage >= (record.passing_score ?? 0) ? 'passed' : 'failed';
+    return percentage >= requireResolvedPassingScore(record) ? 'passed' : 'failed';
 }
 
 function isHistoryScoreReleased(record: RawExamRecord) {
@@ -193,13 +197,14 @@ export function mapExamSummaryResponse(
     const studentView = options?.studentView ?? false;
     const classroomIds = buildClassroomIds(record);
     const classroomNames = buildClassroomNames(record);
+    const passingScore = requireResolvedPassingScore(record);
 
     return {
         id: record.exam_id,
         title: record.title,
         description: record.description,
         durationMinutes: record.duration_minutes,
-        passingScore: record.passing_score ?? 0,
+        passingScore,
         status: studentView
             ? resolveMappedExamStatus(record, true)
             : resolveMappedExamStatus(record, false),
@@ -297,10 +302,12 @@ export function mapExamHistorySummaryResponse(record: RawExamRecord): ExamHistor
 }
 
 export function mapExamHistoryDetailResponse(record: RawExamRecord): ExamHistoryDetail {
+    const passingScore = requireResolvedPassingScore(record);
+
     return {
         ...mapExamHistorySummaryResponse(record),
         durationMinutes: record.duration_minutes,
-        passingScore: record.passing_score ?? 0,
+        passingScore,
         roomName: record.room_name ?? null,
     };
 }

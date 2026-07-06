@@ -6,10 +6,64 @@ import { mapExamConfigurationState } from './map-exam-configuration-state';
 import type { ExamConfigurationPayload } from './configuration.types';
 import {
     normalizeExamConfigurationState,
-    normalizeExamSettingsState,
 } from './normalize-exam-configuration-state';
 import { resolveExamSettings } from './resolve-exam-settings';
 import { LogsService } from '../../../general/logs/logs.service';
+import { resolveExaminationGlobalSettings } from './resolve-examination-global-settings.service';
+
+function hasOwnProperty<Value extends object, Key extends PropertyKey>(
+    value: Value | null | undefined,
+    key: Key,
+): value is Value & Record<Key, unknown> {
+    return value != null && Object.prototype.hasOwnProperty.call(value, key);
+}
+
+function isJsonEqual(left: unknown, right: unknown) {
+    return JSON.stringify(left) === JSON.stringify(right);
+}
+
+function resolveInheritedScalar<Value>(args: {
+    explicitValue: Value | null | undefined;
+    fallbackValue: Value;
+    defaultValue: Value;
+}) {
+    const { explicitValue, fallbackValue, defaultValue } = args;
+    const desiredValue =
+        explicitValue === undefined
+            ? fallbackValue
+            : explicitValue === null
+              ? defaultValue
+              : explicitValue;
+
+    return desiredValue === defaultValue ? null : desiredValue;
+}
+
+function resolveInheritedObject<
+    Shape extends Record<string, any>,
+    Key extends keyof Shape & string,
+>(args: {
+    explicitValue: Partial<Record<Key, Shape[Key] | null>> | null | undefined;
+    fallbackValue: Shape;
+    defaultValue: Shape;
+}) {
+    const { explicitValue, fallbackValue, defaultValue } = args;
+
+    let desiredValue: Shape;
+
+    if (explicitValue === undefined) {
+        desiredValue = { ...fallbackValue };
+    } else if (explicitValue === null) {
+        desiredValue = { ...defaultValue };
+    } else {
+        desiredValue = { ...fallbackValue };
+        for (const key of Object.keys(explicitValue) as Key[]) {
+            const nextValue = explicitValue[key];
+            desiredValue[key] = (nextValue === null ? defaultValue[key] : nextValue) as Shape[Key];
+        }
+    }
+
+    return isJsonEqual(desiredValue, defaultValue) ? null : desiredValue;
+}
 
 export async function saveExamConfiguration(args: {
     dbClient: DbClient;
@@ -18,72 +72,196 @@ export async function saveExamConfiguration(args: {
     userId?: string;
 }) {
     const { dbClient, examId, payload } = args;
-    const currentRecord = await getExamConfigurationData({
-        dbClient,
-        examId,
-    });
-    const currentState = mapExamConfigurationState(currentRecord);
-    const settings = normalizeExamSettingsState(
-        resolveExamSettings({
-            payload,
-            fallback: currentState.settings,
+    const [currentRecord, globalSettings] = await Promise.all([
+        getExamConfigurationData({
+            dbClient,
+            examId,
         }),
-    );
-    const defaultConfiguration = buildDefaultExamConfiguration();
+        resolveExaminationGlobalSettings(dbClient),
+    ]);
+    const currentState = mapExamConfigurationState(currentRecord, globalSettings);
+    const settings = resolveExamSettings({
+        payload,
+        globalSettings,
+        fallback: currentState.settings,
+    });
+    const defaultConfiguration = buildDefaultExamConfiguration(globalSettings);
+    const payloadConfiguration = payload.configuration;
+    const releaseScoreModeExplicit = hasOwnProperty(payloadConfiguration, 'releaseScoreMode')
+        ? payloadConfiguration.releaseScoreMode
+        : undefined;
+    const automaticClosePolicyExplicit = hasOwnProperty(payloadConfiguration, 'automaticClosePolicy')
+        ? payloadConfiguration.automaticClosePolicy
+        : undefined;
     const configuration = normalizeExamConfigurationState({
         lobbyAdmissionMode:
-            payload.configuration?.lobbyAdmissionMode ??
-            currentRecord?.lobby_admission_mode ??
-            defaultConfiguration.lobbyAdmissionMode,
+            resolveInheritedScalar({
+                explicitValue: hasOwnProperty(payloadConfiguration, 'lobbyAdmissionMode')
+                    ? payloadConfiguration.lobbyAdmissionMode
+                    : undefined,
+                fallbackValue: currentState.configuration.lobbyAdmissionMode,
+                defaultValue: defaultConfiguration.lobbyAdmissionMode,
+            }) ?? defaultConfiguration.lobbyAdmissionMode,
         releaseScoreMode:
-            payload.configuration?.releaseScoreMode ??
-            (currentRecord?.release_score_mode as any) ??
+            releaseScoreModeExplicit ??
+            currentState.configuration.releaseScoreMode ??
             defaultConfiguration.releaseScoreMode,
         maxReconnectAttempts:
-            payload.configuration?.maxReconnectAttempts ??
-            currentRecord?.max_reconnect_attempts ??
-            defaultConfiguration.maxReconnectAttempts,
+            resolveInheritedScalar({
+                explicitValue: hasOwnProperty(payloadConfiguration, 'maxReconnectAttempts')
+                    ? payloadConfiguration.maxReconnectAttempts
+                    : undefined,
+                fallbackValue: currentState.configuration.maxReconnectAttempts,
+                defaultValue: defaultConfiguration.maxReconnectAttempts,
+            }) ?? defaultConfiguration.maxReconnectAttempts,
         strictMode:
-            payload.configuration?.strictMode ??
-            currentRecord?.strict_mode ??
-            defaultConfiguration.strictMode,
+            resolveInheritedScalar({
+                explicitValue: hasOwnProperty(payloadConfiguration, 'strictMode')
+                    ? payloadConfiguration.strictMode
+                    : undefined,
+                fallbackValue: currentState.configuration.strictMode,
+                defaultValue: defaultConfiguration.strictMode,
+            }) ?? defaultConfiguration.strictMode,
         screenLock:
-            payload.configuration?.screenLock ??
-            currentRecord?.screen_lock ??
-            defaultConfiguration.screenLock,
+            resolveInheritedScalar({
+                explicitValue: hasOwnProperty(payloadConfiguration, 'screenLock')
+                    ? payloadConfiguration.screenLock
+                    : undefined,
+                fallbackValue: currentState.configuration.screenLock,
+                defaultValue: defaultConfiguration.screenLock,
+            }) ?? defaultConfiguration.screenLock,
         cameraRequired:
-            payload.configuration?.cameraRequired ??
-            currentRecord?.camera_required ??
-            defaultConfiguration.cameraRequired,
+            resolveInheritedScalar({
+                explicitValue: hasOwnProperty(payloadConfiguration, 'cameraRequired')
+                    ? payloadConfiguration.cameraRequired
+                    : undefined,
+                fallbackValue: currentState.configuration.cameraRequired,
+                defaultValue: defaultConfiguration.cameraRequired,
+            }) ?? defaultConfiguration.cameraRequired,
         micRequired:
-            payload.configuration?.micRequired ??
-            currentRecord?.mic_required ??
-            defaultConfiguration.micRequired,
+            resolveInheritedScalar({
+                explicitValue: hasOwnProperty(payloadConfiguration, 'micRequired')
+                    ? payloadConfiguration.micRequired
+                    : undefined,
+                fallbackValue: currentState.configuration.micRequired,
+                defaultValue: defaultConfiguration.micRequired,
+            }) ?? defaultConfiguration.micRequired,
         autoSubmitTimeoutMinutes:
-            payload.configuration?.autoSubmitTimeoutMinutes ??
-            currentRecord?.auto_submit_timeout_minutes ??
-            defaultConfiguration.autoSubmitTimeoutMinutes,
+            resolveInheritedScalar({
+                explicitValue: hasOwnProperty(payloadConfiguration, 'autoSubmitTimeoutMinutes')
+                    ? payloadConfiguration.autoSubmitTimeoutMinutes
+                    : undefined,
+                fallbackValue: currentState.configuration.autoSubmitTimeoutMinutes,
+                defaultValue: defaultConfiguration.autoSubmitTimeoutMinutes,
+            }) ?? defaultConfiguration.autoSubmitTimeoutMinutes,
         aiRules:
-            payload.configuration?.aiRules ??
-            (currentRecord?.ai_rules as any) ??
-            defaultConfiguration.aiRules,
+            resolveInheritedObject({
+                explicitValue: hasOwnProperty(payloadConfiguration, 'aiRules')
+                    ? payloadConfiguration.aiRules
+                    : undefined,
+                fallbackValue: currentState.configuration.aiRules,
+                defaultValue: defaultConfiguration.aiRules,
+            }) ?? defaultConfiguration.aiRules,
         webSecurity:
-            payload.configuration?.webSecurity ??
-            (currentRecord as any)?.web_security ??
-            defaultConfiguration.webSecurity,
+            resolveInheritedObject({
+                explicitValue: hasOwnProperty(payloadConfiguration, 'webSecurity')
+                    ? payloadConfiguration.webSecurity
+                    : undefined,
+                fallbackValue: currentState.configuration.webSecurity,
+                defaultValue: defaultConfiguration.webSecurity,
+            }) ?? defaultConfiguration.webSecurity,
         mobileSecurity:
-            payload.configuration?.mobileSecurity ??
-            (currentRecord as any)?.mobile_security ??
-            defaultConfiguration.mobileSecurity,
+            resolveInheritedObject({
+                explicitValue: hasOwnProperty(payloadConfiguration, 'mobileSecurity')
+                    ? payloadConfiguration.mobileSecurity
+                    : undefined,
+                fallbackValue: currentState.configuration.mobileSecurity,
+                defaultValue: defaultConfiguration.mobileSecurity,
+            }) ?? defaultConfiguration.mobileSecurity,
         automaticClosePolicy:
-            payload.configuration?.automaticClosePolicy ??
+            automaticClosePolicyExplicit ??
             currentState.configuration.automaticClosePolicy ??
             defaultConfiguration.automaticClosePolicy,
     });
 
-    const aiRulesForDb = {
-        ...configuration.aiRules,
+    const aiRulesForDb =
+        resolveInheritedObject({
+            explicitValue: hasOwnProperty(payloadConfiguration, 'aiRules')
+                ? payloadConfiguration.aiRules
+                : undefined,
+            fallbackValue: currentState.configuration.aiRules,
+            defaultValue: defaultConfiguration.aiRules,
+        }) ?? null;
+
+    const persistedAiRules = {
+        ...(aiRulesForDb ?? {}),
         automaticClosePolicy: configuration.automaticClosePolicy,
+    };
+
+    const persistedConfiguration = {
+        lobbyAdmissionMode: resolveInheritedScalar({
+            explicitValue: hasOwnProperty(payloadConfiguration, 'lobbyAdmissionMode')
+                ? payloadConfiguration.lobbyAdmissionMode
+                : undefined,
+            fallbackValue: currentState.configuration.lobbyAdmissionMode,
+            defaultValue: defaultConfiguration.lobbyAdmissionMode,
+        }),
+        maxReconnectAttempts: resolveInheritedScalar({
+            explicitValue: hasOwnProperty(payloadConfiguration, 'maxReconnectAttempts')
+                ? payloadConfiguration.maxReconnectAttempts
+                : undefined,
+            fallbackValue: currentState.configuration.maxReconnectAttempts,
+            defaultValue: defaultConfiguration.maxReconnectAttempts,
+        }),
+        strictMode: resolveInheritedScalar({
+            explicitValue: hasOwnProperty(payloadConfiguration, 'strictMode')
+                ? payloadConfiguration.strictMode
+                : undefined,
+            fallbackValue: currentState.configuration.strictMode,
+            defaultValue: defaultConfiguration.strictMode,
+        }),
+        screenLock: resolveInheritedScalar({
+            explicitValue: hasOwnProperty(payloadConfiguration, 'screenLock')
+                ? payloadConfiguration.screenLock
+                : undefined,
+            fallbackValue: currentState.configuration.screenLock,
+            defaultValue: defaultConfiguration.screenLock,
+        }),
+        cameraRequired: resolveInheritedScalar({
+            explicitValue: hasOwnProperty(payloadConfiguration, 'cameraRequired')
+                ? payloadConfiguration.cameraRequired
+                : undefined,
+            fallbackValue: currentState.configuration.cameraRequired,
+            defaultValue: defaultConfiguration.cameraRequired,
+        }),
+        micRequired: resolveInheritedScalar({
+            explicitValue: hasOwnProperty(payloadConfiguration, 'micRequired')
+                ? payloadConfiguration.micRequired
+                : undefined,
+            fallbackValue: currentState.configuration.micRequired,
+            defaultValue: defaultConfiguration.micRequired,
+        }),
+        autoSubmitTimeoutMinutes: resolveInheritedScalar({
+            explicitValue: hasOwnProperty(payloadConfiguration, 'autoSubmitTimeoutMinutes')
+                ? payloadConfiguration.autoSubmitTimeoutMinutes
+                : undefined,
+            fallbackValue: currentState.configuration.autoSubmitTimeoutMinutes,
+            defaultValue: defaultConfiguration.autoSubmitTimeoutMinutes,
+        }),
+        webSecurity: resolveInheritedObject({
+            explicitValue: hasOwnProperty(payloadConfiguration, 'webSecurity')
+                ? payloadConfiguration.webSecurity
+                : undefined,
+            fallbackValue: currentState.configuration.webSecurity,
+            defaultValue: defaultConfiguration.webSecurity,
+        }),
+        mobileSecurity: resolveInheritedObject({
+            explicitValue: hasOwnProperty(payloadConfiguration, 'mobileSecurity')
+                ? payloadConfiguration.mobileSecurity
+                : undefined,
+            fallbackValue: currentState.configuration.mobileSecurity,
+            defaultValue: defaultConfiguration.mobileSecurity,
+        }),
     };
 
     const result = await upsertExamConfigurationData({
@@ -95,17 +273,20 @@ export async function saveExamConfiguration(args: {
             show_correct_answers: settings.showCorrectAnswers,
             allow_review: settings.allowReview,
             randomize_choices: settings.randomizeChoices,
-            lobby_admission_mode: configuration.lobbyAdmissionMode,
-            release_score_mode: configuration.releaseScoreMode,
-            max_reconnect_attempts: configuration.maxReconnectAttempts,
-            strict_mode: configuration.strictMode,
-            screen_lock: configuration.screenLock,
-            camera_required: configuration.cameraRequired,
-            mic_required: configuration.micRequired,
-            auto_submit_timeout_minutes: configuration.autoSubmitTimeoutMinutes,
-            ai_rules: aiRulesForDb,
-            web_security: configuration.webSecurity,
-            mobile_security: configuration.mobileSecurity,
+            lobby_admission_mode: persistedConfiguration.lobbyAdmissionMode,
+            release_score_mode:
+                releaseScoreModeExplicit === undefined
+                    ? undefined
+                    : configuration.releaseScoreMode,
+            max_reconnect_attempts: persistedConfiguration.maxReconnectAttempts,
+            strict_mode: persistedConfiguration.strictMode,
+            screen_lock: persistedConfiguration.screenLock,
+            camera_required: persistedConfiguration.cameraRequired,
+            mic_required: persistedConfiguration.micRequired,
+            auto_submit_timeout_minutes: persistedConfiguration.autoSubmitTimeoutMinutes,
+            ai_rules: persistedAiRules,
+            web_security: persistedConfiguration.webSecurity,
+            mobile_security: persistedConfiguration.mobileSecurity,
             created_at: new Date(),
             updated_at: new Date(),
         } as any,
@@ -114,17 +295,20 @@ export async function saveExamConfiguration(args: {
             show_correct_answers: settings.showCorrectAnswers,
             allow_review: settings.allowReview,
             randomize_choices: settings.randomizeChoices,
-            lobby_admission_mode: configuration.lobbyAdmissionMode,
-            release_score_mode: configuration.releaseScoreMode,
-            max_reconnect_attempts: configuration.maxReconnectAttempts,
-            strict_mode: configuration.strictMode,
-            screen_lock: configuration.screenLock,
-            camera_required: configuration.cameraRequired,
-            mic_required: configuration.micRequired,
-            auto_submit_timeout_minutes: configuration.autoSubmitTimeoutMinutes,
-            ai_rules: aiRulesForDb,
-            web_security: configuration.webSecurity,
-            mobile_security: configuration.mobileSecurity,
+            lobby_admission_mode: persistedConfiguration.lobbyAdmissionMode,
+            release_score_mode:
+                releaseScoreModeExplicit === undefined
+                    ? undefined
+                    : configuration.releaseScoreMode,
+            max_reconnect_attempts: persistedConfiguration.maxReconnectAttempts,
+            strict_mode: persistedConfiguration.strictMode,
+            screen_lock: persistedConfiguration.screenLock,
+            camera_required: persistedConfiguration.cameraRequired,
+            mic_required: persistedConfiguration.micRequired,
+            auto_submit_timeout_minutes: persistedConfiguration.autoSubmitTimeoutMinutes,
+            ai_rules: persistedAiRules,
+            web_security: persistedConfiguration.webSecurity,
+            mobile_security: persistedConfiguration.mobileSecurity,
             updated_at: new Date(),
         } as any,
     });

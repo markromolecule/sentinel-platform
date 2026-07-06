@@ -1,5 +1,6 @@
 import { type DbClient } from '@sentinel/db';
 import { getExamConfigurationState } from '../../configuration/configuration.service';
+import { resolveExaminationGlobalSettings } from '../../configuration/configuration.service';
 import type { ExamDetail } from '../exam.dto';
 import { getExamByIdData } from '../data/get-exam-by-id';
 import { getExamQuestionsData } from '../data/get-exam-questions';
@@ -12,11 +13,12 @@ import { buildStudentOverrideRuntimeAccess } from '../../student-overrides/stude
 import type { ExamRuntimeAccess } from '../../runtime-access/runtime-access.dto';
 import { TelemetrySettingsService } from '../../../telemetry/settings/telemetry-settings.service';
 import {
-    shuffleExamQuestions,
     randomizeQuestionChoices,
+    shuffleExamQuestions,
     type ExamQuestion,
 } from '@sentinel/shared';
 import { sanitizeQuestionForStudentAttempt } from './student-question-sanitizer.service';
+import { applyEffectiveExamBaselineToRawRecord } from './resolve-effective-exam-baseline.service';
 
 export async function getExamDetail(
     dbClient: DbClient,
@@ -24,15 +26,21 @@ export async function getExamDetail(
     institutionId?: string,
     studentUserId?: string,
 ): Promise<ExamDetail> {
-    const [exam, sections, questions, configurationState, telemetrySettings] = await Promise.all([
-        getExamByIdData({ dbClient, id, institutionId, studentUserId }),
-        getExamSectionsData({ dbClient, examId: id }),
-        getExamQuestionsData({ dbClient, examId: id }),
-        getExamConfigurationState(dbClient, id),
-        TelemetrySettingsService.getTelemetrySettings(dbClient),
-    ]);
+    const [exam, sections, questions, configurationState, telemetrySettings, globalSettings] =
+        await Promise.all([
+            getExamByIdData({ dbClient, id, institutionId, studentUserId }),
+            getExamSectionsData({ dbClient, examId: id }),
+            getExamQuestionsData({ dbClient, examId: id }),
+            getExamConfigurationState(dbClient, id),
+            TelemetrySettingsService.getTelemetrySettings(dbClient),
+            resolveExaminationGlobalSettings(dbClient),
+        ]);
 
     const resolvedExam = requireExamRecord(exam);
+    const examWithResolvedBaseline = applyEffectiveExamBaselineToRawRecord(
+        resolvedExam,
+        globalSettings,
+    );
     const hasCompletedAttempt = resolvedExam.attempt_status?.toUpperCase() === 'COMPLETED';
     let runtimeAccess: ExamRuntimeAccess;
 
@@ -65,15 +73,15 @@ export async function getExamDetail(
         runtimeAccess = await RuntimeAccessService.resolveExamRuntimeAccess({
             dbClient,
             examId: id,
-            scheduledDate: resolvedExam.scheduled_date,
-            endDateTime: resolvedExam.end_date_time,
-            durationMinutes: resolvedExam.duration_minutes,
+            scheduledDate: examWithResolvedBaseline.scheduled_date,
+            endDateTime: examWithResolvedBaseline.end_date_time,
+            durationMinutes: examWithResolvedBaseline.duration_minutes,
             hasActiveAttempt: resolvedExam.attempt_status?.toUpperCase() === 'IN_PROGRESS',
         });
     }
 
     return mapExamDetailResponse({
-        exam: resolvedExam,
+        exam: examWithResolvedBaseline,
         settings: configurationState.settings,
         configuration: configurationState.configuration,
         mediaPipeSandbox: telemetrySettings.value.mediaPipeSandbox,

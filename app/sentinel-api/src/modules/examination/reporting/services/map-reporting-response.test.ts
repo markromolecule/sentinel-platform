@@ -76,6 +76,37 @@ describe('map reporting response', () => {
         expect(student.needsRetake).toBe(true);
     });
 
+    it('uses the resolved inherited passing score when deciding retakes', () => {
+        const student = mapReportStudentSummary(
+            {
+                student_user_id: '11111111-1111-4111-8111-111111111111',
+                student_record_id: '22222222-2222-4222-8222-222222222222',
+                student_number: '2024-0002',
+                first_name: 'Maria',
+                last_name: 'Garcia',
+                attempt_id: '33333333-3333-4333-8333-333333333333',
+                attempt_status: 'COMPLETED',
+                started_at: '2026-04-20T09:00:00.000Z',
+                completed_at: '2026-04-20T09:50:00.000Z',
+                time_spent_minutes: 50,
+                score: 70,
+                total_score: 100,
+                attempt_count: 1,
+                incident_count: 0,
+                open_incident_count: 0,
+                pending_incident_count: 0,
+                reviewed_incident_count: 0,
+                confirmed_incident_count: 0,
+                dismissed_incident_count: 0,
+                highest_incident_type: null,
+                highest_incident_severity: null,
+            },
+            68,
+        );
+
+        expect(student.needsRetake).toBe(false);
+    });
+
     it('does not keep a student in the makeup queue when an active makeup override already exists', () => {
         const student = mapReportStudentSummary(
             {

@@ -225,8 +225,128 @@ describe('ConfigurationService', () => {
                 institution.id,
             );
 
-            // This currently fails because map-exam-configuration-state doesn't read from system_settings
             expect(result.configuration.lobbyAdmissionMode).toBe('INSTRUCTOR_GATED');
+        },
+    );
+
+    testWithDbClient(
+        'inherits global defaults for general settings and runtime configuration when local fields are null',
+        async ({ dbClient }) => {
+            const { institution, exam } = await createExamFixture(dbClient);
+
+            await dbClient
+                .insertInto('system_settings')
+                .values({
+                    category: 'examination',
+                    setting_key: 'examination.global_defaults',
+                    setting_value: JSON.stringify({
+                        ...DEFAULT_EXAMINATION_GLOBAL_SETTINGS,
+                        defaultShuffleQuestions: true,
+                        defaultAllowReview: true,
+                        defaultLobbyAdmissionMode: 'INSTRUCTOR_GATED',
+                        defaultStrictMode: false,
+                        defaultWebSecurity: {
+                            ...DEFAULT_EXAMINATION_GLOBAL_SETTINGS.defaultWebSecurity,
+                            clipboard_control: false,
+                        },
+                    }),
+                    updated_at: new Date(),
+                })
+                .onConflict((oc) =>
+                    oc.column('setting_key').doUpdateSet({
+                        setting_value: JSON.stringify({
+                            ...DEFAULT_EXAMINATION_GLOBAL_SETTINGS,
+                            defaultShuffleQuestions: true,
+                            defaultAllowReview: true,
+                            defaultLobbyAdmissionMode: 'INSTRUCTOR_GATED',
+                            defaultStrictMode: false,
+                            defaultWebSecurity: {
+                                ...DEFAULT_EXAMINATION_GLOBAL_SETTINGS.defaultWebSecurity,
+                                clipboard_control: false,
+                            },
+                        }),
+                        updated_at: new Date(),
+                    }),
+                )
+                .execute();
+
+            const inherited = await ConfigurationService.getExamConfiguration(
+                dbClient,
+                exam.exam_id,
+                institution.id,
+            );
+
+            expect(inherited.settings).toEqual({
+                shuffleQuestions: true,
+                showCorrectAnswers: false,
+                allowReview: true,
+                randomizeChoices: false,
+            });
+            expect(inherited.configuration.lobbyAdmissionMode).toBe('INSTRUCTOR_GATED');
+            expect(inherited.configuration.strictMode).toBe(false);
+            expect(inherited.configuration.webSecurity.clipboard_control).toBe(false);
+        },
+    );
+
+    testWithDbClient(
+        'reverts explicit configuration overrides back to inherited global defaults with null updates',
+        async ({ dbClient }) => {
+            const { institution, exam } = await createExamFixture(dbClient);
+
+            await dbClient
+                .insertInto('system_settings')
+                .values({
+                    category: 'examination',
+                    setting_key: 'examination.global_defaults',
+                    setting_value: JSON.stringify({
+                        ...DEFAULT_EXAMINATION_GLOBAL_SETTINGS,
+                        defaultShuffleQuestions: true,
+                        defaultStrictMode: false,
+                    }),
+                    updated_at: new Date(),
+                })
+                .onConflict((oc) =>
+                    oc.column('setting_key').doUpdateSet({
+                        setting_value: JSON.stringify({
+                            ...DEFAULT_EXAMINATION_GLOBAL_SETTINGS,
+                            defaultShuffleQuestions: true,
+                            defaultStrictMode: false,
+                        }),
+                        updated_at: new Date(),
+                    }),
+                )
+                .execute();
+
+            await ConfigurationService.updateExamConfiguration(
+                dbClient,
+                exam.exam_id,
+                {
+                    settings: {
+                        shuffleQuestions: false,
+                    },
+                    configuration: {
+                        strictMode: true,
+                    },
+                } as any,
+                institution.id,
+            );
+
+            const reverted = await ConfigurationService.updateExamConfiguration(
+                dbClient,
+                exam.exam_id,
+                {
+                    settings: {
+                        shuffleQuestions: null,
+                    },
+                    configuration: {
+                        strictMode: null,
+                    },
+                } as any,
+                institution.id,
+            );
+
+            expect(reverted.settings.shuffleQuestions).toBe(true);
+            expect(reverted.configuration.strictMode).toBe(false);
         },
     );
 });

@@ -17,6 +17,10 @@ import {
     replaceAccessControlRolePermissionsRouteHandler,
 } from './controllers/replace-access-control-role-permissions.controller';
 import {
+    resetAccessControlRolePermissionsRoute,
+    resetAccessControlRolePermissionsRouteHandler,
+} from './controllers/reset-access-control-role-permissions.controller';
+import {
     updateAccessControlRoleRoute,
     updateAccessControlRoleRouteHandler,
 } from './controllers/update-access-control-role.controller';
@@ -31,6 +35,10 @@ rolesRoutes
     .openapi(
         replaceAccessControlRolePermissionsRoute,
         replaceAccessControlRolePermissionsRouteHandler,
+    )
+    .openapi(
+        resetAccessControlRolePermissionsRoute,
+        resetAccessControlRolePermissionsRouteHandler,
     );
 
 export default rolesRoutes;
