@@ -175,4 +175,42 @@ describe('useRoleMatrix hook', () => {
         expect(mockResetMutateAsync).toHaveBeenCalledWith(1);
         expect(result.current.draftPermissionIdsByRoleId[1]).toEqual(['perm-1']);
     });
+
+    it('preserves newer local changes if a toggle occurs while a prior save is in-flight', async () => {
+        let resolveFirstMutation!: (value: unknown) => void;
+        const firstMutationPromise = new Promise((resolve) => {
+            resolveFirstMutation = resolve;
+        });
+
+        mockMutateAsync.mockImplementationOnce(() => firstMutationPromise);
+
+        const { result } = renderHook(() => useRoleMatrix());
+
+        // Toggle perm-2 ON (triggers first save mutation)
+        act(() => {
+            result.current.handlePermissionToggle(1, 'perm-2', true);
+        });
+
+        expect(mockMutateAsync).toHaveBeenCalledTimes(1);
+
+        // While first mutation in-flight, toggle perm-2 OFF
+        act(() => {
+            result.current.handlePermissionToggle(1, 'perm-2', false);
+        });
+
+        // Resolve first mutation which would return ['perm-1', 'perm-2']
+        await act(async () => {
+            resolveFirstMutation({
+                id: 1,
+                name: 'Admin',
+                slug: 'admin',
+                isSystem: true,
+                permissionIds: ['perm-1', 'perm-2'],
+                permissionSyncMode: 'CUSTOM',
+            });
+        });
+
+        // The newer draft of ['perm-1'] should be preserved, not overwritten by ['perm-1', 'perm-2']
+        expect(result.current.draftPermissionIdsByRoleId[1]).toEqual(['perm-1']);
+    });
 });

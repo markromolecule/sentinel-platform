@@ -26,7 +26,7 @@ export function RoleMatrixModuleRow({
             className="bg-muted/15 hover:bg-muted/20 cursor-pointer border border-[#323d8f]/10"
             onClick={onToggle}
         >
-            <TableCell className="border-muted/30 sticky left-0 z-10 border-r py-3 pl-10 whitespace-normal">
+            <TableCell className="border-muted/30 sticky left-0 z-10 border-r py-3 pl-10 bg-inherit whitespace-normal">
                 <div className="flex items-start gap-2">
                     <div className="mt-0.5">
                         {isCollapsed ? (
