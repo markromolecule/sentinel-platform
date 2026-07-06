@@ -182,4 +182,69 @@ describe('createExam service with assignment sync', () => {
             assignedRoomNames: ['Room A'],
         });
     });
+
+    it('persists null passing_score when create payload inherits the global default', async () => {
+        const mockDb = {} as any;
+        const mockBody = {
+            title: 'Inherited Passing Score Exam',
+            description: 'This exam inherits the support-managed passing score baseline.',
+            classroomId: 'classroom-1',
+            startDateTime: '2026-06-14T08:00:00Z',
+            endDateTime: '2026-06-14T09:00:00Z',
+            durationMinutes: 60,
+        };
+
+        vi.mocked(resolveInstructorExamAssignmentTargets).mockResolvedValue({
+            classroomAssignment: {
+                classGroupId: 'class-group-1',
+                className: 'Class A',
+                institutionId: 'inst-1',
+                subjectId: 'sub-1',
+                subjectTitle: 'Subject 1',
+                sectionId: 'sec-1',
+                sectionName: 'Section 1',
+            },
+            assignedSectionIds: [],
+            resolvedClassrooms: [],
+        });
+        vi.mocked(createExamData).mockResolvedValue({ exam_id: 'exam-1' } as any);
+        vi.mocked(getExamDetail).mockResolvedValue({ id: 'exam-1' } as any);
+
+        await createExam(mockDb, mockBody as any, 'inst-1', 'user-1');
+
+        expect(vi.mocked(createExamData).mock.calls[0]?.[0]?.values?.passing_score).toBeNull();
+    });
+
+    it('persists explicit passing_score overrides during create', async () => {
+        const mockDb = {} as any;
+        const mockBody = {
+            title: 'Explicit Passing Score Exam',
+            description: 'This exam intentionally overrides the inherited passing score baseline.',
+            classroomId: 'classroom-1',
+            startDateTime: '2026-06-14T08:00:00Z',
+            endDateTime: '2026-06-14T09:00:00Z',
+            durationMinutes: 60,
+            passingScore: 75,
+        };
+
+        vi.mocked(resolveInstructorExamAssignmentTargets).mockResolvedValue({
+            classroomAssignment: {
+                classGroupId: 'class-group-1',
+                className: 'Class A',
+                institutionId: 'inst-1',
+                subjectId: 'sub-1',
+                subjectTitle: 'Subject 1',
+                sectionId: 'sec-1',
+                sectionName: 'Section 1',
+            },
+            assignedSectionIds: [],
+            resolvedClassrooms: [],
+        });
+        vi.mocked(createExamData).mockResolvedValue({ exam_id: 'exam-1' } as any);
+        vi.mocked(getExamDetail).mockResolvedValue({ id: 'exam-1' } as any);
+
+        await createExam(mockDb, mockBody as any, 'inst-1', 'user-1');
+
+        expect(vi.mocked(createExamData).mock.calls[0]?.[0]?.values?.passing_score).toBe(75);
+    });
 });

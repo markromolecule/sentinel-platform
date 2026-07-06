@@ -1,6 +1,7 @@
 import { type DbClient, executeTransaction } from '@sentinel/db';
 import { getRoleRecord } from './get-role-record.service';
 import { readRoles } from './get-roles.service';
+import { resolveRolePermissionSyncMode } from './role-permission-sync-mode.service';
 import { ActivityNotificationService } from '../../../general/notification/services/activity-notification.service';
 
 /**
@@ -16,6 +17,7 @@ export async function replaceRolePermissions(
     const role = await getRoleRecord(dbClient, roleId);
 
     const normalizedPermissionIds = Array.from(new Set(permissionIds));
+    const syncMode = await resolveRolePermissionSyncMode(dbClient, role, normalizedPermissionIds);
 
     await executeTransaction(async (trx) => {
         await trx.deleteFrom('rbac_role_permissions').where('role_id', '=', roleId).execute();
@@ -31,6 +33,15 @@ export async function replaceRolePermissions(
                 )
                 .execute();
         }
+
+        await trx
+            .updateTable('roles')
+            .set({
+                permission_sync_mode: syncMode,
+                updated_at: new Date(),
+            })
+            .where('role_id', '=', roleId)
+            .execute();
     });
 
     const roles = await readRoles(dbClient);

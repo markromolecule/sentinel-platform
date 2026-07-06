@@ -7,6 +7,13 @@ vi.mock('../data/get-exams', () => ({
     getExamsData: vi.fn(),
 }));
 
+vi.mock('../../configuration/configuration.service', () => ({
+    resolveExaminationGlobalSettings: vi.fn().mockResolvedValue({
+        defaultPassingScore: 70,
+        defaultDurationMinutes: 60,
+    }),
+}));
+
 describe('getExams service', () => {
     const mockDb = {} as DbClient;
 

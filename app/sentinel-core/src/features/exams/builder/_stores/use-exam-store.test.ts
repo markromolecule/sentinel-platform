@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it } from 'vitest';
+import { DEFAULT_EXAMINATION_GLOBAL_SETTINGS } from '@sentinel/shared/constants';
 import type { ExamQuestion, ProctorExam } from '@sentinel/shared/types';
 import { buildBuilderWorkspacePayload, useExamStore } from './use-exam-store';
 
@@ -61,6 +62,15 @@ function createQuestion(id: string): ExamQuestion {
 describe('useExamStore', () => {
     beforeEach(() => {
         useExamStore.setState(useExamStore.getInitialState(), true);
+    });
+
+    it('starts from shared global default passing score and duration', () => {
+        expect(useExamStore.getState().passingScore).toBe(
+            DEFAULT_EXAMINATION_GLOBAL_SETTINGS.defaultPassingScore,
+        );
+        expect(useExamStore.getState().durationMinutes).toBe(
+            DEFAULT_EXAMINATION_GLOBAL_SETTINGS.defaultDurationMinutes,
+        );
     });
 
     it('preserves unsaved imported questions when the same exam workspace rehydrates', () => {

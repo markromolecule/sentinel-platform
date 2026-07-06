@@ -55,4 +55,36 @@ describe('syncSystemRoles', () => {
             }
         },
     );
+
+    testWithDbClient(
+        'does not reset permission_sync_mode to BLUEPRINT for customized roles during sync',
+        async ({ dbClient }) => {
+            const firstRoleName = Object.entries(SYSTEM_ROLE_BLUEPRINTS)[0]![0];
+
+            await dbClient
+                .insertInto('roles')
+                .values({
+                    role_name: firstRoleName,
+                    description: 'custom description',
+                    is_system: true,
+                    permission_sync_mode: 'CUSTOM',
+                })
+                .onConflict((oc) =>
+                    oc.column('role_name').doUpdateSet({
+                        permission_sync_mode: 'CUSTOM',
+                    }),
+                )
+                .execute();
+
+            await syncSystemRoles(dbClient);
+
+            const syncedRole = await dbClient
+                .selectFrom('roles')
+                .select(['role_name', 'permission_sync_mode'])
+                .where('role_name', '=', firstRoleName)
+                .executeTakeFirstOrThrow();
+
+            expect(syncedRole.permission_sync_mode).toBe('CUSTOM');
+        },
+    );
 });

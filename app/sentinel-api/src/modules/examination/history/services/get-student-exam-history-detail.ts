@@ -2,11 +2,13 @@ import { type DbClient, type question_type } from '@sentinel/db';
 import { HTTPException } from 'hono/http-exception';
 import { sql } from 'kysely';
 import type { ExamHistoryDetail } from '../history.dto';
+import { resolveExaminationGlobalSettings } from '../../configuration/configuration.service';
 import { getExamColumnSupport } from '../../exams/helper/exam-schema-compat';
 import {
     mapExamHistoryDetailResponse,
     type RawExamRecord,
 } from '../../exams/services/map-exam-response.service';
+import { applyEffectiveExamBaselineToRawRecord } from '../../exams/services/resolve-effective-exam-baseline.service';
 
 export async function getStudentExamHistoryDetail(
     dbClient: DbClient,
@@ -14,7 +16,10 @@ export async function getStudentExamHistoryDetail(
     studentUserId: string,
     institutionId?: string,
 ): Promise<ExamHistoryDetail> {
-    const columnSupport = await getExamColumnSupport(dbClient);
+    const [columnSupport, globalSettings] = await Promise.all([
+        getExamColumnSupport(dbClient),
+        resolveExaminationGlobalSettings(dbClient),
+    ]);
 
     const record = (await dbClient
         .selectFrom('exam_attempts as ea')
@@ -90,5 +95,7 @@ export async function getStudentExamHistoryDetail(
         });
     }
 
-    return mapExamHistoryDetailResponse(record);
+    return mapExamHistoryDetailResponse(
+        applyEffectiveExamBaselineToRawRecord(record, globalSettings),
+    );
 }

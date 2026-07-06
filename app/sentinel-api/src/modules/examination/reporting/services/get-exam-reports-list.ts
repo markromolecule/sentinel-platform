@@ -1,8 +1,10 @@
 import { type DbClient } from '@sentinel/db';
 import { sql } from 'kysely';
 import type { GetExamReportsQuery } from '../reporting.dto';
+import { resolveExaminationGlobalSettings } from '../../configuration/configuration.service';
 import { mapExamSummaryResponse } from '../../exams/services/map-exam-response.service';
 import type { RawExamRecord } from '../../exams/services/map-exam-response.service';
+import { applyEffectiveExamBaselineToRawRecord } from '../../exams/services/resolve-effective-exam-baseline.service';
 
 type GetExamReportsListArgs = {
     dbClient: DbClient;
@@ -24,6 +26,7 @@ export async function getExamReportsList({
     userId,
     departmentId,
 }: GetExamReportsListArgs) {
+    const globalSettings = await resolveExaminationGlobalSettings(dbClient);
     const page = filters.page ?? 1;
     const limit = filters.pageSize ?? filters.limit ?? 9;
     const offset = (page - 1) * limit;
@@ -307,7 +310,7 @@ export async function getExamReportsList({
         .execute()) as RawExamRecord[];
 
     const data = records.map((record) =>
-        mapExamSummaryResponse(record, {
+        mapExamSummaryResponse(applyEffectiveExamBaselineToRawRecord(record, globalSettings), {
             studentView: false,
         }),
     );

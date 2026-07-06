@@ -1,5 +1,16 @@
 import type { ApiClientType } from '../../api-client';
+import type { ExaminationGlobalSettings } from '@sentinel/shared/types';
 import type { ApiExamResponse, ExamConfigurationState } from './types';
+
+export async function getExaminationConfigurationDefaults(
+    apiClient: ApiClientType,
+): Promise<ExaminationGlobalSettings> {
+    const response: ApiExamResponse<ExaminationGlobalSettings> = await apiClient(
+        '/configuration/defaults',
+    );
+
+    return response.data;
+}
 
 export async function getExamConfiguration(
     apiClient: ApiClientType,

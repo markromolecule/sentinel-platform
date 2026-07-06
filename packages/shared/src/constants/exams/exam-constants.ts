@@ -1,5 +1,7 @@
 import type { ExamCreateFormValues } from '../../schema/exams/exam-create-schema';
+import type { ExaminationGlobalSettings } from '../../types';
 import type { QuestionType } from '../../types';
+import { DEFAULT_EXAMINATION_GLOBAL_SETTINGS } from '../access-control';
 
 export const EXAM_STATUS_OPTIONS = [
     { label: 'Active', value: 'active' },
@@ -14,6 +16,7 @@ export const EXAM_QUERY_KEYS = {
     all: ['exams'] as const,
     details: (id: string) => ['exams', id] as const,
     configuration: (id: string) => ['exams', id, 'configuration'] as const,
+    configurationDefaults: () => ['exams', 'configuration', 'defaults'] as const,
     lobbyCount: (id: string) => ['exams', id, 'lobby', 'count'] as const,
     report: (id: string) => ['exams', id, 'report'] as const,
     attemptReport: (attemptId: string) => ['exams', 'attempt-report', attemptId] as const,
@@ -76,7 +79,7 @@ const formatDateTimeLocal = (date: Date) =>
         date.getHours(),
     )}:${padDatePart(date.getMinutes())}`;
 
-const createSuggestedExamWindow = () => {
+const createSuggestedExamWindow = (durationMinutes: number) => {
     const now = new Date();
     const startDateTime = new Date(now);
 
@@ -93,17 +96,19 @@ const createSuggestedExamWindow = () => {
     }
 
     const endDateTime = new Date(startDateTime);
-    endDateTime.setMinutes(endDateTime.getMinutes() + 60);
+    endDateTime.setMinutes(endDateTime.getMinutes() + durationMinutes);
 
     return {
         startDateTime: formatDateTimeLocal(startDateTime),
         endDateTime: formatDateTimeLocal(endDateTime),
-        durationMinutes: 60,
+        durationMinutes,
     };
 };
 
-export const getExamCreateFormDefaults = (): ExamCreateFormValues => {
-    const suggestedWindow = createSuggestedExamWindow();
+export const getExamCreateFormDefaults = (
+    defaults: ExaminationGlobalSettings = DEFAULT_EXAMINATION_GLOBAL_SETTINGS,
+): ExamCreateFormValues => {
+    const suggestedWindow = createSuggestedExamWindow(defaults.defaultDurationMinutes);
 
     return {
         title: '',
@@ -114,11 +119,11 @@ export const getExamCreateFormDefaults = (): ExamCreateFormValues => {
         startDateTime: suggestedWindow.startDateTime,
         endDateTime: suggestedWindow.endDateTime,
         durationMinutes: suggestedWindow.durationMinutes,
-        passingScore: 75,
-        shuffleQuestions: true,
-        showCorrectAnswers: false,
-        allowReview: true,
-        randomizeChoices: true,
+        passingScore: defaults.defaultPassingScore,
+        shuffleQuestions: defaults.defaultShuffleQuestions,
+        showCorrectAnswers: defaults.defaultShowCorrectAnswers,
+        allowReview: defaults.defaultAllowReview,
+        randomizeChoices: defaults.defaultRandomizeChoices,
         instructorId: undefined,
         instructorIds: [],
         isPublic: false,

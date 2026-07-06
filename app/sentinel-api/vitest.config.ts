@@ -7,8 +7,13 @@ export default defineConfig({
     test: {
         globals: true,
         environment: 'node',
-        setupFiles: ['./vitest.setup.ts'],
+        setupFiles: ['dotenv/config', './vitest.setup.ts'],
         testTimeout: 30000,
         fileParallelism: false,
+        server: {
+            deps: {
+                inline: ['@sentinel/db', '@sentinel/shared'],
+            },
+        },
     },
 });

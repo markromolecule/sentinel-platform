@@ -13,10 +13,10 @@ import type {
 export type ExamStatus = 'draft' | 'published';
 
 const DEFAULT_EXAM_SETTINGS: ExamSettings = {
-    shuffleQuestions: true,
-    showCorrectAnswers: false,
-    allowReview: true,
-    randomizeChoices: true,
+    shuffleQuestions: DEFAULT_EXAMINATION_GLOBAL_SETTINGS.defaultShuffleQuestions,
+    showCorrectAnswers: DEFAULT_EXAMINATION_GLOBAL_SETTINGS.defaultShowCorrectAnswers,
+    allowReview: DEFAULT_EXAMINATION_GLOBAL_SETTINGS.defaultAllowReview,
+    randomizeChoices: DEFAULT_EXAMINATION_GLOBAL_SETTINGS.defaultRandomizeChoices,
 };
 
 const DEFAULT_EXAM_CONFIGURATION: ExamConfiguration = {
@@ -212,8 +212,8 @@ function createDefaultState(): ExamStoreState {
         sectionIds: [],
         startDateTime: null,
         endDateTime: null,
-        durationMinutes: 60,
-        passingScore: 75,
+        durationMinutes: DEFAULT_EXAMINATION_GLOBAL_SETTINGS.defaultDurationMinutes,
+        passingScore: DEFAULT_EXAMINATION_GLOBAL_SETTINGS.defaultPassingScore,
         settings: { ...DEFAULT_EXAM_SETTINGS },
         configuration: { ...DEFAULT_EXAM_CONFIGURATION },
         questionSections: [createQuestionSection(0, DEFAULT_SECTION_TITLE)],
@@ -319,8 +319,11 @@ export const useExamStore = create(
                     exam.duration,
                     exam.endDateTime,
                 );
-                state.durationMinutes = exam.duration || 60;
-                state.passingScore = exam.passingScore || 75;
+                state.durationMinutes =
+                    exam.duration ?? DEFAULT_EXAMINATION_GLOBAL_SETTINGS.defaultDurationMinutes;
+                state.passingScore =
+                    exam.passingScore ??
+                    DEFAULT_EXAMINATION_GLOBAL_SETTINGS.defaultPassingScore;
                 state.settings = exam.settings || { ...DEFAULT_EXAM_SETTINGS };
                 state.configuration = exam.configuration || { ...DEFAULT_EXAM_CONFIGURATION };
                 if (!shouldPreserveLocalQuestions) {

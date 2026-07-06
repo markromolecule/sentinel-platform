@@ -7,14 +7,20 @@ export { getExamConfigurationState } from './services/get-exam-configuration-sta
 export { hasExamConfigurationChanges } from './services/has-exam-configuration-changes';
 export { mapExamConfigurationState } from './services/map-exam-configuration-state';
 export { normalizeExamConfigurationState } from './services/normalize-exam-configuration-state';
+export { resolveExaminationGlobalSettings } from './services/resolve-examination-global-settings.service';
 export { resolveExamSettings } from './services/resolve-exam-settings';
 export { saveExamConfiguration } from './services/save-exam-configuration';
 export type { ExamConfigurationPayload } from './services/configuration.types';
 import { getExamConfigurationState } from './services/get-exam-configuration-state';
+import { resolveExaminationGlobalSettings } from './services/resolve-examination-global-settings.service';
 import { saveExamConfiguration } from './services/save-exam-configuration';
 import { assertExamConfigurationMutable } from './services/assert-exam-configuration-mutable';
 
 export class ConfigurationService {
+    static async getExaminationConfigurationDefaults(dbClient: DbClient) {
+        return await resolveExaminationGlobalSettings(dbClient);
+    }
+
     static async getExamConfiguration(
         dbClient: DbClient,
         examId: string,

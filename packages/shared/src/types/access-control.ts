@@ -18,6 +18,7 @@ export interface AccessControlRole {
     domainScope: string[];
     isActive: boolean;
     assignableBy: string[];
+    permissionSyncMode: 'BLUEPRINT' | 'CUSTOM';
     permissionIds: string[];
     permissionCount: number;
     assignmentCount: number;

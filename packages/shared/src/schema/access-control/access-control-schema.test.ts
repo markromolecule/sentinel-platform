@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { accessControlRoleBodySchema } from './access-control-schema';
+import { accessControlRoleBodySchema, accessControlRoleSchema } from './access-control-schema';
 
 describe('accessControlRoleBodySchema', () => {
     it('should parse a valid role request body successfully', () => {
@@ -88,5 +88,58 @@ describe('accessControlRoleBodySchema', () => {
         };
 
         expect(accessControlRoleBodySchema.safeParse(tooLongDescription).success).toBe(false);
+    });
+});
+
+describe('accessControlRoleSchema', () => {
+    it('should validate a complete role record including permissionSyncMode', () => {
+        const validRole = {
+            id: 1,
+            name: 'Academic Moderator',
+            slug: 'academic-moderator',
+            description: 'Custom moderator role for specific academic contexts.',
+            isSystem: false,
+            domainScope: ['app'],
+            isActive: true,
+            assignableBy: ['admin'],
+            permissionSyncMode: 'CUSTOM',
+            permissionIds: ['12114abb-a8e3-41e3-bc25-b258b10e3ce4'],
+            permissionCount: 1,
+            assignmentCount: 0,
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+        };
+
+        const parsed = accessControlRoleSchema.safeParse(validRole);
+        expect(parsed.success).toBe(true);
+        if (parsed.success) {
+            expect(parsed.data.permissionSyncMode).toBe('CUSTOM');
+        }
+    });
+
+    it('should fail validation if permissionSyncMode is missing or invalid', () => {
+        const missingSyncMode = {
+            id: 1,
+            name: 'Academic Moderator',
+            slug: 'academic-moderator',
+            description: 'Custom moderator role for specific academic contexts.',
+            isSystem: false,
+            domainScope: ['app'],
+            isActive: true,
+            assignableBy: ['admin'],
+            permissionIds: [],
+            permissionCount: 0,
+            assignmentCount: 0,
+            createdAt: null,
+            updatedAt: null,
+        };
+
+        const invalidSyncMode = {
+            ...missingSyncMode,
+            permissionSyncMode: 'INVALID_VALUE',
+        };
+
+        expect(accessControlRoleSchema.safeParse(missingSyncMode).success).toBe(false);
+        expect(accessControlRoleSchema.safeParse(invalidSyncMode).success).toBe(false);
     });
 });

@@ -1,9 +1,14 @@
 import { describe, expect, it, vi, beforeEach } from 'vitest';
-import { renderHook, act } from '@testing-library/react';
+import { renderHook, act, waitFor } from '@testing-library/react';
+import { DEFAULT_EXAMINATION_GLOBAL_SETTINGS } from '@sentinel/shared/constants';
 import { useExamCreateForm } from './use-exam-create-form';
-import { useCreateExamMutation } from '@sentinel/hooks';
+import {
+    useCreateExamMutation,
+} from '@sentinel/hooks';
 
 const mockPush = vi.fn();
+let mockedDefaults: any;
+
 vi.mock('next/navigation', () => ({
     useRouter: () => ({
         push: mockPush,
@@ -12,14 +17,18 @@ vi.mock('next/navigation', () => ({
 
 vi.mock('@sentinel/hooks', () => ({
     useCreateExamMutation: vi.fn(),
+    useExaminationConfigurationDefaultsQuery: vi.fn(() => ({
+        data: mockedDefaults,
+    })),
 }));
 
 describe('useExamCreateForm', () => {
     beforeEach(() => {
         vi.clearAllMocks();
+        mockedDefaults = undefined;
     });
 
-    it('submits form and calls createExamMutation', async () => {
+    it('submits required fields while omitting untouched inherited defaults', async () => {
         const onClose = vi.fn();
         const mockMutateAsync = vi
             .fn()
@@ -30,7 +39,6 @@ describe('useExamCreateForm', () => {
 
         const { result } = renderHook(() => useExamCreateForm(onClose));
 
-        // Set minimal valid form fields
         act(() => {
             result.current.form.setValue('title', 'Exam Title');
             result.current.form.setValue(
@@ -45,14 +53,8 @@ describe('useExamCreateForm', () => {
             result.current.form.setValue('startDateTime', '2026-06-14T08:00');
             result.current.form.setValue('endDateTime', '2026-06-14T09:00');
             result.current.form.setValue('durationMinutes', 60);
-            result.current.form.setValue('passingScore', 75);
-            result.current.form.setValue('shuffleQuestions', true);
-            result.current.form.setValue('showCorrectAnswers', false);
-            result.current.form.setValue('allowReview', true);
-            result.current.form.setValue('randomizeChoices', true);
         });
 
-        // Submit form
         await act(async () => {
             await result.current.onSubmit(result.current.form.getValues());
         });
@@ -69,14 +71,62 @@ describe('useExamCreateForm', () => {
             startDateTime: new Date('2026-06-14T08:00').toISOString(),
             endDateTime: new Date('2026-06-14T09:00').toISOString(),
             durationMinutes: 60,
-            passingScore: 75,
-            shuffleQuestions: true,
-            showCorrectAnswers: false,
-            allowReview: true,
-            randomizeChoices: true,
             isPublic: false,
         });
         expect(onClose).toHaveBeenCalled();
         expect(mockPush).not.toHaveBeenCalled();
+    });
+
+    it('hydrates pristine form defaults when examination defaults load', async () => {
+        vi.mocked(useCreateExamMutation).mockReturnValue({
+            mutateAsync: vi.fn(),
+        } as any);
+
+        const { result, rerender } = renderHook(() => useExamCreateForm(vi.fn()));
+
+        expect(result.current.form.getValues('passingScore')).toBe(
+            DEFAULT_EXAMINATION_GLOBAL_SETTINGS.defaultPassingScore,
+        );
+
+        mockedDefaults = {
+            ...DEFAULT_EXAMINATION_GLOBAL_SETTINGS,
+            defaultDurationMinutes: 90,
+            defaultPassingScore: 88,
+            defaultShuffleQuestions: true,
+        };
+
+        rerender();
+
+        await waitFor(() => {
+            expect(result.current.form.getValues('passingScore')).toBe(88);
+            expect(result.current.form.getValues('durationMinutes')).toBe(90);
+            expect(result.current.form.getValues('shuffleQuestions')).toBe(true);
+        });
+    });
+
+    it('preserves dirty form values when examination defaults load later', async () => {
+        vi.mocked(useCreateExamMutation).mockReturnValue({
+            mutateAsync: vi.fn(),
+        } as any);
+
+        const { result, rerender } = renderHook(() => useExamCreateForm(vi.fn()));
+
+        act(() => {
+            result.current.form.setValue('title', 'Do not overwrite me', { shouldDirty: true });
+        });
+
+        mockedDefaults = {
+            ...DEFAULT_EXAMINATION_GLOBAL_SETTINGS,
+            defaultPassingScore: 88,
+        };
+
+        rerender();
+
+        await waitFor(() => {
+            expect(result.current.form.getValues('title')).toBe('Do not overwrite me');
+        });
+        expect(result.current.form.getValues('passingScore')).toBe(
+            DEFAULT_EXAMINATION_GLOBAL_SETTINGS.defaultPassingScore,
+        );
     });
 });

@@ -149,6 +149,20 @@ export async function replaceAccessControlRolePermissions(
     return response.data;
 }
 
+export async function resetAccessControlRolePermissionsToBlueprint(
+    apiClient: ApiClientType,
+    roleId: number,
+): Promise<AccessControlRole> {
+    const response: ApiResponse<AccessControlRole> = await apiClient(
+        `/access-control/roles/${roleId}/permissions/reset-blueprint`,
+        {
+            method: 'POST',
+        },
+    );
+
+    return response.data;
+}
+
 export async function getAccessControlAssignments(
     apiClient: ApiClientType,
     search?: string,

@@ -221,4 +221,26 @@ describe('updateExam service with assignment sync', () => {
             examId: 'exam-1',
         });
     });
+
+    it('persists passingScore null to return the exam to inherited defaults', async () => {
+        const mockDb = {} as any;
+        const mockBody = {
+            passingScore: null,
+        };
+
+        vi.mocked(getExamByIdData).mockResolvedValue(mockCurrentExam as any);
+        vi.mocked(updateExamData).mockResolvedValue(mockCurrentExam as any);
+        vi.mocked(getExamDetail).mockResolvedValue({ id: 'exam-1' } as any);
+
+        await updateExam(mockDb, 'exam-1', mockBody as any, 'inst-1', 'user-1');
+
+        expect(updateExamData).toHaveBeenCalledWith({
+            dbClient: mockTrx,
+            id: 'exam-1',
+            institutionId: 'inst-1',
+            values: expect.objectContaining({
+                passing_score: null,
+            }),
+        });
+    });
 });

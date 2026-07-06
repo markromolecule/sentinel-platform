@@ -178,6 +178,27 @@ describe('mapExamDetailResponse', () => {
         expect(detail.assignedInstructorNames).toEqual(['Juan dela Cruz', 'Maria Santos']);
     });
 
+    it('preserves effective inherited passing scores on detail mappings', () => {
+        const detail = mapExamDetailResponse({
+            exam: {
+                ...createRawExamRecord(),
+                passing_score: 68,
+            },
+            settings: {
+                shuffleQuestions: false,
+                showCorrectAnswers: false,
+                allowReview: true,
+                randomizeChoices: false,
+            },
+            configuration: createExamConfiguration(),
+            mediaPipeSandbox: DEFAULT_TELEMETRY_SETTINGS.mediaPipeSandbox,
+            questionSections: [],
+            questions: [],
+        });
+
+        expect(detail.passingScore).toBe(68);
+    });
+
     it('maps assign-first classroom relationships into singular and plural classroom fields', () => {
         const detail = mapExamDetailResponse({
             exam: {
@@ -268,6 +289,21 @@ describe('mapExamDetailResponse', () => {
 });
 
 describe('mapExamHistoryDetailResponse', () => {
+    it('keeps effective inherited passing scores in history details', () => {
+        const detail = mapExamHistoryDetailResponse({
+            ...createRawExamRecord(),
+            passing_score: 68,
+            attempt_id: 'attempt-1',
+            attempt_status: 'COMPLETED',
+            attempt_completed_at: new Date('2026-06-26T10:00:00.000Z'),
+            attempt_score: 7,
+            attempt_total_score: 10,
+        });
+
+        expect(detail.passingScore).toBe(68);
+        expect(detail.result).toBe('passed');
+    });
+
     it('hides manual-release scores until the attempt is finalized', () => {
         const detail = mapExamHistoryDetailResponse({
             ...createRawExamRecord(),

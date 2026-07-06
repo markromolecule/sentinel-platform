@@ -1,4 +1,6 @@
-import { config } from 'dotenv';
+import { beforeEach } from 'vitest';
+import { resetAccessControlCatalogsCache } from './src/modules/security/access-control/services/access-control-catalog.service';
 
-// Load environment variables from .env file for tests
-config({ path: '.env' });
+beforeEach(() => {
+    resetAccessControlCatalogsCache();
+});

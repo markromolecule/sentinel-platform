@@ -4,7 +4,10 @@ import { getExamDetail } from './get-exam-detail.service';
 import { getExamByIdData } from '../data/get-exam-by-id';
 import { getExamQuestionsData } from '../data/get-exam-questions';
 import { getExamSectionsData } from '../data/get-exam-sections';
-import { getExamConfigurationState } from '../../configuration/configuration.service';
+import {
+    getExamConfigurationState,
+    resolveExaminationGlobalSettings,
+} from '../../configuration/configuration.service';
 import { TelemetrySettingsService } from '../../../telemetry/settings/telemetry-settings.service';
 import { AccessGatekeeperService } from '../../access/access.service';
 import { RuntimeAccessService } from '../../runtime-access/runtime-access.service';
@@ -23,6 +26,7 @@ vi.mock('../data/get-exam-sections', () => ({
 
 vi.mock('../../configuration/configuration.service', () => ({
     getExamConfigurationState: vi.fn(),
+    resolveExaminationGlobalSettings: vi.fn(),
 }));
 
 vi.mock('../../../telemetry/settings/telemetry-settings.service', () => ({
@@ -144,6 +148,7 @@ describe('getExamDetail service', () => {
         vi.mocked(getExamSectionsData).mockResolvedValue([]);
         vi.mocked(getExamQuestionsData).mockResolvedValue([mockQuestion]);
         vi.mocked(getExamConfigurationState).mockResolvedValue(mockConfigState as any);
+        vi.mocked(resolveExaminationGlobalSettings).mockResolvedValue({} as any);
         vi.mocked(TelemetrySettingsService.getTelemetrySettings).mockResolvedValue(mockTelemetrySettings as any);
         vi.mocked(RuntimeAccessService.resolveExamRuntimeAccess).mockResolvedValue({
             state: 'open',
@@ -165,6 +170,7 @@ describe('getExamDetail service', () => {
         vi.mocked(getExamSectionsData).mockResolvedValue([]);
         vi.mocked(getExamQuestionsData).mockResolvedValue([mockQuestion]);
         vi.mocked(getExamConfigurationState).mockResolvedValue(mockConfigState as any);
+        vi.mocked(resolveExaminationGlobalSettings).mockResolvedValue({} as any);
         vi.mocked(TelemetrySettingsService.getTelemetrySettings).mockResolvedValue(mockTelemetrySettings as any);
         vi.mocked(AccessGatekeeperService.verifyStudentExamEligibility).mockResolvedValue({
             runtimeAccess: {

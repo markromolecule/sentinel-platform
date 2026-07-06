@@ -1,6 +1,11 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { type DbClient } from '@sentinel/db';
+import { resolveExaminationGlobalSettings } from '../../configuration/configuration.service';
 import { getExamReportsList } from './get-exam-reports-list';
+
+vi.mock('../../configuration/configuration.service', () => ({
+    resolveExaminationGlobalSettings: vi.fn(),
+}));
 
 vi.mock('../../exams/services/map-exam-response.service', () => ({
     mapExamSummaryResponse: vi.fn((record) => record),
@@ -11,6 +16,10 @@ describe('getExamReportsList', () => {
 
     beforeEach(() => {
         vi.clearAllMocks();
+        vi.mocked(resolveExaminationGlobalSettings).mockResolvedValue({
+            defaultDurationMinutes: 60,
+            defaultPassingScore: 68,
+        } as any);
 
         mockDb = {
             selectFrom: vi.fn().mockReturnThis(),
@@ -32,6 +41,8 @@ describe('getExamReportsList', () => {
             {
                 exam_id: 'exam-1',
                 title: 'Math Test',
+                duration_minutes: 60,
+                passing_score: null,
                 status: 'PUBLISHED',
             },
         ]);
@@ -53,5 +64,6 @@ describe('getExamReportsList', () => {
         expect(result.total).toBe(12);
         expect(result.totalPages).toBe(3);
         expect(result.data[0].exam_id).toBe('exam-1');
+        expect(result.data[0].passing_score).toBe(68);
     });
 });

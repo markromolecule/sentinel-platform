@@ -5,6 +5,7 @@ import { createRole } from './services/create-role.service';
 import { updateRole } from './services/update-role.service';
 import { deleteRole } from './services/delete-role.service';
 import { replaceRolePermissions } from './services/replace-role-permissions.service';
+import { resetRolePermissionsToBlueprint } from './services/reset-role-permissions-to-blueprint.service';
 
 /**
  * Service layer for Access Control Roles.
@@ -50,4 +51,9 @@ export class RolesService {
      * Replaces access-control permissions assigned to a given role ID.
      */
     static replaceRolePermissions = replaceRolePermissions;
+
+    /**
+     * Resets a system role's permissions to its hardcoded blueprint permissions.
+     */
+    static resetRolePermissionsToBlueprint = resetRolePermissionsToBlueprint;
 }

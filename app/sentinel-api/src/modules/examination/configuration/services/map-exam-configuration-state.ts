@@ -7,12 +7,16 @@ import {
     normalizeExamSettingsState,
 } from './normalize-exam-configuration-state';
 
-function buildFallbackSettings(record?: ExamConfigurationRecord | null) {
+function buildFallbackSettings(
+    record?: ExamConfigurationRecord | null,
+    defaults?: Partial<ExaminationGlobalSettings> | null,
+) {
     return {
-        shuffleQuestions: record?.shuffle_questions ?? false,
-        showCorrectAnswers: record?.show_correct_answers ?? false,
-        allowReview: record?.allow_review ?? false,
-        randomizeChoices: record?.randomize_choices ?? false,
+        shuffleQuestions: record?.shuffle_questions ?? defaults?.defaultShuffleQuestions ?? false,
+        showCorrectAnswers:
+            record?.show_correct_answers ?? defaults?.defaultShowCorrectAnswers ?? false,
+        allowReview: record?.allow_review ?? defaults?.defaultAllowReview ?? false,
+        randomizeChoices: record?.randomize_choices ?? defaults?.defaultRandomizeChoices ?? false,
     };
 }
 
@@ -20,14 +24,25 @@ export function mapExamConfigurationState(
     record?: ExamConfigurationRecord | null,
     defaults?: Partial<ExaminationGlobalSettings> | null,
 ): ExamConfigurationState {
-    const settings = normalizeExamSettingsState(buildFallbackSettings(record));
+    const settings = normalizeExamSettingsState(buildFallbackSettings(record, defaults));
     const defaultConfiguration = buildDefaultExamConfiguration(defaults ?? undefined);
 
     // Mapping and backward
-    const aiRules = (record?.ai_rules as any) || defaultConfiguration.aiRules;
-    const webSecurity = (record as any)?.web_security || defaultConfiguration.webSecurity;
-    const mobileSecurity = (record as any)?.mobile_security || defaultConfiguration.mobileSecurity;
-    const automaticClosePolicy = aiRules.automaticClosePolicy || defaultConfiguration.automaticClosePolicy;
+    const rawAiRules = (record?.ai_rules as any) ?? {};
+    const aiRules = {
+        ...defaultConfiguration.aiRules,
+        ...rawAiRules,
+    };
+    const webSecurity = {
+        ...defaultConfiguration.webSecurity,
+        ...(((record as any)?.web_security as Record<string, unknown> | null) ?? {}),
+    };
+    const mobileSecurity = {
+        ...defaultConfiguration.mobileSecurity,
+        ...(((record as any)?.mobile_security as Record<string, unknown> | null) ?? {}),
+    };
+    const automaticClosePolicy =
+        rawAiRules.automaticClosePolicy ?? defaultConfiguration.automaticClosePolicy;
 
     // Handle migration of old tab_switching from aiRules to webSecurity if it exists there and not in webSecurity
     if (

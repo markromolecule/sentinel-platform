@@ -22,6 +22,7 @@ export class RolesRepository {
                 'roles.domain_scope',
                 'roles.is_active',
                 'roles.assignable_by',
+                'roles.permission_sync_mode',
                 'roles.created_at',
                 'roles.updated_at',
                 sql<
@@ -53,6 +54,7 @@ export class RolesRepository {
                 'roles.domain_scope',
                 'roles.is_active',
                 'roles.assignable_by',
+                'roles.permission_sync_mode',
                 'roles.created_at',
                 'roles.updated_at',
             ])

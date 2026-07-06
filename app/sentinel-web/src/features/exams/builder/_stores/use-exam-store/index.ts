@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { immer } from 'zustand/middleware/immer';
+import { DEFAULT_EXAMINATION_GLOBAL_SETTINGS } from '@sentinel/shared/constants';
 import type { ExamQuestion } from '@sentinel/shared/types';
 import type { ExamStore } from './types';
 import {
@@ -43,8 +44,11 @@ export const useExamStore = create(
                     exam.duration,
                     exam.endDateTime,
                 );
-                state.durationMinutes = exam.duration || 60;
-                state.passingScore = exam.passingScore || 75;
+                state.durationMinutes =
+                    exam.duration ?? DEFAULT_EXAMINATION_GLOBAL_SETTINGS.defaultDurationMinutes;
+                state.passingScore =
+                    exam.passingScore ??
+                    DEFAULT_EXAMINATION_GLOBAL_SETTINGS.defaultPassingScore;
                 state.settings = exam.settings || { ...DEFAULT_EXAM_SETTINGS };
                 state.configuration = exam.configuration || { ...DEFAULT_EXAM_CONFIGURATION };
                 if (!shouldPreserveLocalQuestions) {
