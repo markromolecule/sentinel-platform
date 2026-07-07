@@ -3,8 +3,9 @@
 import { useEffect, useRef, useState } from 'react';
 import { useApi, useAuth } from '@sentinel/hooks';
 import { toast } from 'sonner';
+import { DEFAULT_AUDIO_ANOMALY_CONFIG } from '@sentinel/shared';
 import { AudioAnomalyController } from './audio-anomaly-controller';
-import { useAnomalyTelemetry } from './use-anomaly-telemetry';
+import { getAudioAnomalyCooldownMs, useAnomalyTelemetry } from './use-anomaly-telemetry';
 import type {
     AudioWorkerPhase,
     AudioWorkerResult,
@@ -34,6 +35,7 @@ export function useAudioAnomalyWorker({
 
     const controllerRef = useRef<AudioAnomalyController | null>(null);
     const isSuspendedRef = useRef(isSuspended);
+    const lastAcceptedAnomalyAtRef = useRef<Map<string, number>>(new Map());
 
     // Sync isSuspended to a ref to prevent re-triggering the main setup effect
     useEffect(() => {
@@ -53,6 +55,7 @@ export function useAudioAnomalyWorker({
         examSessionId,
         studentId,
         isSuspendedRef,
+        runtimeConfig?.cooldownMs ?? DEFAULT_AUDIO_ANOMALY_CONFIG.cooldownMs,
     );
 
     // Lifecycle effect: Start and teardown the controller when active
@@ -74,6 +77,20 @@ export function useAudioAnomalyWorker({
                     return;
                 }
 
+                const detectedAt = new Date().toISOString();
+                const now = new Date(detectedAt).getTime();
+                const effectiveCooldownMs = getAudioAnomalyCooldownMs(
+                    anomalyType,
+                    runtimeConfig?.cooldownMs ?? DEFAULT_AUDIO_ANOMALY_CONFIG.cooldownMs,
+                );
+                const lastAcceptedAt = lastAcceptedAnomalyAtRef.current.get(anomalyType) ?? 0;
+
+                if (now - lastAcceptedAt < effectiveCooldownMs) {
+                    return;
+                }
+
+                lastAcceptedAnomalyAtRef.current.set(anomalyType, now);
+
                 const anomalyLabel = anomalyType.replace(/_/g, ' ').toLowerCase();
                 const description =
                     anomalyType === 'SILENCE_DETECTED'
@@ -84,7 +101,7 @@ export function useAudioAnomalyWorker({
                     description,
                 });
 
-                void emitAudioTelemetry(anomalyType, confidenceScore).catch(
+                void emitAudioTelemetry(anomalyType, confidenceScore, detectedAt).catch(
                     (error: unknown) => {
                         console.error('Failed to emit audio anomaly telemetry.', {
                             anomalyType,
@@ -106,7 +123,7 @@ export function useAudioAnomalyWorker({
         // NOTE: runtimeConfig is omitted from dependencies because config updates
         // are dynamically synchronized via the updateConfig call in the effect below.
         // Adding it here would cause unnecessary stream teardown and restarts.
-    }, [isEnabled, audioStream, providedWorker, emitAudioTelemetry]);
+    }, [isEnabled, audioStream, providedWorker, emitAudioTelemetry, runtimeConfig?.cooldownMs]);
 
     // Config Sync Effect: Cheaply sync config changes without restarting the graph
     useEffect(() => {

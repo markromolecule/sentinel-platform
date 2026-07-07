@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { AudioAnomalyEngine } from '../audio-anomaly-engine';
+import { AudioAnomalyEngine, resampleAudioTo16kHz } from '../audio-anomaly-engine';
 import { DEFAULT_AUDIO_ANOMALY_CONFIG } from '@sentinel/shared';
 import * as tf from '@tensorflow/tfjs';
 
@@ -93,13 +93,13 @@ describe('AudioAnomalyEngine', () => {
         const frame1 = new Float32Array(15600);
         frame1[0] = 1.0;
 
-        await engine.processAudioChunk(frame1, onAnomalyDetected);
+        await engine.processAudioChunk(frame1, 16000, onAnomalyDetected);
         expect(onAnomalyDetected).not.toHaveBeenCalled(); // Only 1 hit, threshold is 2
 
         const frame2 = new Float32Array(15600);
         frame2[0] = 1.0;
 
-        await engine.processAudioChunk(frame2, onAnomalyDetected);
+        await engine.processAudioChunk(frame2, 16000, onAnomalyDetected);
         // 2 consecutive hits, should trigger
         expect(onAnomalyDetected).toHaveBeenCalledTimes(1);
         expect(onAnomalyDetected).toHaveBeenCalledWith({
@@ -113,8 +113,20 @@ describe('AudioAnomalyEngine', () => {
         const frame = new Float32Array(15600);
         frame[0] = 0.0;
 
-        await engine.processAudioChunk(frame, onAnomalyDetected);
-        await engine.processAudioChunk(frame, onAnomalyDetected);
+        await engine.processAudioChunk(frame, 16000, onAnomalyDetected);
+        await engine.processAudioChunk(frame, 16000, onAnomalyDetected);
+
+        expect(onAnomalyDetected).not.toHaveBeenCalled();
+    });
+
+    it('does not emit a silence anomaly when only low-amplitude frames are present and silence detection is disabled', async () => {
+        const onAnomalyDetected = vi.fn();
+
+        const quietFrame = new Float32Array(15600).fill(0.01);
+
+        await engine.processAudioChunk(quietFrame, 16000, onAnomalyDetected);
+        await engine.processAudioChunk(quietFrame, 16000, onAnomalyDetected);
+        await engine.processAudioChunk(quietFrame, 16000, onAnomalyDetected);
 
         expect(onAnomalyDetected).not.toHaveBeenCalled();
     });
@@ -128,9 +140,9 @@ describe('AudioAnomalyEngine', () => {
         const frameMiss = new Float32Array(15600);
         frameMiss[0] = 0.0;
 
-        await engine.processAudioChunk(frameHit, onAnomalyDetected); // 1 hit
-        await engine.processAudioChunk(frameMiss, onAnomalyDetected); // streak broken, reset to 0
-        await engine.processAudioChunk(frameHit, onAnomalyDetected); // 1 hit again
+        await engine.processAudioChunk(frameHit, 16000, onAnomalyDetected); // 1 hit
+        await engine.processAudioChunk(frameMiss, 16000, onAnomalyDetected); // streak broken, reset to 0
+        await engine.processAudioChunk(frameHit, 16000, onAnomalyDetected); // 1 hit again
 
         expect(onAnomalyDetected).not.toHaveBeenCalled();
     });
@@ -143,15 +155,23 @@ describe('AudioAnomalyEngine', () => {
         const chunk2 = new Float32Array(5000);
         const chunk3 = new Float32Array(5600);
 
-        await engine.processAudioChunk(chunk1, onAnomalyDetected);
-        await engine.processAudioChunk(chunk2, onAnomalyDetected);
+        await engine.processAudioChunk(chunk1, 16000, onAnomalyDetected);
+        await engine.processAudioChunk(chunk2, 16000, onAnomalyDetected);
 
         const tfMock = await import('@tensorflow/tfjs');
         const predictMock = (await tfMock.loadGraphModel('')).predict;
         expect(predictMock).not.toHaveBeenCalled();
 
-        await engine.processAudioChunk(chunk3, onAnomalyDetected);
+        await engine.processAudioChunk(chunk3, 16000, onAnomalyDetected);
         expect(predictMock).toHaveBeenCalledTimes(1);
+    });
+
+    it('resamples 48 kHz input down to 16 kHz for YAMNet-sized inference windows', () => {
+        const input = new Float32Array(48_000).fill(0.25);
+        const resampled = resampleAudioTo16kHz(input, 48_000);
+
+        expect(resampled).toHaveLength(16_000);
+        expect(resampled[0]).toBeCloseTo(0.25, 5);
     });
 
     it('triggers BACKGROUND_NOISE when detected', async () => {
@@ -160,11 +180,24 @@ describe('AudioAnomalyEngine', () => {
         const frame = new Float32Array(15600);
         frame[0] = 0.5;
 
-        await engine.processAudioChunk(frame, onAnomalyDetected);
-        await engine.processAudioChunk(frame, onAnomalyDetected);
+        await engine.processAudioChunk(frame, 16000, onAnomalyDetected);
+        await engine.processAudioChunk(frame, 16000, onAnomalyDetected);
 
         expect(onAnomalyDetected).toHaveBeenCalledWith({
             BACKGROUND_NOISE: 0.7,
+        });
+    });
+
+    it('triggers BACKGROUND_NOISE from the RMS fallback when class scores stay low but amplitude is high', async () => {
+        const onAnomalyDetected = vi.fn();
+
+        const loudFrame = new Float32Array(15600).fill(0.2);
+
+        await engine.processAudioChunk(loudFrame, 16000, onAnomalyDetected);
+        await engine.processAudioChunk(loudFrame, 16000, onAnomalyDetected);
+
+        expect(onAnomalyDetected).toHaveBeenCalledWith({
+            BACKGROUND_NOISE: expect.any(Number),
         });
     });
 
@@ -180,14 +213,14 @@ describe('AudioAnomalyEngine', () => {
 
         const silentFrame = new Float32Array(15600).fill(0.01);
 
-        await engine.processAudioChunk(silentFrame, onAnomalyDetected);
-        await engine.processAudioChunk(silentFrame, onAnomalyDetected);
-        await engine.processAudioChunk(silentFrame, onAnomalyDetected);
-        await engine.processAudioChunk(silentFrame, onAnomalyDetected);
+        await engine.processAudioChunk(silentFrame, 16000, onAnomalyDetected);
+        await engine.processAudioChunk(silentFrame, 16000, onAnomalyDetected);
+        await engine.processAudioChunk(silentFrame, 16000, onAnomalyDetected);
+        await engine.processAudioChunk(silentFrame, 16000, onAnomalyDetected);
 
         expect(onAnomalyDetected).not.toHaveBeenCalled();
 
-        await engine.processAudioChunk(silentFrame, onAnomalyDetected);
+        await engine.processAudioChunk(silentFrame, 16000, onAnomalyDetected);
 
         expect(onAnomalyDetected).toHaveBeenCalledWith({
             SILENCE_DETECTED: expect.any(Number),
@@ -210,7 +243,7 @@ describe('AudioAnomalyEngine', () => {
         const silentFrame = new Float32Array(15600).fill(0.0);
 
         for (let i = 0; i < 5; i++) {
-            await engine.processAudioChunk(silentFrame, onAnomalyDetected);
+            await engine.processAudioChunk(silentFrame, 16000, onAnomalyDetected);
         }
 
         expect(onAnomalyDetected).toHaveBeenCalledTimes(1);
@@ -218,7 +251,7 @@ describe('AudioAnomalyEngine', () => {
         vi.setSystemTime(new Date('2026-05-11T00:01:00.000Z'));
 
         for (let i = 0; i < 5; i++) {
-            await engine.processAudioChunk(silentFrame, onAnomalyDetected);
+            await engine.processAudioChunk(silentFrame, 16000, onAnomalyDetected);
         }
 
         expect(onAnomalyDetected).toHaveBeenCalledTimes(1);
@@ -226,7 +259,7 @@ describe('AudioAnomalyEngine', () => {
         vi.setSystemTime(new Date('2026-05-11T00:03:01.000Z'));
 
         for (let i = 0; i < 5; i++) {
-            await engine.processAudioChunk(silentFrame, onAnomalyDetected);
+            await engine.processAudioChunk(silentFrame, 16000, onAnomalyDetected);
         }
 
         expect(onAnomalyDetected).toHaveBeenCalledTimes(2);

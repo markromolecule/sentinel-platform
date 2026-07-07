@@ -16,6 +16,7 @@ type MatchingIncident = {
     details: unknown;
     severity: incident_severity | null;
     timestamp: Date | string | null;
+    dedupe_key: string | null;
 };
 
 function isUniqueConstraintViolation(error: unknown): boolean {
@@ -49,6 +50,8 @@ async function findDuplicateDedupeKeyIncident(
         .selectFrom('flagged_incidents')
         .select(['incident_id'])
         .where('attempt_id', '=', payload.examSessionId)
+        .where('rule_key', '=', payload.ruleKey)
+        .where('platform', '=', payload.platform)
         .where('dedupe_key', '=', payload.metadata.dedupeKey)
         .executeTakeFirst();
 }
@@ -56,8 +59,13 @@ async function findDuplicateDedupeKeyIncident(
 function findExistingIncidentWithinWindow(
     incidents: MatchingIncident[],
     dedupeThreshold: Date,
+    currentDedupeKey?: string,
 ): MatchingIncident | undefined {
     return incidents.find((candidate) => {
+        if (currentDedupeKey && candidate.dedupe_key === currentDedupeKey) {
+            return false;
+        }
+
         if (!candidate.timestamp) {
             return false;
         }
@@ -128,11 +136,29 @@ async function findLatestMatchingIncident(
 ): Promise<MatchingIncident | undefined> {
     return db
         .selectFrom('flagged_incidents')
-        .select(['incident_id', 'details', 'severity', 'timestamp'])
+        .select(['incident_id', 'details', 'severity', 'timestamp', 'dedupe_key'])
         .where('attempt_id', '=', payload.examSessionId)
         .where('rule_key', '=', ruleKey)
         .where('platform', '=', platform)
         .orderBy('timestamp', 'desc')
+        .executeTakeFirst();
+}
+
+async function findMatchingIncidentByDedupeKey(
+    db: DbClient,
+    payload: PersistableProctoringEvent,
+): Promise<MatchingIncident | undefined> {
+    if (!payload.metadata?.dedupeKey) {
+        return undefined;
+    }
+
+    return db
+        .selectFrom('flagged_incidents')
+        .select(['incident_id', 'details', 'severity', 'timestamp', 'dedupe_key'])
+        .where('attempt_id', '=', payload.examSessionId)
+        .where('rule_key', '=', payload.ruleKey)
+        .where('platform', '=', payload.platform)
+        .where('dedupe_key', '=', payload.metadata.dedupeKey)
         .executeTakeFirst();
 }
 
@@ -170,7 +196,7 @@ export async function appendIncidentRecord(args: {
 
     const matchingIncidents = await args.db
         .selectFrom('flagged_incidents')
-        .select(['incident_id', 'details', 'severity', 'timestamp'])
+        .select(['incident_id', 'details', 'severity', 'timestamp', 'dedupe_key'])
         .where('attempt_id', '=', args.payload.examSessionId)
         .where('rule_key', '=', incident.ruleKey)
         .where('platform', '=', incident.platform)
@@ -178,7 +204,11 @@ export async function appendIncidentRecord(args: {
         .orderBy('timestamp', 'desc')
         .execute();
 
-    const existingIncident = findExistingIncidentWithinWindow(matchingIncidents, dedupeThreshold);
+    const existingIncident = findExistingIncidentWithinWindow(
+        matchingIncidents,
+        dedupeThreshold,
+        args.payload.metadata?.dedupeKey,
+    );
     const severityResolution = incidentSeverityResolverService.resolveSeverity({
         ruleKey: args.payload.ruleKey,
         baseSeverity: incident.severity,
@@ -262,12 +292,31 @@ export async function appendIncidentRecord(args: {
             throw error;
         }
 
-        const freshExistingIncident = await findLatestMatchingIncident(
+        const duplicateDedupeIncident = await findMatchingIncidentByDedupeKey(
             args.db,
             args.payload,
-            incident.ruleKey,
-            incident.platform,
         );
+
+        if (duplicateDedupeIncident) {
+            console.log(
+                '[TelemetryStorage] Duplicate dedupeKey resolved after concurrency retry, ignoring event.',
+                {
+                    attemptId: args.payload.examSessionId,
+                    dedupeKey: args.payload.metadata?.dedupeKey,
+                    incidentId: duplicateDedupeIncident.incident_id,
+                },
+            );
+            return null;
+        }
+
+        const freshExistingIncident = args.payload.metadata?.dedupeKey
+            ? undefined
+            : await findLatestMatchingIncident(
+                  args.db,
+                  args.payload,
+                  incident.ruleKey,
+                  incident.platform,
+              );
 
         if (!freshExistingIncident) {
             console.log(

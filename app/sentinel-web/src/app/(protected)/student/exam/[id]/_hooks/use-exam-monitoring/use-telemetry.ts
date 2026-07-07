@@ -4,7 +4,6 @@ import type { ExamConfig } from '@sentinel/shared/types';
 import {
     emitWebTelemetryEvent,
     type WebTelemetryEventType,
-    createTelemetryActionMetadata,
 } from '../../_lib/web-telemetry-client';
 
 export function useTelemetry(args: {
@@ -33,16 +32,16 @@ export function useTelemetry(args: {
                 return;
             }
 
-            const actionMetadata = metadataOptions || createTelemetryActionMetadata(eventType);
+            const actionMetadata = metadataOptions;
 
             void emitWebTelemetryEvent(apiClient, {
                 configuration,
                 examSessionId,
                 studentId,
                 eventType,
-                eventId: actionMetadata.eventId,
-                dedupeKey: actionMetadata.dedupeKey,
-                clientActionAt: actionMetadata.clientActionAt,
+                eventId: actionMetadata?.eventId,
+                dedupeKey: actionMetadata?.dedupeKey,
+                clientActionAt: actionMetadata?.clientActionAt,
             }).catch((error: unknown) => {
                 console.error('Failed to emit web telemetry event.', {
                     eventType,

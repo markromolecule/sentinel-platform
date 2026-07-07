@@ -107,4 +107,45 @@ describe('FlaggingTimeline', () => {
         expect(screen.getByText('repeat threshold')).toBeTruthy();
         expect(screen.getByText('Window 5m')).toBeTruthy();
     });
+
+    it('renders audio anomaly labels, confidence copy, and only shows x2 when the audio incident truly repeated', () => {
+        const flags: Flag[] = [
+            {
+                id: '123e4567-e89b-12d3-a456-426614174005',
+                type: 'AUDIO_DETECTED',
+                rawEventType: 'AUDIO_ANOMALY',
+                timestamp: '2026-04-23T14:12:40.000Z',
+                description: 'Audio anomaly detected',
+                severity: 'low',
+                occurrenceCount: 1,
+                anomalyType: 'BACKGROUND_NOISE',
+                confidenceScore: 0.61,
+                severityReason: 'default-ladder',
+                persistenceTrigger: 'confidence-threshold',
+            },
+            {
+                id: '123e4567-e89b-12d3-a456-426614174006',
+                type: 'AUDIO_DETECTED',
+                rawEventType: 'AUDIO_ANOMALY',
+                timestamp: '2026-04-23T14:13:40.000Z',
+                description: 'Audio anomaly detected',
+                severity: 'medium',
+                occurrenceCount: 2,
+                anomalyType: 'TALKING',
+                confidenceScore: 0.84,
+                severityReason: 'repeat-escalated',
+                persistenceTrigger: 'confidence-threshold',
+                matchingWindowSeconds: 120,
+            },
+        ];
+
+        render(<FlaggingTimeline flags={flags} />);
+
+        expect(screen.getByText('Background Noise detected')).toBeTruthy();
+        expect(screen.getByText('Talking detected')).toBeTruthy();
+        expect(screen.getByText('84% confidence')).toBeTruthy();
+        expect(screen.getAllByText('Trigger AUDIO_ANOMALY')).toHaveLength(2);
+        expect(screen.getByText('x2')).toBeTruthy();
+        expect(screen.queryByText('x1')).toBeNull();
+    });
 });

@@ -60,7 +60,7 @@ describe('useAttemptSubmission', () => {
     });
 
     it('suspends monitoring before navigation and fullscreen teardown during turn-in', async () => {
-        const suspendSecurityMonitoring = vi.fn();
+        const suspendSecurityMonitoring = vi.fn(() => true);
 
         const { result } = renderHook(() =>
             useAttemptSubmission({
@@ -114,5 +114,119 @@ describe('useAttemptSubmission', () => {
         expect(suspendSecurityMonitoring.mock.invocationCallOrder[0]).toBeLessThan(
             mockExitFullscreen.mock.invocationCallOrder[0],
         );
+    });
+
+    it('marks monitoring as suspended before a submitting-phase fullscreenchange can be observed', () => {
+        const monitoringState = {
+            isSuspended: false,
+            phase: 'active',
+        };
+        const fullscreenSnapshots: Array<{
+            isSuspended: boolean;
+            phase: string;
+        }> = [];
+        const suspendSecurityMonitoring = vi.fn(() => {
+            monitoringState.isSuspended = true;
+            return true;
+        });
+        const setMonitoringPhase = vi.fn((phase: string) => {
+            monitoringState.phase = phase;
+            fullscreenSnapshots.push({
+                isSuspended: monitoringState.isSuspended,
+                phase: monitoringState.phase,
+            });
+        });
+
+        const { result } = renderHook(() =>
+            useAttemptSubmission({
+                examId: '11111111-1111-1111-1111-111111111111',
+                sessionId: '22222222-2222-2222-2222-222222222222',
+                releaseScoreMode: 'AUTO_RELEASE',
+                questions: [
+                    {
+                        id: 'question-1',
+                        questionId: 'question-1',
+                        orderIndex: 0,
+                        points: 1,
+                        type: 'MULTIPLE_CHOICE',
+                        content: {
+                            prompt: 'Question 1',
+                            options: ['A', 'B', 'C', 'D'],
+                        },
+                    },
+                ] as any,
+                selectedAnswers: {
+                    'question-1': 'A',
+                },
+                elapsedSeconds: 120,
+                unansweredCount: 0,
+                isRedirectingToTurnIn: false,
+                setIsRedirectingToTurnIn: vi.fn(),
+                setIsSubmitDialogOpen: vi.fn(),
+                suspendSecurityMonitoring,
+                isBlocked: false,
+                setMonitoringPhase,
+            }),
+        );
+
+        act(() => {
+            result.current.handleSubmit();
+        });
+
+        expect(fullscreenSnapshots).toEqual([
+            {
+                isSuspended: true,
+                phase: 'submitting',
+            },
+        ]);
+    });
+
+    it('does not navigate or exit fullscreen when monitoring suspension fails', async () => {
+        const suspendSecurityMonitoring = vi.fn(() => false);
+
+        const { result } = renderHook(() =>
+            useAttemptSubmission({
+                examId: '11111111-1111-1111-1111-111111111111',
+                sessionId: '22222222-2222-2222-2222-222222222222',
+                releaseScoreMode: 'AUTO_RELEASE',
+                questions: [
+                    {
+                        id: 'question-1',
+                        questionId: 'question-1',
+                        orderIndex: 0,
+                        points: 1,
+                        type: 'MULTIPLE_CHOICE',
+                        content: {
+                            prompt: 'Question 1',
+                            options: ['A', 'B', 'C', 'D'],
+                        },
+                    },
+                ] as any,
+                selectedAnswers: {
+                    'question-1': 'A',
+                },
+                elapsedSeconds: 120,
+                unansweredCount: 0,
+                isRedirectingToTurnIn: false,
+                setIsRedirectingToTurnIn: vi.fn(),
+                setIsSubmitDialogOpen: vi.fn(),
+                suspendSecurityMonitoring,
+                isBlocked: false,
+                setMonitoringPhase: vi.fn(),
+            }),
+        );
+
+        act(() => {
+            result.current.handleSubmit();
+        });
+
+        await act(async () => {
+            vi.runAllTimers();
+            await Promise.resolve();
+        });
+
+        expect(mockRouterReplace).not.toHaveBeenCalled();
+        expect(mockWriteStoredExamTurnInPreview).not.toHaveBeenCalled();
+        expect(mockExitFullscreen).not.toHaveBeenCalled();
     });
 });

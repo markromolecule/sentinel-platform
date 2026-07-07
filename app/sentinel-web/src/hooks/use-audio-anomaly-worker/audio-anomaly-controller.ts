@@ -9,6 +9,7 @@ import { INIT_TIMEOUT_MS } from './_constants';
 import { createAudioGraph } from './create-audio-graph';
 import type {
     AudioWorkerPhase,
+    AudioFramePayload,
     WorkerOutboundMessage,
 } from './_types';
 
@@ -87,16 +88,20 @@ export class AudioAnomalyController {
             }
 
             // 4b. Create Web Audio components
-            const graph = await createAudioGraph(this.config.audioStream, this.worker, (samples) => {
+            const graph = await createAudioGraph(
+                this.config.audioStream,
+                this.worker,
+                ({ samples, sampleRate }: AudioFramePayload) => {
                 if (this.isDisposed || !this.worker) return;
                 this.worker.postMessage(
                     {
                         type: 'PROCESS_AUDIO',
-                        payload: { samples },
+                        payload: { samples, sampleRate },
                     },
                     [samples.buffer],
                 );
-            });
+                },
+            );
 
             if (this.isDisposed) {
                 if (!this.config.audioStream) {

@@ -272,7 +272,7 @@ describe('StudentExamAttemptPage', () => {
             isResumingExam: false,
             resumeSecuredExam: vi.fn(),
             fullScreenContainerRef: { current: null },
-            suspendSecurityMonitoring: vi.fn(),
+            suspendSecurityMonitoring: vi.fn(() => true),
         });
         mockAttemptMediaPipeMonitoring.mockReturnValue({
             videoRef: { current: null },
@@ -374,7 +374,7 @@ describe('StudentExamAttemptPage', () => {
     it('starts result navigation before exiting fullscreen on turn in', () => {
         vi.useFakeTimers();
         const mockExitFullscreen = vi.fn().mockResolvedValue(undefined);
-        const mockSuspendSecurityMonitoring = vi.fn();
+        const mockSuspendSecurityMonitoring = vi.fn(() => true);
 
         Object.defineProperty(document, 'fullscreenElement', {
             value: document.documentElement,
@@ -413,6 +413,49 @@ describe('StudentExamAttemptPage', () => {
         );
     });
 
+    it('keeps the turn-in flow free of fullscreen lock side effects when fullscreenchange fires immediately', () => {
+        vi.useFakeTimers();
+        const mockExitFullscreen = vi.fn().mockResolvedValue(undefined);
+        const mockSuspendSecurityMonitoring = vi.fn(() => true);
+
+        Object.defineProperty(document, 'fullscreenElement', {
+            value: document.documentElement,
+            configurable: true,
+        });
+        Object.defineProperty(document, 'exitFullscreen', {
+            value: mockExitFullscreen,
+            configurable: true,
+        });
+        mockExamMonitoring.mockReturnValue({
+            securityLockReason: null,
+            isResumingExam: false,
+            resumeSecuredExam: vi.fn(),
+            fullScreenContainerRef: { current: null },
+            suspendSecurityMonitoring: mockSuspendSecurityMonitoring,
+        });
+
+        render(<StudentExamAttemptPage />);
+
+        fireEvent.click(screen.getByRole('button', { name: /answer 4/i }));
+        fireEvent.click(screen.getByRole('button', { name: /turn in exam/i }));
+        act(() => {
+            document.dispatchEvent(new Event('fullscreenchange'));
+        });
+
+        expect(mockSuspendSecurityMonitoring).toHaveBeenCalledTimes(1);
+        expect(mockRouterReplace).toHaveBeenCalledWith(
+            '/student/exam/11111111-1111-1111-1111-111111111111/result',
+        );
+        expect(screen.queryByText(/return to the secured exam view/i)).toBeNull();
+        expect(screen.queryByText(/loading\.\.\./i)).toBeNull();
+
+        act(() => {
+            vi.runOnlyPendingTimers();
+        });
+
+        expect(mockExitFullscreen).toHaveBeenCalledTimes(1);
+    });
+
     it('displays the security lock overlay when a monitoring violation occurs', () => {
         // Mock a focus-loss lock state
         mockExamMonitoring.mockReturnValue({
@@ -420,7 +463,7 @@ describe('StudentExamAttemptPage', () => {
             isResumingExam: false,
             resumeSecuredExam: vi.fn(),
             fullScreenContainerRef: { current: null },
-            suspendSecurityMonitoring: vi.fn(),
+            suspendSecurityMonitoring: vi.fn(() => true),
         });
 
         render(<StudentExamAttemptPage />);
@@ -437,7 +480,7 @@ describe('StudentExamAttemptPage', () => {
             isResumingExam: false,
             resumeSecuredExam,
             fullScreenContainerRef: { current: null },
-            suspendSecurityMonitoring: vi.fn(),
+            suspendSecurityMonitoring: vi.fn(() => true),
         });
 
         render(<StudentExamAttemptPage />);

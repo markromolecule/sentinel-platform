@@ -8,7 +8,7 @@ import {
 describe('YAMNet Class Mapper', () => {
     const mockConfig: AudioAnomalyConfig = {
         sensitivityMultiplier: 1,
-        consecutiveFrameThreshold: 3,
+        consecutiveFrameThreshold: 2,
         cooldownMs: 10000,
         thresholds: { ...DEFAULT_AUDIO_ANOMALY_THRESHOLDS },
         enabledAnomalyTypes: ['TALKING', 'TYPING', 'BACKGROUND_NOISE'],
@@ -45,7 +45,7 @@ describe('YAMNet Class Mapper', () => {
 
     it('respects sensitivity multiplier by lowering effective thresholds', () => {
         const scores = new Float32Array(521).fill(0);
-        // Talking threshold is 0.65. With multiplier 2, effective is 0.65 / 2 = 0.325.
+        // Talking threshold is 0.45. With multiplier 2, effective is 0.225.
         scores[0] = 0.4;
 
         const highSensitivityConfig = { ...mockConfig, sensitivityMultiplier: 2 };

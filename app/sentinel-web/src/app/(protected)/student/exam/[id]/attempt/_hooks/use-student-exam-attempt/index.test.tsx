@@ -133,7 +133,7 @@ describe('useStudentExamAttempt', () => {
             isResumingExam: false,
             resumeSecuredExam: vi.fn(),
             fullScreenContainerRef: { current: null },
-            suspendSecurityMonitoring: vi.fn(),
+            suspendSecurityMonitoring: vi.fn(() => true),
         });
 
         mockReadStoredLobbyEntryMarker.mockReturnValue(true);
@@ -229,7 +229,7 @@ describe('useStudentExamAttempt', () => {
     });
 
     it('suspends security monitoring before navigating to turn-in result review', () => {
-        const suspendSecurityMonitoring = vi.fn();
+        const suspendSecurityMonitoring = vi.fn(() => true);
         mockUseAttemptMonitoring.mockReturnValue({
             mediaPipeVideoRef: { current: null },
             mediaPipeAnalysis: null,

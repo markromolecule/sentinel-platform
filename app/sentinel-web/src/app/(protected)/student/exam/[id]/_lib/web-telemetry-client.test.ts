@@ -82,13 +82,35 @@ describe('web-telemetry-client', () => {
             platform: 'WEB',
             source: TELEMETRY_EVENT_DEFINITIONS.RIGHT_CLICK_ATTEMPT.source,
             ruleKey: TELEMETRY_EVENT_DEFINITIONS.RIGHT_CLICK_ATTEMPT.ruleKey,
-            metadata: undefined,
+            metadata: {
+                clientActionAt: '2026-04-14T00:00:00.000Z',
+            },
             sessionContext: {
                 browser: 'Chrome',
                 os: 'macOS',
                 deviceType: 'DESKTOP',
                 clientCapabilities: ['contextmenu-monitor'],
             },
+        });
+    });
+
+    it('preserves deterministic metadata fields in the ingestion payload', () => {
+        const payload = buildWebTelemetryPayload({
+            examSessionId: '123e4567-e89b-12d3-a456-426614174000',
+            studentId: '123e4567-e89b-12d3-a456-426614174001',
+            eventType: 'RIGHT_CLICK_ATTEMPT',
+            timestamp: '2026-04-14T00:00:00.000Z',
+            eventId: '2cf84368-aad2-4f9b-8932-7cab4d4df82c',
+            dedupeKey:
+                '123e4567-e89b-12d3-a456-426614174000:RIGHT_CLICK_ATTEMPT:contextmenu:2026-04-14T00:00:00.000Z',
+            clientActionAt: '2026-04-14T00:00:00.250Z',
+        });
+
+        expect(payload.metadata).toEqual({
+            eventId: '2cf84368-aad2-4f9b-8932-7cab4d4df82c',
+            dedupeKey:
+                '123e4567-e89b-12d3-a456-426614174000:RIGHT_CLICK_ATTEMPT:contextmenu:2026-04-14T00:00:00.000Z',
+            clientActionAt: '2026-04-14T00:00:00.250Z',
         });
     });
 

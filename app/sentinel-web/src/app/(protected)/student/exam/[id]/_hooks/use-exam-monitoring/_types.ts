@@ -20,5 +20,5 @@ export type UseExamMonitoringResult = {
     isResumingExam: boolean;
     resumeSecuredExam: () => Promise<void>;
     fullScreenContainerRef: React.MutableRefObject<HTMLElement | null>;
-    suspendSecurityMonitoring: () => void;
+    suspendSecurityMonitoring: () => boolean;
 };

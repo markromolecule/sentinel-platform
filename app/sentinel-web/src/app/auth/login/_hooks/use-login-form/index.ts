@@ -7,10 +7,15 @@ import { LoginSchemaType } from '@sentinel/shared/schema';
 import { useRouter } from 'next/navigation';
 import { createSupabaseClient } from '@/data/supabase/client';
 import { toast } from 'sonner';
+import { resolveWebAuthState } from '@/lib/auth/resolve-web-auth-state';
 
+/**
+ * Handles manual login for the student/instructor web portal.
+ */
 export function useLoginForm() {
     const router = useRouter();
     const [authError, setAuthError] = useState<string | null>(null);
+    const supabase = createSupabaseClient();
 
     const form = useForm<LoginSchemaType>({
         resolver: zodResolver(LoginSchema),
@@ -24,34 +29,36 @@ export function useLoginForm() {
     const { mutate: login, isPending: isLoading } = useLoginMutation({
         onSuccess: async (data) => {
             const user = data.user;
-            const role = data.user?.user_metadata?.role?.toLowerCase();
+            if (!user) {
+                setAuthError('Could not verify your account after signing in.');
+                toast.error('Could not verify your access.');
+                return;
+            }
 
-            if (role === 'student') {
-                // Check if student record exists and is fully onboarded
-                const supabase = createSupabaseClient();
-                const { data: studentData } = await supabase
-                    .from('students')
-                    .select('student_number, department_id')
-                    .eq('user_id', user?.id)
-                    .maybeSingle();
+            const authState = await resolveWebAuthState(supabase, user);
 
+            if (authState.role === 'student') {
                 await router.refresh();
-                if (studentData && studentData.student_number && studentData.department_id) {
+                if (authState.isFullyOnboarded) {
                     toast.success('Welcome back Student!');
-                    router.push('/student/classroom');
                 } else {
                     toast.info('Please complete your onboarding.');
-                    router.push('/onboarding');
                 }
-            } else if (role === 'instructor') {
+
+                router.push(authState.destination);
+                return;
+            }
+
+            if (authState.role === 'instructor') {
                 await router.refresh();
                 toast.success('Welcome Instructor!');
-                router.push('/dashboard');
-            } else {
-                // Strictly Student and Instructor only for sentinel-web
-                setAuthError('Access Denied. This portal is for Students and Instructors only.');
-                toast.error('Access Denied.');
+                router.push(authState.destination);
+                return;
             }
+
+            await supabase.auth.signOut();
+            setAuthError('Access Denied. This portal is for Students and Instructors only.');
+            toast.error('Access Denied.');
         },
         onError: (error: LoginError) => {
             setAuthError(error.message);

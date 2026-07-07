@@ -48,6 +48,7 @@ describe('useAudioAnomalyWorker', () => {
     beforeEach(() => {
         cleanup();
         vi.clearAllMocks();
+        vi.useRealTimers();
 
         mockWorker = new MockWorker();
         mockTrackStop = vi.fn();
@@ -196,6 +197,9 @@ describe('useAudioAnomalyWorker', () => {
             } as MessageEvent);
         });
 
+        vi.useFakeTimers();
+        vi.setSystemTime(new Date('2026-07-07T00:00:00.000Z'));
+
         act(() => {
             mockWorker.onmessage?.({
                 data: {
@@ -209,9 +213,7 @@ describe('useAudioAnomalyWorker', () => {
             } as MessageEvent);
         });
 
-        await waitFor(() => {
-            expect(ingestTelemetryEvent).toHaveBeenCalledTimes(1);
-        });
+        expect(ingestTelemetryEvent).toHaveBeenCalledTimes(1);
 
         expect(mockToastWarning).toHaveBeenCalledTimes(1);
         expect(mockToastWarning).toHaveBeenCalledWith(
@@ -220,6 +222,90 @@ describe('useAudioAnomalyWorker', () => {
                 description: expect.stringContaining('talking'),
             }),
         );
+        expect(ingestTelemetryEvent).toHaveBeenCalledWith(
+            expect.any(Function),
+            expect.objectContaining({
+                eventType: 'AUDIO_ANOMALY',
+                metadata: expect.objectContaining({
+                    anomalyType: 'TALKING',
+                    confidenceScore: 0.91,
+                    dedupeKey:
+                        'session-123:AUDIO_ANOMALY:TALKING:2026-07-07T00:00:00.000Z',
+                }),
+            }),
+        );
+    });
+
+    it('does not emit duplicate toasts or telemetry when the same anomaly repeats inside the cooldown after rerender', async () => {
+        const { rerender } = renderHook(
+            ({ isSuspended }) =>
+                useAudioAnomalyWorker({
+                    configuration: validConfig,
+                    examSessionId: 'session-123',
+                    isSuspended,
+                    worker: mockWorker as any,
+                }),
+            {
+                initialProps: {
+                    isSuspended: false,
+                },
+            },
+        );
+
+        await waitFor(() => {
+            expect(mockWorker.postMessage).toHaveBeenCalledWith({
+                type: 'INIT',
+                payload: expect.objectContaining({
+                    config: expect.any(Object),
+                }),
+            });
+        });
+
+        act(() => {
+            mockWorker.onmessage?.({
+                data: { type: 'INIT_SUCCESS' },
+            } as MessageEvent);
+        });
+
+        vi.useFakeTimers();
+        vi.setSystemTime(new Date('2026-07-07T00:00:00.000Z'));
+
+        act(() => {
+            mockWorker.onmessage?.({
+                data: {
+                    type: 'ANOMALY_DETECTED',
+                    payload: {
+                        anomalies: {
+                            TALKING: 0.91,
+                        },
+                    },
+                },
+            } as MessageEvent);
+        });
+
+        expect(ingestTelemetryEvent).toHaveBeenCalledTimes(1);
+
+        rerender({
+            isSuspended: false,
+        });
+
+        act(() => {
+            vi.advanceTimersByTime(1000);
+            vi.setSystemTime(new Date('2026-07-07T00:00:01.000Z'));
+            mockWorker.onmessage?.({
+                data: {
+                    type: 'ANOMALY_DETECTED',
+                    payload: {
+                        anomalies: {
+                            TALKING: 0.91,
+                        },
+                    },
+                },
+            } as MessageEvent);
+        });
+
+        expect(ingestTelemetryEvent).toHaveBeenCalledTimes(1);
+        expect(mockToastWarning).toHaveBeenCalledTimes(1);
     });
 
     it('stops anomaly emission after the hook is rerendered into a suspended state', async () => {

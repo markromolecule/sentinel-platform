@@ -1,5 +1,48 @@
 import { type WebTelemetryEventType } from '../_types';
 
+type CreateTelemetryActionMetadataArgs = {
+    eventType: WebTelemetryEventType;
+    examSessionId?: string;
+    actionSource?: string;
+    clientActionAt?: string;
+    bucketMs?: number;
+};
+
+function normalizeActionSource(actionSource: string | undefined) {
+    return (actionSource ?? 'generic-action')
+        .trim()
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/^-+|-+$/g, '');
+}
+
+function toStableUuid(seed: string) {
+    let hashA = 0x811c9dc5;
+    let hashB = 0x811c9dc5;
+    let hashC = 0x811c9dc5;
+    let hashD = 0x811c9dc5;
+
+    for (let index = 0; index < seed.length; index += 1) {
+        const code = seed.charCodeAt(index);
+        hashA = Math.imul(hashA ^ code, 0x01000193);
+        hashB = Math.imul(hashB ^ (code + 17), 0x01000193);
+        hashC = Math.imul(hashC ^ (code + 31), 0x01000193);
+        hashD = Math.imul(hashD ^ (code + 47), 0x01000193);
+    }
+
+    const hex = [hashA, hashB, hashC, hashD]
+        .map((part) => (part >>> 0).toString(16).padStart(8, '0'))
+        .join('');
+
+    return [
+        hex.slice(0, 8),
+        hex.slice(8, 12),
+        `4${hex.slice(13, 16)}`,
+        `${((parseInt(hex.slice(16, 17), 16) & 0x3) | 0x8).toString(16)}${hex.slice(17, 20)}`,
+        hex.slice(20, 32),
+    ].join('-');
+}
+
 /**
  * Creates unique tracking metadata for a logical telemetry action.
  * Ensures the event has a stable event ID and deduplication key.
@@ -7,10 +50,29 @@ import { type WebTelemetryEventType } from '../_types';
  * @param eventType The type of telemetry event.
  * @returns An object with eventId, dedupeKey, and clientActionAt.
  */
-export function createTelemetryActionMetadata(eventType: WebTelemetryEventType) {
-    const eventId = crypto.randomUUID();
-    const clientActionAt = new Date().toISOString();
-    const dedupeKey = `${eventType}:${eventId}`;
+export function createTelemetryActionMetadata(
+    args: WebTelemetryEventType | CreateTelemetryActionMetadataArgs,
+) {
+    const {
+        eventType,
+        examSessionId,
+        actionSource,
+        clientActionAt = new Date().toISOString(),
+        bucketMs = 1000,
+    } = typeof args === 'string' ? { eventType: args } : args;
+    const normalizedActionSource = normalizeActionSource(actionSource);
+    const bucketStart = new Date(
+        Math.floor(new Date(clientActionAt).getTime() / bucketMs) * bucketMs,
+    ).toISOString();
+    const dedupeSeed = [
+        examSessionId ?? 'unknown-session',
+        eventType,
+        normalizedActionSource,
+        bucketStart,
+    ].join(':');
+    const eventId = toStableUuid(dedupeSeed);
+    const dedupeKey = dedupeSeed;
+
     return {
         eventId,
         dedupeKey,

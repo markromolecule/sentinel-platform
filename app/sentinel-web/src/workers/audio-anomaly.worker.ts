@@ -34,7 +34,7 @@ self.onmessage = async (event: MessageEvent) => {
 
         case 'PROCESS_AUDIO':
             if (engine) {
-                engine.processAudioChunk(payload.samples, (anomalies) => {
+                engine.processAudioChunk(payload.samples, payload.sampleRate, (anomalies) => {
                     self.postMessage({ type: 'ANOMALY_DETECTED', payload: { anomalies } });
                 });
             }

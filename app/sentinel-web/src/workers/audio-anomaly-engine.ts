@@ -5,6 +5,60 @@ import {
     getAnomalyConfidence,
 } from '@sentinel/shared';
 
+type AudioEngineDebugSnapshot = {
+    inputSampleRate: number;
+    resampledSampleCount: number;
+    rms: number;
+    topClassIds: number[];
+    topClassScores: number[];
+    selectedAnomalyConfidence: Partial<Record<AudioAnomalyTypeValue, number>>;
+    frameCounters: Partial<Record<AudioAnomalyTypeValue, number>>;
+    cooldownStatus: Partial<Record<AudioAnomalyTypeValue, boolean>>;
+};
+
+const TARGET_SAMPLE_RATE = 16_000;
+const BACKGROUND_NOISE_RMS_THRESHOLD = 0.08;
+
+function isDevelopmentDebugEnabled() {
+    return process.env.NODE_ENV === 'development';
+}
+
+/**
+ * Linearly resamples mono PCM audio into the 16 kHz waveform YAMNet expects.
+ *
+ * @param samples Source PCM samples captured at the browser's audio context rate.
+ * @param sourceSampleRate Sample rate attached to the incoming PCM buffer.
+ * @returns A new `Float32Array` aligned to the 16 kHz inference rate.
+ */
+export function resampleAudioTo16kHz(
+    samples: Float32Array,
+    sourceSampleRate: number,
+): Float32Array {
+    if (sourceSampleRate <= 0 || !Number.isFinite(sourceSampleRate)) {
+        return samples;
+    }
+
+    if (sourceSampleRate === TARGET_SAMPLE_RATE) {
+        return samples;
+    }
+
+    const targetLength = Math.max(1, Math.round((samples.length * TARGET_SAMPLE_RATE) / sourceSampleRate));
+    const resampled = new Float32Array(targetLength);
+    const ratio = sourceSampleRate / TARGET_SAMPLE_RATE;
+
+    for (let index = 0; index < targetLength; index += 1) {
+        const sourceIndex = index * ratio;
+        const lowerIndex = Math.floor(sourceIndex);
+        const upperIndex = Math.min(lowerIndex + 1, samples.length - 1);
+        const interpolation = sourceIndex - lowerIndex;
+        const lowerValue = samples[lowerIndex] ?? 0;
+        const upperValue = samples[upperIndex] ?? lowerValue;
+        resampled[index] = lowerValue + (upperValue - lowerValue) * interpolation;
+    }
+
+    return resampled;
+}
+
 export class AudioAnomalyEngine {
     // Constants for cooldown and frame thresholds
     private static readonly SILENCE_MIN_CONSECUTIVE_FRAMES = 5;
@@ -22,6 +76,7 @@ export class AudioAnomalyEngine {
 
     private frameCounters: Map<AudioAnomalyTypeValue, number> = new Map();
     private lastAlertTime: Map<AudioAnomalyTypeValue, number> = new Map();
+    private lastDebugSnapshot: AudioEngineDebugSnapshot | null = null;
 
     private getRequiredConsecutiveFrames(anomalyType: AudioAnomalyTypeValue): number {
         if (anomalyType === 'SILENCE_DETECTED') {
@@ -96,6 +151,10 @@ export class AudioAnomalyEngine {
         this.model = null;
     }
 
+    getDebugSnapshot(): AudioEngineDebugSnapshot | null {
+        return this.lastDebugSnapshot;
+    }
+
     updateConfig(newConfig: AudioAnomalySettings): void {
         this.config = newConfig;
         const enabled = new Set<string>(newConfig.enabledAnomalyTypes);
@@ -115,18 +174,20 @@ export class AudioAnomalyEngine {
 
     processAudioChunk(
         samples: Float32Array,
+        sampleRate: number,
         onAnomalyDetected: (results: Record<AudioAnomalyTypeValue, number>) => void,
     ): void {
         if (!this.isDetecting || !this.model) return;
+        const normalizedSamples = resampleAudioTo16kHz(samples, sampleRate);
 
         // Append incoming samples to our buffer
         let offset = 0;
-        while (offset < samples.length) {
+        while (offset < normalizedSamples.length) {
             const spaceInBuffer = this.EXPECTED_SAMPLES - this.bufferIndex;
-            const samplesToCopy = Math.min(spaceInBuffer, samples.length - offset);
+            const samplesToCopy = Math.min(spaceInBuffer, normalizedSamples.length - offset);
 
             this.sampleBuffer.set(
-                samples.subarray(offset, offset + samplesToCopy),
+                normalizedSamples.subarray(offset, offset + samplesToCopy),
                 this.bufferIndex,
             );
             this.bufferIndex += samplesToCopy;
@@ -134,7 +195,7 @@ export class AudioAnomalyEngine {
 
             // If we have filled the buffer, process it
             if (this.bufferIndex >= this.EXPECTED_SAMPLES) {
-                this.runInference(this.sampleBuffer, onAnomalyDetected);
+                this.runInference(this.sampleBuffer, sampleRate, onAnomalyDetected);
                 this.bufferIndex = 0; // Reset buffer
             }
         }
@@ -142,6 +203,7 @@ export class AudioAnomalyEngine {
 
     private runInference(
         samples: Float32Array,
+        inputSampleRate: number,
         onAnomalyDetected: (results: Record<AudioAnomalyTypeValue, number>) => void,
     ): void {
         try {
@@ -171,6 +233,11 @@ export class AudioAnomalyEngine {
 
                 const scoresArray = scoresTensor.dataSync() as Float32Array;
                 const now = Date.now();
+                const topClassIds = Array.from(scoresArray.entries())
+                    .sort((left, right) => right[1] - left[1])
+                    .slice(0, 5)
+                    .map(([classId]) => classId);
+                const topClassScores = topClassIds.map((classId) => scoresArray[classId] ?? 0);
 
                 // Calculate RMS for silence detection
                 let sumSquares = 0;
@@ -178,6 +245,8 @@ export class AudioAnomalyEngine {
                     sumSquares += samples[i] * samples[i];
                 }
                 const rms = Math.sqrt(sumSquares / samples.length);
+                const selectedAnomalyConfidence: Partial<Record<AudioAnomalyTypeValue, number>> = {};
+                const cooldownStatus: Partial<Record<AudioAnomalyTypeValue, boolean>> = {};
 
                 // Evaluate all enabled anomaly types independently
                 for (const anomalyType of this.config.enabledAnomalyTypes) {
@@ -198,9 +267,21 @@ export class AudioAnomalyEngine {
                             anomalyType,
                             this.config,
                         );
+
+                        if (
+                            confidence === null &&
+                            anomalyType === 'BACKGROUND_NOISE' &&
+                            rms >= BACKGROUND_NOISE_RMS_THRESHOLD
+                        ) {
+                            confidence = Math.min(
+                                1,
+                                rms / Math.max(BACKGROUND_NOISE_RMS_THRESHOLD, 0.0001),
+                            );
+                        }
                     }
 
                     if (confidence !== null) {
+                        selectedAnomalyConfidence[anomalyType] = confidence;
                         const count = (this.frameCounters.get(anomalyType) ?? 0) + 1;
                         this.frameCounters.set(anomalyType, count);
 
@@ -209,6 +290,7 @@ export class AudioAnomalyEngine {
                         const requiredConsecutiveFrames =
                             this.getRequiredConsecutiveFrames(anomalyType);
                         const cooldownExpired = now - lastAlert > cooldownMs;
+                        cooldownStatus[anomalyType] = cooldownExpired;
 
                         if (count >= requiredConsecutiveFrames && cooldownExpired) {
                             this.frameCounters.set(anomalyType, 0); // reset after triggering
@@ -219,6 +301,19 @@ export class AudioAnomalyEngine {
                         // Reset counter for this type because it didn't trigger this frame
                         this.frameCounters.set(anomalyType, 0);
                     }
+                }
+
+                if (isDevelopmentDebugEnabled()) {
+                    this.lastDebugSnapshot = {
+                        inputSampleRate,
+                        resampledSampleCount: samples.length,
+                        rms,
+                        topClassIds,
+                        topClassScores,
+                        selectedAnomalyConfidence,
+                        frameCounters: Object.fromEntries(this.frameCounters.entries()),
+                        cooldownStatus,
+                    };
                 }
             });
         } catch (error) {
