@@ -1,7 +1,7 @@
 import { randomUUID } from 'node:crypto';
 import { DEFAULT_TELEMETRY_SETTINGS } from '@sentinel/shared';
-import type { DbClient } from '@sentinel/db';
-import { describe, expect } from 'vitest';
+import { prisma, type DbClient } from '@sentinel/db';
+import { describe, expect, test } from 'vitest';
 import { testWithDbClient } from '../../../../lib/test-with-db-client';
 import type { PersistableProctoringEvent } from '../../ingestion/ingestion.dto';
 import { IncidentPersistenceService } from './incident-persistence.service';
@@ -80,6 +80,9 @@ async function createTelemetryAttemptFixture(
     return {
         attemptId: attempt.attempt_id,
         studentUserId: userId,
+        institutionId: institution.id,
+        studentId: student.student_id,
+        examId: exam.exam_id,
     };
 }
 
@@ -501,6 +504,139 @@ describe('IncidentPersistenceService', () => {
     );
 
     testWithDbClient(
+        'increments audio anomaly occurrence count to two for a later distinct audio dedupe key',
+        async ({ dbClient }) => {
+            const fixture = await createTelemetryAttemptFixture(dbClient);
+
+            await IncidentPersistenceService.appendEvent(
+                dbClient,
+                buildPayload({
+                    ...fixture,
+                    ruleKey: 'aiRules.audio_anomaly_detection',
+                    eventType: 'AUDIO_ANOMALY',
+                    metadata: {
+                        anomalyType: 'TALKING',
+                        confidenceScore: 0.82,
+                        dedupeKey: 'audio:talking:bucket-1',
+                    },
+                }),
+            );
+            await IncidentPersistenceService.appendEvent(
+                dbClient,
+                buildPayload({
+                    ...fixture,
+                    ruleKey: 'aiRules.audio_anomaly_detection',
+                    eventType: 'AUDIO_ANOMALY',
+                    metadata: {
+                        anomalyType: 'TALKING',
+                        confidenceScore: 0.84,
+                        dedupeKey: 'audio:talking:bucket-2',
+                    },
+                }),
+            );
+
+            const incident = await dbClient
+                .selectFrom('flagged_incidents')
+                .select(['rule_key', 'details'])
+                .where('attempt_id', '=', fixture.attemptId)
+                .executeTakeFirstOrThrow();
+
+            expect(incident.rule_key).toBe('aiRules.audio_anomaly_detection');
+            expect(parseIncidentDetails(incident.details)).toMatchObject({
+                occurrenceCount: 2,
+                lastEvent: {
+                    eventType: 'AUDIO_ANOMALY',
+                    metadata: {
+                        anomalyType: 'TALKING',
+                        confidenceScore: 0.84,
+                        dedupeKey: 'audio:talking:bucket-2',
+                    },
+                },
+            });
+        },
+    );
+
+    testWithDbClient(
+        'keeps duplicate first-trigger requests with the same dedupe key at occurrence count one',
+        async ({ dbClient }) => {
+            const fixture = await createTelemetryAttemptFixture(dbClient);
+            const metadata = {
+                dedupeKey: 'attempt:right-click:bucket-1',
+                eventId: 'event-1',
+                clientActionAt: '2026-04-22T08:00:00.000Z',
+            };
+
+            await IncidentPersistenceService.appendEvent(
+                dbClient,
+                buildPayload({
+                    ...fixture,
+                    metadata,
+                }),
+            );
+            await IncidentPersistenceService.appendEvent(
+                dbClient,
+                buildPayload({
+                    ...fixture,
+                    metadata,
+                }),
+            );
+
+            const incidents = await dbClient
+                .selectFrom('flagged_incidents')
+                .select(['incident_id', 'details', 'dedupe_key'])
+                .where('attempt_id', '=', fixture.attemptId)
+                .execute();
+
+            expect(incidents).toHaveLength(1);
+            expect(incidents[0]?.dedupe_key).toBe(metadata.dedupeKey);
+            expect(parseIncidentDetails(incidents[0]?.details)).toMatchObject({
+                occurrenceCount: 1,
+            });
+        },
+    );
+
+    testWithDbClient(
+        'increments occurrence count to two for a later distinct event inside the aggregation window',
+        async ({ dbClient }) => {
+            const fixture = await createTelemetryAttemptFixture(dbClient);
+
+            await IncidentPersistenceService.appendEvent(
+                dbClient,
+                buildPayload({
+                    ...fixture,
+                    metadata: {
+                        dedupeKey: 'attempt:right-click:bucket-1',
+                        eventId: 'event-1',
+                        clientActionAt: '2026-04-22T08:00:00.000Z',
+                    },
+                }),
+            );
+            await IncidentPersistenceService.appendEvent(
+                dbClient,
+                buildPayload({
+                    ...fixture,
+                    metadata: {
+                        dedupeKey: 'attempt:right-click:bucket-2',
+                        eventId: 'event-2',
+                        clientActionAt: '2026-04-22T08:00:03.000Z',
+                    },
+                }),
+            );
+
+            const incidents = await dbClient
+                .selectFrom('flagged_incidents')
+                .select(['incident_id', 'details'])
+                .where('attempt_id', '=', fixture.attemptId)
+                .execute();
+
+            expect(incidents).toHaveLength(1);
+            expect(parseIncidentDetails(incidents[0]?.details)).toMatchObject({
+                occurrenceCount: 2,
+            });
+        },
+    );
+
+    testWithDbClient(
         'automatically closes only the triggering attempt after three high incidents',
         async ({ dbClient }) => {
             const targetFixture = await createTelemetryAttemptFixture(dbClient);
@@ -702,3 +838,60 @@ describe('IncidentPersistenceService', () => {
         },
     );
 });
+
+test(
+    'IncidentPersistenceService keeps one row and occurrence count one for concurrent first-trigger writes with the same dedupe key',
+    async () => {
+        const dbClient = prisma.$kysely;
+        const fixture = await createTelemetryAttemptFixture(dbClient);
+        const payload = buildPayload({
+            attemptId: fixture.attemptId,
+            studentUserId: fixture.studentUserId,
+            metadata: {
+                dedupeKey: 'attempt:right-click:bucket-concurrent',
+                eventId: 'event-concurrent-1',
+                clientActionAt: '2026-04-22T08:00:00.000Z',
+            },
+        });
+
+        try {
+            const results = await Promise.all([
+                IncidentPersistenceService.appendEvent(dbClient, payload),
+                IncidentPersistenceService.appendEvent(dbClient, payload),
+            ]);
+
+            const incidents = await dbClient
+                .selectFrom('flagged_incidents')
+                .select(['incident_id', 'details', 'dedupe_key'])
+                .where('attempt_id', '=', fixture.attemptId)
+                .execute();
+
+            expect(results.filter(Boolean)).toHaveLength(1);
+            expect(incidents).toHaveLength(1);
+            expect(incidents[0]?.dedupe_key).toBe('attempt:right-click:bucket-concurrent');
+            expect(parseIncidentDetails(incidents[0]?.details)).toMatchObject({
+                occurrenceCount: 1,
+            });
+        } finally {
+            await dbClient
+                .deleteFrom('flagged_incidents')
+                .where('attempt_id', '=', fixture.attemptId)
+                .execute();
+            await dbClient
+                .deleteFrom('exam_attempts')
+                .where('attempt_id', '=', fixture.attemptId)
+                .execute();
+            await dbClient.deleteFrom('exams').where('exam_id', '=', fixture.examId).execute();
+            await dbClient
+                .deleteFrom('students')
+                .where('student_id', '=', fixture.studentId)
+                .execute();
+            await dbClient
+                .deleteFrom('institutions')
+                .where('id', '=', fixture.institutionId)
+                .execute();
+            await dbClient.deleteFrom('users').where('id', '=', fixture.studentUserId).execute();
+        }
+    },
+    30000,
+);

@@ -27,17 +27,17 @@ export interface AudioCapabilityReport {
 }
 
 export const DEFAULT_AUDIO_ANOMALY_THRESHOLDS: AudioAnomalyThresholds = {
-    TALKING: 0.65,
+    TALKING: 0.45,
     TYPING: 0.55,
     TAPPING: 0.5,
     MOUTH_BREATHING: 0.45,
-    BACKGROUND_NOISE: 0.7,
+    BACKGROUND_NOISE: 0.55,
     SILENCE_DETECTED: 0.015,
 };
 
 export const DEFAULT_AUDIO_ANOMALY_CONFIG: AudioAnomalyConfig = {
     sensitivityMultiplier: 1,
-    consecutiveFrameThreshold: 3,
+    consecutiveFrameThreshold: 2,
     cooldownMs: 10_000,
     thresholds: { ...DEFAULT_AUDIO_ANOMALY_THRESHOLDS },
     enabledAnomalyTypes: ['TALKING', 'TYPING', 'TAPPING', 'MOUTH_BREATHING', 'BACKGROUND_NOISE'],

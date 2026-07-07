@@ -61,6 +61,7 @@ describe('Audio Anomaly Complete Lifecycle (Integration)', () => {
         config.enabledAnomalyTypes = config.enabledAnomalyTypes.filter(
             (t: string) => t !== 'SILENCE_DETECTED',
         );
+        config.consecutiveFrameThreshold = 2;
 
         engine = new AudioAnomalyEngine(config);
         await engine.initialize();
@@ -70,22 +71,16 @@ describe('Audio Anomaly Complete Lifecycle (Integration)', () => {
     it('Scenario: Talking detected during exam', async () => {
         const onAnomalyDetected = vi.fn();
 
-        // Step 1: Inject a 3-second audio clip classified as "Speech"
-        // 3 seconds = roughly 3 YAMNet frames (0.975s each)
-        // We'll simulate 3 frames of audio data that our mocked predict() recognizes as speech
-        const frameData = new Float32Array(15600);
+        // Step 1: Inject browser-rate audio that must be resampled before YAMNet inference.
+        const frameData = new Float32Array(46_800);
         frameData[0] = 0.99; // Our trigger for "Speech" in mock
 
         // Feed frame 1
-        await engine.processAudioChunk(frameData, onAnomalyDetected);
-        expect(onAnomalyDetected).not.toHaveBeenCalled(); // Need 3 consecutive frames
+        await engine.processAudioChunk(frameData, 48_000, onAnomalyDetected);
+        expect(onAnomalyDetected).not.toHaveBeenCalled(); // Need 2 consecutive frames after resampling
 
         // Feed frame 2
-        await engine.processAudioChunk(frameData, onAnomalyDetected);
-        expect(onAnomalyDetected).not.toHaveBeenCalled();
-
-        // Feed frame 3
-        await engine.processAudioChunk(frameData, onAnomalyDetected);
+        await engine.processAudioChunk(frameData, 48_000, onAnomalyDetected);
 
         // Then the worker emits an ANOMALY event with type=TALKING and confidence >= 0.65
         expect(onAnomalyDetected).toHaveBeenCalledTimes(1);
@@ -109,7 +104,7 @@ describe('Audio Anomaly Complete Lifecycle (Integration)', () => {
             anomalyType: 'TALKING',
             confidence: 0.88,
             detectedAt: new Date().toISOString(),
-            frameWindow: 3,
+            frameWindow: 2,
         };
 
         await fetch('/api/telemetry/events', {

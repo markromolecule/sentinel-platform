@@ -104,6 +104,12 @@ describe('MediaPipe AI ingestion rules', () => {
 
             expect(decision.action).toBe('persist');
             expect(
+                decision.action === 'persist' ? decision.payload.ruleKey : null,
+            ).toBe('aiRules.audio_anomaly_detection');
+            expect(
+                decision.action === 'persist' ? decision.payload.eventType : null,
+            ).toBe('AUDIO_ANOMALY');
+            expect(
                 decision.action === 'persist' ? decision.payload.metadata?.aggregation : null,
             ).toEqual(
                 expect.objectContaining({
@@ -126,6 +132,9 @@ describe('MediaPipe AI ingestion rules', () => {
             });
 
             expect(decision.action).toBe('persist');
+            expect(
+                decision.action === 'persist' ? decision.payload.metadata?.anomalyType : null,
+            ).toBe('BACKGROUND_NOISE');
             expect(
                 decision.action === 'persist' ? decision.payload.metadata?.aggregation : null,
             ).toEqual(

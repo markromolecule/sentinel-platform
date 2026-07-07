@@ -29,3 +29,8 @@ export interface AudioGraphComponents {
     source: MediaStreamAudioSourceNode;
     processor: ScriptProcessorNode;
 }
+
+export interface AudioFramePayload {
+    samples: Float32Array;
+    sampleRate: number;
+}

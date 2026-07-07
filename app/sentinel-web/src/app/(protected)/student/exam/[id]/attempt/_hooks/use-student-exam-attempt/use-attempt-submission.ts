@@ -16,7 +16,7 @@ export type UseAttemptSubmissionArgs = {
     isRedirectingToTurnIn: boolean;
     setIsRedirectingToTurnIn: (val: boolean) => void;
     setIsSubmitDialogOpen: (val: boolean) => void;
-    suspendSecurityMonitoring: () => void;
+    suspendSecurityMonitoring: () => boolean;
     isBlocked?: boolean;
     setMonitoringPhase?: (phase: AttemptMonitoringPhase) => void;
 };
@@ -47,9 +47,20 @@ export function useAttemptSubmission({
 
     const proceedToTurnInReview = () => {
         if (isRedirectingToTurnIn || !sessionId || isBlocked) return;
+        const monitoringSuspended = suspendSecurityMonitoring();
+
+        if (!monitoringSuspended) {
+            if (process.env.NODE_ENV === 'development') {
+                console.warn(
+                    '[AttemptSubmission] Monitoring suspension failed before Turn In review.',
+                    { examId, sessionId },
+                );
+            }
+            return;
+        }
+
         setMonitoringPhase?.('submitting');
         setIsRedirectingToTurnIn(true);
-        suspendSecurityMonitoring();
 
         const summary = scoreExamAttempt({
             questions,
@@ -76,6 +87,16 @@ export function useAttemptSubmission({
         router.replace(`/student/exam/${examId}/result`);
 
         window.setTimeout(() => {
+            if (!monitoringSuspended) {
+                if (process.env.NODE_ENV === 'development') {
+                    console.warn(
+                        '[AttemptSubmission] Skipping fullscreen exit because monitoring was not suspended.',
+                        { examId, sessionId },
+                    );
+                }
+                return;
+            }
+
             if (typeof document === 'undefined' || !document.fullscreenElement) {
                 return;
             }

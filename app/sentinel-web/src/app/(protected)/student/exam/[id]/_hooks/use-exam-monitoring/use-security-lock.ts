@@ -69,6 +69,7 @@ export function useSecurityLock(args: {
         isMonitoringSuspended.current = true;
         setSecurityLockReason(null);
         clearStoredSecurityLock(examId);
+        return true;
     }, [examId, isMonitoringSuspended]);
 
     return {

@@ -3,6 +3,77 @@ import { useApi } from '@sentinel/hooks';
 import { TELEMETRY_EVENT_DEFINITIONS, type AudioAnomalyTypeValue } from '@sentinel/shared';
 import { ingestTelemetryEvent } from '@sentinel/services';
 
+const SILENCE_MIN_COOLDOWN_MS = 180_000;
+const BACKGROUND_NOISE_MIN_COOLDOWN_MS = 60_000;
+
+function toStableUuid(seed: string) {
+    let hashA = 0x811c9dc5;
+    let hashB = 0x811c9dc5;
+    let hashC = 0x811c9dc5;
+    let hashD = 0x811c9dc5;
+
+    for (let index = 0; index < seed.length; index += 1) {
+        const code = seed.charCodeAt(index);
+        hashA = Math.imul(hashA ^ code, 0x01000193);
+        hashB = Math.imul(hashB ^ (code + 17), 0x01000193);
+        hashC = Math.imul(hashC ^ (code + 31), 0x01000193);
+        hashD = Math.imul(hashD ^ (code + 47), 0x01000193);
+    }
+
+    const hex = [hashA, hashB, hashC, hashD]
+        .map((part) => (part >>> 0).toString(16).padStart(8, '0'))
+        .join('');
+
+    return [
+        hex.slice(0, 8),
+        hex.slice(8, 12),
+        `4${hex.slice(13, 16)}`,
+        `${((parseInt(hex.slice(16, 17), 16) & 0x3) | 0x8).toString(16)}${hex.slice(17, 20)}`,
+        hex.slice(20, 32),
+    ].join('-');
+}
+
+export function getAudioAnomalyCooldownMs(
+    anomalyType: AudioAnomalyTypeValue,
+    cooldownMs: number,
+) {
+    if (anomalyType === 'SILENCE_DETECTED') {
+        return Math.max(cooldownMs, SILENCE_MIN_COOLDOWN_MS);
+    }
+
+    if (anomalyType === 'BACKGROUND_NOISE') {
+        return Math.max(cooldownMs, BACKGROUND_NOISE_MIN_COOLDOWN_MS);
+    }
+
+    return cooldownMs;
+}
+
+export function createAudioAnomalyActionMetadata(args: {
+    examSessionId: string;
+    anomalyType: AudioAnomalyTypeValue;
+    clientActionAt?: string;
+    cooldownMs: number;
+}) {
+    const clientActionAt = args.clientActionAt ?? new Date().toISOString();
+    const effectiveCooldownMs = getAudioAnomalyCooldownMs(args.anomalyType, args.cooldownMs);
+    const bucketStart = new Date(
+        Math.floor(new Date(clientActionAt).getTime() / effectiveCooldownMs) *
+            effectiveCooldownMs,
+    ).toISOString();
+    const dedupeKey = [
+        args.examSessionId,
+        'AUDIO_ANOMALY',
+        args.anomalyType,
+        bucketStart,
+    ].join(':');
+
+    return {
+        eventId: toStableUuid(dedupeKey),
+        dedupeKey,
+        clientActionAt,
+    };
+}
+
 /**
  * Custom hook to encapsulate audio anomaly telemetry reporting.
  *
@@ -16,23 +87,36 @@ export function useAnomalyTelemetry(
     examSessionId?: string,
     studentId?: string,
     isSuspendedRef?: React.RefObject<boolean>,
+    cooldownMs = 10_000,
 ) {
     return useCallback(
-        async (anomalyType: AudioAnomalyTypeValue, confidenceScore: number) => {
+        async (
+            anomalyType: AudioAnomalyTypeValue,
+            confidenceScore: number,
+            clientActionAt = new Date().toISOString(),
+        ) => {
             if (!examSessionId || !studentId || isSuspendedRef?.current) {
                 return;
             }
 
             const eventDefinition = TELEMETRY_EVENT_DEFINITIONS.AUDIO_ANOMALY;
+            const actionMetadata = createAudioAnomalyActionMetadata({
+                examSessionId,
+                anomalyType,
+                clientActionAt,
+                cooldownMs,
+            });
+
             await ingestTelemetryEvent(apiClient, {
                 examSessionId,
                 studentId,
-                timestamp: new Date().toISOString(),
+                timestamp: clientActionAt,
                 eventType: 'AUDIO_ANOMALY',
                 platform: 'WEB',
                 source: eventDefinition.source,
                 ruleKey: eventDefinition.ruleKey,
                 metadata: {
+                    ...actionMetadata,
                     confidenceScore,
                     anomalyType,
                     aggregation: {
@@ -45,6 +129,6 @@ export function useAnomalyTelemetry(
                 },
             });
         },
-        [apiClient, examSessionId, studentId, isSuspendedRef],
+        [apiClient, cooldownMs, examSessionId, studentId, isSuspendedRef],
     );
 }

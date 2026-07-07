@@ -29,11 +29,34 @@ vi.mock('sonner', () => ({
 
 vi.mock('../_lib/web-telemetry-client', () => ({
     emitWebTelemetryEvent: vi.fn().mockResolvedValue(true),
-    createTelemetryActionMetadata: (eventType: string) => ({
-        eventId: crypto.randomUUID(),
-        dedupeKey: `${eventType}:${crypto.randomUUID()}`,
-        clientActionAt: new Date().toISOString(),
-    }),
+    createTelemetryActionMetadata: (args: string | {
+        eventType: string;
+        examSessionId?: string;
+        actionSource?: string;
+        clientActionAt?: string;
+        bucketMs?: number;
+    }) => {
+        const eventType = typeof args === 'string' ? args : args.eventType;
+        const examSessionId =
+            typeof args === 'string' ? 'mock-session' : (args.examSessionId ?? 'mock-session');
+        const actionSource =
+            typeof args === 'string' ? 'generic-action' : (args.actionSource ?? 'generic-action');
+        const clientActionAt =
+            typeof args === 'string'
+                ? new Date().toISOString()
+                : (args.clientActionAt ?? new Date().toISOString());
+        const bucketMs = typeof args === 'string' ? 1000 : (args.bucketMs ?? 1000);
+        const bucketStart = new Date(
+            Math.floor(new Date(clientActionAt).getTime() / bucketMs) * bucketMs,
+        ).toISOString();
+        const dedupeKey = `${examSessionId}:${eventType}:${actionSource}:${bucketStart}`;
+
+        return {
+            eventId: crypto.randomUUID(),
+            dedupeKey,
+            clientActionAt,
+        };
+    },
 }));
 
 function createExamConfiguration(overrides: Partial<ExamConfig['webSecurity']> = {}): ExamConfig {
@@ -215,6 +238,27 @@ describe('use-exam-monitoring', () => {
 
         expect(emitWebTelemetryEvent).not.toHaveBeenCalled();
         expect(mockToastWarning).not.toHaveBeenCalled();
+    });
+
+    it('updates the suspension ref immediately before the next fullscreenchange is handled', async () => {
+        const { result } = renderHook(() =>
+            useExamMonitoring({
+                configuration: createExamConfiguration({ full_screen_required: true }),
+                examSessionId: '123e4567-e89b-12d3-a456-426614174000',
+                examId: '123e4567-e89b-12d3-a456-426614174999',
+            }),
+        );
+
+        act(() => {
+            expect(result.current.suspendSecurityMonitoring()).toBe(true);
+            document.dispatchEvent(new Event('fullscreenchange'));
+        });
+
+        await waitFor(() => {
+            expect(result.current.securityLockReason).toBeNull();
+        });
+
+        expect(emitWebTelemetryEvent).not.toHaveBeenCalled();
     });
 
     it('blocks clipboard shortcuts and shows the attempt warning immediately', async () => {
@@ -453,6 +497,116 @@ describe('use-exam-monitoring', () => {
             expect(emitWebTelemetryEvent).toHaveBeenCalledTimes(1);
         });
         expect(mockToastWarning).toHaveBeenCalledTimes(1);
+    });
+
+    it('emits exactly one right-click telemetry payload for the first action', async () => {
+        renderHook(() =>
+            useExamMonitoring({
+                configuration: createExamConfiguration({ right_click_disable: true }),
+                examSessionId: '123e4567-e89b-12d3-a456-426614174000',
+                examId: '123e4567-e89b-12d3-a456-426614174999',
+            }),
+        );
+
+        act(() => {
+            document.dispatchEvent(
+                new MouseEvent('contextmenu', {
+                    bubbles: true,
+                    cancelable: true,
+                }),
+            );
+        });
+
+        await waitFor(() => {
+            expect(emitWebTelemetryEvent).toHaveBeenCalledTimes(1);
+        });
+        expect(emitWebTelemetryEvent).toHaveBeenLastCalledWith(
+            mockApiClient,
+            expect.objectContaining({
+                eventType: 'RIGHT_CLICK_ATTEMPT',
+            }),
+        );
+    });
+
+    it('emits exactly one clipboard telemetry payload for the first clipboard action', async () => {
+        renderHook(() =>
+            useExamMonitoring({
+                configuration: createExamConfiguration({ clipboard_control: true }),
+                examSessionId: '123e4567-e89b-12d3-a456-426614174000',
+                examId: '123e4567-e89b-12d3-a456-426614174999',
+            }),
+        );
+
+        act(() => {
+            document.dispatchEvent(
+                new KeyboardEvent('keydown', {
+                    key: 'c',
+                    ctrlKey: true,
+                    bubbles: true,
+                    cancelable: true,
+                }),
+            );
+        });
+
+        await waitFor(() => {
+            expect(emitWebTelemetryEvent).toHaveBeenCalledTimes(1);
+        });
+        expect(emitWebTelemetryEvent).toHaveBeenLastCalledWith(
+            mockApiClient,
+            expect.objectContaining({
+                eventType: 'CLIPBOARD_ATTEMPT',
+            }),
+        );
+    });
+
+    it('emits exactly one tab-switch telemetry payload for the first focus-loss action', async () => {
+        const { result } = renderHook(() =>
+            useExamMonitoring({
+                configuration: createExamConfiguration({ tab_switching_monitor: true }),
+                examSessionId: '123e4567-e89b-12d3-a456-426614174000',
+                examId: '123e4567-e89b-12d3-a456-426614174999',
+            }),
+        );
+
+        act(() => {
+            window.dispatchEvent(new Event('blur'));
+        });
+
+        await waitFor(() => {
+            expect(result.current.securityLockReason).toBe('focus-loss');
+        });
+        expect(emitWebTelemetryEvent).toHaveBeenCalledTimes(1);
+        expect(emitWebTelemetryEvent).toHaveBeenLastCalledWith(
+            mockApiClient,
+            expect.objectContaining({
+                eventType: 'TAB_SWITCH',
+            }),
+        );
+    });
+
+    it('emits exactly one fullscreen telemetry payload for the first fullscreen exit', async () => {
+        const { result } = renderHook(() =>
+            useExamMonitoring({
+                configuration: createExamConfiguration({ full_screen_required: true }),
+                examSessionId: '123e4567-e89b-12d3-a456-426614174000',
+                examId: '123e4567-e89b-12d3-a456-426614174999',
+            }),
+        );
+
+        act(() => {
+            document.dispatchEvent(new Event('fullscreenchange'));
+        });
+
+        await waitFor(() => {
+            expect(result.current.securityLockReason).toBe('fullscreen-exit');
+        });
+        expect(emitWebTelemetryEvent).toHaveBeenCalledTimes(1);
+        expect(emitWebTelemetryEvent).toHaveBeenLastCalledWith(
+            mockApiClient,
+            expect.objectContaining({
+                eventType: 'FULL_SCREEN_EXIT',
+            }),
+        );
     });
 
     it('locks the exam and emits telemetry for the PrintScreen key', async () => {
@@ -719,6 +873,9 @@ describe('use-exam-monitoring', () => {
     });
 
     it('sends metadata eventId, dedupeKey, and clientActionAt when event is emitted', async () => {
+        vi.useFakeTimers();
+        vi.setSystemTime(new Date('2026-04-22T00:00:00.100Z'));
+
         renderHook(() =>
             useExamMonitoring({
                 configuration: createExamConfiguration(),
@@ -731,36 +888,76 @@ describe('use-exam-monitoring', () => {
             document.dispatchEvent(new MouseEvent('contextmenu', { bubbles: true, cancelable: true }));
         });
 
-        await waitFor(() => {
-            expect(emitWebTelemetryEvent).toHaveBeenCalledWith(
-                mockApiClient,
-                expect.objectContaining({
-                    eventType: 'RIGHT_CLICK_ATTEMPT',
-                    eventId: expect.any(String),
-                    dedupeKey: expect.any(String),
-                    clientActionAt: expect.any(String),
+        expect(emitWebTelemetryEvent).toHaveBeenCalledWith(
+            mockApiClient,
+            expect.objectContaining({
+                eventType: 'RIGHT_CLICK_ATTEMPT',
+                eventId: expect.any(String),
+                dedupeKey:
+                    '123e4567-e89b-12d3-a456-426614174000:RIGHT_CLICK_ATTEMPT:contextmenu:2026-04-22T00:00:00.000Z',
+                clientActionAt: expect.any(String),
+            }),
+        );
+    });
+
+    it('applies client burst guards on repeated contextmenu', () => {
+        vi.useFakeTimers();
+        vi.setSystemTime(new Date('2026-04-22T00:00:00.100Z'));
+
+        renderHook(() =>
+            useExamMonitoring({
+                configuration: createExamConfiguration(),
+                examSessionId: '123e4567-e89b-12d3-a456-426614174000',
+                examId: '123e4567-e89b-12d3-a456-426614174999',
+            }),
+        );
+
+        act(() => {
+            document.dispatchEvent(new MouseEvent('contextmenu', { bubbles: true, cancelable: true }));
+            document.dispatchEvent(new MouseEvent('contextmenu', { bubbles: true, cancelable: true }));
+        });
+
+        expect(emitWebTelemetryEvent).toHaveBeenCalledTimes(1);
+    });
+
+    it('creates a distinct dedupe key for a second right-click after the burst window', () => {
+        vi.useFakeTimers();
+        vi.setSystemTime(new Date('2026-04-22T00:00:00.100Z'));
+
+        renderHook(() =>
+            useExamMonitoring({
+                configuration: createExamConfiguration({ right_click_disable: true }),
+                examSessionId: '123e4567-e89b-12d3-a456-426614174000',
+                examId: '123e4567-e89b-12d3-a456-426614174999',
+            }),
+        );
+
+        act(() => {
+            document.dispatchEvent(
+                new MouseEvent('contextmenu', {
+                    bubbles: true,
+                    cancelable: true,
                 }),
             );
         });
-    });
-
-    it('applies client burst guards on repeated contextmenu', async () => {
-        renderHook(() =>
-            useExamMonitoring({
-                configuration: createExamConfiguration(),
-                examSessionId: '123e4567-e89b-12d3-a456-426614174000',
-                examId: '123e4567-e89b-12d3-a456-426614174999',
-            }),
-        );
 
         act(() => {
-            document.dispatchEvent(new MouseEvent('contextmenu', { bubbles: true, cancelable: true }));
-            document.dispatchEvent(new MouseEvent('contextmenu', { bubbles: true, cancelable: true }));
+            vi.advanceTimersByTime(801);
+            vi.setSystemTime(new Date('2026-04-22T00:00:01.100Z'));
+            document.dispatchEvent(
+                new MouseEvent('contextmenu', {
+                    bubbles: true,
+                    cancelable: true,
+                }),
+            );
         });
 
-        await waitFor(() => {
-            expect(emitWebTelemetryEvent).toHaveBeenCalledTimes(1);
-        });
+        expect(emitWebTelemetryEvent).toHaveBeenCalledTimes(2);
+
+        const firstPayload = vi.mocked(emitWebTelemetryEvent).mock.calls[0]?.[1];
+        const secondPayload = vi.mocked(emitWebTelemetryEvent).mock.calls[1]?.[1];
+
+        expect(firstPayload?.dedupeKey).not.toBe(secondPayload?.dedupeKey);
     });
 
     it('applies client burst guards on repeated fullscreenchange', async () => {

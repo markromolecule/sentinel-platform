@@ -61,15 +61,22 @@ export function useExamMonitoring({
         fullScreenContainerRef,
         lockExam,
         resumeSecuredExam,
-        suspendSecurityMonitoring,
+        suspendSecurityMonitoring: suspendSecurityMonitoringState,
     } = useSecurityLock({
         examId,
         shouldMonitorFullscreen,
         isMonitoringSuspended: isMonitoringSuspendedRef,
     });
 
+    const suspendSecurityMonitoring = () => {
+        monitoringPhaseRef.current = 'suspended';
+        isMonitoringSuspendedRef.current = true;
+        return suspendSecurityMonitoringState();
+    };
+
     useInteractionListeners({
         configuration,
+        examSessionId,
         isMonitoringSuspended: isMonitoringSuspendedRef,
         isMobile,
         shouldMonitorVisibility,

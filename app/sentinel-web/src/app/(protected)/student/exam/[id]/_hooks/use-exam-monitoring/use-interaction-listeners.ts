@@ -13,6 +13,7 @@ import { type AttemptMonitoringPhase } from './_types';
  */
 export function useInteractionListeners(args: {
     configuration?: ExamConfig;
+    examSessionId?: string;
     isMonitoringSuspended: React.MutableRefObject<boolean>;
     isMobile: boolean;
     shouldMonitorVisibility: boolean;
@@ -27,6 +28,7 @@ export function useInteractionListeners(args: {
 }) {
     const {
         configuration,
+        examSessionId,
         isMonitoringSuspended,
         isMobile,
         shouldMonitorVisibility,
@@ -43,24 +45,54 @@ export function useInteractionListeners(args: {
     const lastPrintScreenIncidentAtRef = useRef(0);
     const lastRightClickIncidentAtRef = useRef(0);
     const lastFullscreenIncidentAtRef = useRef(0);
+    const isSubmitTeardown = (phase: AttemptMonitoringPhase | undefined) =>
+        phase === 'submitting' || phase === 'navigating-to-turn-in' || phase === 'suspended';
+    const acceptActionBurst = (
+        lastIncidentAtRef: React.MutableRefObject<number>,
+        windowMs: number,
+        now: number,
+    ) => {
+        if (now - lastIncidentAtRef.current < windowMs) {
+            return false;
+        }
 
-    const registerClipboardIncident = useCallback(() => {
+        lastIncidentAtRef.current = now;
+        return true;
+    };
+    const buildActionMetadata = (
+        eventType: WebTelemetryEventType,
+        actionSource: string,
+        clientActionAt: string,
+        bucketMs: number,
+    ) =>
+        createTelemetryActionMetadata({
+            eventType,
+            examSessionId,
+            actionSource,
+            clientActionAt,
+            bucketMs,
+        });
+
+    const registerClipboardIncident = useCallback((clientActionAt = new Date().toISOString()) => {
         if (isMonitoringSuspended.current) return;
-        const now = Date.now();
-        if (now - lastClipboardIncidentAtRef.current < 800) return;
+        const now = new Date(clientActionAt).getTime();
+        if (!acceptActionBurst(lastClipboardIncidentAtRef, 800, now)) return;
 
-        lastClipboardIncidentAtRef.current = now;
-        const metadata = createTelemetryActionMetadata('CLIPBOARD_ATTEMPT');
+        const metadata = buildActionMetadata(
+            'CLIPBOARD_ATTEMPT',
+            'clipboard',
+            clientActionAt,
+            800,
+        );
         emitTelemetryEvent('CLIPBOARD_ATTEMPT', metadata);
         toast.warning('Clipboard actions are disabled for this exam.');
-    }, [emitTelemetryEvent, isMonitoringSuspended]);
+    }, [emitTelemetryEvent, examSessionId, isMonitoringSuspended]);
 
-    const registerFocusIncident = useCallback(() => {
+    const registerFocusIncident = useCallback((actionSource: 'focus-loss', clientActionAt = new Date().toISOString()) => {
         if (isMonitoringSuspended.current) return;
-        const now = Date.now();
-        if (now - lastFocusIncidentAtRef.current < 1000) return;
+        const now = new Date(clientActionAt).getTime();
+        if (!acceptActionBurst(lastFocusIncidentAtRef, 1000, now)) return;
 
-        lastFocusIncidentAtRef.current = now;
         const shortcutNavigationDetected = now - lastNavigationShortcutAtRef.current < 1500;
         setTabSwitches((current) => current + 1);
 
@@ -69,7 +101,7 @@ export function useInteractionListeners(args: {
             return;
         }
 
-        const metadata = createTelemetryActionMetadata('TAB_SWITCH');
+        const metadata = buildActionMetadata('TAB_SWITCH', actionSource, clientActionAt, 1000);
         emitTelemetryEvent('TAB_SWITCH', metadata);
         lockExam('focus-loss');
         toast.warning('Navigation away from the exam was detected.', {
@@ -77,13 +109,13 @@ export function useInteractionListeners(args: {
                 ? 'A task-switching shortcut or window change was detected. Return to the secured exam view to continue.'
                 : 'Return to the secured exam view to continue.',
         });
-    }, [emitTelemetryEvent, isMobile, lockExam, isMonitoringSuspended, setTabSwitches]);
+    }, [emitTelemetryEvent, examSessionId, isMobile, lockExam, isMonitoringSuspended, setTabSwitches]);
 
     const handleVisibilityChange = useCallback(() => {
         // Policy: Minimize and window-hidden actions are classified under focus/visibility incidents
         // and must not be silently reclassified as or remapped to fullscreen exits.
         if (!isMonitoringSuspended.current && shouldMonitorVisibility && document.hidden) {
-            registerFocusIncident();
+            registerFocusIncident('focus-loss');
         }
     }, [registerFocusIncident, shouldMonitorVisibility, isMonitoringSuspended]);
 
@@ -92,7 +124,7 @@ export function useInteractionListeners(args: {
         setTimeout(() => {
             // Policy: Window blur/loss of focus is tracked separately from fullscreen state.
             if (!isMonitoringSuspended.current && !document.hasFocus() && !document.hidden) {
-                registerFocusIncident();
+                registerFocusIncident('focus-loss');
             }
         }, 100);
     }, [registerFocusIncident, shouldMonitorVisibility, isMonitoringSuspended]);
@@ -103,18 +135,21 @@ export function useInteractionListeners(args: {
             isMonitoringSuspended.current ||
             !shouldMonitorFullscreen ||
             document.fullscreenElement ||
-            currentPhase === 'submitting' ||
-            currentPhase === 'navigating-to-turn-in' ||
-            currentPhase === 'suspended'
+            isSubmitTeardown(currentPhase)
         ) {
             return;
         }
 
-        const now = Date.now();
-        if (now - lastFullscreenIncidentAtRef.current < 1000) return;
+        const clientActionAt = new Date().toISOString();
+        const now = new Date(clientActionAt).getTime();
+        if (!acceptActionBurst(lastFullscreenIncidentAtRef, 1000, now)) return;
 
-        lastFullscreenIncidentAtRef.current = now;
-        const metadata = createTelemetryActionMetadata('FULL_SCREEN_EXIT');
+        const metadata = buildActionMetadata(
+            'FULL_SCREEN_EXIT',
+            'fullscreen-change',
+            clientActionAt,
+            1000,
+        );
         emitTelemetryEvent('FULL_SCREEN_EXIT', metadata);
         lockExam('fullscreen-exit');
         toast.warning('Fullscreen is required for this exam.', {
@@ -134,7 +169,7 @@ export function useInteractionListeners(args: {
                 const normalizedKey = event.key.toLowerCase();
                 if ((event.ctrlKey || event.metaKey) && ['c', 'x', 'v'].includes(normalizedKey)) {
                     event.preventDefault();
-                    registerClipboardIncident();
+                    registerClipboardIncident(new Date().toISOString());
                     return;
                 }
             }
@@ -152,12 +187,17 @@ export function useInteractionListeners(args: {
                 event.metaKey && event.shiftKey && normalizedKey === 's';
 
             if (isPrintScreenKey || isMacCaptureShortcut || isWindowsCaptureShortcut) {
-                event.preventDefault();
-                const now = Date.now();
-                if (now - lastPrintScreenIncidentAtRef.current < 800) return;
+                const clientActionAt = new Date().toISOString();
+                const now = new Date(clientActionAt).getTime();
+                if (!acceptActionBurst(lastPrintScreenIncidentAtRef, 800, now)) return;
 
-                lastPrintScreenIncidentAtRef.current = now;
-                const metadata = createTelemetryActionMetadata('PRINT_SCREEN_ATTEMPT');
+                event.preventDefault();
+                const metadata = buildActionMetadata(
+                    'PRINT_SCREEN_ATTEMPT',
+                    'screen-capture',
+                    clientActionAt,
+                    800,
+                );
                 emitTelemetryEvent('PRINT_SCREEN_ATTEMPT', metadata);
                 lockExam('screen-capture');
                 toast.warning('Screen capture shortcuts are blocked or monitored for this exam.', {
@@ -187,8 +227,9 @@ export function useInteractionListeners(args: {
                 (configuration?.webSecurity.clipboard_control ?? true) &&
                 !isMobile
             ) {
+                const clientActionAt = new Date().toISOString();
                 e.preventDefault();
-                registerClipboardIncident();
+                registerClipboardIncident(clientActionAt);
             }
         };
 
@@ -198,12 +239,17 @@ export function useInteractionListeners(args: {
                 (configuration?.webSecurity.right_click_disable ?? true) &&
                 !isMobile
             ) {
+                const clientActionAt = new Date().toISOString();
+                const now = new Date(clientActionAt).getTime();
                 e.preventDefault();
-                const now = Date.now();
-                if (now - lastRightClickIncidentAtRef.current < 800) return;
+                if (!acceptActionBurst(lastRightClickIncidentAtRef, 800, now)) return;
 
-                lastRightClickIncidentAtRef.current = now;
-                const metadata = createTelemetryActionMetadata('RIGHT_CLICK_ATTEMPT');
+                const metadata = buildActionMetadata(
+                    'RIGHT_CLICK_ATTEMPT',
+                    'contextmenu',
+                    clientActionAt,
+                    800,
+                );
                 emitTelemetryEvent('RIGHT_CLICK_ATTEMPT', metadata);
                 lockExam('right-click');
                 toast.warning('Right-click actions are disabled for this exam.', {
