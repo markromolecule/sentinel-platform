@@ -1,13 +1,13 @@
 import type { Metadata } from 'next';
-import { DM_Sans, Geist_Mono } from 'next/font/google';
+import { Plus_Jakarta_Sans, Geist_Mono } from 'next/font/google';
 import './globals.css';
 import { SmoothScroll } from '@/components/common/layout/smooth-scroll';
 import { SplashscreenProvider } from '@/components/common';
 import { Analytics } from '@vercel/analytics/next';
 import Providers from './providers';
 
-const dmSans = DM_Sans({
-    variable: '--font-dm-sans',
+const plusJakartaSans = Plus_Jakarta_Sans({
+    variable: '--font-plus-jakarta-sans',
     subsets: ['latin'],
 });
 
@@ -50,7 +50,7 @@ export default function RootLayout({
         <html lang="en" suppressHydrationWarning>
             <meta name="apple-mobile-web-app-title" content="Sentinel PH" />
             <body
-                className={`${dmSans.variable} ${geistMono.variable} antialiased`}
+                className={`${plusJakartaSans.variable} ${geistMono.variable} antialiased`}
                 suppressHydrationWarning
             >
                 <script

@@ -1,79 +1,94 @@
 'use client';
 
-import { QrCode } from 'lucide-react';
-import Image from 'next/image';
+import Link from 'next/link';
+import { Apple, ArrowUpRight, ScanFace, Smartphone, Waves } from 'lucide-react';
+import { LandingSectionShell } from '@/app/(public)/landing/_components/landing-section-shell';
+
+const platformCards = [
+    {
+        platform: 'Android',
+        title: 'Student app for exam day',
+        description: 'Launch secure sessions, verify device readiness, and stay monitored from check-in to submit.',
+        icon: Smartphone,
+        accent: 'bg-[#5e8bff] text-[#071019]',
+        href: '#download',
+    },
+    {
+        platform: 'iPhone',
+        title: 'iOS download for mobile proctoring',
+        description: 'Give students the same monitored experience on iPhone with guided setup and cleaner onboarding.',
+        icon: Apple,
+        accent: 'border border-white/14 bg-white/[0.04] text-white',
+        href: '#download',
+    },
+] as const;
 
 export default function DownloadSection() {
     return (
-        <section
+        <LandingSectionShell
             id="download"
-            className="relative flex min-h-screen flex-col justify-center overflow-hidden bg-[#0f0f10] py-24 md:py-32"
+            tone="dark"
+            className="py-24 md:py-32"
+            innerClassName="relative"
+            background={
+                <div className="pointer-events-none absolute inset-x-0 top-10 h-40 bg-[radial-gradient(circle_at_top,rgba(94,139,255,0.18),transparent_58%)]" />
+            }
         >
-            {/* Background Elements */}
-            <div className="pointer-events-none absolute inset-0 overflow-hidden">
-                {/* Gradient Glow */}
-                <div className="absolute top-1/2 left-1/2 h-[400px] w-[800px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-(--sentinel-primary)/15 blur-[150px]"></div>
-                {/* Grid Pattern */}
-                <div className="bg-size:40px_40px absolute inset-0 bg-[linear-gradient(to_right,#ffffff03_1px,transparent_1px),linear-gradient(to_bottom,#ffffff03_1px,transparent_1px)] opacity-50"></div>
-            </div>
 
-            <div className="relative z-10 mx-auto w-full max-w-7xl px-6 lg:px-10">
-                <div className="mx-auto max-w-4xl text-center">
-                    <div className="mb-6 inline-flex items-center gap-2">
-                        <Image
-                            src="/icons/icon0.svg"
-                            alt="Sentinel"
-                            width={20}
-                            height={20}
-                            className="h-5 w-5"
-                        />
-                        <span className="text-base font-medium text-gray-400">
-                            Available on Android Devices Only
-                        </span>
+            <div className="relative z-10 grid gap-10 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] lg:items-start">
+                <div className="space-y-6">
+                    <div className="inline-flex items-center gap-2 border border-white/10 bg-white/[0.03] px-3 py-2 text-[11px] uppercase tracking-[0.32em] text-white/60">
+                        <Waves className="size-3.5 text-[#7c9bff]" />
+                        Downloads
                     </div>
-                    {/* Headline */}
-                    <h2 className="animate-slide-up mb-6 bg-linear-to-b from-gray-300 to-blue-200 bg-clip-text text-4xl leading-tight font-medium tracking-tight text-transparent md:text-5xl lg:text-6xl">
-                        Download Sentinel
-                    </h2>
 
-                    {/* Description */}
-                    <p
-                        className="animate-slide-up mx-auto mb-12 max-w-2xl text-lg leading-relaxed text-gray-400 md:text-xl"
-                        style={{ animationDelay: '0.1s' }}
-                    >
-                        Get started with secure exam monitoring. Scan the QR code below to download
-                        the app directly to your device.
-                    </p>
+                    <div className="space-y-4">
+                        <h2 className="max-w-xl text-4xl font-semibold tracking-[-0.05em] text-white md:text-5xl">
+                            Choose the mobile setup your students already use
+                        </h2>
+                        <p className="max-w-lg text-base leading-7 text-white/[0.6] md:text-lg">
+                            Keep the hero’s momentum going with direct platform choices. Android and iOS both lead into
+                            the same Sentinel exam experience.
+                        </p>
+                    </div>
 
-                    {/* QR Code Container */}
-                    <div
-                        className="animate-slide-up flex flex-col items-center justify-center gap-6"
-                        style={{ animationDelay: '0.2s' }}
-                    >
-                        <div className="group relative rounded-3xl bg-white p-4 shadow-2xl transition-transform duration-300 hover:scale-105">
-                            <div className="absolute inset-0 rounded-3xl bg-blue-500/20 opacity-50 blur-xl transition-all group-hover:blur-2xl"></div>
-                            <div className="relative rounded-2xl border border-gray-100 bg-white p-4">
-                                <QrCode className="h-48 w-48 text-[#0f0f10]" strokeWidth={1.5} />
-                            </div>
-
-                            {/* Scanning Animation overlay */}
-                            <div className="pointer-events-none absolute inset-0 overflow-hidden rounded-3xl">
-                                <div className="animate-scan absolute top-0 right-0 left-0 h-1 bg-blue-500/30 shadow-[0_0_15px_rgba(59,130,246,0.5)]"></div>
-                            </div>
+                    <div className="rounded-[28px] border border-white/10 bg-white/[0.03] p-5 text-white/[0.74]">
+                        <div className="mb-3 flex items-center gap-2 text-sm font-medium text-white">
+                            <ScanFace className="size-4 text-[#7c9bff]" />
+                            What students get
                         </div>
-
-                        <p className="text-sm font-medium text-gray-400">Scan to install</p>
+                        <p className="text-sm leading-6">
+                            Device check, guided permissions, gaze monitoring, audio anomaly checks, and a smoother path
+                            into every protected assessment.
+                        </p>
                     </div>
+                </div>
 
-                    {/* Trust Note */}
-                    <p
-                        className="animate-fade-in mt-10 text-sm text-gray-500"
-                        style={{ animationDelay: '0.3s' }}
-                    >
-                        Free to download • Secure installation
-                    </p>
+                <div className="grid gap-4">
+                    {platformCards.map(({ platform, title, description, icon: Icon, accent, href }) => (
+                        <Link
+                            key={platform}
+                            href={href}
+                            className="group grid gap-5 rounded-[32px] border border-white/10 bg-[#0b0b0c] p-6 transition-transform duration-300 hover:-translate-y-1 hover:border-white/20 md:grid-cols-[auto_minmax(0,1fr)_auto] md:items-center"
+                        >
+                            <div className={`flex size-14 items-center justify-center rounded-2xl ${accent}`}>
+                                <Icon className="size-6" />
+                            </div>
+
+                            <div className="space-y-1">
+                                <p className="text-xs uppercase tracking-[0.32em] text-white/[0.45]">{platform}</p>
+                                <h3 className="text-2xl font-semibold tracking-[-0.04em] text-white">{title}</h3>
+                                <p className="max-w-xl text-sm leading-6 text-white/[0.58]">{description}</p>
+                            </div>
+
+                            <div className="inline-flex items-center gap-2 text-sm font-medium text-white/[0.78]">
+                                Download
+                                <ArrowUpRight className="size-4 transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+                            </div>
+                        </Link>
+                    ))}
                 </div>
             </div>
-        </section>
+        </LandingSectionShell>
     );
 }

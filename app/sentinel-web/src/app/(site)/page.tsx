@@ -2,10 +2,9 @@ import { redirect } from 'next/navigation';
 import {
     HeroSection,
     FeatureSection,
-    HowItWorksSection,
     CompareSection,
-    DownloadSection,
     FAQSection,
+    LandingExperience,
 } from '@/app/(public)/landing';
 import { createSupabaseServerClient } from '@/data/supabase/server';
 import { resolveWebAuthState } from '@/lib/auth/resolve-web-auth-state';
@@ -22,13 +21,11 @@ export default async function Home() {
     }
 
     return (
-        <>
+        <LandingExperience>
             <HeroSection />
             <FeatureSection />
-            <HowItWorksSection />
             <CompareSection />
             <FAQSection />
-            <DownloadSection />
-        </>
+        </LandingExperience>
     );
 }
