@@ -1,53 +1,104 @@
 'use client';
 
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@sentinel/ui';
-import { FAQ_ITEMS } from '@/app/(public)/landing/faq-section/_constants';
-import Image from 'next/image';
+import { useState } from 'react';
+import { ChevronDown } from 'lucide-react';
+import { motion, useReducedMotion } from 'framer-motion';
+import { LandingSectionShell } from '@/app/(public)/landing/_components/landing-section-shell';
+import { cn } from '@sentinel/ui';
+
+const FAQ_ITEMS = [
+    {
+        question: 'What devices are supported by Sentinel?',
+        answer: 'Sentinel is a cross-platform exam security system. It supports all modern web browsers (Chrome, Firefox, Safari, Edge) for web-based exams, and offers dedicated native applications for Android and iOS devices.',
+    },
+    {
+        question: 'How does the gaze tracking and audio detection work?',
+        answer: "Sentinel uses the student's device camera and microphone to perform automated monitoring. The system checks for gaze deviations (looking away from the screen for extended periods) and flags audio anomalies (human voices or sudden noises) in real-time, notifying the proctor panel.",
+    },
+    {
+        question: 'Does Sentinel require any complex installation for students?',
+        answer: 'No, students can take exams directly in their web browser without any installation for standard web proctoring. For enhanced mobile security, students can download the lightweight Sentinel app from the Google Play Store or iOS App Store, which guides them through a simple permission check.',
+    },
+    {
+        question: 'How is student privacy protected during monitored sessions?',
+        answer: 'Privacy is our top priority. Sentinel only accesses the camera, microphone, and device state during active exam sessions. No data is recorded or transmitted before the exam starts or after it is submitted. All data is securely processed in compliance with institutional privacy standards.',
+    },
+    {
+        question: 'Can Sentinel prevent copy-pasting and window switching?',
+        answer: 'Yes. On web browsers, Sentinel monitors focus state and alerts if the student switches tabs or windows. When using our native mobile apps, Sentinel locks the screen to the exam application, preventing unauthorized multitasking, screenshots, and screen sharing.',
+    },
+    {
+        question: 'How do proctors monitor exams in real-time?',
+        answer: 'Proctors access a centralized dashboard where they can see live status indicators, flagged alerts, and real-time activity logs for all active students. This allows proctors to address integrity flags immediately or review session logs post-exam.',
+    },
+];
 
 export default function FAQSection() {
-    return (
-        <section id="faq" className="relative overflow-hidden bg-[#0f0f10] py-24 md:py-32">
-            <div className="relative z-10 mx-auto w-full max-w-7xl px-6 lg:px-10">
-                <div className="mx-auto max-w-3xl">
-                    {/* Header */}
-                    <div className="mb-12 text-center md:mb-16">
-                        <div className="mb-6 inline-flex items-center gap-2">
-                            <Image
-                                src="/icons/icon0.svg"
-                                alt="Sentinel"
-                                width={20}
-                                height={20}
-                                className="h-5 w-5"
-                            />
-                            <span className="text-base font-medium text-gray-400">FAQs</span>
-                        </div>
-                        <h2 className="mb-6 max-w-3xl text-3xl leading-tight font-normal tracking-tight text-blue-100 md:text-5xl">
-                            Frequently Asked Questions
-                        </h2>
-                        <p className="mx-auto max-w-2xl text-base leading-relaxed text-gray-400 md:text-lg">
-                            Everything you need to know about Sentinel.
-                        </p>
-                    </div>
+    const [openIndex, setOpenIndex] = useState<number | null>(null);
+    const reduceMotion = useReducedMotion();
 
-                    {/* FAQ Accordion */}
-                    <Accordion type="single" collapsible className="space-y-3 md:space-y-4">
-                        {FAQ_ITEMS.map((faq, index) => (
-                            <AccordionItem
-                                key={index}
-                                value={`item-${index}`}
-                                className="overflow-hidden rounded-[24px] border border-white/8 bg-white/[0.02] px-5 transition-colors duration-200 hover:bg-white/[0.03] md:px-6"
-                            >
-                                <AccordionTrigger className="py-5 text-base font-medium text-gray-200 transition-colors hover:text-white hover:no-underline md:py-6 md:text-lg">
-                                    {faq.question}
-                                </AccordionTrigger>
-                                <AccordionContent className="pr-8 pb-5 text-sm leading-relaxed text-gray-400 md:pb-6 md:text-base">
-                                    {faq.answer}
-                                </AccordionContent>
-                            </AccordionItem>
-                        ))}
-                    </Accordion>
-                </div>
+    return (
+        <LandingSectionShell
+            id="faq"
+            tone="dark"
+            className="py-24 md:py-32"
+            innerClassName="relative"
+        >
+            <div className="relative z-10">
+                <motion.div
+                    initial={reduceMotion ? false : { opacity: 0, y: 24 }}
+                    whileInView={reduceMotion ? undefined : { opacity: 1, y: 0 }}
+                    viewport={{ once: true, amount: 0.3 }}
+                    transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+                    className="mb-14"
+                >
+                    <h2 className="max-w-3xl text-4xl font-semibold tracking-[-0.06em] text-white md:text-6xl">
+                        Here&apos;s what you need to consider before taking exams.
+                    </h2>
+                </motion.div>
+
+                <motion.div
+                    initial={reduceMotion ? false : { opacity: 0, y: 32 }}
+                    whileInView={reduceMotion ? undefined : { opacity: 1, y: 0 }}
+                    viewport={{ once: true, amount: 0.18 }}
+                    transition={{ duration: 0.78, ease: [0.22, 1, 0.36, 1] }}
+                    className="border-t border-white/10"
+                >
+                    {FAQ_ITEMS.map((faq, index) => {
+                        const isOpen = openIndex === index;
+                        return (
+                            <div key={index} className="border-b border-white/10 py-5">
+                                <button
+                                    onClick={() => setOpenIndex(isOpen ? null : index)}
+                                    className="group flex w-full items-center justify-between gap-4 text-left transition-colors duration-200"
+                                >
+                                    <span className="text-base font-medium text-white/80 transition-colors duration-200 group-hover:text-white md:text-lg">
+                                        {faq.question}
+                                    </span>
+                                    <span className="flex size-8 shrink-0 items-center justify-center rounded-full border border-white/10 text-white/50 transition-all duration-200 group-hover:border-white/20 group-hover:text-white">
+                                        <ChevronDown
+                                            className={cn(
+                                                'size-4 transition-transform duration-300',
+                                                isOpen && 'rotate-180',
+                                            )}
+                                        />
+                                    </span>
+                                </button>
+                                <div
+                                    className={cn(
+                                        'grid transition-all duration-300 ease-in-out',
+                                        isOpen ? 'mt-4 grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0',
+                                    )}
+                                >
+                                    <div className="overflow-hidden">
+                                        <p className="max-w-3xl pb-2 text-sm leading-7 text-white/50">{faq.answer}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        );
+                    })}
+                </motion.div>
             </div>
-        </section>
+        </LandingSectionShell>
     );
 }

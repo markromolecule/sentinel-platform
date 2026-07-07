@@ -1,114 +1,95 @@
-'use client';
-
-import Link from 'next/link';
 import Image from 'next/image';
-import { FOOTER_LINKS, SOCIAL_LINKS } from '@sentinel/shared/constants';
+import Link from 'next/link';
+import { SOCIAL_LINKS } from '@sentinel/shared/constants';
+
+const FOOTER_COLUMNS = [
+    {
+        title: 'Product',
+        links: [
+            { name: 'Features', href: '#features' },
+            { name: 'How it Works', href: '#features' },
+            { name: 'Download', href: '/download' },
+        ],
+    },
+    {
+        title: 'Resources',
+        links: [
+            { name: 'Documentation', href: '/guide' },
+            { name: 'Guides', href: '/guide/rubric' },
+        ],
+    },
+    {
+        title: 'Legal',
+        links: [
+            { name: 'Privacy Policy', href: '/privacy-policy' },
+            { name: 'Terms of Service', href: '/terms-of-service' },
+        ],
+    },
+];
 
 export function Footer() {
     return (
-        <footer className="relative overflow-hidden border-t border-white/5 bg-[#0a0a0b]">
-            {/* Top Gradient Line */}
-            <div className="absolute top-0 right-0 left-0 h-px bg-linear-to-r from-transparent via-(--sentinel-primary)/50 to-transparent"></div>
-
-            <div className="container mx-auto px-6 py-16 md:py-20">
-                {/* Main Footer Grid */}
-                <div className="mb-12 grid grid-cols-2 gap-8 md:grid-cols-5 md:gap-12">
-                    {/* Brand Column */}
-                    <div className="col-span-2">
-                        <Link href="/" className="mb-6 flex items-center">
+        <footer className="relative isolate border-t border-white/8 bg-[#080807] pt-16 pb-8 text-[#f6f4ee]">
+            <div className="mx-auto w-full max-w-[90rem] px-4 md:px-6 lg:px-8">
+                {/* Main row */}
+                <div className="grid gap-12 pb-14 lg:grid-cols-[1fr_2fr]">
+                    {/* Brand */}
+                    <div className="flex items-start flex-col gap-5">
+                        <Link href="/" aria-label="Sentinel home" className="inline-flex items-start">
                             <Image
-                                src="/icons/sentinel-logo.svg"
-                                alt="Sentinel Logo"
-                                width={140}
-                                height={50}
-                                className="-ml-5 h-12 w-auto"
+                                src="/icons/dark-sentinel-logo.svg"
+                                alt="Sentinel"
+                                width={384}
+                                height={92}
+                                className="-ml-1 block h-10 w-auto"
                             />
                         </Link>
-                        <p className="mb-6 max-w-xs text-sm leading-relaxed text-gray-400">
+                        <p className="max-w-[18rem] text-sm leading-6 text-white/40">
                             A mobile and web-based examination security system with gaze and audio
                             monitoring. Built for educators.
                         </p>
-                        {/* Social Links */}
-                        <div className="flex items-center gap-3">
+                        <div className="flex gap-2.5">
                             {SOCIAL_LINKS.map((social) => (
                                 <Link
                                     key={social.name}
                                     href={social.href}
-                                    className="flex h-9 w-9 items-center justify-center rounded-full border border-white/10 bg-white/5 text-gray-400 transition-all duration-300 hover:border-white/20 hover:bg-white/10 hover:text-white"
                                     aria-label={social.name}
+                                    className="flex size-9 items-center justify-center rounded-full border border-white/10 text-white/40 transition-colors hover:border-white/20 hover:text-white"
                                 >
-                                    <social.icon className="h-4 w-4" />
+                                    <social.icon className="size-4" />
                                 </Link>
                             ))}
                         </div>
                     </div>
 
-                    {/* Product Links */}
-                    <div>
-                        <h4 className="mb-4 text-sm font-semibold tracking-wider text-white uppercase">
-                            Product
-                        </h4>
-                        <ul className="space-y-3">
-                            {FOOTER_LINKS.product.map((link) => (
-                                <li key={link.name}>
-                                    <Link
-                                        href={link.href}
-                                        className="text-sm text-gray-400 transition-colors hover:text-white"
-                                    >
-                                        {link.name}
-                                    </Link>
-                                </li>
-                            ))}
-                        </ul>
-                    </div>
-
-                    {/* Resources Links */}
-                    <div>
-                        <h4 className="mb-4 text-sm font-semibold tracking-wider text-white uppercase">
-                            Resources
-                        </h4>
-                        <ul className="space-y-3">
-                            {FOOTER_LINKS.resources.map((link) => (
-                                <li key={link.name}>
-                                    <Link
-                                        href={link.href}
-                                        className="text-sm text-gray-400 transition-colors hover:text-white"
-                                    >
-                                        {link.name}
-                                    </Link>
-                                </li>
-                            ))}
-                        </ul>
-                    </div>
-
-                    {/* Legal Links */}
-                    <div>
-                        <h4 className="mb-4 text-sm font-semibold tracking-wider text-white uppercase">
-                            Legal
-                        </h4>
-                        <ul className="space-y-3">
-                            {FOOTER_LINKS.legal.map((link) => (
-                                <li key={link.name}>
-                                    <Link
-                                        href={link.href}
-                                        className="text-sm text-gray-400 transition-colors hover:text-white"
-                                    >
-                                        {link.name}
-                                    </Link>
-                                </li>
-                            ))}
-                        </ul>
+                    {/* Link columns */}
+                    <div className="grid grid-cols-3 gap-8">
+                        {FOOTER_COLUMNS.map((col) => (
+                            <div key={col.title}>
+                                <h3 className="mb-5 text-[11px] font-semibold tracking-[0.18em] text-white/50 uppercase">
+                                    {col.title}
+                                </h3>
+                                <ul className="grid gap-3.5">
+                                    {col.links.map((link) => (
+                                        <li key={link.name}>
+                                            <Link
+                                                href={link.href}
+                                                className="text-sm text-white/50 transition-colors hover:text-white"
+                                            >
+                                                {link.name}
+                                            </Link>
+                                        </li>
+                                    ))}
+                                </ul>
+                            </div>
+                        ))}
                     </div>
                 </div>
 
-                {/* Bottom Bar */}
-                <div className="border-t border-white/5 pt-8">
-                    <div className="flex flex-col items-center justify-between gap-4 md:flex-row">
-                        <p className="text-sm text-gray-500">
-                            © {new Date().getFullYear()} Sentinel. All rights reserved.
-                        </p>
-                        <p className="text-sm text-gray-500">Stay secure with Sentinel.</p>
-                    </div>
+                {/* Bottom bar */}
+                <div className="flex flex-col gap-2 border-t border-white/8 pt-6 text-sm text-white/30 md:flex-row md:items-center md:justify-between">
+                    <p>© {new Date().getFullYear()} Sentinel. All rights reserved.</p>
+                    <p>Stay secure with Sentinel.</p>
                 </div>
             </div>
         </footer>

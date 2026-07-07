@@ -1,102 +1,90 @@
 'use client';
 
-import Image from 'next/image';
-import {
-    GazeTrackingVisual,
-    AudioAnalysisVisual,
-    MobileAppVisual,
-} from '@/app/(public)/landing/feature-section/_components/visuals';
-import { FEATURE_ITEMS } from '@/app/(public)/landing/feature-section/_constants';
-import type { FEATURE } from '@/app/(public)/landing/feature-section/_constants';
+import { motion, useReducedMotion } from 'framer-motion';
+import { LandingSectionShell } from '@/app/(public)/landing/_components/landing-section-shell';
+import { FEATURE_ITEMS } from './_constants';
 
-// Main Component
 export default function FeatureSection() {
+    const reduceMotion = useReducedMotion();
+
     return (
-        <section
+        <LandingSectionShell
             id="features"
-            className="relative flex min-h-screen flex-col justify-center overflow-hidden bg-[#0f0f10] py-24 md:py-32"
+            tone="ink"
+            transitionTo="paper"
+            className="py-0"
+            innerClassName="relative"
+            background={
+                <>
+                    <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,#11182a_0%,#141c31_50%,#162038_100%)]" />
+                    <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_16%_22%,rgba(70,84,233,0.08),transparent_30%),radial-gradient(circle_at_82%_78%,rgba(97,113,255,0.06),transparent_26%),radial-gradient(circle_at_50%_100%,rgba(255,255,255,0.02),transparent_42%)]" />
+                    <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(90deg,rgba(255,255,255,0.02),transparent_18%,transparent_82%,rgba(255,255,255,0.02))]" />
+                </>
+            }
         >
-            <BackgroundGrid />
 
-            <div className="relative z-10 mx-auto w-full max-w-7xl px-6 lg:px-10">
-                <FeatureHeader />
-                <FeatureGrid />
+            <div className="relative z-10 min-h-[100svh] pt-28 pb-36 md:pt-32 md:pb-48 lg:pt-36 lg:pb-56">
+                <div className="flex w-full flex-col">
+                <motion.div
+                    initial={reduceMotion ? false : { opacity: 0, y: 24 }}
+                    whileInView={reduceMotion ? undefined : { opacity: 1, y: 0 }}
+                    viewport={{ once: true, amount: 0.45 }}
+                    transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+                    className="relative z-10 mb-14 max-w-4xl"
+                >
+                    <h2 className="max-w-4xl text-4xl font-semibold tracking-[-0.06em] text-white md:text-6xl">
+                        Monitoring essentials, designed to stay out of the way.
+                    </h2>
+                </motion.div>
+
+                <div className="relative z-10 grid gap-4 lg:grid-cols-3">
+                    {FEATURE_ITEMS.map((feature, index) => (
+                        <motion.article
+                            key={feature.id}
+                            initial={reduceMotion ? false : { opacity: 0, y: 48, scale: 0.98 }}
+                            whileInView={reduceMotion ? undefined : { opacity: 1, y: 0, scale: 1 }}
+                            viewport={{ once: true, amount: 0.25 }}
+                            transition={{
+                                duration: 0.8,
+                                delay: reduceMotion ? 0 : index * 0.1,
+                                ease: [0.22, 1, 0.36, 1],
+                            }}
+                            whileHover={reduceMotion ? undefined : { y: -6 }}
+                            className="group relative flex min-h-[38rem] flex-col justify-between border border-[rgba(108,125,255,0.14)] bg-[rgba(10,14,26,0.58)] px-9 py-8 backdrop-blur-[2px]"
+                        >
+                            <motion.div
+                                initial={reduceMotion ? false : { scaleX: 0 }}
+                                whileInView={reduceMotion ? undefined : { scaleX: 1 }}
+                                viewport={{ once: true, amount: 0.5 }}
+                                transition={{
+                                    duration: 0.75,
+                                    delay: reduceMotion ? 0 : 0.12 + index * 0.1,
+                                    ease: [0.22, 1, 0.36, 1],
+                                }}
+                                className="absolute top-0 left-0 h-[2px] w-full origin-left bg-[linear-gradient(90deg,rgba(70,84,233,0.82),rgba(70,84,233,0.24),transparent_86%)]"
+                            />
+
+                            <div>
+                                <p className="mb-8 text-[0.9rem] font-medium uppercase tracking-[0.26em] text-white/28">
+                                    {String(index + 1).padStart(2, '0')}
+                                </p>
+                                <h3 className="max-w-[12rem] text-[2.7rem] font-semibold leading-[0.94] tracking-[-0.055em] text-white">
+                                    {feature.title}
+                                </h3>
+                            </div>
+
+                            <div className="space-y-7">
+                                <p className="max-w-[17rem] text-[1rem] leading-7 text-white/68">{feature.description}</p>
+                                <div className="h-px w-full bg-[linear-gradient(90deg,rgba(70,84,233,0.26),rgba(255,255,255,0.04),transparent)]" />
+                                <p className="text-sm font-medium uppercase tracking-[0.24em] text-white/48">
+                                    {feature.stat}
+                                </p>
+                            </div>
+                        </motion.article>
+                    ))}
+                </div>
+                </div>
             </div>
-        </section>
-    );
-}
-
-// Sub Components
-function FeatureHeader() {
-    return (
-        <div className="mb-12 flex flex-col items-start text-left md:mb-16 md:items-center md:text-center">
-            <div className="mb-6 inline-flex items-center gap-2">
-                <Image
-                    src="/icons/icon0.svg"
-                    alt="Sentinel"
-                    width={20}
-                    height={20}
-                    className="h-5 w-5"
-                />
-                <span className="text-base font-medium text-gray-400">What you&apos;ll get</span>
-            </div>
-            <h2 className="max-w-3xl text-3xl leading-tight font-normal tracking-tight text-blue-100 md:text-5xl">
-                Monitoring essentials, designed to stay out of the way.
-            </h2>
-            <p className="mt-5 max-w-2xl text-base leading-relaxed text-gray-400 md:text-lg">
-                Three focused tools give proctors a cleaner view of what matters during every
-                session.
-            </p>
-        </div>
-    );
-}
-
-const VISUALS: Record<string, React.ReactNode> = {
-    gaze: <GazeTrackingVisual />,
-    audio: <AudioAnalysisVisual />,
-    mobile: <MobileAppVisual />,
-};
-
-function FeatureGrid() {
-    return (
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-3 lg:gap-8">
-            {FEATURE_ITEMS.map((feature, index) => (
-                <FeatureCard key={index} {...feature} visual={VISUALS[feature.id]} />
-            ))}
-        </div>
-    );
-}
-
-interface FeatureCardProps extends Omit<FEATURE, 'id'> {
-    visual: React.ReactNode;
-}
-
-function FeatureCard({ title, description, visual }: FeatureCardProps) {
-    return (
-        <article className="group flex h-full flex-col rounded-[30px] border border-white/8 bg-[#131315]/90 p-2.5 transition-colors duration-200 hover:border-white/12 hover:bg-[#151519]">
-            <div className="relative h-64 overflow-hidden rounded-[24px] border border-white/6 bg-[#101012] md:h-72">
-                <InnerGrid />
-                {visual}
-            </div>
-            <div className="flex flex-1 flex-col px-5 py-6 md:px-6 md:py-7">
-                <h3 className="mb-3 font-sans text-[1.35rem] font-semibold tracking-tight text-white transition-colors group-hover:text-blue-200">
-                    {title}
-                </h3>
-                <p className="text-[15px] leading-7 text-gray-400">{description}</p>
-            </div>
-        </article>
-    );
-}
-
-// --- Background Components ---
-function BackgroundGrid() {
-    return (
-        <div className="bg-size:40px_40px mask-linear-gradient(to_bottom,black_40%,transparent_100%) pointer-events-none absolute inset-0 bg-[linear-gradient(to_right,#ffffff03_1px,transparent_1px),linear-gradient(to_bottom,#ffffff03_1px,transparent_1px)]"></div>
-    );
-}
-
-function InnerGrid() {
-    return (
-        <div className="bg-size:20px_20px absolute inset-0 bg-[linear-gradient(to_right,#ffffff03_1px,transparent_1px),linear-gradient(to_bottom,#ffffff03_1px,transparent_1px)] opacity-10"></div>
+        </LandingSectionShell>
     );
 }

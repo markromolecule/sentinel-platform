@@ -2,24 +2,26 @@ export type FEATURE = {
     id: string;
     title: string;
     description: string;
+    stat: string;
 };
 
 export const FEATURE_ITEMS: FEATURE[] = [
     {
         id: 'gaze',
-        title: 'Gaze Tracking',
-        description:
-            'Tracks eye movement to instantly flag if a student looks away from the screen.',
+        title: 'Gaze Monitoring',
+        description: 'Track focus shifts during live exams.',
+        stat: 'Live visibility',
     },
     {
         id: 'audio',
-        title: 'Audio Analysis',
-        description:
-            'Listens for whispers, talking, or suspicious background noises during the exam.',
+        title: 'Audio Detection',
+        description: 'Surface suspicious sound patterns faster.',
+        stat: 'Clearer signals',
     },
     {
         id: 'mobile',
-        title: 'Mobile Proctoring',
-        description: 'A dedicated Android app for flexible examination for institutions.',
+        title: 'Mobile Security',
+        description: 'Support guided device-based exam sessions.',
+        stat: 'Web + mobile',
     },
 ];

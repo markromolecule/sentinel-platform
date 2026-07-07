@@ -11,7 +11,7 @@
 @theme inline {
     --color-background: hsl(var(--background));
     --color-foreground: hsl(var(--foreground));
-    --font-sans: var(--font-dm-sans);
+    --font-sans: var(--font-plus-jakarta-sans);
     --font-mono: var(--font-geist-mono);
     --color-sidebar-ring: hsl(var(--sidebar-ring));
     --color-sidebar-border: hsl(var(--sidebar-border));
@@ -147,6 +147,17 @@
 
     html {
         scroll-behavior: smooth;
+        scrollbar-width: none;
+    }
+
+    body {
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+    }
+
+    html::-webkit-scrollbar,
+    body::-webkit-scrollbar {
+        display: none;
     }
 }
 
