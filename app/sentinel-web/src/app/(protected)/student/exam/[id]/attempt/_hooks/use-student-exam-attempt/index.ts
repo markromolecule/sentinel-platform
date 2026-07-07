@@ -2,6 +2,7 @@
 
 import { useMemo, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useAudioSettingsQuery } from '@sentinel/hooks';
 import { DEFAULT_AUDIO_ANOMALY_CONFIG } from '@sentinel/shared';
 import { getRuntimePassageDetails, hasAnswer } from '@/features/exams/_components/engine';
 import { useStudentExamData } from '@/app/(protected)/student/exam/[id]/_hooks/use-student-exam-data';
@@ -121,6 +122,26 @@ export function useStudentExamAttempt() {
             }),
         [effectiveConfiguration, mediaPipeSandbox],
     );
+    const audioSettingsQuery = useAudioSettingsQuery();
+    const effectiveAudioSettings = useMemo(() => {
+        if (!effectiveConfiguration?.aiRules?.audio_anomaly_detection) {
+            return null;
+        }
+
+        if (audioSettingsQuery.data?.value) {
+            return audioSettingsQuery.data.value;
+        }
+
+        if (audioSettingsQuery.isLoading) {
+            return null;
+        }
+
+        return DEFAULT_AUDIO_ANOMALY_CONFIG;
+    }, [
+        audioSettingsQuery.data?.value,
+        audioSettingsQuery.isLoading,
+        effectiveConfiguration?.aiRules?.audio_anomaly_detection,
+    ]);
 
     const navigationHook = useAttemptNavigation({
         totalQuestions: questions.length,
@@ -128,9 +149,7 @@ export function useStudentExamAttempt() {
 
     const monitoringHook = useAttemptMonitoring({
         examId,
-        audioSettings: effectiveConfiguration?.aiRules?.audio_anomaly_detection
-            ? DEFAULT_AUDIO_ANOMALY_CONFIG
-            : null,
+        audioSettings: effectiveAudioSettings,
         configuration: effectiveConfiguration,
         examSessionId: examSession?.sessionId,
         isRedirectingToTurnIn: uiHook.isRedirectingToTurnIn,

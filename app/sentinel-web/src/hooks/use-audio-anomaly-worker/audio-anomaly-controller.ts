@@ -7,11 +7,7 @@ import {
 
 import { INIT_TIMEOUT_MS } from './_constants';
 import { createAudioGraph } from './create-audio-graph';
-import type {
-    AudioWorkerPhase,
-    AudioFramePayload,
-    WorkerOutboundMessage,
-} from './_types';
+import type { AudioWorkerPhase, AudioFramePayload, WorkerOutboundMessage } from './_types';
 
 export interface AudioAnomalyControllerConfig {
     audioStream?: MediaStream | null;
@@ -37,7 +33,7 @@ export class AudioAnomalyController {
     private initTimeout: ReturnType<typeof setTimeout> | null = null;
     private isDisposed = false;
 
-    constructor(private config: AudioAnomalyControllerConfig) { }
+    constructor(private config: AudioAnomalyControllerConfig) {}
 
     /**
      * Initializes capabilities, constructs the audio graph, connects the worker,
@@ -92,14 +88,14 @@ export class AudioAnomalyController {
                 this.config.audioStream,
                 this.worker,
                 ({ samples, sampleRate }: AudioFramePayload) => {
-                if (this.isDisposed || !this.worker) return;
-                this.worker.postMessage(
-                    {
-                        type: 'PROCESS_AUDIO',
-                        payload: { samples, sampleRate },
-                    },
-                    [samples.buffer],
-                );
+                    if (this.isDisposed || !this.worker) return;
+                    this.worker.postMessage(
+                        {
+                            type: 'PROCESS_AUDIO',
+                            payload: { samples, sampleRate },
+                        },
+                        [samples.buffer],
+                    );
                 },
             );
 
@@ -236,13 +232,19 @@ export class AudioAnomalyController {
 
             case 'ANOMALY_DETECTED':
                 if (data.payload?.anomalies) {
-                    for (const [anomalyType, confidenceScore] of Object.entries(
-                        data.payload.anomalies,
-                    )) {
-                        this.config.onAnomaly(
-                            anomalyType as AudioAnomalyTypeValue,
-                            confidenceScore,
-                        );
+                    const primaryAnomaly = Object.entries(data.payload.anomalies).reduce<
+                        [AudioAnomalyTypeValue, number] | null
+                    >((best, current) => {
+                        const typedCurrent = current as [AudioAnomalyTypeValue, number];
+                        if (!best || typedCurrent[1] > best[1]) {
+                            return typedCurrent;
+                        }
+
+                        return best;
+                    }, null);
+
+                    if (primaryAnomaly) {
+                        this.config.onAnomaly(primaryAnomaly[0], primaryAnomaly[1]);
                     }
                 }
                 break;

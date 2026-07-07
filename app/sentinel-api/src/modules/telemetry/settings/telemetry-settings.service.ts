@@ -3,6 +3,7 @@ import type { TelemetrySettings, TelemetrySettingsRecord } from '@sentinel/share
 import { telemetrySettingsResolverService } from './telemetry-settings-resolver.service';
 import { upsertTelemetrySettingsData } from './data/upsert-telemetry-settings';
 import { TELEMETRY_SETTINGS_KEY } from './settings.constants';
+import { LogsService } from '../../general/logs/logs.service';
 
 export class TelemetrySettingsService {
     static async getTelemetrySettings(dbClient: DbClient): Promise<TelemetrySettingsRecord> {
@@ -42,7 +43,6 @@ export class TelemetrySettingsService {
 
         // Telemetry logging
         try {
-            const { LogsService } = await import('../../general/logs/logs.service');
             let instId = '';
             if (updatedBy) {
                 const userProfile = await dbClient

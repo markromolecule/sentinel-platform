@@ -210,6 +210,50 @@ describe('useMonitoring', () => {
         expect(toast.warning).toHaveBeenCalledTimes(1);
     });
 
+    it('distinguishes an occurrence-count update from a new incident snapshot', async () => {
+        const { toast } = await import('sonner');
+        currentMonitoringOverview = {
+            ...currentMonitoringOverview,
+            students: currentMonitoringOverview.students.map((student) =>
+                student.attemptId === 'attempt-1'
+                    ? {
+                          ...student,
+                          incidentCount: 1,
+                          openIncidentCount: 1,
+                          latestIncidentType: 'TAB_SWITCH',
+                      }
+                    : student,
+            ),
+        };
+
+        const { rerender } = renderHook(() => useMonitoring('exam-1'));
+
+        expect(toast.warning).not.toHaveBeenCalled();
+
+        currentMonitoringOverview = {
+            ...currentMonitoringOverview,
+            students: currentMonitoringOverview.students.map((student) =>
+                student.attemptId === 'attempt-1'
+                    ? {
+                          ...student,
+                          incidentCount: 2,
+                          openIncidentCount: 1,
+                          latestIncidentType: 'TAB_SWITCH',
+                      }
+                    : student,
+            ),
+        };
+
+        rerender();
+
+        await waitFor(() => {
+            expect(toast.warning).toHaveBeenCalledTimes(1);
+        });
+        expect(toast.warning).toHaveBeenCalledWith('Proctoring incident occurrence updated.', {
+            description: 'Pat Student now has 2 occurrences for TAB_SWITCH.',
+        });
+    });
+
     it('routes per-student lifecycle actions through the dedicated mutation hooks', async () => {
         const lockMutateAsync = vi.fn().mockResolvedValue(undefined);
         mockUseLockExamAttemptMutation.mockReturnValue({

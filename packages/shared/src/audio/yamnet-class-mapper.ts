@@ -34,6 +34,10 @@ function getHighestClassScore(scores: Float32Array, classIds: readonly number[])
     return highestScore;
 }
 
+/**
+ * Resolves the highest matching YAMNet confidence for one anomaly type and
+ * returns `null` when the configured threshold is not met.
+ */
 export function getAnomalyConfidence(
     scores: Float32Array,
     anomalyType: AudioAnomalyType,
@@ -49,6 +53,9 @@ export function getAnomalyConfidence(
     return confidence >= effectiveThreshold ? confidence : null;
 }
 
+/**
+ * Maps a YAMNet score vector to the strongest enabled anomaly label.
+ */
 export function mapYamnetScoresToAnomaly(
     scores: Float32Array,
     config: AudioAnomalyConfig,

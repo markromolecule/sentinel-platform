@@ -33,10 +33,13 @@ function toStableUuid(seed: string) {
     ].join('-');
 }
 
-export function getAudioAnomalyCooldownMs(
-    anomalyType: AudioAnomalyTypeValue,
-    cooldownMs: number,
-) {
+/**
+ * Returns the effective cooldown for a reported audio anomaly type.
+ *
+ * @param anomalyType The accepted anomaly label selected for the current audio window.
+ * @param cooldownMs The configured base cooldown for general audio anomalies.
+ */
+export function getAudioAnomalyCooldownMs(anomalyType: AudioAnomalyTypeValue, cooldownMs: number) {
     if (anomalyType === 'SILENCE_DETECTED') {
         return Math.max(cooldownMs, SILENCE_MIN_COOLDOWN_MS);
     }
@@ -48,6 +51,11 @@ export function getAudioAnomalyCooldownMs(
     return cooldownMs;
 }
 
+/**
+ * Builds stable action metadata for one accepted audio anomaly window.
+ *
+ * @param args Session, anomaly, and cooldown inputs used to bucket one accepted audio event.
+ */
 export function createAudioAnomalyActionMetadata(args: {
     examSessionId: string;
     anomalyType: AudioAnomalyTypeValue;
@@ -57,15 +65,11 @@ export function createAudioAnomalyActionMetadata(args: {
     const clientActionAt = args.clientActionAt ?? new Date().toISOString();
     const effectiveCooldownMs = getAudioAnomalyCooldownMs(args.anomalyType, args.cooldownMs);
     const bucketStart = new Date(
-        Math.floor(new Date(clientActionAt).getTime() / effectiveCooldownMs) *
-            effectiveCooldownMs,
+        Math.floor(new Date(clientActionAt).getTime() / effectiveCooldownMs) * effectiveCooldownMs,
     ).toISOString();
-    const dedupeKey = [
-        args.examSessionId,
-        'AUDIO_ANOMALY',
-        args.anomalyType,
-        bucketStart,
-    ].join(':');
+    const dedupeKey = [args.examSessionId, 'AUDIO_ANOMALY', args.anomalyType, bucketStart].join(
+        ':',
+    );
 
     return {
         eventId: toStableUuid(dedupeKey),

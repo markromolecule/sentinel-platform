@@ -1,10 +1,11 @@
 import { cleanup, renderHook, waitFor } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { DEFAULT_AUDIO_ANOMALY_CONFIG } from '@sentinel/shared';
 import { useAttemptMonitoring } from './use-attempt-monitoring';
-import { useCheckupAudio } from '@/app/(protected)/student/exam/[id]/_components/student-exam-audio-provider';
 
-const { mockEnsureAudioAccess } = vi.hoisted(() => ({
+const { mockEnsureAudioAccess, mockUseAudioAnomalyWorker } = vi.hoisted(() => ({
     mockEnsureAudioAccess: vi.fn().mockResolvedValue(undefined),
+    mockUseAudioAnomalyWorker: vi.fn(),
 }));
 
 vi.mock('@/app/(protected)/student/exam/[id]/_components/student-exam-audio-provider', () => ({
@@ -38,17 +39,18 @@ vi.mock('@/app/(protected)/student/exam/[id]/_hooks/use-attempt-mediapipe-monito
 }));
 
 vi.mock('@/hooks/use-audio-anomaly-worker', () => ({
-    useAudioAnomalyWorker: () => ({
-        errorMessage: null,
-        isEnabled: false,
-        phase: 'idle',
-    }),
+    useAudioAnomalyWorker: (args: unknown) => mockUseAudioAnomalyWorker(args),
 }));
 
 describe('useAttemptMonitoring', () => {
     beforeEach(() => {
         cleanup();
         vi.clearAllMocks();
+        mockUseAudioAnomalyWorker.mockReturnValue({
+            errorMessage: null,
+            isEnabled: false,
+            phase: 'idle',
+        });
     });
 
     it('invokes ensureAudioAccess when mic is required', async () => {
@@ -111,5 +113,55 @@ describe('useAttemptMonitoring', () => {
 
         await new Promise((resolve) => setTimeout(resolve, 100));
         expect(mockEnsureAudioAccess).not.toHaveBeenCalled();
+    });
+
+    it('passes through a null runtime config while audio settings are still loading', () => {
+        const configuration = {
+            micRequired: false,
+            aiRules: {
+                audio_anomaly_detection: true,
+            },
+        } as any;
+
+        renderHook(() =>
+            useAttemptMonitoring({
+                examId: 'exam-1',
+                configuration,
+                audioSettings: null,
+                examSessionId: 'session-1',
+                isRedirectingToTurnIn: false,
+            }),
+        );
+
+        expect(mockUseAudioAnomalyWorker).toHaveBeenCalledWith(
+            expect.objectContaining({
+                runtimeConfig: null,
+            }),
+        );
+    });
+
+    it('passes the persisted runtime config into the audio worker when settings are available', () => {
+        const configuration = {
+            micRequired: false,
+            aiRules: {
+                audio_anomaly_detection: true,
+            },
+        } as any;
+
+        renderHook(() =>
+            useAttemptMonitoring({
+                examId: 'exam-1',
+                configuration,
+                audioSettings: DEFAULT_AUDIO_ANOMALY_CONFIG,
+                examSessionId: 'session-1',
+                isRedirectingToTurnIn: false,
+            }),
+        );
+
+        expect(mockUseAudioAnomalyWorker).toHaveBeenCalledWith(
+            expect.objectContaining({
+                runtimeConfig: DEFAULT_AUDIO_ANOMALY_CONFIG,
+            }),
+        );
     });
 });

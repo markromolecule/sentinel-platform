@@ -28,9 +28,9 @@ export interface AudioCapabilityReport {
 
 export const DEFAULT_AUDIO_ANOMALY_THRESHOLDS: AudioAnomalyThresholds = {
     TALKING: 0.45,
-    TYPING: 0.55,
-    TAPPING: 0.5,
-    MOUTH_BREATHING: 0.45,
+    TYPING: 0.8,
+    TAPPING: 0.8,
+    MOUTH_BREATHING: 0.6,
     BACKGROUND_NOISE: 0.55,
     SILENCE_DETECTED: 0.015,
 };
@@ -40,14 +40,15 @@ export const DEFAULT_AUDIO_ANOMALY_CONFIG: AudioAnomalyConfig = {
     consecutiveFrameThreshold: 2,
     cooldownMs: 10_000,
     thresholds: { ...DEFAULT_AUDIO_ANOMALY_THRESHOLDS },
-    enabledAnomalyTypes: ['TALKING', 'TYPING', 'TAPPING', 'MOUTH_BREATHING', 'BACKGROUND_NOISE'],
+    enabledAnomalyTypes: ['TALKING', 'BACKGROUND_NOISE'],
 };
 
+// Keep this mapping aligned with `app/sentinel-web/public/models/yamnet/yamnet_class_map.csv`.
 export const YAMNET_CLASS_IDS_BY_ANOMALY_TYPE: Record<AudioAnomalyType, readonly number[]> = {
-    TALKING: [0, 1, 3, 4],
-    TYPING: [400, 401],
-    TAPPING: [398, 402],
-    MOUTH_BREATHING: [287, 288],
-    BACKGROUND_NOISE: [494, 495, 496],
+    TALKING: [0, 1, 2, 3, 4],
+    TYPING: [378, 379, 380],
+    TAPPING: [354],
+    MOUTH_BREATHING: [36],
+    BACKGROUND_NOISE: [500, 507, 508],
     SILENCE_DETECTED: [],
 };

@@ -42,7 +42,10 @@ export function resampleAudioTo16kHz(
         return samples;
     }
 
-    const targetLength = Math.max(1, Math.round((samples.length * TARGET_SAMPLE_RATE) / sourceSampleRate));
+    const targetLength = Math.max(
+        1,
+        Math.round((samples.length * TARGET_SAMPLE_RATE) / sourceSampleRate),
+    );
     const resampled = new Float32Array(targetLength);
     const ratio = sourceSampleRate / TARGET_SAMPLE_RATE;
 
@@ -93,10 +96,7 @@ export class AudioAnomalyEngine {
     private getCooldownMs(anomalyType: AudioAnomalyTypeValue): number {
         if (anomalyType === 'SILENCE_DETECTED') {
             // Cooldowns are longer for silence to prevent spamming notifications while the room is quiet
-            return Math.max(
-                this.config.cooldownMs,
-                AudioAnomalyEngine.SILENCE_MIN_COOLDOWN_MS,
-            );
+            return Math.max(this.config.cooldownMs, AudioAnomalyEngine.SILENCE_MIN_COOLDOWN_MS);
         }
 
         if (anomalyType === 'BACKGROUND_NOISE') {
@@ -245,8 +245,10 @@ export class AudioAnomalyEngine {
                     sumSquares += samples[i] * samples[i];
                 }
                 const rms = Math.sqrt(sumSquares / samples.length);
-                const selectedAnomalyConfidence: Partial<Record<AudioAnomalyTypeValue, number>> = {};
+                const selectedAnomalyConfidence: Partial<Record<AudioAnomalyTypeValue, number>> =
+                    {};
                 const cooldownStatus: Partial<Record<AudioAnomalyTypeValue, boolean>> = {};
+                const triggeredAnomalies: Partial<Record<AudioAnomalyTypeValue, number>> = {};
 
                 // Evaluate all enabled anomaly types independently
                 for (const anomalyType of this.config.enabledAnomalyTypes) {
@@ -262,11 +264,7 @@ export class AudioAnomalyEngine {
                         }
                     } else {
                         // Check YAMNet-based anomalies
-                        confidence = getAnomalyConfidence(
-                            scoresArray,
-                            anomalyType,
-                            this.config,
-                        );
+                        confidence = getAnomalyConfidence(scoresArray, anomalyType, this.config);
 
                         if (
                             confidence === null &&
@@ -295,12 +293,26 @@ export class AudioAnomalyEngine {
                         if (count >= requiredConsecutiveFrames && cooldownExpired) {
                             this.frameCounters.set(anomalyType, 0); // reset after triggering
                             this.lastAlertTime.set(anomalyType, now);
-                            onAnomalyDetected({ [anomalyType]: confidence } as Record<AudioAnomalyTypeValue, number>);
+                            triggeredAnomalies[anomalyType] = confidence;
                         }
                     } else {
                         // Reset counter for this type because it didn't trigger this frame
                         this.frameCounters.set(anomalyType, 0);
                     }
+                }
+
+                const triggeredEntries = Object.entries(triggeredAnomalies) as Array<
+                    [AudioAnomalyTypeValue, number]
+                >;
+
+                if (triggeredEntries.length > 0) {
+                    const [primaryAnomalyType, primaryConfidence] = triggeredEntries.reduce(
+                        (best, current) => (current[1] > best[1] ? current : best),
+                    );
+
+                    onAnomalyDetected({
+                        [primaryAnomalyType]: primaryConfidence,
+                    } as Record<AudioAnomalyTypeValue, number>);
                 }
 
                 if (isDevelopmentDebugEnabled()) {

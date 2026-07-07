@@ -12,6 +12,7 @@ vi.mock('next/navigation', () => ({
     useParams: () => ({ id: 'exam-1' }),
     usePathname: () => '/exams/exam-1/monitoring',
     useRouter: () => ({ push: mockPush }),
+    useSearchParams: () => new URLSearchParams(),
 }));
 
 vi.mock('./_hooks/use-monitoring', () => ({
