@@ -13,9 +13,20 @@ vi.mock('@sentinel/shared', async (importOriginal) => {
             if (anomalyType === 'TALKING' && scoresArray[0] === 1.0) {
                 return 0.9;
             }
+            // If the first element is 0.25, simulate a keyboard typing-like event
+            if (anomalyType === 'TYPING' && scoresArray[0] === 0.25) {
+                return 0.88;
+            }
             // Background noise mock trigger
             if (anomalyType === 'BACKGROUND_NOISE' && scoresArray[0] === 0.5) {
                 return 0.7;
+            }
+            // Simulate a frame that would otherwise trigger multiple labels at once
+            if (anomalyType === 'TALKING' && scoresArray[0] === 0.75) {
+                return 0.8;
+            }
+            if (anomalyType === 'BACKGROUND_NOISE' && scoresArray[0] === 0.75) {
+                return 0.9;
             }
             return null;
         }),
@@ -198,6 +209,65 @@ describe('AudioAnomalyEngine', () => {
 
         expect(onAnomalyDetected).toHaveBeenCalledWith({
             BACKGROUND_NOISE: expect.any(Number),
+        });
+    });
+
+    it('does not trigger keyboard-specific anomalies when they are disabled by the runtime config', async () => {
+        const onAnomalyDetected = vi.fn();
+
+        engine.updateConfig({
+            ...DEFAULT_AUDIO_ANOMALY_CONFIG,
+            consecutiveFrameThreshold: 2,
+            cooldownMs: 0,
+            enabledAnomalyTypes: ['TALKING', 'BACKGROUND_NOISE'],
+        });
+
+        const keyboardLikeFrame = new Float32Array(15600);
+        keyboardLikeFrame[0] = 0.25;
+
+        await engine.processAudioChunk(keyboardLikeFrame, 16000, onAnomalyDetected);
+        await engine.processAudioChunk(keyboardLikeFrame, 16000, onAnomalyDetected);
+
+        expect(onAnomalyDetected).not.toHaveBeenCalled();
+    });
+
+    it('triggers a keyboard-specific anomaly only when that anomaly type is enabled', async () => {
+        const onAnomalyDetected = vi.fn();
+
+        engine.updateConfig({
+            ...DEFAULT_AUDIO_ANOMALY_CONFIG,
+            consecutiveFrameThreshold: 2,
+            cooldownMs: 0,
+            enabledAnomalyTypes: ['TYPING'],
+            thresholds: {
+                ...DEFAULT_AUDIO_ANOMALY_CONFIG.thresholds,
+                TYPING: 0.8,
+            },
+        });
+
+        const keyboardLikeFrame = new Float32Array(15600);
+        keyboardLikeFrame[0] = 0.25;
+
+        await engine.processAudioChunk(keyboardLikeFrame, 16000, onAnomalyDetected);
+        await engine.processAudioChunk(keyboardLikeFrame, 16000, onAnomalyDetected);
+
+        expect(onAnomalyDetected).toHaveBeenCalledWith({
+            TYPING: 0.88,
+        });
+    });
+
+    it('emits only the strongest anomaly when one frame window crosses multiple anomaly thresholds', async () => {
+        const onAnomalyDetected = vi.fn();
+
+        const noisyTalkingFrame = new Float32Array(15600);
+        noisyTalkingFrame[0] = 0.75;
+
+        await engine.processAudioChunk(noisyTalkingFrame, 16000, onAnomalyDetected);
+        await engine.processAudioChunk(noisyTalkingFrame, 16000, onAnomalyDetected);
+
+        expect(onAnomalyDetected).toHaveBeenCalledTimes(1);
+        expect(onAnomalyDetected).toHaveBeenCalledWith({
+            BACKGROUND_NOISE: 0.9,
         });
     });
 

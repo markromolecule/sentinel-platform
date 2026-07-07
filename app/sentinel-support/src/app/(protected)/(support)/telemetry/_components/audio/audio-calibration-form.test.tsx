@@ -25,7 +25,12 @@ describe('AudioCalibrationForm', () => {
 
         expect(screen.getByText(/audio anomaly calibration/i)).toBeTruthy();
         expect(screen.getByText(/support operator/i)).toBeTruthy();
-        expect(screen.getByText(/base 0.80/i)).toBeTruthy();
+        expect(screen.getAllByText(/base 0.80/i)).not.toHaveLength(0);
+        expect(
+            screen.getByText(
+                /higher values lower the effective threshold and make detection more sensitive/i,
+            ),
+        ).toBeTruthy();
     });
 
     it('updates the effective threshold display when sensitivity changes', async () => {
@@ -35,7 +40,7 @@ describe('AudioCalibrationForm', () => {
         sensitivityThumb.focus();
         fireEvent.keyDown(sensitivityThumb, { key: 'ArrowRight' });
 
-        expect(await screen.findByText(/effective 0.73/i)).toBeTruthy();
+        expect(await screen.findAllByText(/effective 0.73/i)).not.toHaveLength(0);
     });
 
     it('blocks invalid submissions and shows validation feedback', async () => {

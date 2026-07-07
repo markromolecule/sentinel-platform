@@ -1,11 +1,13 @@
 import { act, renderHook } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { DEFAULT_AUDIO_ANOMALY_CONFIG } from '@sentinel/shared';
 import { useStudentExamAttempt } from './index';
 
 const {
     mockUseStudentExamData,
     mockUseExamSession,
     mockUseAttemptMonitoring,
+    mockUseAudioSettingsQuery,
     mockRouterReplace,
     mockReadStoredLobbyEntryMarker,
     mockReadStoredExamSession,
@@ -13,6 +15,7 @@ const {
     mockUseStudentExamData: vi.fn(),
     mockUseExamSession: vi.fn(),
     mockUseAttemptMonitoring: vi.fn(),
+    mockUseAudioSettingsQuery: vi.fn(),
     mockRouterReplace: vi.fn(),
     mockReadStoredLobbyEntryMarker: vi.fn(),
     mockReadStoredExamSession: vi.fn(),
@@ -22,6 +25,10 @@ vi.mock('next/navigation', () => ({
     useRouter: () => ({
         replace: mockRouterReplace,
     }),
+}));
+
+vi.mock('@sentinel/hooks', () => ({
+    useAudioSettingsQuery: () => mockUseAudioSettingsQuery(),
 }));
 
 vi.mock('@/app/(protected)/student/exam/[id]/_hooks/use-student-exam-data', () => ({
@@ -138,6 +145,18 @@ describe('useStudentExamAttempt', () => {
 
         mockReadStoredLobbyEntryMarker.mockReturnValue(true);
         mockReadStoredExamSession.mockReturnValue(null);
+        mockUseAudioSettingsQuery.mockReturnValue({
+            data: {
+                value: {
+                    ...DEFAULT_AUDIO_ANOMALY_CONFIG,
+                    thresholds: {
+                        ...DEFAULT_AUDIO_ANOMALY_CONFIG.thresholds,
+                        TALKING: 0.72,
+                    },
+                },
+            },
+            isLoading: false,
+        });
     });
 
     it('reports zero unanswered questions when every question has a valid answer', () => {
@@ -266,6 +285,46 @@ describe('useStudentExamAttempt', () => {
         );
         expect(suspendSecurityMonitoring.mock.invocationCallOrder[0]).toBeLessThan(
             mockRouterReplace.mock.invocationCallOrder[0],
+        );
+    });
+
+    it('passes persisted support audio settings into attempt monitoring when audio anomaly detection is enabled', () => {
+        mockUseStudentExamData.mockReturnValue({
+            examId: '11111111-1111-1111-1111-111111111111',
+            exam: {
+                id: '11111111-1111-1111-1111-111111111111',
+                title: 'Attempt test',
+                description: 'Attempt test description',
+                duration: 60,
+                status: 'available',
+                runtimeAccess: {
+                    canStart: true,
+                    canResume: false,
+                    hasActiveAttempt: true,
+                },
+            },
+            configuration: {
+                cameraRequired: false,
+                micRequired: true,
+                aiRules: {
+                    audio_anomaly_detection: true,
+                },
+            },
+            mediaPipeSandbox: null,
+            questions: createQuestions(2),
+            isLoading: false,
+        });
+
+        renderHook(() => useStudentExamAttempt());
+
+        expect(mockUseAttemptMonitoring).toHaveBeenCalledWith(
+            expect.objectContaining({
+                audioSettings: expect.objectContaining({
+                    thresholds: expect.objectContaining({
+                        TALKING: 0.72,
+                    }),
+                }),
+            }),
         );
     });
 });

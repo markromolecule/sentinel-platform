@@ -6,11 +6,7 @@ import { toast } from 'sonner';
 import { DEFAULT_AUDIO_ANOMALY_CONFIG } from '@sentinel/shared';
 import { AudioAnomalyController } from './audio-anomaly-controller';
 import { getAudioAnomalyCooldownMs, useAnomalyTelemetry } from './use-anomaly-telemetry';
-import type {
-    AudioWorkerPhase,
-    AudioWorkerResult,
-    UseAudioAnomalyWorkerArgs,
-} from './_types';
+import type { AudioWorkerPhase, AudioWorkerResult, UseAudioAnomalyWorkerArgs } from './_types';
 
 /**
  * Manages the browser audio-anomaly worker lifecycle for a student exam attempt.
@@ -43,10 +39,10 @@ export function useAudioAnomalyWorker({
     }, [isSuspended]);
 
     const isEnabled = Boolean(
-        configuration?.micRequired &&
         configuration?.aiRules?.audio_anomaly_detection &&
         examSessionId &&
         studentId &&
+        runtimeConfig &&
         !isSuspended,
     );
 

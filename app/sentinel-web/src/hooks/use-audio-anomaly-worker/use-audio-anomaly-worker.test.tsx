@@ -2,7 +2,7 @@ import { cleanup, renderHook, waitFor, act } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { useAudioAnomalyWorker } from './use-audio-anomaly-worker';
 import { ingestTelemetryEvent } from '@sentinel/services';
-import type { ExamConfig } from '@sentinel/shared';
+import { DEFAULT_AUDIO_ANOMALY_CONFIG, type ExamConfig } from '@sentinel/shared';
 
 const { mockApiClient, mockAuth, mockToastWarning } = vi.hoisted(() => ({
     mockApiClient: vi.fn(),
@@ -99,6 +99,7 @@ describe('useAudioAnomalyWorker', () => {
                 configuration: validConfig,
                 examSessionId: 'session-123',
                 isSuspended: false,
+                runtimeConfig: DEFAULT_AUDIO_ANOMALY_CONFIG,
                 worker: mockWorker as any,
             }),
         );
@@ -163,6 +164,7 @@ describe('useAudioAnomalyWorker', () => {
                 configuration: validConfig,
                 examSessionId: 'session-123',
                 isSuspended: true,
+                runtimeConfig: DEFAULT_AUDIO_ANOMALY_CONFIG,
                 worker: mockWorker as any,
             }),
         );
@@ -172,12 +174,59 @@ describe('useAudioAnomalyWorker', () => {
         expect(mockWorker.postMessage).not.toHaveBeenCalled();
     });
 
+    it('does not enable audio monitoring until a runtime config is available', () => {
+        const { result } = renderHook(() =>
+            useAudioAnomalyWorker({
+                configuration: validConfig,
+                examSessionId: 'session-123',
+                isSuspended: false,
+                runtimeConfig: null,
+                worker: mockWorker as any,
+            }),
+        );
+
+        expect(result.current.isEnabled).toBe(false);
+        expect(result.current.phase).toBe('idle');
+        expect(mockWorker.postMessage).not.toHaveBeenCalled();
+    });
+
+    it('enables audio monitoring when the audio anomaly rule is on even if micRequired is false', async () => {
+        const audioOnlyConfig: ExamConfig = {
+            micRequired: false,
+            aiRules: {
+                audio_anomaly_detection: true,
+            },
+        } as any;
+
+        const { result } = renderHook(() =>
+            useAudioAnomalyWorker({
+                configuration: audioOnlyConfig,
+                examSessionId: 'session-123',
+                isSuspended: false,
+                runtimeConfig: DEFAULT_AUDIO_ANOMALY_CONFIG,
+                worker: mockWorker as any,
+            }),
+        );
+
+        expect(result.current.isEnabled).toBe(true);
+
+        await waitFor(() => {
+            expect(mockWorker.postMessage).toHaveBeenCalledWith({
+                type: 'INIT',
+                payload: expect.objectContaining({
+                    config: expect.any(Object),
+                }),
+            });
+        });
+    });
+
     it('shows one warning and emits one telemetry event for one accepted anomaly', async () => {
         renderHook(() =>
             useAudioAnomalyWorker({
                 configuration: validConfig,
                 examSessionId: 'session-123',
                 isSuspended: false,
+                runtimeConfig: DEFAULT_AUDIO_ANOMALY_CONFIG,
                 worker: mockWorker as any,
             }),
         );
@@ -229,8 +278,7 @@ describe('useAudioAnomalyWorker', () => {
                 metadata: expect.objectContaining({
                     anomalyType: 'TALKING',
                     confidenceScore: 0.91,
-                    dedupeKey:
-                        'session-123:AUDIO_ANOMALY:TALKING:2026-07-07T00:00:00.000Z',
+                    dedupeKey: 'session-123:AUDIO_ANOMALY:TALKING:2026-07-07T00:00:00.000Z',
                 }),
             }),
         );
@@ -243,6 +291,7 @@ describe('useAudioAnomalyWorker', () => {
                     configuration: validConfig,
                     examSessionId: 'session-123',
                     isSuspended,
+                    runtimeConfig: DEFAULT_AUDIO_ANOMALY_CONFIG,
                     worker: mockWorker as any,
                 }),
             {
@@ -315,6 +364,7 @@ describe('useAudioAnomalyWorker', () => {
                     configuration: validConfig,
                     examSessionId: 'session-123',
                     isSuspended,
+                    runtimeConfig: DEFAULT_AUDIO_ANOMALY_CONFIG,
                     worker: mockWorker as any,
                 }),
             {
@@ -369,6 +419,7 @@ describe('useAudioAnomalyWorker', () => {
                 configuration: validConfig,
                 examSessionId: 'session-123',
                 isSuspended: false,
+                runtimeConfig: DEFAULT_AUDIO_ANOMALY_CONFIG,
                 audioStream: mockStream as MediaStream,
                 worker: mockWorker as any,
             }),
@@ -394,6 +445,7 @@ describe('useAudioAnomalyWorker', () => {
                 configuration: validConfig,
                 examSessionId: 'session-123',
                 isSuspended: false,
+                runtimeConfig: DEFAULT_AUDIO_ANOMALY_CONFIG,
                 worker: mockWorker as any,
             }),
         );
@@ -439,6 +491,7 @@ describe('useAudioAnomalyWorker', () => {
                 configuration: validConfig,
                 examSessionId: 'session-123',
                 isSuspended: false,
+                runtimeConfig: DEFAULT_AUDIO_ANOMALY_CONFIG,
                 worker: mockWorker as any,
             }),
         );
@@ -460,6 +513,7 @@ describe('useAudioAnomalyWorker', () => {
                 configuration: validConfig,
                 examSessionId: 'session-123',
                 isSuspended: false,
+                runtimeConfig: DEFAULT_AUDIO_ANOMALY_CONFIG,
                 audioStream: mockDeadStream as any,
                 worker: mockWorker as any,
             }),
@@ -469,5 +523,125 @@ describe('useAudioAnomalyWorker', () => {
             expect(result.current.phase).toBe('error');
             expect(result.current.errorMessage).toBe('No live audio tracks available.');
         });
+    });
+
+    it('emits one toast and one telemetry event when a worker message contains multiple anomaly labels', async () => {
+        renderHook(() =>
+            useAudioAnomalyWorker({
+                configuration: validConfig,
+                examSessionId: 'session-123',
+                isSuspended: false,
+                runtimeConfig: DEFAULT_AUDIO_ANOMALY_CONFIG,
+                worker: mockWorker as any,
+            }),
+        );
+
+        await waitFor(() => {
+            expect(mockWorker.postMessage).toHaveBeenCalledWith({
+                type: 'INIT',
+                payload: expect.objectContaining({
+                    config: expect.any(Object),
+                }),
+            });
+        });
+
+        act(() => {
+            mockWorker.onmessage?.({
+                data: { type: 'INIT_SUCCESS' },
+            } as MessageEvent);
+        });
+
+        act(() => {
+            mockWorker.onmessage?.({
+                data: {
+                    type: 'ANOMALY_DETECTED',
+                    payload: {
+                        anomalies: {
+                            BACKGROUND_NOISE: 0.61,
+                            TALKING: 0.92,
+                        },
+                    },
+                },
+            } as MessageEvent);
+        });
+
+        await waitFor(() => {
+            expect(ingestTelemetryEvent).toHaveBeenCalledTimes(1);
+        });
+
+        expect(mockToastWarning).toHaveBeenCalledTimes(1);
+        expect(ingestTelemetryEvent).toHaveBeenCalledWith(
+            expect.any(Function),
+            expect.objectContaining({
+                metadata: expect.objectContaining({
+                    anomalyType: 'TALKING',
+                    confidenceScore: 0.92,
+                }),
+            }),
+        );
+    });
+
+    it('posts UPDATE_CONFIG without reinitializing the worker when runtime settings change', async () => {
+        const updatedConfig = {
+            ...DEFAULT_AUDIO_ANOMALY_CONFIG,
+            thresholds: {
+                ...DEFAULT_AUDIO_ANOMALY_CONFIG.thresholds,
+                TALKING: 0.72,
+            },
+        };
+
+        const { rerender } = renderHook(
+            ({ runtimeConfig }) =>
+                useAudioAnomalyWorker({
+                    configuration: validConfig,
+                    examSessionId: 'session-123',
+                    isSuspended: false,
+                    runtimeConfig,
+                    worker: mockWorker as any,
+                }),
+            {
+                initialProps: {
+                    runtimeConfig: DEFAULT_AUDIO_ANOMALY_CONFIG,
+                },
+            },
+        );
+
+        await waitFor(() => {
+            expect(mockWorker.postMessage).toHaveBeenCalledWith({
+                type: 'INIT',
+                payload: expect.objectContaining({
+                    config: expect.any(Object),
+                }),
+            });
+        });
+
+        act(() => {
+            mockWorker.onmessage?.({
+                data: { type: 'INIT_SUCCESS' },
+            } as MessageEvent);
+        });
+
+        const initCallCount = mockWorker.postMessage.mock.calls.filter(
+            ([message]) => message?.type === 'INIT',
+        ).length;
+
+        rerender({
+            runtimeConfig: updatedConfig,
+        });
+
+        await waitFor(() => {
+            expect(mockWorker.postMessage).toHaveBeenCalledWith({
+                type: 'UPDATE_CONFIG',
+                payload: {
+                    config: updatedConfig,
+                },
+            });
+        });
+
+        const updatedInitCallCount = mockWorker.postMessage.mock.calls.filter(
+            ([message]) => message?.type === 'INIT',
+        ).length;
+
+        expect(updatedInitCallCount).toBe(initCallCount);
     });
 });

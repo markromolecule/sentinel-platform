@@ -90,8 +90,9 @@ export function AudioCalibrationForm({ record, isPending, onSubmit }: AudioCalib
                                                     Global Sensitivity Multiplier ({field.value}x)
                                                 </FormLabel>
                                                 <FormDescription className="text-xs leading-normal">
-                                                    Adjusts all thresholds proportionally. Lower
-                                                    value = more sensitive. (0.5 to 2.0)
+                                                    Adjusts all thresholds proportionally. Higher
+                                                    values lower the effective threshold and make
+                                                    detection more sensitive. (0.5 to 2.0)
                                                 </FormDescription>
                                                 <FormControl className="pt-2">
                                                     <Slider
