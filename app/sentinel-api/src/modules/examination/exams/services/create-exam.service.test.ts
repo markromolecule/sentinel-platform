@@ -105,6 +105,7 @@ describe('createExam service with assignment sync', () => {
         const mockBody = {
             title: 'Test Exam',
             description: 'This is a description with twenty plus chars.',
+            isPublic: false,
             classroomId: 'classroom-1',
             roomId: 'room-1',
             startDateTime: '2026-06-14T08:00:00Z',
@@ -180,6 +181,72 @@ describe('createExam service with assignment sync', () => {
             title: 'Test Exam',
             classroomIds: ['classroom-1'],
             assignedRoomNames: ['Room A'],
+        });
+    });
+
+    it('persists section assignments for public classroom exams too', async () => {
+        const mockDb = {} as any;
+        const mockBody = {
+            title: 'Public Classroom Exam',
+            description: 'This public exam still needs classroom assignment rows.',
+            isPublic: true,
+            classroomId: 'classroom-1',
+            roomId: 'room-1',
+            startDateTime: '2026-06-14T08:00:00Z',
+            endDateTime: '2026-06-14T09:00:00Z',
+            durationMinutes: 60,
+            passingScore: 75,
+            instructorId: 'inst-1',
+            instructorIds: ['inst-1'],
+        };
+
+        vi.mocked(resolveInstructorExamAssignmentTargets).mockResolvedValue({
+            classroomAssignment: {
+                classGroupId: 'class-group-1',
+                className: 'Class A',
+                institutionId: 'inst-1',
+                subjectId: 'sub-1',
+                subjectTitle: 'Subject 1',
+                sectionId: 'sec-1',
+                sectionName: 'Section 1',
+            },
+            assignedSectionIds: [],
+            resolvedClassrooms: [
+                {
+                    classGroupId: 'class-group-1',
+                    className: 'Class A',
+                    institutionId: 'inst-1',
+                    subjectId: 'sub-1',
+                    subjectTitle: 'Subject 1',
+                    sectionId: 'sec-1',
+                    sectionName: 'Section 1',
+                },
+            ],
+        });
+        vi.mocked(createExamData).mockResolvedValue({ exam_id: 'exam-2' } as any);
+        vi.mocked(getExamDetail).mockResolvedValue({
+            id: 'exam-2',
+            title: 'Public Classroom Exam',
+        } as any);
+
+        await createExam(mockDb, mockBody as any, 'inst-1', 'user-1');
+
+        expect(createExamSectionAssignmentsBatch).toHaveBeenCalledWith({
+            dbClient: 'mock-trx',
+            examId: 'exam-2',
+            assignments: [
+                {
+                    sectionId: 'sec-1',
+                    classGroupId: 'class-group-1',
+                    roomId: 'room-1',
+                    instructorId: 'inst-1',
+                    scheduledAt: '2026-06-14T08:00:00Z',
+                },
+            ],
+        });
+        expect(syncExamAssignmentSummary).toHaveBeenCalledWith({
+            dbClient: 'mock-trx',
+            examId: 'exam-2',
         });
     });
 

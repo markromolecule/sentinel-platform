@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 import { getExamsData } from './get-exams';
+import { getProctorAssignmentColumnSupport } from '../helper/exam-schema-compat';
 import {
     Kysely,
     DummyDriver,
@@ -7,6 +8,15 @@ import {
     PostgresIntrospector,
     PostgresQueryCompiler,
 } from 'kysely';
+
+vi.mock('../helper/exam-schema-compat', async () => {
+    const actual = await vi.importActual('../helper/exam-schema-compat');
+
+    return {
+        ...(actual as object),
+        getProctorAssignmentColumnSupport: vi.fn(),
+    };
+});
 
 function createMockDb(metadataRows: any[], dataRows: any[]) {
     const db = new Kysely<any>({
@@ -38,6 +48,12 @@ function createMockDb(metadataRows: any[], dataRows: any[]) {
 }
 
 describe('getExamsData', () => {
+    beforeEach(() => {
+        vi.mocked(getProctorAssignmentColumnSupport).mockResolvedValue({
+            assigneeColumn: 'instructor_id',
+        } as any);
+    });
+
     it('should query exams without department filtering when departmentId is not provided', async () => {
         const { db, executeSpy } = createMockDb(
             [
@@ -271,7 +287,7 @@ describe('getExamsData', () => {
         // Should select e.is_public
         expect(compiledQuery.sql).toContain('"e"."is_public"');
         // Should filter by instructorUserId
-        expect(compiledQuery.sql).toContain('"e"."created_by" =');
+        expect(compiledQuery.sql).toContain('e.created_by =');
     });
 
     it('applies default limit and offset when not specified in filters', async () => {

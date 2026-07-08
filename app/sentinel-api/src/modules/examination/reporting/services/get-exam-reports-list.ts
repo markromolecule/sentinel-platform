@@ -1,6 +1,7 @@
 import { type DbClient } from '@sentinel/db';
 import { sql } from 'kysely';
 import type { GetExamReportsQuery } from '../reporting.dto';
+import { buildStaffExamVisibilityPredicates } from '../../assign/services/exam-access';
 import { resolveExaminationGlobalSettings } from '../../configuration/configuration.service';
 import { mapExamSummaryResponse } from '../../exams/services/map-exam-response.service';
 import type { RawExamRecord } from '../../exams/services/map-exam-response.service';
@@ -238,33 +239,13 @@ export async function getExamReportsList({
             throw new Error('Institution context required for instructor exam visibility');
         }
 
-        baseQuery = baseQuery.where((eb) =>
-            eb.or([
-                eb.and([eb('e.is_public', '=', true), eb('e.institution_id', '=', institutionId)]),
-                eb('e.created_by', '=', userId),
-                eb.exists(
-                    eb
-                        .selectFrom('exam_section_assignments as esa_filter')
-                        .select('esa_filter.exam_id')
-                        .whereRef('esa_filter.exam_id', '=', 'e.exam_id')
-                        .where('esa_filter.instructor_id', '=', userId),
-                ),
-                eb.exists(
-                    eb
-                        .selectFrom('proctor_assignments as pa_filter')
-                        .select('pa_filter.exam_id')
-                        .whereRef('pa_filter.exam_id', '=', 'e.exam_id')
-                        .where('pa_filter.instructor_id', '=', userId),
-                ),
-                eb.exists(
-                    eb
-                        .selectFrom('exam_shares as es_filter')
-                        .select('es_filter.exam_id')
-                        .whereRef('es_filter.exam_id', '=', 'e.exam_id')
-                        .where('es_filter.user_id', '=', userId),
-                ),
-            ]),
-        );
+        const visibilityPredicates = await buildStaffExamVisibilityPredicates({
+            dbClient,
+            userId,
+            institutionId,
+            includePublicInstitutionExams: true,
+        });
+        baseQuery = baseQuery.where(sql<boolean>`(${sql.join(visibilityPredicates, sql` or `)})`);
     }
 
     if (departmentId) {

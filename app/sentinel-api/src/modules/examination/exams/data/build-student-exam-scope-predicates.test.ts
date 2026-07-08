@@ -172,6 +172,46 @@ describe('student exam scope predicates', () => {
         void db.destroy();
     });
 
+    it('keeps private published exams visible through exact class-group assignment matching without requiring public visibility', () => {
+        const db = createCompilerDb();
+        const compiled = db
+            .selectFrom('exams as e')
+            .select('e.exam_id')
+            .where(
+                buildStudentExamVisibilityPredicate({
+                    studentUserId: '4bb7db25-f34f-4a57-b6ae-1db2f898f142',
+                    hasSectionId: true,
+                }),
+            )
+            .compile();
+
+        expect(compiled.sql).toContain('enr.class_group_id = e.class_group_id');
+        expect(compiled.sql).toContain('esa.class_group_id = "student_cg"."class_group_id"');
+        expect(compiled.sql).not.toContain('e.is_public = true');
+
+        void db.destroy();
+    });
+
+    it('keeps public published exams dependent on enrollment and assignment matching rather than public visibility alone', () => {
+        const db = createCompilerDb();
+        const compiled = db
+            .selectFrom('exams as e')
+            .select('e.exam_id')
+            .where(
+                buildStudentExamVisibilityPredicate({
+                    studentUserId: '4bb7db25-f34f-4a57-b6ae-1db2f898f142',
+                    hasSectionId: true,
+                }),
+            )
+            .compile();
+
+        expect(compiled.sql).toContain('enr.class_group_id = e.class_group_id');
+        expect(compiled.sql).toContain('from exam_section_assignments as esa');
+        expect(compiled.sql).not.toContain('e.is_public = true');
+
+        void db.destroy();
+    });
+
     it('keeps private classroom-assigned exams visible through exact class-group assignment matching', () => {
         const db = createCompilerDb();
         const compiled = db

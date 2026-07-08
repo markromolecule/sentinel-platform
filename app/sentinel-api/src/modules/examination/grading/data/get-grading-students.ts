@@ -1,6 +1,6 @@
 import { type DbClient } from '@sentinel/db';
 import { sql } from 'kysely';
-import { buildInstructorExamVisibilityPredicates } from '../../assign/services/exam-access';
+import { buildStaffExamVisibilityPredicates } from '../../assign/services/exam-access';
 
 export type GetGradingStudentsDataArgs = {
     dbClient: DbClient;
@@ -44,9 +44,11 @@ export async function buildGetGradingStudentsQuery({
     }
 
     if (userId) {
-        const visibilityPredicates = await buildInstructorExamVisibilityPredicates({
+        const visibilityPredicates = await buildStaffExamVisibilityPredicates({
             dbClient,
             userId,
+            institutionId,
+            includePublicInstitutionExams: true,
         });
         query = query.where(sql<boolean>`(${sql.join(visibilityPredicates, sql` or `)})`);
     }

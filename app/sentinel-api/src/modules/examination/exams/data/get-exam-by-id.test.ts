@@ -5,8 +5,18 @@ import {
     PostgresIntrospector,
     PostgresQueryCompiler,
 } from 'kysely';
-import { describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { getProctorAssignmentColumnSupport } from '../helper/exam-schema-compat';
 import { getExamByIdData } from './get-exam-by-id';
+
+vi.mock('../helper/exam-schema-compat', async () => {
+    const actual = await vi.importActual('../helper/exam-schema-compat');
+
+    return {
+        ...(actual as object),
+        getProctorAssignmentColumnSupport: vi.fn(),
+    };
+});
 
 function createMockDb(metadataRows: any[], dataRows: any[]) {
     const db = new Kysely<any>({
@@ -36,6 +46,12 @@ function createMockDb(metadataRows: any[], dataRows: any[]) {
 }
 
 describe('getExamByIdData', () => {
+    beforeEach(() => {
+        vi.mocked(getProctorAssignmentColumnSupport).mockResolvedValue({
+            assigneeColumn: 'instructor_id',
+        } as any);
+    });
+
     it('includes both legacy and decoupled section assignments in the student visibility query', async () => {
         const { db, executeSpy } = createMockDb(
             [
@@ -119,7 +135,7 @@ describe('getExamByIdData', () => {
         void db.destroy();
     });
 
-    it('keeps published private classroom-assigned exam detail queries scoped to exact classroom assignments', async () => {
+    it('applies staff visibility predicates when a staff actor is supplied', async () => {
         const { db, executeSpy } = createMockDb(
             [
                 { column_name: 'section_id' },
@@ -133,14 +149,18 @@ describe('getExamByIdData', () => {
             dbClient: db as any,
             id: 'exam-1',
             institutionId: 'institution-1',
-            studentUserId: 'student-1',
+            staffUserId: 'staff-1',
+            applyStaffVisibility: true,
         });
 
         const compiledQuery = executeSpy.mock.calls[1][0];
 
-        expect(compiledQuery.sql).toContain('"e"."published_at" is not null');
-        expect(compiledQuery.sql).toContain('esa.class_group_id = "student_cg"."class_group_id"');
-        expect(compiledQuery.sql).not.toContain('"e"."is_public" = true');
+        expect(compiledQuery.sql).toContain('e.is_public = true');
+        expect(compiledQuery.sql).toContain('e.created_by =');
+        expect(compiledQuery.sql).toContain('from exam_section_assignments as esa');
+        expect(compiledQuery.sql).toContain('from proctor_assignments as pa');
+        expect(compiledQuery.sql).toContain('from exam_shares as es');
+        expect(compiledQuery.sql).toContain('classroom_instructor_assignments as cia');
 
         void db.destroy();
     });
