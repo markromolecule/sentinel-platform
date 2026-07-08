@@ -11,7 +11,6 @@ vi.mock('../../assessment/assessment-access', async () => {
         ...(actual as object),
         assertAssessmentReadAccess: vi.fn(),
         resolveAssessmentReadScope: vi.fn(),
-        assertExamReadScope: vi.fn(),
         logAssessmentQuery: vi.fn(),
     };
 });
@@ -29,7 +28,6 @@ vi.mock('../exam.service', () => ({
 import {
     assertAssessmentReadAccess,
     resolveAssessmentReadScope,
-    assertExamReadScope,
 } from '../../assessment/assessment-access';
 
 function createApp(
@@ -101,6 +99,8 @@ describe('getExamRouteHandler', () => {
             id: examId,
             institutionId: 'institution-1',
             studentUserId: 'user-1',
+            staffUserId: undefined,
+            applyStaffVisibility: false,
         });
         expect(ExamService.getExamById).toHaveBeenCalledWith(
             expect.anything(),
@@ -110,7 +110,7 @@ describe('getExamRouteHandler', () => {
         );
     });
 
-    it('calls assertExamReadScope with correctly resolved parameters', async () => {
+    it('uses the staff access lookup for instructor detail reads', async () => {
         vi.mocked(resolveAssessmentReadScope).mockResolvedValue({
             role: 'instructor',
             institutionId: 'institution-1',
@@ -126,11 +126,118 @@ describe('getExamRouteHandler', () => {
         const response = await app.request(`/${examId}`);
 
         expect(response.status).toBe(200);
-        expect(assertExamReadScope).toHaveBeenCalledWith({
-            role: 'instructor',
-            userId: 'user-1',
-            examRecord: mockExamRecord,
-            isShared: false,
+        expect(getExamByIdData).toHaveBeenCalledWith({
+            dbClient: expect.anything(),
+            id: examId,
+            institutionId: 'institution-1',
+            studentUserId: undefined,
+            staffUserId: 'user-1',
+            applyStaffVisibility: true,
         });
+    });
+
+    it('allows assigned instructors to open private exam detail routes', async () => {
+        vi.mocked(resolveAssessmentReadScope).mockResolvedValue({
+            role: 'instructor',
+            institutionId: 'institution-1',
+            studentUserId: undefined,
+            departmentId: undefined,
+            instructorUserId: 'user-1',
+        });
+        vi.mocked(getExamByIdData).mockResolvedValue({
+            exam_id: examId,
+            is_public: false,
+            created_by: 'other-user',
+            assigned_instructor_ids: ['user-1'],
+        } as any);
+
+        const app = createApp({ id: 'user-1' });
+        const response = await app.request(`/${examId}`);
+
+        expect(response.status).toBe(200);
+    });
+
+    it('allows shared instructors to open private exam detail routes', async () => {
+        vi.mocked(resolveAssessmentReadScope).mockResolvedValue({
+            role: 'instructor',
+            institutionId: 'institution-1',
+            studentUserId: undefined,
+            departmentId: undefined,
+            instructorUserId: 'user-1',
+        });
+        vi.mocked(getExamByIdData).mockResolvedValue({
+            exam_id: examId,
+            is_public: false,
+            created_by: 'other-user',
+            assigned_instructor_ids: [],
+        } as any);
+
+        const app = createApp({ id: 'user-1' });
+        const response = await app.request(`/${examId}`);
+
+        expect(response.status).toBe(200);
+        expect(getExamByIdData).toHaveBeenCalledWith({
+            dbClient: expect.anything(),
+            id: examId,
+            institutionId: 'institution-1',
+            studentUserId: undefined,
+            staffUserId: 'user-1',
+            applyStaffVisibility: true,
+        });
+    });
+
+    it('denies unassigned instructors from opening private exam detail routes', async () => {
+        vi.mocked(resolveAssessmentReadScope).mockResolvedValue({
+            role: 'instructor',
+            institutionId: 'institution-1',
+            studentUserId: undefined,
+            departmentId: undefined,
+            instructorUserId: 'user-1',
+        });
+        vi.mocked(getExamByIdData).mockResolvedValueOnce(undefined as any);
+
+        const app = createApp({ id: 'user-1' });
+        const response = await app.request(`/${examId}`);
+
+        expect(response.status).toBe(404);
+        expect(ExamService.getExamById).not.toHaveBeenCalled();
+    });
+
+    it('allows admin creators to open private exam detail routes', async () => {
+        vi.mocked(resolveAssessmentReadScope).mockResolvedValue({
+            role: 'admin',
+            institutionId: 'institution-1',
+            studentUserId: undefined,
+            departmentId: 'dept-1',
+            instructorUserId: 'user-1',
+        });
+        vi.mocked(getExamByIdData).mockResolvedValue({
+            exam_id: examId,
+            is_public: false,
+            created_by: 'user-1',
+            assigned_instructor_ids: [],
+        } as any);
+
+        const app = createApp({ id: 'user-1', user_profiles: { department_id: 'dept-1' } });
+        const response = await app.request(`/${examId}`);
+
+        expect(response.status).toBe(200);
+    });
+
+    it('denies admin users from opening private exam detail routes when they are neither creator, assigned, nor shared', async () => {
+        vi.mocked(resolveAssessmentReadScope).mockResolvedValue({
+            role: 'admin',
+            institutionId: 'institution-1',
+            studentUserId: undefined,
+            departmentId: 'dept-1',
+            instructorUserId: 'user-1',
+        });
+        vi.mocked(getExamByIdData).mockResolvedValueOnce(undefined as any);
+
+        const app = createApp({ id: 'user-1', user_profiles: { department_id: 'dept-1' } });
+        const response = await app.request(`/${examId}`);
+
+        expect(response.status).toBe(404);
+        expect(ExamService.getExamById).not.toHaveBeenCalled();
     });
 });

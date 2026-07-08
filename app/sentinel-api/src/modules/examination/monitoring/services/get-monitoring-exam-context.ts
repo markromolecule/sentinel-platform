@@ -1,7 +1,7 @@
 import { type DbClient } from '@sentinel/db';
 import { HTTPException } from 'hono/http-exception';
 import { sql } from 'kysely';
-import { buildInstructorExamVisibilityPredicates } from '../../assign/services/exam-access';
+import { buildStaffExamVisibilityPredicates } from '../../assign/services/exam-access';
 import type { AssessmentAllowedRole } from '../../assessment/assessment-access';
 import type { ExamRuntimeAccess } from '../../runtime-access/runtime-access.dto';
 import { RuntimeAccessService } from '../../runtime-access/runtime-access.service';
@@ -72,9 +72,11 @@ export async function getMonitoringExamContext({
     }
 
     if (viewerRole === 'instructor' && userId) {
-        const visibilityPredicates = await buildInstructorExamVisibilityPredicates({
+        const visibilityPredicates = await buildStaffExamVisibilityPredicates({
             dbClient,
             userId,
+            institutionId,
+            includePublicInstitutionExams: true,
         });
         query = query.where(sql<boolean>`(${sql.join(visibilityPredicates, sql` or `)})`);
     }

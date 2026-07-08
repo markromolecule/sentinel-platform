@@ -1,28 +1,35 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { Kysely, PostgresDialect, sql } from 'kysely';
-import { Pool } from 'pg';
+import {
+    DummyDriver,
+    Kysely,
+    PostgresAdapter,
+    PostgresIntrospector,
+    PostgresQueryCompiler,
+    sql,
+} from 'kysely';
 import { buildGetGradingExamsQuery } from './get-grading-exams';
 import { buildGetGradingStudentsQuery } from './get-grading-students';
-import { buildInstructorExamVisibilityPredicates } from '../../assign/services/exam-access';
+import { buildStaffExamVisibilityPredicates } from '../../assign/services/exam-access';
 
 vi.mock('../../assign/services/exam-access', () => ({
-    buildInstructorExamVisibilityPredicates: vi.fn(),
+    buildStaffExamVisibilityPredicates: vi.fn(),
 }));
 
 function createCompilerDb() {
     return new Kysely<any>({
-        dialect: new PostgresDialect({
-            pool: new Pool({
-                connectionString: 'postgres://sentinel:sentinel@127.0.0.1:5432/sentinel',
-            }),
-        }),
+        dialect: {
+            createAdapter: () => new PostgresAdapter(),
+            createDriver: () => new DummyDriver(),
+            createIntrospector: (database) => new PostgresIntrospector(database),
+            createQueryCompiler: () => new PostgresQueryCompiler(),
+        },
     });
 }
 
 describe('grading visibility queries', () => {
     beforeEach(() => {
         vi.clearAllMocks();
-        vi.mocked(buildInstructorExamVisibilityPredicates).mockResolvedValue([
+        vi.mocked(buildStaffExamVisibilityPredicates).mockResolvedValue([
             sql<boolean>`e.created_by = ${'user-1'}`,
             sql<boolean>`e.exam_id in (
                 select pa.exam_id
@@ -42,9 +49,11 @@ describe('grading visibility queries', () => {
         });
         const compiled = query.compile();
 
-        expect(buildInstructorExamVisibilityPredicates).toHaveBeenCalledWith({
+        expect(buildStaffExamVisibilityPredicates).toHaveBeenCalledWith({
             dbClient: db,
             userId: 'user-1',
+            institutionId: 'institution-1',
+            includePublicInstitutionExams: true,
         });
         expect(compiled.sql).toContain('e.created_by = $');
         expect(compiled.sql).toContain('from proctor_assignments as pa');
@@ -64,9 +73,11 @@ describe('grading visibility queries', () => {
         });
         const compiled = query.compile();
 
-        expect(buildInstructorExamVisibilityPredicates).toHaveBeenCalledWith({
+        expect(buildStaffExamVisibilityPredicates).toHaveBeenCalledWith({
             dbClient: db,
             userId: 'user-1',
+            institutionId: 'institution-1',
+            includePublicInstitutionExams: true,
         });
         expect(compiled.sql).toContain('where "e"."exam_id" = $1');
         expect(compiled.sql).toContain('e.created_by = $');

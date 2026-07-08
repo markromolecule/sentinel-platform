@@ -199,6 +199,23 @@ describe('updateExam service with assignment sync', () => {
         expect(syncExamAssignmentSummary).not.toHaveBeenCalled();
     });
 
+    it('preserves assignment rows and summary fields when only isPublic changes', async () => {
+        const mockDb = {} as any;
+        const mockBody = {
+            isPublic: true,
+        };
+
+        vi.mocked(getExamByIdData).mockResolvedValue(mockCurrentExam as any);
+        vi.mocked(updateExamData).mockResolvedValue(mockCurrentExam as any);
+        vi.mocked(getExamDetail).mockResolvedValue({ id: 'exam-1' } as any);
+
+        await updateExam(mockDb, 'exam-1', mockBody as any, 'inst-1', 'user-1');
+
+        expect(deleteAllExamSectionAssignments).not.toHaveBeenCalled();
+        expect(createExamSectionAssignmentsBatch).not.toHaveBeenCalled();
+        expect(syncExamAssignmentSummary).not.toHaveBeenCalled();
+    });
+
     it('clears assignments when classroomId is updated to null', async () => {
         const mockDb = {} as any;
         const mockBody = {

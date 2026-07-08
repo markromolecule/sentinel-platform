@@ -3,6 +3,7 @@ import { sql } from 'kysely';
 import { buildStudentAttemptSelects } from '../../history/data/build-student-attempt-selects';
 import { getExamColumnSupport } from '../helper/exam-schema-compat';
 import type { RawExamRecord } from '../services/map-exam-response.service';
+import { buildStaffExamVisibilityPredicates } from '../../assign/services/exam-access';
 import {
     buildPublishedStudentExamPredicate,
     buildStudentExamVisibilityPredicate,
@@ -13,6 +14,8 @@ export type GetExamByIdDataArgs = {
     id: string;
     institutionId?: string;
     studentUserId?: string;
+    staffUserId?: string;
+    applyStaffVisibility?: boolean;
 };
 
 export async function getExamByIdData({
@@ -20,6 +23,8 @@ export async function getExamByIdData({
     id,
     institutionId,
     studentUserId,
+    staffUserId,
+    applyStaffVisibility,
 }: GetExamByIdDataArgs) {
     const columnSupport = await getExamColumnSupport(dbClient);
 
@@ -177,6 +182,17 @@ export async function getExamByIdData({
                 }),
             ]),
         );
+    }
+
+    if (applyStaffVisibility && staffUserId) {
+        const visibilityPredicates = await buildStaffExamVisibilityPredicates({
+            dbClient,
+            userId: staffUserId,
+            institutionId,
+            includePublicInstitutionExams: true,
+        });
+
+        query = query.where((eb) => eb.or(visibilityPredicates));
     }
 
     return (await query.executeTakeFirst()) as RawExamRecord | undefined;

@@ -1,10 +1,8 @@
 import { createRoute } from '@hono/zod-openapi';
-import { HTTPException } from 'hono/http-exception';
 import { type AppRouteHandler } from '../../../../types/hono';
 import {
     assertAssessmentReadAccess,
     resolveAssessmentReadScope,
-    assertExamReadScope,
     logAssessmentQuery,
 } from '../../assessment/assessment-access';
 import { getExamByIdSchema } from '../exam.dto';
@@ -42,7 +40,7 @@ export const getExamRouteHandler: AppRouteHandler<typeof getExamRoute> = async (
 
     assertAssessmentReadAccess(c);
 
-    const { role, institutionId, studentUserId } = await resolveAssessmentReadScope({
+    const { role, institutionId, studentUserId, instructorUserId } = await resolveAssessmentReadScope({
         dbClient: c.get('dbClient'),
         user,
         claimedRole: supabaseUser?.user_metadata?.role,
@@ -56,25 +54,10 @@ export const getExamRouteHandler: AppRouteHandler<typeof getExamRoute> = async (
             id,
             institutionId,
             studentUserId,
+            staffUserId: instructorUserId,
+            applyStaffVisibility: Boolean(instructorUserId),
         }),
     );
-
-    const isShared = user?.id
-        ? await c
-              .get('dbClient')
-              .selectFrom('exam_shares')
-              .select('user_id')
-              .where('exam_id', '=', id)
-              .where('user_id', '=', user.id)
-              .executeTakeFirst()
-        : null;
-
-    assertExamReadScope({
-        role,
-        userId: user?.id,
-        examRecord: examAccessRecord,
-        isShared: Boolean(isShared),
-    });
 
     const exam = await ExamService.getExamById(c.get('dbClient'), id, institutionId, studentUserId);
 
