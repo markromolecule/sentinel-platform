@@ -1,6 +1,6 @@
 import { describe, expect, it, vi, beforeEach } from 'vitest';
 import { HTTPException } from 'hono/http-exception';
-import { createExamAssignment } from './create-exam-assignment';
+import { createExamAssignment } from './create-exam-assignment.service';
 import { findManageableExam } from '../data/find-manageable-exam';
 import { findAssigneeInstructor } from '../data/find-assignee-instructor';
 import { findConflictingExamAssignment } from '../data/find-conflicting-exam-assignment';

@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { type DbClient } from '@sentinel/db';
 import { sql } from 'kysely';
 import { resolveExaminationGlobalSettings } from '../../configuration/configuration.service';
-import { buildAssignedInstructorExamVisibilityPredicates } from '../../assign/services/exam-access';
+import { buildAssignedInstructorExamVisibilityPredicates } from '../../assign/services/exam-access.service';
 import { getReportingExamContext } from './get-reporting-exam-context';
 
 vi.mock('../../configuration/configuration.service', () => ({

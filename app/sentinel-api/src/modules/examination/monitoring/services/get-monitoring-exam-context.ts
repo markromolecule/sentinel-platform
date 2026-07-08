@@ -1,7 +1,7 @@
 import { type DbClient } from '@sentinel/db';
 import { HTTPException } from 'hono/http-exception';
 import { sql } from 'kysely';
-import { buildStaffExamVisibilityPredicates } from '../../assign/services/exam-access';
+import { buildStaffExamVisibilityPredicates } from '../../assign/services/exam-access.service';
 import type { AssessmentAllowedRole } from '../../assessment/assessment-access';
 import type { ExamRuntimeAccess } from '../../runtime-access/runtime-access.dto';
 import { RuntimeAccessService } from '../../runtime-access/runtime-access.service';

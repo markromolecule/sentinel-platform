@@ -2,7 +2,7 @@ import { type DbClient, type question_type } from '@sentinel/db';
 import { sql } from 'kysely';
 import type { GetExamsQuery } from '../exam.dto';
 import { buildStudentAttemptSelects } from '../../history/data/build-student-attempt-selects';
-import { buildStaffExamVisibilityPredicates } from '../../assign/services/exam-access';
+import { buildStaffExamVisibilityPredicates } from '../../assign/services/exam-access.service';
 import { getExamColumnSupport } from '../helper/exam-schema-compat';
 import type { RawExamRecord } from '../services/map-exam-response.service';
 import {

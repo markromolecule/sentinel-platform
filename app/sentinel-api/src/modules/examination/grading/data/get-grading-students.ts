@@ -1,6 +1,6 @@
 import { type DbClient } from '@sentinel/db';
 import { sql } from 'kysely';
-import { buildStaffExamVisibilityPredicates } from '../../assign/services/exam-access';
+import { buildStaffExamVisibilityPredicates } from '../../assign/services/exam-access.service';
 
 export type GetGradingStudentsDataArgs = {
     dbClient: DbClient;

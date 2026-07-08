@@ -1,7 +1,7 @@
 import { type DbClient } from '@sentinel/db';
 import { getExamConfigurationData } from '../../exams/data/get-exam-configuration';
 import type { ExamConfigurationState } from '../configuration.dto';
-import { mapExamConfigurationState } from './map-exam-configuration-state';
+import { mapExamConfigurationState } from './map-exam-configuration-state.service';
 import { resolveExaminationGlobalSettings } from './resolve-examination-global-settings.service';
 
 export async function getExamConfigurationState(

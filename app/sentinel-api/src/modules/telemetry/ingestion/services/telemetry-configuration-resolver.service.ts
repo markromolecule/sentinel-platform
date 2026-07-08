@@ -1,6 +1,6 @@
 import { type DbClient } from '@sentinel/db';
 import type { TelemetryRuleKey } from '@sentinel/shared';
-import { getExamConfigurationState } from '../../../examination/configuration/services/get-exam-configuration-state';
+import { getExamConfigurationState } from '../../../examination/configuration/services/get-exam-configuration-state.service';
 import type { ExamConfigurationValues } from '../../../examination/configuration/services/configuration.types';
 import { telemetryRuleRegistry } from '../rules/registry';
 

@@ -4,7 +4,7 @@ import { closeOtherPendingExamAssignments } from '../data/close-other-pending-ex
 import { findRespondableExamAssignment } from '../data/find-respondable-exam-assignment';
 import { updateExamAssignmentStatus } from '../data/update-exam-assignment-status';
 import { ExamNotificationService } from '../../../general/notification/services/exam-notification.service';
-import { respondToExamAssignment } from './respond-to-exam-assignment';
+import { respondToExamAssignment } from './respond-to-exam-assignment.service';
 
 vi.mock('../data/find-respondable-exam-assignment', () => ({
     findRespondableExamAssignment: vi.fn(),

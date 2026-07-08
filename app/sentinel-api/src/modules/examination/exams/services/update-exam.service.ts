@@ -3,7 +3,7 @@ import {
     hasExamConfigurationChanges,
     saveExamConfiguration,
 } from '../../configuration/configuration.service';
-import { assertExamConfigurationMutable } from '../../configuration/services/assert-exam-configuration-mutable';
+import { assertExamConfigurationMutable } from '../../configuration/services/assert-exam-configuration-mutable.service';
 
 import type { UpdateExamBody } from '../exam.dto';
 import { getExamByIdData } from '../data/get-exam-by-id';
@@ -132,21 +132,22 @@ export async function updateExam(
     });
 
     // Compute assignments once and reuse to avoid drift or duplicate computations.
-    const nextAssignments = (hasAssignmentRelevantChange && assignmentTargets)
-        ? buildExamSectionAssignmentInputs({
-            targets: assignmentTargets,
-            roomId: body.roomId !== undefined ? body.roomId : current.room_id,
-            startDateTime:
-                body.startDateTime !== undefined
-                    ? body.startDateTime
-                    : parseDateTime(current.scheduled_date)?.toISOString() ?? null,
-            instructorId:
-                body.instructorId !== undefined
-                    ? body.instructorId
-                    : (current.created_by ?? null),
-            instructorIds: body.instructorIds !== undefined ? body.instructorIds : null,
-        })
-        : [];
+    const nextAssignments =
+        hasAssignmentRelevantChange && assignmentTargets
+            ? buildExamSectionAssignmentInputs({
+                  targets: assignmentTargets,
+                  roomId: body.roomId !== undefined ? body.roomId : current.room_id,
+                  startDateTime:
+                      body.startDateTime !== undefined
+                          ? body.startDateTime
+                          : (parseDateTime(current.scheduled_date)?.toISOString() ?? null),
+                  instructorId:
+                      body.instructorId !== undefined
+                          ? body.instructorId
+                          : (current.created_by ?? null),
+                  instructorIds: body.instructorIds !== undefined ? body.instructorIds : null,
+              })
+            : [];
 
     await executeExamTransaction(async (trx) => {
         // Re-verify room availability inside the transaction to prevent TOCTOU race conditions.

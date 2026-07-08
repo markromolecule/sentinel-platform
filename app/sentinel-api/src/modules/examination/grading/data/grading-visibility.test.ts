@@ -9,7 +9,7 @@ import {
 } from 'kysely';
 import { buildGetGradingExamsQuery } from './get-grading-exams';
 import { buildGetGradingStudentsQuery } from './get-grading-students';
-import { buildStaffExamVisibilityPredicates } from '../../assign/services/exam-access';
+import { buildStaffExamVisibilityPredicates } from '../../assign/services/exam-access.service';
 
 vi.mock('../../assign/services/exam-access', () => ({
     buildStaffExamVisibilityPredicates: vi.fn(),

@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest';
-import { buildDefaultExamConfiguration } from '../../modules/examination/configuration/services/build-default-exam-configuration';
-import { hasExamConfigurationChanges } from '../../modules/examination/configuration/services/has-exam-configuration-changes';
-import { mapExamConfigurationState } from '../../modules/examination/configuration/services/map-exam-configuration-state';
-import { resolveExamSettings } from '../../modules/examination/configuration/services/resolve-exam-settings';
+import { buildDefaultExamConfiguration } from '../../modules/examination/configuration/services/build-default-exam-configuration.service';
+import { hasExamConfigurationChanges } from '../../modules/examination/configuration/services/has-exam-configuration-changes.service';
+import { mapExamConfigurationState } from '../../modules/examination/configuration/services/map-exam-configuration-state.service';
+import { resolveExamSettings } from '../../modules/examination/configuration/services/resolve-exam-settings.service';
 
 describe('configuration module', () => {
     it('maps missing stored configuration to stable defaults', () => {

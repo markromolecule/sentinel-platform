@@ -3,7 +3,7 @@ import { sql } from 'kysely';
 import { buildStudentAttemptSelects } from '../../history/data/build-student-attempt-selects';
 import { getExamColumnSupport } from '../helper/exam-schema-compat';
 import type { RawExamRecord } from '../services/map-exam-response.service';
-import { buildStaffExamVisibilityPredicates } from '../../assign/services/exam-access';
+import { buildStaffExamVisibilityPredicates } from '../../assign/services/exam-access.service';
 import {
     buildPublishedStudentExamPredicate,
     buildStudentExamVisibilityPredicate,

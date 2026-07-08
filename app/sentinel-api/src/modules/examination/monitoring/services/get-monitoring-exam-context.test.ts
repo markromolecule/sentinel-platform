@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { type DbClient } from '@sentinel/db';
 import { sql } from 'kysely';
-import { buildStaffExamVisibilityPredicates } from '../../assign/services/exam-access';
+import { buildStaffExamVisibilityPredicates } from '../../assign/services/exam-access.service';
 import { getMonitoringExamContext } from './get-monitoring-exam-context';
 
 vi.mock('../../assign/services/exam-access', () => ({

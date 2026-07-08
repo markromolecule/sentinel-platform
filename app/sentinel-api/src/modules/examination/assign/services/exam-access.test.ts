@@ -6,7 +6,7 @@ import {
     buildAssignedInstructorExamVisibilityPredicates,
     buildStaffExamVisibilityPredicates,
     getExamAssignmentAccessStatuses,
-} from './exam-access';
+} from './exam-access.service';
 
 vi.mock('../../exams/helper/exam-schema-compat', async () => {
     const actual = await vi.importActual('../../exams/helper/exam-schema-compat');
