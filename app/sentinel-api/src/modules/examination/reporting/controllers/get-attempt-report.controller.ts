@@ -1,7 +1,7 @@
 import { createRoute } from '@hono/zod-openapi';
 import { HTTPException } from 'hono/http-exception';
 import { type AppRouteHandler } from '../../../../types/hono';
-import { assertAssignedInstructorAttemptAccess } from '../../assign/services/exam-access';
+import { assertAssignedInstructorAttemptAccess } from '../../assign/services/exam-access.service';
 import {
     type AssessmentAllowedRole,
     assertAssessmentAccess,

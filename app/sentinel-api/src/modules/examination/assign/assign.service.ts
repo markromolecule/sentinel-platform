@@ -1,8 +1,8 @@
 import { type DbClient } from '@sentinel/db';
 import type { CreateExamAssignmentBody } from './assign.dto';
-import { createExamAssignment } from './services/create-exam-assignment';
-import { getExamAssignments } from './services/get-exam-assignments';
-import { respondToExamAssignment } from './services/respond-to-exam-assignment';
+import { createExamAssignment } from './services/create-exam-assignment.service';
+import { getExamAssignments } from './services/get-exam-assignments.service';
+import { respondToExamAssignment } from './services/respond-to-exam-assignment.service';
 
 export class AssignService {
     static async createExamAssignment(args: {

@@ -1,13 +1,11 @@
 import { type DbClient } from '@sentinel/db';
 import { getExamConfigurationData } from '../../exams/data/get-exam-configuration';
 import { upsertExamConfigurationData } from '../../exams/data/upsert-exam-configuration';
-import { buildDefaultExamConfiguration } from './build-default-exam-configuration';
-import { mapExamConfigurationState } from './map-exam-configuration-state';
+import { buildDefaultExamConfiguration } from './build-default-exam-configuration.service';
+import { mapExamConfigurationState } from './map-exam-configuration-state.service';
 import type { ExamConfigurationPayload } from './configuration.types';
-import {
-    normalizeExamConfigurationState,
-} from './normalize-exam-configuration-state';
-import { resolveExamSettings } from './resolve-exam-settings';
+import { normalizeExamConfigurationState } from './normalize-exam-configuration-state.service';
+import { resolveExamSettings } from './resolve-exam-settings.service';
 import { LogsService } from '../../../general/logs/logs.service';
 import { resolveExaminationGlobalSettings } from './resolve-examination-global-settings.service';
 
@@ -90,7 +88,10 @@ export async function saveExamConfiguration(args: {
     const releaseScoreModeExplicit = hasOwnProperty(payloadConfiguration, 'releaseScoreMode')
         ? payloadConfiguration.releaseScoreMode
         : undefined;
-    const automaticClosePolicyExplicit = hasOwnProperty(payloadConfiguration, 'automaticClosePolicy')
+    const automaticClosePolicyExplicit = hasOwnProperty(
+        payloadConfiguration,
+        'automaticClosePolicy',
+    )
         ? payloadConfiguration.automaticClosePolicy
         : undefined;
     const configuration = normalizeExamConfigurationState({
@@ -275,9 +276,7 @@ export async function saveExamConfiguration(args: {
             randomize_choices: settings.randomizeChoices,
             lobby_admission_mode: persistedConfiguration.lobbyAdmissionMode,
             release_score_mode:
-                releaseScoreModeExplicit === undefined
-                    ? undefined
-                    : configuration.releaseScoreMode,
+                releaseScoreModeExplicit === undefined ? undefined : configuration.releaseScoreMode,
             max_reconnect_attempts: persistedConfiguration.maxReconnectAttempts,
             strict_mode: persistedConfiguration.strictMode,
             screen_lock: persistedConfiguration.screenLock,
@@ -297,9 +296,7 @@ export async function saveExamConfiguration(args: {
             randomize_choices: settings.randomizeChoices,
             lobby_admission_mode: persistedConfiguration.lobbyAdmissionMode,
             release_score_mode:
-                releaseScoreModeExplicit === undefined
-                    ? undefined
-                    : configuration.releaseScoreMode,
+                releaseScoreModeExplicit === undefined ? undefined : configuration.releaseScoreMode,
             max_reconnect_attempts: persistedConfiguration.maxReconnectAttempts,
             strict_mode: persistedConfiguration.strictMode,
             screen_lock: persistedConfiguration.screenLock,

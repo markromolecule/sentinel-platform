@@ -9,7 +9,7 @@ import {
     sql,
 } from 'kysely';
 import { resolveExaminationGlobalSettings } from '../../configuration/configuration.service';
-import { buildStaffExamVisibilityPredicates } from '../../assign/services/exam-access';
+import { buildStaffExamVisibilityPredicates } from '../../assign/services/exam-access.service';
 import { getExamReportsList } from './get-exam-reports-list';
 
 vi.mock('../../configuration/configuration.service', () => ({

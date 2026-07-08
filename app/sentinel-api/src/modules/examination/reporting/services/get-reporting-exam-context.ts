@@ -1,7 +1,7 @@
 import { type DbClient } from '@sentinel/db';
 import { HTTPException } from 'hono/http-exception';
 import { sql } from 'kysely';
-import { buildAssignedInstructorExamVisibilityPredicates } from '../../assign/services/exam-access';
+import { buildAssignedInstructorExamVisibilityPredicates } from '../../assign/services/exam-access.service';
 import type { AssessmentAllowedRole } from '../../assessment/assessment-access';
 import { resolveExaminationGlobalSettings } from '../../configuration/configuration.service';
 import { resolveEffectiveExamBaseline } from '../../exams/services/resolve-effective-exam-baseline.service';

@@ -2,19 +2,19 @@ import { HTTPException } from 'hono/http-exception';
 import { type DbClient } from '@sentinel/db';
 import { getExamByIdData } from '../exams/data/get-exam-by-id';
 import type { UpdateExamConfigurationBody } from './configuration.dto';
-export { buildDefaultExamConfiguration } from './services/build-default-exam-configuration';
-export { getExamConfigurationState } from './services/get-exam-configuration-state';
-export { hasExamConfigurationChanges } from './services/has-exam-configuration-changes';
-export { mapExamConfigurationState } from './services/map-exam-configuration-state';
-export { normalizeExamConfigurationState } from './services/normalize-exam-configuration-state';
+export { buildDefaultExamConfiguration } from './services/build-default-exam-configuration.service';
+export { getExamConfigurationState } from './services/get-exam-configuration-state.service';
+export { hasExamConfigurationChanges } from './services/has-exam-configuration-changes.service';
+export { mapExamConfigurationState } from './services/map-exam-configuration-state.service';
+export { normalizeExamConfigurationState } from './services/normalize-exam-configuration-state.service';
 export { resolveExaminationGlobalSettings } from './services/resolve-examination-global-settings.service';
-export { resolveExamSettings } from './services/resolve-exam-settings';
-export { saveExamConfiguration } from './services/save-exam-configuration';
+export { resolveExamSettings } from './services/resolve-exam-settings.service';
+export { saveExamConfiguration } from './services/save-exam-configuration.service';
 export type { ExamConfigurationPayload } from './services/configuration.types';
-import { getExamConfigurationState } from './services/get-exam-configuration-state';
+import { getExamConfigurationState } from './services/get-exam-configuration-state.service';
 import { resolveExaminationGlobalSettings } from './services/resolve-examination-global-settings.service';
-import { saveExamConfiguration } from './services/save-exam-configuration';
-import { assertExamConfigurationMutable } from './services/assert-exam-configuration-mutable';
+import { saveExamConfiguration } from './services/save-exam-configuration.service';
+import { assertExamConfigurationMutable } from './services/assert-exam-configuration-mutable.service';
 
 export class ConfigurationService {
     static async getExaminationConfigurationDefaults(dbClient: DbClient) {

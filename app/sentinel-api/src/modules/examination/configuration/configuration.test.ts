@@ -1,13 +1,13 @@
 import { describe, it, expect } from 'vitest';
 import { HTTPException } from 'hono/http-exception';
-import { assertExamConfigurationMutable } from './services/assert-exam-configuration-mutable';
+import { assertExamConfigurationMutable } from './services/assert-exam-configuration-mutable.service';
 import {
     normalizeExamConfigurationState,
     normalizeExamSettingsState,
-} from './services/normalize-exam-configuration-state';
+} from './services/normalize-exam-configuration-state.service';
 import { DEFAULT_EXAMINATION_GLOBAL_SETTINGS } from '@sentinel/shared/constants';
-import { buildDefaultExamConfiguration } from './services/build-default-exam-configuration';
-import { mapExamConfigurationState } from './services/map-exam-configuration-state';
+import { buildDefaultExamConfiguration } from './services/build-default-exam-configuration.service';
+import { mapExamConfigurationState } from './services/map-exam-configuration-state.service';
 
 describe('Examination configuration guards', () => {
     it('normalizes settings through the shared schema contract', () => {
@@ -115,7 +115,9 @@ describe('Examination configuration guards', () => {
     it('maps automaticClosePolicy from aiRules and fallback to defaults', () => {
         const defaultConfig = buildDefaultExamConfiguration();
         const mappedDefault = mapExamConfigurationState(null);
-        expect(mappedDefault.configuration.automaticClosePolicy).toEqual(defaultConfig.automaticClosePolicy);
+        expect(mappedDefault.configuration.automaticClosePolicy).toEqual(
+            defaultConfig.automaticClosePolicy,
+        );
 
         const mockRecord = {
             ai_rules: {

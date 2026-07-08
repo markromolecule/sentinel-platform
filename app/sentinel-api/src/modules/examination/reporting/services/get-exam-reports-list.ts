@@ -1,7 +1,7 @@
 import { type DbClient } from '@sentinel/db';
 import { sql } from 'kysely';
 import type { GetExamReportsQuery } from '../reporting.dto';
-import { buildStaffExamVisibilityPredicates } from '../../assign/services/exam-access';
+import { buildStaffExamVisibilityPredicates } from '../../assign/services/exam-access.service';
 import { resolveExaminationGlobalSettings } from '../../configuration/configuration.service';
 import { mapExamSummaryResponse } from '../../exams/services/map-exam-response.service';
 import type { RawExamRecord } from '../../exams/services/map-exam-response.service';

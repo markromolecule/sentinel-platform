@@ -1,11 +1,11 @@
 import type { ExaminationGlobalSettings } from '@sentinel/shared';
 import type { ExamConfigurationState } from '../configuration.dto';
-import { buildDefaultExamConfiguration } from './build-default-exam-configuration';
+import { buildDefaultExamConfiguration } from './build-default-exam-configuration.service';
 import type { ExamConfigurationRecord } from './configuration.types';
 import {
     normalizeExamConfigurationState,
     normalizeExamSettingsState,
-} from './normalize-exam-configuration-state';
+} from './normalize-exam-configuration-state.service';
 
 function buildFallbackSettings(
     record?: ExamConfigurationRecord | null,

@@ -2,7 +2,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { HTTPException } from 'hono/http-exception';
 import { type DbClient } from '@sentinel/db';
 import { EntitlementsRepository } from '../access/data/entitlements.repository';
-import { assertInstructorExamAccess } from '../assign/services/exam-access';
+import { assertInstructorExamAccess } from '../assign/services/exam-access.service';
 import { getMonitoringExamContext } from '../monitoring/services/get-monitoring-exam-context';
 import { checkInLobby } from './services/check-in-lobby';
 import { getAdmissionStatus } from './services/get-admission-status';
