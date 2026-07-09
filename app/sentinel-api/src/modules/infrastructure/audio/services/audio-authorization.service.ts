@@ -27,6 +27,13 @@ export function assertAudioPermission(args: {
         return;
     }
 
+    // Students are permitted to read global audio calibration settings so that
+    // support-managed thresholds and anomaly types are available during exam attempts.
+    // Students may not write (manage) calibration — that remains restricted to support/admin.
+    if (requiredPermission === AUDIO_PERMISSION_KEYS.readCalibration && role === 'student') {
+        return;
+    }
+
     if (
         requiredPermission === AUDIO_PERMISSION_KEYS.readIncidents &&
         (role === 'admin' || role === 'instructor')
