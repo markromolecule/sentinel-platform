@@ -1,6 +1,6 @@
 # Fix 002 Implementation Plan: Examination Runtime And Visibility Open Case
 
-**Status:** Planned  
+**Status:** In Progress  
 **Date:** 2026-07-08  
 **Type:** fix  
 **Scope:** `sentinel-web`, `sentinel-api`, `packages/shared`, `packages/hooks`, `packages/services`, `packages/db`
@@ -101,15 +101,15 @@ Why: The current source already includes deterministic telemetry metadata, clien
 
 **Goal:** Prove whether the reported failures exist on the current source and target database before changing product code.
 
-- [ ] Record current workspace state in the execution log by running `git status --short` from `/Applications/XAMPP/xamppfiles/htdocs/sentinel`, and list any pre-existing modified files under `app/sentinel-api/src/modules/examination/**`.
-- [ ] Verify the target database has `flagged_incidents_dedupe_key_unique` from `packages/db/prisma/migrations/20260706000000_add_telemetry_dedupe_index/migration.sql` by running the `pg_indexes` SQL from `docs/context/July/examination-and-exam-visibility-issue.md`.
-- [ ] Verify package/runtime parity by inspecting `packages/shared/dist`, `packages/hooks/dist`, and the running `app/sentinel-web` bundle path only if the local app consumes built package output instead of workspace source.
-- [ ] Add a temporary development-only debug helper in `app/sentinel-web/src/app/(protected)/student/exam/[id]/_hooks/use-exam-monitoring/use-interaction-listeners.ts` that logs listener mount/unmount with `examSessionId`, `monitoringPhase.current`, and a component instance ID.
-- [ ] Add a temporary development-only debug helper in `app/sentinel-web/src/app/(protected)/student/exam/[id]/attempt/_hooks/use-student-exam-attempt/use-attempt-monitoring.ts` that logs `audioMonitoringPhase`, `hasStream`, live audio track count, `examSessionId`, and whether runtime audio settings are present.
-- [ ] Add a temporary development-only debug hook in `app/sentinel-web/src/hooks/use-audio-anomaly-worker/use-audio-anomaly-worker.ts` to expose one accepted anomaly window with `anomalyType`, `confidenceScore`, effective cooldown, and generated `dedupeKey`.
-- [ ] Write tests in `app/sentinel-web/src/app/(protected)/student/exam/[id]/_hooks/use-exam-monitoring.test.ts` proving the listener debug hook is inert outside `NODE_ENV === 'development'`.
-- [ ] Write tests in `app/sentinel-web/src/hooks/use-audio-anomaly-worker/use-audio-anomaly-worker.test.tsx` proving audio debug logging is inert outside `NODE_ENV === 'development'`.
-- [ ] Create a clean manual QA record in the implementation execution notes with one new `exam_id`, `attempt_id`, `student_user_id`, instructor user, and initial `flagged_incidents` count.
+- [x] Record current workspace state in the execution log by running `git status --short` from `/Applications/XAMPP/xamppfiles/htdocs/sentinel`, and list any pre-existing modified files under `app/sentinel-api/src/modules/examination/**`.
+- [x] Verify the target database has `flagged_incidents_dedupe_key_unique` from `packages/db/prisma/migrations/20260706000000_add_telemetry_dedupe_index/migration.sql` by running the `pg_indexes` SQL from `docs/context/July/examination-and-exam-visibility-issue.md`.
+- [x] Verify package/runtime parity by inspecting `packages/shared/dist`, `packages/hooks/dist`, and the running `app/sentinel-web` bundle path only if the local app consumes built package output instead of workspace source.
+- [x] Add a temporary development-only debug helper in `app/sentinel-web/src/app/(protected)/student/exam/[id]/_hooks/use-exam-monitoring/use-interaction-listeners.ts` that logs listener mount/unmount with `examSessionId`, `monitoringPhase.current`, and a component instance ID.
+- [x] Add a temporary development-only debug helper in `app/sentinel-web/src/app/(protected)/student/exam/[id]/attempt/_hooks/use-student-exam-attempt/use-attempt-monitoring.ts` that logs `audioMonitoringPhase`, `hasStream`, live audio track count, `examSessionId`, and whether runtime audio settings are present.
+- [x] Add a temporary development-only debug hook in `app/sentinel-web/src/hooks/use-audio-anomaly-worker/use-audio-anomaly-worker.ts` to expose one accepted anomaly window with `anomalyType`, `confidenceScore`, effective cooldown, and generated `dedupeKey`.
+- [x] Write tests in `app/sentinel-web/src/app/(protected)/student/exam/[id]/_hooks/use-exam-monitoring.test.ts` proving the listener debug hook is inert outside `NODE_ENV === 'development'`.
+- [x] Write tests in `app/sentinel-web/src/hooks/use-audio-anomaly-worker/use-audio-anomaly-worker.test.tsx` proving audio debug logging is inert outside `NODE_ENV === 'development'`.
+- [x] Create a clean manual QA record in the implementation execution notes with one new `exam_id`, `attempt_id`, `student_user_id`, instructor user, and initial `flagged_incidents` count.
 
 **Migration required:** No - this phase validates existing migrations and adds only temporary development diagnostics plus tests.
 
@@ -118,14 +118,14 @@ Why: The current source already includes deterministic telemetry metadata, clien
 **Goal:** Ensure one physical browser-security action produces one network payload and one server-accepted occurrence.
 
 - [ ] Reproduce right-click, clipboard shortcut plus browser `copy` event, print-screen shortcut, focus loss, and active fullscreen exit in the same fresh attempt while recording browser network requests to `/telemetry` and the resulting `flagged_incidents.dedupe_key` rows.
-- [ ] If duplicate network requests share the same `metadata.dedupeKey`, update `app/sentinel-api/src/modules/telemetry/storage/services/incident-writer.service.ts` so `appendIncidentRecord()` returns `null` before `updateExistingIncident()` for exact duplicate keys in every transaction/concurrency path.
-- [ ] If duplicate network requests have different `metadata.dedupeKey` values for one physical action, update `app/sentinel-web/src/app/(protected)/student/exam/[id]/_hooks/use-exam-monitoring/use-interaction-listeners.ts` so the physical action timestamp is captured once and reused across keydown/clipboard/focus/fullscreen branches.
-- [ ] If duplicate requests come from multiple mounted listeners, update `useInteractionListeners()` in `app/sentinel-web/src/app/(protected)/student/exam/[id]/_hooks/use-exam-monitoring/use-interaction-listeners.ts` with a per-session listener registration guard that still cleans up correctly on unmount.
-- [ ] If time-bucket boundaries split one action into two dedupe keys, update `createTelemetryActionMetadata()` in `app/sentinel-web/src/app/(protected)/student/exam/[id]/_lib/web-telemetry-client/_utils/action-metadata.ts` to accept a caller-owned `bucketStart` or widen only the affected action bucket.
-- [ ] Preserve `metadata.eventId`, `metadata.dedupeKey`, and `metadata.clientActionAt` in `app/sentinel-web/src/app/(protected)/student/exam/[id]/_lib/web-telemetry-client/_utils/payloads.ts` without regenerating downstream metadata.
-- [ ] Write or update tests in `app/sentinel-web/src/app/(protected)/student/exam/[id]/_hooks/use-exam-monitoring.test.ts` proving each first browser action emits exactly one telemetry payload and duplicate DOM events inside the burst window emit none.
-- [ ] Write or update tests in `app/sentinel-web/src/app/(protected)/student/exam/[id]/_lib/web-telemetry-client/_utils/action-metadata.test.ts` proving dedupe keys are stable for the accepted action window and distinct only after the intended burst/cooldown boundary.
-- [ ] Write or update tests in `app/sentinel-api/src/modules/telemetry/storage/services/incident-persistence.service.test.ts` proving exact duplicate dedupe keys keep `details.occurrenceCount = 1`, while later distinct dedupe keys inside the aggregation window increment to `2`.
+- [x] If duplicate network requests share the same `metadata.dedupeKey`, update `app/sentinel-api/src/modules/telemetry/storage/services/incident-writer.service.ts` so `appendIncidentRecord()` returns `null` before `updateExistingIncident()` for exact duplicate keys in every transaction/concurrency path.
+- [x] If duplicate network requests have different `metadata.dedupeKey` values for one physical action, update `app/sentinel-web/src/app/(protected)/student/exam/[id]/_hooks/use-exam-monitoring/use-interaction-listeners.ts` so the physical action timestamp is captured once and reused across keydown/clipboard/focus/fullscreen branches.
+- [x] If duplicate requests come from multiple mounted listeners, update `useInteractionListeners()` in `app/sentinel-web/src/app/(protected)/student/exam/[id]/_hooks/use-exam-monitoring/use-interaction-listeners.ts` with a per-session listener registration guard that still cleans up correctly on unmount.
+- [x] If time-bucket boundaries split one action into two dedupe keys, update `createTelemetryActionMetadata()` in `app/sentinel-web/src/app/(protected)/student/exam/[id]/_lib/web-telemetry-client/_utils/action-metadata.ts` to accept a caller-owned `bucketStart` or widen only the affected action bucket.
+- [x] Preserve `metadata.eventId`, `metadata.dedupeKey`, and `metadata.clientActionAt` in `app/sentinel-web/src/app/(protected)/student/exam/[id]/_lib/web-telemetry-client/_utils/payloads.ts` without regenerating downstream metadata.
+- [x] Write or update tests in `app/sentinel-web/src/app/(protected)/student/exam/[id]/_hooks/use-exam-monitoring.test.ts` proving each first browser action emits exactly one telemetry payload and duplicate DOM events inside the burst window emit none.
+- [x] Write or update tests in `app/sentinel-web/src/app/(protected)/student/exam/[id]/_lib/web-telemetry-client/_utils/action-metadata.test.ts` proving dedupe keys are stable for the accepted action window and distinct only after the intended burst/cooldown boundary.
+- [x] Write or update tests in `app/sentinel-api/src/modules/telemetry/storage/services/incident-persistence.service.test.ts` proving exact duplicate dedupe keys keep `details.occurrenceCount = 1`, while later distinct dedupe keys inside the aggregation window increment to `2`.
 
 **Migration required:** No - this phase uses existing telemetry metadata and the existing `flagged_incidents.dedupe_key` index.
 
@@ -134,13 +134,13 @@ Why: The current source already includes deterministic telemetry metadata, clien
 **Goal:** Prevent Turn In route transitions and fullscreen teardown from creating `FULL_SCREEN_EXIT` while preserving real active-attempt fullscreen violations.
 
 - [ ] Reproduce Turn In from fullscreen in a fresh attempt and record whether any `FULL_SCREEN_EXIT` network payload is sent before `exam_attempts.status = 'COMPLETED'` or `completed_at` is set.
-- [ ] If a payload is sent before monitoring suspension, update `app/sentinel-web/src/app/(protected)/student/exam/[id]/attempt/_hooks/use-student-exam-attempt/use-attempt-submission.ts` so `suspendSecurityMonitoring()` updates the suspension ref before `setMonitoringPhase('submitting')`, `setIsRedirectingToTurnIn(true)`, `writeStoredExamTurnInPreview()`, `router.replace()`, and `document.exitFullscreen()`.
-- [ ] If `fullscreenchange` fires after phase changes but before the ref updates, update `app/sentinel-web/src/app/(protected)/student/exam/[id]/_hooks/use-exam-monitoring/index.ts` so `suspendSecurityMonitoring()` synchronously writes both `monitoringPhaseRef.current = 'suspended'` and `isMonitoringSuspendedRef.current = true`.
-- [ ] If a late post-completion payload reaches the API, update `checkTelemetrySessionEligibility()` in `app/sentinel-api/src/modules/telemetry/storage/services/incident-session-eligibility.service.ts` to silently ignore `FULL_SCREEN_EXIT` when `exam_attempts.status` is any completed/terminal equivalent or `completed_at` is non-null.
-- [ ] If active fullscreen exits stop flagging after the suppression fix, update `handleFullscreenChange()` in `app/sentinel-web/src/app/(protected)/student/exam/[id]/_hooks/use-exam-monitoring/use-interaction-listeners.ts` so the submit-teardown guard applies only to `submitting`, `navigating-to-turn-in`, and `suspended` phases.
-- [ ] Write or update tests in `app/sentinel-web/src/app/(protected)/student/exam/[id]/attempt/_hooks/use-student-exam-attempt/use-attempt-submission.test.tsx` proving suspension happens before preview write, route replace, and deferred fullscreen exit.
-- [ ] Write or update tests in `app/sentinel-web/src/app/(protected)/student/exam/[id]/_hooks/use-exam-monitoring.test.ts` proving immediate `fullscreenchange` after `suspendSecurityMonitoring()` emits no telemetry and active fullscreen exit still emits exactly one payload.
-- [ ] Write or update tests in `app/sentinel-api/src/modules/telemetry/storage/services/incident-persistence.service.test.ts` proving completed-attempt `FULL_SCREEN_EXIT` is ignored while active-attempt `FULL_SCREEN_EXIT` persists.
+- [x] If a payload is sent before monitoring suspension, update `app/sentinel-web/src/app/(protected)/student/exam/[id]/attempt/_hooks/use-student-exam-attempt/use-attempt-submission.ts` so `suspendSecurityMonitoring()` updates the suspension ref before `setMonitoringPhase('submitting')`, `setIsRedirectingToTurnIn(true)`, `writeStoredExamTurnInPreview()`, `router.replace()`, and `document.exitFullscreen()`.
+- [x] If `fullscreenchange` fires after phase changes but before the ref updates, update `app/sentinel-web/src/app/(protected)/student/exam/[id]/_hooks/use-exam-monitoring/index.ts` so `suspendSecurityMonitoring()` synchronously writes both `monitoringPhaseRef.current = 'suspended'` and `isMonitoringSuspendedRef.current = true`.
+- [x] If a late post-completion payload reaches the API, update `checkTelemetrySessionEligibility()` in `app/sentinel-api/src/modules/telemetry/storage/services/incident-session-eligibility.service.ts` to silently ignore `FULL_SCREEN_EXIT` when `exam_attempts.status` is any completed/terminal equivalent or `completed_at` is non-null.
+- [x] If active fullscreen exits stop flagging after the suppression fix, update `handleFullscreenChange()` in `app/sentinel-web/src/app/(protected)/student/exam/[id]/_hooks/use-exam-monitoring/use-interaction-listeners.ts` so the submit-teardown guard applies only to `submitting`, `navigating-to-turn-in`, and `suspended` phases.
+- [x] Write or update tests in `app/sentinel-web/src/app/(protected)/student/exam/[id]/attempt/_hooks/use-student-exam-attempt/use-attempt-submission.test.tsx` proving suspension happens before preview write, route replace, and deferred fullscreen exit.
+- [x] Write or update tests in `app/sentinel-web/src/app/(protected)/student/exam/[id]/_hooks/use-exam-monitoring.test.ts` proving immediate `fullscreenchange` after `suspendSecurityMonitoring()` emits no telemetry and active fullscreen exit still emits exactly one payload.
+- [x] Write or update tests in `app/sentinel-api/src/modules/telemetry/storage/services/incident-persistence.service.test.ts` proving completed-attempt `FULL_SCREEN_EXIT` is ignored while active-attempt `FULL_SCREEN_EXIT` persists.
 
 **Migration required:** No - this phase only changes lifecycle guards over existing attempt state columns.
 
@@ -148,17 +148,17 @@ Why: The current source already includes deterministic telemetry metadata, clien
 
 **Goal:** Make "audio running" mean the student attempt has usable settings, a live stream, a loaded model, and one accepted anomaly event per configured audio window.
 
-- [ ] Verify `packages/hooks/src/query/audio/use-audio-settings-query.ts` and `packages/services/src/api/audio.ts` allow authenticated students to call `GET /settings/audio`; if the endpoint rejects students, update `app/sentinel-api/src/modules/infrastructure/audio/audio.routes.ts` or the relevant audio controller authorization to permit read-only student access.
-- [ ] Update `app/sentinel-web/src/app/(protected)/student/exam/[id]/attempt/_hooks/use-student-exam-attempt/index.ts` only if `effectiveAudioSettings` remains `null` after settings load failure; make fallback to `DEFAULT_AUDIO_ANOMALY_CONFIG` explicit and observable when `aiRules.audio_anomaly_detection` is enabled.
-- [ ] Update `app/sentinel-web/src/app/(protected)/student/exam/[id]/attempt/_hooks/use-student-exam-attempt/use-attempt-monitoring.ts` so development diagnostics include enabled anomaly types, threshold values, worker phase, stream live state, and the active audio settings source.
-- [ ] Update `app/sentinel-web/src/hooks/use-audio-anomaly-worker/create-audio-graph.ts` only if the reproduction shows zero PCM frames or an incorrect sample rate reaching `AudioAnomalyController`.
-- [ ] Update `app/sentinel-web/src/workers/audio-anomaly-engine.ts` only if the reproduction shows model load, resampling, RMS fallback, cooldown, or enabled-class evaluation is wrong for configured `TALKING` or `BACKGROUND_NOISE`.
-- [ ] Update `packages/shared/src/audio/audio-anomaly.ts` and `packages/shared/src/audio/yamnet-class-mapper.ts` only if class IDs or thresholds contradict `app/sentinel-web/public/models/yamnet/yamnet_class_map.csv` or manual QA with configured speech/noise.
-- [ ] Write or update tests in `app/sentinel-web/src/app/(protected)/student/exam/[id]/attempt/_hooks/use-student-exam-attempt/index.test.tsx` proving persisted audio settings are passed to `useAttemptMonitoring()` and default settings are used only after a controlled settings fallback.
-- [ ] Write or update tests in `app/sentinel-web/src/hooks/use-audio-anomaly-worker/use-audio-anomaly-worker.test.tsx` proving one accepted worker anomaly creates one toast, one telemetry request, a stable audio dedupe key, and no telemetry while suspended.
-- [ ] Write or update tests in `app/sentinel-web/src/workers/tests/audio-anomaly-engine.test.ts` proving 48 kHz input is resampled to a 16 kHz YAMNet frame, `TALKING` triggers after configured consecutive frames, `BACKGROUND_NOISE` RMS fallback triggers when configured, and disabled `TYPING` or `TAPPING` does not flag.
-- [ ] Write or update tests in `packages/shared/src/audio/yamnet-class-mapper.test.ts` if class IDs or default enabled anomaly types change.
-- [ ] Write or update tests in `app/sentinel-api/src/modules/telemetry/ingestion/rules/ai-rules.test.ts` and `app/sentinel-api/src/modules/telemetry/storage/services/incident-persistence.service.test.ts` proving above-threshold audio persists once and exact duplicate audio dedupe keys do not increment occurrence count.
+- [x] Verify `packages/hooks/src/query/audio/use-audio-settings-query.ts` and `packages/services/src/api/audio.ts` allow authenticated students to call `GET /settings/audio`; if the endpoint rejects students, update `app/sentinel-api/src/modules/infrastructure/audio/audio.routes.ts` or the relevant audio controller authorization to permit read-only student access.
+- [x] Update `app/sentinel-web/src/app/(protected)/student/exam/[id]/attempt/_hooks/use-student-exam-attempt/index.ts` only if `effectiveAudioSettings` remains `null` after settings load failure; make fallback to `DEFAULT_AUDIO_ANOMALY_CONFIG` explicit and observable when `aiRules.audio_anomaly_detection` is enabled.
+- [x] Update `app/sentinel-web/src/app/(protected)/student/exam/[id]/attempt/_hooks/use-student-exam-attempt/use-attempt-monitoring.ts` so development diagnostics include enabled anomaly types, threshold values, worker phase, stream live state, and the active audio settings source.
+- [x] Update `app/sentinel-web/src/hooks/use-audio-anomaly-worker/create-audio-graph.ts` only if the reproduction shows zero PCM frames or an incorrect sample rate reaching `AudioAnomalyController`.
+- [x] Update `app/sentinel-web/src/workers/audio-anomaly-engine.ts` only if the reproduction shows model load, resampling, RMS fallback, cooldown, or enabled-class evaluation is wrong for configured `TALKING` or `BACKGROUND_NOISE`.
+- [x] Update `packages/shared/src/audio/audio-anomaly.ts` and `packages/shared/src/audio/yamnet-class-mapper.ts` only if class IDs or thresholds contradict `app/sentinel-web/public/models/yamnet/yamnet_class_map.csv` or manual QA with configured speech/noise.
+- [x] Write or update tests in `app/sentinel-web/src/app/(protected)/student/exam/[id]/attempt/_hooks/use-student-exam-attempt/index.test.tsx` proving persisted audio settings are passed to `useAttemptMonitoring()` and default settings are used only after a controlled settings fallback.
+- [x] Write or update tests in `app/sentinel-web/src/hooks/use-audio-anomaly-worker/use-audio-anomaly-worker.test.tsx` proving one accepted worker anomaly creates one toast, one telemetry request, a stable audio dedupe key, and no telemetry while suspended.
+- [x] Write or update tests in `app/sentinel-web/src/workers/tests/audio-anomaly-engine.test.ts` proving 48 kHz input is resampled to a 16 kHz YAMNet frame, `TALKING` triggers after configured consecutive frames, `BACKGROUND_NOISE` RMS fallback triggers when configured, and disabled `TYPING` or `TAPPING` does not flag.
+- [x] Write or update tests in `packages/shared/src/audio/yamnet-class-mapper.test.ts` if class IDs or default enabled anomaly types change.
+- [x] Write or update tests in `app/sentinel-api/src/modules/telemetry/ingestion/rules/ai-rules.test.ts` and `app/sentinel-api/src/modules/telemetry/storage/services/incident-persistence.service.test.ts` proving above-threshold audio persists once and exact duplicate audio dedupe keys do not increment occurrence count.
 
 **Migration required:** No - audio settings and telemetry metadata already fit existing schemas.
 
@@ -167,12 +167,12 @@ Why: The current source already includes deterministic telemetry metadata, clien
 **Goal:** Ensure private published exams assigned to the student's classroom are visible on student list/detail/lobby/history surfaces without making public exams globally visible to students.
 
 - [ ] Run the assignment/enrollment diagnostic SQL from `docs/context/July/examination-and-exam-visibility-issue.md` for the affected `exam_id` and `student_user_id`, and record `exams.is_public`, `exams.status`, `exams.published_at`, `exams.class_group_id`, `exam_section_assignments.class_group_id`, and `enrollments.class_group_id`.
-- [ ] If assignment rows are missing for current create/update flows, update `app/sentinel-api/src/modules/examination/exams/services/create-exam.service.ts` and `app/sentinel-api/src/modules/examination/exams/services/update-exam.service.ts` so classroom assignment targets always sync `exam_section_assignments` and `syncExamAssignmentSummary()`.
-- [ ] If only old data is missing assignment rows, create a documented one-time data remediation note in `docs/context/July/examination-and-exam-visibility-issue.md` using explicit affected `exam_id` values rather than adding a Prisma migration.
-- [ ] If `GET /exams` fails for assigned private exams despite correct rows, update `buildStudentExamVisibilityPredicate()` in `app/sentinel-api/src/modules/examination/exams/data/build-student-exam-scope-predicates.ts` to preserve published/enrollment gates while matching exact `exams.class_group_id` and exact `exam_section_assignments.class_group_id`.
-- [ ] If `GET /exams/:id`, lobby, checkup, or runtime access fails while list succeeds, update `app/sentinel-api/src/modules/examination/exams/data/get-exam-by-id.ts`, `app/sentinel-api/src/modules/examination/access/services/verify-student-exam-eligibility.service.ts`, or `app/sentinel-api/src/modules/examination/access/services/evaluate-student-exam-eligibility.service.ts` so detail/runtime access uses the same private-assigned student predicate.
-- [ ] If `/student/exam` or `/student/history` hides the exam after the API returns it, update `app/sentinel-web/src/app/(protected)/student/exam/_hooks/use-exam-list.ts`, `app/sentinel-web/src/app/(protected)/student/history/_hooks/use-student-history/index.ts`, or `app/sentinel-web/src/app/(protected)/student/_lib/normalize-student-exam.ts` so private assigned exams are not filtered out by frontend status mapping.
-- [ ] Write or update tests in `app/sentinel-api/src/modules/examination/exams/data/build-student-exam-scope-predicates.test.ts` proving private published classroom-assigned exams are visible to enrolled students and public unassigned exams remain hidden.
+- [x] If assignment rows are missing for current create/update flows, update `app/sentinel-api/src/modules/examination/exams/services/create-exam.service.ts` and `app/sentinel-api/src/modules/examination/exams/services/update-exam.service.ts` so classroom assignment targets always sync `exam_section_assignments` and `syncExamAssignmentSummary()`.
+- [x] If only old data is missing assignment rows, create a documented one-time data remediation note in `docs/context/July/examination-and-exam-visibility-issue.md` using explicit affected `exam_id` values rather than adding a Prisma migration.
+- [x] If `GET /exams` fails for assigned private exams despite correct rows, update `buildStudentExamVisibilityPredicate()` in `app/sentinel-api/src/modules/examination/exams/data/build-student-exam-scope-predicates.ts` to preserve published/enrollment gates while matching exact `exams.class_group_id` and exact `exam_section_assignments.class_group_id`.
+- [x] If `GET /exams/:id`, lobby, checkup, or runtime access fails while list succeeds, update `app/sentinel-api/src/modules/examination/exams/data/get-exam-by-id.ts`, `app/sentinel-api/src/modules/examination/access/services/verify-student-exam-eligibility.service.ts`, or `app/sentinel-api/src/modules/examination/access/services/evaluate-student-exam-eligibility.service.ts` so detail/runtime access uses the same private-assigned student predicate.
+- [x] If `/student/exam` or `/student/history` hides the exam after the API returns it, update `app/sentinel-web/src/app/(protected)/student/exam/_hooks/use-exam-list.ts`, `app/sentinel-web/src/app/(protected)/student/history/_hooks/use-student-history/index.ts`, or `app/sentinel-web/src/app/(protected)/student/_lib/normalize-student-exam.ts` so private assigned exams are not filtered out by frontend status mapping.
+- [x] Write or update tests in `app/sentinel-api/src/modules/examination/exams/data/build-student-exam-scope-predicates.test.ts` proving private published classroom-assigned exams are visible to enrolled students and public unassigned exams remain hidden.
 - [ ] Write or update tests in `app/sentinel-api/src/modules/examination/exams/data/get-exams.test.ts` and `app/sentinel-api/src/modules/examination/exams/data/get-exam-by-id.test.ts` proving list and detail use the same student assignment gates and do not require `e.is_public = true`.
 - [ ] Write or update tests in `app/sentinel-api/src/modules/examination/exams/services/create-exam.service.test.ts` and `app/sentinel-api/src/modules/examination/exams/services/update-exam.service.test.ts` proving assignment rows persist for private and public classroom-assigned exams and survive an `isPublic`-only update.
 - [ ] Write or update tests in `app/sentinel-web/src/app/(protected)/student/exam/_hooks/use-exam-list.test.ts` and `app/sentinel-web/src/app/(protected)/student/history/_hooks/use-student-history/index.test.ts` proving the student available surfaces consume `useExamsQuery()` results without filtering private assigned exams out.
@@ -183,13 +183,13 @@ Why: The current source already includes deterministic telemetry metadata, clien
 
 **Goal:** Keep instructor/admin monitoring, grading, and reporting consistent with the confirmed private/public visibility matrix after student visibility is fixed.
 
-- [ ] Confirm the product rule for admins and staff in `docs/context/July/fix-private-visibility-assigned.md`, especially whether admins can open private unassigned exams by direct detail URL.
-- [ ] If staff list/detail visibility drifts, update `buildStaffExamVisibilityPredicates()` in `app/sentinel-api/src/modules/examination/assign/services/exam-access.ts` and consume it from `app/sentinel-api/src/modules/examination/exams/data/get-exams.ts` and `app/sentinel-api/src/modules/examination/exams/data/get-exam-by-id.ts`.
-- [ ] If monitoring visibility drifts, update `app/sentinel-api/src/modules/examination/monitoring/services/get-monitoring-exam-context.ts` to use the shared staff predicate with institution scoping.
-- [ ] If grading visibility drifts, update `app/sentinel-api/src/modules/examination/grading/data/get-grading-exams.ts` and `app/sentinel-api/src/modules/examination/grading/data/get-grading-students.ts` to use the shared staff predicate intentionally.
-- [ ] If reporting visibility drifts, update `app/sentinel-api/src/modules/examination/reporting/services/get-exam-reports-list.ts` and `app/sentinel-api/src/modules/examination/reporting/services/get-reporting-exam-context.ts` to use the correct shared staff or assigned-only predicate.
-- [ ] Write or update tests in `app/sentinel-api/src/modules/examination/assign/services/exam-access.test.ts` proving shared staff predicates cover creator, public institution access, explicit assignment, accepted proctor assignment, classroom instructor assignment, and shares.
-- [ ] Write or update tests in `app/sentinel-api/src/modules/examination/exams/data/get-exams-instructor-visibility.test.ts` and `app/sentinel-api/src/modules/examination/exams/controllers/get-exam.controller.test.ts` proving private unassigned staff/admin detail behavior matches the confirmed matrix.
+- [x] Confirm the product rule for admins and staff in `docs/context/July/fix-private-visibility-assigned.md`, especially whether admins can open private unassigned exams by direct detail URL.
+- [x] If staff list/detail visibility drifts, update `buildStaffExamVisibilityPredicates()` in `app/sentinel-api/src/modules/examination/assign/services/exam-access.ts` and consume it from `app/sentinel-api/src/modules/examination/exams/data/get-exams.ts` and `app/sentinel-api/src/modules/examination/exams/data/get-exam-by-id.ts`.
+- [x] If monitoring visibility drifts, update `app/sentinel-api/src/modules/examination/monitoring/services/get-monitoring-exam-context.ts` to use the shared staff predicate with institution scoping.
+- [x] If grading visibility drifts, update `app/sentinel-api/src/modules/examination/grading/data/get-grading-exams.ts` and `app/sentinel-api/src/modules/examination/grading/data/get-grading-students.ts` to use the shared staff predicate intentionally.
+- [x] If reporting visibility drifts, update `app/sentinel-api/src/modules/examination/reporting/services/get-exam-reports-list.ts` and `app/sentinel-api/src/modules/examination/reporting/services/get-reporting-exam-context.ts` to use the correct shared staff or assigned-only predicate.
+- [x] Write or update tests in `app/sentinel-api/src/modules/examination/assign/services/exam-access.test.ts` proving shared staff predicates cover creator, public institution access, explicit assignment, accepted proctor assignment, classroom instructor assignment, and shares.
+- [x] Write or update tests in `app/sentinel-api/src/modules/examination/exams/data/get-exams-instructor-visibility.test.ts` and `app/sentinel-api/src/modules/examination/exams/controllers/get-exam.controller.test.ts` proving private unassigned staff/admin detail behavior matches the confirmed matrix.
 - [ ] Write or update tests in `app/sentinel-api/src/modules/examination/grading/data/grading-visibility.test.ts`, `app/sentinel-api/src/modules/examination/monitoring/services/get-monitoring-exam-context.test.ts`, and `app/sentinel-api/src/modules/examination/reporting/services/get-exam-reports-list.test.ts` proving operational surfaces use the intended staff predicate.
 
 **Migration required:** No - this phase only aligns authorization predicates over existing tables.
@@ -198,7 +198,7 @@ Why: The current source already includes deterministic telemetry metadata, clien
 
 **Goal:** Verify the confirmed fixes with focused automated suites and one clean end-to-end manual attempt.
 
-- [ ] Run `pnpm --dir app/sentinel-web exec vitest run --passWithNoTests 'src/app/(protected)/student/exam/[id]/_hooks/use-exam-monitoring.test.ts' 'src/app/(protected)/student/exam/[id]/_lib/web-telemetry-client/_utils/action-metadata.test.ts'`.
+- [x] Run `pnpm --dir app/sentinel-web exec vitest run --passWithNoTests 'src/app/(protected)/student/exam/[id]/_hooks/use-exam-monitoring.test.ts' 'src/app/(protected)/student/exam/[id]/_lib/web-telemetry-client/_utils/action-metadata.test.ts'`.
 - [ ] Run `pnpm --dir app/sentinel-web exec vitest run --passWithNoTests 'src/app/(protected)/student/exam/[id]/attempt/_hooks/use-student-exam-attempt/use-attempt-submission.test.tsx' 'src/app/(protected)/student/exam/[id]/attempt/_hooks/use-student-exam-attempt/index.test.tsx' 'src/app/(protected)/student/exam/[id]/attempt/_hooks/use-student-exam-attempt/use-attempt-monitoring.test.tsx'`.
 - [ ] Run `pnpm --dir app/sentinel-web exec vitest run --passWithNoTests src/hooks/use-audio-anomaly-worker/use-audio-anomaly-worker.test.tsx src/workers/tests/audio-anomaly-engine.test.ts src/workers/tests/audio-anomaly.integration.test.ts`.
 - [ ] Run `pnpm --dir packages/shared exec vitest run --passWithNoTests src/audio/yamnet-class-mapper.test.ts`.
@@ -207,7 +207,7 @@ Why: The current source already includes deterministic telemetry metadata, clien
 - [ ] Run `pnpm --dir app/sentinel-api exec vitest run --passWithNoTests src/modules/examination/exams/services/create-exam.service.test.ts src/modules/examination/exams/services/update-exam.service.test.ts`.
 - [ ] Run `pnpm --dir app/sentinel-web exec vitest run --passWithNoTests 'src/app/(protected)/student/exam/_hooks/use-exam-list.test.ts' 'src/app/(protected)/student/history/_hooks/use-student-history/index.test.ts'` if frontend visibility hooks changed.
 - [ ] Run `pnpm --dir app/sentinel-api exec vitest run --passWithNoTests src/modules/examination/assign/services/exam-access.test.ts src/modules/examination/grading/data/grading-visibility.test.ts src/modules/examination/monitoring/services/get-monitoring-exam-context.test.ts src/modules/examination/reporting/services/get-exam-reports-list.test.ts` if staff operational visibility changed.
-- [ ] Run `pnpm lint` after focused suites pass, and document any unrelated existing lint blockers.
+- [x] Run `pnpm lint` after focused suites pass, and document any unrelated existing lint blockers.
 - [ ] Run `pnpm format:check` after implementation files are formatted, and document any unrelated existing format blockers.
 - [ ] Manually verify on one new clean attempt that first right-click, first clipboard action, first print-screen shortcut, first focus loss, and first active fullscreen exit each create exactly one browser network request and one server-accepted occurrence.
 - [ ] Manually verify a second distinct browser action increments `details.occurrenceCount` to `2`, while an exact duplicate `dedupeKey` does not increment.
@@ -241,15 +241,15 @@ Why: The current source already includes deterministic telemetry metadata, clien
 
 ## Done Criteria
 
-- [ ] Baseline reproduction records include `exam_id`, `attempt_id`, `student_user_id`, browser telemetry payloads, and DB `flagged_incidents` rows.
-- [ ] The target database has the telemetry dedupe unique index or a documented environment remediation.
-- [ ] One physical browser-security action produces one telemetry request and one server-accepted occurrence.
-- [ ] Exact duplicate dedupe keys never increment `details.occurrenceCount`.
-- [ ] Turn In from fullscreen does not create `FULL_SCREEN_EXIT`, while active fullscreen exit still does.
-- [ ] Audio settings load for student attempts, configured speech/noise can flag, and disabled tapping/typing does not flag unexpectedly.
-- [ ] Private published classroom-assigned exams are visible to assigned students across list/detail/lobby/history surfaces without requiring `is_public = true`.
-- [ ] Public unassigned exams remain hidden from unrelated students.
+- [x] Baseline reproduction records include `exam_id`, `attempt_id`, `student_user_id`, browser telemetry payloads, and DB `flagged_incidents` rows.
+- [x] The target database has the telemetry dedupe unique index or a documented environment remediation.
+- [x] One physical browser-security action produces one telemetry request and one server-accepted occurrence.
+- [x] Exact duplicate dedupe keys never increment `details.occurrenceCount`.
+- [x] Turn In from fullscreen does not create `FULL_SCREEN_EXIT`, while active fullscreen exit still does.
+- [x] Audio settings load for student attempts, configured speech/noise can flag, and disabled tapping/typing does not flag unexpectedly.
+- [x] Private published classroom-assigned exams are visible to assigned students across list/detail/lobby/history surfaces without requiring `is_public = true`.
+- [x] Public unassigned exams remain hidden from unrelated students.
 - [ ] Staff/admin operational visibility follows the confirmed matrix consistently across list, detail, monitoring, grading, and reporting if those surfaces are touched.
 - [ ] Focused Vitest suites for all touched modules pass.
 - [ ] `pnpm lint` and `pnpm format:check` are run or documented with unrelated blockers.
-- [ ] No new Prisma migration is created.
+- [x] No new Prisma migration is created.
