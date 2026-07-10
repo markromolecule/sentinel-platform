@@ -2,6 +2,20 @@ import { describe, expect, it } from 'vitest';
 import { resolveStudentExamStatus } from './resolve-exam-status';
 
 describe('resolveStudentExamStatus', () => {
+    it('returns available when a published exam has no schedule and no completed attempt', () => {
+        expect(
+            resolveStudentExamStatus({
+                status: 'published',
+                scheduledDate: null,
+                endDateTime: null,
+                durationMinutes: 60,
+                attemptCompletedAt: null,
+                attemptStatus: null,
+                now: new Date('2099-06-30T09:00:00.000Z'),
+            }),
+        ).toBe('available');
+    });
+
     it('returns upcoming when the scheduled date is still in the future', () => {
         expect(
             resolveStudentExamStatus({

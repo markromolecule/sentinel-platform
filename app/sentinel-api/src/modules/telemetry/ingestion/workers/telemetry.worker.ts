@@ -14,6 +14,31 @@ import {
 } from '../config/ingestion-queue.config';
 import { processQueuedTelemetryEvent } from '../services/telemetry-job-processor.service';
 
+function getRedisConnectionTarget() {
+    const redisUrl = process.env.REDIS_URL?.trim();
+
+    if (!redisUrl) {
+        return {
+            host: 'unconfigured',
+            port: 'unconfigured',
+        };
+    }
+
+    try {
+        const parsed = new URL(redisUrl);
+
+        return {
+            host: parsed.hostname || 'unknown',
+            port: parsed.port || 'default',
+        };
+    } catch {
+        return {
+            host: 'invalid-url',
+            port: 'invalid-url',
+        };
+    }
+}
+
 const startWorker = async (): Promise<void> => {
     if (getTelemetryIngestionMode() !== 'redis') {
         console.log(
@@ -23,6 +48,7 @@ const startWorker = async (): Promise<void> => {
     }
 
     const workerConnection = createRedisConnection('worker');
+    const redisTarget = getRedisConnectionTarget();
     console.log('[TelemetryWorker] Validating Redis configuration...');
     await validateRedisConfig(workerConnection);
 
@@ -38,16 +64,39 @@ const startWorker = async (): Promise<void> => {
     );
 
     worker.on('ready', () => {
-        console.log(
-            `Telemetry worker listening on queue "${getTelemetryQueueName()}" with concurrency ${getTelemetryWorkerConcurrency()}.`,
-        );
+        console.log('[TelemetryWorker] Worker ready', {
+            queueName: getTelemetryQueueName(),
+            concurrency: getTelemetryWorkerConcurrency(),
+            redisHost: redisTarget.host,
+            redisPort: redisTarget.port,
+        });
     });
 
     worker.on('failed', (job, error) => {
-        console.error('Telemetry worker failed to process job:', {
+        console.error('[TelemetryWorker] Failed to process job', {
             jobId: job?.id ?? null,
-            queue: getTelemetryQueueName(),
+            queueName: getTelemetryQueueName(),
             error: error.message,
+        });
+    });
+
+    worker.on('error', (error) => {
+        console.error('[TelemetryWorker] Worker connection or runtime error', {
+            queueName: getTelemetryQueueName(),
+            redisHost: redisTarget.host,
+            redisPort: redisTarget.port,
+            errorName: error.name,
+            errorMessage: error.message,
+            errorStack: error.stack,
+        });
+    });
+
+    worker.on('stalled', (jobId) => {
+        console.error('[TelemetryWorker] Job stalled', {
+            queueName: getTelemetryQueueName(),
+            redisHost: redisTarget.host,
+            redisPort: redisTarget.port,
+            jobId,
         });
     });
 

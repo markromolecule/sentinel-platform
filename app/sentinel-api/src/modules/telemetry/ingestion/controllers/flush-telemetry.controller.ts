@@ -19,6 +19,16 @@ export const flushTelemetryRoute = createRoute({
                     schema: z.object({
                         message: z.string(),
                         flushedCount: z.number(),
+                        stats: z.object({
+                            mode: z.string(),
+                            queueName: z.string().nullable(),
+                            bufferName: z.string().nullable(),
+                            waiting: z.number().optional(),
+                            active: z.number().optional(),
+                            failed: z.number().optional(),
+                            completed: z.number().optional(),
+                            buffered: z.number().optional(),
+                        }),
                     }),
                 },
             },
@@ -54,11 +64,13 @@ export const flushTelemetryRouteHandler: AppRouteHandler<typeof flushTelemetryRo
         }
 
         const flushedCount = await telemetryIngestionQueueService.flushBuffer(c.get('dbClient'));
+        const stats = await telemetryIngestionQueueService.getStats();
 
         return c.json(
             {
                 message: 'Telemetry flush completed.',
                 flushedCount,
+                stats,
             },
             200,
         );

@@ -27,25 +27,18 @@ export class TelemetryIngestionQueueService {
     private queue: Queue<PersistableProctoringEvent> | null = null;
     private queueConnection: ReturnType<typeof createRedisConnection> | null = null;
 
+    /**
+     * Resolves the effective ingestion mode, falling back to sync whenever
+     * Redis-backed ingestion is requested without a configured Redis URL.
+     */
     getMode(options?: TelemetryQueueRuntimeOptions): TelemetryQueueMode {
         const configuredMode = options?.operations?.ingestionMode;
 
         if (!configuredMode) {
-            return getTelemetryIngestionMode();
+            return this.resolveRedisBackedMode(getTelemetryIngestionMode(), 'environment');
         }
 
-        if (configuredMode === 'redis') {
-            if (hasRedisConfigured()) {
-                return 'redis';
-            }
-
-            console.warn(
-                '[TelemetryQueue] Telemetry settings requested redis mode, but REDIS_URL is not configured. Falling back to sync mode.',
-            );
-            return 'sync';
-        }
-
-        return 'sync';
+        return this.resolveRedisBackedMode(configuredMode, 'settings');
     }
 
     async getStats(options?: TelemetryQueueRuntimeOptions) {
@@ -258,6 +251,30 @@ export class TelemetryIngestionQueueService {
         }
 
         return chunks;
+    }
+
+    private resolveRedisBackedMode(
+        configuredMode: string | null | undefined,
+        source: 'environment' | 'settings',
+    ): TelemetryQueueMode {
+        if (configuredMode !== 'redis') {
+            return 'sync';
+        }
+
+        if (hasRedisConfigured()) {
+            return 'redis';
+        }
+
+        const sourceLabel =
+            source === 'settings'
+                ? 'Telemetry settings requested redis mode'
+                : 'TELEMETRY_INGESTION_MODE requested redis mode';
+
+        console.warn(
+            `[TelemetryQueue] ${sourceLabel}, but REDIS_URL is not configured. Falling back to sync mode.`,
+        );
+
+        return 'sync';
     }
 }
 

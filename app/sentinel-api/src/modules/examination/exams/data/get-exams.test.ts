@@ -262,6 +262,32 @@ describe('getExamsData', () => {
         expect(compiledQuery.sql).not.toContain('"e"."is_public" = true');
     });
 
+    it('should use the same student assignment gates for list queries without adding a public-only where clause', async () => {
+        const { db, executeSpy } = createMockDb(
+            [
+                { column_name: 'section_id' },
+                { column_name: 'section_name' },
+                { column_name: 'room_id' },
+            ],
+            [],
+        );
+
+        await getExamsData({
+            dbClient: db as any,
+            institutionId: 'inst-123',
+            filters: {},
+            studentUserId: 'student-123',
+        });
+
+        const compiledQuery = executeSpy.mock.calls[1][0];
+
+        expect(compiledQuery.sql).toContain('"e"."published_at" is not null');
+        expect(compiledQuery.sql).toContain('lower(cast("e"."status" as text)) <>');
+        expect(compiledQuery.sql).toContain('enr.class_group_id = e.class_group_id');
+        expect(compiledQuery.sql).toContain('esa.class_group_id = "student_cg"."class_group_id"');
+        expect(compiledQuery.sql).not.toContain('"e"."is_public" = true');
+    });
+
     it('should include creator/publisher joins, is_public selection, and instructorUserId filters in SQL', async () => {
         const { db, executeSpy } = createMockDb(
             [
