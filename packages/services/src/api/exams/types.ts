@@ -379,6 +379,11 @@ export type GetExamsParams = {
     subjectId?: string;
     classroomId?: string;
     institutionId?: string;
+    viewer?: 'student' | 'staff';
+};
+
+export type GetExamParams = {
+    viewer?: 'student' | 'staff';
 };
 
 export type GetExamReportParams = {

@@ -13,6 +13,7 @@ import type {
     ResetExamAttemptLifecyclePayload,
     ApiStudentExamAccessOverride,
     GetExamsParams,
+    GetExamParams,
     CreateExamPayload,
     CreateStudentExamAccessOverridePayload,
     OverrideReconnectLimitPayload,
@@ -49,6 +50,10 @@ function buildQueryString(params?: GetExamsParams) {
         searchParams.set('institutionId', params.institutionId);
     }
 
+    if (params.viewer) {
+        searchParams.set('viewer', params.viewer);
+    }
+
     const query = searchParams.toString();
     return query ? `?${query}` : '';
 }
@@ -63,8 +68,21 @@ export async function getExams(
     return response.data.map(mapExam);
 }
 
-export async function getExam(apiClient: ApiClientType, id: string): Promise<ProctorExam> {
-    const response: ApiExamResponse<ApiExamDetail> = await apiClient(`/exams/${id}`);
+export async function getExam(
+    apiClient: ApiClientType,
+    id: string,
+    params?: GetExamParams,
+): Promise<ProctorExam> {
+    const searchParams = new URLSearchParams();
+
+    if (params?.viewer) {
+        searchParams.set('viewer', params.viewer);
+    }
+
+    const query = searchParams.toString();
+    const response: ApiExamResponse<ApiExamDetail> = await apiClient(
+        `/exams/${id}${query ? `?${query}` : ''}`,
+    );
     return mapExam(response.data);
 }
 

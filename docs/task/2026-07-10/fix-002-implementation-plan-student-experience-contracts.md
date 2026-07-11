@@ -187,6 +187,8 @@ Private classroom-assigned exams, proctoring telemetry, audio detection, fullscr
 
 - [x] Run focused API tests for assignment predicates, exam list/detail, create/update assignment persistence, telemetry queue/worker, incident persistence, monitoring overview, and recovery services.
 - [x] Run focused web/shared tests for student list/history normalization, submission/fullscreen monitoring, audio worker/engine, session/lobby recovery, and monitoring UI.
+- [x] Verify student exam list/detail role resolution ignores generic token claims such as `authenticated` and still admits real students once the database-backed student profile resolves.
+- [x] Fix the mixed-role student/staff audience collision on shared exam read endpoints by adding an explicit additive student-view override (`viewer=student`) and wiring student list/detail/history consumers to use it.
 - [ ] Run `pnpm format:check` and `pnpm lint`; document unrelated existing blockers without marking the plan complete.
 - [ ] Manually verify private published classroom assignment appears on student exam list, available history, detail, checkup, and lobby, while unrelated students remain blocked.
 - [ ] Manually verify a Redis-mode event reaches `flagged_incidents` and instructor monitoring while the worker is running; verify stopped-worker health, retry, and recovery behavior.
@@ -201,6 +203,7 @@ Private classroom-assigned exams, proctoring telemetry, audio detection, fullscr
 ## Public API / Type Changes
 
 - No endpoint path changes are planned.
+- Additive exam-read query metadata is allowed when required to disambiguate shared student/staff surfaces; the implemented `viewer=student` override follows this rule and remains backward compatible because callers that omit it keep the existing behavior.
 - Additive telemetry health fields are allowed for mode, queue depth, buffer depth, worker state, and failure counts.
 - Additive recovery/runtime fields are allowed only if existing clients can ignore them.
 - Existing exam list/detail, telemetry event, incident, lobby, and monitoring response fields must remain backward compatible.

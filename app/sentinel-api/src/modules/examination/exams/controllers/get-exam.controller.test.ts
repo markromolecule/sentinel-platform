@@ -93,7 +93,37 @@ describe('getExamRouteHandler', () => {
         const response = await app.request(`/${examId}`);
         expect(response.status).toBe(200);
 
-        expect(assertAssessmentReadAccess).toHaveBeenCalled();
+        expect(assertAssessmentReadAccess).not.toHaveBeenCalled();
+        expect(getExamByIdData).toHaveBeenCalledWith({
+            dbClient: expect.anything(),
+            id: examId,
+            institutionId: 'institution-1',
+            studentUserId: 'user-1',
+            staffUserId: undefined,
+            applyStaffVisibility: false,
+        });
+        expect(ExamService.getExamById).toHaveBeenCalledWith(
+            expect.anything(),
+            examId,
+            'institution-1',
+            'user-1',
+        );
+    });
+
+    it('forces student viewer scope for shared detail reads when explicitly requested by student surfaces', async () => {
+        vi.mocked(resolveAssessmentReadScope).mockResolvedValue({
+            role: 'admin',
+            institutionId: 'institution-1',
+            studentUserId: 'user-1',
+            departmentId: undefined,
+            instructorUserId: 'user-1',
+        });
+
+        const app = createApp({ id: 'user-1' });
+        const response = await app.request(`/${examId}?viewer=student`);
+
+        expect(response.status).toBe(200);
+        expect(assertAssessmentReadAccess).not.toHaveBeenCalled();
         expect(getExamByIdData).toHaveBeenCalledWith({
             dbClient: expect.anything(),
             id: examId,
@@ -126,6 +156,7 @@ describe('getExamRouteHandler', () => {
         const response = await app.request(`/${examId}`);
 
         expect(response.status).toBe(200);
+        expect(assertAssessmentReadAccess).toHaveBeenCalled();
         expect(getExamByIdData).toHaveBeenCalledWith({
             dbClient: expect.anything(),
             id: examId,

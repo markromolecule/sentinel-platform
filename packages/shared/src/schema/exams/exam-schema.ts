@@ -145,12 +145,17 @@ export const getExamsQuerySchema = z.object({
     subjectId: z.string().uuid().optional(),
     classroomId: z.string().uuid().optional(),
     institutionId: z.string().uuid().optional(),
+    viewer: z.enum(['student', 'staff']).optional(),
     limit: z.coerce.number().int().min(1).max(100).optional(),
     page: z.coerce.number().int().min(1).optional(),
 });
 
 export const examIdParamsSchema = z.object({
     id: z.string().uuid(),
+});
+
+export const examReadQuerySchema = z.object({
+    viewer: z.enum(['student', 'staff']).optional(),
 });
 
 export const examHistoryAttemptParamsSchema = z.object({

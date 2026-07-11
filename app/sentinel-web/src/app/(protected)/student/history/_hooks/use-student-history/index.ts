@@ -52,11 +52,14 @@ export function useStudentHistory(): UseStudentHistoryReturn {
             : undefined,
     );
 
-    const { data: exams = [], isLoading: isExamsLoading } = useExamsQuery(undefined, {
-        staleTime: 0,
-        refetchOnMount: 'always',
-        refetchOnWindowFocus: true,
-    });
+    const { data: exams = [], isLoading: isExamsLoading } = useExamsQuery(
+        { viewer: 'student' },
+        {
+            staleTime: 0,
+            refetchOnMount: 'always',
+            refetchOnWindowFocus: true,
+        },
+    );
 
     const history = useMemo(() => {
         if (!historyData) return [];

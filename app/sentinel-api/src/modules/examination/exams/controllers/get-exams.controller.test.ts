@@ -74,7 +74,7 @@ describe('getExamsRouteHandler', () => {
         const response = await app.request('/');
 
         expect(response.status).toBe(200);
-        expect(assertAssessmentReadAccess).toHaveBeenCalled();
+        expect(assertAssessmentReadAccess).not.toHaveBeenCalled();
         expect(ExamService.getExams).toHaveBeenCalledWith(
             expect.anything(),
             {},
@@ -98,6 +98,7 @@ describe('getExamsRouteHandler', () => {
         const response = await app.request('/');
 
         expect(response.status).toBe(200);
+        expect(assertAssessmentReadAccess).toHaveBeenCalled();
         expect(ExamService.getExams).toHaveBeenCalledWith(
             expect.anything(),
             {},
@@ -124,6 +125,7 @@ describe('getExamsRouteHandler', () => {
         const response = await app.request('/');
 
         expect(response.status).toBe(200);
+        expect(assertAssessmentReadAccess).toHaveBeenCalled();
         expect(ExamService.getExams).toHaveBeenCalledWith(
             expect.anything(),
             {},
@@ -131,6 +133,30 @@ describe('getExamsRouteHandler', () => {
             undefined,
             'dept-1',
             'admin-1',
+        );
+    });
+
+    it('forces student viewer scope when explicitly requested by student surfaces', async () => {
+        vi.mocked(resolveAssessmentReadScope).mockResolvedValue({
+            role: 'admin',
+            institutionId: 'institution-1',
+            studentUserId: 'user-1',
+            departmentId: 'dept-1',
+            instructorUserId: 'user-1',
+        });
+
+        const app = createApp({ id: 'user-1' });
+        const response = await app.request('/?viewer=student');
+
+        expect(response.status).toBe(200);
+        expect(assertAssessmentReadAccess).not.toHaveBeenCalled();
+        expect(ExamService.getExams).toHaveBeenCalledWith(
+            expect.anything(),
+            { viewer: 'student' },
+            'institution-1',
+            'user-1',
+            undefined,
+            undefined,
         );
     });
 });

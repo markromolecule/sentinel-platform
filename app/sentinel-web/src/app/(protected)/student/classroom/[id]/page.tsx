@@ -46,7 +46,7 @@ export default function StudentClassroomDetailPage() {
     const classroom = classrooms?.find((c) => c.id === id);
 
     const { data: exams, isLoading: isExamsLoading } = useExamsQuery(
-        { classroomId: id },
+        { classroomId: id, viewer: 'student' },
         {
             staleTime: 0,
             refetchOnMount: 'always',
