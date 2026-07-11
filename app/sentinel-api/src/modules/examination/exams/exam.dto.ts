@@ -30,6 +30,7 @@ export const getExamsSchema = {
 
 export const getExamByIdSchema = {
     params: Schema.examIdParamsSchema,
+    query: Schema.examReadQuerySchema,
     response: z.object({
         message: z.string(),
         data: examDetailSchema,

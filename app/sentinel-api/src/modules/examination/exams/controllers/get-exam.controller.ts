@@ -17,6 +17,7 @@ export const getExamRoute = createRoute({
     summary: 'Get an exam',
     request: {
         params: getExamByIdSchema.params,
+        query: getExamByIdSchema.query,
     },
     responses: {
         200: {
@@ -35,18 +36,28 @@ export const getExamRoute = createRoute({
  */
 export const getExamRouteHandler: AppRouteHandler<typeof getExamRoute> = async (c) => {
     const { id } = c.req.valid('param');
+    const query = c.req.valid('query');
     const supabaseUser = c.get('supabaseUser') as any;
     const user = c.get('user');
 
-    assertAssessmentReadAccess(c);
+    let { role, institutionId, studentUserId, instructorUserId } = await resolveAssessmentReadScope(
+        {
+            dbClient: c.get('dbClient'),
+            user,
+            claimedRole: supabaseUser?.user_metadata?.role,
+            contextInstitutionId: c.get('institutionId'),
+            activePermissionKeys: c.get('activePermissionKeys'),
+        },
+    );
 
-    const { role, institutionId, studentUserId, instructorUserId } = await resolveAssessmentReadScope({
-        dbClient: c.get('dbClient'),
-        user,
-        claimedRole: supabaseUser?.user_metadata?.role,
-        contextInstitutionId: c.get('institutionId'),
-        activePermissionKeys: c.get('activePermissionKeys'),
-    });
+    if (query.viewer === 'student' && studentUserId) {
+        role = 'student';
+        instructorUserId = undefined;
+    }
+
+    if (role !== 'student') {
+        assertAssessmentReadAccess(c);
+    }
 
     const examAccessRecord = requireExamRecord(
         await getExamByIdData({

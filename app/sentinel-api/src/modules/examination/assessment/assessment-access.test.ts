@@ -67,6 +67,18 @@ describe('assessment access', () => {
         ).resolves.toBe('student');
     });
 
+    it('ignores generic authenticated claims and falls back to the resolved db role', async () => {
+        vi.mocked(resolveTargetUserRole).mockResolvedValue('student');
+
+        await expect(
+            resolveAssessmentActorRole({
+                dbClient: mockDb,
+                userId: 'user-1',
+                claimedRole: 'authenticated',
+            }),
+        ).resolves.toBe('student');
+    });
+
     it('treats a user with a student profile as student when no claim exists', async () => {
         vi.mocked(resolveTargetUserRole).mockResolvedValue(null);
         vi.mocked(EntitlementsRepository.getStudentProfileByUserId).mockResolvedValue({

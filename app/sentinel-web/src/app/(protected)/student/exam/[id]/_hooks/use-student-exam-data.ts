@@ -103,7 +103,9 @@ function resolveLifecycleBlockedState(exam: ProctorExam | null) {
 export function useStudentExamData() {
     const params = useParams();
     const examId = params.id as string;
-    const { data: exam, isLoading: isExamLoading, refetch: refetchExam } = useExamQuery(examId);
+    const { data: exam, isLoading: isExamLoading, refetch: refetchExam } = useExamQuery(examId, {
+        viewer: 'student',
+    });
     const { data: configurationState, isLoading: isConfigurationLoading } =
         useExamConfigurationQuery(examId);
 

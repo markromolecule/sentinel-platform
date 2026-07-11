@@ -33,6 +33,10 @@ export function normalizeAssessmentRole(role?: string | null) {
     return normalizedRole.length > 0 ? normalizedRole : null;
 }
 
+function isGenericAuthenticatedRole(role?: string | null) {
+    return role === 'authenticated' || role === 'anon' || role === 'anonymous';
+}
+
 /**
  * Throws HTTP 403 if the user does not have permission to manage assessments.
  * Supports passing either a Hono Context (for dynamic RBAC) or a role string (for backward compatibility).
@@ -98,7 +102,7 @@ export async function resolveAssessmentActorRole(args: {
 }) {
     const normalizedClaimedRole = normalizeAssessmentRole(args.claimedRole);
 
-    if (normalizedClaimedRole) {
+    if (normalizedClaimedRole && !isGenericAuthenticatedRole(normalizedClaimedRole)) {
         return normalizedClaimedRole;
     }
 

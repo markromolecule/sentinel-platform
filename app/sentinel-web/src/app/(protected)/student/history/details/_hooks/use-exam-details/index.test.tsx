@@ -202,7 +202,9 @@ describe('useExamDetails', () => {
         expect(result.current.historyItem?.examId).toBe('exam-1');
         expect(result.current.reportAvailability).toBe('unavailable');
         expect(mockAttemptReportQuery).toHaveBeenCalledWith(null);
-        expect(mockExamQuery).toHaveBeenCalledWith('exam-route-1');
+        expect(mockExamQuery).toHaveBeenCalledWith('exam-route-1', {
+            viewer: 'student',
+        });
     });
 
     it('exposes loading_report while the attempt report is still loading', async () => {

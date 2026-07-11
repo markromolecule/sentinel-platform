@@ -48,14 +48,12 @@ interface SupabaseUserMetadata {
  * scoping and query params. Don't conflate the two.
  */
 export const getExamsRouteHandler: AppRouteHandler<typeof getExamsRoute> = async (c) => {
-    assertAssessmentReadAccess(c);
-
     const query = c.req.valid('query');
     const dbClient = c.get('dbClient');
     const user = c.get('user');
     const supabaseUser = c.get('supabaseUser') as SupabaseUserMetadata | undefined;
 
-    const { role, institutionId, studentUserId, departmentId, instructorUserId } =
+    let { role, institutionId, studentUserId, departmentId, instructorUserId } =
         await resolveAssessmentReadScope({
             dbClient,
             user,
@@ -64,6 +62,16 @@ export const getExamsRouteHandler: AppRouteHandler<typeof getExamsRoute> = async
             requestedInstitutionId: query.institutionId,
             activePermissionKeys: c.get('activePermissionKeys'),
         });
+
+    if (query.viewer === 'student' && studentUserId) {
+        role = 'student';
+        departmentId = undefined;
+        instructorUserId = undefined;
+    }
+
+    if (role !== 'student') {
+        assertAssessmentReadAccess(c);
+    }
 
     if (role === 'instructor' && !institutionId) {
         return c.json({ message: 'Institution context required', data: [] }, 400);
