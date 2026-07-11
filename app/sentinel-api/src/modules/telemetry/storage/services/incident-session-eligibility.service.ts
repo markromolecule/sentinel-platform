@@ -59,6 +59,8 @@ export function checkTelemetrySessionEligibility(
         return {
             ok: false,
             errorType: 'IGNORE_SILENTLY',
+            // Completed attempts reject late fullscreen teardown noise even during the
+            // recent-completion grace period that still allows other telemetry retries.
             message: 'Ignoring post-completion fullscreen telemetry',
         };
     }

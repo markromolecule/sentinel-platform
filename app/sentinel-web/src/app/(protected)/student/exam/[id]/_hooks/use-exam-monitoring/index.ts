@@ -37,15 +37,19 @@ export function useExamMonitoring({
         : (configuration?.webSecurity.tab_switching_monitor ?? true);
     const shouldMonitorFullscreen =
         !isMobile && (configuration?.webSecurity.full_screen_required ?? true);
+    const resolvedMonitoringSuspended =
+        isMonitoringSuspended ||
+        monitoringPhase === 'suspended' ||
+        monitoringPhase === 'submitting' ||
+        monitoringPhase === 'navigating-to-turn-in';
+
+    monitoringPhaseRef.current = monitoringPhase;
+    isMonitoringSuspendedRef.current = resolvedMonitoringSuspended;
 
     useEffect(() => {
         monitoringPhaseRef.current = monitoringPhase;
-        isMonitoringSuspendedRef.current =
-            isMonitoringSuspended ||
-            monitoringPhase === 'suspended' ||
-            monitoringPhase === 'submitting' ||
-            monitoringPhase === 'navigating-to-turn-in';
-    }, [isMonitoringSuspended, monitoringPhase]);
+        isMonitoringSuspendedRef.current = resolvedMonitoringSuspended;
+    }, [monitoringPhase, resolvedMonitoringSuspended]);
 
     const { emitTelemetryEvent } = useTelemetry({
         configuration,
@@ -69,6 +73,15 @@ export function useExamMonitoring({
     });
 
     const suspendSecurityMonitoring = () => {
+        if (
+            isMonitoringSuspendedRef.current &&
+            (monitoringPhaseRef.current === 'suspended' ||
+                monitoringPhaseRef.current === 'submitting' ||
+                monitoringPhaseRef.current === 'navigating-to-turn-in')
+        ) {
+            return true;
+        }
+
         monitoringPhaseRef.current = 'suspended';
         isMonitoringSuspendedRef.current = true;
         return suspendSecurityMonitoringState();

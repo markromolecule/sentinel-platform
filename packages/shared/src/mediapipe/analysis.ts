@@ -17,6 +17,38 @@ function createMediaPipeFrameAnalysis(analysis: MediaPipeFrameAnalysis): MediaPi
     return analysis;
 }
 
+/**
+ * Returns whether the face center sits too close to the viewport edge.
+ *
+ * @param faceBounds The face bounds resolved for the current frame.
+ * @returns `true` when the face center is outside the stable viewport window.
+ */
+export function isMediaPipeFaceNearViewportEdge(faceBounds: MediaPipeFrameAnalysis['faceBounds']) {
+    return Boolean(
+        faceBounds &&
+            (faceBounds.centerX < 0.12 ||
+                faceBounds.centerX > 0.88 ||
+                faceBounds.centerY < 0.08 ||
+                faceBounds.centerY > 0.92),
+    );
+}
+
+/**
+ * Returns whether the visible face bounds indicate a partial face near the frame edge.
+ *
+ * @param faceBounds The face bounds resolved for the current frame.
+ * @returns `true` when the face extends outside the stable capture window.
+ */
+export function isMediaPipePartialFaceVisible(faceBounds: MediaPipeFrameAnalysis['faceBounds']) {
+    return Boolean(
+        faceBounds &&
+            (faceBounds.minX < 0.05 ||
+                faceBounds.maxX > 0.95 ||
+                faceBounds.minY < 0.04 ||
+                faceBounds.maxY > 0.96),
+    );
+}
+
 function buildSingleFaceAnalysis(args: {
     landmarks: MediaPipeLandmark[];
     confidenceScore: number | null;
@@ -30,20 +62,8 @@ function buildSingleFaceAnalysis(args: {
         args.tolerateDownwardGaze &&
         gazeEstimate.eyeState === 'open' &&
         gazeEstimate.direction === 'down';
-    const faceNearViewportEdge = Boolean(
-        faceBounds &&
-        (faceBounds.centerX < 0.12 ||
-            faceBounds.centerX > 0.88 ||
-            faceBounds.centerY < 0.08 ||
-            faceBounds.centerY > 0.92),
-    );
-    const partialFaceVisible = Boolean(
-        faceBounds &&
-        (faceBounds.minX < 0.05 ||
-            faceBounds.maxX > 0.95 ||
-            faceBounds.minY < 0.04 ||
-            faceBounds.maxY > 0.96),
-    );
+    const faceNearViewportEdge = isMediaPipeFaceNearViewportEdge(faceBounds);
+    const partialFaceVisible = isMediaPipePartialFaceVisible(faceBounds);
     const eyesClosed = gazeEstimate.eyeState === 'closed';
     const isOffScreen =
         eyesClosed ||

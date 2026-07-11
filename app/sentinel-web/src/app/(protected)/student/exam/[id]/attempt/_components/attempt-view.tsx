@@ -165,7 +165,7 @@ export function AttemptView() {
                         />
                     }
                     passagePanel={
-                        showPassagePanel ? (
+                        showPassagePanel && currentQuestion ? (
                             <ExamAttemptRuntimePassage
                                 showPassagePanel={showPassagePanel}
                                 currentQuestion={currentQuestion}

@@ -12,6 +12,7 @@ const {
     mockExamMonitoring,
     mockAttemptMediaPipeMonitoring,
     mockUseAudioAnomalyWorker,
+    mockUseAudioSettingsQuery,
 } = vi.hoisted(() => ({
     mockRouterReplace: vi.fn(),
     mockStudentExamData: vi.fn(),
@@ -19,6 +20,7 @@ const {
     mockExamMonitoring: vi.fn(),
     mockAttemptMediaPipeMonitoring: vi.fn(),
     mockUseAudioAnomalyWorker: vi.fn(),
+    mockUseAudioSettingsQuery: vi.fn(),
 }));
 
 vi.mock('next/navigation', () => ({
@@ -53,6 +55,10 @@ vi.mock('@/app/(protected)/student/exam/[id]/_hooks/use-attempt-mediapipe-monito
 
 vi.mock('@/hooks/use-audio-anomaly-worker', () => ({
     useAudioAnomalyWorker: () => mockUseAudioAnomalyWorker(),
+}));
+
+vi.mock('@sentinel/hooks', () => ({
+    useAudioSettingsQuery: () => mockUseAudioSettingsQuery(),
 }));
 
 vi.mock('@/app/(protected)/student/exam/[id]/attempt/_lib/exam-turn-in-storage', () => ({
@@ -124,17 +130,74 @@ vi.mock('@/features/exams/_components/engine', () => ({
     type: {},
     hasAnswer: (value: unknown) => value !== null && value !== undefined && value !== '',
     formatTimer: (seconds: number) => `${seconds}s`,
-    getRuntimePassageDetails: () => ({
+    getRuntimePassageDetails: ({
+        questionPassageContent,
+        questionPassageType,
+    }: {
+        questionPassageContent?: string | null;
+        questionPassageType?: 'plain' | 'html' | null;
+    }) => ({
         title: 'Passage',
         description: '',
-        body: '<p>Passage body</p>',
+        body:
+            questionPassageType === 'plain'
+                ? (questionPassageContent ?? '').replaceAll('\n', '<br />')
+                : (questionPassageContent ?? ''),
     }),
-    ExamAttemptRuntimeHeader: ({ onSubmit }: { onSubmit: () => void }) => (
-        <button onClick={onSubmit}>Turn in exam</button>
+    ExamAttemptRuntimeHeader: ({
+        onSubmit,
+        onTogglePassagePanel,
+        showPassagePanel,
+    }: {
+        onSubmit: () => void;
+        onTogglePassagePanel: () => void;
+        showPassagePanel: boolean;
+    }) => (
+        <div>
+            <button onClick={onTogglePassagePanel}>
+                {showPassagePanel ? 'Hide passage panel' : 'Show passage panel'}
+            </button>
+            <button onClick={onSubmit}>Turn in exam</button>
+        </div>
     ),
     ExamAttemptRuntimeFooter: () => <div>Footer</div>,
-    ExamAttemptRuntimeNavigation: () => <div>Navigation</div>,
-    ExamAttemptRuntimePassage: () => <div>Passage</div>,
+    ExamAttemptRuntimeNavigation: ({
+        questions,
+        onQuestionSelect,
+    }: {
+        questions: Array<{ id: string; content: { prompt: string } }>;
+        onQuestionSelect: (index: number) => void;
+    }) => (
+        <div>
+            {questions.map((question, index) => (
+                <button key={question.id} onClick={() => onQuestionSelect(index)}>
+                    Go to {question.content.prompt}
+                </button>
+            ))}
+        </div>
+    ),
+    ExamAttemptRuntimePassage: ({
+        showPassagePanel,
+        currentQuestion,
+        currentContext,
+    }: {
+        showPassagePanel: boolean;
+        currentQuestion: { id: string } | null;
+        currentContext: { title: string; description: string; body: string };
+    }) =>
+        showPassagePanel && currentQuestion ? (
+            <div>
+                <div>{currentContext.title}</div>
+                {currentContext.body ? (
+                    <div
+                        data-testid="runtime-passage-body"
+                        dangerouslySetInnerHTML={{ __html: currentContext.body }}
+                    />
+                ) : (
+                    <div>No passage is attached to this question yet.</div>
+                )}
+            </div>
+        ) : null,
     ExamAttemptRuntimeSecurity: ({
         securityLockReason,
         onResumeExam,
@@ -231,6 +294,8 @@ function createStudentExamData() {
                     prompt: 'What is 2 + 2?',
                     options: ['3', '4'],
                 },
+                passageType: 'plain',
+                passageContent: 'First passage line 1\nFirst passage line 2',
                 orderIndex: 0,
             },
         ],
@@ -290,13 +355,17 @@ describe('StudentExamAttemptPage', () => {
             isEnabled: false,
             phase: 'idle',
         });
+        mockUseAudioSettingsQuery.mockReturnValue({
+            data: null,
+            isLoading: false,
+        });
     });
 
     it('renders the active MediaPipe status badge inside the attempt shell', () => {
         render(<StudentExamAttemptPage />);
 
         expect(screen.getByText(/mediapipe off-screen/i)).toBeTruthy();
-        expect(screen.getByText(/what is 2 \+ 2\?/i)).toBeTruthy();
+        expect(screen.getByRole('button', { name: /answer 4/i })).toBeTruthy();
     });
 
     it('renders the MediaPipe video element when MediaPipe monitoring is enabled', () => {
@@ -313,9 +382,95 @@ describe('StudentExamAttemptPage', () => {
 
         fireEvent.click(screen.getByRole('button', { name: /answer 4/i }));
 
-        expect(screen.getByText(/what is 2 \+ 2\?/i)).toBeTruthy();
+        expect(screen.getByRole('button', { name: /answer 4/i })).toBeTruthy();
         expect(screen.getByRole('button', { name: /turn in exam/i })).toBeTruthy();
         expect(screen.queryByText(/loading\.\.\./i)).toBeNull();
+    });
+
+    it('updates the runtime passage content when navigating between questions without leaking prior content', () => {
+        mockStudentExamData.mockReturnValue({
+            ...createStudentExamData(),
+            questions: [
+                {
+                    id: 'question-1',
+                    content: {
+                        prompt: 'What is 2 + 2?',
+                        options: ['3', '4'],
+                    },
+                    passageType: 'plain',
+                    passageContent: 'First passage line 1\nFirst passage line 2',
+                    orderIndex: 0,
+                },
+                {
+                    id: 'question-2',
+                    content: {
+                        prompt: 'What is 5 + 5?',
+                        options: ['9', '10'],
+                    },
+                    passageType: null,
+                    passageContent: null,
+                    orderIndex: 1,
+                },
+            ],
+        });
+
+        render(<StudentExamAttemptPage />);
+
+        expect(screen.getByTestId('runtime-passage-body').innerHTML).toContain(
+            'First passage line 1',
+        );
+        expect(screen.queryByText(/No passage is attached to this question yet/i)).toBeNull();
+
+        fireEvent.click(screen.getByRole('button', { name: /go to what is 5 \+ 5\?/i }));
+
+        expect(screen.queryByTestId('runtime-passage-body')).toBeNull();
+        expect(screen.getByText(/No passage is attached to this question yet/i)).toBeTruthy();
+        expect(screen.queryByText(/First passage line 1/i)).toBeNull();
+    });
+
+    it('preserves explicit panel visibility changes across question navigation', () => {
+        mockStudentExamData.mockReturnValue({
+            ...createStudentExamData(),
+            questions: [
+                {
+                    id: 'question-1',
+                    content: {
+                        prompt: 'What is 2 + 2?',
+                        options: ['3', '4'],
+                    },
+                    passageType: 'plain',
+                    passageContent: 'First passage line 1\nFirst passage line 2',
+                    orderIndex: 0,
+                },
+                {
+                    id: 'question-2',
+                    content: {
+                        prompt: 'What is 5 + 5?',
+                        options: ['9', '10'],
+                    },
+                    passageType: null,
+                    passageContent: null,
+                    orderIndex: 1,
+                },
+            ],
+        });
+
+        render(<StudentExamAttemptPage />);
+
+        fireEvent.click(screen.getByRole('button', { name: /hide passage panel/i }));
+
+        expect(screen.queryByTestId('runtime-passage-body')).toBeNull();
+        expect(screen.queryByText(/^Passage$/)).toBeNull();
+
+        fireEvent.click(screen.getByRole('button', { name: /go to what is 5 \+ 5\?/i }));
+
+        expect(screen.queryByTestId('runtime-passage-body')).toBeNull();
+        expect(screen.queryByText(/No passage is attached to this question yet/i)).toBeNull();
+
+        fireEvent.click(screen.getByRole('button', { name: /show passage panel/i }));
+
+        expect(screen.getByText(/No passage is attached to this question yet/i)).toBeTruthy();
+        expect(screen.queryByText(/First passage line 1/i)).toBeNull();
     });
 
     it('shows a MediaPipe incident dialog when an actionable signal is raised', () => {
@@ -368,7 +523,7 @@ describe('StudentExamAttemptPage', () => {
             screen.getByText(/existing browser security monitoring remains active/i),
         ).toBeTruthy();
         expect(screen.getByText(/mediapipe error/i)).toBeTruthy();
-        expect(screen.getByText(/what is 2 \+ 2\?/i)).toBeTruthy();
+        expect(screen.getByRole('button', { name: /answer 4/i })).toBeTruthy();
     });
 
     it('starts result navigation before exiting fullscreen on turn in', () => {
@@ -523,5 +678,112 @@ describe('StudentExamAttemptPage', () => {
         render(<StudentExamAttemptPage />);
 
         expect(screen.getByText(/no live audio tracks available/i)).toBeTruthy();
+    });
+
+    it('covers active monitoring, browser lock, audio state, gaze incident, submission, and teardown in one regression flow', () => {
+        vi.useFakeTimers();
+        const mockExitFullscreen = vi.fn().mockResolvedValue(undefined);
+        const mockSuspendSecurityMonitoring = vi.fn(() => true);
+        const dismissMediaPipeIncident = vi.fn();
+
+        Object.defineProperty(document, 'fullscreenElement', {
+            value: document.documentElement,
+            configurable: true,
+        });
+        Object.defineProperty(document, 'exitFullscreen', {
+            value: mockExitFullscreen,
+            configurable: true,
+        });
+
+        let monitoringState = {
+            securityLockReason: null as string | null,
+            isResumingExam: false,
+            resumeSecuredExam: vi.fn(),
+            fullScreenContainerRef: { current: null },
+            suspendSecurityMonitoring: mockSuspendSecurityMonitoring,
+        };
+        let mediaPipeState = {
+            videoRef: { current: null },
+            analysis: {
+                status: 'off-screen',
+            },
+            phase: 'running' as const,
+            errorMessage: null as string | null,
+            activeIncident: null as any,
+            dismissIncident: dismissMediaPipeIncident,
+            isEnabled: true,
+        };
+
+        mockExamMonitoring.mockImplementation(() => monitoringState);
+        mockAttemptMediaPipeMonitoring.mockImplementation(() => mediaPipeState);
+
+        mockUseAudioAnomalyWorker.mockReturnValue({
+            errorMessage: null,
+            isEnabled: true,
+            phase: 'running',
+        });
+
+        const { rerender } = render(<StudentExamAttemptPage />);
+
+        expect(screen.getByText(/mediapipe off-screen/i)).toBeTruthy();
+        expect(screen.getByText(/audio running/i)).toBeTruthy();
+        expect(screen.queryByText(/multiple faces detected/i)).toBeNull();
+
+        monitoringState = {
+            ...monitoringState,
+            securityLockReason: 'right-click',
+        };
+        mediaPipeState = {
+            ...mediaPipeState,
+            activeIncident: {
+                eventType: 'GAZE_OFF_SCREEN',
+                detectedAt: '2026-07-11T08:00:00.000Z',
+                analysis: {
+                    status: 'off-screen',
+                    signal: 'GAZE_OFF_SCREEN',
+                    faceCount: 1,
+                    confidenceScore: 0.81,
+                    gazeDirection: 'left',
+                    eyeState: 'open',
+                    faceBounds: null,
+                    reasons: ['Eye tracking indicates the student is looking away from center.'],
+                },
+            },
+        };
+        rerender(<StudentExamAttemptPage />);
+
+        expect(screen.getByText(/return to the secured exam view/i)).toBeTruthy();
+        expect(screen.getByText(/eyes off screen detected/i)).toBeTruthy();
+
+        fireEvent.click(screen.getByRole('button', { name: /resume exam/i }));
+
+        monitoringState = {
+            ...monitoringState,
+            securityLockReason: null,
+        };
+        mediaPipeState = {
+            ...mediaPipeState,
+            activeIncident: null,
+        };
+        rerender(<StudentExamAttemptPage />);
+
+        fireEvent.click(screen.getByRole('button', { name: /answer 4/i }));
+        fireEvent.click(screen.getByRole('button', { name: /turn in exam/i }));
+
+        expect(mockSuspendSecurityMonitoring).toHaveBeenCalledTimes(1);
+        expect(mockRouterReplace).toHaveBeenCalledWith(
+            '/student/exam/11111111-1111-1111-1111-111111111111/result',
+        );
+        expect(screen.queryByText(/return to the secured exam view/i)).toBeNull();
+
+        act(() => {
+            document.dispatchEvent(new Event('fullscreenchange'));
+            vi.runOnlyPendingTimers();
+        });
+
+        expect(mockExitFullscreen).toHaveBeenCalledTimes(1);
+        expect(mockRouterReplace.mock.invocationCallOrder[0]).toBeLessThan(
+            mockExitFullscreen.mock.invocationCallOrder[0],
+        );
     });
 });

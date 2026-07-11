@@ -43,4 +43,35 @@ describe('checkTelemetrySessionEligibility', () => {
             message: 'Ignoring post-completion fullscreen telemetry',
         });
     });
+
+    it('keeps rejecting fullscreen teardown retries even inside the recent-completion grace period', () => {
+        vi.setSystemTime(new Date('2026-07-11T03:00:00.000Z'));
+
+        const session = {
+            ...baseSession,
+            completed_at: new Date('2026-07-11T02:58:30.000Z'),
+            status: 'COMPLETED',
+        } as const;
+
+        expect(
+            checkTelemetrySessionEligibility(session, {
+                studentId: 'student-user-1',
+                eventType: 'FULL_SCREEN_EXIT',
+            }),
+        ).toEqual({
+            ok: false,
+            errorType: 'IGNORE_SILENTLY',
+            message: 'Ignoring post-completion fullscreen telemetry',
+        });
+        expect(
+            checkTelemetrySessionEligibility(session, {
+                studentId: 'student-user-1',
+                eventType: 'FULL_SCREEN_EXIT',
+            }),
+        ).toEqual({
+            ok: false,
+            errorType: 'IGNORE_SILENTLY',
+            message: 'Ignoring post-completion fullscreen telemetry',
+        });
+    });
 });

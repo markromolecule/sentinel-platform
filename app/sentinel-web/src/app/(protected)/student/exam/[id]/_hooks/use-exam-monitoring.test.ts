@@ -1,9 +1,10 @@
 import { cleanup, renderHook, waitFor } from '@testing-library/react';
-import { act } from 'react';
+import { act, createElement, StrictMode, type ReactNode } from 'react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { ExamConfig } from '@sentinel/shared';
 import { useExamMonitoring } from './use-exam-monitoring';
 import { emitWebTelemetryEvent } from '../_lib/web-telemetry-client';
+import { detectScreenCaptureShortcut } from '../_lib/web-telemetry-client/_utils/screen-capture-shortcut';
 
 const { mockApiClient, mockToastError, mockToastWarning } = vi.hoisted(() => ({
     mockApiClient: vi.fn(),
@@ -27,37 +28,51 @@ vi.mock('sonner', () => ({
     },
 }));
 
-vi.mock('../_lib/web-telemetry-client', () => ({
-    emitWebTelemetryEvent: vi.fn().mockResolvedValue(true),
-    createTelemetryActionMetadata: (args: string | {
-        eventType: string;
-        examSessionId?: string;
-        actionSource?: string;
-        clientActionAt?: string;
-        bucketMs?: number;
-    }) => {
-        const eventType = typeof args === 'string' ? args : args.eventType;
-        const examSessionId =
-            typeof args === 'string' ? 'mock-session' : (args.examSessionId ?? 'mock-session');
-        const actionSource =
-            typeof args === 'string' ? 'generic-action' : (args.actionSource ?? 'generic-action');
-        const clientActionAt =
-            typeof args === 'string'
-                ? new Date().toISOString()
-                : (args.clientActionAt ?? new Date().toISOString());
-        const bucketMs = typeof args === 'string' ? 1000 : (args.bucketMs ?? 1000);
-        const bucketStart = new Date(
-            Math.floor(new Date(clientActionAt).getTime() / bucketMs) * bucketMs,
-        ).toISOString();
-        const dedupeKey = `${examSessionId}:${eventType}:${actionSource}:${bucketStart}`;
+vi.mock('../_lib/web-telemetry-client', async (importOriginal) => {
+    const actual = await importOriginal<typeof import('../_lib/web-telemetry-client')>();
 
-        return {
-            eventId: crypto.randomUUID(),
-            dedupeKey,
-            clientActionAt,
-        };
-    },
-}));
+    return {
+        ...actual,
+        emitWebTelemetryEvent: vi.fn().mockResolvedValue(true),
+        createTelemetryActionMetadata: (args: string | {
+            eventType: string;
+            examSessionId?: string;
+            actionSource?: string;
+            actionBucketId?: string;
+            clientActionAt?: string;
+            bucketMs?: number;
+        }) => {
+            const eventType = typeof args === 'string' ? args : args.eventType;
+            const examSessionId =
+                typeof args === 'string' ? 'mock-session' : (args.examSessionId ?? 'mock-session');
+            const actionSource =
+                typeof args === 'string'
+                    ? 'generic-action'
+                    : (args.actionSource ?? 'generic-action');
+            const actionBucketId =
+                typeof args === 'string' ? actionSource : (args.actionBucketId ?? actionSource);
+            const clientActionAt =
+                typeof args === 'string'
+                    ? new Date().toISOString()
+                    : (args.clientActionAt ?? new Date().toISOString());
+            const bucketMs = typeof args === 'string' ? 1000 : (args.bucketMs ?? 1000);
+            const bucketStart = new Date(
+                Math.floor(new Date(clientActionAt).getTime() / bucketMs) * bucketMs,
+            ).toISOString();
+            const dedupeKey = `${examSessionId}:${eventType}:${actionBucketId}:${bucketStart}`;
+
+            return {
+                eventId: dedupeKey,
+                dedupeKey,
+                clientActionAt,
+                detectionTimestamp: clientActionAt,
+                detectorSource: actionSource,
+                eventSubtype: actionSource,
+            };
+        },
+        writeMonitoringEventTrace: vi.fn(),
+    };
+});
 
 function createExamConfiguration(overrides: Partial<ExamConfig['webSecurity']> = {}): ExamConfig {
     return {
@@ -408,6 +423,113 @@ describe('use-exam-monitoring', () => {
         expect(mockToastWarning).toHaveBeenCalledTimes(2);
     });
 
+    it('reuses one dedupe identity for clipboard DOM signals in one burst and rotates on the next burst', async () => {
+        vi.useFakeTimers();
+        vi.setSystemTime(new Date('2026-04-22T00:00:00.100Z'));
+
+        renderHook(() =>
+            useExamMonitoring({
+                configuration: createExamConfiguration({ clipboard_control: true }),
+                examSessionId: '123e4567-e89b-12d3-a456-426614174000',
+                examId: '123e4567-e89b-12d3-a456-426614174999',
+            }),
+        );
+
+        act(() => {
+            document.dispatchEvent(
+                new KeyboardEvent('keydown', {
+                    key: 'c',
+                    ctrlKey: true,
+                    bubbles: true,
+                    cancelable: true,
+                }),
+            );
+            document.dispatchEvent(
+                new Event('copy', {
+                    bubbles: true,
+                    cancelable: true,
+                }),
+            );
+        });
+
+        const firstCall = vi.mocked(emitWebTelemetryEvent).mock.calls[0]?.[1];
+
+        act(() => {
+            vi.advanceTimersByTime(801);
+            document.dispatchEvent(
+                new Event('paste', {
+                    bubbles: true,
+                    cancelable: true,
+                }),
+            );
+        });
+
+        const secondCall = vi.mocked(emitWebTelemetryEvent).mock.calls[1]?.[1];
+
+        expect(firstCall?.dedupeKey).toBe(
+            '123e4567-e89b-12d3-a456-426614174000:CLIPBOARD_ATTEMPT:clipboard:2026-04-22T00:00:00.000Z',
+        );
+        expect(firstCall?.eventId).toBe(firstCall?.dedupeKey);
+        expect(secondCall?.dedupeKey).toBe(
+            '123e4567-e89b-12d3-a456-426614174000:CLIPBOARD_ATTEMPT:clipboard:2026-04-22T00:00:00.800Z',
+        );
+        expect(secondCall?.eventId).toBe(secondCall?.dedupeKey);
+        expect(secondCall?.dedupeKey).not.toBe(firstCall?.dedupeKey);
+    });
+
+    it('keeps one listener set active through StrictMode remounts', async () => {
+        const wrapper = ({ children }: { children: ReactNode }) => (
+            createElement(StrictMode, null, children)
+        );
+
+        renderHook(
+            () =>
+                useExamMonitoring({
+                    configuration: createExamConfiguration({ right_click_disable: true }),
+                    examSessionId: '123e4567-e89b-12d3-a456-426614174000',
+                    examId: '123e4567-e89b-12d3-a456-426614174999',
+                }),
+            { wrapper },
+        );
+
+        act(() => {
+            document.dispatchEvent(
+                new MouseEvent('contextmenu', {
+                    bubbles: true,
+                    cancelable: true,
+                }),
+            );
+        });
+
+        await waitFor(() => {
+            expect(emitWebTelemetryEvent).toHaveBeenCalledTimes(1);
+        });
+        expect(mockToastWarning).toHaveBeenCalledTimes(1);
+    });
+
+    it('removes interaction listeners on unmount so later DOM events do not emit in parallel', () => {
+        const { unmount } = renderHook(() =>
+            useExamMonitoring({
+                configuration: createExamConfiguration({ right_click_disable: true }),
+                examSessionId: '123e4567-e89b-12d3-a456-426614174000',
+                examId: '123e4567-e89b-12d3-a456-426614174999',
+            }),
+        );
+
+        unmount();
+
+        act(() => {
+            document.dispatchEvent(
+                new MouseEvent('contextmenu', {
+                    bubbles: true,
+                    cancelable: true,
+                }),
+            );
+        });
+
+        expect(emitWebTelemetryEvent).not.toHaveBeenCalled();
+    });
+
     it('blocks right-click attempts and raises the shared security alert', async () => {
         const { result } = renderHook(() =>
             useExamMonitoring({
@@ -640,9 +762,9 @@ describe('use-exam-monitoring', () => {
             }),
         );
         expect(mockToastWarning).toHaveBeenCalledWith(
-            'Screen capture shortcuts are blocked or monitored for this exam.',
+            'A screen capture shortcut was detected for this exam.',
             expect.objectContaining({
-                description: expect.stringContaining('screen capture tools'),
+                description: expect.stringContaining('logged'),
             }),
         );
     });
@@ -774,6 +896,21 @@ describe('use-exam-monitoring', () => {
         expect(mockToastWarning).toHaveBeenCalledTimes(1);
     });
 
+    it('uses the shared shortcut detector to classify delivered print-screen events', () => {
+        expect(
+            detectScreenCaptureShortcut({
+                event: new KeyboardEvent('keydown', {
+                    key: 'PrintScreen',
+                    code: 'PrintScreen',
+                }),
+                isMobile: false,
+            }),
+        ).toMatchObject({
+            detected: true,
+            shortcut: 'print-screen',
+        });
+    });
+
     it('does not emit desktop right-click or print-screen telemetry on mobile', async () => {
         Object.defineProperty(window.navigator, 'userAgent', {
             value: 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 Mobile/15E148',
@@ -813,6 +950,96 @@ describe('use-exam-monitoring', () => {
         });
 
         expect(emitWebTelemetryEvent).not.toHaveBeenCalled();
+    });
+
+    it('emits one canonical app-backgrounding event for a mobile visibility-only transition', async () => {
+        Object.defineProperty(window.navigator, 'userAgent', {
+            value: 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 Mobile/15E148',
+            configurable: true,
+        });
+
+        renderHook(() =>
+            useExamMonitoring({
+                configuration: createExamConfiguration(),
+                examSessionId: '123e4567-e89b-12d3-a456-426614174000',
+                examId: '123e4567-e89b-12d3-a456-426614174999',
+            }),
+        );
+
+        act(() => {
+            Object.defineProperty(document, 'hidden', { value: true, configurable: true });
+            document.dispatchEvent(new Event('visibilitychange'));
+        });
+
+        await waitFor(() => {
+            expect(emitWebTelemetryEvent).toHaveBeenCalledTimes(1);
+        });
+        expect(emitWebTelemetryEvent).toHaveBeenLastCalledWith(
+            mockApiClient,
+            expect.objectContaining({
+                eventType: 'APP_BACKGROUNDING',
+                platform: 'MOBILE',
+            }),
+        );
+        expect(mockToastWarning).toHaveBeenCalledWith(
+            'Backgrounding the exam app was detected.',
+            expect.objectContaining({
+                description: 'Incident logged.',
+            }),
+        );
+
+        Object.defineProperty(document, 'hidden', { value: false, configurable: true });
+    });
+
+    it('collapses mobile blur plus visibility into one backgrounding event and emits again on a later transition', async () => {
+        vi.useFakeTimers();
+        Object.defineProperty(window.navigator, 'userAgent', {
+            value: 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 Mobile/15E148',
+            configurable: true,
+        });
+
+        renderHook(() =>
+            useExamMonitoring({
+                configuration: createExamConfiguration(),
+                examSessionId: '123e4567-e89b-12d3-a456-426614174000',
+                examId: '123e4567-e89b-12d3-a456-426614174999',
+            }),
+        );
+
+        act(() => {
+            Object.defineProperty(document, 'hidden', { value: true, configurable: true });
+            document.dispatchEvent(new Event('visibilitychange'));
+            window.dispatchEvent(new Event('blur'));
+        });
+
+        expect(emitWebTelemetryEvent).toHaveBeenCalledTimes(1);
+        expect(vi.mocked(emitWebTelemetryEvent).mock.calls[0]?.[1]).toEqual(
+            expect.objectContaining({
+                eventType: 'APP_BACKGROUNDING',
+            }),
+        );
+
+        act(() => {
+            Object.defineProperty(document, 'hidden', { value: false, configurable: true });
+            document.dispatchEvent(new Event('visibilitychange'));
+        });
+
+        expect(emitWebTelemetryEvent).toHaveBeenCalledTimes(1);
+
+        act(() => {
+            vi.advanceTimersByTime(1001);
+            Object.defineProperty(document, 'hidden', { value: true, configurable: true });
+            document.dispatchEvent(new Event('visibilitychange'));
+        });
+
+        expect(emitWebTelemetryEvent).toHaveBeenCalledTimes(2);
+        expect(vi.mocked(emitWebTelemetryEvent).mock.calls[1]?.[1]).toEqual(
+            expect.objectContaining({
+                eventType: 'APP_BACKGROUNDING',
+            }),
+        );
+
+        Object.defineProperty(document, 'hidden', { value: false, configurable: true });
     });
 
     it('clears the security lock and allows interaction after the student resumes the secured exam', async () => {
@@ -894,7 +1121,7 @@ describe('use-exam-monitoring', () => {
                 eventType: 'RIGHT_CLICK_ATTEMPT',
                 eventId: expect.any(String),
                 dedupeKey:
-                    '123e4567-e89b-12d3-a456-426614174000:RIGHT_CLICK_ATTEMPT:contextmenu:2026-04-22T00:00:00.000Z',
+                    '123e4567-e89b-12d3-a456-426614174000:RIGHT_CLICK_ATTEMPT:right-click:2026-04-22T00:00:00.000Z',
                 clientActionAt: expect.any(String),
             }),
         );
@@ -1078,5 +1305,47 @@ describe('use-exam-monitoring', () => {
 
         expect(result.current.securityLockReason).toBeNull();
         expect(emitWebTelemetryEvent).not.toHaveBeenCalled();
+    });
+
+    it('still emits one active fullscreen exit while keeping teardown phases suppressed', async () => {
+        const { rerender } = renderHook(
+            ({ monitoringPhase }) =>
+                useExamMonitoring({
+                    configuration: createExamConfiguration({ full_screen_required: true }),
+                    examSessionId: '123e4567-e89b-12d3-a456-426614174000',
+                    examId: '123e4567-e89b-12d3-a456-426614174999',
+                    monitoringPhase,
+                }),
+            {
+                initialProps: {
+                    monitoringPhase: 'active' as const,
+                },
+            },
+        );
+
+        act(() => {
+            document.dispatchEvent(new Event('fullscreenchange'));
+        });
+
+        await waitFor(() => {
+            expect(emitWebTelemetryEvent).toHaveBeenCalledTimes(1);
+        });
+
+        rerender({ monitoringPhase: 'submitting' as const });
+        act(() => {
+            document.dispatchEvent(new Event('fullscreenchange'));
+        });
+
+        rerender({ monitoringPhase: 'navigating-to-turn-in' as const });
+        act(() => {
+            document.dispatchEvent(new Event('fullscreenchange'));
+        });
+
+        rerender({ monitoringPhase: 'suspended' as const });
+        act(() => {
+            document.dispatchEvent(new Event('fullscreenchange'));
+        });
+
+        expect(emitWebTelemetryEvent).toHaveBeenCalledTimes(1);
     });
 });

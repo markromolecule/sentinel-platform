@@ -1,7 +1,7 @@
 import { randomUUID } from 'node:crypto';
 import { DEFAULT_TELEMETRY_SETTINGS } from '@sentinel/shared';
 import { prisma, type DbClient } from '@sentinel/db';
-import { describe, expect, test } from 'vitest';
+import { afterEach, describe, expect, test, vi } from 'vitest';
 import { testWithDbClient } from '../../../../lib/test-with-db-client';
 import type { PersistableProctoringEvent } from '../../ingestion/ingestion.dto';
 import { IncidentPersistenceService } from './incident-persistence.service';
@@ -114,6 +114,11 @@ function buildPayload(
 }
 
 describe('IncidentPersistenceService', () => {
+    afterEach(() => {
+        vi.restoreAllMocks();
+        vi.unstubAllEnvs();
+    });
+
     testWithDbClient(
         'persists first browser security occurrences as one reviewable row each',
         async ({ dbClient }) => {
@@ -224,6 +229,133 @@ describe('IncidentPersistenceService', () => {
                 },
             });
         },
+    );
+
+    test(
+        'emits structured persistence diagnostics for insert, duplicate retry, aggregation, and concurrent first writes',
+        async () => {
+            vi.stubEnv('NODE_ENV', 'development');
+            const diagnosticSpy = vi.spyOn(console, 'info').mockImplementation(() => undefined);
+            const dbClient = prisma.$kysely;
+            const fixture = await createTelemetryAttemptFixture(dbClient);
+
+            try {
+                const insertedPayload = buildPayload({
+                    ...fixture,
+                    metadata: {
+                        eventId: randomUUID(),
+                        dedupeKey: 'diag-right-click-1',
+                        clientActionAt: '2026-04-22T08:00:00.000Z',
+                    },
+                });
+
+                await IncidentPersistenceService.appendEvent(dbClient, insertedPayload);
+                await IncidentPersistenceService.appendEvent(dbClient, insertedPayload);
+
+                await IncidentPersistenceService.appendEvent(
+                    dbClient,
+                    buildPayload({
+                        ...fixture,
+                        metadata: {
+                            eventId: randomUUID(),
+                            dedupeKey: 'diag-right-click-2',
+                            clientActionAt: '2026-04-22T08:02:30.000Z',
+                        },
+                    }),
+                );
+
+                const concurrentPayload = buildPayload({
+                    ...fixture,
+                    ruleKey: 'webSecurity.print_screen_disable',
+                    eventType: 'PRINT_SCREEN_ATTEMPT',
+                    metadata: {
+                        eventId: randomUUID(),
+                        dedupeKey: 'diag-print-screen-1',
+                        clientActionAt: '2026-04-22T08:03:00.000Z',
+                    },
+                });
+
+                await Promise.allSettled([
+                    IncidentPersistenceService.appendEvent(dbClient, concurrentPayload),
+                    IncidentPersistenceService.appendEvent(dbClient, concurrentPayload),
+                ]);
+
+                const diagnostics = diagnosticSpy.mock.calls
+                    .filter(([message]) => message === '[TelemetryStorage][Diagnostics]')
+                    .map(([, diagnostic]) => diagnostic as Record<string, unknown>);
+
+                expect(diagnostics).toEqual(
+                    expect.arrayContaining([
+                        expect.objectContaining({
+                            disposition: 'inserted',
+                            dedupeKey: 'diag-right-click-1',
+                            occurrenceCount: 1,
+                        }),
+                        expect.objectContaining({
+                            disposition: 'duplicate-ignored',
+                            dedupeKey: 'diag-right-click-1',
+                            occurrenceCount: 1,
+                        }),
+                        expect.objectContaining({
+                            disposition: 'aggregated',
+                            dedupeKey: 'diag-right-click-2',
+                            occurrenceCount: 2,
+                        }),
+                        expect.objectContaining({
+                            disposition: 'inserted',
+                            dedupeKey: 'diag-print-screen-1',
+                            occurrenceCount: 1,
+                        }),
+                        expect.objectContaining({
+                            disposition: 'duplicate-ignored',
+                            dedupeKey: 'diag-print-screen-1',
+                            occurrenceCount: 1,
+                        }),
+                    ]),
+                );
+
+                const rightClickIncident = await dbClient
+                    .selectFrom('flagged_incidents')
+                    .select(['details'])
+                    .where('attempt_id', '=', fixture.attemptId)
+                    .where('rule_key', '=', 'webSecurity.right_click_disable')
+                    .executeTakeFirstOrThrow();
+                const printScreenIncidents = await dbClient
+                    .selectFrom('flagged_incidents')
+                    .select(['incident_id', 'details'])
+                    .where('attempt_id', '=', fixture.attemptId)
+                    .where('rule_key', '=', 'webSecurity.print_screen_disable')
+                    .execute();
+
+                expect(parseIncidentDetails(rightClickIncident.details)).toMatchObject({
+                    occurrenceCount: 2,
+                });
+                expect(printScreenIncidents).toHaveLength(1);
+                expect(parseIncidentDetails(printScreenIncidents[0]?.details)).toMatchObject({
+                    occurrenceCount: 1,
+                });
+            } finally {
+                await dbClient
+                    .deleteFrom('flagged_incidents')
+                    .where('attempt_id', '=', fixture.attemptId)
+                    .execute();
+                await dbClient
+                    .deleteFrom('exam_attempts')
+                    .where('attempt_id', '=', fixture.attemptId)
+                    .execute();
+                await dbClient.deleteFrom('exams').where('exam_id', '=', fixture.examId).execute();
+                await dbClient
+                    .deleteFrom('students')
+                    .where('student_id', '=', fixture.studentId)
+                    .execute();
+                await dbClient
+                    .deleteFrom('institutions')
+                    .where('id', '=', fixture.institutionId)
+                    .execute();
+                await dbClient.deleteFrom('users').where('id', '=', fixture.studentUserId).execute();
+            }
+        },
+        30000,
     );
 
     testWithDbClient(
@@ -557,6 +689,171 @@ describe('IncidentPersistenceService', () => {
     );
 
     testWithDbClient(
+        'keeps mixed-event counts isolated by rule key, platform, and dedupe key within one attempt',
+        async ({ dbClient }) => {
+            const fixture = await createTelemetryAttemptFixture(dbClient);
+
+            await IncidentPersistenceService.appendEvent(
+                dbClient,
+                buildPayload({
+                    ...fixture,
+                    ruleKey: 'webSecurity.right_click_disable',
+                    eventType: 'RIGHT_CLICK_ATTEMPT',
+                    platform: 'WEB',
+                    metadata: {
+                        dedupeKey: 'mixed:right-click:bucket-1',
+                        eventId: 'mixed-right-click-1',
+                        clientActionAt: '2026-04-22T08:00:00.000Z',
+                    },
+                }),
+            );
+            await IncidentPersistenceService.appendEvent(
+                dbClient,
+                buildPayload({
+                    ...fixture,
+                    ruleKey: 'webSecurity.right_click_disable',
+                    eventType: 'RIGHT_CLICK_ATTEMPT',
+                    platform: 'WEB',
+                    metadata: {
+                        dedupeKey: 'mixed:right-click:bucket-1',
+                        eventId: 'mixed-right-click-1-retry',
+                        clientActionAt: '2026-04-22T08:00:00.000Z',
+                    },
+                }),
+            );
+            await IncidentPersistenceService.appendEvent(
+                dbClient,
+                buildPayload({
+                    ...fixture,
+                    ruleKey: 'webSecurity.right_click_disable',
+                    eventType: 'RIGHT_CLICK_ATTEMPT',
+                    platform: 'WEB',
+                    metadata: {
+                        dedupeKey: 'mixed:right-click:bucket-2',
+                        eventId: 'mixed-right-click-2',
+                        clientActionAt: '2026-04-22T08:00:04.000Z',
+                    },
+                }),
+            );
+
+            await IncidentPersistenceService.appendEvent(
+                dbClient,
+                buildPayload({
+                    ...fixture,
+                    ruleKey: 'mobileSecurity.prevent_backgrounding',
+                    eventType: 'APP_BACKGROUNDING',
+                    platform: 'MOBILE',
+                    metadata: {
+                        dedupeKey: 'mixed:backgrounding:bucket-1',
+                        eventId: 'mixed-backgrounding-1',
+                        clientActionAt: '2026-04-22T08:01:00.000Z',
+                    },
+                }),
+            );
+
+            await IncidentPersistenceService.appendEvent(
+                dbClient,
+                buildPayload({
+                    ...fixture,
+                    ruleKey: 'aiRules.audio_anomaly_detection',
+                    eventType: 'AUDIO_ANOMALY',
+                    platform: 'WEB',
+                    metadata: {
+                        dedupeKey: 'mixed:audio:bucket-1',
+                        eventId: 'mixed-audio-1',
+                        clientActionAt: '2026-04-22T08:02:00.000Z',
+                        anomalyType: 'TALKING',
+                        confidenceScore: 0.84,
+                    },
+                }),
+            );
+
+            await IncidentPersistenceService.appendEvent(
+                dbClient,
+                buildPayload({
+                    ...fixture,
+                    ruleKey: 'aiRules.gaze_tracking',
+                    eventType: 'GAZE_OFF_SCREEN',
+                    platform: 'WEB',
+                    metadata: {
+                        dedupeKey: 'mixed:gaze:bucket-1',
+                        eventId: 'mixed-gaze-1',
+                        clientActionAt: '2026-04-22T08:03:00.000Z',
+                        durationMs: 1500,
+                        confidenceScore: 0.79,
+                    },
+                }),
+            );
+
+            const incidents = await dbClient
+                .selectFrom('flagged_incidents')
+                .select(['rule_key', 'platform', 'dedupe_key', 'details'])
+                .where('attempt_id', '=', fixture.attemptId)
+                .orderBy('rule_key', 'asc')
+                .execute();
+
+            expect(incidents).toHaveLength(4);
+
+            const rightClickIncident = incidents.find(
+                (incident) => incident.rule_key === 'webSecurity.right_click_disable',
+            );
+            const backgroundingIncident = incidents.find(
+                (incident) => incident.rule_key === 'mobileSecurity.prevent_backgrounding',
+            );
+            const audioIncident = incidents.find(
+                (incident) => incident.rule_key === 'aiRules.audio_anomaly_detection',
+            );
+            const gazeIncident = incidents.find(
+                (incident) => incident.rule_key === 'aiRules.gaze_tracking',
+            );
+
+            expect(rightClickIncident?.platform).toBe('WEB');
+            expect(rightClickIncident?.dedupe_key).toBe('mixed:right-click:bucket-1');
+            expect(parseIncidentDetails(rightClickIncident?.details)).toMatchObject({
+                occurrenceCount: 2,
+                lastEvent: {
+                    eventType: 'RIGHT_CLICK_ATTEMPT',
+                    metadata: {
+                        dedupeKey: 'mixed:right-click:bucket-2',
+                    },
+                },
+            });
+
+            expect(backgroundingIncident?.platform).toBe('MOBILE');
+            expect(backgroundingIncident?.dedupe_key).toBe('mixed:backgrounding:bucket-1');
+            expect(parseIncidentDetails(backgroundingIncident?.details)).toMatchObject({
+                eventType: 'APP_BACKGROUNDING',
+                occurrenceCount: 1,
+            });
+
+            expect(audioIncident?.platform).toBe('WEB');
+            expect(audioIncident?.dedupe_key).toBe('mixed:audio:bucket-1');
+            expect(parseIncidentDetails(audioIncident?.details)).toMatchObject({
+                eventType: 'AUDIO_ANOMALY',
+                occurrenceCount: 1,
+                lastEvent: {
+                    metadata: {
+                        anomalyType: 'TALKING',
+                        confidenceScore: 0.84,
+                    },
+                },
+            });
+
+            expect(gazeIncident?.platform).toBe('WEB');
+            expect(gazeIncident?.dedupe_key).toBe('mixed:gaze:bucket-1');
+            expect(parseIncidentDetails(gazeIncident?.details)).toMatchObject({
+                eventType: 'GAZE_OFF_SCREEN',
+                occurrenceCount: 1,
+                lastEvent: {
+                    metadata: {
+                        durationMs: 1500,
+                    },
+                },
+            });
+        },
+    );
+
+    testWithDbClient(
         'keeps duplicate first-trigger requests with the same dedupe key at occurrence count one',
         async ({ dbClient }) => {
             const fixture = await createTelemetryAttemptFixture(dbClient);
@@ -762,7 +1059,15 @@ describe('IncidentPersistenceService', () => {
                 .execute();
 
             expect(updatedIncidents).toHaveLength(1);
+            expect(updatedIncidents[0].dedupe_key).toBe(dedupeKey);
             expect(parseIncidentDetails(updatedIncidents[0].details).occurrenceCount).toBe(2);
+            expect(parseIncidentDetails(updatedIncidents[0].details)).toMatchObject({
+                lastEvent: {
+                    metadata: {
+                        dedupeKey: 'different-dedupe-key-456',
+                    },
+                },
+            });
         },
     );
 

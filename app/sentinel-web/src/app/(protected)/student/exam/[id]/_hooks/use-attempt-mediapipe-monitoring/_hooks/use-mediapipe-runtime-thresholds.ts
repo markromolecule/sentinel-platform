@@ -27,6 +27,35 @@ export type UseMediapipeRuntimeThresholdsArgs = {
     activeSandbox: ResolvedMediaPipeSandbox | undefined;
 };
 
+export type AttemptMediaPipeDevelopmentDiagnostics = {
+    confidenceThreshold: number;
+    durationThresholdMs: number | null;
+    frameIntervalMs: number;
+    calibrationState: 'available' | 'missing';
+    downwardGazePolicy: 'tolerated' | 'strict';
+};
+
+/**
+ * Builds a compact development-only diagnostics payload for attempt-page
+ * MediaPipe dispatch decisions.
+ */
+export function buildAttemptMediaPipeDevelopmentDiagnostics(args: {
+    activeSandbox: ResolvedMediaPipeSandbox | undefined;
+    thresholds: ReturnType<typeof resolveMediaPipeThresholds>;
+    hasCalibrationProfile: boolean;
+    tolerateDownwardGaze: boolean;
+}): AttemptMediaPipeDevelopmentDiagnostics {
+    const sandbox = args.activeSandbox ?? FALLBACK_SANDBOX;
+
+    return {
+        confidenceThreshold: sandbox.confidenceThreshold,
+        durationThresholdMs: args.thresholds.GAZE_OFF_SCREEN.durationThresholdMs,
+        frameIntervalMs: sandbox.frameIntervalMs,
+        calibrationState: args.hasCalibrationProfile ? 'available' : 'missing',
+        downwardGazePolicy: args.tolerateDownwardGaze ? 'tolerated' : 'strict',
+    };
+}
+
 /**
  * Derives the signal-dispatch thresholds from the resolved sandbox config.
  * Clamps `GAZE_OFF_SCREEN` and `NO_FACE_DETECTED` duration thresholds to

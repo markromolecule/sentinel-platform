@@ -4,6 +4,7 @@ import type { EmitWebTelemetryEventArgs, EmitMediaPipeTelemetryEventArgs } from 
 import {
     isWebTelemetryEventEnabled,
     buildWebTelemetryPayload,
+    buildMobileTelemetryPayload,
     isMediaPipeTelemetryEventEnabled,
     buildAttemptMediaPipeTelemetryPayload,
 } from './_utils/payloads';
@@ -12,6 +13,8 @@ export * from './_types';
 export * from './_utils/payloads';
 export * from './_utils/context';
 export * from './_utils/action-metadata';
+export * from './_utils/monitoring-event-trace';
+export * from './_utils/screen-capture-shortcut';
 
 export async function emitWebTelemetryEvent(
     apiClient: ApiClientType,
@@ -21,7 +24,12 @@ export async function emitWebTelemetryEvent(
         return false;
     }
 
-    await ingestTelemetryEvent(apiClient, buildWebTelemetryPayload(payloadArgs));
+    const payload =
+        payloadArgs.platform === 'MOBILE'
+            ? buildMobileTelemetryPayload(payloadArgs)
+            : buildWebTelemetryPayload(payloadArgs);
+
+    await ingestTelemetryEvent(apiClient, payload);
     return true;
 }
 

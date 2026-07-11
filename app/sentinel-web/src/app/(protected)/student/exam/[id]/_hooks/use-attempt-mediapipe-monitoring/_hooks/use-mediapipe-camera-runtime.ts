@@ -14,6 +14,7 @@ import { useStudentExamMediaPipeStream } from '@/app/(protected)/student/exam/[i
 import {
     emitMediaPipeTelemetryEvent,
     isMediaPipeTelemetryEventEnabled,
+    writeMonitoringEventTrace,
 } from '@/app/(protected)/student/exam/[id]/_lib/web-telemetry-client';
 import { MEDIAPIPE_MODEL_PATH, MEDIAPIPE_WASM_PATH } from '../_constants';
 import type { MediaPipeAttemptIncident, ResolvedMediaPipeSandbox } from '../_types';
@@ -23,6 +24,7 @@ import {
     normalizeAttemptMediaPipeAnalysis,
 } from '../_utils';
 import type { MediapipeRuntimeEligibility } from './use-mediapipe-runtime-eligibility';
+import { buildAttemptMediaPipeDevelopmentDiagnostics } from './use-mediapipe-runtime-thresholds';
 
 export type MediapipeSignalThresholds = ReturnType<typeof resolveMediaPipeThresholds>;
 
@@ -220,6 +222,7 @@ export function useMediapipeCameraRuntime({
                 // -----------------------------------------------------------------
                 const tick = () => {
                     const currentSandbox = activeSandbox;
+                    const tolerateDownwardGaze = true;
 
                     if (
                         disposed ||
@@ -255,6 +258,7 @@ export function useMediapipeCameraRuntime({
                         landmarksByFace,
                         confidenceThreshold: currentSandbox.confidenceThreshold,
                         calibrationProfile,
+                        tolerateDownwardGaze,
                     });
 
                     const normalizedAnalysis = normalizeAttemptMediaPipeAnalysis({
@@ -274,16 +278,63 @@ export function useMediapipeCameraRuntime({
 
                     setAnalysis(normalizedAnalysis);
 
+                    const detectionTime = new Date(Date.now()).toISOString();
+                    const developmentDiagnostics = buildAttemptMediaPipeDevelopmentDiagnostics({
+                        activeSandbox: currentSandbox,
+                        thresholds,
+                        hasCalibrationProfile: Boolean(calibrationProfile),
+                        tolerateDownwardGaze,
+                    });
+
                     const dispatch = evaluateMediaPipeSignalDispatch({
                         currentSignal: telemetrySignal,
                         tracker: trackerRef.current,
                         nowMs: Date.now(),
                         thresholds,
+                        signalGapGraceMs: currentSandbox.frameIntervalMs,
                     });
 
                     trackerRef.current = dispatch.tracker;
 
+                    if (telemetrySignal && !dispatch.shouldEmit) {
+                        writeMonitoringEventTrace({
+                            detectorSource: 'mediapipe',
+                            eventType: telemetrySignal,
+                            eventSubtype: normalizedAnalysis.status,
+                            detectionTime,
+                            disposition: 'suppressed',
+                            reason:
+                                dispatch.tracker.lastEmittedAtMs !== null
+                                    ? 'dispatch-cooldown-active'
+                                    : 'awaiting-duration-threshold',
+                            developmentContext: {
+                                ...developmentDiagnostics,
+                                analysisStatus: normalizedAnalysis.status,
+                                confidenceScore: normalizedAnalysis.confidenceScore ?? undefined,
+                                trackedSignal: dispatch.tracker.activeSignal ?? undefined,
+                                activeSinceMs: dispatch.tracker.activeSinceMs ?? undefined,
+                            },
+                        });
+                    }
+
                     if (dispatch.shouldEmit && telemetrySignal) {
+                        const emissionTime = new Date().toISOString();
+
+                        writeMonitoringEventTrace({
+                            detectorSource: 'mediapipe',
+                            eventType: telemetrySignal,
+                            eventSubtype: normalizedAnalysis.status,
+                            detectionTime,
+                            emissionTime,
+                            disposition: 'emitting',
+                            developmentContext: {
+                                ...developmentDiagnostics,
+                                analysisStatus: normalizedAnalysis.status,
+                                confidenceScore: normalizedAnalysis.confidenceScore ?? undefined,
+                                durationMs: dispatch.durationMs ?? undefined,
+                            },
+                        });
+
                         // Show a contextual toast for each incident type.
                         if (telemetrySignal === 'GAZE_OFF_SCREEN') {
                             toast.warning('Please keep your eyes on the exam screen.', {
@@ -302,7 +353,7 @@ export function useMediapipeCameraRuntime({
 
                         setActiveIncident({
                             eventType: telemetrySignal,
-                            detectedAt: new Date().toISOString(),
+                            detectedAt: detectionTime,
                             analysis: normalizedAnalysis,
                         });
 
@@ -317,9 +368,41 @@ export function useMediapipeCameraRuntime({
                                 confidenceScore: normalizedAnalysis.confidenceScore ?? undefined,
                                 aggregation: dispatch.aggregation,
                             },
-                        }).catch((error) => {
-                            console.error('Failed to emit MediaPipe telemetry event.', { error });
-                        });
+                        })
+                            .then((emitted) => {
+                                writeMonitoringEventTrace({
+                                    detectorSource: 'mediapipe',
+                                    eventType: telemetrySignal,
+                                    eventSubtype: normalizedAnalysis.status,
+                                    detectionTime,
+                                    emissionTime,
+                                    disposition: emitted ? 'accepted' : 'suppressed',
+                                    reason: emitted ? undefined : 'rule-disabled',
+                                    developmentContext: {
+                                        ...developmentDiagnostics,
+                                        analysisStatus: normalizedAnalysis.status,
+                                        confidenceScore:
+                                            normalizedAnalysis.confidenceScore ?? undefined,
+                                        durationMs: dispatch.durationMs ?? undefined,
+                                    },
+                                });
+                            })
+                            .catch((error) => {
+                                writeMonitoringEventTrace({
+                                    detectorSource: 'mediapipe',
+                                    eventType: telemetrySignal,
+                                    eventSubtype: normalizedAnalysis.status,
+                                    detectionTime,
+                                    emissionTime,
+                                    disposition: 'failed',
+                                    reason:
+                                        error instanceof Error ? error.message : 'unknown-error',
+                                    developmentContext: developmentDiagnostics,
+                                });
+                                console.error('Failed to emit MediaPipe telemetry event.', {
+                                    error,
+                                });
+                            });
                     }
 
                     animationFrameRef.current = window.requestAnimationFrame(tick);

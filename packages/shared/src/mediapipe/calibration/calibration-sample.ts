@@ -7,6 +7,38 @@ import type {
 import { calculateMediaPipeGazeOffsetSample } from './gaze-offset';
 
 /**
+ * Returns whether the face bounds remain within the centered calibration window.
+ *
+ * @param args.faceBounds The detected face bounds for the current frame.
+ * @param args.targetCenterX The expected horizontal center of the face.
+ * @param args.targetCenterY The expected vertical center of the face.
+ * @param args.maxHorizontalDelta The maximum horizontal drift allowed from center.
+ * @param args.maxVerticalDelta The maximum vertical drift allowed from center.
+ * @returns `true` when the face stays inside the calibration target bounds.
+ */
+export function isMediaPipeFaceCenteredForCalibration(args: {
+    faceBounds: MediaPipeCalibrationSample['faceBounds'] | null;
+    targetCenterX?: number;
+    targetCenterY?: number;
+    maxHorizontalDelta?: number;
+    maxVerticalDelta?: number;
+}) {
+    if (!args.faceBounds) {
+        return false;
+    }
+
+    const targetCenterX = args.targetCenterX ?? 0.5;
+    const targetCenterY = args.targetCenterY ?? 0.45;
+    const maxHorizontalDelta = args.maxHorizontalDelta ?? 0.15;
+    const maxVerticalDelta = args.maxVerticalDelta ?? 0.2;
+
+    return (
+        Math.abs(args.faceBounds.centerX - targetCenterX) < maxHorizontalDelta &&
+        Math.abs(args.faceBounds.centerY - targetCenterY) < maxVerticalDelta
+    );
+}
+
+/**
  * Creates a single calibration sample from raw face landmarks and a confidence score.
  * Returns `null` if face bounds cannot be determined (e.g. no visible face).
  */
@@ -68,11 +100,9 @@ export function isMediaPipeCalibrationCandidate(args: {
         return false;
     }
 
-    const targetCenterX = args.targetCenterX ?? 0.5;
-    const targetCenterY = args.targetCenterY ?? 0.45;
-
-    return (
-        Math.abs(sample.faceBounds.centerX - targetCenterX) < 0.15 &&
-        Math.abs(sample.faceBounds.centerY - targetCenterY) < 0.2
-    );
+    return isMediaPipeFaceCenteredForCalibration({
+        faceBounds: sample.faceBounds,
+        targetCenterX: args.targetCenterX,
+        targetCenterY: args.targetCenterY,
+    });
 }

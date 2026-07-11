@@ -21,7 +21,7 @@ export function ExamAttemptRuntimePassage({
     }
 
     return (
-        <div className="flex h-full flex-col">
+        <div className="flex h-full min-h-0 min-w-0 flex-col">
             <div className="space-y-3">
                 <div>
                     <h2 className="text-foreground text-xl font-semibold tracking-tight sm:text-2xl">
@@ -35,10 +35,11 @@ export function ExamAttemptRuntimePassage({
                 </div>
             </div>
 
-            <div className="border-border/60 mt-4 flex-1 border-y py-4 sm:mt-6 sm:py-6">
+            <div className="border-border/60 mt-4 min-h-0 flex-1 border-y py-4 sm:mt-6 sm:py-6">
                 {currentContext.body ? (
                     <div
-                        className="text-foreground text-sm leading-7 sm:text-[15px] sm:leading-8"
+                        data-testid="runtime-passage-body"
+                        className="text-foreground min-w-0 break-words text-sm leading-7 sm:text-[15px] sm:leading-8 [&_a]:break-all [&_a]:underline [&_blockquote]:border-l-2 [&_blockquote]:border-border/60 [&_blockquote]:pl-4 [&_code]:rounded [&_code]:bg-muted [&_code]:px-1.5 [&_img]:h-auto [&_img]:max-w-full [&_img]:rounded-lg [&_img]:border [&_img]:border-border/60 [&_img]:object-contain [&_ol]:pl-5 [&_pre]:overflow-x-auto [&_pre]:rounded-lg [&_pre]:bg-muted [&_pre]:p-3 [&_ul]:pl-5"
                         dangerouslySetInnerHTML={{ __html: currentContext.body }}
                     />
                 ) : (

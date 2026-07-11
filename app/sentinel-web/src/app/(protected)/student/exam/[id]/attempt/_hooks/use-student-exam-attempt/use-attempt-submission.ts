@@ -47,6 +47,7 @@ export function useAttemptSubmission({
 
     const proceedToTurnInReview = () => {
         if (isRedirectingToTurnIn || !sessionId || isBlocked) return;
+        setMonitoringPhase?.('submitting');
         const monitoringSuspended = suspendSecurityMonitoring();
 
         if (!monitoringSuspended) {
@@ -59,7 +60,6 @@ export function useAttemptSubmission({
             return;
         }
 
-        setMonitoringPhase?.('submitting');
         setIsRedirectingToTurnIn(true);
 
         const summary = scoreExamAttempt({

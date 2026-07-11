@@ -1,11 +1,24 @@
-import { type WebTelemetryEventType } from '../_types';
+import { type BrowserTelemetryEventType } from '../_types';
 
 type CreateTelemetryActionMetadataArgs = {
-    eventType: WebTelemetryEventType;
+    eventType: BrowserTelemetryEventType;
     examSessionId?: string;
     actionSource?: string;
+    actionBucketId?: string;
     clientActionAt?: string;
     bucketMs?: number;
+};
+
+/**
+ * Correlation metadata attached to one logical browser action.
+ */
+export type TelemetryActionMetadata = {
+    eventId: string;
+    dedupeKey: string;
+    clientActionAt: string;
+    detectionTimestamp: string;
+    detectorSource: string;
+    eventSubtype: string;
 };
 
 function normalizeActionSource(actionSource: string | undefined) {
@@ -51,23 +64,26 @@ function toStableUuid(seed: string) {
  * @returns An object with eventId, dedupeKey, and clientActionAt.
  */
 export function createTelemetryActionMetadata(
-    args: WebTelemetryEventType | CreateTelemetryActionMetadataArgs,
+    args: BrowserTelemetryEventType | CreateTelemetryActionMetadataArgs,
 ) {
     const {
         eventType,
         examSessionId,
         actionSource,
+        actionBucketId,
         clientActionAt = new Date().toISOString(),
         bucketMs = 1000,
     } = typeof args === 'string' ? { eventType: args } : args;
     const normalizedActionSource = normalizeActionSource(actionSource);
+    const normalizedActionBucketId =
+        normalizeActionSource(actionBucketId) || normalizedActionSource;
     const bucketStart = new Date(
         Math.floor(new Date(clientActionAt).getTime() / bucketMs) * bucketMs,
     ).toISOString();
     const dedupeSeed = [
         examSessionId ?? 'unknown-session',
         eventType,
-        normalizedActionSource,
+        normalizedActionBucketId,
         bucketStart,
     ].join(':');
     const eventId = toStableUuid(dedupeSeed);
@@ -77,5 +93,8 @@ export function createTelemetryActionMetadata(
         eventId,
         dedupeKey,
         clientActionAt,
+        detectionTimestamp: clientActionAt,
+        detectorSource: normalizedActionSource || 'generic-action',
+        eventSubtype: normalizedActionSource || normalizedActionBucketId || 'generic-action',
     };
 }
