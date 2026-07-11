@@ -31,12 +31,27 @@ export function useAudioAnomalyWorker({
 
     const controllerRef = useRef<AudioAnomalyController | null>(null);
     const isSuspendedRef = useRef(isSuspended);
+    const phaseRef = useRef<AudioWorkerPhase>(phase);
+    const runtimeConfigRef = useRef(runtimeConfig);
+    const audioStreamRef = useRef(audioStream);
     const lastAcceptedAnomalyAtRef = useRef<Map<string, number>>(new Map());
 
     // Sync isSuspended to a ref to prevent re-triggering the main setup effect
     useEffect(() => {
         isSuspendedRef.current = isSuspended;
     }, [isSuspended]);
+
+    useEffect(() => {
+        phaseRef.current = phase;
+    }, [phase]);
+
+    useEffect(() => {
+        runtimeConfigRef.current = runtimeConfig;
+    }, [runtimeConfig]);
+
+    useEffect(() => {
+        audioStreamRef.current = audioStream;
+    }, [audioStream]);
 
     const isEnabled = Boolean(
         configuration?.aiRules?.audio_anomaly_detection &&
@@ -52,6 +67,9 @@ export function useAudioAnomalyWorker({
         studentId,
         isSuspendedRef,
         runtimeConfig?.cooldownMs ?? DEFAULT_AUDIO_ANOMALY_CONFIG.cooldownMs,
+        runtimeConfigRef,
+        phaseRef,
+        audioStreamRef,
     );
 
     // Lifecycle effect: Start and teardown the controller when active
@@ -66,7 +84,10 @@ export function useAudioAnomalyWorker({
             audioStream,
             providedWorker,
             runtimeConfig,
-            onPhaseChange: setPhase,
+            onPhaseChange: (nextPhase) => {
+                phaseRef.current = nextPhase;
+                setPhase(nextPhase);
+            },
             onErrorMessage: setErrorMessage,
             onAnomaly: (anomalyType, confidenceScore) => {
                 if (isSuspendedRef.current) {

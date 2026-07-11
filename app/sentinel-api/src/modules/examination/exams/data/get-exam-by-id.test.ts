@@ -131,6 +131,35 @@ describe('getExamByIdData', () => {
         expect(compiledQuery.sql).toContain('esa.class_group_id = "student_cg"."class_group_id"');
         expect(compiledQuery.sql).toContain('from "exam_assigned_sections"');
         expect(compiledQuery.sql).toContain('esa.class_group_id is null');
+        expect(compiledQuery.sql).not.toContain('"e"."is_public" = true');
+
+        void db.destroy();
+    });
+
+    it('uses the same published plus assignment visibility gates for student detail queries as the list query', async () => {
+        const { db, executeSpy } = createMockDb(
+            [
+                { column_name: 'section_id' },
+                { column_name: 'section_name' },
+                { column_name: 'room_id' },
+            ],
+            [],
+        );
+
+        await getExamByIdData({
+            dbClient: db as any,
+            id: 'exam-1',
+            institutionId: 'institution-1',
+            studentUserId: 'student-1',
+        });
+
+        const compiledQuery = executeSpy.mock.calls[1][0];
+
+        expect(compiledQuery.sql).toContain('"e"."published_at" is not null');
+        expect(compiledQuery.sql).toContain('lower(cast("e"."status" as text)) <>');
+        expect(compiledQuery.sql).toContain('enr.class_group_id = e.class_group_id');
+        expect(compiledQuery.sql).toContain('esa.class_group_id = "student_cg"."class_group_id"');
+        expect(compiledQuery.sql).not.toContain('"e"."is_public" = true');
 
         void db.destroy();
     });

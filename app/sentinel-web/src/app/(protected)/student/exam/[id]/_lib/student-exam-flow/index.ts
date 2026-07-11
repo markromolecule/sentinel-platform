@@ -76,6 +76,30 @@ export function patchStoredStudentExamFlow(examId: string, patch: Partial<Stored
     return nextValue;
 }
 
+export function resolveStoredStudentExamCheckupReadiness(args: {
+    examId: string;
+    requiresMediaPipeActivation: boolean;
+    maxAgeMs?: number;
+    nowMs?: number;
+}) {
+    const storedFlow = readStoredStudentExamFlow(args.examId);
+    const mediaPipeActivation = resolveStoredStudentExamMediaPipeActivation({
+        examId: args.examId,
+        required: args.requiresMediaPipeActivation,
+        maxAgeMs: args.maxAgeMs,
+        nowMs: args.nowMs,
+    });
+
+    return {
+        storedFlow,
+        mediaPipeActivation,
+        isReady:
+            storedFlow.privacyAccepted &&
+            storedFlow.checkupCompleted &&
+            mediaPipeActivation.isValid,
+    };
+}
+
 export function resolveStoredStudentExamMediaPipeActivation(args: {
     examId: string;
     required: boolean;

@@ -28,15 +28,16 @@ describe('mapYamnetScoresToAnomaly', () => {
 
     it('applies the sensitivity multiplier when calculating thresholds', () => {
         const scores = new Float32Array(521);
-        scores[400] = 0.35;
+        scores[380] = 0.4;
 
         const result = mapYamnetScoresToAnomaly(scores, {
             ...DEFAULT_AUDIO_ANOMALY_CONFIG,
             sensitivityMultiplier: 2,
+            enabledAnomalyTypes: ['TALKING', 'TYPING', 'BACKGROUND_NOISE'],
         });
 
         expect(result?.type).toBe('TYPING');
-        expect(result?.confidence).toBeCloseTo(0.35);
+        expect(result?.confidence).toBeCloseTo(0.4);
     });
 });
 

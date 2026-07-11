@@ -3,12 +3,7 @@ import {
     WEB_TELEMETRY_RULE_KEYS,
     MOBILE_TELEMETRY_RULE_KEYS,
 } from '@sentinel/shared';
-import type {
-    TelemetryRuleKey,
-    TelemetryIncidentSeverity,
-    TelemetrySettings,
-    TelemetryRuleOverride,
-} from '@sentinel/shared';
+import type { TelemetryRuleKey, TelemetrySettings } from '@sentinel/shared';
 import type { TelemetrySettingsRecord } from '@sentinel/shared/types';
 import type { TelemetryHealthSnapshot } from '@sentinel/services';
 

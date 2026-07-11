@@ -1,7 +1,10 @@
 import { HTTPException } from 'hono/http-exception';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { PersistableProctoringEvent } from '../ingestion.dto';
-import { processQueuedTelemetryEvent } from './telemetry-job-processor.service';
+import {
+    buildTelemetryJobLogContext,
+    processQueuedTelemetryEvent,
+} from './telemetry-job-processor.service';
 import { TelemetryStorageService } from '../../storage/storage.service';
 
 vi.mock('../../storage/storage.service', () => ({
@@ -34,6 +37,7 @@ describe('processQueuedTelemetryEvent', () => {
     });
 
     it('drops terminal not-found storage errors without retrying the queue job', async () => {
+        const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
         appendEventMock.mockRejectedValueOnce(
             new HTTPException(404, {
                 message: 'Exam session not found for telemetry ingestion.',
@@ -41,6 +45,17 @@ describe('processQueuedTelemetryEvent', () => {
         );
 
         await expect(processQueuedTelemetryEvent({} as never, payload)).resolves.toBe('dropped');
+        expect(warnSpy).toHaveBeenCalledWith('[TelemetryWorker] Dropping terminal telemetry job.', {
+            status: 404,
+            message: 'Exam session not found for telemetry ingestion.',
+            attemptId: payload.examSessionId,
+            studentId: payload.studentId,
+            eventType: payload.eventType,
+            ruleKey: payload.ruleKey,
+            timestamp: payload.timestamp,
+            eventId: null,
+            dedupeKey: null,
+        });
     });
 
     it('drops terminal completed-session storage errors without retrying the queue job', async () => {
@@ -58,5 +73,27 @@ describe('processQueuedTelemetryEvent', () => {
         appendEventMock.mockRejectedValueOnce(error);
 
         await expect(processQueuedTelemetryEvent({} as never, payload)).rejects.toThrow(error);
+    });
+});
+
+describe('buildTelemetryJobLogContext', () => {
+    it('returns the identifiers needed to reconcile a telemetry job to an attempt and event', () => {
+        expect(
+            buildTelemetryJobLogContext({
+                ...payload,
+                metadata: {
+                    eventId: '123e4567-e89b-12d3-a456-426614174999',
+                    dedupeKey: 'attempt-1:TAB_SWITCH:bucket-1',
+                },
+            }),
+        ).toEqual({
+            attemptId: payload.examSessionId,
+            studentId: payload.studentId,
+            eventType: payload.eventType,
+            ruleKey: payload.ruleKey,
+            timestamp: payload.timestamp,
+            eventId: '123e4567-e89b-12d3-a456-426614174999',
+            dedupeKey: 'attempt-1:TAB_SWITCH:bucket-1',
+        });
     });
 });

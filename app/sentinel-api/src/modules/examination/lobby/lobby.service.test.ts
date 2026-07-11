@@ -17,7 +17,7 @@ vi.mock('../access/data/entitlements.repository', () => ({
     },
 }));
 
-vi.mock('../assign/services/exam-access', () => ({
+vi.mock('../assign/services/exam-access.service', () => ({
     assertInstructorExamAccess: vi.fn(),
 }));
 

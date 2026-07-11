@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo } from 'react';
+import { useCallback, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { Camera, Mic, ScanFace, CheckCircle2 } from 'lucide-react';
 import { Progress } from '@sentinel/ui';
@@ -13,6 +13,7 @@ import { useStudentCheckupManager } from '../_hooks/use-student-checkup-manager'
 import {
     buildStudentExamHref,
     patchStoredStudentExamFlow,
+    resolveStoredStudentExamCheckupReadiness,
     resolveStudentExamMediaPipeSandbox,
 } from '../_lib/student-exam-flow';
 import { MonitoringPreloader } from '../_components/monitoring-preloader';
@@ -82,9 +83,40 @@ export default function StudentExamCheckupPage() {
     const isMediaPipeConfigured = Boolean(
         effectiveMediaPipeSandbox.enabled && effectiveMediaPipeSandbox.captureDuringCheckup,
     );
+    const storedCheckupReadiness = useMemo(
+        () =>
+            resolveStoredStudentExamCheckupReadiness({
+                examId,
+                requiresMediaPipeActivation: isMediaPipeConfigured,
+            }),
+        [examId, isMediaPipeConfigured],
+    );
     const isCalibrationPending = isMediaPipeConfigured && !isCalibrated;
     const isMediaPipeReady = !isMediaPipeConfigured || (isCalibrated && !isCalibrationPending);
     const isCheckupReady = isDeviceCheckupReady && isMediaPipeReady;
+    const isPersistedCheckupReady = storedCheckupReadiness.isReady;
+    const isRestoringPersistedCheckup = isPersistedCheckupReady && !isCheckupReady;
+    const effectiveCameraState =
+        configuration.cameraRequired && isRestoringPersistedCheckup ? 'granted' : cameraState;
+    const effectiveMicState =
+        configuration.micRequired && isRestoringPersistedCheckup ? 'granted' : micState;
+    const effectiveIdentityState = isRestoringPersistedCheckup
+        ? ('granted' as const)
+        : isCalibrated
+          ? ('granted' as const)
+          : ('idle' as const);
+    const isCheckupFlowReady = isCheckupReady || isPersistedCheckupReady;
+
+    const handleRequestDeviceAccess = useCallback(() => {
+        patchStoredStudentExamFlow(examId, {
+            checkupCompleted: false,
+            mediaPipeActivatedAt: null,
+            mediaPipeCalibrationCompletedAt: null,
+            mediaPipeActivationSource: null,
+            mediaPipeCalibrationProfile: null,
+        });
+        requestDeviceAccess();
+    }, [examId, requestDeviceAccess]);
 
     const checks = [
         {
@@ -92,7 +124,7 @@ export default function StudentExamCheckupPage() {
             description: configuration.cameraRequired
                 ? 'Required for face visibility during the exam.'
                 : 'Not required for this exam.',
-            state: configuration.cameraRequired ? cameraState : 'granted',
+            state: configuration.cameraRequired ? effectiveCameraState : 'granted',
             icon: Camera,
         },
         {
@@ -100,7 +132,7 @@ export default function StudentExamCheckupPage() {
             description: configuration.micRequired
                 ? 'Required for room audio monitoring.'
                 : 'Not required for this exam.',
-            state: configuration.micRequired ? micState : 'granted',
+            state: configuration.micRequired ? effectiveMicState : 'granted',
             icon: Mic,
         },
         ...(isMediaPipeConfigured
@@ -108,7 +140,7 @@ export default function StudentExamCheckupPage() {
                   {
                       label: 'Identity Scan',
                       description: 'A stable face scan ensures secure session ownership.',
-                      state: isCalibrated ? ('granted' as const) : ('idle' as const),
+                      state: effectiveIdentityState,
                       icon: ScanFace,
                   },
               ]
@@ -118,15 +150,17 @@ export default function StudentExamCheckupPage() {
     const calibrationHoldDurationLabel = formatCalibrationHoldDuration(
         calibrationHoldSecondsRemaining,
     );
-    const currentStatusLabel = isCheckupReady
+    const currentStatusLabel = isCheckupFlowReady
         ? 'Ready for lobby'
         : isCalibrationPending
           ? 'Calibrating identity'
           : isDeviceCheckupReady
             ? 'Waiting for final checks'
             : 'Device access required';
-    const currentStatusDescription = isCheckupReady
-        ? 'Your device and monitoring setup are ready. You can continue to the lobby.'
+    const currentStatusDescription = isCheckupFlowReady
+        ? isRestoringPersistedCheckup
+            ? 'Your previous device and identity verification are still valid. Continue to the lobby, or grant device access again to rerun the checkup.'
+            : 'Your device and monitoring setup are ready. You can continue to the lobby.'
         : isCalibrationPending
           ? mediaPipeAnalysis?.status === 'ready'
               ? `Hold steady for ${calibrationHoldDurationLabel} to complete the scan.`
@@ -136,10 +170,14 @@ export default function StudentExamCheckupPage() {
             : 'Grant the required device permissions before the exam can proceed.';
 
     useEffect(() => {
-        const hasCompletedMediaPipeActivation = isCheckupReady && isMediaPipeConfigured;
+        if (!isCheckupReady) {
+            return;
+        }
+
+        const hasCompletedMediaPipeActivation = isMediaPipeConfigured;
 
         patchStoredStudentExamFlow(examId, {
-            checkupCompleted: isCheckupReady,
+            checkupCompleted: true,
             mediaPipeActivatedAt: hasCompletedMediaPipeActivation ? new Date().toISOString() : null,
             mediaPipeCalibrationCompletedAt: hasCompletedMediaPipeActivation
                 ? new Date().toISOString()
@@ -211,7 +249,7 @@ export default function StudentExamCheckupPage() {
                             streamActive={isStreamActive}
                             isRequesting={isRequesting}
                             errorMessage={errorMessage}
-                            onRequestAccess={requestDeviceAccess}
+                            onRequestAccess={handleRequestDeviceAccess}
                             className="mx-auto w-full max-w-xl items-center text-center"
                             supplementaryContent={
                                 isMediaPipeConfigured && isStreamActive ? (
@@ -275,8 +313,14 @@ export default function StudentExamCheckupPage() {
                 </section>
 
                 <StudentFlowFooterActions
-                    primaryLabel={isCalibrationPending ? 'Finalizing Setup' : 'Continue to Lobby'}
-                    primaryDisabled={!isCheckupReady}
+                    primaryLabel={
+                        isCheckupFlowReady
+                            ? 'Continue to Lobby'
+                            : isCalibrationPending
+                              ? 'Finalizing Setup'
+                              : 'Continue to Lobby'
+                    }
+                    primaryDisabled={!isCheckupFlowReady}
                     primaryOnClick={() => router.push(buildStudentExamHref(examId, 'lobby'))}
                     secondaryLabel="Previous Step"
                     secondaryHref={buildStudentExamHref(examId, 'privacy')}

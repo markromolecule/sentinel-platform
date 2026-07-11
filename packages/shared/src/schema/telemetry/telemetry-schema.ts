@@ -215,12 +215,22 @@ export const telemetryAudioMetadataSchema = z
     })
     .strict();
 
+export const telemetryAudioDiagnosticsMetadataSchema = z
+    .object({
+        threshold: z.number().min(0).max(1).optional(),
+        configVersion: z.string().trim().min(1).max(100).optional(),
+        workerPhase: z.enum(['idle', 'initializing', 'running', 'error']).optional(),
+        streamPhase: z.enum(['live', 'ended', 'unavailable', 'managed']).optional(),
+    })
+    .strict();
+
 export const telemetryMetadataSchema = z
     .object({
         durationMs: z.number().int().nonnegative().optional(),
         confidenceScore: z.number().min(0).max(1).optional(),
         aggregation: telemetryAggregationMetadataSchema.optional(),
         anomalyType: telemetryAudioMetadataSchema.shape.anomalyType,
+        audioDiagnostics: telemetryAudioDiagnosticsMetadataSchema.optional(),
         eventId: z.string().uuid().optional(),
         dedupeKey: z.string().optional(),
         clientActionAt: z.string().optional(),
@@ -267,6 +277,7 @@ export const telemetryIncidentLastEventSchema = z
                 confidenceScore: z.number().min(0).max(1).optional(),
                 aggregation: telemetryAggregationMetadataSchema.optional(),
                 anomalyType: telemetryAudioMetadataSchema.shape.anomalyType,
+                audioDiagnostics: telemetryAudioDiagnosticsMetadataSchema.optional(),
             })
             .passthrough()
             .nullable()
