@@ -122,6 +122,7 @@ export type MediaPipeRolloutStage = 'sandbox' | 'checkup' | 'attempt';
 export type MediaPipeSignalTrackerState = {
     activeSignal: MediaPipeSupportedEventType | null;
     activeSinceMs: number | null;
+    lastObservedAtMs: number | null;
     lastEmittedAtMs: number | null;
     occurrenceCount: number;
 };
@@ -131,6 +132,7 @@ export type EvaluateMediaPipeSignalDispatchArgs = {
     tracker: MediaPipeSignalTrackerState;
     nowMs: number;
     thresholds: Record<MediaPipeSupportedEventType, MediaPipeThresholdResolution>;
+    signalGapGraceMs?: number;
 };
 
 export type EvaluateMediaPipeSignalDispatchResult = {

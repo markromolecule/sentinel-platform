@@ -2,12 +2,12 @@ import {
     DEFAULT_AUDIO_ANOMALY_CONFIG,
     checkAudioCapabilities,
     type AudioAnomalySettings,
-    type AudioAnomalyTypeValue,
 } from '@sentinel/shared';
 
 import { INIT_TIMEOUT_MS } from './_constants';
 import { createAudioGraph } from './create-audio-graph';
 import type { AudioWorkerPhase, AudioFramePayload, WorkerOutboundMessage } from './_types';
+import type { AudioEngineDetection } from '../../workers/audio-anomaly-engine';
 
 export interface AudioAnomalyControllerConfig {
     audioStream?: MediaStream | null;
@@ -15,7 +15,7 @@ export interface AudioAnomalyControllerConfig {
     runtimeConfig?: AudioAnomalySettings | null;
     onPhaseChange: (phase: AudioWorkerPhase) => void;
     onErrorMessage: (msg: string | null) => void;
-    onAnomaly: (anomalyType: AudioAnomalyTypeValue, confidenceScore: number) => void;
+    onAnomaly: (detection: AudioEngineDetection) => void;
 }
 
 /**
@@ -231,21 +231,8 @@ export class AudioAnomalyController {
                 break;
 
             case 'ANOMALY_DETECTED':
-                if (data.payload?.anomalies) {
-                    const primaryAnomaly = Object.entries(data.payload.anomalies).reduce<
-                        [AudioAnomalyTypeValue, number] | null
-                    >((best, current) => {
-                        const typedCurrent = current as [AudioAnomalyTypeValue, number];
-                        if (!best || typedCurrent[1] > best[1]) {
-                            return typedCurrent;
-                        }
-
-                        return best;
-                    }, null);
-
-                    if (primaryAnomaly) {
-                        this.config.onAnomaly(primaryAnomaly[0], primaryAnomaly[1]);
-                    }
+                if (data.payload) {
+                    this.config.onAnomaly(data.payload);
                 }
                 break;
         }

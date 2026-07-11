@@ -8,6 +8,7 @@ import {
     getNextOccurrenceCount,
     parseIncidentDetails,
 } from './incident-details.utils';
+import { writeIncidentTelemetryDiagnostic } from './incident-telemetry-diagnostics';
 import type { AppendEventResult, IngestSessionType } from './incident-persistence.types';
 import { incidentSeverityResolverService } from './incident-severity-resolver.service';
 
@@ -62,6 +63,8 @@ function findExistingIncidentWithinWindow(
     currentDedupeKey?: string,
 ): MatchingIncident | undefined {
     return incidents.find((candidate) => {
+        // Duplicate delivery with the same dedupe key is handled separately and must
+        // not count as a later distinct occurrence within the aggregation window.
         if (currentDedupeKey && candidate.dedupe_key === currentDedupeKey) {
             return false;
         }
@@ -116,6 +119,17 @@ async function updateExistingIncident(args: {
         occurrenceCount,
         severity: args.finalSeverity,
         settingsVersion: args.payload.runtimeSettingsSnapshot?.version ?? null,
+    });
+    writeIncidentTelemetryDiagnostic({
+        disposition: 'aggregated',
+        attemptId: args.payload.examSessionId,
+        incidentId: args.incident.incident_id,
+        ruleKey: args.payload.ruleKey,
+        platform: args.payload.platform,
+        eventType: args.payload.eventType,
+        dedupeKey: args.payload.metadata?.dedupeKey,
+        eventId: args.payload.metadata?.eventId,
+        occurrenceCount,
     });
 
     return {
@@ -177,9 +191,22 @@ export async function appendIncidentRecord(args: {
     const duplicateDedupeKey = await findDuplicateDedupeKeyIncident(args.db, args.payload);
 
     if (duplicateDedupeKey) {
+        // Same-key retries are ignored entirely: they represent duplicate delivery
+        // of one logical action, not a later occurrence that should increment count.
         console.log('[TelemetryStorage] Duplicate dedupeKey detected, ignoring event.', {
             attemptId: args.payload.examSessionId,
             dedupeKey: args.payload.metadata?.dedupeKey,
+        });
+        writeIncidentTelemetryDiagnostic({
+            disposition: 'duplicate-ignored',
+            attemptId: args.payload.examSessionId,
+            incidentId: duplicateDedupeKey.incident_id,
+            ruleKey: args.payload.ruleKey,
+            platform: args.payload.platform,
+            eventType: args.payload.eventType,
+            dedupeKey: args.payload.metadata?.dedupeKey,
+            eventId: args.payload.metadata?.eventId,
+            occurrenceCount: 1,
         });
         return null;
     }
@@ -220,6 +247,8 @@ export async function appendIncidentRecord(args: {
     const insertDetails = parseIncidentDetails(incident.details);
 
     if (existingIncident) {
+        // A later distinct dedupe key inside the lookback window aggregates into the
+        // existing row and increments occurrenceCount exactly once.
         return updateExistingIncident({
             db: args.db,
             incident: existingIncident,
@@ -278,6 +307,17 @@ export async function appendIncidentRecord(args: {
             severity: severityResolution.finalSeverity,
             settingsVersion: args.payload.runtimeSettingsSnapshot?.version ?? null,
         });
+        writeIncidentTelemetryDiagnostic({
+            disposition: 'inserted',
+            attemptId: args.payload.examSessionId,
+            incidentId: insertedIncident.incident_id,
+            ruleKey: args.payload.ruleKey,
+            platform: args.payload.platform,
+            eventType: args.payload.eventType,
+            dedupeKey: args.payload.metadata?.dedupeKey,
+            eventId: args.payload.metadata?.eventId,
+            occurrenceCount: 1,
+        });
 
         return {
             incidentId: insertedIncident.incident_id,
@@ -306,6 +346,17 @@ export async function appendIncidentRecord(args: {
                     incidentId: duplicateDedupeIncident.incident_id,
                 },
             );
+            writeIncidentTelemetryDiagnostic({
+                disposition: 'duplicate-ignored',
+                attemptId: args.payload.examSessionId,
+                incidentId: duplicateDedupeIncident.incident_id,
+                ruleKey: args.payload.ruleKey,
+                platform: args.payload.platform,
+                eventType: args.payload.eventType,
+                dedupeKey: args.payload.metadata?.dedupeKey,
+                eventId: args.payload.metadata?.eventId,
+                occurrenceCount: 1,
+            });
             return null;
         }
 

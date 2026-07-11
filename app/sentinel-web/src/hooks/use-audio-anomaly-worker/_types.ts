@@ -1,4 +1,5 @@
-import type { AudioAnomalySettings, AudioAnomalyTypeValue, ExamConfig } from '@sentinel/shared';
+import type { AudioAnomalySettings, ExamConfig } from '@sentinel/shared';
+import type { AudioEngineDetection } from '../../workers/audio-anomaly-engine';
 
 export type AudioWorkerPhase = 'idle' | 'initializing' | 'running' | 'error';
 
@@ -21,7 +22,7 @@ export type WorkerOutboundMessage =
     | { type: 'INIT_SUCCESS' }
     | { type: 'CAPABILITY_FAILURE'; payload?: Record<string, unknown> }
     | { type: 'INIT_FAILURE'; payload?: { message: string } }
-    | { type: 'ANOMALY_DETECTED'; payload?: { anomalies: Record<AudioAnomalyTypeValue, number> } };
+    | { type: 'ANOMALY_DETECTED'; payload?: AudioEngineDetection };
 
 export interface AudioGraphComponents {
     stream: MediaStream;

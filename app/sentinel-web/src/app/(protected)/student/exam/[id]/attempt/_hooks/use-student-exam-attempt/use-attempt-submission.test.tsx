@@ -116,7 +116,7 @@ describe('useAttemptSubmission', () => {
         );
     });
 
-    it('marks monitoring as suspended before a submitting-phase fullscreenchange can be observed', () => {
+    it('marks the submission phase before suspension and reaches suspended teardown state before navigation', () => {
         const monitoringState = {
             isSuspended: false,
             phase: 'active',
@@ -175,6 +175,115 @@ describe('useAttemptSubmission', () => {
 
         expect(fullscreenSnapshots).toEqual([
             {
+                isSuspended: false,
+                phase: 'submitting',
+            },
+        ]);
+        expect(setMonitoringPhase.mock.invocationCallOrder[0]).toBeLessThan(
+            suspendSecurityMonitoring.mock.invocationCallOrder[0],
+        );
+        expect(monitoringState.isSuspended).toBe(true);
+    });
+
+    it('reaches submitting plus suspended state before fullscreenchange at submission, router replacement, and delayed fullscreen exit', async () => {
+        const monitoringState = {
+            isSuspended: false,
+            phase: 'active',
+        };
+        const fullscreenSnapshots: Array<{
+            label: string;
+            isSuspended: boolean;
+            phase: string;
+        }> = [];
+        const originalRouterReplace = mockRouterReplace.getMockImplementation();
+        const originalExitFullscreen = mockExitFullscreen.getMockImplementation();
+        const suspendSecurityMonitoring = vi.fn(() => {
+            monitoringState.isSuspended = true;
+            return true;
+        });
+        const setMonitoringPhase = vi.fn((phase: string) => {
+            monitoringState.phase = phase;
+            document.dispatchEvent(new Event('fullscreenchange'));
+            fullscreenSnapshots.push({
+                label: 'during-submission',
+                isSuspended: monitoringState.isSuspended,
+                phase: monitoringState.phase,
+            });
+        });
+
+        mockRouterReplace.mockImplementation((...args) => {
+            document.dispatchEvent(new Event('fullscreenchange'));
+            fullscreenSnapshots.push({
+                label: 'after-router-replace',
+                isSuspended: monitoringState.isSuspended,
+                phase: monitoringState.phase,
+            });
+            return originalRouterReplace?.(...args);
+        });
+        mockExitFullscreen.mockImplementation((...args) => {
+            document.dispatchEvent(new Event('fullscreenchange'));
+            fullscreenSnapshots.push({
+                label: 'after-zero-delay-fullscreen-exit',
+                isSuspended: monitoringState.isSuspended,
+                phase: monitoringState.phase,
+            });
+            return originalExitFullscreen?.(...args);
+        });
+
+        const { result } = renderHook(() =>
+            useAttemptSubmission({
+                examId: '11111111-1111-1111-1111-111111111111',
+                sessionId: '22222222-2222-2222-2222-222222222222',
+                releaseScoreMode: 'AUTO_RELEASE',
+                questions: [
+                    {
+                        id: 'question-1',
+                        questionId: 'question-1',
+                        orderIndex: 0,
+                        points: 1,
+                        type: 'MULTIPLE_CHOICE',
+                        content: {
+                            prompt: 'Question 1',
+                            options: ['A', 'B', 'C', 'D'],
+                        },
+                    },
+                ] as any,
+                selectedAnswers: {
+                    'question-1': 'A',
+                },
+                elapsedSeconds: 120,
+                unansweredCount: 0,
+                isRedirectingToTurnIn: false,
+                setIsRedirectingToTurnIn: vi.fn(),
+                setIsSubmitDialogOpen: vi.fn(),
+                suspendSecurityMonitoring,
+                isBlocked: false,
+                setMonitoringPhase,
+            }),
+        );
+
+        act(() => {
+            result.current.handleSubmit();
+        });
+
+        await act(async () => {
+            vi.runOnlyPendingTimers();
+            await Promise.resolve();
+        });
+
+        expect(fullscreenSnapshots).toEqual([
+            {
+                label: 'during-submission',
+                isSuspended: false,
+                phase: 'submitting',
+            },
+            {
+                label: 'after-router-replace',
+                isSuspended: true,
+                phase: 'submitting',
+            },
+            {
+                label: 'after-zero-delay-fullscreen-exit',
                 isSuspended: true,
                 phase: 'submitting',
             },

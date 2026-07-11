@@ -7,21 +7,21 @@ import type { IngestTelemetryEventPayload } from '@sentinel/services';
 import type {
     BuildWebTelemetryPayloadArgs,
     BuildMediaPipeTelemetryPayloadArgs,
-    WebTelemetryEventType,
+    BrowserTelemetryEventType,
     MediaPipeTelemetryEventType,
 } from '../_types';
 import {
-    WEB_TELEMETRY_RULE_ENABLED_READERS,
+    BROWSER_TELEMETRY_RULE_ENABLED_READERS,
     MEDIAPIPE_TELEMETRY_RULE_ENABLED_READERS,
 } from '../_constants';
 import { buildWebTelemetrySessionContext, buildMediaPipeTelemetrySessionContext } from './context';
 
 export function isWebTelemetryEventEnabled(
     configuration: ExamConfig | undefined,
-    eventType: WebTelemetryEventType,
+    eventType: BrowserTelemetryEventType,
 ) {
     if (!configuration) return false;
-    return WEB_TELEMETRY_RULE_ENABLED_READERS[eventType](configuration);
+    return BROWSER_TELEMETRY_RULE_ENABLED_READERS[eventType](configuration);
 }
 
 export function buildWebTelemetryPayload({
@@ -34,6 +34,7 @@ export function buildWebTelemetryPayload({
     eventId,
     dedupeKey,
     clientActionAt,
+    platform = 'WEB',
 }: BuildWebTelemetryPayloadArgs): IngestTelemetryEventPayload {
     const eventDefinition = TELEMETRY_EVENT_DEFINITIONS[eventType];
 
@@ -42,7 +43,7 @@ export function buildWebTelemetryPayload({
         studentId,
         timestamp,
         eventType,
-        platform: 'WEB',
+        platform,
         source: eventDefinition.source,
         ruleKey: eventDefinition.ruleKey,
         metadata: {
@@ -53,6 +54,21 @@ export function buildWebTelemetryPayload({
         },
         sessionContext,
     };
+}
+
+/**
+ * Builds a canonical mobile browser telemetry payload that uses the shared schema.
+ *
+ * @param args The telemetry payload arguments for a mobile browser event.
+ * @returns The ingestion payload with `platform: MOBILE`.
+ */
+export function buildMobileTelemetryPayload(
+    args: Omit<BuildWebTelemetryPayloadArgs, 'platform'>,
+): IngestTelemetryEventPayload {
+    return buildWebTelemetryPayload({
+        ...args,
+        platform: 'MOBILE',
+    });
 }
 
 export function isMediaPipeTelemetryEventEnabled(

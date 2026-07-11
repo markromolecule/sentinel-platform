@@ -3,6 +3,7 @@ import type { ApiClientType } from '@sentinel/services';
 import { describe, expect, it, vi } from 'vitest';
 import {
     buildWebTelemetryPayload,
+    buildMobileTelemetryPayload,
     buildAttemptMediaPipeTelemetryPayload,
     emitMediaPipeTelemetryEvent,
     emitWebTelemetryEvent,
@@ -114,6 +115,40 @@ describe('web-telemetry-client', () => {
         });
     });
 
+    it('builds shared-contract payloads for mobile backgrounding telemetry', () => {
+        const payload = buildMobileTelemetryPayload({
+            examSessionId: '123e4567-e89b-12d3-a456-426614174000',
+            studentId: '123e4567-e89b-12d3-a456-426614174001',
+            eventType: 'APP_BACKGROUNDING',
+            timestamp: '2026-04-14T00:00:00.000Z',
+            sessionContext: {
+                browser: 'Safari',
+                os: 'iOS',
+                deviceType: 'MOBILE',
+                clientCapabilities: ['visibility-monitor'],
+            },
+        });
+
+        expect(payload).toEqual({
+            examSessionId: '123e4567-e89b-12d3-a456-426614174000',
+            studentId: '123e4567-e89b-12d3-a456-426614174001',
+            timestamp: '2026-04-14T00:00:00.000Z',
+            eventType: 'APP_BACKGROUNDING',
+            platform: 'MOBILE',
+            source: TELEMETRY_EVENT_DEFINITIONS.APP_BACKGROUNDING.source,
+            ruleKey: TELEMETRY_EVENT_DEFINITIONS.APP_BACKGROUNDING.ruleKey,
+            metadata: {
+                clientActionAt: '2026-04-14T00:00:00.000Z',
+            },
+            sessionContext: {
+                browser: 'Safari',
+                os: 'iOS',
+                deviceType: 'MOBILE',
+                clientCapabilities: ['visibility-monitor'],
+            },
+        });
+    });
+
     it('skips disabled events and posts enabled ones', async () => {
         const apiClient = vi.fn().mockResolvedValue(undefined);
 
@@ -165,6 +200,34 @@ describe('web-telemetry-client', () => {
             platform: 'WEB',
             source: TELEMETRY_EVENT_DEFINITIONS.PRINT_SCREEN_ATTEMPT.source,
             ruleKey: TELEMETRY_EVENT_DEFINITIONS.PRINT_SCREEN_ATTEMPT.ruleKey,
+        });
+    });
+
+    it('posts enabled mobile browser events with the mobile platform contract', async () => {
+        const apiClient = vi.fn().mockResolvedValue(undefined);
+
+        const enabledResult = await emitWebTelemetryEvent(apiClient as unknown as ApiClientType, {
+            configuration: createExamConfiguration(),
+            examSessionId: '123e4567-e89b-12d3-a456-426614174000',
+            studentId: '123e4567-e89b-12d3-a456-426614174001',
+            eventType: 'APP_BACKGROUNDING',
+            platform: 'MOBILE',
+            timestamp: '2026-04-14T00:00:00.000Z',
+            sessionContext: {
+                browser: 'Safari',
+                os: 'iOS',
+                deviceType: 'MOBILE',
+                clientCapabilities: ['visibility-monitor'],
+            },
+        });
+
+        expect(enabledResult).toBe(true);
+        expect(apiClient).toHaveBeenCalledTimes(1);
+        expect(JSON.parse(apiClient.mock.calls[0][1].body)).toMatchObject({
+            eventType: 'APP_BACKGROUNDING',
+            platform: 'MOBILE',
+            source: TELEMETRY_EVENT_DEFINITIONS.APP_BACKGROUNDING.source,
+            ruleKey: TELEMETRY_EVENT_DEFINITIONS.APP_BACKGROUNDING.ruleKey,
         });
     });
 

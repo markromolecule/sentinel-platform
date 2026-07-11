@@ -74,6 +74,14 @@ function createQuestions(count: number) {
             prompt: `Question ${index + 1}`,
             options: ['A', 'B', 'C', 'D'],
         },
+        passageType:
+            index === 0 ? 'plain' : index === 1 ? 'html' : null,
+        passageContent:
+            index === 0
+                ? 'Passage for question 1'
+                : index === 1
+                  ? '<p><strong>Passage</strong> for question 2</p>'
+                  : null,
     })) as {
         id: string;
         questionId: string;
@@ -84,6 +92,8 @@ function createQuestions(count: number) {
             prompt: string;
             options: string[];
         };
+        passageType: 'plain' | 'html' | null;
+        passageContent: string | null;
     }[];
 }
 
@@ -326,5 +336,43 @@ describe('useStudentExamAttempt', () => {
                 }),
             }),
         );
+    });
+
+    it('recomputes the current passage context when the current question changes', () => {
+        const { result } = renderHook(() => useStudentExamAttempt());
+
+        expect(result.current.currentQuestion?.id).toBe('question-1');
+        expect(result.current.currentContext.body).toContain('Passage for question 1');
+
+        act(() => {
+            result.current.setCurrentQuestionIndex(1);
+        });
+
+        expect(result.current.currentQuestion?.id).toBe('question-2');
+        expect(result.current.currentContext.body).toContain('Passage');
+        expect(result.current.currentContext.body).not.toContain('Passage for question 1');
+
+        act(() => {
+            result.current.setCurrentQuestionIndex(2);
+        });
+
+        expect(result.current.currentQuestion?.id).toBe('question-3');
+        expect(result.current.currentContext.body).toBe('');
+    });
+
+    it('keeps the chosen passage-panel visibility state while question content refreshes', () => {
+        const { result } = renderHook(() => useStudentExamAttempt());
+
+        expect(result.current.showPassagePanel).toBe(true);
+
+        act(() => {
+            result.current.setShowPassagePanel(false);
+            result.current.setCurrentQuestionIndex(1);
+        });
+
+        expect(result.current.showPassagePanel).toBe(false);
+        expect(result.current.currentQuestion?.id).toBe('question-2');
+        expect(result.current.currentContext.body).toContain('Passage');
+        expect(result.current.currentContext.body).not.toContain('question 1');
     });
 });

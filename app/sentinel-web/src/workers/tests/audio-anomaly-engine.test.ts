@@ -2,6 +2,12 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { AudioAnomalyEngine, resampleAudioTo16kHz } from '../audio-anomaly-engine';
 import { DEFAULT_AUDIO_ANOMALY_CONFIG } from '@sentinel/shared';
 import * as tf from '@tensorflow/tfjs';
+import {
+    BACKGROUND_NOISE_SCORES,
+    MIXED_SPEECH_TYPING_SCORES,
+    TALKING_SCORES,
+    TYPING_SCORES,
+} from './fixtures/audio-anomaly-fixtures';
 
 // Mock getAnomalyConfidence so we can deterministically trigger alerts
 vi.mock('@sentinel/shared', async (importOriginal) => {
@@ -9,23 +15,28 @@ vi.mock('@sentinel/shared', async (importOriginal) => {
     return {
         ...mod,
         getAnomalyConfidence: vi.fn((scoresArray: Float32Array, anomalyType: string) => {
-            // If the first element is 1.0, simulate a TALKING event with 0.9 confidence
-            if (anomalyType === 'TALKING' && scoresArray[0] === 1.0) {
+            if (anomalyType === 'TALKING' && scoresArray[0] === TALKING_SCORES[0]) {
                 return 0.9;
             }
-            // If the first element is 0.25, simulate a keyboard typing-like event
-            if (anomalyType === 'TYPING' && scoresArray[0] === 0.25) {
+            if (anomalyType === 'TYPING' && scoresArray[378] === TYPING_SCORES[378]) {
                 return 0.88;
             }
-            // Background noise mock trigger
-            if (anomalyType === 'BACKGROUND_NOISE' && scoresArray[0] === 0.5) {
+            if (
+                anomalyType === 'BACKGROUND_NOISE' &&
+                scoresArray[500] === BACKGROUND_NOISE_SCORES[500]
+            ) {
                 return 0.7;
             }
-            // Simulate a frame that would otherwise trigger multiple labels at once
-            if (anomalyType === 'TALKING' && scoresArray[0] === 0.75) {
+            if (
+                anomalyType === 'TALKING' &&
+                scoresArray[0] === MIXED_SPEECH_TYPING_SCORES[0]
+            ) {
                 return 0.8;
             }
-            if (anomalyType === 'BACKGROUND_NOISE' && scoresArray[0] === 0.75) {
+            if (
+                anomalyType === 'TYPING' &&
+                scoresArray[378] === MIXED_SPEECH_TYPING_SCORES[378]
+            ) {
                 return 0.9;
             }
             return null;
@@ -48,9 +59,20 @@ vi.mock('@tensorflow/tfjs', async (importOriginal) => {
         loadGraphModel: vi.fn().mockResolvedValue({
             predict: vi.fn((tensor) => {
                 const data = tensor.dataSync();
-                // Return a mock tensor with the same first element as the input
+                let scores = new Float32Array(521);
+
+                if (data[0] === 1.0) {
+                    scores = TALKING_SCORES;
+                } else if (data[0] === 0.25) {
+                    scores = TYPING_SCORES;
+                } else if (data[0] === 0.5) {
+                    scores = BACKGROUND_NOISE_SCORES;
+                } else if (data[0] === 0.75) {
+                    scores = MIXED_SPEECH_TYPING_SCORES;
+                }
+
                 return {
-                    dataSync: () => new Float32Array([data[0], ...new Array(520).fill(0)]),
+                    dataSync: () => scores,
                     shape: [521],
                     dispose: vi.fn(),
                 };
@@ -113,9 +135,13 @@ describe('AudioAnomalyEngine', () => {
         await engine.processAudioChunk(frame2, 16000, onAnomalyDetected);
         // 2 consecutive hits, should trigger
         expect(onAnomalyDetected).toHaveBeenCalledTimes(1);
-        expect(onAnomalyDetected).toHaveBeenCalledWith({
-            TALKING: 0.9,
-        });
+        expect(onAnomalyDetected).toHaveBeenCalledWith(
+            expect.objectContaining({
+                anomalyType: 'TALKING',
+                confidenceScore: 0.9,
+                detectedAt: expect.any(String),
+            }),
+        );
     });
 
     it('does not trigger when talking confidence never reaches the configured threshold', async () => {
@@ -194,9 +220,12 @@ describe('AudioAnomalyEngine', () => {
         await engine.processAudioChunk(frame, 16000, onAnomalyDetected);
         await engine.processAudioChunk(frame, 16000, onAnomalyDetected);
 
-        expect(onAnomalyDetected).toHaveBeenCalledWith({
-            BACKGROUND_NOISE: 0.7,
-        });
+        expect(onAnomalyDetected).toHaveBeenCalledWith(
+            expect.objectContaining({
+                anomalyType: 'BACKGROUND_NOISE',
+                confidenceScore: 0.7,
+            }),
+        );
     });
 
     it('triggers BACKGROUND_NOISE from the RMS fallback when class scores stay low but amplitude is high', async () => {
@@ -207,9 +236,12 @@ describe('AudioAnomalyEngine', () => {
         await engine.processAudioChunk(loudFrame, 16000, onAnomalyDetected);
         await engine.processAudioChunk(loudFrame, 16000, onAnomalyDetected);
 
-        expect(onAnomalyDetected).toHaveBeenCalledWith({
-            BACKGROUND_NOISE: expect.any(Number),
-        });
+        expect(onAnomalyDetected).toHaveBeenCalledWith(
+            expect.objectContaining({
+                anomalyType: 'BACKGROUND_NOISE',
+                confidenceScore: expect.any(Number),
+            }),
+        );
     });
 
     it('does not trigger keyboard-specific anomalies when they are disabled by the runtime config', async () => {
@@ -251,9 +283,12 @@ describe('AudioAnomalyEngine', () => {
         await engine.processAudioChunk(keyboardLikeFrame, 16000, onAnomalyDetected);
         await engine.processAudioChunk(keyboardLikeFrame, 16000, onAnomalyDetected);
 
-        expect(onAnomalyDetected).toHaveBeenCalledWith({
-            TYPING: 0.88,
-        });
+        expect(onAnomalyDetected).toHaveBeenCalledWith(
+            expect.objectContaining({
+                anomalyType: 'TYPING',
+                confidenceScore: 0.88,
+            }),
+        );
     });
 
     it('emits only the strongest anomaly when one frame window crosses multiple anomaly thresholds', async () => {
@@ -266,9 +301,12 @@ describe('AudioAnomalyEngine', () => {
         await engine.processAudioChunk(noisyTalkingFrame, 16000, onAnomalyDetected);
 
         expect(onAnomalyDetected).toHaveBeenCalledTimes(1);
-        expect(onAnomalyDetected).toHaveBeenCalledWith({
-            BACKGROUND_NOISE: 0.9,
-        });
+        expect(onAnomalyDetected).toHaveBeenCalledWith(
+            expect.objectContaining({
+                anomalyType: 'TYPING',
+                confidenceScore: 0.9,
+            }),
+        );
     });
 
     it('triggers SILENCE_DETECTED only after a stricter sustained-frame requirement', async () => {
@@ -292,9 +330,12 @@ describe('AudioAnomalyEngine', () => {
 
         await engine.processAudioChunk(silentFrame, 16000, onAnomalyDetected);
 
-        expect(onAnomalyDetected).toHaveBeenCalledWith({
-            SILENCE_DETECTED: expect.any(Number),
-        });
+        expect(onAnomalyDetected).toHaveBeenCalledWith(
+            expect.objectContaining({
+                anomalyType: 'SILENCE_DETECTED',
+                confidenceScore: expect.any(Number),
+            }),
+        );
     });
 
     it('does not retrigger silence immediately because it uses an extended cooldown', async () => {
@@ -333,5 +374,29 @@ describe('AudioAnomalyEngine', () => {
         }
 
         expect(onAnomalyDetected).toHaveBeenCalledTimes(2);
+    });
+
+    it('attaches development capture and inference timestamps to the debug snapshot', async () => {
+        vi.stubEnv('NODE_ENV', 'development');
+        vi.useFakeTimers();
+        vi.setSystemTime(new Date('2026-07-11T00:00:01.000Z'));
+
+        const onAnomalyDetected = vi.fn();
+        const frame = new Float32Array(15600);
+        frame[0] = 1.0;
+
+        await engine.processAudioChunk(frame, 16000, onAnomalyDetected);
+        await engine.processAudioChunk(frame, 16000, onAnomalyDetected);
+
+        expect(onAnomalyDetected).toHaveBeenCalledWith(
+            expect.objectContaining({
+                detectedAt: '2026-07-11T00:00:01.000Z',
+                debugSnapshot: expect.objectContaining({
+                    captureWindowStartedAt: expect.any(String),
+                    captureWindowEndedAt: '2026-07-11T00:00:01.000Z',
+                    inferenceCompletedAt: '2026-07-11T00:00:01.000Z',
+                }),
+            }),
+        );
     });
 });

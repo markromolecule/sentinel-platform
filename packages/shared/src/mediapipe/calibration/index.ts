@@ -5,6 +5,7 @@ export {
 export {
     createMediaPipeCalibrationSample,
     isMediaPipeCalibrationCandidate,
+    isMediaPipeFaceCenteredForCalibration,
 } from './calibration-sample';
 export { estimateMediaPipeEyeState } from './eye-state';
 export { estimateMediaPipeGazeDirectionFromSample } from './gaze-direction';

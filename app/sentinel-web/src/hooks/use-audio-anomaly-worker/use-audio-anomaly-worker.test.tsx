@@ -134,9 +134,9 @@ describe('useAudioAnomalyWorker', () => {
                 data: {
                     type: 'ANOMALY_DETECTED',
                     payload: {
-                        anomalies: {
-                            TALKING: 0.85,
-                        },
+                        anomalyType: 'TALKING',
+                        confidenceScore: 0.85,
+                        detectedAt: '2026-07-07T00:00:00.000Z',
                     },
                 },
             } as MessageEvent);
@@ -149,6 +149,7 @@ describe('useAudioAnomalyWorker', () => {
                     examSessionId: 'session-123',
                     studentId: 'student-1',
                     eventType: 'AUDIO_ANOMALY',
+                    timestamp: '2026-07-07T00:00:00.000Z',
                     metadata: expect.objectContaining({
                         anomalyType: 'TALKING',
                         confidenceScore: 0.85,
@@ -260,9 +261,9 @@ describe('useAudioAnomalyWorker', () => {
                 data: {
                     type: 'ANOMALY_DETECTED',
                     payload: {
-                        anomalies: {
-                            TALKING: 0.91,
-                        },
+                        anomalyType: 'TALKING',
+                        confidenceScore: 0.91,
+                        detectedAt: '2026-07-07T00:00:00.000Z',
                     },
                 },
             } as MessageEvent);
@@ -336,9 +337,9 @@ describe('useAudioAnomalyWorker', () => {
                 data: {
                     type: 'ANOMALY_DETECTED',
                     payload: {
-                        anomalies: {
-                            TALKING: 0.91,
-                        },
+                        anomalyType: 'TALKING',
+                        confidenceScore: 0.91,
+                        detectedAt: '2026-07-07T00:00:00.000Z',
                     },
                 },
             } as MessageEvent);
@@ -357,16 +358,16 @@ describe('useAudioAnomalyWorker', () => {
                 data: {
                     type: 'ANOMALY_DETECTED',
                     payload: {
-                        anomalies: {
-                            TALKING: 0.91,
-                        },
+                        anomalyType: 'TALKING',
+                        confidenceScore: 0.91,
+                        detectedAt: '2026-07-07T00:00:01.000Z',
                     },
                 },
             } as MessageEvent);
         });
 
-        expect(ingestTelemetryEvent).toHaveBeenCalledTimes(1);
-        expect(mockToastWarning).toHaveBeenCalledTimes(1);
+        expect(ingestTelemetryEvent).toHaveBeenCalledTimes(2);
+        expect(mockToastWarning).toHaveBeenCalledTimes(2);
     });
 
     it('stops anomaly emission after the hook is rerendered into a suspended state', async () => {
@@ -410,9 +411,9 @@ describe('useAudioAnomalyWorker', () => {
                 data: {
                     type: 'ANOMALY_DETECTED',
                     payload: {
-                        anomalies: {
-                            TALKING: 0.72,
-                        },
+                        anomalyType: 'TALKING',
+                        confidenceScore: 0.72,
+                        detectedAt: '2026-07-07T00:00:00.000Z',
                     },
                 },
             } as MessageEvent);
@@ -537,7 +538,7 @@ describe('useAudioAnomalyWorker', () => {
         });
     });
 
-    it('emits one toast and one telemetry event when a worker message contains multiple anomaly labels', async () => {
+    it('uses the selected worker anomaly subtype, confidence, and timestamp unchanged through toast and telemetry', async () => {
         renderHook(() =>
             useAudioAnomalyWorker({
                 configuration: validConfig,
@@ -568,10 +569,9 @@ describe('useAudioAnomalyWorker', () => {
                 data: {
                     type: 'ANOMALY_DETECTED',
                     payload: {
-                        anomalies: {
-                            BACKGROUND_NOISE: 0.61,
-                            TALKING: 0.92,
-                        },
+                        anomalyType: 'TALKING',
+                        confidenceScore: 0.92,
+                        detectedAt: '2026-07-07T00:00:05.000Z',
                     },
                 },
             } as MessageEvent);
@@ -585,9 +585,11 @@ describe('useAudioAnomalyWorker', () => {
         expect(ingestTelemetryEvent).toHaveBeenCalledWith(
             expect.any(Function),
             expect.objectContaining({
+                timestamp: '2026-07-07T00:00:05.000Z',
                 metadata: expect.objectContaining({
                     anomalyType: 'TALKING',
                     confidenceScore: 0.92,
+                    clientActionAt: '2026-07-07T00:00:05.000Z',
                     audioDiagnostics: expect.objectContaining({
                         threshold: DEFAULT_AUDIO_ANOMALY_CONFIG.thresholds.TALKING,
                         workerPhase: 'running',

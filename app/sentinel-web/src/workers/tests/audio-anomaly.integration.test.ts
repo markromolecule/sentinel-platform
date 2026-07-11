@@ -86,10 +86,12 @@ describe('Audio Anomaly Complete Lifecycle (Integration)', () => {
         expect(onAnomalyDetected).toHaveBeenCalledTimes(1);
         expect(onAnomalyDetected).toHaveBeenCalledWith(
             expect.objectContaining({
-                TALKING: expect.any(Number),
+                anomalyType: 'TALKING',
+                confidenceScore: expect.any(Number),
+                detectedAt: expect.any(String),
             }),
         );
-        expect(onAnomalyDetected.mock.calls[0][0].TALKING).toBeCloseTo(0.88, 5);
+        expect(onAnomalyDetected.mock.calls[0][0].confidenceScore).toBeCloseTo(0.88, 5);
 
         // Simulate main thread posting to telemetry
         const mockFetch = global.fetch as ReturnType<typeof vi.fn>;
@@ -103,7 +105,7 @@ describe('Audio Anomaly Complete Lifecycle (Integration)', () => {
             studentId: 'test-student-456',
             anomalyType: 'TALKING',
             confidence: 0.88,
-            detectedAt: new Date().toISOString(),
+            detectedAt: onAnomalyDetected.mock.calls[0][0].detectedAt,
             frameWindow: 2,
         };
 

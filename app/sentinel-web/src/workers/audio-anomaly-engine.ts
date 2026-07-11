@@ -2,10 +2,14 @@ import * as tf from '@tensorflow/tfjs';
 import {
     type AudioAnomalySettings,
     type AudioAnomalyTypeValue,
+    evaluateAudioAnomalyTrigger,
     getAnomalyConfidence,
 } from '@sentinel/shared';
 
 type AudioEngineDebugSnapshot = {
+    captureWindowStartedAt: string;
+    captureWindowEndedAt: string;
+    inferenceCompletedAt: string;
     inputSampleRate: number;
     resampledSampleCount: number;
     rms: number;
@@ -14,6 +18,13 @@ type AudioEngineDebugSnapshot = {
     selectedAnomalyConfidence: Partial<Record<AudioAnomalyTypeValue, number>>;
     frameCounters: Partial<Record<AudioAnomalyTypeValue, number>>;
     cooldownStatus: Partial<Record<AudioAnomalyTypeValue, boolean>>;
+};
+
+export type AudioEngineDetection = {
+    anomalyType: AudioAnomalyTypeValue;
+    confidenceScore: number;
+    detectedAt: string;
+    debugSnapshot?: AudioEngineDebugSnapshot;
 };
 
 const TARGET_SAMPLE_RATE = 16_000;
@@ -175,7 +186,7 @@ export class AudioAnomalyEngine {
     processAudioChunk(
         samples: Float32Array,
         sampleRate: number,
-        onAnomalyDetected: (results: Record<AudioAnomalyTypeValue, number>) => void,
+        onAnomalyDetected: (detection: AudioEngineDetection) => void,
     ): void {
         if (!this.isDetecting || !this.model) return;
         const normalizedSamples = resampleAudioTo16kHz(samples, sampleRate);
@@ -204,11 +215,18 @@ export class AudioAnomalyEngine {
     private runInference(
         samples: Float32Array,
         inputSampleRate: number,
-        onAnomalyDetected: (results: Record<AudioAnomalyTypeValue, number>) => void,
+        onAnomalyDetected: (detection: AudioEngineDetection) => void,
     ): void {
         try {
             tf.tidy(() => {
                 if (!this.model) return;
+                const inferenceCompletedAt = new Date().toISOString();
+                const inferenceCompletedAtMs = new Date(inferenceCompletedAt).getTime();
+                const captureWindowEndedAt = inferenceCompletedAt;
+                const captureWindowStartedAt = new Date(
+                    inferenceCompletedAtMs -
+                        Math.round((samples.length / TARGET_SAMPLE_RATE) * 1000),
+                ).toISOString();
 
                 const waveform = tf.tensor1d(samples);
                 const output = this.model.predict(waveform);
@@ -280,20 +298,32 @@ export class AudioAnomalyEngine {
 
                     if (confidence !== null) {
                         selectedAnomalyConfidence[anomalyType] = confidence;
-                        const count = (this.frameCounters.get(anomalyType) ?? 0) + 1;
-                        this.frameCounters.set(anomalyType, count);
-
+                        const currentCount = this.frameCounters.get(anomalyType) ?? 0;
                         const lastAlert = this.lastAlertTime.get(anomalyType) ?? 0;
                         const cooldownMs = this.getCooldownMs(anomalyType);
                         const requiredConsecutiveFrames =
                             this.getRequiredConsecutiveFrames(anomalyType);
-                        const cooldownExpired = now - lastAlert > cooldownMs;
-                        cooldownStatus[anomalyType] = cooldownExpired;
+                        const triggerDecision = evaluateAudioAnomalyTrigger({
+                            anomalyType,
+                            confidence,
+                            threshold: 0,
+                            consecutiveFrames: currentCount,
+                            requiredConsecutiveFrames,
+                            cooldownMs,
+                            lastTriggeredAtMs: lastAlert || null,
+                            nowMs: now,
+                        });
 
-                        if (count >= requiredConsecutiveFrames && cooldownExpired) {
-                            this.frameCounters.set(anomalyType, 0); // reset after triggering
+                        this.frameCounters.set(anomalyType, triggerDecision.nextConsecutiveFrames);
+                        cooldownStatus[anomalyType] = !triggerDecision.cooldownActive;
+
+                        if (
+                            triggerDecision.triggered &&
+                            triggerDecision.acceptedConfidence !== null
+                        ) {
                             this.lastAlertTime.set(anomalyType, now);
-                            triggeredAnomalies[anomalyType] = confidence;
+                            triggeredAnomalies[anomalyType] =
+                                triggerDecision.acceptedConfidence;
                         }
                     } else {
                         // Reset counter for this type because it didn't trigger this frame
@@ -309,14 +339,35 @@ export class AudioAnomalyEngine {
                     const [primaryAnomalyType, primaryConfidence] = triggeredEntries.reduce(
                         (best, current) => (current[1] > best[1] ? current : best),
                     );
+                    const debugSnapshot = isDevelopmentDebugEnabled()
+                        ? {
+                              captureWindowStartedAt,
+                              captureWindowEndedAt,
+                              inferenceCompletedAt,
+                              inputSampleRate,
+                              resampledSampleCount: samples.length,
+                              rms,
+                              topClassIds,
+                              topClassScores,
+                              selectedAnomalyConfidence,
+                              frameCounters: Object.fromEntries(this.frameCounters.entries()),
+                              cooldownStatus,
+                          }
+                        : undefined;
 
                     onAnomalyDetected({
-                        [primaryAnomalyType]: primaryConfidence,
-                    } as Record<AudioAnomalyTypeValue, number>);
+                        anomalyType: primaryAnomalyType,
+                        confidenceScore: primaryConfidence,
+                        detectedAt: inferenceCompletedAt,
+                        debugSnapshot,
+                    });
                 }
 
                 if (isDevelopmentDebugEnabled()) {
                     this.lastDebugSnapshot = {
+                        captureWindowStartedAt,
+                        captureWindowEndedAt,
+                        inferenceCompletedAt,
                         inputSampleRate,
                         resampledSampleCount: samples.length,
                         rms,

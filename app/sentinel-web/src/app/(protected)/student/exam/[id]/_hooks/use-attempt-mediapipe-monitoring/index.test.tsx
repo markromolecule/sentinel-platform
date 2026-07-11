@@ -13,6 +13,7 @@ const EXAM_ID = '123e4567-e89b-12d3-a456-426614174999';
 const {
     mockApiClient,
     mockEmitMediaPipeTelemetryEvent,
+    mockWriteMonitoringEventTrace,
     mockTrackStop,
     mockFaceLandmarkerClose,
     mockDetectForVideo,
@@ -21,6 +22,7 @@ const {
 } = vi.hoisted(() => ({
     mockApiClient: vi.fn(),
     mockEmitMediaPipeTelemetryEvent: vi.fn().mockResolvedValue(true),
+    mockWriteMonitoringEventTrace: vi.fn(),
     mockTrackStop: vi.fn(),
     mockFaceLandmarkerClose: vi.fn(),
     mockDetectForVideo: vi.fn(),
@@ -39,6 +41,7 @@ vi.mock('@sentinel/hooks', () => ({
 
 vi.mock('../../_lib/web-telemetry-client', () => ({
     emitMediaPipeTelemetryEvent: mockEmitMediaPipeTelemetryEvent,
+    writeMonitoringEventTrace: mockWriteMonitoringEventTrace,
     isMediaPipeTelemetryEventEnabled: (
         configuration: ExamConfig | undefined,
         eventType: 'GAZE_OFF_SCREEN' | 'NO_FACE_DETECTED' | 'MULTIPLE_FACES',
@@ -844,6 +847,84 @@ describe('use-attempt-mediapipe-monitoring', () => {
         expect(result.current.activeIncident).toMatchObject({
             eventType: 'NO_FACE_DETECTED',
         });
+    });
+
+    it('keeps a sustained off-screen interval through a one-frame low-confidence interruption', async () => {
+        const offscreenFace = buildOffscreenFace();
+        const lowConfidenceFace = buildLowConfidenceFace();
+
+        mockDetectForVideo
+            .mockReturnValueOnce({
+                faceLandmarks: [offscreenFace],
+            })
+            .mockReturnValueOnce({
+                faceLandmarks: [lowConfidenceFace],
+            })
+            .mockReturnValue({
+                faceLandmarks: [offscreenFace],
+            });
+
+        const configuration = createExamConfiguration({
+            aiRules: {
+                gaze_tracking: true,
+                face_detection: false,
+                audio_anomaly_detection: false,
+                multiple_faces_detection: true,
+            },
+        });
+        const mediaPipeSandbox = createSandbox({
+            offScreenDurationMs: 1000,
+        });
+        const runtimeAccess = createRuntimeAccess();
+
+        const { result } = renderHook(() =>
+            useAttemptMediaPipeMonitoring({
+                examId: EXAM_ID,
+                configuration,
+                mediaPipeSandbox,
+                examSessionId: '123e4567-e89b-12d3-a456-426614174000',
+                runtimeAccess,
+            }),
+        );
+
+        act(() => {
+            result.current.videoRef.current = createVideoElement();
+        });
+
+        await waitFor(() => {
+            expect(result.current.phase).toBe('running');
+        });
+
+        advanceAnimationFrame(500);
+        expect(mockEmitMediaPipeTelemetryEvent).not.toHaveBeenCalled();
+
+        advanceAnimationFrame(1000);
+        expect(result.current.analysis).toMatchObject({
+            status: 'low-confidence',
+            signal: null,
+        });
+        expect(mockEmitMediaPipeTelemetryEvent).not.toHaveBeenCalled();
+
+        advanceAnimationFrame(1500);
+
+        await waitFor(() => {
+            expect(mockEmitMediaPipeTelemetryEvent).toHaveBeenCalledTimes(1);
+        });
+
+        expect(result.current.activeIncident).toMatchObject({
+            eventType: 'GAZE_OFF_SCREEN',
+            detectedAt: new Date(1500).toISOString(),
+        });
+        expect(mockEmitMediaPipeTelemetryEvent).toHaveBeenNthCalledWith(
+            1,
+            mockApiClient,
+            expect.objectContaining({
+                eventType: 'GAZE_OFF_SCREEN',
+                metadata: expect.objectContaining({
+                    durationMs: 1000,
+                }),
+            }),
+        );
     });
 
     it('cleans up the camera stream when MediaPipe startup fails after the stream is acquired', async () => {

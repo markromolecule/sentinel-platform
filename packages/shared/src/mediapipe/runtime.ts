@@ -49,6 +49,7 @@ export function createMediaPipeSignalTrackerState(): MediaPipeSignalTrackerState
     return {
         activeSignal: null,
         activeSinceMs: null,
+        lastObservedAtMs: null,
         lastEmittedAtMs: null,
         occurrenceCount: 0,
     };
@@ -59,8 +60,21 @@ export function evaluateMediaPipeSignalDispatch({
     tracker,
     nowMs,
     thresholds,
+    signalGapGraceMs = 0,
 }: EvaluateMediaPipeSignalDispatchArgs): EvaluateMediaPipeSignalDispatchResult {
     if (!currentSignal) {
+        const hasGraceWindow =
+            tracker.activeSignal !== null &&
+            tracker.lastObservedAtMs !== null &&
+            nowMs - tracker.lastObservedAtMs <= signalGapGraceMs;
+
+        if (hasGraceWindow) {
+            return {
+                tracker,
+                shouldEmit: false,
+            };
+        }
+
         return {
             tracker: createMediaPipeSignalTrackerState(),
             shouldEmit: false,
@@ -79,6 +93,7 @@ export function evaluateMediaPipeSignalDispatch({
     const nextTracker = {
         activeSignal: currentSignal,
         activeSinceMs,
+        lastObservedAtMs: nowMs,
         lastEmittedAtMs,
         occurrenceCount,
     };

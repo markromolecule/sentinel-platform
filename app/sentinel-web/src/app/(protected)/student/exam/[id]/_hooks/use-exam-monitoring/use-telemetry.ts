@@ -3,7 +3,9 @@ import { useApi } from '@sentinel/hooks';
 import type { ExamConfig } from '@sentinel/shared/types';
 import {
     emitWebTelemetryEvent,
-    type WebTelemetryEventType,
+    writeMonitoringEventTrace,
+    type TelemetryActionMetadata,
+    type BrowserTelemetryEventType,
 } from '../../_lib/web-telemetry-client';
 
 export function useTelemetry(args: {
@@ -18,36 +20,72 @@ export function useTelemetry(args: {
 
     const emitTelemetryEvent = useCallback(
         (
-            eventType: WebTelemetryEventType,
-            metadataOptions?: {
-                eventId?: string;
-                dedupeKey?: string;
-                clientActionAt?: string;
-            },
+            eventType: BrowserTelemetryEventType,
+            metadataOptions?: TelemetryActionMetadata,
         ) => {
-            const shouldSkipEmission =
-                isMonitoringSuspended.current || !examSessionId || !studentId || isMobile;
+            const requestedPlatform = isMobile ? 'MOBILE' : 'WEB';
+            const shouldSkipEmission = isMonitoringSuspended.current || !examSessionId || !studentId;
+            const detectionTime = metadataOptions?.detectionTimestamp ?? metadataOptions?.clientActionAt ?? new Date().toISOString();
+            const emissionTime = new Date().toISOString();
+            const traceBase = {
+                detectorSource: metadataOptions?.detectorSource ?? 'browser',
+                eventType,
+                eventSubtype: metadataOptions?.eventSubtype,
+                eventId: metadataOptions?.eventId,
+                dedupeKey: metadataOptions?.dedupeKey,
+                detectionTime,
+            } as const;
 
             if (shouldSkipEmission) {
+                writeMonitoringEventTrace({
+                    ...traceBase,
+                    emissionTime,
+                    disposition: 'suppressed',
+                    reason: isMonitoringSuspended.current
+                        ? 'monitoring-suspended'
+                        : !examSessionId || !studentId
+                            ? 'missing-session-context'
+                            : 'rule-disabled',
+                });
                 return;
             }
 
-            const actionMetadata = metadataOptions;
+            writeMonitoringEventTrace({
+                ...traceBase,
+                emissionTime,
+                disposition: 'emitting',
+            });
 
             void emitWebTelemetryEvent(apiClient, {
                 configuration,
                 examSessionId,
                 studentId,
                 eventType,
-                eventId: actionMetadata?.eventId,
-                dedupeKey: actionMetadata?.dedupeKey,
-                clientActionAt: actionMetadata?.clientActionAt,
-            }).catch((error: unknown) => {
-                console.error('Failed to emit web telemetry event.', {
-                    eventType,
-                    error,
+                platform: requestedPlatform,
+                eventId: metadataOptions?.eventId,
+                dedupeKey: metadataOptions?.dedupeKey,
+                clientActionAt: metadataOptions?.clientActionAt,
+            })
+                .then((emitted) => {
+                    writeMonitoringEventTrace({
+                        ...traceBase,
+                        emissionTime,
+                        disposition: emitted ? 'accepted' : 'suppressed',
+                        reason: emitted ? undefined : 'rule-disabled',
+                    });
+                })
+                .catch((error: unknown) => {
+                    writeMonitoringEventTrace({
+                        ...traceBase,
+                        emissionTime,
+                        disposition: 'failed',
+                        reason: error instanceof Error ? error.message : 'unknown-error',
+                    });
+                    console.error('Failed to emit web telemetry event.', {
+                        eventType,
+                        error,
+                    });
                 });
-            });
         },
         [apiClient, configuration, examSessionId, isMobile, studentId, isMonitoringSuspended],
     );

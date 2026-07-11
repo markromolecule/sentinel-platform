@@ -5,7 +5,7 @@ import { useApi, useAuth } from '@sentinel/hooks';
 import { toast } from 'sonner';
 import { DEFAULT_AUDIO_ANOMALY_CONFIG } from '@sentinel/shared';
 import { AudioAnomalyController } from './audio-anomaly-controller';
-import { getAudioAnomalyCooldownMs, useAnomalyTelemetry } from './use-anomaly-telemetry';
+import { useAnomalyTelemetry } from './use-anomaly-telemetry';
 import type { AudioWorkerPhase, AudioWorkerResult, UseAudioAnomalyWorkerArgs } from './_types';
 
 /**
@@ -34,7 +34,6 @@ export function useAudioAnomalyWorker({
     const phaseRef = useRef<AudioWorkerPhase>(phase);
     const runtimeConfigRef = useRef(runtimeConfig);
     const audioStreamRef = useRef(audioStream);
-    const lastAcceptedAnomalyAtRef = useRef<Map<string, number>>(new Map());
 
     // Sync isSuspended to a ref to prevent re-triggering the main setup effect
     useEffect(() => {
@@ -89,24 +88,10 @@ export function useAudioAnomalyWorker({
                 setPhase(nextPhase);
             },
             onErrorMessage: setErrorMessage,
-            onAnomaly: (anomalyType, confidenceScore) => {
+            onAnomaly: ({ anomalyType, confidenceScore, detectedAt }) => {
                 if (isSuspendedRef.current) {
                     return;
                 }
-
-                const detectedAt = new Date().toISOString();
-                const now = new Date(detectedAt).getTime();
-                const effectiveCooldownMs = getAudioAnomalyCooldownMs(
-                    anomalyType,
-                    runtimeConfig?.cooldownMs ?? DEFAULT_AUDIO_ANOMALY_CONFIG.cooldownMs,
-                );
-                const lastAcceptedAt = lastAcceptedAnomalyAtRef.current.get(anomalyType) ?? 0;
-
-                if (now - lastAcceptedAt < effectiveCooldownMs) {
-                    return;
-                }
-
-                lastAcceptedAnomalyAtRef.current.set(anomalyType, now);
 
                 const anomalyLabel = anomalyType.replace(/_/g, ' ').toLowerCase();
                 const description =
