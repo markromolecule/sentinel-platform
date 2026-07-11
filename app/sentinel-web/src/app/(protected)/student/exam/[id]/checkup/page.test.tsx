@@ -8,6 +8,7 @@ import StudentExamCheckupPage from './page';
 const {
     mockRouterPush,
     mockPatchStoredStudentExamFlow,
+    mockResolveStoredStudentExamCheckupReadiness,
     mockStudentExamData,
     mockCheckupManager,
     mockCheckupMediaPipe,
@@ -15,6 +16,7 @@ const {
 } = vi.hoisted(() => ({
     mockRouterPush: vi.fn(),
     mockPatchStoredStudentExamFlow: vi.fn(),
+    mockResolveStoredStudentExamCheckupReadiness: vi.fn(),
     mockStudentExamData: vi.fn(),
     mockCheckupManager: vi.fn(),
     mockCheckupMediaPipe: vi.fn(),
@@ -84,11 +86,24 @@ vi.mock('../../_components/student-flow-primitives', () => ({
     ),
     StudentFlowDevicePreviewPanel: ({
         supplementaryContent,
+        onRequestAccess,
+        streamActive,
+        isRequesting,
     }: {
         supplementaryContent?: ReactNode;
+        onRequestAccess?: () => void;
+        streamActive?: boolean;
+        isRequesting?: boolean;
     }) => (
         <div>
             <div>Device preview</div>
+            <button type="button" onClick={onRequestAccess}>
+                {isRequesting
+                    ? 'Requesting permissions...'
+                    : streamActive
+                      ? 'Reset Device Access'
+                      : 'Grant Device Permissions'}
+            </button>
             {supplementaryContent}
         </div>
     ),
@@ -114,6 +129,7 @@ vi.mock('../_lib/student-exam-flow', async () => {
         ...actual,
         buildStudentExamHref: (examId: string, step: string) => `/student/exam/${examId}/${step}`,
         patchStoredStudentExamFlow: mockPatchStoredStudentExamFlow,
+        resolveStoredStudentExamCheckupReadiness: mockResolveStoredStudentExamCheckupReadiness,
     };
 });
 
@@ -213,6 +229,23 @@ describe('StudentExamCheckupPage', () => {
             requestAudioAccess: vi.fn(),
             stopAudioStream: vi.fn(),
         });
+        mockResolveStoredStudentExamCheckupReadiness.mockReturnValue({
+            storedFlow: {
+                privacyAccepted: true,
+                checkupCompleted: false,
+                mediaPipeActivatedAt: null,
+                mediaPipeCalibrationCompletedAt: null,
+                mediaPipeActivationSource: null,
+                mediaPipeCalibrationProfile: null,
+            },
+            mediaPipeActivation: {
+                status: 'missing',
+                isValid: false,
+                storedFlow: null,
+                ageMs: null,
+            },
+            isReady: false,
+        });
         mockCheckupMediaPipe.mockImplementation(() => ({
             overlayCanvasRef: { current: null },
             analysis: {
@@ -248,6 +281,98 @@ describe('StudentExamCheckupPage', () => {
             (screen.getByRole('button', { name: /finalizing setup/i }) as HTMLButtonElement)
                 .disabled,
         ).toBe(true);
+    });
+
+    it('preserves a previously completed checkup across reload without clearing stored readiness', () => {
+        mockCheckupManager.mockReturnValue({
+            videoRef: { current: null },
+            cameraState: 'idle',
+            micState: 'idle',
+            isRequesting: false,
+            isStreamActive: false,
+            errorMessage: null,
+            isCheckupReady: false,
+            requestDeviceAccess: vi.fn(),
+        });
+        mockResolveStoredStudentExamCheckupReadiness.mockReturnValue({
+            storedFlow: {
+                privacyAccepted: true,
+                checkupCompleted: true,
+                mediaPipeActivatedAt: '2026-07-11T00:00:00.000Z',
+                mediaPipeCalibrationCompletedAt: '2026-07-11T00:00:00.000Z',
+                mediaPipeActivationSource: 'checkup',
+                mediaPipeCalibrationProfile: null,
+            },
+            mediaPipeActivation: {
+                status: 'ready',
+                isValid: true,
+                storedFlow: null,
+                ageMs: 1000,
+            },
+            isReady: true,
+        });
+
+        render(<StudentExamCheckupPage />);
+
+        expect(screen.getByText(/ready for lobby/i)).toBeTruthy();
+        expect(
+            screen.getByText(
+                /previous device and identity verification are still valid/i,
+            ),
+        ).toBeTruthy();
+        expect(
+            (screen.getByRole('button', { name: /continue to lobby/i }) as HTMLButtonElement)
+                .disabled,
+        ).toBe(false);
+        expect(mockPatchStoredStudentExamFlow).not.toHaveBeenCalled();
+    });
+
+    it('clears stored readiness before re-requesting device access from a completed state', async () => {
+        const requestDeviceAccess = vi.fn();
+
+        mockCheckupManager.mockReturnValue({
+            videoRef: { current: null },
+            cameraState: 'idle',
+            micState: 'idle',
+            isRequesting: false,
+            isStreamActive: false,
+            errorMessage: null,
+            isCheckupReady: false,
+            requestDeviceAccess,
+        });
+        mockResolveStoredStudentExamCheckupReadiness.mockReturnValue({
+            storedFlow: {
+                privacyAccepted: true,
+                checkupCompleted: true,
+                mediaPipeActivatedAt: '2026-07-11T00:00:00.000Z',
+                mediaPipeCalibrationCompletedAt: '2026-07-11T00:00:00.000Z',
+                mediaPipeActivationSource: 'checkup',
+                mediaPipeCalibrationProfile: null,
+            },
+            mediaPipeActivation: {
+                status: 'ready',
+                isValid: true,
+                storedFlow: null,
+                ageMs: 1000,
+            },
+            isReady: true,
+        });
+
+        render(<StudentExamCheckupPage />);
+
+        screen.getByRole('button', { name: /grant device permissions/i }).click();
+
+        expect(mockPatchStoredStudentExamFlow).toHaveBeenCalledWith(
+            '11111111-1111-1111-1111-111111111111',
+            expect.objectContaining({
+                checkupCompleted: false,
+                mediaPipeActivatedAt: null,
+                mediaPipeCalibrationCompletedAt: null,
+                mediaPipeActivationSource: null,
+                mediaPipeCalibrationProfile: null,
+            }),
+        );
+        expect(requestDeviceAccess).toHaveBeenCalled();
     });
 
     it('shows the lifecycle block message and removes the lobby CTA when the exam is locked', () => {

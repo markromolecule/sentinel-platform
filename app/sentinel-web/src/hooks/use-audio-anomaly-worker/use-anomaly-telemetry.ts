@@ -1,6 +1,11 @@
 import { useCallback } from 'react';
 import { useApi } from '@sentinel/hooks';
-import { TELEMETRY_EVENT_DEFINITIONS, type AudioAnomalyTypeValue } from '@sentinel/shared';
+import {
+    DEFAULT_AUDIO_ANOMALY_CONFIG,
+    TELEMETRY_EVENT_DEFINITIONS,
+    type AudioAnomalySettings,
+    type AudioAnomalyTypeValue,
+} from '@sentinel/shared';
 import { ingestTelemetryEvent } from '@sentinel/services';
 
 const SILENCE_MIN_COOLDOWN_MS = 180_000;
@@ -78,6 +83,36 @@ export function createAudioAnomalyActionMetadata(args: {
     };
 }
 
+function createAudioConfigVersion(runtimeConfig?: AudioAnomalySettings | null) {
+    if (!runtimeConfig) {
+        return 'audio-config:default';
+    }
+
+    const stableSeed = JSON.stringify({
+        enabledAnomalyTypes: [...runtimeConfig.enabledAnomalyTypes].sort(),
+        thresholds: runtimeConfig.thresholds,
+        cooldownMs: runtimeConfig.cooldownMs,
+        consecutiveFrameThreshold: runtimeConfig.consecutiveFrameThreshold,
+        sensitivityMultiplier: runtimeConfig.sensitivityMultiplier,
+    });
+
+    return `audio-config:${toStableUuid(stableSeed)}`;
+}
+
+function getAudioStreamPhase(audioStream?: MediaStream | null) {
+    if (!audioStream) {
+        return 'managed' as const;
+    }
+
+    const tracks = audioStream.getAudioTracks?.() ?? audioStream.getTracks?.() ?? [];
+
+    if (!tracks.length) {
+        return 'unavailable' as const;
+    }
+
+    return tracks.some((track) => track.readyState === 'live') ? ('live' as const) : ('ended' as const);
+}
+
 /**
  * Custom hook to encapsulate audio anomaly telemetry reporting.
  *
@@ -92,6 +127,9 @@ export function useAnomalyTelemetry(
     studentId?: string,
     isSuspendedRef?: React.RefObject<boolean>,
     cooldownMs = 10_000,
+    runtimeConfigRef?: React.RefObject<AudioAnomalySettings | null | undefined>,
+    workerPhaseRef?: React.RefObject<'idle' | 'initializing' | 'running' | 'error'>,
+    audioStreamRef?: React.RefObject<MediaStream | null | undefined>,
 ) {
     return useCallback(
         async (
@@ -102,6 +140,10 @@ export function useAnomalyTelemetry(
             if (!examSessionId || !studentId || isSuspendedRef?.current) {
                 return;
             }
+
+            const runtimeConfig = runtimeConfigRef?.current;
+            const workerPhase = workerPhaseRef?.current ?? 'idle';
+            const audioStream = audioStreamRef?.current;
 
             const eventDefinition = TELEMETRY_EVENT_DEFINITIONS.AUDIO_ANOMALY;
             const actionMetadata = createAudioAnomalyActionMetadata({
@@ -123,6 +165,14 @@ export function useAnomalyTelemetry(
                     ...actionMetadata,
                     confidenceScore,
                     anomalyType,
+                    audioDiagnostics: {
+                        threshold:
+                            runtimeConfig?.thresholds[anomalyType] ??
+                            DEFAULT_AUDIO_ANOMALY_CONFIG.thresholds[anomalyType],
+                        configVersion: createAudioConfigVersion(runtimeConfig),
+                        workerPhase,
+                        streamPhase: getAudioStreamPhase(audioStream),
+                    },
                     aggregation: {
                         trigger:
                             anomalyType === 'SILENCE_DETECTED'
@@ -133,6 +183,6 @@ export function useAnomalyTelemetry(
                 },
             });
         },
-        [apiClient, cooldownMs, examSessionId, studentId, isSuspendedRef],
+        [apiClient, cooldownMs, examSessionId, isSuspendedRef, runtimeConfigRef, studentId, workerPhaseRef, audioStreamRef],
     );
 }

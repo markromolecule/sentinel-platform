@@ -152,6 +152,12 @@ describe('useAudioAnomalyWorker', () => {
                     metadata: expect.objectContaining({
                         anomalyType: 'TALKING',
                         confidenceScore: 0.85,
+                        audioDiagnostics: expect.objectContaining({
+                            threshold: DEFAULT_AUDIO_ANOMALY_CONFIG.thresholds.TALKING,
+                            workerPhase: 'running',
+                            streamPhase: 'managed',
+                            configVersion: expect.stringMatching(/^audio-config:/),
+                        }),
                     }),
                 }),
             );
@@ -279,6 +285,12 @@ describe('useAudioAnomalyWorker', () => {
                     anomalyType: 'TALKING',
                     confidenceScore: 0.91,
                     dedupeKey: 'session-123:AUDIO_ANOMALY:TALKING:2026-07-07T00:00:00.000Z',
+                    audioDiagnostics: expect.objectContaining({
+                        threshold: DEFAULT_AUDIO_ANOMALY_CONFIG.thresholds.TALKING,
+                        workerPhase: 'running',
+                        streamPhase: 'managed',
+                        configVersion: expect.stringMatching(/^audio-config:/),
+                    }),
                 }),
             }),
         );
@@ -576,6 +588,12 @@ describe('useAudioAnomalyWorker', () => {
                 metadata: expect.objectContaining({
                     anomalyType: 'TALKING',
                     confidenceScore: 0.92,
+                    audioDiagnostics: expect.objectContaining({
+                        threshold: DEFAULT_AUDIO_ANOMALY_CONFIG.thresholds.TALKING,
+                        workerPhase: 'running',
+                        streamPhase: 'managed',
+                        configVersion: expect.stringMatching(/^audio-config:/),
+                    }),
                 }),
             }),
         );

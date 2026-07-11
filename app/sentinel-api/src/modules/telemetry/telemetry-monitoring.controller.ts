@@ -19,10 +19,12 @@ export const telemetryHealthRoute = createRoute({
                         ingestion: z.object({
                             mode: z.string(),
                             queueName: z.string().nullable(),
+                            bufferName: z.string().nullable(),
                             waiting: z.number().optional(),
                             active: z.number().optional(),
                             failed: z.number().optional(),
                             completed: z.number().optional(),
+                            buffered: z.number().optional(),
                         }),
                     }),
                 },

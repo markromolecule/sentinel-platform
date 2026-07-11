@@ -5,6 +5,18 @@ import { TelemetryStorageService } from '../../storage/storage.service';
 
 export type TelemetryJobProcessingResult = 'persisted' | 'dropped';
 
+export function buildTelemetryJobLogContext(payload: PersistableProctoringEvent) {
+    return {
+        attemptId: payload.examSessionId,
+        studentId: payload.studentId,
+        eventType: payload.eventType,
+        ruleKey: payload.ruleKey,
+        timestamp: payload.timestamp,
+        eventId: payload.metadata?.eventId ?? null,
+        dedupeKey: payload.metadata?.dedupeKey ?? null,
+    };
+}
+
 function isTerminalTelemetryStorageError(error: unknown): error is HTTPException {
     if (!(error instanceof HTTPException)) {
         return false;
@@ -26,10 +38,9 @@ export async function processQueuedTelemetryEvent(
         }
 
         console.warn('[TelemetryWorker] Dropping terminal telemetry job.', {
-            attemptId: payload.examSessionId,
-            eventType: payload.eventType,
             status: error.status,
             message: error.message,
+            ...buildTelemetryJobLogContext(payload),
         });
 
         return 'dropped';

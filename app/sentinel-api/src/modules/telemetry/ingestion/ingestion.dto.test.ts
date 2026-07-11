@@ -62,6 +62,39 @@ describe('ingestProctoringEventSchema', () => {
         });
     });
 
+    it('accepts additive audio diagnostics metadata on audio telemetry requests', () => {
+        const parsed = ingestProctoringEventSchema.body.parse({
+            examSessionId: '123e4567-e89b-12d3-a456-426614174000',
+            studentId: '123e4567-e89b-12d3-a456-426614174001',
+            timestamp: '2026-04-23T00:00:00.000Z',
+            platform: 'WEB',
+            source: 'AI',
+            ruleKey: 'aiRules.audio_anomaly_detection',
+            eventType: 'AUDIO_ANOMALY',
+            metadata: {
+                anomalyType: 'TALKING',
+                confidenceScore: 0.84,
+                audioDiagnostics: {
+                    threshold: 0.45,
+                    configVersion: 'audio-config:test-version',
+                    workerPhase: 'running',
+                    streamPhase: 'live',
+                },
+            },
+        });
+
+        expect(parsed.metadata).toMatchObject({
+            anomalyType: 'TALKING',
+            confidenceScore: 0.84,
+            audioDiagnostics: {
+                threshold: 0.45,
+                configVersion: 'audio-config:test-version',
+                workerPhase: 'running',
+                streamPhase: 'live',
+            },
+        });
+    });
+
     it('rejects malformed eventId (not uuid)', () => {
         const parseResult = ingestProctoringEventSchema.body.safeParse({
             examSessionId: '123e4567-e89b-12d3-a456-426614174000',

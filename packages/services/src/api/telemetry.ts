@@ -2,7 +2,6 @@ import type {
     TelemetryIncidentRecord,
     TelemetryIncidentStatus,
     TelemetryEventIngestionRequest,
-    TelemetryEventType,
     TelemetryPlatform,
     TelemetryRuleKey,
     TelemetrySettings,

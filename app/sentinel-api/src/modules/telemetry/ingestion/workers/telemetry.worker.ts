@@ -12,9 +12,12 @@ import {
     getTelemetryQueueName,
     getTelemetryWorkerConcurrency,
 } from '../config/ingestion-queue.config';
-import { processQueuedTelemetryEvent } from '../services/telemetry-job-processor.service';
+import {
+    buildTelemetryJobLogContext,
+    processQueuedTelemetryEvent,
+} from '../services/telemetry-job-processor.service';
 
-function getRedisConnectionTarget() {
+export function getRedisConnectionTarget() {
     const redisUrl = process.env.REDIS_URL?.trim();
 
     if (!redisUrl) {
@@ -39,7 +42,17 @@ function getRedisConnectionTarget() {
     }
 }
 
-const startWorker = async (): Promise<void> => {
+export const buildWorkerFailureContext = (
+    payload: PersistableProctoringEvent | null | undefined,
+    jobId: string | null,
+) => {
+    return {
+        jobId,
+        ...(payload ? buildTelemetryJobLogContext(payload) : {}),
+    };
+};
+
+export const startWorker = async (): Promise<void> => {
     if (getTelemetryIngestionMode() !== 'redis') {
         console.log(
             `[TelemetryWorker] Ingestion mode is set to "${getTelemetryIngestionMode()}". Telemetry worker is inactive and exiting gracefully.`,
@@ -74,9 +87,9 @@ const startWorker = async (): Promise<void> => {
 
     worker.on('failed', (job, error) => {
         console.error('[TelemetryWorker] Failed to process job', {
-            jobId: job?.id ?? null,
             queueName: getTelemetryQueueName(),
             error: error.message,
+            ...buildWorkerFailureContext(job?.data, job?.id?.toString() ?? null),
         });
     });
 
@@ -91,12 +104,17 @@ const startWorker = async (): Promise<void> => {
         });
     });
 
-    worker.on('stalled', (jobId) => {
+    worker.on('stalled', async (jobId) => {
+        const job = typeof jobId === 'string' ? await worker.getJob(jobId) : undefined;
+
         console.error('[TelemetryWorker] Job stalled', {
             queueName: getTelemetryQueueName(),
             redisHost: redisTarget.host,
             redisPort: redisTarget.port,
-            jobId,
+            ...buildWorkerFailureContext(
+                (job?.data as PersistableProctoringEvent | undefined) ?? null,
+                jobId?.toString?.() ?? null,
+            ),
         });
     });
 
