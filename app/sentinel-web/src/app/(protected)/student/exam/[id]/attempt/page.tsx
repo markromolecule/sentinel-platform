@@ -6,9 +6,16 @@ import { useStudentExamAttempt } from '@/app/(protected)/student/exam/[id]/attem
 import { StudentFlowShell } from '../_components/student-flow-shell';
 import { StudentFlowPageHeader } from '../../_components/student-flow-primitives';
 
+/**
+ * The main container page for a student's active exam attempt.
+ *
+ * Invokes the attempt coordination hook exactly once at the route boundary
+ * to initialize security monitoring, media stream tracking, and audio checks,
+ * then passes the unified attempt state down to the render tree.
+ */
 export default function StudentExamAttemptPage() {
-    const { isLoading, isInitializingSession, isRedirectingHistory, blockedState } =
-        useStudentExamAttempt();
+    const attempt = useStudentExamAttempt();
+    const { isLoading, isInitializingSession, isRedirectingHistory, blockedState } = attempt;
 
     if (isLoading || isInitializingSession || isRedirectingHistory) {
         return <StudentExamLoadingState />;
@@ -33,5 +40,5 @@ export default function StudentExamAttemptPage() {
         );
     }
 
-    return <AttemptView />;
+    return <AttemptView attempt={attempt} />;
 }

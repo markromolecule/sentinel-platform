@@ -21,7 +21,7 @@ export function MonitoringPreloader({ configuration }: MonitoringPreloaderProps)
         if (!configuration) return;
 
         // Warm up Audio Anomaly Detection if enabled
-        if (configuration.micRequired && configuration.aiRules?.audio_anomaly_detection) {
+        if (configuration.aiRules?.audio_anomaly_detection) {
             warmupAudioAnomaly();
         }
 

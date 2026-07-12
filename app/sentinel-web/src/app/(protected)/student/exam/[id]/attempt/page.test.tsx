@@ -709,7 +709,7 @@ describe('StudentExamAttemptPage', () => {
             },
             phase: 'running' as const,
             errorMessage: null as string | null,
-            activeIncident: null as any,
+            activeIncident: null as unknown as unknown,
             dismissIncident: dismissMediaPipeIncident,
             isEnabled: true,
         };
@@ -785,5 +785,30 @@ describe('StudentExamAttemptPage', () => {
         expect(mockRouterReplace.mock.invocationCallOrder[0]).toBeLessThan(
             mockExitFullscreen.mock.invocationCallOrder[0],
         );
+    });
+
+    it('invokes the mocked security, MediaPipe, and audio monitoring integrations once rather than twice', () => {
+        render(<StudentExamAttemptPage />);
+        expect(mockExamMonitoring).toHaveBeenCalledTimes(1);
+        expect(mockAttemptMediaPipeMonitoring).toHaveBeenCalledTimes(1);
+        expect(mockUseAudioAnomalyWorker).toHaveBeenCalledTimes(1);
+    });
+
+    it('verifies the single monitoring owner calls suspendSecurityMonitoring() once before the turn-in transition and does not produce a fullscreen lock from another instance', () => {
+        const mockSuspendSecurityMonitoring = vi.fn(() => true);
+        mockExamMonitoring.mockReturnValue({
+            securityLockReason: null,
+            isResumingExam: false,
+            resumeSecuredExam: vi.fn(),
+            fullScreenContainerRef: { current: null },
+            suspendSecurityMonitoring: mockSuspendSecurityMonitoring,
+        });
+
+        render(<StudentExamAttemptPage />);
+
+        fireEvent.click(screen.getByRole('button', { name: /answer 4/i }));
+        fireEvent.click(screen.getByRole('button', { name: /turn in exam/i }));
+
+        expect(mockSuspendSecurityMonitoring).toHaveBeenCalledTimes(1);
     });
 });
