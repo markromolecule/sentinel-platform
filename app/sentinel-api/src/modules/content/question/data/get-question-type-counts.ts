@@ -2,6 +2,7 @@ import { type DbClient } from '@sentinel/db';
 import { sql } from 'kysely';
 import { applyQuestionFilters } from './get-questions';
 import type { GetQuestionsQuery } from '../question.dto';
+import { type QuestionType } from '@sentinel/shared';
 
 export type GetQuestionTypeCountsDataArgs = {
     dbClient: DbClient;
@@ -34,8 +35,11 @@ export async function getQuestionTypeCountsData({
         .groupBy('qbq.question_type')
         .execute();
 
-    const items = counts.map((row: any) => ({
-        type: row.question_type,
+    const items: {
+        type: QuestionType;
+        count: number
+    }[] = counts.map((row: any) => ({
+        type: row.question_type as QuestionType,
         count: Number(row.count),
     }));
 
