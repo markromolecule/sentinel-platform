@@ -1,7 +1,29 @@
+'use client';
+
 import * as React from 'react';
-import { Badge, Button, Collapsible, CollapsibleContent, Input, Textarea, cn } from '@sentinel/ui';
+import { Button, Collapsible, CollapsibleContent, Textarea, cn } from '@sentinel/ui';
 import { ChevronDown, Database, GripVertical, Plus, PencilLine, Trash2 } from 'lucide-react';
 import type { ExamQuestionSection } from '@sentinel/shared/types';
+
+type QuestionSectionCardProps = {
+    section: ExamQuestionSection;
+    questionCount: number;
+    totalPoints: number;
+    isSectionDragging: boolean;
+    isSectionDropTarget: boolean;
+    onSectionDragStart: (event: React.DragEvent<HTMLButtonElement>) => void;
+    onSectionDragEnter: (event: React.DragEvent<HTMLDivElement>) => void;
+    onSectionDragOver: (event: React.DragEvent<HTMLDivElement>) => void;
+    onSectionDrop: (event: React.DragEvent<HTMLDivElement>) => void;
+    onSectionDragEnd: () => void;
+    onSectionTitleChange: (title: string) => void;
+    onSectionDescriptionChange: (description: string) => void;
+    onDeleteSection?: () => void;
+    onToggleCollapse: () => void;
+    onImportQuestions: () => void;
+    onAddQuestion: () => void;
+    children?: React.ReactNode;
+};
 
 export function QuestionSectionCard({
     section,
@@ -21,40 +43,16 @@ export function QuestionSectionCard({
     onImportQuestions,
     onAddQuestion,
     children,
-}: {
-    section: ExamQuestionSection;
-    questionCount: number;
-    totalPoints: number;
-    isSectionDragging: boolean;
-    isSectionDropTarget: boolean;
-    onSectionDragStart: (event: React.DragEvent<HTMLButtonElement>) => void;
-    onSectionDragEnter: (event: React.DragEvent<HTMLDivElement>) => void;
-    onSectionDragOver: (event: React.DragEvent<HTMLDivElement>) => void;
-    onSectionDrop: (event: React.DragEvent<HTMLDivElement>) => void;
-    onSectionDragEnd: () => void;
-    onSectionTitleChange: (title: string) => void;
-    onSectionDescriptionChange: (description: string) => void;
-    onDeleteSection?: () => void;
-    onToggleCollapse: () => void;
-    onImportQuestions: () => void;
-    onAddQuestion: () => void;
-    children?: React.ReactNode;
-}) {
+}: QuestionSectionCardProps) {
     const isOpen = !section.isCollapsed;
     const hasInstruction = Boolean(section.description?.trim());
-    const [isInstructionEditorOpen, setIsInstructionEditorOpen] = React.useState(hasInstruction);
-
-    React.useEffect(() => {
-        if (hasInstruction) {
-            setIsInstructionEditorOpen(true);
-        }
-    }, [hasInstruction]);
+    const [isInstructionEditorOpen, setIsInstructionEditorOpen] = React.useState(false);
 
     return (
         <Collapsible open={isOpen}>
             <div
                 className={cn(
-                    'border-border/60 bg-background overflow-hidden rounded-2xl border shadow-sm transition-colors',
+                    'border-border/60 bg-background overflow-hidden rounded-xl border shadow-sm transition-colors',
                     isSectionDragging && 'opacity-70',
                     isSectionDropTarget && 'border-foreground/20 bg-muted/30',
                 )}
@@ -62,25 +60,28 @@ export function QuestionSectionCard({
                 onDragOverCapture={onSectionDragOver}
                 onDropCapture={onSectionDrop}
             >
-                <div className="border-border/60 bg-muted/30 flex flex-col gap-4 border-b px-4 py-4">
-                    <div className="flex flex-col gap-3 xl:flex-row xl:items-start xl:justify-between">
-                        <div className="flex min-w-0 items-start gap-3">
+                {/* Header Row */}
+                <div className="bg-muted/10 flex flex-col border-b px-3 py-2 gap-1">
+                    <div className="flex items-center justify-between">
+                        <div className="flex min-w-0 flex-1 items-center gap-2">
+                            {/* Drag Grip */}
                             <button
                                 type="button"
                                 draggable
                                 onDragStart={onSectionDragStart}
                                 onDragEnd={onSectionDragEnd}
-                                className="border-border/60 bg-background text-foreground hover:bg-muted flex h-9 w-9 shrink-0 cursor-grab items-center justify-center rounded-lg border shadow-sm transition active:cursor-grabbing"
+                                className="text-zinc-400 hover:bg-zinc-100 hover:text-zinc-600 flex h-8 w-8 shrink-0 cursor-grab items-center justify-center rounded-md transition active:cursor-grabbing"
                                 aria-label={`Reorder ${section.title}`}
                                 title="Drag to reorder section"
                             >
                                 <GripVertical className="h-4 w-4" />
                             </button>
 
+                            {/* Collapse Arrow */}
                             <button
                                 type="button"
                                 onClick={onToggleCollapse}
-                                className="border-border/60 bg-background text-foreground hover:bg-muted flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border shadow-sm transition"
+                                className="text-zinc-400 hover:bg-zinc-100 hover:text-zinc-600 flex h-8 w-8 shrink-0 items-center justify-center rounded-md transition"
                                 aria-label={
                                     isOpen ? `Collapse ${section.title}` : `Expand ${section.title}`
                                 }
@@ -93,112 +94,102 @@ export function QuestionSectionCard({
                                 />
                             </button>
 
-                            <div className="min-w-0 flex-1 space-y-2">
-                                <div className="space-y-1">
-                                    <p className="text-muted-foreground text-[10px] font-semibold tracking-[0.2em] uppercase">
-                                        Section title
-                                    </p>
-                                    <Input
-                                        aria-label={`${section.title} title`}
-                                        value={section.title}
-                                        onChange={(event) =>
-                                            onSectionTitleChange(event.target.value)
-                                        }
-                                        className="bg-background h-11 text-base font-semibold shadow-none"
-                                    />
-                                </div>
+                            {/* Inline Title Input & Stats */}
+                            <div className="flex min-w-0 flex-1 items-center gap-3">
+                                <input
+                                    aria-label={`${section.title} title`}
+                                    value={section.title}
+                                    onChange={(event) =>
+                                        onSectionTitleChange(event.target.value)
+                                    }
+                                    className="bg-transparent border-transparent px-1.5 py-0.5 hover:bg-zinc-100/50 focus:bg-background focus:border-zinc-200 text-sm font-semibold rounded-md shadow-none focus:ring-0 focus:outline-none transition min-w-[120px] max-w-[240px] truncate"
+                                />
+                                <span className="text-zinc-400 font-normal text-xs shrink-0 select-none">
+                                    {questionCount} question{questionCount === 1 ? '' : 's'} · {totalPoints} pt{totalPoints === 1 ? '' : 's'}
+                                </span>
                             </div>
                         </div>
 
-                        <div className="flex flex-wrap items-center gap-2 xl:justify-end">
-                            <Badge variant="secondary">{questionCount} questions</Badge>
-                            <Badge variant="secondary">{totalPoints} pts</Badge>
+                        {/* Action Buttons */}
+                        <div className="flex items-center gap-1.5 pl-4">
                             <Button
                                 type="button"
                                 variant="outline"
+                                size="sm"
                                 onClick={onImportQuestions}
-                                className="gap-2"
+                                className="h-8 text-xs gap-1.5 px-3 border-zinc-200 bg-background text-zinc-700 hover:bg-zinc-50 shadow-none rounded-md"
                             >
-                                <Database className="h-4 w-4" />
+                                <Database className="h-3.5 w-3.5" />
                                 Import from Bank
                             </Button>
+
                             <Button
                                 type="button"
-                                variant="outline"
+                                size="sm"
                                 onClick={onAddQuestion}
-                                className="gap-2"
+                                className="h-8 text-xs gap-1.5 px-3 bg-primary text-primary-foreground hover:bg-primary/90 shadow-none rounded-md"
                             >
-                                <Plus className="h-4 w-4" />
+                                <Plus className="h-3.5 w-3.5" />
                                 Add Question
                             </Button>
+
+                            {/* Pencil to Edit Instructions */}
+                            <Button
+                                type="button"
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => setIsInstructionEditorOpen((curr) => !curr)}
+                                className={cn(
+                                    "h-8 w-8 text-zinc-400 hover:text-zinc-600 rounded-md",
+                                    isInstructionEditorOpen && "text-primary bg-primary/5 hover:text-primary hover:bg-primary/10"
+                                )}
+                                title={hasInstruction ? "Edit Instruction" : "Add Instruction"}
+                            >
+                                <PencilLine className="h-4 w-4" />
+                            </Button>
+
+                            {/* Delete Section */}
                             {onDeleteSection ? (
                                 <Button
                                     type="button"
-                                    variant="outline"
+                                    variant="ghost"
+                                    size="icon"
                                     onClick={onDeleteSection}
-                                    className="text-destructive hover:bg-destructive/10 hover:text-destructive gap-2"
+                                    className="h-8 w-8 text-zinc-400 hover:text-destructive hover:bg-destructive/5 rounded-md transition"
+                                    title="Delete Section"
                                 >
                                     <Trash2 className="h-4 w-4" />
-                                    Delete Section
                                 </Button>
                             ) : null}
                         </div>
                     </div>
 
-                    <div className="border-border/60 bg-background/80 rounded-xl border p-3 shadow-sm">
-                        <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
-                            <div className="min-w-0 space-y-1">
-                                <p className="text-muted-foreground text-[10px] font-semibold tracking-[0.2em] uppercase">
-                                    Section instruction
-                                </p>
-                                <p className="text-foreground/80 text-sm leading-relaxed">
-                                    {hasInstruction
-                                        ? section.description
-                                        : 'No instruction added yet. Use plain text to guide students through this section.'}
-                                </p>
-                            </div>
-
-                            <Button
-                                type="button"
-                                variant="ghost"
-                                onClick={() => setIsInstructionEditorOpen((current) => !current)}
-                                className="gap-2 self-start"
-                            >
-                                <PencilLine className="h-4 w-4" />
-                                {isInstructionEditorOpen
-                                    ? 'Hide Editor'
-                                    : hasInstruction
-                                        ? 'Edit Instruction'
-                                        : 'Add Instruction'}
-                            </Button>
+                    {/* Inline Static Instructions (when editor closed but instruction exists) */}
+                    {hasInstruction && !isInstructionEditorOpen && (
+                        <div className="pl-[76px] pb-1.5 pr-4">
+                            <p className="text-zinc-500 text-xs italic line-clamp-2">
+                                {section.description}
+                            </p>
                         </div>
+                    )}
 
-                        <div
-                            className={cn(
-                                'overflow-hidden transition-[max-height,opacity] duration-300 ease-in-out',
-                                isInstructionEditorOpen
-                                    ? 'max-h-80 opacity-100'
-                                    : 'max-h-0 opacity-0',
-                            )}
-                        >
-                            {isInstructionEditorOpen && (
-                                <div className="pt-3">
-                                    <Textarea
-                                        aria-label={`${section.title} instructions`}
-                                        value={section.description ?? ''}
-                                        onChange={(event) =>
-                                            onSectionDescriptionChange(event.target.value)
-                                        }
-                                        placeholder="Write plain-text instructions for this section"
-                                        className="bg-background min-h-24 resize-y text-sm shadow-none"
-                                    />
-                                    <p className="text-muted-foreground mt-2 text-xs">
-                                        Plain text only. Keep the guidance clear and concise.
-                                    </p>
-                                </div>
-                            )}
+                    {/* Expandable Instruction Editor */}
+                    {isInstructionEditorOpen && (
+                        <div className="pl-[76px] pb-2.5 pr-4 pt-1">
+                            <Textarea
+                                aria-label={`${section.title} instructions`}
+                                value={section.description ?? ''}
+                                onChange={(event) =>
+                                    onSectionDescriptionChange(event.target.value)
+                                }
+                                placeholder="Section instruction (optional)"
+                                className="bg-background min-h-16 resize-y text-xs shadow-none border-zinc-200 focus-visible:ring-1 focus-visible:ring-primary rounded-md"
+                            />
+                            <p className="text-zinc-400 mt-1 text-[10px]">
+                                Plain text only. Keep instructions clear and concise.
+                            </p>
                         </div>
-                    </div>
+                    )}
                 </div>
 
                 <CollapsibleContent className="data-[state=closed]:animate-accordion-up data-[state=open]:animate-accordion-down">

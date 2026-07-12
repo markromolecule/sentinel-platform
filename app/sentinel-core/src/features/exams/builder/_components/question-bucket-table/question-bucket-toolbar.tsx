@@ -1,6 +1,6 @@
 'use client';
 
-import { Badge, Button } from '@sentinel/ui';
+import { Button } from '@sentinel/ui';
 import { Database, FolderPlus, Plus } from 'lucide-react';
 
 export function FlatQuestionBucketToolbar({
@@ -14,19 +14,19 @@ export function FlatQuestionBucketToolbar({
 }) {
     return (
         <div className="flex items-center justify-between gap-3">
-            <div className="space-y-1">
-                <h3 className="text-base font-semibold">Questions ({questionCount})</h3>
-                <p className="text-muted-foreground text-sm">
-                    Drag the # handle to reorder questions.
+            <div className="space-y-0.5">
+                <h3 className="text-sm font-semibold">Questions ({questionCount})</h3>
+                <p className="text-muted-foreground text-xs">
+                    Drag the handle to reorder questions.
                 </p>
             </div>
             <div className="flex gap-2">
-                <Button variant="outline" onClick={onImport} className="gap-2">
-                    <Database className="h-4 w-4" />
+                <Button variant="outline" size="sm" onClick={onImport} className="h-8 text-xs gap-1.5">
+                    <Database className="h-3.5 w-3.5" />
                     Import from Bank
                 </Button>
-                <Button variant="outline" onClick={onAddQuestion} className="gap-2">
-                    <Plus className="h-4 w-4" />
+                <Button size="sm" onClick={onAddQuestion} className="h-8 text-xs gap-1.5 bg-primary text-primary-foreground hover:bg-primary/90">
+                    <Plus className="h-3.5 w-3.5" />
                     Add Question
                 </Button>
             </div>
@@ -44,21 +44,22 @@ export function SectionedQuestionBucketToolbar({
     onAddSection?: () => void;
 }) {
     return (
-        <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-            <div className="space-y-1">
-                <h3 className="text-base font-semibold">Questions ({questionCount})</h3>
-                <p className="text-muted-foreground text-sm">
-                    Organize questions into sections. Add and import questions inside the section
-                    where they belong.
-                </p>
-                <div className="flex flex-wrap gap-2 pt-1">
-                    <Badge variant="secondary">{totalPoints} pts total</Badge>
+        <div className="flex items-center justify-between gap-3">
+            <div className="space-y-0.5">
+                <div className="flex items-center gap-2">
+                    <h3 className="text-sm font-semibold">Questions ({questionCount})</h3>
+                    <span className="text-zinc-400 font-normal text-xs select-none">
+                        · {totalPoints} pt{totalPoints === 1 ? '' : 's'} total
+                    </span>
                 </div>
+                <p className="text-muted-foreground text-xs">
+                    Organize questions into sections where they belong.
+                </p>
             </div>
 
             {onAddSection ? (
-                <Button variant="outline" onClick={onAddSection} className="gap-2 self-start">
-                    <FolderPlus className="h-4 w-4" />
+                <Button variant="outline" size="sm" onClick={onAddSection} className="h-8 text-xs gap-1.5">
+                    <FolderPlus className="h-3.5 w-3.5" />
                     Add Section
                 </Button>
             ) : null}

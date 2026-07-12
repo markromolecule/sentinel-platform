@@ -3,6 +3,9 @@ import {
     getQuestionsQuerySchema,
     questionRecordSchema,
     updateQuestionBodySchema,
+    getQuestionTypeCountsQuerySchema,
+    questionTypeCountSchema,
+    questionTypeCountsResponseSchema,
 } from './question-schema';
 import { questionInputSchema } from './assessment-schema';
 import { generateQuestionPreviewConfigSchema } from '../gemini/gemini-schema';
@@ -146,4 +149,51 @@ describe('Question and AI Config Schemas', () => {
             expect(parsed.success).toBe(false);
         });
     });
+
+    describe('getQuestionTypeCountsQuerySchema', () => {
+        it('validates correct query parameters', () => {
+            const valid = {
+                search: 'algebra',
+                difficulty: 'HARD',
+                subjectId: '11111111-1111-4111-8111-111111111111',
+                status: 'ACTIVE',
+            };
+            const parsed = getQuestionTypeCountsQuerySchema.safeParse(valid);
+            expect(parsed.success).toBe(true);
+        });
+
+        it('rejects invalid statuses or UUIDs', () => {
+            const invalid = {
+                subjectId: 'not-a-uuid',
+                status: 'INVALID_STATUS',
+            };
+            const parsed = getQuestionTypeCountsQuerySchema.safeParse(invalid);
+            expect(parsed.success).toBe(false);
+        });
+    });
+
+    describe('questionTypeCountSchema and response schema', () => {
+        it('validates a correct count record and list response', () => {
+            const validCount = {
+                type: 'MULTIPLE_CHOICE',
+                count: 10,
+            };
+            expect(questionTypeCountSchema.safeParse(validCount).success).toBe(true);
+
+            const validResponse = {
+                items: [validCount, { type: 'TRUE_FALSE', count: 5 }],
+                total: 15,
+            };
+            expect(questionTypeCountsResponseSchema.safeParse(validResponse).success).toBe(true);
+        });
+
+        it('rejects negative or non-integer counts', () => {
+            const invalid = {
+                type: 'MULTIPLE_CHOICE',
+                count: -1,
+            };
+            expect(questionTypeCountSchema.safeParse(invalid).success).toBe(false);
+        });
+    });
 });
+

@@ -11,6 +11,10 @@ import {
 } from './controllers/delete-question.controller';
 import { getQuestionRoute, getQuestionRouteHandler } from './controllers/get-question.controller';
 import {
+    getQuestionTypeCountsRoute,
+    getQuestionTypeCountsRouteHandler,
+} from './controllers/get-question-type-counts.controller';
+import {
     getQuestionsRoute,
     getQuestionsRouteHandler,
 } from './controllers/get-questions.controller';
@@ -25,6 +29,7 @@ questionRoutes.use('*', authMiddleware);
 
 questionRoutes
     .openapi(getQuestionsRoute, getQuestionsRouteHandler)
+    .openapi(getQuestionTypeCountsRoute, getQuestionTypeCountsRouteHandler)
     .openapi(getQuestionRoute, getQuestionRouteHandler)
     .openapi(createQuestionRoute, createQuestionRouteHandler)
     .openapi(updateQuestionRoute, updateQuestionRouteHandler)

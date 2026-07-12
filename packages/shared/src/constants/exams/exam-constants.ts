@@ -37,6 +37,7 @@ export const QUESTION_QUERY_KEYS = {
     all: ['questions'] as const,
     list: (params?: object) => ['questions', 'list', params ?? {}] as const,
     infinite: (params?: object) => ['questions', 'infinite', params ?? {}] as const,
+    typeCounts: (params?: object) => ['questions', 'type-counts', params ?? {}] as const,
     details: (id: string) => ['questions', id] as const,
 };
 

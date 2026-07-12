@@ -16,6 +16,7 @@ export function useQuestionBankImportSelection() {
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedQuestionType, setSelectedQuestionType] = useState<QuestionType | 'all'>('all');
     const [selectedCollectionId, setSelectedCollectionId] = useState<string>(ALL_COLLECTIONS_ID);
+    const [currentPage, setCurrentPage] = useState(1);
 
     const selectedIdSet = useMemo(() => new Set(selectedIds), [selectedIds]);
     const selectedQuestions = useMemo(
@@ -35,6 +36,22 @@ export function useQuestionBankImportSelection() {
         setSearchQuery('');
         setSelectedQuestionType('all');
         setSelectedCollectionId(ALL_COLLECTIONS_ID);
+        setCurrentPage(1);
+    };
+
+    const handleSetSearchQuery = (query: string) => {
+        setSearchQuery(query);
+        setCurrentPage(1);
+    };
+
+    const handleSetSelectedCollectionId = (id: string) => {
+        setSelectedCollectionId(id);
+        setCurrentPage(1);
+    };
+
+    const handleSetSelectedQuestionType = (type: QuestionType | 'all') => {
+        setSelectedQuestionType(type);
+        setCurrentPage(1);
     };
 
     const toggleQuestion = (question: QuestionRecord, sourceCollectionId?: string) => {
@@ -123,10 +140,12 @@ export function useQuestionBankImportSelection() {
         searchQuery,
         selectedQuestionType,
         selectedCollectionId,
+        currentPage,
         setAlreadyAddedIds,
-        setSearchQuery,
-        setSelectedQuestionType,
-        setSelectedCollectionId,
+        setSearchQuery: handleSetSearchQuery,
+        setSelectedQuestionType: handleSetSelectedQuestionType,
+        setSelectedCollectionId: handleSetSelectedCollectionId,
+        setCurrentPage,
         toggleQuestion,
         toggleSelectAllFilteredQuestions,
         resetState,

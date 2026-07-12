@@ -38,4 +38,5 @@ export type ExamBuilderSidebarProps = Pick<
     | 'handleToggleExamSetting'
     | 'handleToggleLobbyAdmissionMode'
     | 'handleToggleReleaseScoreMode'
+    | 'handleToggleStrictMode'
 >;

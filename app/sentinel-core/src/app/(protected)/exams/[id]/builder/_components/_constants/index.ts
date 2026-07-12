@@ -18,7 +18,7 @@ export type ExamRuleToggleOption =
       }
     | {
           kind: 'configuration';
-          key: 'lobbyAdmissionMode' | 'releaseScoreMode';
+          key: 'lobbyAdmissionMode' | 'releaseScoreMode' | 'strictMode';
           label: string;
       };
 
@@ -29,6 +29,7 @@ export const TOGGLE_OPTIONS: ExamRuleToggleOption[] = [
     { kind: 'setting', key: 'randomizeChoices', label: 'Randomize Choices' },
     { kind: 'configuration', key: 'lobbyAdmissionMode', label: 'Require Instructor Admit' },
     { kind: 'configuration', key: 'releaseScoreMode', label: 'Auto Release Scores' },
+    { kind: 'configuration', key: 'strictMode', label: 'Strict Mode' },
 ];
 
 export function getExamRuleToggleState(args: {
@@ -39,6 +40,9 @@ export function getExamRuleToggleState(args: {
     if (args.option.kind === 'configuration') {
         if (args.option.key === 'lobbyAdmissionMode') {
             return args.configuration.lobbyAdmissionMode === 'INSTRUCTOR_GATED';
+        }
+        if (args.option.key === 'strictMode') {
+            return args.configuration.strictMode;
         }
 
         return (args.configuration.releaseScoreMode ?? 'AUTO_RELEASE') === 'AUTO_RELEASE';
@@ -53,10 +57,15 @@ export function applyExamRuleToggle(args: {
     onToggleSetting: (key: keyof ExamSettings, checked: boolean) => void;
     onToggleLobbyAdmissionMode: (checked: boolean) => void;
     onToggleReleaseScoreMode: (checked: boolean) => void;
+    onToggleStrictMode: (checked: boolean) => void;
 }) {
     if (args.option.kind === 'configuration') {
         if (args.option.key === 'lobbyAdmissionMode') {
             args.onToggleLobbyAdmissionMode(args.checked);
+            return;
+        }
+        if (args.option.key === 'strictMode') {
+            args.onToggleStrictMode(args.checked);
             return;
         }
 
@@ -85,27 +94,6 @@ export function getSystemConfigurationRows(configuration?: ExamConfiguration) {
             .join(' • ') || 'No hardware requirements';
 
     return [
-        {
-            label: 'Lobby Gate',
-            value:
-                configuration.lobbyAdmissionMode === 'INSTRUCTOR_GATED'
-                    ? 'Instructor admit required'
-                    : 'Automatic entry',
-            icon: UserCheck,
-        },
-        {
-            label: 'Score Release',
-            value:
-                (configuration.releaseScoreMode ?? 'AUTO_RELEASE') === 'AUTO_RELEASE'
-                    ? 'Immediately after submit'
-                    : 'After instructor finalization',
-            icon: Clock3,
-        },
-        {
-            label: 'Strict Mode',
-            value: configuration.strictMode ? 'Enabled' : 'Disabled',
-            icon: Cpu,
-        },
         {
             label: 'Session Lock',
             value: configuration.screenLock ? 'Locked exam surface' : 'Monitoring only',

@@ -80,3 +80,23 @@ export const updateQuestionBodySchema = z.object({
     content: questionContentSchema.optional(),
     status: questionBankStatusSchema.optional(),
 });
+
+export const getQuestionTypeCountsQuerySchema = z.object({
+    search: z.string().optional(),
+    difficulty: questionDifficultySchema.optional(),
+    subjectId: z.string().uuid().optional(),
+    institutionId: z.string().uuid().optional(),
+    collectionId: z.string().uuid().optional(),
+    status: questionBankStatusSchema.optional(),
+});
+
+export const questionTypeCountSchema = z.object({
+    type: questionTypeSchema,
+    count: z.number().int().nonnegative(),
+});
+
+export const questionTypeCountsResponseSchema = z.object({
+    items: z.array(questionTypeCountSchema),
+    total: z.number().int().nonnegative(),
+});
+

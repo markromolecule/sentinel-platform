@@ -27,12 +27,13 @@ export function ExamBuilderSidebar({
     handleToggleExamSetting,
     handleToggleLobbyAdmissionMode,
     handleToggleReleaseScoreMode,
+    handleToggleStrictMode,
 }: ExamBuilderSidebarProps) {
     const params = useParams();
     const id = params?.id as string;
-    const { data: configurationState, isLoading: isConfigurationLoading } =
+    const { isLoading: isConfigurationLoading } =
         useExamConfigurationQuery(id);
-    const systemConfigurationRows = getSystemConfigurationRows(configurationState?.configuration);
+    const systemConfigurationRows = getSystemConfigurationRows(configuration);
     const enabledRuleCount = TOGGLE_OPTIONS.filter((option) =>
         getExamRuleToggleState({
             option,
@@ -69,6 +70,7 @@ export function ExamBuilderSidebar({
                                     onToggleSetting: handleToggleExamSetting,
                                     onToggleLobbyAdmissionMode: handleToggleLobbyAdmissionMode,
                                     onToggleReleaseScoreMode: handleToggleReleaseScoreMode,
+                                    onToggleStrictMode: handleToggleStrictMode,
                                 })
                             }
                         />

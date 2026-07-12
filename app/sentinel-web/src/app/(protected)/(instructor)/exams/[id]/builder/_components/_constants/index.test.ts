@@ -71,6 +71,7 @@ describe('exam builder rule toggles', () => {
         const onToggleSetting = vi.fn();
         const onToggleLobbyAdmissionMode = vi.fn();
         const onToggleReleaseScoreMode = vi.fn();
+        const onToggleStrictMode = vi.fn();
 
         applyExamRuleToggle({
             option: option!,
@@ -78,6 +79,7 @@ describe('exam builder rule toggles', () => {
             onToggleSetting,
             onToggleLobbyAdmissionMode,
             onToggleReleaseScoreMode,
+            onToggleStrictMode,
         });
 
         expect(onToggleSetting).not.toHaveBeenCalled();
@@ -89,6 +91,7 @@ describe('exam builder rule toggles', () => {
         const onToggleSetting = vi.fn();
         const onToggleLobbyAdmissionMode = vi.fn();
         const onToggleReleaseScoreMode = vi.fn();
+        const onToggleStrictMode = vi.fn();
 
         applyExamRuleToggle({
             option: option!,
@@ -96,6 +99,7 @@ describe('exam builder rule toggles', () => {
             onToggleSetting,
             onToggleLobbyAdmissionMode,
             onToggleReleaseScoreMode,
+            onToggleStrictMode,
         });
 
         expect(onToggleSetting).not.toHaveBeenCalled();
@@ -103,15 +107,44 @@ describe('exam builder rule toggles', () => {
         expect(onToggleReleaseScoreMode).toHaveBeenCalledWith(false);
     });
 
-    it('includes score release in the configuration summary rows', () => {
-        const rows = getSystemConfigurationRows({
-            ...configuration,
-            releaseScoreMode: 'MANUAL_RELEASE',
+    it('routes strict mode toggles to the strict mode handler', () => {
+        const option = TOGGLE_OPTIONS.find((item) => item.key === 'strictMode');
+        const onToggleSetting = vi.fn();
+        const onToggleLobbyAdmissionMode = vi.fn();
+        const onToggleReleaseScoreMode = vi.fn();
+        const onToggleStrictMode = vi.fn();
+
+        applyExamRuleToggle({
+            option: option!,
+            checked: false,
+            onToggleSetting,
+            onToggleLobbyAdmissionMode,
+            onToggleReleaseScoreMode,
+            onToggleStrictMode,
         });
 
-        expect(rows.some((row) => row.label === 'Score Release')).toBe(true);
-        expect(rows.find((row) => row.label === 'Score Release')?.value).toBe(
-            'After instructor finalization',
+        expect(onToggleSetting).not.toHaveBeenCalled();
+        expect(onToggleLobbyAdmissionMode).not.toHaveBeenCalled();
+        expect(onToggleReleaseScoreMode).not.toHaveBeenCalled();
+        expect(onToggleStrictMode).toHaveBeenCalledWith(false);
+    });
+
+    it('includes session lock in the configuration summary rows', () => {
+        const rows = getSystemConfigurationRows({
+            ...configuration,
+            screenLock: true,
+        });
+
+        expect(rows.some((row) => row.label === 'Session Lock')).toBe(true);
+        expect(rows.find((row) => row.label === 'Session Lock')?.value).toBe(
+            'Locked exam surface',
         );
+    });
+    
+    it('does not include lobby gate, score release, or strict mode in the configuration summary rows', () => {
+        const rows = getSystemConfigurationRows(configuration);
+        expect(rows.some((row) => row.label === 'Lobby Gate')).toBe(false);
+        expect(rows.some((row) => row.label === 'Score Release')).toBe(false);
+        expect(rows.some((row) => row.label === 'Strict Mode')).toBe(false);
     });
 });
