@@ -34,7 +34,10 @@ export async function getQuestionTypeCountsData({
         .groupBy('qbq.question_type')
         .execute();
 
-    const items = counts.map((row: any) => ({
+    const items: {
+        type: string;
+        count: number
+    }[] = counts.map((row: any) => ({
         type: row.question_type,
         count: Number(row.count),
     }));
