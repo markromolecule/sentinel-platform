@@ -15,7 +15,21 @@ import config from '@/lib/config';
 import { useStudentExamAttempt } from '@/app/(protected)/student/exam/[id]/attempt/_hooks/use-student-exam-attempt';
 import { MediaPipeIncidentDialog } from './mediapipe-incident-dialog';
 
-export function AttemptView() {
+/**
+ * Props for the AttemptView component.
+ */
+export interface AttemptViewProps {
+    /** The coordinated state and handlers returned from `useStudentExamAttempt` hook. */
+    attempt: ReturnType<typeof useStudentExamAttempt>;
+}
+
+/**
+ * Renders the primary workspace for a student exam attempt.
+ *
+ * This component acts as a pure presentation/view layer for the exam runtime,
+ * consuming the coordinated exam attempt state and controls passed down from the page container.
+ */
+export function AttemptView({ attempt }: AttemptViewProps) {
     const {
         exam,
         questions,
@@ -60,7 +74,7 @@ export function AttemptView() {
         handleSubmit,
         proceedToTurnInReview,
         setCurrentQuestionIndex,
-    } = useStudentExamAttempt();
+    } = attempt;
 
     return (
         <div
