@@ -60,6 +60,7 @@ describe('ExamBuilderSidebar', () => {
         const handleToggleExamSetting = vi.fn();
         const handleToggleLobbyAdmissionMode = vi.fn();
         const handleToggleReleaseScoreMode = vi.fn();
+        const handleToggleStrictMode = vi.fn();
 
         vi.mocked(useParams).mockReturnValue({ id: 'exam-1' });
         vi.mocked(useExamConfigurationQuery).mockReturnValue({
@@ -74,16 +75,19 @@ describe('ExamBuilderSidebar', () => {
                 handleToggleExamSetting={handleToggleExamSetting}
                 handleToggleLobbyAdmissionMode={handleToggleLobbyAdmissionMode}
                 handleToggleReleaseScoreMode={handleToggleReleaseScoreMode}
+                handleToggleStrictMode={handleToggleStrictMode}
             />,
         );
 
         fireEvent.click(screen.getByRole('switch', { name: 'Shuffle Questions' }));
         fireEvent.click(screen.getByRole('switch', { name: 'Require Instructor Admit' }));
         fireEvent.click(screen.getByRole('switch', { name: 'Auto Release Scores' }));
+        fireEvent.click(screen.getByRole('switch', { name: 'Strict Mode' }));
 
         expect(handleToggleExamSetting).toHaveBeenCalledWith('shuffleQuestions', true);
         expect(handleToggleLobbyAdmissionMode).toHaveBeenCalledWith(true);
         expect(handleToggleReleaseScoreMode).toHaveBeenCalledWith(false);
+        expect(handleToggleStrictMode).toHaveBeenCalledWith(false);
     });
 
     it('shows the configuration summary and full configuration link', () => {
@@ -100,6 +104,7 @@ describe('ExamBuilderSidebar', () => {
                 handleToggleExamSetting={vi.fn()}
                 handleToggleLobbyAdmissionMode={vi.fn()}
                 handleToggleReleaseScoreMode={vi.fn()}
+                handleToggleStrictMode={vi.fn()}
             />,
         );
 

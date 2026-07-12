@@ -56,3 +56,16 @@ export type UpdateQuestionBody = z.infer<typeof updateQuestionSchema.body>;
 export type DeleteQuestionParams = z.infer<typeof deleteQuestionSchema.params>;
 export type QuestionRecord = z.infer<typeof questionRecordSchema>;
 export type QuestionPageRecord = z.infer<typeof Schema.questionPageSchema>;
+
+export const getQuestionTypeCountsSchema = {
+    request: {
+        query: Schema.getQuestionTypeCountsQuerySchema,
+    },
+    response: z.object({
+        message: z.string(),
+        data: Schema.questionTypeCountsResponseSchema,
+    }),
+};
+
+export type GetQuestionTypeCountsQuery = z.infer<typeof getQuestionTypeCountsSchema.request.query>;
+export type QuestionTypeCountsResponse = z.infer<typeof getQuestionTypeCountsSchema.response>;

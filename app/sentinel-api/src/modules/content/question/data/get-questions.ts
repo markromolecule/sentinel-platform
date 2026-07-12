@@ -10,10 +10,10 @@ export type GetQuestionsDataArgs = {
     userId?: string;
 };
 
-function applyQuestionFilters(
+export function applyQuestionFilters(
     query: any,
     institutionId: string | undefined,
-    filters: GetQuestionsQuery,
+    filters: Partial<GetQuestionsQuery>,
     userId?: string,
 ) {
     let nextQuery = query.where('qbq.archived_at', 'is', null);

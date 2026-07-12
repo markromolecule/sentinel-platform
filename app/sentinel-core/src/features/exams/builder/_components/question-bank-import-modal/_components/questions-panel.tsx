@@ -1,28 +1,30 @@
 'use client';
 
-import { useEffect, useRef, useMemo } from 'react';
+import { useMemo } from 'react';
 import {
     Checkbox,
     Input,
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
+    DropdownMenu,
+    DropdownMenuTrigger,
+    DropdownMenuContent,
+    DropdownMenuItem,
 } from '@sentinel/ui';
-import { Search, Library } from 'lucide-react';
+import { Search, Library, ChevronDown, Loader2 } from 'lucide-react';
 import type {
     QuestionBankCollectionRecord,
     QuestionRecord,
     QuestionTypeDefinition,
+    QuestionTypeCountRecord,
 } from '@sentinel/services';
 import type { QuestionType } from '@sentinel/shared/types';
 import { QuestionPanelEmptyState } from './question-panel-empty-state';
 import { QuestionRow } from './question-row';
+import { cn } from '@sentinel/ui';
 
 interface QuestionsPanelProps {
     selectedCollection: QuestionBankCollectionRecord | null;
     questionTypes: QuestionTypeDefinition[];
+    typeCounts: QuestionTypeCountRecord[];
     searchQuery: string;
     selectedQuestionType: QuestionType | 'all';
     questionRecords: QuestionRecord[];
@@ -31,79 +33,91 @@ interface QuestionsPanelProps {
     alreadyAddedIds: string[];
     alreadyAddedIdSet: Set<string>;
     totalQuestionCount: number;
-    hasMoreQuestions: boolean;
-    isFetchingMoreQuestions: boolean;
+    currentPage: number;
+    totalPages: number;
     isQuestionsLoading: boolean;
+    isFetchingMoreQuestions: boolean;
     isQuestionTypesLoading: boolean;
+    isTypeCountsLoading: boolean;
     isSelectedCollectionLoading: boolean;
     questionsScrollContainerRef: React.RefObject<HTMLDivElement | null>;
     onSearchChange: (value: string) => void;
     onQuestionTypeChange: (value: QuestionType | 'all') => void;
+    onPageChange: (page: number) => void;
     onToggleSelectAll: () => void;
     onToggleQuestion: (id: string) => void;
-    onLoadMore: () => void;
 }
 
 export function QuestionsPanel({
     selectedCollection,
     questionTypes,
+    typeCounts,
     searchQuery,
     selectedQuestionType,
     questionRecords,
     selectedIdSet,
     alreadyAddedIdSet,
     totalQuestionCount,
-    hasMoreQuestions,
-    isFetchingMoreQuestions,
+    currentPage,
+    totalPages,
     isQuestionsLoading,
+    isFetchingMoreQuestions,
     isQuestionTypesLoading,
+    isTypeCountsLoading,
     isSelectedCollectionLoading,
     questionsScrollContainerRef,
     onSearchChange,
     onQuestionTypeChange,
+    onPageChange,
     onToggleSelectAll,
     onToggleQuestion,
-    onLoadMore,
 }: QuestionsPanelProps) {
-    const loadMoreRef = useRef<HTMLDivElement | null>(null);
-
-    useEffect(() => {
-        const root = questionsScrollContainerRef.current;
-        const target = loadMoreRef.current;
-
-        if (!root || !target || !hasMoreQuestions) {
-            return;
-        }
-
-        const observer = new IntersectionObserver(
-            (entries) => {
-                if (entries[0]?.isIntersecting && !isFetchingMoreQuestions) {
-                    onLoadMore();
-                }
-            },
-            {
-                root,
-                rootMargin: '160px 0px',
-            },
-        );
-
-        observer.observe(target);
-
-        return () => {
-            observer.disconnect();
-        };
-    }, [hasMoreQuestions, isFetchingMoreQuestions, onLoadMore, questionsScrollContainerRef]);
-
     const importableQuestionRecords = useMemo(
         () => questionRecords.filter((question) => !alreadyAddedIdSet.has(question.id)),
         [questionRecords, alreadyAddedIdSet],
     );
+
     const allFilteredSelected = useMemo(
         () =>
             importableQuestionRecords.length > 0 &&
             importableQuestionRecords.every((question) => selectedIdSet.has(question.id)),
         [importableQuestionRecords, selectedIdSet],
     );
+
+    const facets = useMemo(() => {
+        const countsMap = new Map(typeCounts.map((tc) => [tc.type, tc.count]));
+        const mapped = questionTypes.map((qt) => ({
+            value: qt.value,
+            label: qt.label,
+            count: countsMap.get(qt.value) ?? 0,
+        }));
+
+        // Filter out types with count of 0, but always keep the currently selected question type in the list (even if its count is 0) so the filter doesn't disappear.
+        return mapped.filter((facet) => facet.count > 0 || selectedQuestionType === facet.value);
+    }, [questionTypes, typeCounts, selectedQuestionType]);
+
+    const totalFacetCount = useMemo(() => {
+        return typeCounts.reduce((acc, tc) => acc + tc.count, 0);
+    }, [typeCounts]);
+
+    const activeFacetLabel = useMemo(() => {
+        if (selectedQuestionType === 'all') return 'All';
+        return questionTypes.find((qt) => qt.value === selectedQuestionType)?.label ?? selectedQuestionType;
+    }, [selectedQuestionType, questionTypes]);
+
+    const activeFacetCount = useMemo(() => {
+        if (selectedQuestionType === 'all') return totalFacetCount;
+        return typeCounts.find((tc) => tc.type === selectedQuestionType)?.count ?? 0;
+    }, [selectedQuestionType, totalFacetCount, typeCounts]);
+
+    const handleScroll = (event: React.UIEvent<HTMLDivElement>) => {
+        const container = event.currentTarget;
+        const isNearBottom = container.scrollHeight - container.scrollTop - container.clientHeight <= 30;
+
+        if (isNearBottom && !isQuestionsLoading && !isFetchingMoreQuestions && currentPage < totalPages) {
+            onPageChange(currentPage + 1);
+        }
+    };
 
     return (
         <div className="bg-background flex min-h-0 flex-1 flex-col overflow-hidden">
@@ -114,50 +128,70 @@ export function QuestionsPanel({
                         {selectedCollection ? selectedCollection.name : 'All Questions'}
                     </span>
                 </div>
-                <div className="group relative">
-                    <Search className="group-focus-within:text-primary absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-zinc-400 transition-colors" />
-                    <Input
-                        placeholder="Search by topic, tags, or question content..."
-                        className="bg-background h-9 rounded-lg border-zinc-200 pl-10 text-sm shadow-none"
-                        value={searchQuery}
-                        onChange={(event) => onSearchChange(event.target.value)}
-                    />
-                </div>
-                <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                    <div className="sm:max-w-[220px]">
-                        <Select
-                            value={selectedQuestionType}
-                            onValueChange={(value) =>
-                                onQuestionTypeChange(value as QuestionType | 'all')
-                            }
-                        >
-                            <SelectTrigger className="h-9 rounded-lg">
-                                <SelectValue placeholder="All question types" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                <SelectItem value="all">All question types</SelectItem>
-                                {questionTypes.map((questionType) => (
-                                    <SelectItem key={questionType.value} value={questionType.value}>
-                                        {questionType.label}
-                                    </SelectItem>
-                                ))}
-                            </SelectContent>
-                        </Select>
+
+                <div className="flex flex-row items-center gap-3">
+                    <div className="group relative flex-1">
+                        <Search className="group-focus-within:text-primary absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-zinc-400 transition-colors" />
+                        <Input
+                            placeholder="Search by topic, tags, or question content..."
+                            className="bg-background h-9 rounded-lg border-zinc-200 pl-10 text-sm shadow-none"
+                            value={searchQuery}
+                            onChange={(event) => onSearchChange(event.target.value)}
+                        />
                     </div>
-                    {isQuestionTypesLoading ? (
-                        <p className="text-muted-foreground text-xs">Loading question types...</p>
-                    ) : null}
+
+                    <div className="shrink-0">
+                        {isQuestionTypesLoading || isTypeCountsLoading ? (
+                            <p className="text-muted-foreground text-xs py-2">Loading...</p>
+                        ) : (
+                            <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                    <button
+                                        type="button"
+                                        className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold transition-colors border border-zinc-200 bg-white hover:bg-zinc-50 text-zinc-700 cursor-pointer dark:bg-zinc-900 dark:border-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-800/80"
+                                    >
+                                        <span>Type: {activeFacetLabel}</span>{' '}
+                                        <span className="rounded-full px-1.5 py-0.25 text-[10px] font-bold bg-zinc-100 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400">
+                                            {activeFacetCount}
+                                        </span>
+                                        <ChevronDown className="h-3.5 w-3.5 opacity-60 ml-0.5" />
+                                    </button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end" className="w-52 max-h-[280px] overflow-y-auto">
+                                    {selectedQuestionType !== 'all' && (
+                                        <DropdownMenuItem
+                                            className="cursor-pointer flex justify-between items-center text-xs"
+                                            onClick={() => onQuestionTypeChange('all')}
+                                        >
+                                            <span>All Types</span>
+                                            <span className="text-muted-foreground text-[10px] font-bold bg-zinc-100 px-1.5 py-0.5 rounded dark:bg-zinc-800">
+                                                {totalFacetCount}
+                                            </span>
+                                        </DropdownMenuItem>
+                                    )}
+                                    {facets.map((facet) => {
+                                        if (facet.value === selectedQuestionType) return null;
+                                        return (
+                                            <DropdownMenuItem
+                                                key={facet.value}
+                                                className="cursor-pointer flex justify-between items-center text-xs"
+                                                onClick={() => onQuestionTypeChange(facet.value)}
+                                            >
+                                                <span>{facet.label}</span>
+                                                <span className="text-muted-foreground text-[10px] font-bold bg-zinc-100 px-1.5 py-0.5 rounded dark:bg-zinc-800">
+                                                    {facet.count}
+                                                </span>
+                                            </DropdownMenuItem>
+                                        );
+                                    })}
+                                </DropdownMenuContent>
+                            </DropdownMenu>
+                        )}
+                    </div>
                 </div>
 
                 <div className="flex items-center justify-between px-1">
-                    <p className="text-muted-foreground text-xs">
-                        Showing{' '}
-                        <span className="text-foreground font-medium">
-                            {questionRecords.length}
-                        </span>{' '}
-                        of <span className="text-foreground font-medium">{totalQuestionCount}</span>{' '}
-                        question{totalQuestionCount !== 1 ? 's' : ''}
-                    </p>
+                    <span className="text-xs text-muted-foreground font-medium">Available questions</span>
                     {importableQuestionRecords.length > 0 ? (
                         <div
                             role="button"
@@ -184,8 +218,9 @@ export function QuestionsPanel({
             <div
                 ref={questionsScrollContainerRef}
                 className="min-h-0 flex-1 overflow-y-auto overscroll-contain"
+                onScroll={handleScroll}
             >
-                <div className="space-y-2 p-4">
+                <div className="space-y-2 px-4 py-1.5">
                     {isQuestionsLoading || isSelectedCollectionLoading ? (
                         <QuestionPanelEmptyState
                             title="Loading questions"
@@ -194,6 +229,7 @@ export function QuestionsPanel({
                                     ? `Loading questions from ${selectedCollection.name}...`
                                     : 'Fetching your question bank...'
                             }
+                            isLoading={true}
                         />
                     ) : questionRecords.length === 0 ? (
                         <QuestionPanelEmptyState
@@ -215,23 +251,26 @@ export function QuestionsPanel({
                                     onToggle={() => onToggleQuestion(question.id)}
                                 />
                             ))}
-                            {hasMoreQuestions ? (
-                                <div
-                                    ref={loadMoreRef}
-                                    className="text-muted-foreground flex items-center justify-center py-3 text-xs"
-                                >
-                                    {isFetchingMoreQuestions
-                                        ? 'Loading more questions...'
-                                        : 'Scroll to load more'}
+
+                            {isFetchingMoreQuestions && (
+                                <div className="flex justify-center py-4">
+                                    <Loader2 className="h-6 w-6 animate-spin text-zinc-500" />
                                 </div>
-                            ) : totalQuestionCount > 0 ? (
-                                <div className="text-muted-foreground flex items-center justify-center py-3 text-xs">
-                                    All questions loaded
-                                </div>
-                            ) : null}
+                            )}
                         </div>
                     )}
                 </div>
+            </div>
+
+            <div className="border-t px-4 py-3 bg-zinc-50/50 dark:bg-zinc-950/20 shrink-0 text-right">
+                <p className="text-muted-foreground text-xs">
+                    Showing{' '}
+                    <span className="text-foreground font-semibold">
+                        {questionRecords.length}
+                    </span>{' '}
+                    of <span className="text-foreground font-semibold">{totalQuestionCount}</span>{' '}
+                    question{totalQuestionCount !== 1 ? 's' : ''}
+                </p>
             </div>
         </div>
     );

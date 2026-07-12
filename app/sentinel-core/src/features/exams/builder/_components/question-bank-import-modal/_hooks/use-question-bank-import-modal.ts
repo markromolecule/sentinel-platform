@@ -29,6 +29,7 @@ export function useQuestionBankImportModal(
         selection.selectedCollectionId,
         selection.searchQuery,
         selection.selectedQuestionType,
+        selection.currentPage,
     );
 
     const buildImportedQuestions = () => buildImportedExamQuestions(selection.selectedQuestions);
@@ -37,6 +38,7 @@ export function useQuestionBankImportModal(
         questionRecords: data.questionRecords,
         collections: data.collections,
         questionTypes: data.questionTypes,
+        typeCounts: data.typeCounts,
         selectedCollection: data.selectedCollection,
         selectedCollectionId: selection.selectedCollectionId,
         selectedIds: selection.selectedIds,
@@ -47,15 +49,18 @@ export function useQuestionBankImportModal(
         selectedQuestionType: selection.selectedQuestionType,
         selectedImportableCount: selection.selectedIds.length,
         totalQuestionCount: data.totalQuestionCount,
-        hasMoreQuestions: data.hasMoreQuestions,
-        isFetchingMoreQuestions: data.isFetchingMoreQuestions,
+        currentPage: selection.currentPage,
+        totalPages: data.totalPages,
         isQuestionsLoading: data.isQuestionsLoading,
+        isFetchingMoreQuestions: data.isFetchingMoreQuestions,
         isCollectionsLoading: data.isCollectionsLoading,
         isQuestionTypesLoading: data.isQuestionTypesLoading,
-        isSelectedCollectionLoading: data.isSelectedCollectionLoading,
+        isTypeCountsLoading: data.isTypeCountsLoading,
+        isSelectedCollectionLoading: false,
         setSearchQuery: selection.setSearchQuery,
         setSelectedCollectionId: selection.setSelectedCollectionId,
         setSelectedQuestionType: selection.setSelectedQuestionType,
+        setCurrentPage: selection.setCurrentPage,
         toggleQuestion: (id) => {
             const question = data.questionRecords.find((record) => record.id === id);
 
@@ -70,7 +75,6 @@ export function useQuestionBankImportModal(
                 data.questionRecords,
                 data.selectedCollection?.id,
             ),
-        fetchNextQuestionsPage: data.fetchNextQuestionsPage,
         buildImportedQuestions,
         resetState: selection.resetState,
     };

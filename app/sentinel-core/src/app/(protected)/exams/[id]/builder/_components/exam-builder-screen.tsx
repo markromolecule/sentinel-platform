@@ -50,6 +50,7 @@ export function ExamBuilderScreen() {
                         handleToggleExamSetting={builder.handleToggleExamSetting}
                         handleToggleLobbyAdmissionMode={builder.handleToggleLobbyAdmissionMode}
                         handleToggleReleaseScoreMode={builder.handleToggleReleaseScoreMode}
+                        handleToggleStrictMode={builder.handleToggleStrictMode}
                     />
                 )
             }

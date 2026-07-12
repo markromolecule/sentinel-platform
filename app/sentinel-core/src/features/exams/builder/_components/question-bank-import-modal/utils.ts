@@ -81,3 +81,44 @@ export function buildImportedExamQuestions(selectedQuestions: SelectedImportQues
             }) satisfies ExamQuestion,
     );
 }
+
+/**
+ * Generates an array of page items to display in pagination controls.
+ * Shows first, last, current, adjacent pages, and ellipses for gaps.
+ *
+ * @param currentPage - The active 1-indexed page number
+ * @param totalPages - The total count of pages
+ * @returns Array containing page numbers and 'ellipsis' placeholders.
+ */
+export function getPaginationItems(currentPage: number, totalPages: number): (number | 'ellipsis')[] {
+    if (totalPages <= 1) {
+        return [];
+    }
+
+    const items: (number | 'ellipsis')[] = [];
+    const maxVisibleAdjacent = 1;
+
+    items.push(1);
+
+    const startPage = Math.max(2, currentPage - maxVisibleAdjacent);
+    const endPage = Math.min(totalPages - 1, currentPage + maxVisibleAdjacent);
+
+    if (startPage > 2) {
+        items.push('ellipsis');
+    }
+
+    for (let i = startPage; i <= endPage; i++) {
+        items.push(i);
+    }
+
+    if (endPage < totalPages - 1) {
+        items.push('ellipsis');
+    }
+
+    if (totalPages > 1) {
+        items.push(totalPages);
+    }
+
+    return items;
+}
+

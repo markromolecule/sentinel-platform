@@ -52,7 +52,7 @@ export function QuestionBankImportModal({
 
     return (
         <Dialog open={open} onOpenChange={handleOpenChange}>
-            <DialogContent className="flex h-[82vh] min-h-0 w-[95vw] flex-col overflow-hidden rounded-xl border p-0 sm:max-w-6xl">
+            <DialogContent className="flex h-[82vh] min-h-0 w-[95vw] flex-col gap-0 overflow-hidden rounded-xl border p-0 sm:max-w-6xl">
                 <VisuallyHidden>
                     <DialogTitle>Import Questions from Question Bank</DialogTitle>
                 </VisuallyHidden>
@@ -61,7 +61,7 @@ export function QuestionBankImportModal({
                 <div className="flex min-h-0 flex-1 overflow-hidden">
                     <CollectionSidebar
                         collections={modal.collections}
-                        questionCount={modal.questionRecords.length}
+                        questionCount={modal.totalQuestionCount}
                         selectedCollectionId={modal.selectedCollectionId}
                         isCollectionsLoading={modal.isCollectionsLoading}
                         onSelectCollection={modal.setSelectedCollectionId}
@@ -70,6 +70,7 @@ export function QuestionBankImportModal({
                     <QuestionsPanel
                         selectedCollection={modal.selectedCollection}
                         questionTypes={modal.questionTypes}
+                        typeCounts={modal.typeCounts}
                         searchQuery={modal.searchQuery}
                         selectedQuestionType={modal.selectedQuestionType}
                         questionRecords={modal.questionRecords}
@@ -78,17 +79,19 @@ export function QuestionBankImportModal({
                         alreadyAddedIds={modal.alreadyAddedIds}
                         alreadyAddedIdSet={modal.alreadyAddedIdSet}
                         totalQuestionCount={modal.totalQuestionCount}
-                        hasMoreQuestions={modal.hasMoreQuestions}
-                        isFetchingMoreQuestions={modal.isFetchingMoreQuestions}
+                        currentPage={modal.currentPage}
+                        totalPages={modal.totalPages}
                         isQuestionsLoading={modal.isQuestionsLoading}
+                        isFetchingMoreQuestions={modal.isFetchingMoreQuestions}
                         isQuestionTypesLoading={modal.isQuestionTypesLoading}
+                        isTypeCountsLoading={modal.isTypeCountsLoading}
                         isSelectedCollectionLoading={modal.isSelectedCollectionLoading}
                         questionsScrollContainerRef={questionsScrollContainerRef}
                         onSearchChange={modal.setSearchQuery}
                         onQuestionTypeChange={modal.setSelectedQuestionType}
+                        onPageChange={modal.setCurrentPage}
                         onToggleSelectAll={modal.toggleSelectAllFilteredQuestions}
                         onToggleQuestion={modal.toggleQuestion}
-                        onLoadMore={() => void modal.fetchNextQuestionsPage()}
                     />
                 </div>
 

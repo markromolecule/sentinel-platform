@@ -93,6 +93,7 @@ export function useExamBuilder(): UseExamBuilderResult {
         handleToggleExamSetting: workspaceActions.handleToggleExamSetting,
         handleToggleLobbyAdmissionMode: workspaceActions.handleToggleLobbyAdmissionMode,
         handleToggleReleaseScoreMode: workspaceActions.handleToggleReleaseScoreMode,
+        handleToggleStrictMode: workspaceActions.handleToggleStrictMode,
         handleUpdateTitle: workspaceActions.handleUpdateTitle,
         handleSave: workspaceActions.handleSave,
         handlePublish: workspaceActions.handlePublish,

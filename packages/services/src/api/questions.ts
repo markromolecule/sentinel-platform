@@ -47,6 +47,25 @@ export interface GetQuestionsParams {
     pageSize?: number;
 }
 
+export interface GetQuestionTypeCountsParams {
+    search?: string;
+    difficulty?: QuestionDifficulty;
+    subjectId?: string;
+    institutionId?: string;
+    collectionId?: string;
+    status?: QuestionBankStatus;
+}
+
+export interface QuestionTypeCountRecord {
+    type: QuestionType;
+    count: number;
+}
+
+export interface QuestionTypeCountsResponseRecord {
+    items: QuestionTypeCountRecord[];
+    total: number;
+}
+
 export interface QuestionPageRecord {
     items: QuestionRecord[];
     page: number;
@@ -142,6 +161,16 @@ export async function getQuestions(
 ): Promise<QuestionPageRecord> {
     const response: ApiResponse<QuestionPageRecord> = await apiClient(
         `/questions${buildQueryString(params)}`,
+    );
+    return response.data;
+}
+
+export async function getQuestionTypeCounts(
+    apiClient: ApiClientType,
+    params?: GetQuestionTypeCountsParams,
+): Promise<QuestionTypeCountsResponseRecord> {
+    const response: ApiResponse<QuestionTypeCountsResponseRecord> = await apiClient(
+        `/questions/type-counts${buildQueryString(params as GetQuestionsParams)}`,
     );
     return response.data;
 }

@@ -59,6 +59,10 @@ export function useBuilderWorkspaceActions({
         updateConfiguration('releaseScoreMode', enabled ? 'AUTO_RELEASE' : 'MANUAL_RELEASE');
     };
 
+    const handleToggleStrictMode = (enabled: boolean) => {
+        updateConfiguration('strictMode', enabled);
+    };
+
     const handleUpdateTitle = async (nextTitle: string) => {
         const examId = useExamStore.getState().examId ?? id;
         const trimmedTitle = nextTitle.trim();
@@ -139,6 +143,7 @@ export function useBuilderWorkspaceActions({
         handleToggleExamSetting,
         handleToggleLobbyAdmissionMode,
         handleToggleReleaseScoreMode,
+        handleToggleStrictMode,
         handleUpdateTitle,
         handleSave,
         handlePublish,

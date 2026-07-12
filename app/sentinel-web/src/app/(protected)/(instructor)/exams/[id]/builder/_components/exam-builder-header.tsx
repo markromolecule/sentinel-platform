@@ -1,7 +1,7 @@
 'use client';
 
 import * as React from 'react';
-import { Badge, Button, Input } from '@sentinel/ui';
+import { Badge, Button, Input, Separator } from '@sentinel/ui';
 import { LayoutGrid, Pencil, Save } from 'lucide-react';
 import type { UseExamBuilderResult } from '@/app/(protected)/(instructor)/exams/[id]/builder/hooks/use-exam-builder/_types';
 
@@ -122,6 +122,7 @@ export function ExamBuilderHeader({
                     </Button>
                 </div>
             </div>
+            <Separator className="mt-4" />
         </section>
     );
 }
