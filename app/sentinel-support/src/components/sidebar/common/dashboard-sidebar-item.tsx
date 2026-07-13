@@ -30,6 +30,7 @@ interface DashboardSidebarItemProps {
     onOpenChange?: (open: boolean) => void;
     isChildActive: (url: string) => boolean;
     sidebarState: 'expanded' | 'collapsed';
+    unreadCount?: number;
 }
 
 export function DashboardSidebarItem({
@@ -39,6 +40,7 @@ export function DashboardSidebarItem({
     onOpenChange,
     isChildActive,
     sidebarState,
+    unreadCount,
 }: DashboardSidebarItemProps) {
     const isItemActive = pathname === item.url || pathname.startsWith(`${item.url}/`);
 
@@ -110,7 +112,7 @@ export function DashboardSidebarItem({
     }
 
     return (
-        <SidebarMenuItem key={item.title}>
+        <SidebarMenuItem key={item.title} className="relative">
             <SidebarMenuButton
                 asChild
                 isActive={isItemActive}
@@ -122,6 +124,18 @@ export function DashboardSidebarItem({
                     <span>{item.title}</span>
                 </Link>
             </SidebarMenuButton>
+            {item.url === '/messages' && unreadCount !== undefined && unreadCount > 0 && (
+                <span
+                    className={cn(
+                        'pointer-events-none absolute rounded-full bg-destructive text-white font-semibold flex items-center justify-center shadow-xs transition-all duration-300 select-none animate-in zoom-in-50 duration-200',
+                        sidebarState === 'collapsed'
+                            ? 'top-0.5 right-0.5 h-4 w-4 text-[9px]'
+                            : 'top-1/2 -translate-y-1/2 right-3 h-5 min-w-[20px] px-1.5 text-[10px]',
+                    )}
+                >
+                    {unreadCount}
+                </span>
+            )}
         </SidebarMenuItem>
     );
 }

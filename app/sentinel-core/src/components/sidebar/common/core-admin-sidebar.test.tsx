@@ -26,6 +26,16 @@ vi.mock('@/hooks/use-core-admin-capabilities', () => ({
     useCoreAdminCapabilities: () => mockUseCoreAdminCapabilities(),
 }));
 
+vi.mock('@sentinel/hooks', () => ({
+    useConversationsQuery: vi.fn(() => ({
+        data: [
+            { conversationId: '1', unreadCount: 2, participants: [] },
+            { conversationId: '2', unreadCount: 3, participants: [] },
+        ],
+    })),
+    useMessageRealtime: vi.fn(),
+}));
+
 vi.mock('./dashboard-sidebar-item', () => ({
     DashboardSidebarItem: ({
         item,

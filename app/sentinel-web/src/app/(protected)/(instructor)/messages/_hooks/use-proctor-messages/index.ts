@@ -1,9 +1,7 @@
 'use client';
 
-import { useState, useEffect, useDeferredValue, useRef, Suspense, useCallback } from 'react';
+import { useState, useEffect, useDeferredValue, useRef, useCallback } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { MessageList } from './_components/message-list';
-import { ChatWindow } from './_components/chat-window';
 import {
     useConversationsQuery,
     useConversationMessagesQuery,
@@ -15,9 +13,15 @@ import {
     useUsersQuery,
     useCreateDirectConversationMutation,
 } from '@sentinel/hooks';
-import { Conversation, Message } from '@sentinel/shared/types';
+import { Conversation, Message } from '../../_types';
+import { DEEP_LINK_PARAM } from '../../_constants';
+import { UseProctorMessagesReturn } from './_types';
 
-function AdminMessagesPageContent() {
+/**
+ * Custom hook managing the data fetching, presence, deep-linking, mutations,
+ * and state transformations for the proctor messaging workspace.
+ */
+export function useProctorMessages(): UseProctorMessagesReturn {
     const hasFiredDeepLinkRef = useRef(false);
     const [selectedConversationId, setSelectedConversationId] = useState<string | null>(null);
     const [searchTerm, setSearchTerm] = useState('');
@@ -63,12 +67,6 @@ function AdminMessagesPageContent() {
     });
 
     const lastMarkedConversationIdRef = useRef<string | null>(null);
-
-    useMessageRealtime({
-        enabled: !!profile && !!selectedConversationId,
-        conversationId: selectedConversationId ?? undefined,
-        invalidateList: false,
-    });
 
     // Mark as read when selecting conversation
     useEffect(() => {
@@ -118,7 +116,7 @@ function AdminMessagesPageContent() {
     );
 
     const searchParams = useSearchParams();
-    const targetUserId = searchParams.get('userId');
+    const targetUserId = searchParams ? searchParams.get(DEEP_LINK_PARAM) : null;
 
     useEffect(() => {
         if (!targetUserId || !profile || conversationsQuery.isLoading) return;
@@ -136,7 +134,7 @@ function AdminMessagesPageContent() {
             }, 0);
         } else {
             setTimeout(() => {
-                handleStartConversation(targetUserId);
+                void handleStartConversation(targetUserId);
             }, 0);
         }
     }, [
@@ -147,17 +145,7 @@ function AdminMessagesPageContent() {
         handleStartConversation,
     ]);
 
-    if (isProfileLoading || conversationsQuery.isLoading || !profile) {
-        return (
-            <div className="flex h-full items-center justify-center">
-                <div className="text-muted-foreground animate-pulse text-lg">
-                    Loading messages...
-                </div>
-            </div>
-        );
-    }
-
-    const currentUserId = profile.id;
+    const currentUserId = profile?.id ?? '';
 
     // Map DB ConversationSummary to UI Conversation
     const mappedConversations: Conversation[] = conversations.map((c) => {
@@ -179,12 +167,12 @@ function AdminMessagesPageContent() {
             participants,
             lastMessage: c.lastMessage
                 ? {
-                      id: c.lastMessage.messageId,
-                      senderId: c.lastMessage.senderId,
-                      content: c.lastMessage.content,
-                      timestamp: c.lastMessage.createdAt,
-                      isRead: c.lastMessage.status === 'READ',
-                  }
+                    id: c.lastMessage.messageId,
+                    senderId: c.lastMessage.senderId,
+                    content: c.lastMessage.content,
+                    timestamp: c.lastMessage.createdAt,
+                    isRead: c.lastMessage.status === 'READ',
+                }
                 : undefined,
             unreadCount: c.unreadCount,
         };
@@ -220,52 +208,27 @@ function AdminMessagesPageContent() {
         isRead: m.status === 'READ',
     }));
 
-    return (
-        <div className="flex h-[calc(100dvh-4rem)] min-h-0 max-h-[calc(100dvh-4rem)] flex-1 overflow-hidden">
-            <MessageList
-                conversations={filteredConversations}
-                selectedId={selectedConversationId}
-                onSelect={setSelectedConversationId}
-                searchTerm={showDirectory ? directorySearch : searchTerm}
-                onSearchChange={showDirectory ? setDirectorySearch : setSearchTerm}
-                showDirectory={showDirectory}
-                onToggleDirectory={() => {
-                    setShowDirectory((prev) => !prev);
-                    setDirectorySearch('');
-                    setSearchTerm('');
-                }}
-                directoryUsers={directoryUsersFiltered}
-                onSelectUser={handleStartConversation}
-                isCreatingConversation={createDirectConversationMutation.isPending}
-                isLoading={conversationsQuery.isLoading}
-            />
-            <ChatWindow
-                conversation={selectedConversation}
-                messages={mappedMessages}
-                currentUserId={currentUserId}
-                onSendMessage={handleSendMessage}
-                onBack={() => setSelectedConversationId(null)}
-                isLoading={messagesQuery.isLoading}
-            />
-        </div>
-    );
-}
-
-/**
- * Protected messages page wrapper for `sentinel-core`.
- */
-export default function AdminMessagesPage() {
-    return (
-        <Suspense
-            fallback={
-                <div className="flex h-full items-center justify-center">
-                    <div className="text-muted-foreground animate-pulse text-lg">
-                        Loading messages...
-                    </div>
-                </div>
-            }
-        >
-            <AdminMessagesPageContent />
-        </Suspense>
-    );
+    return {
+        selectedConversationId,
+        setSelectedConversationId,
+        searchTerm,
+        setSearchTerm,
+        showDirectory,
+        setShowDirectory,
+        directorySearch,
+        setDirectorySearch,
+        profile,
+        onlineUserIds,
+        filteredConversations,
+        directoryUsersFiltered,
+        selectedConversation,
+        mappedMessages,
+        currentUserId,
+        handleSendMessage,
+        handleStartConversation,
+        isProfileLoading,
+        isConversationsLoading: conversationsQuery.isLoading,
+        isMessagesLoading: messagesQuery.isLoading,
+        isCreatingConversation: createDirectConversationMutation.isPending,
+    };
 }

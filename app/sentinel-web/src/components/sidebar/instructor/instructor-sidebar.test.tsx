@@ -35,6 +35,17 @@ vi.mock('@sentinel/ui', () => ({
         state: 'expanded',
         setOpen: vi.fn(),
     }),
+    cn: (...inputs: any[]) => inputs.filter(Boolean).join(' '),
+}));
+
+vi.mock('@sentinel/hooks', () => ({
+    useConversationsQuery: () => ({
+        data: [
+            { conversationId: '1', unreadCount: 2, participants: [] },
+            { conversationId: '2', unreadCount: 3, participants: [] },
+        ],
+    }),
+    useMessageRealtime: vi.fn(),
 }));
 
 afterEach(() => {
