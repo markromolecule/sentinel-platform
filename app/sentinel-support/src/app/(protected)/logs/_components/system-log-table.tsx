@@ -12,7 +12,7 @@ import { PaginationState } from '@tanstack/react-table';
 export function SystemLogTable() {
     const [pagination, setPagination] = useState<PaginationState>({
         pageIndex: 0,
-        pageSize: 10,
+        pageSize: 20,
     });
 
     const { data, isLoading, isError, error } = useSystemLogsQuery({

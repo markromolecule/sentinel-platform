@@ -1,7 +1,7 @@
 'use client';
 
 import { type LogRecord } from '@sentinel/services';
-import { DataTable } from '@sentinel/ui';
+import { DataTable, Spinner } from '@sentinel/ui';
 import { columns } from './columns';
 import { PaginationState } from '@tanstack/react-table';
 
@@ -24,13 +24,8 @@ export function AuditLogTable({
 }: AuditLogTableProps) {
     if (isLoading) {
         return (
-            <div className="bg-card/50 flex h-64 items-center justify-center rounded-lg border border-dashed backdrop-blur-sm">
-                <div className="flex flex-col items-center gap-2">
-                    <div className="h-8 w-8 animate-spin rounded-full border-4 border-indigo-500 border-t-transparent" />
-                    <p className="text-muted-foreground text-sm font-medium">
-                        Loading audit logs...
-                    </p>
-                </div>
+            <div className="flex h-64 items-center justify-center">
+                <Spinner className="size-8 text-[#323d8f]" />
             </div>
         );
     }

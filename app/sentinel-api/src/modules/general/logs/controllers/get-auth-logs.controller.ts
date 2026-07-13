@@ -4,6 +4,7 @@ import { getLogsResponseSchema, logQuerySchema } from '../logs.dto';
 import { LogsService } from '../logs.service';
 import { AuthLogsService } from '../services/auth-logs.service';
 import { HTTPException } from 'hono/http-exception';
+import { hasActivePermission } from '../../../../lib/permissions';
 
 export const getAuthLogsRoute = createRoute({
     method: 'get',
@@ -36,11 +37,26 @@ export const getAuthLogsRouteHandler: AppRouteHandler<typeof getAuthLogsRoute> =
     const query = c.req.valid('query');
     const dbClient = c.get('dbClient');
     const activeInstitutionId = c.get('institutionId');
+    const role = c.get('role');
+    const activePermissionKeys = c.get('activePermissionKeys');
 
-    const { scopingInstitutionId, scopingBranchId } = await LogsService.resolveInstitutionHierarchy(
-        dbClient,
-        activeInstitutionId,
-    );
+    const hasCrossTenant = activePermissionKeys
+        ? hasActivePermission(activePermissionKeys, 'institutions:cross-tenant-view')
+        : role === 'superadmin' || role === 'support';
+
+    let scopingInstitutionId: string | undefined;
+    let scopingBranchId: string | null = null;
+
+    if (hasCrossTenant) {
+        scopingInstitutionId = query.institutionId || undefined;
+    } else {
+        const hierarchy = await LogsService.resolveInstitutionHierarchy(
+            dbClient,
+            activeInstitutionId,
+        );
+        scopingInstitutionId = hierarchy.scopingInstitutionId;
+        scopingBranchId = hierarchy.scopingBranchId;
+    }
 
     // Security Check: enforce child branch data boundaries strictly
     if (scopingBranchId && query.branchId && query.branchId !== scopingBranchId) {

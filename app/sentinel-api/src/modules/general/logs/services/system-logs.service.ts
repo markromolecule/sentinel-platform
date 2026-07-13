@@ -42,7 +42,7 @@ export class SystemLogsService {
      */
     static async getSystemLogs(
         dbClient: DbClient,
-        scopingInstitutionId: string,
+        scopingInstitutionId: string | undefined,
         scopingBranchId: string | null | undefined,
         filters: LogQuery,
     ) {

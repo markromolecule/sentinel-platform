@@ -48,7 +48,7 @@ export class ActivityLogsService {
      */
     static async getActivityLogs(
         dbClient: DbClient,
-        scopingInstitutionId: string,
+        scopingInstitutionId: string | undefined,
         scopingBranchId: string | null | undefined,
         filters: LogQuery,
     ) {

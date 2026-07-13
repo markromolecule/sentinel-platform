@@ -4,7 +4,7 @@ import type { LogQuery } from '../logs.dto';
 
 export type GetLogsDataArgs = {
     dbClient: DbClient;
-    scopingInstitutionId: string;
+    scopingInstitutionId?: string;
     scopingBranchId?: string | null;
     filters: LogQuery;
     excludeResourceTypes?: string[];
@@ -31,7 +31,9 @@ export async function getLogsData({
     let baseQuery = dbClient.selectFrom('audit_logs as al');
 
     // 1. Mandate tenant data isolation boundaries
-    baseQuery = baseQuery.where('al.institution_id', '=', scopingInstitutionId);
+    if (scopingInstitutionId) {
+        baseQuery = baseQuery.where('al.institution_id', '=', scopingInstitutionId);
+    }
 
     if (scopingBranchId) {
         // Child user context: strictly isolate query within child branch boundary
