@@ -97,9 +97,11 @@ export function CoreNotificationDropdown() {
                     className="relative"
                     aria-label="Open notifications"
                 >
-                    <Bell className="h-5 w-5" />
+                    <Bell className="h-[22px] w-[22px]" />
                     {unreadCount > 0 && (
-                        <span className="bg-destructive absolute top-2 right-2 h-2 w-2 rounded-full" />
+                        <span className="absolute -top-1 -right-2 flex h-4 min-w-4 items-center justify-center rounded-full bg-destructive px-1 text-[9px] font-bold leading-none text-white ring-2 ring-background shadow-sm animate-in fade-in zoom-in-75 duration-200">
+                            {unreadCount > 99 ? '99+' : unreadCount}
+                        </span>
                     )}
                 </Button>
             </DropdownMenuTrigger>
@@ -128,7 +130,7 @@ export function CoreNotificationDropdown() {
                     )}
                 </div>
                 <DropdownMenuSeparator className="mx-0" />
-                <div className="max-h-72 overflow-y-auto">
+                <div className="max-h-72 overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none]">
                     {recentNotifications.length === 0 ? (
                         <div className="text-muted-foreground p-4 text-sm">
                             No notifications yet.

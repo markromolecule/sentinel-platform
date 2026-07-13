@@ -3,6 +3,7 @@ import { HTTPException } from 'hono/http-exception';
 import { type AppRouteHandler } from '../../../../types/hono';
 import { respondWithRouteError } from '../../../../lib/route-error-response';
 import { telemetryIngestionQueueService } from '../services/ingestion-queue.service';
+import { SystemLogsService } from '../../../general/logs/services/system-logs.service';
 
 export const flushTelemetryRoute = createRoute({
     method: 'get',
@@ -66,6 +67,20 @@ export const flushTelemetryRouteHandler: AppRouteHandler<typeof flushTelemetryRo
         const flushedCount = await telemetryIngestionQueueService.flushBuffer(c.get('dbClient'));
         const stats = await telemetryIngestionQueueService.getStats();
 
+        // Write a system log entry for telemetry flush success
+        try {
+            await SystemLogsService.logSystemEvent(c.get('dbClient'), {
+                action: 'telemetry.flush_success',
+                details: {
+                    message: 'Telemetry buffer flushed successfully.',
+                    flushedCount,
+                    stats,
+                },
+            });
+        } catch (logError) {
+            console.error('[TelemetryFlush] Failed to create system log:', logError);
+        }
+
         return c.json(
             {
                 message: 'Telemetry flush completed.',
@@ -75,6 +90,18 @@ export const flushTelemetryRouteHandler: AppRouteHandler<typeof flushTelemetryRo
             200,
         );
     } catch (error: any) {
+        // Write a system log entry for telemetry flush failure
+        try {
+            await SystemLogsService.logSystemEvent(c.get('dbClient'), {
+                action: 'telemetry.flush_failure',
+                details: {
+                    error: error?.message || String(error),
+                },
+            });
+        } catch (logError) {
+            console.error('[TelemetryFlush] Failed to log failure:', logError);
+        }
+
         return respondWithRouteError(c, error, 'Flush Telemetry Error:');
     }
 };

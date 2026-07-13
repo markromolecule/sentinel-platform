@@ -9,7 +9,10 @@ import { AuditLogTable } from './audit-log-table';
  * It manages its own state and fetches data using the useAuthLogsQuery hook.
  */
 export function AuthLogTable() {
-    const { pagination, setPagination } = useServerPagination();
+    const { pagination, setPagination } = useServerPagination([], {
+        pageIndex: 0,
+        pageSize: 20,
+    });
 
     const { data, isLoading, isError, error } = useAuthLogsQuery({
         params: {

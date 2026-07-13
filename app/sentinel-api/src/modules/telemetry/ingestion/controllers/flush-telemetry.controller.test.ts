@@ -10,6 +10,12 @@ vi.mock('../services/ingestion-queue.service', () => ({
     },
 }));
 
+vi.mock('../../../../modules/general/logs/services/system-logs.service', () => ({
+    SystemLogsService: {
+        logSystemEvent: vi.fn(),
+    },
+}));
+
 describe('Flush Telemetry Controller', () => {
     const app = new OpenAPIHono();
     app.openapi(flushTelemetryRoute, flushTelemetryRouteHandler);

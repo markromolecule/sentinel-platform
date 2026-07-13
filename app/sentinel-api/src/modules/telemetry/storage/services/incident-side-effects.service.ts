@@ -71,32 +71,27 @@ export async function handleIncidentSideEffects(
             },
         });
 
-        const title = result.isNew
-            ? 'Proctoring incident flagged'
-            : 'Proctoring incident escalated';
-        const message = result.isNew
-            ? `Proctoring incident flagged for student attempt. Rule: ${payload.ruleKey}. Severity: ${result.finalSeverity}`
-            : `Proctoring incident escalated for student attempt. Rule: ${payload.ruleKey}. Severity escalated from ${result.previousSeverity} to ${result.finalSeverity}`;
-
-        await ActivityNotificationService.notifyInstitutionActivityCreated({
-            dbClient: db,
-            actorUserId: result.studentUserId,
-            institutionId: result.institutionId,
-            targetType: 'TELEMETRY_INCIDENT',
-            targetId: result.incidentId,
-            targetLabel: payload.ruleKey || 'Incident',
-            title,
-            message,
-            sourceModule: 'telemetry',
-            sourceAction: result.isNew ? 'flag-incident' : 'escalate-incident',
-            metadata: {
-                attemptId: payload.examSessionId,
-                incidentId: result.incidentId,
-                ruleKey: payload.ruleKey,
-                severity: result.finalSeverity,
-                previousSeverity: result.previousSeverity,
-            },
-        });
+        if (!result.isNew) {
+            await ActivityNotificationService.notifyInstitutionActivityCreated({
+                dbClient: db,
+                actorUserId: result.studentUserId,
+                institutionId: result.institutionId,
+                targetType: 'TELEMETRY_INCIDENT',
+                targetId: result.incidentId,
+                targetLabel: payload.ruleKey || 'Incident',
+                title: 'Proctoring incident escalated',
+                message: `Proctoring incident escalated for student attempt. Rule: ${payload.ruleKey}. Severity escalated from ${result.previousSeverity} to ${result.finalSeverity}`,
+                sourceModule: 'telemetry',
+                sourceAction: 'escalate-incident',
+                metadata: {
+                    attemptId: payload.examSessionId,
+                    incidentId: result.incidentId,
+                    ruleKey: payload.ruleKey,
+                    severity: result.finalSeverity,
+                    previousSeverity: result.previousSeverity,
+                },
+            });
+        }
     } catch (error) {
         console.error('[TelemetryStorage] Failed to log or notify telemetry incident activity:', {
             attemptId: payload.examSessionId,

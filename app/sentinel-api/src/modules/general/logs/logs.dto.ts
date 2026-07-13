@@ -104,6 +104,10 @@ export const logQuerySchema = z
             description: 'Filter logs by branch institution.',
             example: 'branch-3422',
         }),
+        institutionId: z.string().uuid('Invalid institution UUID').optional().openapi({
+            description: 'Filter logs by parent institution.',
+            example: 'inst-9382',
+        }),
     })
     .openapi('LogQuery');
 

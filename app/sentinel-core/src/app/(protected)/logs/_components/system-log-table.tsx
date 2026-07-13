@@ -9,7 +9,10 @@ import { AuditLogTable } from './audit-log-table';
  * It manages its own state and fetches data using the useSystemLogsQuery hook.
  */
 export function SystemLogTable() {
-    const { pagination, setPagination } = useServerPagination();
+    const { pagination, setPagination } = useServerPagination([], {
+        pageIndex: 0,
+        pageSize: 20,
+    });
 
     const { data, isLoading, isError, error } = useSystemLogsQuery({
         params: {

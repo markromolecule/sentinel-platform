@@ -1,6 +1,5 @@
 import Link from 'next/link';
 import { cn, Separator } from '@sentinel/ui';
-import { ShieldCheck, UserCog, Terminal, type LucideIcon } from 'lucide-react';
 
 export type LogsSection = 'auth' | 'activity' | 'system';
 
@@ -8,8 +7,6 @@ interface LogsNavItem {
     id: LogsSection;
     label: string;
     href: string;
-    icon: LucideIcon;
-    iconColor: string;
 }
 
 const LOGS_NAV_GROUPS = [
@@ -20,22 +17,16 @@ const LOGS_NAV_GROUPS = [
                 id: 'auth',
                 label: 'Auth Logs',
                 href: '/logs/auth',
-                icon: ShieldCheck,
-                iconColor: 'text-emerald-500',
             },
             {
                 id: 'activity',
                 label: 'Activity Logs',
                 href: '/logs/activity',
-                icon: UserCog,
-                iconColor: 'text-blue-500',
             },
             {
                 id: 'system',
                 label: 'System Logs',
                 href: '/logs/system',
-                icon: Terminal,
-                iconColor: 'text-indigo-500',
             },
         ] as LogsNavItem[],
     },
@@ -58,13 +49,12 @@ export function LogsNav({ activeSection }: LogsNavProps) {
                     {groupIndex > 0 && <Separator className="bg-border/40 my-3" />}
 
                     <h3 className="text-muted-foreground/60 mb-2 px-4 text-xs font-semibold tracking-wider uppercase">
-                        {group.title}
+                         {group.title}
                     </h3>
 
                     <div className="flex flex-col gap-0.5">
                         {group.items.map((item) => {
                             const isActive = activeSection === item.id;
-                            const Icon = item.icon;
 
                             return (
                                 <Link
@@ -77,14 +67,6 @@ export function LogsNav({ activeSection }: LogsNavProps) {
                                             : 'text-muted-foreground hover:bg-accent/30 hover:text-foreground',
                                     )}
                                 >
-                                    <Icon
-                                        className={cn(
-                                            'h-4 w-4 shrink-0 transition-colors',
-                                            isActive
-                                                ? item.iconColor
-                                                : 'text-muted-foreground/60 group-hover:text-foreground',
-                                        )}
-                                    />
                                     <span className="truncate">{item.label}</span>
                                 </Link>
                             );

@@ -51,7 +51,7 @@ export class AuthLogsService {
      */
     static async getAuthLogs(
         dbClient: DbClient,
-        scopingInstitutionId: string,
+        scopingInstitutionId: string | undefined,
         scopingBranchId: string | null | undefined,
         filters: LogQuery,
     ) {

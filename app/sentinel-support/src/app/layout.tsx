@@ -7,7 +7,7 @@ import Providers from './providers';
 
 export const metadata: Metadata = {
     title: {
-        default: 'Support Portal | Sentinel',
+        default: 'Main Application | Support Portal',
         template: 'Sentinel PH | %s',
     },
     robots: {
