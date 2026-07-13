@@ -22,12 +22,20 @@ interface DashboardShellProps {
  */
 export function DashboardShell({ children }: DashboardShellProps) {
     return (
-        <div className="relative flex min-h-[calc(100vh-64px)] flex-col lg:-m-6 lg:flex-row lg:items-stretch">
+        <div className="relative flex min-h-[calc(100vh-64px)] flex-col lg:h-[calc(100svh-64px)] lg:min-h-0 lg:-m-6 lg:flex-row lg:items-stretch lg:overflow-hidden">
             {/* Main Content */}
-            <main className="min-w-0 flex-1 space-y-6 p-6 pb-10">{children}</main>
+            <main
+                data-lenis-prevent
+                className="min-w-0 flex-1 space-y-6 p-6 pb-10 lg:min-h-0 lg:overflow-y-auto lg:[-ms-overflow-style:none] lg:[scrollbar-width:none] lg:[&::-webkit-scrollbar]:hidden"
+            >
+                {children}
+            </main>
 
             {/* Right Sidebar — desktop only (sticky) */}
-            <div className="bg-background sticky top-0 hidden w-80 shrink-0 flex-col overflow-y-auto border-l lg:flex">
+            <div
+                data-lenis-prevent
+                className="bg-background hidden w-80 shrink-0 flex-col border-l lg:flex lg:h-full lg:min-h-0 lg:overflow-y-auto lg:[-ms-overflow-style:none] lg:[scrollbar-width:none] lg:[&::-webkit-scrollbar]:hidden"
+            >
                 <DashboardSidebar />
             </div>
 

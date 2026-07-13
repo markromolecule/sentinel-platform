@@ -12,6 +12,7 @@ import {
 } from '@sentinel/ui';
 import { useInstructorNav } from '@/components/sidebar/instructor/hooks/use-instructor-nav';
 import { InstructorSidebarItem } from '@/components/sidebar/instructor/instructor-sidebar-item';
+import { useConversationsQuery, useMessageRealtime } from '@sentinel/hooks';
 import {
     overviewItems,
     supportItems,
@@ -29,6 +30,10 @@ export { InstructorHeader } from './instructor-header';
 export function InstructorSidebar() {
     const { state, setOpen } = useSidebar();
     const { pathname, isExamActive, isSubjectsActive, isQuestionBankActive } = useInstructorNav();
+
+    const { data: conversations } = useConversationsQuery();
+    useMessageRealtime();
+    const unreadCount = conversations?.reduce((acc, c) => acc + (c.unreadCount ?? 0), 0) ?? 0;
 
     const sections = [
         { title: 'Overview', items: overviewItems, showSeparator: true },
@@ -71,6 +76,7 @@ export function InstructorSidebar() {
                                                         : pathname === item.url
                                             }
                                             sidebarState={state}
+                                            unreadCount={item.url === '/messages' ? unreadCount : undefined}
                                         />
                                     ))}
                                 </SidebarMenu>

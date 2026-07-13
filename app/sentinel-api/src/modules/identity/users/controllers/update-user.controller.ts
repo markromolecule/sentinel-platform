@@ -1,5 +1,6 @@
 import { createRoute } from '@hono/zod-openapi';
 import { type AppRouteHandler } from '../../../../types/hono';
+import { resolveRequesterRole } from '../../../../lib/resolve-requester-role';
 import { updateUserSchema } from '../user.dto';
 import { UserService } from '../user.service';
 import {
@@ -43,7 +44,7 @@ export const updateUserRouteHandler: AppRouteHandler<typeof updateUserRoute> = a
         const params = c.req.valid('param');
         const body = c.req.valid('json');
         const supabaseUser = c.get('supabaseUser') as any;
-        const role = supabaseUser?.user_metadata?.role;
+        const role = resolveRequesterRole(supabaseUser);
         const institutionId = c.get('institutionId');
         const requester = c.get('user');
         const scopedInstitutionId =
@@ -77,11 +78,11 @@ export const updateUserRouteHandler: AppRouteHandler<typeof updateUserRoute> = a
             200,
         );
     } catch (error: any) {
-        console.error('Update user error:', error);
-
         if (error?.status === 404 || error?.message === 'User profile not found after update') {
             return c.json({ error: 'User not found' }, 404);
         }
+
+        console.error('Update user error:', error);
 
         return c.json({ error: error?.message || 'Internal Server Error' }, error?.status || 500);
     }

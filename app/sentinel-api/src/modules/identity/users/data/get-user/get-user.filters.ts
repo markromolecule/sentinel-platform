@@ -73,11 +73,6 @@ export function applyRequesterLimits<T>(
         );
     }
 
-    if (requesterRole !== SUPERADMIN_ROLE_NAME) {
-        return query.where((eb) =>
-            eb.or([eb('r.role_name', '!=', SUPERADMIN_ROLE_NAME), eb('r.role_name', 'is', null)]),
-        );
-    }
-
     return query;
 }
+

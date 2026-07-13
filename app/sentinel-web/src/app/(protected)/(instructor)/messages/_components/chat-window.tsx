@@ -26,7 +26,7 @@ interface ChatWindowProps {
 
 function ChatSkeleton() {
     return (
-        <div className="bg-muted/5 custom-scrollbar flex-1 animate-pulse space-y-4 overflow-y-auto p-4 md:space-y-6 md:p-6">
+        <div className="bg-muted/5 custom-scrollbar min-h-0 flex-1 basis-0 animate-pulse space-y-4 overflow-y-auto p-4 md:space-y-6 md:p-6">
             {[...Array(4)].map((_, i) => {
                 const isMe = i % 2 === 1;
                 return (
@@ -109,7 +109,7 @@ export function ChatWindow({
     const participant = conversation.participants[0];
 
     return (
-        <div className="bg-background relative flex h-full w-full flex-1 flex-col overflow-hidden">
+        <div className="bg-background relative flex h-full w-full min-h-0 flex-1 flex-col overflow-hidden">
             {/* Header */}
             <div className="border-border bg-card flex h-16 shrink-0 items-center justify-between border-b px-4 md:h-20 md:px-6">
                 <div className="flex items-center gap-3">
@@ -171,7 +171,10 @@ export function ChatWindow({
             {isLoading ? (
                 <ChatSkeleton />
             ) : (
-                <div className="bg-muted/5 custom-scrollbar flex-1 space-y-4 overflow-y-auto p-4 md:space-y-6 md:p-6">
+                <div
+                    data-lenis-prevent
+                    className="bg-muted/5 custom-scrollbar min-h-0 flex-1 basis-0 space-y-4 overflow-y-auto p-4 md:space-y-6 md:p-6"
+                >
                     {messages.map((msg, index) => {
                         const isMe = msg.senderId === currentUserId;
                         const showAvatar =

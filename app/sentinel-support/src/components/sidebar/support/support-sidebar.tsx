@@ -20,10 +20,15 @@ import {
 } from './constants';
 import { useDashboardNav } from '../common/hooks/use-dashboard-nav';
 import { DashboardSidebarItem } from '../common/dashboard-sidebar-item';
+import { useConversationsQuery, useMessageRealtime } from '@sentinel/hooks';
 
 export function SuperAdminSidebar() {
     const { state, setOpen } = useSidebar();
     const { pathname, openMenus, toggleMenu, isChildActive } = useDashboardNav();
+
+    const { data: conversations } = useConversationsQuery();
+    useMessageRealtime();
+    const unreadCount = conversations?.reduce((acc, c) => acc + (c.unreadCount ?? 0), 0) ?? 0;
 
     const sections = [
         { label: 'Overview', items: DASHBOARD_ITEMS, showSeparator: true },
@@ -60,6 +65,7 @@ export function SuperAdminSidebar() {
                                             onOpenChange={(open) => toggleMenu(item.title, open)}
                                             isChildActive={isChildActive}
                                             sidebarState={state}
+                                            unreadCount={item.url === '/messages' ? unreadCount : undefined}
                                         />
                                     ))}
                                 </SidebarMenu>

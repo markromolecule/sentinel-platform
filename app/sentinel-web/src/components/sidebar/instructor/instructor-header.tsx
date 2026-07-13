@@ -56,7 +56,7 @@ export function InstructorHeader() {
             </div>
 
             <div className="absolute left-1/2 hidden -translate-x-1/2 md:flex">
-                <UserSearchBar redirectPath="/instructor/messages" />
+                <UserSearchBar redirectPath="/messages" />
             </div>
 
             <div className="flex items-center gap-4">

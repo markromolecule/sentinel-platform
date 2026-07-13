@@ -55,7 +55,7 @@ export function MessageList({
     return (
         <div
             className={cn(
-                'border-border bg-card h-full w-full shrink-0 flex-col border-r md:w-[320px] lg:w-[380px]',
+                'border-border bg-card flex h-full min-h-0 w-full shrink-0 flex-col border-r md:w-[320px] lg:w-[380px]',
                 selectedId ? 'hidden md:flex' : 'flex',
             )}
         >
@@ -98,7 +98,7 @@ export function MessageList({
             </div>
 
             {/* List Body */}
-            <div className="custom-scrollbar flex-1 overflow-y-auto">
+            <div className="custom-scrollbar min-h-0 flex-1 overflow-y-auto">
                 {showDirectory ? (
                     isCreatingConversation ? (
                         <div className="text-muted-foreground flex h-32 items-center justify-center gap-2 text-sm">
