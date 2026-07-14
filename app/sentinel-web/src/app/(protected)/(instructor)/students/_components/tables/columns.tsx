@@ -56,7 +56,7 @@ export const columns: ColumnDef<Student>[] = [
             const initials = `${student.firstName[0]}${student.lastName[0]}`;
 
             return (
-                <div className="flex items-center gap-3 pl-4">
+                <div className="flex items-center gap-3">
                     <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-[#323d8f] to-[#4a5bb8] text-xs font-bold text-white">
                         {initials}
                     </div>

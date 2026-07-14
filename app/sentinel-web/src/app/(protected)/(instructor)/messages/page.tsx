@@ -1,6 +1,7 @@
 'use client';
 
 import { Suspense } from 'react';
+import { Spinner } from '@sentinel/ui';
 import { MessageList } from './_components/message-list';
 import { ChatWindow } from './_components/chat-window';
 import { useProctorMessages } from './_hooks/use-proctor-messages';
@@ -71,9 +72,7 @@ export default function ProctorMessagesPage() {
         <Suspense
             fallback={
                 <div className="flex h-full items-center justify-center">
-                    <div className="text-muted-foreground animate-pulse text-lg">
-                        Loading messages...
-                    </div>
+                    <Spinner className="text-primary size-8" />
                 </div>
             }
         >

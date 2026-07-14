@@ -22,6 +22,7 @@ interface IncidentTableProps {
     sections: { id: string; name: string }[];
     groupMode: 'logs' | 'student';
     onGroupModeChange: (mode: 'logs' | 'student') => void;
+    isLoading?: boolean;
 }
 
 export function IncidentTable({
@@ -39,6 +40,7 @@ export function IncidentTable({
     sections,
     groupMode,
     onGroupModeChange,
+    isLoading,
 }: IncidentTableProps) {
     const observerTargetRef = useRef<HTMLDivElement | null>(null);
 
@@ -159,6 +161,7 @@ export function IncidentTable({
                 rowClassName={getRowClassName}
                 emptyContent={emptyContent}
                 manualPagination={true}
+                isLoading={isLoading}
                 searchValue={searchValue}
                 onSearchChange={onSearchChange}
                 columnFilters={columnFilters}
