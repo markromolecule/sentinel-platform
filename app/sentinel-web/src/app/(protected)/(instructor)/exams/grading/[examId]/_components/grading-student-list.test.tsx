@@ -104,6 +104,6 @@ describe('GradingStudentList', () => {
         );
 
         // The facet button label appears in the toolbar
-        expect(screen.getByText('Section')).toBeTruthy();
+        expect(screen.getAllByText('Section').length).toBeGreaterThan(0);
     });
 });

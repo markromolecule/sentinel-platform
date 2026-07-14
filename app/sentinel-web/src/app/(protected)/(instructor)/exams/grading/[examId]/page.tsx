@@ -6,7 +6,7 @@ import {
     useExportGrades,
     useGradingDetail,
 } from '@/app/(protected)/(instructor)/exams/grading/_hooks';
-import { Button } from '@sentinel/ui';
+import { Button, Separator } from '@sentinel/ui';
 import { ArrowLeft, Download } from 'lucide-react';
 import Link from 'next/link';
 
@@ -76,44 +76,37 @@ export default function ExamGradingPage({ params }: ExamGradingPageProps) {
     }
 
     return (
-        <div className="h-full flex-1 flex-col space-y-8 p-8 md:flex">
-            <div className="flex items-center justify-between space-y-2">
-                <div className="space-y-1">
-                    <div className="text-muted-foreground flex items-center gap-2">
-                        <Link
-                            href="/exams/grading"
-                            className="hover:text-foreground transition-colors"
-                        >
-                            Grading
-                        </Link>
-                        <span>/</span>
-                        <span>{exam.title}</span>
+        <div className="h-full flex-1 flex-col gap-6 p-8 md:flex">
+            <div className="space-y-4">
+                <div className="flex items-center justify-between space-y-2">
+                    <div className="space-y-1">
+                        <h2 className="text-2xl font-bold tracking-tight">{exam.title}</h2>
+                        <p className="text-muted-foreground">
+                            {exam.classroomName || exam.subject} •{' '}
+                            {exam.scheduledDate || exam.createdAt
+                                ? new Date(exam.scheduledDate || exam.createdAt).toLocaleDateString()
+                                : 'No schedule'}
+                        </p>
                     </div>
-                    <h2 className="text-2xl font-bold tracking-tight">{exam.title}</h2>
-                    <p className="text-muted-foreground">
-                        {exam.classroomName || exam.subject} •{' '}
-                        {exam.scheduledDate || exam.createdAt
-                            ? new Date(exam.scheduledDate || exam.createdAt).toLocaleDateString()
-                            : 'No schedule'}
-                    </p>
+                    <div className="flex items-center gap-2">
+                        {/* Export button styled with a soft Excel green */}
+                        <Button
+                            className="border-[#217346] bg-[#217346]/10 text-[#217346] hover:bg-[#217346]/20"
+                            variant="outline"
+                            onClick={() => exportToExcel(students, exam.title)}
+                        >
+                            <Download className="mr-2 h-4 w-4" />
+                            Export to Excel
+                        </Button>
+                        <Button variant="outline" asChild>
+                            <Link href="/exams/grading">
+                                <ArrowLeft className="mr-2 h-4 w-4" />
+                                Back to List
+                            </Link>
+                        </Button>
+                    </div>
                 </div>
-                <div className="flex items-center gap-2">
-                    {/* Export button styled with a soft Excel green */}
-                    <Button
-                        className="border-[#217346] bg-[#217346]/10 text-[#217346] hover:bg-[#217346]/20"
-                        variant="outline"
-                        onClick={() => exportToExcel(students, exam.title)}
-                    >
-                        <Download className="mr-2 h-4 w-4" />
-                        Export to Excel
-                    </Button>
-                    <Button variant="outline" asChild>
-                        <Link href="/exams/grading">
-                            <ArrowLeft className="mr-2 h-4 w-4" />
-                            Back to List
-                        </Link>
-                    </Button>
-                </div>
+                <Separator />
             </div>
             <GradingStudentList
                 students={students}

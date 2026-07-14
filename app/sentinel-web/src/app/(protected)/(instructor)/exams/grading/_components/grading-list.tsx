@@ -1,52 +1,40 @@
 'use client';
 
-import { useMemo, useState } from 'react';
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-    DataTable,
-} from '@sentinel/ui';
+import { useMemo } from 'react';
+import { DataTable, type DataTableFacet } from '@sentinel/ui';
 import { columns } from '@/app/(protected)/(instructor)/exams/grading/_components/columns';
 import { useGradingList } from '@/app/(protected)/(instructor)/exams/grading/_hooks/use-grading-list';
-import { useSectionsQuery } from '@sentinel/hooks';
 
 export function GradingList() {
-    const [sectionId, setSectionId] = useState<string | undefined>();
-    const { exams, isLoading } = useGradingList(sectionId);
-    const { data: sections = [], isLoading: isSectionsLoading } = useSectionsQuery();
-    const sectionOptions = useMemo(
-        () =>
-            sections
-                .map((section) => ({
-                    id: section.id,
-                    name: section.name,
-                }))
-                .sort((left, right) => left.name.localeCompare(right.name)),
-        [sections],
-    );
+    const { exams, isLoading } = useGradingList();
 
-    const filterAction = (
-        <Select
-            value={sectionId || 'all'}
-            onValueChange={(val) => setSectionId(val === 'all' ? undefined : val)}
-        >
-            <SelectTrigger className="w-[200px]">
-                <SelectValue
-                    placeholder={isSectionsLoading ? 'Loading sections...' : 'All Sections'}
-                />
-            </SelectTrigger>
-            <SelectContent>
-                <SelectItem value="all">All Sections</SelectItem>
-                {sectionOptions.map((section) => (
-                    <SelectItem key={section.id} value={section.id}>
-                        {section.name}
-                    </SelectItem>
-                ))}
-            </SelectContent>
-        </Select>
+    const availableSections = useMemo(() => {
+        const sectionsMap = new Map<string, string>();
+        exams.forEach((exam) => {
+            if (exam.sectionIds && exam.sectionNames) {
+                exam.sectionIds.forEach((id, index) => {
+                    const name = exam.sectionNames[index];
+                    if (name) {
+                        sectionsMap.set(id, name);
+                    }
+                });
+            }
+        });
+        return Array.from(sectionsMap.entries())
+            .map(([id, name]) => ({ id, name }))
+            .sort((a, b) => a.name.localeCompare(b.name));
+    }, [exams]);
+
+    const sectionFacet = useMemo<DataTableFacet>(
+        () => ({
+            columnKey: 'sectionName',
+            title: 'Section',
+            options: availableSections.map((s) => ({
+                label: s.name,
+                value: s.name,
+            })),
+        }),
+        [availableSections],
     );
 
     return (
@@ -55,8 +43,9 @@ export function GradingList() {
             data={exams}
             searchKey="title"
             searchPlaceholder="Filter exams..."
-            toolbarActions={filterAction}
             isLoading={isLoading}
+            facets={[sectionFacet]}
+            initialColumnVisibility={{ sectionName: false }}
         />
     );
 }
