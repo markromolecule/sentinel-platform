@@ -16,6 +16,7 @@ import {
     useCreateDirectConversationMutation,
 } from '@sentinel/hooks';
 import { Conversation, Message } from '@sentinel/shared/types';
+import { Spinner } from '@sentinel/ui';
 
 function AdminMessagesPageContent() {
     const hasFiredDeepLinkRef = useRef(false);
@@ -150,9 +151,7 @@ function AdminMessagesPageContent() {
     if (isProfileLoading || conversationsQuery.isLoading || !profile) {
         return (
             <div className="flex h-full items-center justify-center">
-                <div className="text-muted-foreground animate-pulse text-lg">
-                    Loading messages...
-                </div>
+                <Spinner className="text-primary size-8" />
             </div>
         );
     }
@@ -259,9 +258,7 @@ export default function AdminMessagesPage() {
         <Suspense
             fallback={
                 <div className="flex h-full items-center justify-center">
-                    <div className="text-muted-foreground animate-pulse text-lg">
-                        Loading messages...
-                    </div>
+                    <Spinner className="text-primary size-8" />
                 </div>
             }
         >

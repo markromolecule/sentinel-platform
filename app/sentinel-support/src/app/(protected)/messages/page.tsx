@@ -17,6 +17,7 @@ import {
     useActivePermissions,
 } from '@sentinel/hooks';
 import { Conversation, Message } from '@sentinel/shared/types';
+import { Spinner } from '@sentinel/ui';
 
 function SupportMessagesPageContent() {
     const { hasPermission } = useActivePermissions();
@@ -156,9 +157,7 @@ function SupportMessagesPageContent() {
     if (isProfileLoading || conversationsQuery.isLoading || !profile) {
         return (
             <div className="flex h-full items-center justify-center">
-                <div className="text-muted-foreground animate-pulse text-lg">
-                    Loading messages...
-                </div>
+                <Spinner className="text-primary size-8" />
             </div>
         );
     }
@@ -272,9 +271,7 @@ export default function SupportMessagesPage() {
         <Suspense
             fallback={
                 <div className="flex h-full items-center justify-center">
-                    <div className="text-muted-foreground animate-pulse text-lg">
-                        Loading messages...
-                    </div>
+                    <Spinner className="text-primary size-8" />
                 </div>
             }
         >
