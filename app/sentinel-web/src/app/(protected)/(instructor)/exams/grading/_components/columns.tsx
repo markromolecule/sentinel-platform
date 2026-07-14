@@ -78,4 +78,14 @@ export const columns: ColumnDef<GradingExam>[] = [
             );
         },
     },
+    {
+        id: 'sectionName',
+        accessorFn: (row) => row.sectionNames,
+        filterFn: (row, id, value: string[]) => {
+            if (!value || value.length === 0) return true;
+            const rowSections = row.getValue(id) as string[] | undefined;
+            if (!rowSections) return false;
+            return rowSections.some((secName) => value.includes(secName));
+        },
+    },
 ];
