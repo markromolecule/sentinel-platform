@@ -21,6 +21,7 @@ export * from './telemetry';
 export * from './student-whitelist';
 export * from './calendar';
 export * from './analytics';
+export * from './pdf-documents';
 export * from './logs';
 export * from './notifications';
 export * from './api/use-api-health';

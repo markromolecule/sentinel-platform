@@ -20,21 +20,32 @@ import {
 } from './constants';
 import { useDashboardNav } from '../common/hooks/use-dashboard-nav';
 import { DashboardSidebarItem } from '../common/dashboard-sidebar-item';
-import { useConversationsQuery, useMessageRealtime } from '@sentinel/hooks';
+import { useActivePermissions, useConversationsQuery, useMessageRealtime } from '@sentinel/hooks';
 
 export function SuperAdminSidebar() {
     const { state, setOpen } = useSidebar();
     const { pathname, openMenus, toggleMenu, isChildActive } = useDashboardNav();
+    const { hasAnyPermission } = useActivePermissions();
 
     const { data: conversations } = useConversationsQuery();
     useMessageRealtime();
     const unreadCount = conversations?.reduce((acc, c) => acc + (c.unreadCount ?? 0), 0) ?? 0;
+    const canAccessPdfTemplates = hasAnyPermission([
+        'pdf_templates:view',
+        'pdf_templates:manage',
+        'institution_branding:manage',
+        'examinations:export_answer_key',
+    ]);
+
+    const filteredConfigurationItems = CONFIGURATION_ITEMS.filter((item) =>
+        item.url === '/pdf-templates' ? canAccessPdfTemplates : true,
+    );
 
     const sections = [
         { label: 'Overview', items: DASHBOARD_ITEMS, showSeparator: true },
         { label: 'Management', items: MANAGEMENT_ITEMS, showSeparator: true },
         { label: 'User Management', items: USER_MANAGEMENT_ITEMS, showSeparator: true },
-        { label: 'Configuration', items: CONFIGURATION_ITEMS, showSeparator: true },
+        { label: 'Configuration', items: filteredConfigurationItems, showSeparator: true },
         { label: 'Analytics & Logs', items: ANALYTICS_ITEMS, showSeparator: true },
         { label: 'Communication', items: COMMUNICATION_ITEMS, showSeparator: true },
     ].filter((section) => section.items.length > 0);
@@ -65,7 +76,9 @@ export function SuperAdminSidebar() {
                                             onOpenChange={(open) => toggleMenu(item.title, open)}
                                             isChildActive={isChildActive}
                                             sidebarState={state}
-                                            unreadCount={item.url === '/messages' ? unreadCount : undefined}
+                                            unreadCount={
+                                                item.url === '/messages' ? unreadCount : undefined
+                                            }
                                         />
                                     ))}
                                 </SidebarMenu>

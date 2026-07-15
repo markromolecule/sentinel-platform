@@ -1,6 +1,5 @@
 import { type DbClient } from '@sentinel/db';
 import {
-    createAnalyticsReportData,
     getAnalyticsDepartmentIntegrityData,
     getAnalyticsIncidentSeverityData,
     getAnalyticsIncidentTypeData,
@@ -11,6 +10,8 @@ import {
 } from './data';
 import { mapAnalyticsKPIs } from './services/map-analytics-kpis';
 import { LogsService } from '../logs/logs.service';
+import { resolvePdfReportPeriod } from '../pdf-documents/services/resolve-pdf-report-period';
+import { pdfGenerationQueueService } from '../pdf-documents/queue/pdf-generation-queue.service';
 import type {
     AnalyticsKPIsSummary,
     AnalyticsReport,
@@ -66,6 +67,8 @@ export class AnalyticsService {
     }): Promise<IncidentTrendMetric[]> {
         return getAnalyticsIncidentTrendsData(args.dbClient, {
             institutionId: args.institutionId,
+            startAt: new Date(Date.now() - 5 * 7 * 24 * 3600 * 1000), // Fallback start range for live chart APIs
+            endAtExclusive: new Date()
         });
     }
 
@@ -144,6 +147,11 @@ export class AnalyticsService {
                 createdBy: r.createdBy,
                 creatorFirstName: r.creatorFirstName,
                 creatorLastName: r.creatorLastName,
+                institutionId: r.institutionId,
+                failureCode: r.failureCode,
+                failureMessage: r.failureMessage,
+                expiresAt: r.expiresAt ? r.expiresAt.toISOString() : null,
+                retryCount: r.retryCount,
             })),
             total_records: result.total_records,
             limit: result.limit,
@@ -152,52 +160,75 @@ export class AnalyticsService {
     }
 
     /**
-     * Generates a new analytics report record in the database.
-     *
-     * @param args - Object containing dbClient, userId, title, type and format.
-     * @returns Newly created report record.
+     * Enqueues a new overall analytics PDF generation job and returns the pending database record.
      */
     static async generateReport(args: {
         dbClient: DbClient;
         userId: string;
         title: string;
-        type: 'completion' | 'incident' | 'performance';
-        format: 'pdf' | 'csv' | 'xlsx';
+        institutionId?: string | null;
+        period: 'LAST_7_DAYS' | 'LAST_30_DAYS' | 'LAST_90_DAYS' | 'CUSTOM';
+        startDate?: string | null;
+        endDate?: string | null;
+        timezone?: string;
     }): Promise<AnalyticsReport> {
-        const createdRow = await createAnalyticsReportData(args.dbClient, {
-            title: args.title,
-            type: args.type,
-            format: args.format,
-            createdBy: args.userId,
-            status: 'READY',
+        const { startAt, endAtExclusive } = resolvePdfReportPeriod({
+            preset: args.period,
+            start_date: args.startDate || undefined,
+            end_date: args.endDate || undefined,
         });
 
-        if (typeof args.dbClient.selectFrom === 'function') {
-            try {
-                const profile = await args.dbClient
-                    .selectFrom('user_profiles')
-                    .select(['institution_id'])
-                    .where('user_id', '=', args.userId)
-                    .executeTakeFirst();
-                const activeInstitutionId = profile?.institution_id ?? undefined;
+        const PERIOD_LABELS: Record<string, string> = {
+            LAST_7_DAYS: 'Last 7 Days',
+            LAST_30_DAYS: 'Last 30 Days',
+            LAST_90_DAYS: 'Last 90 Days',
+            CUSTOM: 'Custom Range',
+        };
+        const periodLabel = PERIOD_LABELS[args.period] ?? args.period;
 
-                if (activeInstitutionId) {
-                    await LogsService.createLog(args.dbClient, {
-                        userId: args.userId,
-                        action: 'report.generated',
-                        resourceType: 'report',
-                        resourceId: createdRow.report_id,
-                        activeInstitutionId,
-                        details: {
-                            reportId: createdRow.report_id,
-                            title: createdRow.title,
-                            type: createdRow.type,
-                            format: createdRow.format,
-                        },
-                    });
-                }
+        // Insert pending report row
+        const createdRow = await args.dbClient
+            .insertInto('analytics_reports')
+            .values({
+                title: args.title,
+                type: 'ANALYTICS_OVERALL',
+                format: 'pdf',
+                status: 'PENDING',
+                created_by: args.userId,
+                institution_id: args.institutionId || null,
+                period_start_at: startAt,
+                period_end_at: endAtExclusive,
+                timezone: args.timezone || 'Asia/Manila',
+                retry_count: 0,
+                request_snapshot: JSON.stringify({
+                    period: args.period,
+                    startDate: args.startDate,
+                    endDate: args.endDate,
+                    timezone: args.timezone,
+                    periodLabel
+                })
+            })
+            .returningAll()
+            .executeTakeFirstOrThrow();
+
+        // Enqueue the generation task in BullMQ
+        await pdfGenerationQueueService.submitPdfJob(createdRow.report_id, 'ANALYTICS_OVERALL');
+
+        // Audit Log if institution scoping is set
+        if (createdRow.institution_id) {
+            try {
+                await LogsService.createLog(args.dbClient, {
+                    userId: args.userId,
+                    action: 'PDF_EXPORT_REQUESTED',
+                    activeInstitutionId: createdRow.institution_id,
+                    details: {
+                        reportId: createdRow.report_id,
+                        period: args.period,
+                        periodLabel
+                    }
+                });
             } catch (logErr) {
-                console.error('Failed to log report.generated:', logErr);
+                console.error('Failed to log PDF_EXPORT_REQUESTED:', logErr);
             }
         }
 
@@ -210,6 +241,11 @@ export class AnalyticsService {
             status: createdRow.status,
             fileUrl: createdRow.file_url,
             createdBy: createdRow.created_by,
+            institutionId: createdRow.institution_id,
+            failureCode: createdRow.failure_code,
+            failureMessage: createdRow.failure_message,
+            expiresAt: createdRow.expires_at ? createdRow.expires_at.toISOString() : null,
+            retryCount: Number(createdRow.retry_count ?? 0)
         };
     }
 }

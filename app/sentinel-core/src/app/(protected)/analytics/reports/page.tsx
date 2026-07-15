@@ -46,8 +46,9 @@ export default function ReportsAnalyticsPage() {
                     onClick={() =>
                         generateReport({
                             title: `Administrative Telemetry Report - ${new Date().toLocaleDateString()}`,
-                            type: 'incident',
-                            format: 'pdf',
+                            institutionId: institutionId || undefined,
+                            period: 'LAST_30_DAYS',
+                            timezone: 'Asia/Manila',
                         })
                     }
                 >

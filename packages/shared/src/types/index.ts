@@ -950,3 +950,5 @@ export * from './proctor/students';
 
 // Messages
 export * from './messages';
+
+export * from '../schema/pdf-documents';

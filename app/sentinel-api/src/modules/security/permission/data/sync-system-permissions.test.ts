@@ -24,6 +24,11 @@ describe('syncSystemPermissions', () => {
             'examinations:delete',
             'examinations:assign',
             'ai:generate_questions',
+            'reports:generate',
+            'pdf_templates:view',
+            'pdf_templates:manage',
+            'institution_branding:manage',
+            'examinations:export_answer_key',
         ];
 
         const activeKeys = ALL_PERMISSIONS.map((p) => p.id);
@@ -35,6 +40,14 @@ describe('syncSystemPermissions', () => {
 
     it('should grant the generate questions permission to the support blueprint', () => {
         expect(SYSTEM_ROLE_BLUEPRINTS.support.permissionKeys).toContain('ai:generate_questions');
+    });
+
+    it('should grant the new PDF and branding permissions to the support blueprint', () => {
+        expect(SYSTEM_ROLE_BLUEPRINTS.support.permissionKeys).toContain('reports:generate');
+        expect(SYSTEM_ROLE_BLUEPRINTS.support.permissionKeys).toContain('pdf_templates:view');
+        expect(SYSTEM_ROLE_BLUEPRINTS.support.permissionKeys).toContain('pdf_templates:manage');
+        expect(SYSTEM_ROLE_BLUEPRINTS.support.permissionKeys).toContain('institution_branding:manage');
+        expect(SYSTEM_ROLE_BLUEPRINTS.support.permissionKeys).toContain('examinations:export_answer_key');
     });
 
     it('should define feedback:view and grant it to the support blueprint', () => {

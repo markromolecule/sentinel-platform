@@ -60,6 +60,7 @@ import logsRouter from './modules/general/logs/logs.routes';
 import feedbackRouter from './modules/general/feedbacks/feedback.routes';
 import instructorSubjectRequestsRouter from './modules/core/instructor-subject-requests/instructor-subject-requests.routes';
 import passageImagesRouter from './modules/infrastructure/passage-images/passage-images.routes';
+import pdfDocumentsRouter from './modules/general/pdf-documents/pdf-documents.routes';
 
 type Variables = {
     user: Prisma.usersGetPayload<{ include: { user_profiles: true } }>;
@@ -191,6 +192,7 @@ app.route('/messages', messagesRouter);
 app.route('/logs', logsRouter);
 app.route('/feedbacks', feedbackRouter);
 app.route('/instructor-subject-requests', instructorSubjectRequestsRouter);
+app.route('/pdf-documents', pdfDocumentsRouter);
 
 // 6. OpenAPI Specs & Documentation
 app.doc('/doc', {

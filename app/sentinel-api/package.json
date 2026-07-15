@@ -14,6 +14,8 @@
         "telemetry:failed-jobs": "tsx -r dotenv/config src/modules/telemetry/ingestion/scripts/manage-failed-jobs.ts",
         "start": "tsx -r dotenv/config src/server.ts",
         "start:telemetry-worker": "tsx -r dotenv/config src/modules/telemetry/ingestion/workers/telemetry.worker.ts",
+        "dev:pdf-worker": "tsx watch -r dotenv/config src/pdf-worker-process.ts",
+        "start:pdf-worker": "tsx -r dotenv/config src/pdf-worker-process.ts",
         "build": "cd ../../packages/db && pnpm run build && cd ../../packages/shared && pnpm run build",
         "ignore-build": "npx turbo-ignore",
         "seed:support": "prisma db seed",
@@ -35,7 +37,8 @@
         "prettier": "3.8.1",
         "prisma": "~7.5.0",
         "typescript": "^5.3.3",
-        "vitest": "^4.0.18"
+        "vitest": "^4.0.18",
+        "@types/pdfkit": "^0.13.4"
     },
     "prisma": {
         "seed": "tsx prisma/seed.ts",
@@ -60,6 +63,8 @@
         "prisma-extension-kysely": "^4.0.0",
         "prisma-kysely": "^3.1.0",
         "tsx": "^4.22.3",
-        "zod": "^4.3.6"
+        "zod": "^4.3.6",
+        "sharp": "^0.33.5",
+        "pdfkit": "^0.15.0"
     }
 }

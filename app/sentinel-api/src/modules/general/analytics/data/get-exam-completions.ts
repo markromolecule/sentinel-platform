@@ -3,6 +3,8 @@ import { sql } from 'kysely';
 
 export type GetExamCompletionsArgs = {
     institutionId?: string;
+    startAt?: Date;
+    endAtExclusive?: Date;
 };
 
 export type ExamCompletionRow = {
@@ -19,7 +21,7 @@ export async function getAnalyticsExamCompletionsData(
     dbClient: DbClient,
     args: GetExamCompletionsArgs,
 ): Promise<ExamCompletionRow[]> {
-    const { institutionId } = args;
+    const { institutionId, startAt, endAtExclusive } = args;
 
     let query = dbClient
         .selectFrom('exam_attempts as ea')
@@ -38,8 +40,14 @@ export async function getAnalyticsExamCompletionsData(
         query = query.where('e.institution_id', '=', institutionId);
     }
 
-    // Filter to last 30 days to keep it relevant, or just group all if no dates are set
     query = query.where('ea.started_at', 'is not', null);
+
+    if (startAt) {
+        query = query.where('ea.started_at', '>=', startAt);
+    }
+    if (endAtExclusive) {
+        query = query.where('ea.started_at', '<', endAtExclusive);
+    }
 
     const rows = await query
         .groupBy([sql`to_char(ea.started_at, 'Dy')`, sql`extract(isodow from ea.started_at)`])

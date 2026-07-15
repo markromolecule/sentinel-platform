@@ -7,6 +7,8 @@ import { useAuthenticatedQueryEnabled } from '../_shared/use-authenticated-query
 
 type UseInstitutionsQueryArgs = {
     search?: string;
+    parentInstitutionId?: string;
+    institutionKind?: 'STANDALONE' | 'PARENT' | 'CHILD';
     page?: number;
     limit?: number;
     enabled?: boolean;
@@ -30,11 +32,19 @@ export function useInstitutionsQuery(params: UseInstitutionsQueryArgs = {}) {
     return useQuery({
         queryKey: [
             ...INSTITUTION_QUERY_KEYS.all,
-            { search: params.search, page: params.page, limit: params.limit },
+            {
+                search: params.search,
+                parentInstitutionId: params.parentInstitutionId,
+                institutionKind: params.institutionKind,
+                page: params.page,
+                limit: params.limit,
+            },
         ],
         queryFn: async () => {
             const response = await getInstitutions(apiClient, {
                 search: params.search,
+                parentInstitutionId: params.parentInstitutionId,
+                institutionKind: params.institutionKind,
                 page: params.page,
                 limit: params.limit,
             });

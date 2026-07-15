@@ -1,4 +1,6 @@
 import type { ApiClientType } from '../api-client';
+import type { PdfReportGenerationRequest } from '@sentinel/shared/schema';
+import { getPdfExportDownload, retryPdfExport } from './pdf-documents';
 
 export interface AnalyticsKPIsSummary {
     totalExams: number;
@@ -51,6 +53,11 @@ export interface AnalyticsReport {
     createdBy: string | null;
     creatorFirstName?: string | null;
     creatorLastName?: string | null;
+    institutionId?: string | null;
+    failureCode?: string | null;
+    failureMessage?: string | null;
+    expiresAt?: string | null;
+    retryCount?: number;
 }
 
 export interface PaginatedAnalyticsReports {
@@ -62,8 +69,11 @@ export interface PaginatedAnalyticsReports {
 
 export interface GenerateAnalyticsReportBody {
     title: string;
-    type: 'completion' | 'incident' | 'performance';
-    format: 'pdf' | 'csv' | 'xlsx';
+    institutionId?: string | null;
+    period: 'LAST_7_DAYS' | 'LAST_30_DAYS' | 'LAST_90_DAYS' | 'CUSTOM';
+    startDate?: string | null;
+    endDate?: string | null;
+    timezone?: 'Asia/Manila';
 }
 
 export interface GetAnalyticsParams {
@@ -71,8 +81,10 @@ export interface GetAnalyticsParams {
 }
 
 export interface GetAnalyticsReportsParams extends GetAnalyticsParams {
+    institutionId?: string;
     limit?: number;
     page?: number;
+    status?: string;
 }
 
 interface ApiResponse<T> {
@@ -96,6 +108,13 @@ function buildQueryString(params?: GetAnalyticsParams): string {
 
     if (params.institution_id) {
         searchParams.set('institution_id', params.institution_id);
+    }
+
+    if ('institutionId' in (params ?? {}) && (params as GetAnalyticsReportsParams).institutionId) {
+        searchParams.set(
+            'institutionId',
+            (params as GetAnalyticsReportsParams).institutionId as string,
+        );
     }
 
     const queryString = searchParams.toString();
@@ -189,11 +208,17 @@ export async function getAnalyticsReports(
         if (params.institution_id) {
             searchParams.set('institution_id', params.institution_id);
         }
+        if (params.institutionId) {
+            searchParams.set('institutionId', params.institutionId);
+        }
         if (params.limit !== undefined) {
             searchParams.set('limit', String(params.limit));
         }
         if (params.page !== undefined) {
             searchParams.set('page', String(params.page));
+        }
+        if (params.status) {
+            searchParams.set('status', params.status);
         }
     }
 
@@ -224,6 +249,28 @@ export async function generateAnalyticsReport(
     });
     return response.data;
 }
+
+/**
+ * Requests a fresh, short-lived signed URL for a READY analytics report.
+ */
+export async function getAnalyticsReportDownload(
+    apiClient: ApiClientType,
+    reportId: string,
+): Promise<{ success: boolean; downloadUrl: string }> {
+    return getPdfExportDownload(apiClient, reportId);
+}
+
+/**
+ * Requeues a failed analytics report export.
+ */
+export async function retryAnalyticsReport(
+    apiClient: ApiClientType,
+    reportId: string,
+): Promise<{ success?: boolean; message: string }> {
+    return retryPdfExport(apiClient, reportId);
+}
+
+export type AnalyticsPdfReportGenerationRequest = PdfReportGenerationRequest;
 
 /**
  * Fetches daily exam completion statistics (completed vs dropped breakdown by day of week).

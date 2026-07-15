@@ -23,11 +23,6 @@ vi.mock('@sentinel/ui', () => ({
     PermissionDeniedState: ({ resourceName }: { resourceName: string }) => (
         <div>Denied: {resourceName}</div>
     ),
-    Select: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
-    SelectContent: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
-    SelectItem: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
-    SelectTrigger: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
-    SelectValue: () => <div>SelectValue</div>,
     Separator: () => <hr />,
 }));
 

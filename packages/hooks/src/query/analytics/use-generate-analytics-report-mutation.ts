@@ -15,8 +15,7 @@ export type UseGenerateAnalyticsReportMutationArgs = UseMutationOptions<
 >;
 
 /**
- * Mutation hook to generate a new analytics report.
- * Automatically invalidates all analytics queries (including reports list) upon success.
+ * Mutation hook to queue a new analytics report generation request.
  *
  * @param args Optional mutation options.
  * @returns The mutation object.
@@ -31,14 +30,15 @@ export function useGenerateAnalyticsReportMutation(
         ...args,
         mutationFn: (variables) => generateAnalyticsReport(apiClient, variables),
         onSuccess: async (data, variables, context) => {
-            // Invalidate all analytics queries, especially reports list
-            await queryClient.invalidateQueries({ queryKey: ANALYTICS_QUERY_KEYS.all });
+            await queryClient.invalidateQueries({
+                queryKey: ANALYTICS_QUERY_KEYS.reports(variables.institutionId ?? null),
+            });
 
             if (args.onSuccess) {
                 await (args.onSuccess as any)(data, variables, context);
                 return;
             }
-            toast.success('Analytics report generation triggered successfully');
+            toast.success('Report queued');
         },
         onError: (error, variables, context) => {
             if (args.onError) {

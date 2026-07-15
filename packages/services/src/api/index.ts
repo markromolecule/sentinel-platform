@@ -28,6 +28,7 @@ export * from './telemetry';
 export * from './notifications';
 export * from './calendar';
 export * from './analytics';
+export * from './pdf-documents';
 export * from './messages';
 export * from './logs';
 export * from './announcements';

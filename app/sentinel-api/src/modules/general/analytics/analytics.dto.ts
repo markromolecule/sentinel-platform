@@ -170,7 +170,7 @@ export const analyticsReportRecordSchema = z
         reportId: z.string().uuid().openapi({ description: 'Unique report identifier' }),
         title: z.string().openapi({ description: 'Report Title' }),
         type: z.string().openapi({
-            description: 'Report category type, e.g. completion, incident, performance',
+            description: 'Report category type, e.g. completion, incident, performance, or ANALYTICS_OVERALL',
         }),
         generatedAt: z
             .string()
@@ -183,7 +183,7 @@ export const analyticsReportRecordSchema = z
         status: z
             .string()
             .nullable()
-            .openapi({ description: 'Processing status, e.g. PENDING, READY, FAILED' }),
+            .openapi({ description: 'Processing status, e.g. PENDING, READY, FAILED, EXPIRED' }),
         fileUrl: z
             .string()
             .nullable()
@@ -191,6 +191,11 @@ export const analyticsReportRecordSchema = z
         createdBy: z.string().uuid().nullable().openapi({ description: 'User ID of the creator' }),
         creatorFirstName: z.string().nullable().openapi({ description: 'Creator first name' }),
         creatorLastName: z.string().nullable().openapi({ description: 'Creator last name' }),
+        institutionId: z.string().uuid().nullable().openapi({ description: 'Institution ID' }),
+        failureCode: z.string().nullable().openapi({ description: 'Error code if generation failed' }),
+        failureMessage: z.string().nullable().openapi({ description: 'Error message if generation failed' }),
+        expiresAt: z.string().nullable().openapi({ description: 'ISO-8601 date when report expires' }),
+        retryCount: z.number().int().openapi({ description: 'Retried attempts count' })
     })
     .openapi('AnalyticsReportRecord');
 
@@ -203,6 +208,10 @@ export const getReportsQuerySchema = z.object({
         description: 'Pagination page number (defaults to 1)',
         example: 1,
     }),
+    institutionId: z.string().uuid().optional().openapi({
+        description: 'Optional institution ID to filter list',
+        example: 'd3b07384-d113-495f-a558-145c38d52367',
+    })
 });
 
 export const analyticsReportsResponseSchema = z.object({
@@ -232,14 +241,26 @@ export const generateAnalyticsReportBodySchema = z
                 description: 'Descriptive title for the report',
                 example: 'Quarterly Security Integrity Review',
             }),
-        type: z.enum(['completion', 'incident', 'performance']).openapi({
-            description: 'The type of analytics report to generate',
-            example: 'incident',
+        institutionId: z.string().uuid().optional().nullable().openapi({
+            description: 'Target institution ID to scope the overall analytics report',
+            example: 'd3b07384-d113-495f-a558-145c38d52367',
         }),
-        format: z.enum(['pdf', 'csv', 'xlsx']).openapi({
-            description: 'Target export file format',
-            example: 'pdf',
+        period: z.enum(['LAST_7_DAYS', 'LAST_30_DAYS', 'LAST_90_DAYS', 'CUSTOM']).default('LAST_30_DAYS').openapi({
+            description: 'Predefined report period preset',
+            example: 'LAST_30_DAYS',
         }),
+        startDate: z.string().optional().nullable().openapi({
+            description: 'ISO start date (YYYY-MM-DD), required if period is CUSTOM',
+            example: '2026-06-15',
+        }),
+        endDate: z.string().optional().nullable().openapi({
+            description: 'ISO end date (YYYY-MM-DD), required if period is CUSTOM',
+            example: '2026-07-15',
+        }),
+        timezone: z.string().optional().default('Asia/Manila').openapi({
+            description: 'Target timezone context for daily trend aggregation',
+            example: 'Asia/Manila',
+        })
     })
     .openapi('GenerateAnalyticsReportBody');
 
@@ -253,6 +274,11 @@ export const createdAnalyticsReportSchema = z
         status: z.string().nullable(),
         fileUrl: z.string().nullable(),
         createdBy: z.string().uuid().nullable(),
+        institutionId: z.string().uuid().nullable(),
+        failureCode: z.string().nullable(),
+        failureMessage: z.string().nullable(),
+        expiresAt: z.string().nullable(),
+        retryCount: z.number().int(),
     })
     .openapi('CreatedAnalyticsReport');
 

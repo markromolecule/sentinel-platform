@@ -5,6 +5,7 @@ import { LogsService } from '../../../general/logs/logs.service';
 import { recalculateRoomStatus } from '../../../core/rooms/services/recalculate-room-status';
 import { assertExamOwnership } from './assert-exam-ownership.service';
 import { type DeleteExamDataResponse, deleteExamData } from '../data/delete-exam';
+import { PdfStorageService } from '../../../general/pdf-documents/storage/pdf-storage.service';
 
 async function finalizeDeletedExam(
     dbClient: DbClient,
@@ -13,6 +14,27 @@ async function finalizeDeletedExam(
 ) {
     if (deletedRecord.room_id) {
         await recalculateRoomStatus(dbClient, deletedRecord.room_id);
+    }
+
+    // Purge private answer-key storage objects before DB cascade removes the records
+    try {
+        const answerKeyExports = await dbClient
+            .selectFrom('exam_answer_key_exports')
+            .select(['export_id', 'storage_bucket', 'storage_path'])
+            .where('exam_id', '=', deletedRecord.exam_id)
+            .execute();
+
+        for (const ake of answerKeyExports) {
+            if (ake.storage_bucket && ake.storage_path) {
+                try {
+                    await PdfStorageService.deletePdf(ake.storage_bucket, ake.storage_path);
+                } catch (storageErr: any) {
+                    console.warn(`[ExamDelete] Storage cleanup failed for answer key ${ake.export_id}:`, storageErr.message);
+                }
+            }
+        }
+    } catch (cleanupErr: any) {
+        console.warn(`[ExamDelete] Answer key storage cleanup failed for exam ${deletedRecord.exam_id}:`, cleanupErr.message);
     }
 
     if (institutionId) {

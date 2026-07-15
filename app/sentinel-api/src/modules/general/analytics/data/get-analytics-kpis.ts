@@ -2,6 +2,8 @@ import { type DbClient } from '@sentinel/db';
 
 export type GetAnalyticsKPIsDataArgs = {
     institutionId?: string;
+    startAt?: Date;
+    endAtExclusive?: Date;
 };
 
 export type RawKPIAggregates = {
@@ -14,22 +16,29 @@ export type RawKPIAggregates = {
 };
 
 /**
- * Aggregates analytical KPIs for a given institution.
+ * Aggregates analytical KPIs for a given institution within a period.
+ * Uses half-open timestamp predicates for starts/ends.
  */
 export async function getAnalyticsKPIsData(
     dbClient: DbClient,
     args: GetAnalyticsKPIsDataArgs,
 ): Promise<RawKPIAggregates> {
-    const { institutionId } = args;
+    const { institutionId, startAt, endAtExclusive } = args;
 
-    // 1. Total Exams (non-draft)
+    // 1. Total Exams (non-draft) scheduled within the period
     let examsQuery = dbClient.selectFrom('exams').select((eb) => eb.fn.countAll().as('count'));
     if (institutionId) {
         examsQuery = examsQuery.where('institution_id', '=', institutionId);
     }
     examsQuery = examsQuery.where('status', '!=', 'DRAFT');
+    if (startAt) {
+        examsQuery = examsQuery.where('scheduled_date', '>=', startAt);
+    }
+    if (endAtExclusive) {
+        examsQuery = examsQuery.where('scheduled_date', '<', endAtExclusive);
+    }
 
-    // 2. Total Attempts
+    // 2. Total Attempts started within the period
     let totalAttemptsQuery = dbClient
         .selectFrom('exam_attempts as ea')
         .innerJoin('exams as e', 'e.exam_id', 'ea.exam_id')
@@ -37,8 +46,14 @@ export async function getAnalyticsKPIsData(
     if (institutionId) {
         totalAttemptsQuery = totalAttemptsQuery.where('e.institution_id', '=', institutionId);
     }
+    if (startAt) {
+        totalAttemptsQuery = totalAttemptsQuery.where('ea.started_at', '>=', startAt);
+    }
+    if (endAtExclusive) {
+        totalAttemptsQuery = totalAttemptsQuery.where('ea.started_at', '<', endAtExclusive);
+    }
 
-    // 3. Completed Attempts
+    // 3. Completed Attempts started within the period
     let completedAttemptsQuery = dbClient
         .selectFrom('exam_attempts as ea')
         .innerJoin('exams as e', 'e.exam_id', 'ea.exam_id')
@@ -51,8 +66,14 @@ export async function getAnalyticsKPIsData(
             institutionId,
         );
     }
+    if (startAt) {
+        completedAttemptsQuery = completedAttemptsQuery.where('ea.started_at', '>=', startAt);
+    }
+    if (endAtExclusive) {
+        completedAttemptsQuery = completedAttemptsQuery.where('ea.started_at', '<', endAtExclusive);
+    }
 
-    // 4. Total Incidents
+    // 4. Total Incidents occurring within the period
     let totalIncidentsQuery = dbClient
         .selectFrom('flagged_incidents as fi')
         .innerJoin('exam_attempts as ea', 'ea.attempt_id', 'fi.attempt_id')
@@ -61,8 +82,14 @@ export async function getAnalyticsKPIsData(
     if (institutionId) {
         totalIncidentsQuery = totalIncidentsQuery.where('e.institution_id', '=', institutionId);
     }
+    if (startAt) {
+        totalIncidentsQuery = totalIncidentsQuery.where('fi.timestamp', '>=', startAt);
+    }
+    if (endAtExclusive) {
+        totalIncidentsQuery = totalIncidentsQuery.where('fi.timestamp', '<', endAtExclusive);
+    }
 
-    // 5. Flagged Attempts (attempts with at least one incident)
+    // 5. Flagged Attempts (attempts with at least one incident within the period)
     let flaggedAttemptsQuery = dbClient
         .selectFrom('exam_attempts as ea')
         .innerJoin('exams as e', 'e.exam_id', 'ea.exam_id')
@@ -71,14 +98,23 @@ export async function getAnalyticsKPIsData(
     if (institutionId) {
         flaggedAttemptsQuery = flaggedAttemptsQuery.where('e.institution_id', '=', institutionId);
     }
+    if (startAt) {
+        flaggedAttemptsQuery = flaggedAttemptsQuery.where('fi.timestamp', '>=', startAt);
+    }
+    if (endAtExclusive) {
+        flaggedAttemptsQuery = flaggedAttemptsQuery.where('fi.timestamp', '<', endAtExclusive);
+    }
 
-    // 6. Active Exams (status AVAILABLE, IN_PROGRESS, or ACTIVE)
+    // 6. Active Exams (status AVAILABLE, IN_PROGRESS, or ACTIVE at end boundary)
     let activeExamsQuery = dbClient
         .selectFrom('exams')
         .select((eb) => eb.fn.countAll().as('count'))
         .where('status', 'in', ['AVAILABLE', 'IN_PROGRESS', 'ACTIVE']);
     if (institutionId) {
         activeExamsQuery = activeExamsQuery.where('institution_id', '=', institutionId);
+    }
+    if (endAtExclusive) {
+        activeExamsQuery = activeExamsQuery.where('scheduled_date', '<', endAtExclusive);
     }
 
     const [examsRes, attemptsRes, completedRes, incidentsRes, flaggedAttemptsRes, activeRes] =

@@ -3,6 +3,8 @@ import { sql } from 'kysely';
 
 export type GetAnalyticsDepartmentIntegrityDataArgs = {
     institutionId?: string;
+    startAt?: Date;
+    endAtExclusive?: Date;
 };
 
 export type DepartmentIntegrityRow = {
@@ -13,13 +15,20 @@ export type DepartmentIntegrityRow = {
 };
 
 /**
- * Retrieves integrity metrics grouped by department.
+ * Retrieves integrity metrics grouped by department, scoped to a period.
+ * Retains zero-valued departments by executing date checks inside left-join case statements.
  */
 export async function getAnalyticsDepartmentIntegrityData(
     dbClient: DbClient,
     args: GetAnalyticsDepartmentIntegrityDataArgs,
 ): Promise<DepartmentIntegrityRow[]> {
-    const { institutionId } = args;
+    const { institutionId, startAt, endAtExclusive } = args;
+
+    const startFilter = startAt ? sql`and ea.started_at >= ${startAt}` : sql``;
+    const endFilter = endAtExclusive ? sql`and ea.started_at < ${endAtExclusive}` : sql``;
+
+    const fiStartFilter = startAt ? sql`and fi.timestamp >= ${startAt}` : sql``;
+    const fiEndFilter = endAtExclusive ? sql`and fi.timestamp < ${endAtExclusive}` : sql``;
 
     let query = dbClient
         .selectFrom('departments as d')
@@ -29,13 +38,13 @@ export async function getAnalyticsDepartmentIntegrityData(
         .leftJoin('flagged_incidents as fi', 'fi.attempt_id', 'ea.attempt_id')
         .select([
             'd.department_name as department',
-            sql<number>`coalesce(count(distinct case when ea.status = 'COMPLETED' then ea.attempt_id end), 0)`.as(
+            sql<number>`coalesce(count(distinct case when ea.status = 'COMPLETED' ${startFilter} ${endFilter} then ea.attempt_id end), 0)`.as(
                 'completed',
             ),
-            sql<number>`coalesce(count(distinct case when fi.incident_id is not null then ea.attempt_id end), 0)`.as(
+            sql<number>`coalesce(count(distinct case when fi.incident_id is not null ${fiStartFilter} ${fiEndFilter} then ea.attempt_id end), 0)`.as(
                 'flagged',
             ),
-            sql<number>`coalesce(count(distinct case when ea.status != 'COMPLETED' and ea.attempt_id is not null and fi.incident_id is null then ea.attempt_id end), 0)`.as(
+            sql<number>`coalesce(count(distinct case when ea.status != 'COMPLETED' and ea.attempt_id is not null and fi.incident_id is null ${startFilter} ${endFilter} then ea.attempt_id end), 0)`.as(
                 'dropped',
             ),
         ]);

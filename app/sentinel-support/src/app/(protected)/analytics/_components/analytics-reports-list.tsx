@@ -4,7 +4,7 @@ import { ColumnDef, type PaginationState } from '@tanstack/react-table';
 import { DataTable } from '@sentinel/ui';
 import { Button } from '@sentinel/ui';
 import { StatusBadge } from '@/components/common/status-badge';
-import { Download, Loader2 } from 'lucide-react';
+import { AlertTriangle, Download, Loader2, RefreshCw } from 'lucide-react';
 import { DataTableColumnHeader } from '@sentinel/ui';
 import { AnalyticsReport } from '@sentinel/services';
 
@@ -13,17 +13,49 @@ export interface AnalyticsReportsListProps {
     pagination?: PaginationState;
     onPaginationChange?: (pagination: PaginationState) => void;
     pageCount?: number;
+    institutionNameById?: Record<string, string>;
+    activeDownloadId?: string | null;
+    activeRetryId?: string | null;
+    canExportReports?: boolean;
+    canRetryReports?: boolean;
+    onDownload?: (reportId: string) => void;
+    onRetry?: (reportId: string) => void;
 }
 
-const columns: ColumnDef<AnalyticsReport>[] = [
+const buildColumns = ({
+    institutionNameById = {},
+    activeDownloadId,
+    activeRetryId,
+    canExportReports,
+    canRetryReports,
+    onDownload,
+    onRetry,
+}: Pick<
+    AnalyticsReportsListProps,
+    | 'institutionNameById'
+    | 'activeDownloadId'
+    | 'activeRetryId'
+    | 'canExportReports'
+    | 'canRetryReports'
+    | 'onDownload'
+    | 'onRetry'
+>): ColumnDef<AnalyticsReport>[] => [
     {
         accessorKey: 'title',
         header: ({ column }) => <DataTableColumnHeader column={column} title="Report Title" />,
         cell: ({ row }) => <div className="font-medium">{row.getValue('title')}</div>,
     },
     {
+        accessorKey: 'institutionId',
+        header: ({ column }) => <DataTableColumnHeader column={column} title="Institution" />,
+        cell: ({ row }) => {
+            const institutionId = row.original.institutionId ?? '';
+            return <div>{institutionNameById[institutionId] ?? 'Unknown institution'}</div>;
+        },
+    },
+    {
         accessorKey: 'type',
-        header: ({ column }) => <DataTableColumnHeader column={column} title="Type" />,
+        header: ({ column }) => <DataTableColumnHeader column={column} title="Document" />,
         cell: ({ row }) => <div className="capitalize">{row.getValue('type')}</div>,
     },
     {
@@ -43,6 +75,14 @@ const columns: ColumnDef<AnalyticsReport>[] = [
         },
     },
     {
+        accessorKey: 'expiresAt',
+        header: ({ column }) => <DataTableColumnHeader column={column} title="Expires" />,
+        cell: ({ row }) => {
+            const value = row.original.expiresAt;
+            return <div>{value ? new Date(value).toLocaleString() : 'Persistent'}</div>;
+        },
+    },
+    {
         accessorKey: 'status',
         header: 'Status',
         cell: ({ row }) => {
@@ -51,39 +91,75 @@ const columns: ColumnDef<AnalyticsReport>[] = [
         },
     },
     {
+        id: 'details',
+        header: 'Details',
+        cell: ({ row }) => {
+            const report = row.original;
+            if (report.status?.toUpperCase() !== 'FAILED') {
+                return <span className="text-muted-foreground text-sm">No issues</span>;
+            }
+
+            return (
+                <div className="flex items-start gap-2 text-sm text-red-600">
+                    <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
+                    <span>{report.failureMessage || 'Report generation failed.'}</span>
+                </div>
+            );
+        },
+    },
+    {
         id: 'actions',
         header: () => <div className="text-right">Actions</div>,
         cell: ({ row }) => {
             const report = row.original;
-            const status = report.status?.toLowerCase();
-            const hasDownloadUrl = Boolean(report.fileUrl);
+            const status = report.status?.toUpperCase();
+            const isDownloading = activeDownloadId === report.reportId;
+            const isRetrying = activeRetryId === report.reportId;
+
             return (
-                <div className="text-right">
-                    {status === 'ready' && hasDownloadUrl ? (
-                        <Button variant="ghost" size="sm" asChild>
-                            <a
-                                href={report.fileUrl ?? undefined}
-                                download
-                                target="_blank"
-                                rel="noopener noreferrer"
-                            >
+                <div className="flex justify-end gap-2">
+                    {status === 'READY' ? (
+                        <Button
+                            variant="ghost"
+                            size="sm"
+                            disabled={!canExportReports || isDownloading}
+                            onClick={() => onDownload?.(report.reportId)}
+                        >
+                            {isDownloading ? (
+                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                            ) : (
                                 <Download className="mr-2 h-4 w-4" />
-                                Download
-                            </a>
+                            )}
+                            Download
                         </Button>
-                    ) : status === 'ready' ? (
-                        <Button variant="ghost" size="sm" disabled title="No file available">
-                            <Download className="mr-2 h-4 w-4" />
-                            No file available
+                    ) : null}
+
+                    {status === 'FAILED' ? (
+                        <Button
+                            variant="ghost"
+                            size="sm"
+                            disabled={!canRetryReports || isRetrying}
+                            onClick={() => onRetry?.(report.reportId)}
+                        >
+                            {isRetrying ? (
+                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                            ) : (
+                                <RefreshCw className="mr-2 h-4 w-4" />
+                            )}
+                            Retry
                         </Button>
-                    ) : status === 'generating' ? (
+                    ) : null}
+
+                    {status === 'GENERATING' || status === 'PENDING' ? (
                         <Button variant="ghost" size="sm" disabled>
                             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                            Generating...
+                            {status === 'PENDING' ? 'Queued' : 'Generating'}
                         </Button>
-                    ) : (
-                        <span className="text-muted-foreground text-sm">Unavailable</span>
-                    )}
+                    ) : null}
+
+                    {status === 'EXPIRED' ? (
+                        <span className="text-muted-foreground text-sm">Expired</span>
+                    ) : null}
                 </div>
             );
         },
@@ -95,24 +171,29 @@ export function AnalyticsReportsList({
     pagination,
     onPaginationChange,
     pageCount,
+    institutionNameById,
+    activeDownloadId,
+    activeRetryId,
+    canExportReports,
+    canRetryReports,
+    onDownload,
+    onRetry,
 }: AnalyticsReportsListProps) {
     const facets = [
         {
             columnKey: 'type',
-            title: 'Type',
-            options: [
-                { label: 'Completion', value: 'completion' },
-                { label: 'Incident', value: 'incident' },
-                { label: 'Performance', value: 'performance' },
-            ],
+            title: 'Document',
+            options: [{ label: 'Overall report', value: 'ANALYTICS_OVERALL' }],
         },
         {
             columnKey: 'status',
             title: 'Status',
             options: [
-                { label: 'Ready', value: 'ready' },
-                { label: 'Generating', value: 'generating' },
-                { label: 'Failed', value: 'failed' },
+                { label: 'Queued', value: 'PENDING' },
+                { label: 'Generating', value: 'GENERATING' },
+                { label: 'Ready', value: 'READY' },
+                { label: 'Failed', value: 'FAILED' },
+                { label: 'Expired', value: 'EXPIRED' },
             ],
         },
     ];
@@ -120,7 +201,15 @@ export function AnalyticsReportsList({
     return (
         <section className="space-y-4">
             <DataTable
-                columns={columns}
+                columns={buildColumns({
+                    institutionNameById,
+                    activeDownloadId,
+                    activeRetryId,
+                    canExportReports,
+                    canRetryReports,
+                    onDownload,
+                    onRetry,
+                })}
                 data={reports}
                 searchKey="title"
                 facets={facets}

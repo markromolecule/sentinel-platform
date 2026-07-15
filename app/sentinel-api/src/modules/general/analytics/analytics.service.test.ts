@@ -22,6 +22,18 @@ vi.mock('./data', () => ({
     getAnalyticsIncidentTrendsData: vi.fn(),
 }));
 
+vi.mock('../pdf-documents/queue/pdf-generation-queue.service', () => ({
+    pdfGenerationQueueService: {
+        submitPdfJob: vi.fn(),
+    },
+}));
+
+vi.mock('../logs/logs.service', () => ({
+    LogsService: {
+        createLog: vi.fn(),
+    },
+}));
+
 describe('AnalyticsService', () => {
     const dbClient = {} as any;
 
@@ -103,8 +115,8 @@ describe('AnalyticsService', () => {
     describe('getIncidentType', () => {
         it('should return incident type distribution metrics', async () => {
             const mockMetrics = [
-                { type: 'MULTIPLE_PEOPLE', count: 12, percentage: 60 },
-                { type: 'TAB_SWITCH', count: 8, percentage: 40 },
+                { type: 'TAB_SWITCH', count: 8, percentage: 80 },
+                { type: 'CAMERA_BLOCKED', count: 2, percentage: 20 },
             ];
             vi.mocked(getAnalyticsIncidentTypeData).mockResolvedValue(mockMetrics);
 
@@ -123,8 +135,7 @@ describe('AnalyticsService', () => {
     describe('getDepartmentIntegrity', () => {
         it('should return department integrity metrics', async () => {
             const mockMetrics = [
-                { department: 'Computer Science', completed: 45, flagged: 2, dropped: 1 },
-                { department: 'Information Technology', completed: 30, flagged: 4, dropped: 2 },
+                { department: 'CS', completed: 10, flagged: 1, dropped: 0 },
             ];
             vi.mocked(getAnalyticsDepartmentIntegrityData).mockResolvedValue(mockMetrics);
 
@@ -156,6 +167,11 @@ describe('AnalyticsService', () => {
                         createdBy: 'user-1',
                         creatorFirstName: 'John',
                         creatorLastName: 'Doe',
+                        institutionId: 'inst-1',
+                        failureCode: null,
+                        failureMessage: null,
+                        expiresAt: null,
+                        retryCount: 0,
                     },
                 ],
                 total_records: 1,
@@ -189,6 +205,11 @@ describe('AnalyticsService', () => {
                         createdBy: 'user-1',
                         creatorFirstName: 'John',
                         creatorLastName: 'Doe',
+                        institutionId: 'inst-1',
+                        failureCode: null,
+                        failureMessage: null,
+                        expiresAt: null,
+                        retryCount: 0,
                     },
                 ],
                 total_records: 1,
@@ -199,44 +220,56 @@ describe('AnalyticsService', () => {
     });
 
     describe('generateReport', () => {
-        it('should call createAnalyticsReportData and return the newly generated report record in camelCase', async () => {
+        it('should insert pending report row and enqueue a job to BullMQ', async () => {
             const date = new Date('2026-05-22T09:00:00.000Z');
-            vi.mocked(createAnalyticsReportData).mockResolvedValue({
+            const mockInsertedRow = {
                 report_id: 'new-rep-1',
                 title: 'New Security Review',
-                type: 'incident',
+                type: 'ANALYTICS_OVERALL',
                 generated_at: date,
                 format: 'pdf',
-                status: 'READY',
+                status: 'PENDING',
                 file_url: null,
                 created_by: 'user-1',
-            });
+                institution_id: 'inst-1',
+                failure_code: null,
+                failure_message: null,
+                expires_at: null,
+                retry_count: 0,
+            };
+
+            const mockDbClient = {
+                insertInto: () => ({
+                    values: () => ({
+                        returningAll: () => ({
+                            executeTakeFirstOrThrow: vi.fn().mockResolvedValue(mockInsertedRow),
+                        }),
+                    }),
+                }),
+            } as any;
 
             const result = await AnalyticsService.generateReport({
-                dbClient,
+                dbClient: mockDbClient,
                 userId: 'user-1',
                 title: 'New Security Review',
-                type: 'incident',
-                format: 'pdf',
-            });
-
-            expect(createAnalyticsReportData).toHaveBeenCalledWith(dbClient, {
-                title: 'New Security Review',
-                type: 'incident',
-                format: 'pdf',
-                createdBy: 'user-1',
-                status: 'READY',
+                institutionId: 'inst-1',
+                period: 'LAST_30_DAYS',
             });
 
             expect(result).toEqual({
                 reportId: 'new-rep-1',
                 title: 'New Security Review',
-                type: 'incident',
+                type: 'ANALYTICS_OVERALL',
                 generatedAt: '2026-05-22T09:00:00.000Z',
                 format: 'pdf',
-                status: 'READY',
+                status: 'PENDING',
                 fileUrl: null,
                 createdBy: 'user-1',
+                institutionId: 'inst-1',
+                failureCode: null,
+                failureMessage: null,
+                expiresAt: null,
+                retryCount: 0,
             });
         });
     });
@@ -276,6 +309,8 @@ describe('AnalyticsService', () => {
 
             expect(getAnalyticsIncidentTrendsData).toHaveBeenCalledWith(dbClient, {
                 institutionId: 'inst-1',
+                startAt: expect.any(Date),
+                endAtExclusive: expect.any(Date),
             });
             expect(result).toEqual(mockTrends);
         });

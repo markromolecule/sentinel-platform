@@ -16,6 +16,11 @@ describe('getAnalyticsReportsData', () => {
                 createdBy: 'user-123',
                 creatorFirstName: 'John',
                 creatorLastName: 'Doe',
+                institutionId: 'inst-123',
+                failureCode: null,
+                failureMessage: null,
+                expiresAt: null,
+                retryCount: 0,
             },
         ];
 
@@ -53,6 +58,11 @@ describe('getAnalyticsReportsData', () => {
                     createdBy: 'user-123',
                     creatorFirstName: 'John',
                     creatorLastName: 'Doe',
+                    institutionId: 'inst-123',
+                    failureCode: null,
+                    failureMessage: null,
+                    expiresAt: null,
+                    retryCount: 0,
                 },
             ],
             total_records: 1,
@@ -68,6 +78,6 @@ describe('getAnalyticsReportsData', () => {
         );
         expect(mockDbClient.limit).toHaveBeenCalledWith(5);
         expect(mockDbClient.offset).toHaveBeenCalledWith(5); // (2-1)*5 = 5
-        expect(mockDbClient.where).toHaveBeenCalledWith('up.institution_id', '=', 'inst-123');
+        expect(mockDbClient.where).toHaveBeenCalledWith('ar.institution_id', '=', 'inst-123');
     });
 });

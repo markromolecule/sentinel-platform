@@ -2,6 +2,8 @@ import { type DbClient } from '@sentinel/db';
 
 export type GetAnalyticsIncidentSeverityDataArgs = {
     institutionId?: string;
+    startAt?: Date;
+    endAtExclusive?: Date;
 };
 
 export type IncidentSeverityMetric = {
@@ -11,13 +13,13 @@ export type IncidentSeverityMetric = {
 };
 
 /**
- * Returns incident severity distribution with counts and percentages.
+ * Returns incident severity distribution with counts and percentages within a period.
  */
 export async function getAnalyticsIncidentSeverityData(
     dbClient: DbClient,
     args: GetAnalyticsIncidentSeverityDataArgs,
 ): Promise<IncidentSeverityMetric[]> {
-    const { institutionId } = args;
+    const { institutionId, startAt, endAtExclusive } = args;
 
     let query = dbClient
         .selectFrom('flagged_incidents as fi')
@@ -27,6 +29,13 @@ export async function getAnalyticsIncidentSeverityData(
 
     if (institutionId) {
         query = query.where('e.institution_id', '=', institutionId);
+    }
+
+    if (startAt) {
+        query = query.where('fi.timestamp', '>=', startAt);
+    }
+    if (endAtExclusive) {
+        query = query.where('fi.timestamp', '<', endAtExclusive);
     }
 
     const rows = await query.groupBy('fi.severity').execute();

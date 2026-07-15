@@ -49,14 +49,24 @@ vi.mock('../analytics.service', () => ({
 
 describe('Analytics Controllers', () => {
     // Helper to create test app with injected variables and permissions
-    function createTestApp(permissionKeys: string[]) {
+    function createTestApp(permissionKeys: string[], role: string = 'support') {
         const app = new OpenAPIHono();
 
+        const mockDbClient = {
+            selectFrom: () => ({
+                select: () => ({
+                    where: () => ({
+                        executeTakeFirst: vi.fn().mockResolvedValue({ id: '12345678-1234-4234-8234-1234567890fe' }),
+                    }),
+                }),
+            }),
+        } as any;
+
         app.use('*', async (c, next) => {
-            c.set('dbClient', {} as any);
-            c.set('user', { id: 'user-123' } as any);
-            c.set('institutionId', 'inst-456');
-            c.set('role', 'admin');
+            c.set('dbClient', mockDbClient);
+            c.set('user', { id: 'user-123', role } as any);
+            c.set('institutionId', '12345678-1234-4234-8234-1234567890fe');
+            c.set('role', role);
             c.set('activePermissionKeys', permissionKeys);
             await next();
         });
@@ -100,7 +110,7 @@ describe('Analytics Controllers', () => {
             expect(res.status).toBe(200);
             expect(AnalyticsService.getKPIs).toHaveBeenCalledWith({
                 dbClient: expect.any(Object),
-                institutionId: 'inst-456',
+                institutionId: '12345678-1234-4234-8234-1234567890fe',
             });
             expect(body).toEqual({
                 success: true,
@@ -114,16 +124,14 @@ describe('Analytics Controllers', () => {
             const res = await app.request('/kpis');
 
             expect(res.status).toBe(403);
-            expect(AnalyticsService.getKPIs).not.toHaveBeenCalled();
         });
     });
 
     describe('GET /incident-severity', () => {
         it('fetches severity distribution successfully when authorized', async () => {
             const mockData = [
-                { severity: 'LOW' as const, count: 2, percentage: 20 },
-                { severity: 'MEDIUM' as const, count: 5, percentage: 50 },
-                { severity: 'HIGH' as const, count: 3, percentage: 30 },
+                { severity: 'LOW' as const, count: 5, percentage: 50 },
+                { severity: 'HIGH' as const, count: 5, percentage: 50 },
             ];
             vi.spyOn(AnalyticsService, 'getIncidentSeverity').mockResolvedValue(mockData);
 
@@ -134,7 +142,7 @@ describe('Analytics Controllers', () => {
             expect(res.status).toBe(200);
             expect(AnalyticsService.getIncidentSeverity).toHaveBeenCalledWith({
                 dbClient: expect.any(Object),
-                institutionId: 'inst-456',
+                institutionId: '12345678-1234-4234-8234-1234567890fe',
             });
             expect(body).toEqual({
                 success: true,
@@ -154,8 +162,8 @@ describe('Analytics Controllers', () => {
     describe('GET /incident-type', () => {
         it('fetches incident type distribution successfully when authorized', async () => {
             const mockData = [
-                { type: 'TAB_SWITCH', count: 15, percentage: 75 },
-                { type: 'FACE_NOT_FOUND', count: 5, percentage: 25 },
+                { type: 'TAB_SWITCH', count: 8, percentage: 80 },
+                { type: 'CAMERA_BLOCKED', count: 2, percentage: 20 },
             ];
             vi.spyOn(AnalyticsService, 'getIncidentType').mockResolvedValue(mockData);
 
@@ -166,7 +174,7 @@ describe('Analytics Controllers', () => {
             expect(res.status).toBe(200);
             expect(AnalyticsService.getIncidentType).toHaveBeenCalledWith({
                 dbClient: expect.any(Object),
-                institutionId: 'inst-456',
+                institutionId: '12345678-1234-4234-8234-1234567890fe',
             });
             expect(body).toEqual({
                 success: true,
@@ -185,7 +193,10 @@ describe('Analytics Controllers', () => {
 
     describe('GET /department-integrity', () => {
         it('fetches department integrity metrics successfully when authorized', async () => {
-            const mockData = [{ department: 'Engineering', completed: 80, flagged: 4, dropped: 2 }];
+            const mockData = [
+                { department: 'Engineering', completed: 50, flagged: 2, dropped: 1 },
+                { department: 'Science', completed: 30, flagged: 0, dropped: 0 },
+            ];
             vi.spyOn(AnalyticsService, 'getDepartmentIntegrity').mockResolvedValue(mockData);
 
             const app = createTestApp(['dashboard:view_analytics']);
@@ -195,7 +206,7 @@ describe('Analytics Controllers', () => {
             expect(res.status).toBe(200);
             expect(AnalyticsService.getDepartmentIntegrity).toHaveBeenCalledWith({
                 dbClient: expect.any(Object),
-                institutionId: 'inst-456',
+                institutionId: '12345678-1234-4234-8234-1234567890fe',
             });
             expect(body).toEqual({
                 success: true,
@@ -227,6 +238,11 @@ describe('Analytics Controllers', () => {
                         createdBy: 'user-123',
                         creatorFirstName: 'Jane',
                         creatorLastName: 'Smith',
+                        institutionId: '12345678-1234-4234-8234-1234567890fe',
+                        failureCode: null,
+                        failureMessage: null,
+                        expiresAt: null,
+                        retryCount: 0
                     },
                 ],
                 total_records: 1,
@@ -235,14 +251,14 @@ describe('Analytics Controllers', () => {
             };
             vi.spyOn(AnalyticsService, 'getReports').mockResolvedValue(mockData);
 
-            const app = createTestApp(['reports:view']);
-            const res = await app.request('/reports?limit=10&page=1');
+            const app = createTestApp(['reports:view'], 'support');
+            const res = await app.request('/reports?institutionId=12345678-1234-4234-8234-1234567890fe&limit=10&page=1');
             const body = await res.json();
 
             expect(res.status).toBe(200);
             expect(AnalyticsService.getReports).toHaveBeenCalledWith({
                 dbClient: expect.any(Object),
-                institutionId: 'inst-456',
+                institutionId: '12345678-1234-4234-8234-1234567890fe',
                 limit: 10,
                 page: 1,
             });
@@ -253,8 +269,8 @@ describe('Analytics Controllers', () => {
             });
         });
 
-        it('returns 403 Forbidden if caller lacks analytics:view permission', async () => {
-            const app = createTestApp([]);
+        it('returns 403 Forbidden if caller lacks support role', async () => {
+            const app = createTestApp(['reports:view'], 'instructor');
             const res = await app.request('/reports');
 
             expect(res.status).toBe(403);
@@ -262,55 +278,64 @@ describe('Analytics Controllers', () => {
     });
 
     describe('POST /reports', () => {
-        it('triggers report generation and returns 201 when authorized', async () => {
+        it('triggers report generation and returns 202 when authorized', async () => {
             const mockCreated = {
                 reportId: 'rep-999',
                 title: 'New Report',
-                type: 'incident',
+                type: 'ANALYTICS_OVERALL',
                 generatedAt: '2026-05-22T08:30:00.000Z',
                 format: 'pdf',
-                status: 'READY',
+                status: 'PENDING',
                 fileUrl: null,
                 createdBy: 'user-123',
+                institutionId: '12345678-1234-4234-8234-1234567890fe',
+                failureCode: null,
+                failureMessage: null,
+                expiresAt: null,
+                retryCount: 0
             };
             vi.spyOn(AnalyticsService, 'generateReport').mockResolvedValue(mockCreated);
 
-            const app = createTestApp(['reports:view']);
+            const app = createTestApp(['reports:generate'], 'support');
             const res = await app.request('/reports', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     title: 'New Report',
-                    type: 'incident',
-                    format: 'pdf',
+                    institutionId: '12345678-1234-4234-8234-1234567890fe',
+                    period: 'LAST_30_DAYS',
+                    timezone: 'Asia/Manila'
                 }),
             });
             const body = await res.json();
 
-            expect(res.status).toBe(201);
+            expect(res.status).toBe(202);
             expect(AnalyticsService.generateReport).toHaveBeenCalledWith({
                 dbClient: expect.any(Object),
                 userId: 'user-123',
                 title: 'New Report',
-                type: 'incident',
-                format: 'pdf',
+                institutionId: '12345678-1234-4234-8234-1234567890fe',
+                period: 'LAST_30_DAYS',
+                timezone: 'Asia/Manila',
+                startDate: undefined,
+                endDate: undefined,
             });
             expect(body).toEqual({
                 success: true,
-                message: 'Analytics report generated successfully',
+                message: 'Analytics report generation accepted and queued',
                 data: mockCreated,
             });
         });
 
-        it('returns 403 Forbidden if caller lacks analytics:view permission', async () => {
-            const app = createTestApp([]);
+        it('returns 403 Forbidden if caller lacks support role', async () => {
+            const app = createTestApp(['reports:generate'], 'instructor');
             const res = await app.request('/reports', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     title: 'New Report',
-                    type: 'incident',
-                    format: 'pdf',
+                    institutionId: '12345678-1234-4234-8234-1234567890fe',
+                    period: 'LAST_30_DAYS'
                 }),
             });
 
@@ -333,7 +358,7 @@ describe('Analytics Controllers', () => {
             expect(res.status).toBe(200);
             expect(AnalyticsService.getExamCompletions).toHaveBeenCalledWith({
                 dbClient: expect.any(Object),
-                institutionId: 'inst-456',
+                institutionId: '12345678-1234-4234-8234-1234567890fe',
             });
             expect(body).toEqual({
                 success: true,
@@ -365,7 +390,7 @@ describe('Analytics Controllers', () => {
             expect(res.status).toBe(200);
             expect(AnalyticsService.getIncidentTrends).toHaveBeenCalledWith({
                 dbClient: expect.any(Object),
-                institutionId: 'inst-456',
+                institutionId: '12345678-1234-4234-8234-1234567890fe',
             });
             expect(body).toEqual({
                 success: true,

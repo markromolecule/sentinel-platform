@@ -10,6 +10,7 @@ import {
     CalendarDays,
     Users,
     ShieldCheck,
+    FileStack,
     DoorOpen,
     BookOpen,
     Layers3,
@@ -94,6 +95,11 @@ export const CONFIGURATION_ITEMS: SidebarItem[] = [
         title: 'Access Control',
         url: '/control',
         icon: ShieldCheck,
+    },
+    {
+        title: 'PDF Templates',
+        url: '/pdf-templates',
+        icon: FileStack,
     },
     {
         title: 'Telemetry',

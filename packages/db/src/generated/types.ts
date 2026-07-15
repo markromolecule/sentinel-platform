@@ -380,6 +380,21 @@ export type analytics_reports = {
     status: Generated<string | null>;
     file_url: string | null;
     created_by: string | null;
+    institution_id: string | null;
+    period_start_at: Timestamp | null;
+    period_end_at: Timestamp | null;
+    timezone: string | null;
+    template_id: string | null;
+    template_snapshot: unknown | null;
+    storage_bucket: string | null;
+    storage_path: string | null;
+    failure_code: string | null;
+    failure_message: string | null;
+    started_at: Timestamp | null;
+    completed_at: Timestamp | null;
+    expires_at: Timestamp | null;
+    retry_count: Generated<number>;
+    request_snapshot: unknown | null;
 };
 export type announcements = {
     id: Generated<string>;
@@ -553,6 +568,26 @@ export type enrollments = {
     class_group_id: string | null;
     student_id: string | null;
     enrolled_at: Generated<Timestamp | null>;
+};
+export type exam_answer_key_exports = {
+    export_id: Generated<string>;
+    exam_id: string;
+    institution_id: string;
+    template_id: string;
+    template_snapshot: unknown;
+    storage_bucket: string | null;
+    storage_path: string | null;
+    status: Generated<string>;
+    failure_code: string | null;
+    failure_message: string | null;
+    retry_count: Generated<number>;
+    request_snapshot: unknown | null;
+    created_by: string | null;
+    started_at: Timestamp | null;
+    completed_at: Timestamp | null;
+    expires_at: Timestamp | null;
+    created_at: Generated<Timestamp>;
+    updated_at: Generated<Timestamp>;
 };
 export type exam_assigned_sections = {
     exam_id: string;
@@ -799,6 +834,18 @@ export type institution_naming_conventions = {
     updated_at: Timestamp | null;
     updated_by: string | null;
 };
+export type institution_pdf_branding = {
+    institution_id: string;
+    logo_storage_bucket: string;
+    logo_storage_path: string;
+    logo_mime_type: string;
+    logo_size_bytes: number;
+    logo_hash_sha256: string;
+    logo_original_name: string;
+    updated_by: string | null;
+    created_at: Generated<Timestamp>;
+    updated_at: Generated<Timestamp>;
+};
 export type institutions = {
     id: Generated<string>;
     name: string;
@@ -957,6 +1004,21 @@ export type one_time_tokens = {
     relates_to: string;
     created_at: Generated<Timestamp>;
     updated_at: Generated<Timestamp>;
+};
+export type pdf_templates = {
+    template_id: Generated<string>;
+    institution_id: string | null;
+    document_kind: string;
+    version: Generated<number>;
+    status: string;
+    header_config: unknown;
+    footer_config: unknown;
+    created_by: string | null;
+    updated_by: string | null;
+    published_by: string | null;
+    created_at: Generated<Timestamp>;
+    updated_at: Generated<Timestamp>;
+    published_at: Timestamp | null;
 };
 export type proctor_assignments = {
     assignment_id: Generated<string>;
@@ -1430,6 +1492,7 @@ export type DB = {
     departments: departments;
     enrollment_requests: enrollment_requests;
     enrollments: enrollments;
+    exam_answer_key_exports: exam_answer_key_exports;
     exam_assigned_sections: exam_assigned_sections;
     exam_attempt_lifecycle_events: exam_attempt_lifecycle_events;
     exam_attempts: exam_attempts;
@@ -1444,6 +1507,7 @@ export type DB = {
     exams: exams;
     flagged_incidents: flagged_incidents;
     institution_naming_conventions: institution_naming_conventions;
+    institution_pdf_branding: institution_pdf_branding;
     institutions: institutions;
     instructor_courses: instructor_courses;
     instructor_subject_requests: instructor_subject_requests;
@@ -1451,6 +1515,7 @@ export type DB = {
     instructors: instructors;
     messages: messages;
     notifications: notifications;
+    pdf_templates: pdf_templates;
     proctor_assignments: proctor_assignments;
     question_bank_collection_questions: question_bank_collection_questions;
     question_bank_collection_shares: question_bank_collection_shares;

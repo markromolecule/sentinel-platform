@@ -14,7 +14,7 @@ export const generateAnalyticsReportRoute = createRoute({
     tags: ['Analytics'],
     summary: 'Generate an analytics report',
     description:
-        'Triggers the generation of a new analytics report and returns the created record.',
+        'Triggers the generation of a new overall analytics report and returns the pending record.',
     request: {
         body: {
             content: {
@@ -25,17 +25,18 @@ export const generateAnalyticsReportRoute = createRoute({
         },
     },
     responses: {
-        201: {
+        202: {
             content: {
                 'application/json': {
                     schema: generateAnalyticsReportResponseSchema,
                 },
             },
-            description: 'Analytics report generated successfully',
+            description: 'Analytics report generation accepted and queued',
         },
         400: { description: 'Bad Request / Validation Error' },
         401: { description: 'Unauthorized' },
         403: { description: 'Forbidden' },
+        404: { description: 'Target institution not found' },
         500: { description: 'Internal Server Error' },
     },
 });
@@ -44,37 +45,51 @@ export const generateAnalyticsReportRouteHandler: AppRouteHandler<
     typeof generateAnalyticsReportRoute
 > = async (c) => {
     try {
-        requireActivePermission(
-            c,
-            ['dashboard:view_analytics', 'reports:view'],
-            'Forbidden. You do not have permission to view analytics.',
-        );
-
         const user = c.get('user');
-        const institutionId = c.get('institutionId');
-        const role = c.get('role');
+        const role = user?.role;
 
-        if (!institutionId && role !== 'support' && role !== 'superadmin') {
-            return c.json({ error: 'Unauthorized. Institution ID not found.' }, 401 as any);
+        if (role !== 'support') {
+            return c.json({ success: false, error: 'Forbidden. Support role required.' }, 403 as any);
         }
 
+        requireActivePermission(
+            c,
+            ['reports:generate'],
+            'Forbidden. You do not have permission to generate reports.',
+        );
+
         const payload = c.req.valid('json');
+
+        // Validate target institution scope consistently
+        if (payload.institutionId) {
+            const instExists = await c.get('dbClient')
+                .selectFrom('institutions')
+                .select('id')
+                .where('id', '=', payload.institutionId)
+                .executeTakeFirst();
+            if (!instExists) {
+                return c.json({ success: false, error: 'Target institution not found.' }, 404 as any);
+            }
+        }
 
         const data = await AnalyticsService.generateReport({
             dbClient: c.get('dbClient'),
             userId: user.id,
             title: payload.title,
-            type: payload.type,
-            format: payload.format,
+            institutionId: payload.institutionId,
+            period: payload.period,
+            startDate: payload.startDate,
+            endDate: payload.endDate,
+            timezone: payload.timezone,
         });
 
         return c.json(
             {
                 success: true,
-                message: 'Analytics report generated successfully',
+                message: 'Analytics report generation accepted and queued',
                 data,
             },
-            201,
+            202 as any,
         );
     } catch (error: any) {
         return respondWithRouteError(c, error, 'Generate analytics report error:');

@@ -38,8 +38,9 @@ describe('useGenerateAnalyticsReportMutation Hook', () => {
     it('calls generateAnalyticsReport and invalidates cache on success', async () => {
         const payload = {
             title: 'Monthly Safety Report',
-            type: 'incident' as const,
-            format: 'pdf' as const,
+            institutionId: 'institution-1',
+            period: 'LAST_30_DAYS' as const,
+            timezone: 'Asia/Manila' as const,
         };
 
         const mutation = useGenerateAnalyticsReportMutation();
@@ -47,7 +48,7 @@ describe('useGenerateAnalyticsReportMutation Hook', () => {
 
         expect(generateAnalyticsReport).toHaveBeenCalledWith({ mockClient: true }, payload);
         expect(mockInvalidateQueries).toHaveBeenCalledWith({
-            queryKey: ANALYTICS_QUERY_KEYS.all,
+            queryKey: ANALYTICS_QUERY_KEYS.reports('institution-1'),
         });
     });
 });
