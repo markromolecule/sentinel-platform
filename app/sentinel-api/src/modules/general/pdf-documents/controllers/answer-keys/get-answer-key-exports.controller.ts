@@ -1,12 +1,15 @@
 import { createRoute, z } from '@hono/zod-openapi';
 import { sql } from 'kysely';
 import { type AppRouteHandler } from '../../../../../types/hono';
-import { hasActivePermission } from '../../../../../lib/permissions';
 import {
     listAnswerKeyExportsQuerySchema,
     answerKeyExportListResponseSchema,
     answerKeyExportRecordSchema,
 } from '../../pdf-documents.dto';
+import {
+    canAccessPdfInstitutionScope,
+    requirePdfDocumentAccess,
+} from '../../services/pdf-document-authorization.service';
 
 export const getAnswerKeyExportsRoute = createRoute({
     method: 'get',
@@ -30,20 +33,20 @@ export const getAnswerKeyExportsRoute = createRoute({
 });
 
 export const getAnswerKeyExportsHandler: AppRouteHandler<typeof getAnswerKeyExportsRoute> = async (c) => {
-    const user = c.get('user');
     const dbClient = c.get('dbClient');
 
-    if (user?.role !== 'support') {
-        return c.json({ success: false, error: 'Forbidden. Support role required.' }, 403 as any);
-    }
-    if (!hasActivePermission(c.get('activePermissionKeys'), ['pdf_templates:view', 'reports:view'])) {
-        return c.json({ success: false, error: 'Forbidden. Insufficient privileges.' }, 403 as any);
-    }
+    requirePdfDocumentAccess({
+        role: c.get('role'),
+        activePermissionKeys: c.get('activePermissionKeys'),
+        requiredPermissions: ['pdf_templates:view', 'reports:view'],
+        missingRoleMessage: 'Forbidden. Support role required.',
+        missingPermissionMessage: 'Forbidden. Insufficient privileges.',
+    });
 
     const { examId, institutionId, limit = 10, page = 1 } = c.req.valid('query');
     const userInstitutionId = c.get('institutionId');
 
-    if (userInstitutionId && institutionId && institutionId !== userInstitutionId) {
+    if (institutionId && !(await canAccessPdfInstitutionScope(dbClient, userInstitutionId, institutionId))) {
         return c.json(
             { success: false, error: "Forbidden. Cannot list another institution's answer key exports." },
             403 as any,

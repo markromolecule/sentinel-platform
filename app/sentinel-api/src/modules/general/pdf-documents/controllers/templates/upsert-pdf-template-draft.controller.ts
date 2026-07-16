@@ -7,6 +7,7 @@ import { HTTPException } from 'hono/http-exception';
 import { z } from '@hono/zod-openapi';
 import {
     assertOverallReportTemplateScope,
+    canAccessPdfInstitutionScope,
     requirePdfDocumentAccess,
 } from '../../services/pdf-document-authorization.service';
 
@@ -57,6 +58,7 @@ export const upsertTemplateDraftHandler: AppRouteHandler<typeof upsertTemplateDr
 
     const { institution_id, document_kind, header_config, footer_config } = c.req.valid('json');
     const dbClient = c.get('dbClient');
+    const userInstitutionId = c.get('institutionId');
 
     // Custom constraint: Sentinel logo must be visible on overall analytics reports
     if (document_kind === 'ANALYTICS_OVERALL') {
@@ -79,6 +81,12 @@ export const upsertTemplateDraftHandler: AppRouteHandler<typeof upsertTemplateDr
         if (!inst) {
             throw new HTTPException(400, {
                 message: `Institution ${institution_id} does not exist.`,
+            });
+        }
+
+        if (!(await canAccessPdfInstitutionScope(dbClient, userInstitutionId, institution_id))) {
+            throw new HTTPException(403, {
+                message: 'Forbidden. You cannot manage another institution\'s answer key template.',
             });
         }
     }

@@ -2,6 +2,13 @@ import { render, screen } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 import PdfTemplateExaminationsPage from './page';
 
+vi.mock('@/hooks/use-academic-scope', () => ({
+    useAcademicScope: () => ({
+        institutionId: '',
+        isLoading: false,
+    }),
+}));
+
 vi.mock('@/data', () => ({
     useActivePermissions: () => ({
         hasAnyPermission: () => false,

@@ -7,8 +7,8 @@ import {
     useDeleteInstitutionPdfBrandingMutation,
     useInstitutionPdfBrandingQuery,
     useInstitutionsQuery,
-    usePdfTemplatesQuery,
     usePreviewPdfTemplateMutation,
+    usePdfTemplatesQuery,
     usePublishPdfTemplateMutation,
     useResetPdfTemplateOverrideMutation,
     useSavePdfTemplateDraftMutation,
@@ -85,12 +85,10 @@ export default function PdfTemplateReportsPage() {
 
     const [headerConfig, setHeaderConfig] = React.useState<HeaderConfig>(DEFAULT_HEADER_CONFIG);
     const [footerConfig, setFooterConfig] = React.useState<FooterConfig>(DEFAULT_FOOTER_CONFIG);
-    const [previewBlob, setPreviewBlob] = React.useState<Blob | null>(null);
-
     const saveDraftMutation = useSavePdfTemplateDraftMutation();
     const publishMutation = usePublishPdfTemplateMutation();
-    const resetOverrideMutation = useResetPdfTemplateOverrideMutation();
     const previewMutation = usePreviewPdfTemplateMutation();
+    const resetOverrideMutation = useResetPdfTemplateOverrideMutation();
     const uploadBrandingMutation = useUploadInstitutionPdfBrandingMutation();
     const deleteBrandingMutation = useDeleteInstitutionPdfBrandingMutation();
 
@@ -111,7 +109,6 @@ export default function PdfTemplateReportsPage() {
         const normalized = normalizeTemplateConfigs(workingTemplate);
         setHeaderConfig(normalized.header);
         setFooterConfig(normalized.footer);
-        setPreviewBlob(null);
     }, [workingTemplate?.template_id, workingTemplate?.updated_at, selectedScope]);
 
     const hasUnsavedChanges = React.useMemo(() => {
@@ -248,18 +245,30 @@ export default function PdfTemplateReportsPage() {
                         toast.error(error?.message || 'Failed to remove the logo.');
                     }
                 }}
-                previewBlob={previewBlob}
                 isGeneratingPreview={previewMutation.isPending}
                 onGeneratePreview={async () => {
+                    const previewWindow = window.open('about:blank', '_blank');
+
+                    if (!previewWindow) {
+                        toast.error('Allow pop-ups to open the PDF preview in a new tab.');
+                        return;
+                    }
+
                     try {
-                        const blob = await previewMutation.mutateAsync({
+                        const previewBlob = await previewMutation.mutateAsync({
                             institution_id: selectedInstitutionId,
                             document_kind: 'ANALYTICS_OVERALL',
                             header_config: headerConfig,
                             footer_config: footerConfig,
                         });
-                        setPreviewBlob(blob);
+                        const previewUrl = URL.createObjectURL(previewBlob);
+                        previewWindow.location.href = previewUrl;
+
+                        window.setTimeout(() => {
+                            URL.revokeObjectURL(previewUrl);
+                        }, 60_000);
                     } catch (error: any) {
+                        previewWindow.close();
                         toast.error(error?.message || 'Failed to render the preview.');
                     }
                 }}

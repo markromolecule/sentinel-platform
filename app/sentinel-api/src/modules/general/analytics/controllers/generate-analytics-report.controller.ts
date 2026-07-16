@@ -46,7 +46,7 @@ export const generateAnalyticsReportRouteHandler: AppRouteHandler<
 > = async (c) => {
     try {
         const user = c.get('user');
-        const role = user?.role;
+        const role = c.get('role');
 
         if (role !== 'support') {
             return c.json({ success: false, error: 'Forbidden. Support role required.' }, 403 as any);

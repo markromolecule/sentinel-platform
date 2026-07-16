@@ -35,6 +35,36 @@ export interface AnalyticsOverallData {
     incidentSeverities: IncidentSeverityMetric[];
 }
 
+function sanitizeRoundedNumber(
+    value: number | undefined,
+    {
+        decimals = 1,
+        min,
+        max,
+        fallback = 0,
+    }: {
+        decimals?: number;
+        min?: number;
+        max?: number;
+        fallback?: number;
+    } = {},
+): number {
+    if (value === undefined || value === null || Number.isNaN(value)) {
+        return fallback;
+    }
+
+    let nextValue = value;
+    if (min !== undefined) {
+        nextValue = Math.max(min, nextValue);
+    }
+    if (max !== undefined) {
+        nextValue = Math.min(max, nextValue);
+    }
+
+    const rounded = Number(nextValue.toFixed(decimals));
+    return Object.is(rounded, -0) ? 0 : rounded;
+}
+
 /**
  * Normalizes analytics raw data, formatting empty values, rounding percentages/scores,
  * and ensuring stable defaults for missing fields.
@@ -44,8 +74,8 @@ export interface AnalyticsOverallData {
  */
 export function normalizeAnalyticsOverallData(data: Partial<AnalyticsOverallData>): AnalyticsOverallData {
     const kpis: AnalyticsKPIs = {
-        averageScore: Number(data.kpis?.averageScore?.toFixed(1)) || 0,
-        passRate: Number(data.kpis?.passRate?.toFixed(1)) || 0,
+        averageScore: sanitizeRoundedNumber(data.kpis?.averageScore, { min: 0, max: 100 }),
+        passRate: sanitizeRoundedNumber(data.kpis?.passRate, { min: 0, max: 100 }),
         totalCompletions: data.kpis?.totalCompletions || 0,
         integrityIncidentsCount: data.kpis?.integrityIncidentsCount || 0
     };
@@ -54,14 +84,18 @@ export function normalizeAnalyticsOverallData(data: Partial<AnalyticsOverallData
         departmentName: dept.departmentName || 'Unknown Department',
         courseCount: dept.courseCount || 0,
         studentCount: dept.studentCount || 0,
-        averageScore: Number(dept.averageScore?.toFixed(1)) || 0,
-        integrityRate: Number(dept.integrityRate?.toFixed(1)) || 100.0
+        averageScore: sanitizeRoundedNumber(dept.averageScore, { min: 0, max: 100 }),
+        integrityRate: sanitizeRoundedNumber(dept.integrityRate, {
+            min: 0,
+            max: 100,
+            fallback: 0,
+        })
     }));
 
     const incidentTypes: IncidentTypeMetric[] = (data.incidentTypes || []).map(t => ({
         type: t.type || 'Other',
         count: t.count || 0,
-        percentage: Number(t.percentage?.toFixed(1)) || 0
+        percentage: sanitizeRoundedNumber(t.percentage, { min: 0, max: 100 })
     }));
 
     const severityMap = new Map<string, number>();

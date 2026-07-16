@@ -6,6 +6,7 @@ import {
     HeaderConfigSchema,
     FooterConfigSchema
 } from '@sentinel/shared/types';
+import { randomUUID } from 'crypto';
 
 export interface ResolvedPdfTemplate {
     templateId: string | null;
@@ -13,6 +14,10 @@ export interface ResolvedPdfTemplate {
     headerConfig: HeaderConfig;
     footerConfig: FooterConfig;
 }
+
+type ResolvePdfTemplateOptions = {
+    persistBuiltInFallback?: boolean;
+};
 
 // Code-owned built-in defaults
 const BUILT_IN_DEFAULTS: Record<DocumentKind, { headerConfig: HeaderConfig; footerConfig: FooterConfig }> = {
@@ -78,7 +83,8 @@ const BUILT_IN_DEFAULTS: Record<DocumentKind, { headerConfig: HeaderConfig; foot
 export async function resolvePdfTemplate(
     dbClient: DbClient,
     institutionId: string | null,
-    documentKind: DocumentKind
+    documentKind: DocumentKind,
+    options: ResolvePdfTemplateOptions = {},
 ): Promise<ResolvedPdfTemplate> {
     // 1. Try to find institution-published override
     if (institutionId) {
@@ -120,8 +126,43 @@ export async function resolvePdfTemplate(
 
     // 3. Fall back to built-in defaults
     const builtIn = BUILT_IN_DEFAULTS[documentKind];
+    let templateId: string | null = null;
+
+    if (options.persistBuiltInFallback) {
+        const persistedFallback = await dbClient
+            .selectFrom('pdf_templates')
+            .select(['template_id'])
+            .where('institution_id', 'is', null)
+            .where('document_kind', '=', documentKind)
+            .where('status', '=', 'PUBLISHED')
+            .executeTakeFirst();
+
+        if (persistedFallback) {
+            templateId = persistedFallback.template_id;
+        } else {
+            templateId = randomUUID();
+            const now = new Date();
+
+            await dbClient
+                .insertInto('pdf_templates')
+                .values({
+                    template_id: templateId,
+                    institution_id: null,
+                    document_kind: documentKind,
+                    version: 1,
+                    status: 'PUBLISHED',
+                    header_config: JSON.stringify(builtIn.headerConfig) as any,
+                    footer_config: JSON.stringify(builtIn.footerConfig) as any,
+                    created_at: now,
+                    updated_at: now,
+                    published_at: now,
+                })
+                .execute();
+        }
+    }
+
     return {
-        templateId: null,
+        templateId,
         documentKind,
         headerConfig: builtIn.headerConfig,
         footerConfig: builtIn.footerConfig,

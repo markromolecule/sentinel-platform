@@ -200,7 +200,7 @@ describe('pdf document hooks', () => {
         });
 
         expect(mockInvalidateQueries).toHaveBeenCalledWith({
-            queryKey: ANALYTICS_QUERY_KEYS.reports('institution-1'),
+            queryKey: [...ANALYTICS_QUERY_KEYS.all, 'reports'],
         });
     });
 

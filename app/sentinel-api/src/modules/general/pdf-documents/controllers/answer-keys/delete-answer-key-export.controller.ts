@@ -1,8 +1,11 @@
 import { createRoute, z } from '@hono/zod-openapi';
 import { type AppRouteHandler } from '../../../../../types/hono';
-import { hasActivePermission } from '../../../../../lib/permissions';
 import { PdfStorageService } from '../../storage/pdf-storage.service';
 import { LogsService } from '../../../logs/logs.service';
+import {
+    canAccessPdfInstitutionScope,
+    requirePdfDocumentAccess,
+} from '../../services/pdf-document-authorization.service';
 
 export const deleteAnswerKeyExportRoute = createRoute({
     method: 'delete',
@@ -34,12 +37,13 @@ export const deleteAnswerKeyExportHandler: AppRouteHandler<typeof deleteAnswerKe
     const user = c.get('user');
     const dbClient = c.get('dbClient');
 
-    if (user?.role !== 'support') {
-        return c.json({ success: false, error: 'Forbidden. Support role required.' }, 403 as any);
-    }
-    if (!hasActivePermission(c.get('activePermissionKeys'), 'pdf_templates:manage')) {
-        return c.json({ success: false, error: 'Forbidden. Missing pdf_templates:manage permission.' }, 403 as any);
-    }
+    requirePdfDocumentAccess({
+        role: c.get('role'),
+        activePermissionKeys: c.get('activePermissionKeys'),
+        requiredPermissions: 'pdf_templates:manage',
+        missingRoleMessage: 'Forbidden. Support role required.',
+        missingPermissionMessage: 'Forbidden. Missing pdf_templates:manage permission.',
+    });
 
     const { exportId } = c.req.valid('param');
 
@@ -56,7 +60,9 @@ export const deleteAnswerKeyExportHandler: AppRouteHandler<typeof deleteAnswerKe
 
         // Institution scope check
         const userInstitutionId = c.get('institutionId');
-        if (userInstitutionId && row.institution_id && row.institution_id !== userInstitutionId) {
+        if (
+            !(await canAccessPdfInstitutionScope(dbClient, userInstitutionId, row.institution_id))
+        ) {
             return c.json({ success: false, error: "Forbidden: Access denied to this institution's exports." }, 403 as any);
         }
 

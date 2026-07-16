@@ -1,7 +1,10 @@
 import { createRoute, z } from '@hono/zod-openapi';
 import { type AppRouteHandler } from '../../../../../types/hono';
-import { hasActivePermission } from '../../../../../lib/permissions';
 import { answerKeyExportRecordSchema } from '../../pdf-documents.dto';
+import {
+    canAccessPdfInstitutionScope,
+    requirePdfDocumentAccess,
+} from '../../services/pdf-document-authorization.service';
 
 export const getAnswerKeyExportStatusRoute = createRoute({
     method: 'get',
@@ -33,15 +36,15 @@ export const getAnswerKeyExportStatusRoute = createRoute({
 });
 
 export const getAnswerKeyExportStatusHandler: AppRouteHandler<typeof getAnswerKeyExportStatusRoute> = async (c) => {
-    const user = c.get('user');
     const dbClient = c.get('dbClient');
 
-    if (user?.role !== 'support') {
-        return c.json({ success: false, error: 'Forbidden. Support role required.' }, 403 as any);
-    }
-    if (!hasActivePermission(c.get('activePermissionKeys'), ['pdf_templates:view', 'reports:view'])) {
-        return c.json({ success: false, error: 'Forbidden. Insufficient privileges.' }, 403 as any);
-    }
+    requirePdfDocumentAccess({
+        role: c.get('role'),
+        activePermissionKeys: c.get('activePermissionKeys'),
+        requiredPermissions: ['pdf_templates:view', 'reports:view'],
+        missingRoleMessage: 'Forbidden. Support role required.',
+        missingPermissionMessage: 'Forbidden. Insufficient privileges.',
+    });
 
     const { exportId } = c.req.valid('param');
 
@@ -58,7 +61,9 @@ export const getAnswerKeyExportStatusHandler: AppRouteHandler<typeof getAnswerKe
 
         // Institution scope check
         const userInstitutionId = c.get('institutionId');
-        if (userInstitutionId && row.institution_id && row.institution_id !== userInstitutionId) {
+        if (
+            !(await canAccessPdfInstitutionScope(dbClient, userInstitutionId, row.institution_id))
+        ) {
             return c.json({ success: false, error: 'Forbidden: Access denied to this institution\'s exports.' }, 403 as any);
         }
 

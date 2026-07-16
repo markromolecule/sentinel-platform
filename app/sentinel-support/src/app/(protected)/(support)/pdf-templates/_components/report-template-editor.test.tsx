@@ -69,7 +69,7 @@ vi.mock('./template-preview-card', () => ({
     TemplatePreviewCard: ({ onGeneratePreview, isGenerating }: any) => (
         <div>
             <button onClick={onGeneratePreview}>Generate preview</button>
-            <span>{isGenerating ? 'Generating...' : 'Preview ready'}</span>
+            <span>{isGenerating ? 'Generating...' : 'Preview action ready'}</span>
         </div>
     ),
 }));
@@ -115,7 +115,6 @@ describe('ReportTemplateEditor', () => {
         isRemovingBranding: false,
         onUploadBranding: vi.fn(),
         onRemoveBranding: vi.fn(),
-        previewBlob: null,
         isGeneratingPreview: false,
         onGeneratePreview: vi.fn(),
         showResetOverride: false,
@@ -123,14 +122,13 @@ describe('ReportTemplateEditor', () => {
         onResetOverride: vi.fn(),
     };
 
-    it('shows compact status and renders preview after settings', () => {
+    it('shows compact status and renders both preview and settings controls', () => {
         const { container } = render(<ReportTemplateEditor {...baseProps} />);
 
         expect(screen.getAllByText('Global (Sentinel)').length).toBeGreaterThan(0);
         expect(screen.getByText('Unsaved changes')).toBeTruthy();
-        expect(container.textContent?.indexOf('header-fields')).toBeLessThan(
-            container.textContent?.indexOf('Generate preview') ?? 0,
-        );
+        expect(container.textContent).toContain('header-fields');
+        expect(container.textContent).toContain('Generate preview');
     });
 
     it('switches tabs and shows the global branding empty state', () => {

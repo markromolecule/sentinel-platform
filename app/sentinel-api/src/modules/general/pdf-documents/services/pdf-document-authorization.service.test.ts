@@ -1,18 +1,47 @@
 import { describe, expect, it } from 'vitest';
 import {
     assertOverallReportTemplateScope,
+    canAccessPdfInstitutionScope,
     requirePdfDocumentAccess,
+    resolvePdfAccessibleInstitutionIds,
 } from './pdf-document-authorization.service';
 
-function createDbClient(institutions: Array<{ id: string; institution_kind: string }>) {
+function createDbClient(
+    institutions: Array<{
+        id: string;
+        institution_kind: string;
+        parent_institution_id?: string | null;
+    }>,
+) {
     return {
-        selectFrom: () => ({
+        selectFrom: (table: string) => ({
             select: () => ({
-                where: (_column: string, _op: string, institutionId: string) => ({
-                    executeTakeFirst: async () =>
-                        institutions.find((institution) => institution.id === institutionId) ??
-                        null,
-                }),
+                where: (column: string, _op: string, value: string) => {
+                    if (table === 'institutions' && column === 'id') {
+                        return {
+                            executeTakeFirst: async () =>
+                                institutions.find((institution) => institution.id === value) ??
+                                null,
+                        };
+                    }
+
+                    if (table === 'institutions' && column === 'parent_institution_id') {
+                        return {
+                            execute: async () =>
+                                institutions
+                                    .filter(
+                                        (institution) =>
+                                            institution.parent_institution_id === value,
+                                    )
+                                    .map((institution) => ({ id: institution.id })),
+                        };
+                    }
+
+                    return {
+                        executeTakeFirst: async () => null,
+                        execute: async () => [],
+                    };
+                },
             }),
         }),
     } as any;
@@ -84,5 +113,44 @@ describe('pdf-document-authorization.service', () => {
         await expect(
             assertOverallReportTemplateScope(createDbClient([]), 'missing-id'),
         ).rejects.toMatchObject({ status: 400 });
+    });
+
+    it('keeps child and standalone support accounts locked to their own institution', async () => {
+        const dbClient = createDbClient([
+            { id: 'branch-1', institution_kind: 'CHILD', parent_institution_id: 'parent-1' },
+            { id: 'standalone-1', institution_kind: 'STANDALONE' },
+        ]);
+
+        await expect(resolvePdfAccessibleInstitutionIds(dbClient, 'branch-1')).resolves.toEqual([
+            'branch-1',
+        ]);
+        await expect(
+            canAccessPdfInstitutionScope(dbClient, 'branch-1', 'parent-1'),
+        ).resolves.toBe(false);
+
+        await expect(
+            resolvePdfAccessibleInstitutionIds(dbClient, 'standalone-1'),
+        ).resolves.toEqual(['standalone-1']);
+    });
+
+    it('allows parent-institution support accounts to access their branches', async () => {
+        const dbClient = createDbClient([
+            { id: 'parent-1', institution_kind: 'PARENT' },
+            { id: 'branch-1', institution_kind: 'CHILD', parent_institution_id: 'parent-1' },
+            { id: 'branch-2', institution_kind: 'CHILD', parent_institution_id: 'parent-1' },
+            { id: 'other-branch', institution_kind: 'CHILD', parent_institution_id: 'other' },
+        ]);
+
+        await expect(resolvePdfAccessibleInstitutionIds(dbClient, 'parent-1')).resolves.toEqual([
+            'parent-1',
+            'branch-1',
+            'branch-2',
+        ]);
+        await expect(
+            canAccessPdfInstitutionScope(dbClient, 'parent-1', 'branch-2'),
+        ).resolves.toBe(true);
+        await expect(
+            canAccessPdfInstitutionScope(dbClient, 'parent-1', 'other-branch'),
+        ).resolves.toBe(false);
     });
 });

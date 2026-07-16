@@ -13,6 +13,12 @@ const mockResetMutateAsync = vi.fn();
 const mockUploadBrandingMutateAsync = vi.fn();
 const mockDeleteBrandingMutateAsync = vi.fn();
 const mockReportTemplateEditor = vi.fn();
+const mockPreviewWindow = {
+    location: {
+        href: '',
+    },
+    close: vi.fn(),
+} as unknown as Window;
 
 vi.mock('sonner', () => ({
     toast: {
@@ -92,6 +98,10 @@ vi.mock('../_components', () => ({
 describe('PdfTemplateReportsPage', () => {
     beforeEach(() => {
         vi.clearAllMocks();
+        vi.spyOn(URL, 'createObjectURL').mockReturnValue('blob:preview-url');
+        vi.spyOn(URL, 'revokeObjectURL').mockImplementation(() => {});
+        mockPreviewWindow.location.href = '';
+        vi.spyOn(window, 'open').mockReturnValue(mockPreviewWindow);
         mockUseInstitutionsQuery.mockReturnValue({
             data: [
                 { id: 'parent-1', name: 'Parent One', institutionKind: 'PARENT' },
@@ -103,7 +113,7 @@ describe('PdfTemplateReportsPage', () => {
         });
         mockUsePdfTemplatesQuery.mockReturnValue({ data: [] });
         mockUseInstitutionPdfBrandingQuery.mockReturnValue({ data: null });
-        mockPreviewMutateAsync.mockResolvedValue(new Blob(['pdf']));
+        mockPreviewMutateAsync.mockResolvedValue(new Blob(['pdf'], { type: 'application/pdf' }));
         mockSaveDraftMutateAsync.mockResolvedValue(undefined);
         mockPublishMutateAsync.mockResolvedValue(undefined);
         mockResetMutateAsync.mockResolvedValue(undefined);
@@ -128,7 +138,7 @@ describe('PdfTemplateReportsPage', () => {
         );
     });
 
-    it('keeps Global as the initial preview scope and sends null institution_id', async () => {
+    it('generates the preview and opens it in a new tab', async () => {
         render(<PdfTemplateReportsPage />);
 
         fireEvent.click(screen.getByText('Trigger preview'));
@@ -141,6 +151,8 @@ describe('PdfTemplateReportsPage', () => {
                 }),
             ),
         );
+        expect(window.open).toHaveBeenCalledWith('about:blank', '_blank');
+        expect(mockPreviewWindow.location.href).toBe('blob:preview-url');
     });
 
     it('switches to a parent override and enables reset behavior', async () => {

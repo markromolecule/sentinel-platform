@@ -12,6 +12,9 @@ export type DepartmentIntegrityRow = {
     completed: number;
     flagged: number;
     dropped: number;
+    courseCount: number;
+    studentCount: number;
+    averageScore: number;
 };
 
 /**
@@ -32,9 +35,9 @@ export async function getAnalyticsDepartmentIntegrityData(
 
     let query = dbClient
         .selectFrom('departments as d')
-        .leftJoin('sections as s', 's.department_id', 'd.department_id')
-        .leftJoin('exams as e', 'e.section_id', 's.section_id')
-        .leftJoin('exam_attempts as ea', 'ea.exam_id', 'e.exam_id')
+        .leftJoin('students as st', 'st.department_id', 'd.department_id')
+        .leftJoin('exam_attempts as ea', 'ea.student_id', 'st.student_id')
+        .leftJoin('exams as e', 'e.exam_id', 'ea.exam_id')
         .leftJoin('flagged_incidents as fi', 'fi.attempt_id', 'ea.attempt_id')
         .select([
             'd.department_name as department',
@@ -46,6 +49,15 @@ export async function getAnalyticsDepartmentIntegrityData(
             ),
             sql<number>`coalesce(count(distinct case when ea.status != 'COMPLETED' and ea.attempt_id is not null and fi.incident_id is null ${startFilter} ${endFilter} then ea.attempt_id end), 0)`.as(
                 'dropped',
+            ),
+            sql<number>`coalesce(count(distinct case when ea.attempt_id is not null ${startFilter} ${endFilter} then st.course_id end), 0)`.as(
+                'courseCount',
+            ),
+            sql<number>`coalesce(count(distinct case when ea.attempt_id is not null ${startFilter} ${endFilter} then st.student_id end), 0)`.as(
+                'studentCount',
+            ),
+            sql<number>`coalesce(avg(case when ea.status = 'COMPLETED' and ea.total_score is not null and ea.total_score > 0 ${startFilter} ${endFilter} then (coalesce(ea.score, ea.initial_score, 0)::numeric / nullif(ea.total_score, 0)::numeric) * 100 end), 0)`.as(
+                'averageScore',
             ),
         ]);
 
@@ -63,5 +75,8 @@ export async function getAnalyticsDepartmentIntegrityData(
         completed: Number(row.completed),
         flagged: Number(row.flagged),
         dropped: Number(row.dropped),
+        courseCount: Number((row as any).courseCount ?? 0),
+        studentCount: Number((row as any).studentCount ?? 0),
+        averageScore: Number((row as any).averageScore ?? 0),
     }));
 }

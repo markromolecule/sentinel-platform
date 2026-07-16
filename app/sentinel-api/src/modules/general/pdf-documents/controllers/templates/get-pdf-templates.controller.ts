@@ -6,6 +6,7 @@ import { HTTPException } from 'hono/http-exception';
 import { z } from '@hono/zod-openapi';
 import {
     assertOverallReportTemplateScope,
+    canAccessPdfInstitutionScope,
     requirePdfDocumentAccess,
 } from '../../services/pdf-document-authorization.service';
 
@@ -47,6 +48,7 @@ export const getPdfTemplatesHandler: AppRouteHandler<typeof getPdfTemplatesRoute
 
     const { institutionId, documentKind, status } = c.req.valid('query');
     const dbClient = c.get('dbClient');
+    const userInstitutionId = c.get('institutionId');
 
     if (documentKind === 'ANALYTICS_OVERALL') {
         await assertOverallReportTemplateScope(dbClient, institutionId);
@@ -59,6 +61,12 @@ export const getPdfTemplatesHandler: AppRouteHandler<typeof getPdfTemplatesRoute
         if (!institution) {
             throw new HTTPException(400, {
                 message: `Institution ${institutionId} does not exist.`,
+            });
+        }
+
+        if (!(await canAccessPdfInstitutionScope(dbClient, userInstitutionId, institutionId))) {
+            throw new HTTPException(403, {
+                message: 'Forbidden. You cannot access another institution\'s answer key template.',
             });
         }
     }

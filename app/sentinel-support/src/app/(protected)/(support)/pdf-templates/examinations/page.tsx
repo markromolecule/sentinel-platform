@@ -3,11 +3,6 @@
 import * as React from 'react';
 import {
     Button,
-    Card,
-    CardContent,
-    CardDescription,
-    CardHeader,
-    CardTitle,
     Label,
     PermissionDeniedState,
     Select,
@@ -15,6 +10,10 @@ import {
     SelectItem,
     SelectTrigger,
     SelectValue,
+    Tabs,
+    TabsContent,
+    TabsList,
+    TabsTrigger,
 } from '@sentinel/ui';
 import {
     useActivePermissions,
@@ -36,9 +35,10 @@ import {
     AnswerKeyExportsPanel,
     PdfTemplatePageShell,
     TemplateHeaderFooterFields,
-    TemplatePreviewCard,
     TemplateStatusCard,
 } from '../_components';
+import { useAcademicScope } from '@/hooks/use-academic-scope';
+import { ExternalLink, Eye } from 'lucide-react';
 import { toast } from 'sonner';
 
 const DEFAULT_HEADER_CONFIG: HeaderConfig = {
@@ -66,6 +66,8 @@ const DEFAULT_FOOTER_CONFIG: FooterConfig = {
 
 export default function PdfTemplateExaminationsPage() {
     const { hasAnyPermission, hasPermission } = useActivePermissions();
+    const { institutionId: scopedInstitutionId, isLoading: isAcademicScopeLoading } =
+        useAcademicScope();
     const canView = hasAnyPermission(['pdf_templates:view', 'pdf_templates:manage']);
     const canManageTemplate = hasPermission('pdf_templates:manage');
     const canExportAnswerKey = hasPermission('examinations:export_answer_key');
@@ -73,12 +75,44 @@ export default function PdfTemplateExaminationsPage() {
     const { data: institutions = [] } = useInstitutionsQuery();
     const [selectedInstitutionId, setSelectedInstitutionId] = React.useState('');
     const [selectedExamId, setSelectedExamId] = React.useState('');
+    const [activeTab, setActiveTab] = React.useState<'header' | 'footer' | 'answer-key'>(
+        'header',
+    );
     const [headerConfig, setHeaderConfig] = React.useState<HeaderConfig>(DEFAULT_HEADER_CONFIG);
     const [footerConfig, setFooterConfig] = React.useState<FooterConfig>(DEFAULT_FOOTER_CONFIG);
-    const [previewBlob, setPreviewBlob] = React.useState<Blob | null>(null);
     const [activeDownloadId, setActiveDownloadId] = React.useState<string | null>(null);
     const [activeRetryId, setActiveRetryId] = React.useState<string | null>(null);
     const [activeDeleteId, setActiveDeleteId] = React.useState<string | null>(null);
+
+    const scopedInstitution = React.useMemo(
+        () => institutions.find((institution) => institution.id === scopedInstitutionId) ?? null,
+        [institutions, scopedInstitutionId],
+    );
+
+    const availableInstitutions = React.useMemo(() => {
+        if (!scopedInstitutionId) {
+            return institutions;
+        }
+
+        if (!scopedInstitution) {
+            return institutions.filter((institution) => institution.id === scopedInstitutionId);
+        }
+
+        if (scopedInstitution.institutionKind === 'PARENT') {
+            return institutions.filter(
+                (institution) =>
+                    institution.id === scopedInstitutionId ||
+                    institution.parentInstitutionId === scopedInstitutionId,
+            );
+        }
+
+        return institutions.filter((institution) => institution.id === scopedInstitutionId);
+    }, [institutions, scopedInstitution, scopedInstitutionId]);
+
+    const isInstitutionLocked = Boolean(
+        scopedInstitutionId &&
+            (!scopedInstitution || scopedInstitution.institutionKind !== 'PARENT'),
+    );
 
     const templatesQuery = usePdfTemplatesQuery({
         payload: {
@@ -127,10 +161,58 @@ export default function PdfTemplateExaminationsPage() {
     const workingTemplate = draftTemplate ?? publishedTemplate;
 
     React.useEffect(() => {
+        if (isAcademicScopeLoading) {
+            return;
+        }
+
+        if (scopedInstitutionId) {
+            setSelectedInstitutionId((current) => {
+                if (
+                    current &&
+                    availableInstitutions.some((institution) => institution.id === current)
+                ) {
+                    return current;
+                }
+
+                if (
+                    availableInstitutions.some(
+                        (institution) => institution.id === scopedInstitutionId,
+                    )
+                ) {
+                    return scopedInstitutionId;
+                }
+
+                return availableInstitutions[0]?.id ?? '';
+            });
+            return;
+        }
+
+        setSelectedInstitutionId((current) =>
+            current &&
+            availableInstitutions.some((institution) => institution.id === current)
+                ? current
+                : '',
+        );
+    }, [
+        availableInstitutions,
+        isAcademicScopeLoading,
+        scopedInstitutionId,
+    ]);
+
+    React.useEffect(() => {
         setHeaderConfig(workingTemplate?.header_config ?? DEFAULT_HEADER_CONFIG);
         setFooterConfig(workingTemplate?.footer_config ?? DEFAULT_FOOTER_CONFIG);
-        setPreviewBlob(null);
     }, [workingTemplate?.template_id, workingTemplate?.updated_at, selectedInstitutionId]);
+
+    React.useEffect(() => {
+        if (!selectedExamId) {
+            return;
+        }
+
+        if (!(examsQuery.data ?? []).some((exam) => exam.id === selectedExamId)) {
+            setSelectedExamId('');
+        }
+    }, [examsQuery.data, selectedExamId]);
 
     const hasUnsavedChanges = React.useMemo(() => {
         return (
@@ -204,115 +286,92 @@ export default function PdfTemplateExaminationsPage() {
             }
         >
             <div className="space-y-6">
-                <Card>
-                    <CardHeader>
-                        <CardTitle>Scope</CardTitle>
-                        <CardDescription>
-                            Choose an institution first, then filter exams that belong to that
-                            institution.
-                        </CardDescription>
-                    </CardHeader>
-                    <CardContent className="grid gap-4 md:grid-cols-2">
-                        <div className="space-y-2">
-                            <Label htmlFor="answer-key-institution">Institution</Label>
-                            <Select
-                                value={selectedInstitutionId}
-                                onValueChange={(value) => {
-                                    setSelectedInstitutionId(value);
-                                    setSelectedExamId('');
-                                }}
-                            >
-                                <SelectTrigger id="answer-key-institution">
-                                    <SelectValue placeholder="Choose an institution" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    {institutions.map((institution) => (
-                                        <SelectItem key={institution.id} value={institution.id}>
-                                            {institution.name}
-                                        </SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
+                <section className="bg-background rounded-2xl border p-3">
+                    <div className="grid gap-4 xl:grid-cols-3 xl:items-stretch">
+                        <div className="space-y-2 xl:border-r xl:pr-4">
+                            <div className="flex flex-col gap-0.5 sm:flex-row sm:items-baseline sm:gap-3">
+                                <p className="text-sm font-medium">Scope</p>
+                                <p className="text-muted-foreground text-xs">
+                                    {isInstitutionLocked
+                                        ? 'Your branch scope is applied automatically.'
+                                        : scopedInstitution?.institutionKind === 'PARENT'
+                                          ? 'Choose a branch under your assigned parent institution.'
+                                          : 'Select institution and exam.'}
+                                </p>
+                            </div>
+                            <div className="space-y-2">
+                                <div className="space-y-1">
+                                    <Label htmlFor="answer-key-institution" className="text-xs">
+                                        Institution
+                                    </Label>
+                                    <Select
+                                        value={selectedInstitutionId}
+                                        onValueChange={(value) => {
+                                            setSelectedInstitutionId(value);
+                                            setSelectedExamId('');
+                                        }}
+                                        disabled={isInstitutionLocked}
+                                    >
+                                        <SelectTrigger
+                                            id="answer-key-institution"
+                                            className="h-9"
+                                        >
+                                            <SelectValue placeholder="Choose an institution" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            {availableInstitutions.map((institution) => (
+                                                <SelectItem key={institution.id} value={institution.id}>
+                                                    {institution.name}
+                                                </SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+                                <div className="space-y-1">
+                                    <Label htmlFor="answer-key-exam" className="text-xs">
+                                        Exam
+                                    </Label>
+                                    <Select
+                                        value={selectedExamId}
+                                        onValueChange={setSelectedExamId}
+                                        disabled={!selectedInstitutionId}
+                                    >
+                                        <SelectTrigger id="answer-key-exam" className="h-9">
+                                            <SelectValue
+                                                placeholder={
+                                                    selectedInstitutionId
+                                                        ? 'Choose an exam'
+                                                        : 'Choose an institution first'
+                                                }
+                                            />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            {(examsQuery.data ?? []).map((exam) => (
+                                                <SelectItem key={exam.id} value={exam.id}>
+                                                    {exam.title}
+                                                </SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+                            </div>
                         </div>
 
-                        <div className="space-y-2">
-                            <Label htmlFor="answer-key-exam">Exam</Label>
-                            <Select
-                                value={selectedExamId}
-                                onValueChange={setSelectedExamId}
-                                disabled={!selectedInstitutionId}
-                            >
-                                <SelectTrigger id="answer-key-exam">
-                                    <SelectValue
-                                        placeholder={
-                                            selectedInstitutionId
-                                                ? 'Choose an exam'
-                                                : 'Choose an institution first'
-                                        }
-                                    />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    {(examsQuery.data ?? []).map((exam) => (
-                                        <SelectItem key={exam.id} value={exam.id}>
-                                            {exam.title}
-                                        </SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
-                        </div>
-                    </CardContent>
-                </Card>
-
-                <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_360px]">
-                    <div className="space-y-6">
-                        <TemplateHeaderFooterFields
-                            headerConfig={headerConfig}
-                            footerConfig={footerConfig}
-                            onHeaderChange={setHeaderConfig}
-                            onFooterChange={setFooterConfig}
-                        />
-                        <TemplatePreviewCard
-                            previewBlob={previewBlob}
-                            isGenerating={previewMutation.isPending}
-                            onGeneratePreview={async () => {
-                                if (!selectedInstitutionId) {
-                                    toast.error(
-                                        'Choose an institution before generating a preview.',
-                                    );
-                                    return;
-                                }
-                                try {
-                                    const blob = await previewMutation.mutateAsync({
-                                        institution_id: selectedInstitutionId,
-                                        document_kind: 'EXAM_ANSWER_KEY',
-                                        header_config: headerConfig,
-                                        footer_config: footerConfig,
-                                    });
-                                    setPreviewBlob(blob);
-                                } catch (error: any) {
-                                    toast.error(error?.message || 'Failed to render the preview.');
-                                }
-                            }}
-                        />
-                    </div>
-
-                    <div className="space-y-6">
-                        <TemplateStatusCard
-                            template={workingTemplate}
-                            scopeLabel="Institution answer key template"
-                            hasUnsavedChanges={hasUnsavedChanges}
-                        />
-
-                        <Card>
-                            <CardHeader>
-                                <CardTitle>Generate answer key</CardTitle>
-                                <CardDescription>
-                                    Queue a PDF export using the currently published answer key
-                                    template.
-                                </CardDescription>
-                            </CardHeader>
-                            <CardContent>
+                        <div className="flex flex-col space-y-2.5 xl:border-r xl:px-4">
+                            <TemplateStatusCard
+                                template={workingTemplate}
+                                scopeLabel="Institution answer key template"
+                                hasUnsavedChanges={hasUnsavedChanges}
+                                variant="inline"
+                            />
+                            <div className="mt-auto border-t pt-2.5">
+                                <p className="text-sm font-medium">Generate answer key</p>
+                                <p className="text-muted-foreground mt-1 text-xs">
+                                    Queue an export for the selected institution and exam.
+                                </p>
                                 <Button
+                                    size="sm"
+                                    className="mt-2.5 w-full"
                                     disabled={
                                         !selectedInstitutionId ||
                                         !selectedExamId ||
@@ -338,64 +397,174 @@ export default function PdfTemplateExaminationsPage() {
                                         ? 'Queueing...'
                                         : 'Generate answer key'}
                                 </Button>
-                            </CardContent>
-                        </Card>
-                    </div>
-                </div>
+                            </div>
+                        </div>
 
-                <AnswerKeyExportsPanel
-                    exports={answerKeyExportsQuery.data?.records ?? []}
-                    canExport={canView}
-                    canManage={canManageTemplate}
-                    activeDownloadId={activeDownloadId}
-                    activeRetryId={activeRetryId}
-                    activeDeleteId={activeDeleteId}
-                    onDownload={async (exportId) => {
-                        try {
-                            setActiveDownloadId(exportId);
-                            const response = await downloadMutation.mutateAsync(exportId);
-                            window.open(response.downloadUrl, '_blank', 'noopener,noreferrer');
-                        } catch (error: any) {
-                            toast.error(
-                                error?.message || 'Failed to prepare the answer key download.',
-                            );
-                        } finally {
-                            setActiveDownloadId(null);
+                        <div className="flex flex-col space-y-2 xl:pl-4">
+                            <p className="text-foreground/80 text-[11px] font-semibold uppercase tracking-[0.14em]">
+                                Preview
+                            </p>
+                            <div className="space-y-1">
+                                <h3 className="text-sm font-semibold">Open PDF in a new tab</h3>
+                                <p className="text-muted-foreground text-xs">
+                                    Check the rendered output without leaving this page.
+                                </p>
+                            </div>
+                            <Button
+                                size="sm"
+                                className="mt-auto w-full"
+                                disabled={previewMutation.isPending}
+                                onClick={async () => {
+                                    if (!selectedInstitutionId) {
+                                        toast.error(
+                                            'Choose an institution before generating a preview.',
+                                        );
+                                        return;
+                                    }
+
+                                    const previewWindow = window.open('about:blank', '_blank');
+
+                                    if (!previewWindow) {
+                                        toast.error(
+                                            'Allow pop-ups to open the PDF preview in a new tab.',
+                                        );
+                                        return;
+                                    }
+
+                                    try {
+                                        const previewBlob = await previewMutation.mutateAsync({
+                                            institution_id: selectedInstitutionId,
+                                            document_kind: 'EXAM_ANSWER_KEY',
+                                            header_config: headerConfig,
+                                            footer_config: footerConfig,
+                                        });
+                                        const previewUrl = URL.createObjectURL(previewBlob);
+                                        previewWindow.location.href = previewUrl;
+                                        window.setTimeout(() => {
+                                            URL.revokeObjectURL(previewUrl);
+                                        }, 60_000);
+                                    } catch (error: any) {
+                                        previewWindow.close();
+                                        toast.error(
+                                            error?.message || 'Failed to render the preview.',
+                                        );
+                                    }
+                                }}
+                            >
+                                <Eye className="mr-2 h-4 w-4" />
+                                {previewMutation.isPending
+                                    ? 'Generating preview...'
+                                    : 'Generate preview'}
+                                {!previewMutation.isPending ? (
+                                    <ExternalLink className="ml-2 h-4 w-4" />
+                                ) : null}
+                            </Button>
+                        </div>
+                    </div>
+                </section>
+
+                <div className="space-y-4">
+                    <Tabs
+                        value={activeTab}
+                        onValueChange={(value) =>
+                            setActiveTab(value as 'header' | 'footer' | 'answer-key')
                         }
-                    }}
-                    onRetry={async (exportId) => {
-                        try {
-                            setActiveRetryId(exportId);
-                            await retryMutation.mutateAsync({
-                                exportId,
-                                institutionId: selectedInstitutionId,
-                                examId: selectedExamId || undefined,
-                            });
-                            toast.success('Answer key retry queued');
-                        } catch (error: any) {
-                            toast.error(error?.message || 'Failed to retry the answer key export.');
-                        } finally {
-                            setActiveRetryId(null);
-                        }
-                    }}
-                    onDelete={async (exportId) => {
-                        try {
-                            setActiveDeleteId(exportId);
-                            await deleteMutation.mutateAsync({
-                                exportId,
-                                institutionId: selectedInstitutionId,
-                                examId: selectedExamId || undefined,
-                            });
-                            toast.success('Answer key export deleted');
-                        } catch (error: any) {
-                            toast.error(
-                                error?.message || 'Failed to delete the answer key export.',
-                            );
-                        } finally {
-                            setActiveDeleteId(null);
-                        }
-                    }}
-                />
+                    >
+                        <TabsList className="grid w-full grid-cols-3">
+                            <TabsTrigger value="header">Header</TabsTrigger>
+                            <TabsTrigger value="footer">Footer</TabsTrigger>
+                            <TabsTrigger value="answer-key">Answer key</TabsTrigger>
+                        </TabsList>
+
+                        <TabsContent value="header" className="mt-4">
+                            <TemplateHeaderFooterFields
+                                headerConfig={headerConfig}
+                                footerConfig={footerConfig}
+                                onHeaderChange={setHeaderConfig}
+                                onFooterChange={setFooterConfig}
+                                section="header"
+                                showSectionChrome={false}
+                            />
+                        </TabsContent>
+
+                        <TabsContent value="footer" className="mt-4">
+                            <TemplateHeaderFooterFields
+                                headerConfig={headerConfig}
+                                footerConfig={footerConfig}
+                                onHeaderChange={setHeaderConfig}
+                                onFooterChange={setFooterConfig}
+                                section="footer"
+                                showSectionChrome={false}
+                            />
+                        </TabsContent>
+
+                        <TabsContent value="answer-key" className="mt-4">
+                            <AnswerKeyExportsPanel
+                                exports={answerKeyExportsQuery.data?.records ?? []}
+                                canExport={canView}
+                                canManage={canManageTemplate}
+                                activeDownloadId={activeDownloadId}
+                                activeRetryId={activeRetryId}
+                                activeDeleteId={activeDeleteId}
+                                onDownload={async (exportId) => {
+                                    try {
+                                        setActiveDownloadId(exportId);
+                                        const response =
+                                            await downloadMutation.mutateAsync(exportId);
+                                        window.open(
+                                            response.downloadUrl,
+                                            '_blank',
+                                            'noopener,noreferrer',
+                                        );
+                                    } catch (error: any) {
+                                        toast.error(
+                                            error?.message ||
+                                                'Failed to prepare the answer key download.',
+                                        );
+                                    } finally {
+                                        setActiveDownloadId(null);
+                                    }
+                                }}
+                                onRetry={async (exportId) => {
+                                    try {
+                                        setActiveRetryId(exportId);
+                                        await retryMutation.mutateAsync({
+                                            exportId,
+                                            institutionId: selectedInstitutionId,
+                                            examId: selectedExamId || undefined,
+                                        });
+                                        toast.success('Answer key retry queued');
+                                    } catch (error: any) {
+                                        toast.error(
+                                            error?.message ||
+                                                'Failed to retry the answer key export.',
+                                        );
+                                    } finally {
+                                        setActiveRetryId(null);
+                                    }
+                                }}
+                                onDelete={async (exportId) => {
+                                    try {
+                                        setActiveDeleteId(exportId);
+                                        await deleteMutation.mutateAsync({
+                                            exportId,
+                                            institutionId: selectedInstitutionId,
+                                            examId: selectedExamId || undefined,
+                                        });
+                                        toast.success('Answer key export deleted');
+                                    } catch (error: any) {
+                                        toast.error(
+                                            error?.message ||
+                                                'Failed to delete the answer key export.',
+                                        );
+                                    } finally {
+                                        setActiveDeleteId(null);
+                                    }
+                                }}
+                            />
+                        </TabsContent>
+                    </Tabs>
+                </div>
             </div>
         </PdfTemplatePageShell>
     );

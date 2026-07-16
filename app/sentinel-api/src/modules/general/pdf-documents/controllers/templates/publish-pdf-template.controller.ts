@@ -6,6 +6,7 @@ import { HTTPException } from 'hono/http-exception';
 import { z } from '@hono/zod-openapi';
 import {
     assertOverallReportTemplateScope,
+    canAccessPdfInstitutionScope,
     requirePdfDocumentAccess,
 } from '../../services/pdf-document-authorization.service';
 
@@ -51,10 +52,11 @@ export const publishTemplateHandler: AppRouteHandler<typeof publishTemplateRoute
 
     const { templateId } = c.req.valid('param');
     const dbClient = c.get('dbClient');
+    const userInstitutionId = c.get('institutionId');
 
     const template = await dbClient
         .selectFrom('pdf_templates')
-        .select(['institution_id', 'document_kind'])
+        .select(['institution_id', 'document_kind', 'status'])
         .where('template_id', '=', templateId)
         .executeTakeFirst();
 
@@ -62,8 +64,20 @@ export const publishTemplateHandler: AppRouteHandler<typeof publishTemplateRoute
         throw new HTTPException(404, { message: 'Template not found.' });
     }
 
+    if (template.status !== 'DRAFT') {
+        throw new HTTPException(400, {
+            message: `Template is not in DRAFT status (current status: ${template.status}).`,
+        });
+    }
+
     if (template.document_kind === 'ANALYTICS_OVERALL') {
         await assertOverallReportTemplateScope(dbClient, template.institution_id);
+    } else if (
+        !(await canAccessPdfInstitutionScope(dbClient, userInstitutionId, template.institution_id))
+    ) {
+        throw new HTTPException(403, {
+            message: 'Forbidden. You cannot publish another institution\'s answer key template.',
+        });
     }
 
     const result = await PdfTemplateService.publishTemplate(dbClient, templateId, user.id);

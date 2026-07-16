@@ -48,7 +48,7 @@ describe('useGenerateAnalyticsReportMutation Hook', () => {
 
         expect(generateAnalyticsReport).toHaveBeenCalledWith({ mockClient: true }, payload);
         expect(mockInvalidateQueries).toHaveBeenCalledWith({
-            queryKey: ANALYTICS_QUERY_KEYS.reports('institution-1'),
+            queryKey: [...ANALYTICS_QUERY_KEYS.all, 'reports'],
         });
     });
 });

@@ -58,3 +58,55 @@ export async function assertOverallReportTemplateScope(
         });
     }
 }
+
+export async function resolvePdfAccessibleInstitutionIds(
+    dbClient: DbClient,
+    requesterInstitutionId?: string | null,
+): Promise<string[] | null> {
+    if (!requesterInstitutionId) {
+        return null;
+    }
+
+    const requesterInstitution = await dbClient
+        .selectFrom('institutions')
+        .select(['id', 'institution_kind'])
+        .where('id', '=', requesterInstitutionId)
+        .executeTakeFirst();
+
+    if (!requesterInstitution) {
+        return [requesterInstitutionId];
+    }
+
+    if (requesterInstitution.institution_kind !== 'PARENT') {
+        return [requesterInstitutionId];
+    }
+
+    const branches = await dbClient
+        .selectFrom('institutions')
+        .select('id')
+        .where('parent_institution_id', '=', requesterInstitutionId)
+        .execute();
+
+    return [requesterInstitutionId, ...branches.map((branch) => branch.id)];
+}
+
+export async function canAccessPdfInstitutionScope(
+    dbClient: DbClient,
+    requesterInstitutionId: string | null | undefined,
+    targetInstitutionId: string | null | undefined,
+): Promise<boolean> {
+    if (!targetInstitutionId) {
+        return !requesterInstitutionId;
+    }
+
+    const accessibleInstitutionIds = await resolvePdfAccessibleInstitutionIds(
+        dbClient,
+        requesterInstitutionId,
+    );
+
+    if (!accessibleInstitutionIds) {
+        return true;
+    }
+
+    return accessibleInstitutionIds.includes(targetInstitutionId);
+}

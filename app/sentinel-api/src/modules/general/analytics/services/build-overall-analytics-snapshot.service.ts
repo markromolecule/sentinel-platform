@@ -62,22 +62,26 @@ export class BuildOverallAnalyticsSnapshotService {
             institutionName,
             periodLabel,
             kpis: {
-                // averageScore and passRate are not yet computed by the KPI query;
-                // default to 0 until a dedicated score/pass-rate data source is wired in.
-                averageScore: 0,
-                passRate: 0,
+                averageScore: mappedKPIs.averageScore,
+                passRate: mappedKPIs.passRate,
                 totalCompletions: mappedKPIs.completedAttempts,
                 integrityIncidentsCount: mappedKPIs.totalIncidents,
             },
             departments: rawDepts.map(d => ({
                 departmentName: d.department || 'Unknown Department',
-                courseCount: 0,
-                studentCount: 0,
-                averageScore: 0,
+                courseCount: d.courseCount || 0,
+                studentCount: d.studentCount || 0,
+                averageScore: d.averageScore || 0,
                 // Derive integrity rate: % of completed attempts that were not flagged
                 integrityRate: d.completed > 0
-                    ? Math.round(((d.completed - d.flagged) / d.completed) * 1000) / 10
-                    : 100.0
+                    ? Math.max(
+                        0,
+                        Math.min(
+                            100,
+                            Math.round(((d.completed - d.flagged) / d.completed) * 1000) / 10,
+                        ),
+                    )
+                    : 0
             })),
             incidentTypes: rawTypes.map(t => ({
                 type: t.type || 'Other',

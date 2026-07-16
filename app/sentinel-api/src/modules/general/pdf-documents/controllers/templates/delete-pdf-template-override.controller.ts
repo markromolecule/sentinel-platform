@@ -7,6 +7,7 @@ import { HTTPException } from 'hono/http-exception';
 import { z } from '@hono/zod-openapi';
 import {
     assertOverallReportTemplateScope,
+    canAccessPdfInstitutionScope,
     requirePdfDocumentAccess,
 } from '../../services/pdf-document-authorization.service';
 
@@ -50,6 +51,7 @@ export const deleteTemplateOverrideHandler: AppRouteHandler<
 
     const { institutionId, documentKind } = c.req.valid('query');
     const dbClient = c.get('dbClient');
+    const userInstitutionId = c.get('institutionId');
 
     if (documentKind === 'ANALYTICS_OVERALL') {
         await assertOverallReportTemplateScope(dbClient, institutionId);
@@ -62,6 +64,12 @@ export const deleteTemplateOverrideHandler: AppRouteHandler<
         if (!inst) {
             throw new HTTPException(400, {
                 message: `Institution ${institutionId} does not exist.`,
+            });
+        }
+
+        if (!(await canAccessPdfInstitutionScope(dbClient, userInstitutionId, institutionId))) {
+            throw new HTTPException(403, {
+                message: 'Forbidden. You cannot reset another institution\'s answer key template.',
             });
         }
     }

@@ -9,7 +9,6 @@ import {
     SelectItem,
     SelectTrigger,
     SelectValue,
-    Separator,
     Switch,
     Textarea,
 } from '@sentinel/ui';
@@ -41,12 +40,14 @@ function SettingToggleRow({
     onCheckedChange: (checked: boolean) => void;
 }) {
     return (
-        <div className="flex items-center justify-between gap-4 py-3 first:pt-0 last:pb-0">
-            <div className="space-y-1">
-                <p className="text-sm font-medium">{title}</p>
-                <p className="text-muted-foreground text-xs">{description}</p>
+        <div className="grid grid-cols-[minmax(0,1fr)_auto] items-start gap-4 py-4">
+            <div className="min-w-0 space-y-1">
+                <p className="text-sm font-medium leading-5">{title}</p>
+                <p className="text-muted-foreground text-xs leading-5">{description}</p>
             </div>
-            <Switch checked={checked} disabled={disabled} onCheckedChange={onCheckedChange} />
+            <div className="flex min-h-10 items-center">
+                <Switch checked={checked} disabled={disabled} onCheckedChange={onCheckedChange} />
+            </div>
         </div>
     );
 }
@@ -172,10 +173,10 @@ function HeaderFields({
                 </div>
             </div>
 
-            <div className="rounded-xl border px-4">
+            <div className="divide-border/70 rounded-xl border bg-muted/15 px-4 divide-y">
                 <SettingToggleRow
                     title="Show institution logo"
-                    description="Uses the uploaded institution branding logo when available."
+                    description="Uses the uploaded institution branding logo when available. Manage the file in Report Template > Branding."
                     checked={headerConfig.logo_visible}
                     onCheckedChange={(checked) =>
                         onHeaderChange({
@@ -184,7 +185,6 @@ function HeaderFields({
                         })
                     }
                 />
-                <Separator />
                 <SettingToggleRow
                     title="Show divider"
                     description="Adds a rule beneath the header block."
@@ -196,12 +196,11 @@ function HeaderFields({
                         })
                     }
                 />
-                <Separator />
                 <SettingToggleRow
                     title="Sentinel logo"
                     description={
                         isAnalyticsTemplate
-                            ? 'Required for overall analytics reports.'
+                            ? 'Required for overall analytics reports and kept visible automatically.'
                             : 'Optional for answer key templates.'
                     }
                     checked={headerConfig.sentinel_logo_visible}
@@ -304,7 +303,7 @@ function FooterFields({
                 </div>
             </div>
 
-            <div className="rounded-xl border px-4">
+            <div className="divide-border/70 rounded-xl border bg-muted/15 px-4 divide-y">
                 <SettingToggleRow
                     title="Show divider"
                     description="Adds a rule above the footer content."
@@ -316,7 +315,6 @@ function FooterFields({
                         })
                     }
                 />
-                <Separator />
                 <SettingToggleRow
                     title="Show page numbers"
                     description="Repeats page numbering across the exported PDF."

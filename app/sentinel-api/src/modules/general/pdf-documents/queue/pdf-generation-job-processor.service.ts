@@ -1,4 +1,4 @@
-import { type DbClient } from '@sentinel/db';
+import { executeTransaction, type DbClient } from '@sentinel/db';
 import { UnrecoverableError } from 'bullmq';
 import { PdfStorageService } from '../storage/pdf-storage.service';
 import { resolvePdfTemplate } from '../services/resolve-pdf-template.service';
@@ -23,7 +23,7 @@ export class PdfGenerationJobProcessor {
         const idCol = isAnalytics ? 'report_id' : 'export_id';
 
         // 1. Transaction block for claiming the job and updating state
-        const taskResult = await dbClient.transaction().execute(async (trx) => {
+        const taskResult = await executeTransaction(async (trx) => {
             // Select and lock the row to avoid concurrent duplicate processing
             const exportRecord = await trx
                 .selectFrom(tableName as any)
@@ -33,7 +33,7 @@ export class PdfGenerationJobProcessor {
                 .executeTakeFirst();
 
             if (!exportRecord) {
-                throw new UnrecoverableError(`PDF Export record not found in ${tableName}: ${exportId}`);
+                return { action: 'SKIP_MISSING' as const, record: null };
             }
 
             const rec = exportRecord as any;
@@ -68,6 +68,12 @@ export class PdfGenerationJobProcessor {
         if (taskResult.action === 'SKIP') {
             return;
         }
+        if (taskResult.action === 'SKIP_MISSING') {
+            console.warn(
+                `[PDFWorker] Skipping orphaned job for missing ${tableName} record ${exportId}`,
+            );
+            return;
+        }
 
         const exportRecord = taskResult.record;
         const requestData = typeof exportRecord.request_snapshot === 'string'
@@ -79,7 +85,8 @@ export class PdfGenerationJobProcessor {
             const resolvedTemplate = await resolvePdfTemplate(
                 dbClient,
                 exportRecord.institution_id,
-                documentKind
+                documentKind,
+                { persistBuiltInFallback: documentKind === 'EXAM_ANSWER_KEY' },
             );
 
             const headerConfig = resolvedTemplate.headerConfig;
@@ -108,7 +115,7 @@ export class PdfGenerationJobProcessor {
                     .executeTakeFirst();
                 if (branding) {
                     try {
-                        logoBuffer = await PdfStorageService.downloadPdf(
+                        logoBuffer = await PdfStorageService.downloadFile(
                             branding.logo_storage_bucket,
                             branding.logo_storage_path
                         );
@@ -158,11 +165,11 @@ export class PdfGenerationJobProcessor {
             }
 
             // 5. Upload file to private storage bucket
-            const bucket = 'sentinel-pdf-assets';
+            const bucket = PdfStorageService.PDF_ARTIFACTS_BUCKET;
             await PdfStorageService.uploadPdf(bucket, storagePath, pdfBuffer);
 
             // 6. Update status to READY transactionally
-            await dbClient.transaction().execute(async (trx) => {
+            await executeTransaction(async (trx) => {
                 const completedAt = new Date();
                 const updateSet: any = {
                     status: 'READY',
@@ -209,7 +216,7 @@ export class PdfGenerationJobProcessor {
             const isUnrecoverable = error instanceof UnrecoverableError;
             const status = 'FAILED';
 
-            await dbClient.transaction().execute(async (trx) => {
+            await executeTransaction(async (trx) => {
                 const updateSet: any = {
                     status,
                     failure_code: isUnrecoverable ? 'UNRECOVERABLE_ERROR' : 'TRANSIENT_ERROR',

@@ -54,7 +54,6 @@ type ReportTemplateEditorProps = {
     isRemovingBranding?: boolean;
     onUploadBranding: (file: File) => void;
     onRemoveBranding: () => void;
-    previewBlob: Blob | null;
     isGeneratingPreview: boolean;
     onGeneratePreview: () => void;
     showResetOverride?: boolean;
@@ -83,7 +82,6 @@ export function ReportTemplateEditor({
     isRemovingBranding,
     onUploadBranding,
     onRemoveBranding,
-    previewBlob,
     isGeneratingPreview,
     onGeneratePreview,
     showResetOverride,
@@ -101,52 +99,50 @@ export function ReportTemplateEditor({
     return (
         <div className="space-y-6">
             <section className="bg-background rounded-2xl border p-4">
-                <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
-                    <div className="min-w-0 flex-1 space-y-3">
-                        <div className="space-y-2">
-                            <Label htmlFor="report-template-scope">Template scope</Label>
-                            <Select value={scopeValue} onValueChange={onScopeChange}>
-                                <SelectTrigger id="report-template-scope">
-                                    <SelectValue />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    {scopeOptions.map((scopeOption) => (
-                                        <SelectItem
-                                            key={scopeOption.value}
-                                            value={scopeOption.value}
-                                        >
-                                            {scopeOption.label}
-                                        </SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
-                        </div>
+                <div className="grid gap-4 xl:grid-cols-3 xl:items-start">
+                    <div className="space-y-2 xl:border-r xl:pr-4">
+                        <Label htmlFor="report-template-scope">Template scope</Label>
+                        <Select value={scopeValue} onValueChange={onScopeChange}>
+                            <SelectTrigger id="report-template-scope">
+                                <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                                {scopeOptions.map((scopeOption) => (
+                                    <SelectItem key={scopeOption.value} value={scopeOption.value}>
+                                        {scopeOption.label}
+                                    </SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
                         {isScopeLoading ? (
-                            <p className="text-muted-foreground text-sm">
+                            <p className="text-muted-foreground text-xs">
                                 Loading parent institutions…
                             </p>
                         ) : null}
                         {scopeError ? (
-                            <p className="text-destructive text-sm">{scopeError}</p>
+                            <p className="text-destructive text-xs">{scopeError}</p>
                         ) : null}
                         {scopeHint ? (
-                            <p className="text-muted-foreground text-sm">{scopeHint}</p>
+                            <p className="text-muted-foreground text-xs">{scopeHint}</p>
                         ) : null}
                     </div>
 
-                    <div className="flex min-w-0 flex-col gap-3 xl:max-w-md xl:items-end">
+                    <div className="space-y-2 xl:border-r xl:px-4">
                         <TemplateStatusCard
                             template={template}
                             scopeLabel={scopeLabel}
                             hasUnsavedChanges={hasUnsavedChanges}
                             variant="inline"
+                            className="min-w-0"
                         />
                         {showResetOverride ? (
                             <AlertDialog open={resetDialogOpen} onOpenChange={setResetDialogOpen}>
                                 <Button
                                     variant="outline"
+                                    size="sm"
                                     disabled={isResettingOverride}
                                     onClick={() => setResetDialogOpen(true)}
+                                    className="w-full"
                                 >
                                     {isResettingOverride ? 'Resetting...' : 'Reset to global'}
                                 </Button>
@@ -173,72 +169,68 @@ export function ReportTemplateEditor({
                             </AlertDialog>
                         ) : null}
                     </div>
+
+                    <TemplatePreviewCard
+                        isGenerating={isGeneratingPreview}
+                        onGeneratePreview={onGeneratePreview}
+                        variant="inline"
+                        className="xl:pl-4"
+                    />
                 </div>
             </section>
 
-            <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_380px]">
-                <div className="space-y-4">
-                    <Tabs
-                        value={activeTab}
-                        onValueChange={(value) =>
-                            setActiveTab(value as 'header' | 'footer' | 'branding')
-                        }
-                    >
-                        <TabsList className="grid w-full grid-cols-3">
-                            <TabsTrigger value="header">Header</TabsTrigger>
-                            <TabsTrigger value="footer">Footer</TabsTrigger>
-                            <TabsTrigger value="branding">Branding</TabsTrigger>
-                        </TabsList>
+            <div className="space-y-4">
+                <Tabs
+                    value={activeTab}
+                    onValueChange={(value) =>
+                        setActiveTab(value as 'header' | 'footer' | 'branding')
+                    }
+                >
+                    <TabsList className="grid w-full grid-cols-3">
+                        <TabsTrigger value="header">Header</TabsTrigger>
+                        <TabsTrigger value="footer">Footer</TabsTrigger>
+                        <TabsTrigger value="branding">Branding</TabsTrigger>
+                    </TabsList>
 
-                        <div ref={panelRef} tabIndex={-1} className="outline-none">
-                            <TabsContent value="header" className="mt-4 outline-none">
-                                <TemplateHeaderFooterFields
-                                    headerConfig={headerConfig}
-                                    footerConfig={footerConfig}
-                                    onHeaderChange={onHeaderChange}
-                                    onFooterChange={onFooterChange}
-                                    isAnalyticsTemplate
-                                    section="header"
-                                    showSectionChrome={false}
-                                />
-                            </TabsContent>
+                    <div ref={panelRef} tabIndex={-1} className="outline-none">
+                        <TabsContent value="header" className="mt-4 outline-none">
+                            <TemplateHeaderFooterFields
+                                headerConfig={headerConfig}
+                                footerConfig={footerConfig}
+                                onHeaderChange={onHeaderChange}
+                                onFooterChange={onFooterChange}
+                                isAnalyticsTemplate
+                                section="header"
+                                showSectionChrome={false}
+                            />
+                        </TabsContent>
 
-                            <TabsContent value="footer" className="mt-4 outline-none">
-                                <TemplateHeaderFooterFields
-                                    headerConfig={headerConfig}
-                                    footerConfig={footerConfig}
-                                    onHeaderChange={onHeaderChange}
-                                    onFooterChange={onFooterChange}
-                                    isAnalyticsTemplate
-                                    section="footer"
-                                    showSectionChrome={false}
-                                />
-                            </TabsContent>
+                        <TabsContent value="footer" className="mt-4 outline-none">
+                            <TemplateHeaderFooterFields
+                                headerConfig={headerConfig}
+                                footerConfig={footerConfig}
+                                onHeaderChange={onHeaderChange}
+                                onFooterChange={onFooterChange}
+                                isAnalyticsTemplate
+                                section="footer"
+                                showSectionChrome={false}
+                            />
+                        </TabsContent>
 
-                            <TabsContent value="branding" className="mt-4 outline-none">
-                                <BrandingUploadCard
-                                    branding={branding}
-                                    disabled={brandingDisabled}
-                                    onUpload={onUploadBranding}
-                                    onRemove={onRemoveBranding}
-                                    isUploading={isUploadingBranding}
-                                    isRemoving={isRemovingBranding}
-                                    variant="panel"
-                                    globalMessage={brandingGlobalMessage}
-                                />
-                            </TabsContent>
-                        </div>
-                    </Tabs>
-                </div>
-
-                <div className="xl:sticky xl:top-6 xl:self-start">
-                    <TemplatePreviewCard
-                        previewBlob={previewBlob}
-                        isGenerating={isGeneratingPreview}
-                        onGeneratePreview={onGeneratePreview}
-                        variant="panel"
-                    />
-                </div>
+                        <TabsContent value="branding" className="mt-4 outline-none">
+                            <BrandingUploadCard
+                                branding={branding}
+                                disabled={brandingDisabled}
+                                onUpload={onUploadBranding}
+                                onRemove={onRemoveBranding}
+                                isUploading={isUploadingBranding}
+                                isRemoving={isRemovingBranding}
+                                variant="panel"
+                                globalMessage={brandingGlobalMessage}
+                            />
+                        </TabsContent>
+                    </div>
+                </Tabs>
             </div>
         </div>
     );

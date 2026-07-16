@@ -1,8 +1,11 @@
 import { createRoute, z } from '@hono/zod-openapi';
 import { type AppRouteHandler } from '../../../../../types/hono';
-import { hasActivePermission } from '../../../../../lib/permissions';
 import { pdfGenerationQueueService } from '../../queue/pdf-generation-queue.service';
 import { LogsService } from '../../../logs/logs.service';
+import {
+    canAccessPdfInstitutionScope,
+    requirePdfDocumentAccess,
+} from '../../services/pdf-document-authorization.service';
 
 export const postAnswerKeyExportRetryRoute = createRoute({
     method: 'post',
@@ -35,12 +38,13 @@ export const postAnswerKeyExportRetryHandler: AppRouteHandler<typeof postAnswerK
     const user = c.get('user');
     const dbClient = c.get('dbClient');
 
-    if (user?.role !== 'support') {
-        return c.json({ success: false, error: 'Forbidden. Support role required.' }, 403 as any);
-    }
-    if (!hasActivePermission(c.get('activePermissionKeys'), ['pdf_templates:manage', 'reports:generate'])) {
-        return c.json({ success: false, error: 'Forbidden. Insufficient privileges.' }, 403 as any);
-    }
+    requirePdfDocumentAccess({
+        role: c.get('role'),
+        activePermissionKeys: c.get('activePermissionKeys'),
+        requiredPermissions: ['pdf_templates:manage', 'reports:generate'],
+        missingRoleMessage: 'Forbidden. Support role required.',
+        missingPermissionMessage: 'Forbidden. Insufficient privileges.',
+    });
 
     const { exportId } = c.req.valid('param');
 
@@ -58,7 +62,9 @@ export const postAnswerKeyExportRetryHandler: AppRouteHandler<typeof postAnswerK
             }
 
             const userInstitutionId = c.get('institutionId');
-            if (userInstitutionId && row.institution_id && row.institution_id !== userInstitutionId) {
+            if (
+                !(await canAccessPdfInstitutionScope(dbClient, userInstitutionId, row.institution_id))
+            ) {
                 return {
                     success: false,
                     status: 403,

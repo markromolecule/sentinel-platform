@@ -10,81 +10,54 @@ import {
     CardTitle,
     cn,
 } from '@sentinel/ui';
-import { Download, Eye } from 'lucide-react';
+import { Eye, ExternalLink } from 'lucide-react';
 
 type TemplatePreviewCardProps = {
-    previewBlob: Blob | null;
     isGenerating: boolean;
     onGeneratePreview: () => void;
-    variant?: 'card' | 'panel';
+    variant?: 'card' | 'panel' | 'inline';
     className?: string;
 };
 
 export function TemplatePreviewCard({
-    previewBlob,
     isGenerating,
     onGeneratePreview,
     variant = 'card',
     className,
 }: TemplatePreviewCardProps) {
-    const previewUrl = React.useMemo(
-        () => (previewBlob ? URL.createObjectURL(previewBlob) : null),
-        [previewBlob],
-    );
-
-    React.useEffect(() => {
-        return () => {
-            if (previewUrl) {
-                URL.revokeObjectURL(previewUrl);
-            }
-        };
-    }, [previewUrl]);
-
     const content = (
         <>
-            <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-                <div>
-                    <h3 className="text-base font-semibold">Preview</h3>
-                    <p className="text-muted-foreground text-sm">
-                        Render a sample PDF using the current form values before publishing.
+            <div className="space-y-3">
+                <div className="space-y-1">
+                    <p className="text-foreground/80 text-[11px] font-semibold uppercase tracking-[0.14em]">
+                        Preview
                     </p>
+                    <h3 className="text-sm font-semibold">Open PDF in a new tab</h3>
                 </div>
-                <div className="flex flex-wrap gap-2">
-                    <Button variant="outline" onClick={onGeneratePreview} disabled={isGenerating}>
-                        <Eye className="mr-2 h-4 w-4" />
-                        {isGenerating ? 'Generating...' : 'Generate preview'}
-                    </Button>
-                    {previewUrl ? (
-                        <Button variant="outline" asChild>
-                            <a href={previewUrl} download="pdf-template-preview.pdf">
-                                <Download className="mr-2 h-4 w-4" />
-                                Download preview
-                            </a>
-                        </Button>
-                    ) : null}
-                </div>
+                <Button size="sm" className="w-full" onClick={onGeneratePreview} disabled={isGenerating}>
+                    <Eye className="mr-2 h-4 w-4" />
+                    {isGenerating ? 'Generating preview...' : 'Generate preview'}
+                    {!isGenerating ? <ExternalLink className="ml-2 h-4 w-4" /> : null}
+                </Button>
             </div>
-
-            {previewUrl ? (
-                <iframe
-                    title="PDF preview"
-                    src={previewUrl}
-                    className="mt-4 h-[720px] w-full rounded-xl border bg-white"
-                />
-            ) : (
-                <div className="text-muted-foreground mt-4 flex h-[420px] items-center justify-center rounded-xl border border-dashed text-sm">
-                    Generate a preview to inspect the current header and footer layout.
-                </div>
-            )}
         </>
     );
 
     if (variant === 'panel') {
         return (
-            <section className={cn('bg-background rounded-2xl border p-4', className)}>
+            <section
+                className={cn(
+                    'bg-background rounded-2xl border p-4',
+                    className,
+                )}
+            >
                 {content}
             </section>
         );
+    }
+
+    if (variant === 'inline') {
+        return <section className={cn('space-y-3', className)}>{content}</section>;
     }
 
     return (

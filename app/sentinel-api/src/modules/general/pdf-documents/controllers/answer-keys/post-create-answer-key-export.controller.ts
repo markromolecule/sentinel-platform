@@ -1,9 +1,12 @@
 import { createRoute, z } from '@hono/zod-openapi';
 import { type AppRouteHandler } from '../../../../../types/hono';
-import { hasActivePermission } from '../../../../../lib/permissions';
 import { pdfGenerationQueueService } from '../../queue/pdf-generation-queue.service';
 import { resolvePdfTemplate } from '../../services/resolve-pdf-template.service';
 import { LogsService } from '../../../logs/logs.service';
+import {
+    canAccessPdfInstitutionScope,
+    requirePdfDocumentAccess,
+} from '../../services/pdf-document-authorization.service';
 import {
     createAnswerKeyExportBodySchema,
     createAnswerKeyExportResponseSchema,
@@ -38,17 +41,18 @@ export const postCreateAnswerKeyExportHandler: AppRouteHandler<typeof postCreate
     const user = c.get('user');
     const dbClient = c.get('dbClient');
 
-    if (user?.role !== 'support') {
-        return c.json({ success: false, error: 'Forbidden. Support role required.' }, 403 as any);
-    }
-    if (!hasActivePermission(c.get('activePermissionKeys'), 'examinations:export_answer_key')) {
-        return c.json({ success: false, error: 'Forbidden. Missing examinations:export_answer_key permission.' }, 403 as any);
-    }
+    requirePdfDocumentAccess({
+        role: c.get('role'),
+        activePermissionKeys: c.get('activePermissionKeys'),
+        requiredPermissions: 'examinations:export_answer_key',
+        missingRoleMessage: 'Forbidden. Support role required.',
+        missingPermissionMessage: 'Forbidden. Missing examinations:export_answer_key permission.',
+    });
 
     const body = c.req.valid('json');
     const userInstitutionId = c.get('institutionId');
 
-    if (userInstitutionId && body.institution_id !== userInstitutionId) {
+    if (!(await canAccessPdfInstitutionScope(dbClient, userInstitutionId, body.institution_id))) {
         return c.json(
             { success: false, error: "Forbidden. Cannot create an answer key export for another institution." },
             403 as any,
@@ -80,7 +84,12 @@ export const postCreateAnswerKeyExportHandler: AppRouteHandler<typeof postCreate
         }
 
         // Resolve and snapshot the template at request time
-        const resolvedTemplate = await resolvePdfTemplate(dbClient, body.institution_id, 'EXAM_ANSWER_KEY');
+        const resolvedTemplate = await resolvePdfTemplate(
+            dbClient,
+            body.institution_id,
+            'EXAM_ANSWER_KEY',
+            { persistBuiltInFallback: true },
+        );
 
         // Insert PENDING record
         const exportTitle = body.title ?? `Answer Key — ${exam.title}`;

@@ -8,6 +8,7 @@ import { InstitutionBrandingService } from '../../services/institution-branding.
 import { HTTPException } from 'hono/http-exception';
 import {
     assertOverallReportTemplateScope,
+    canAccessPdfInstitutionScope,
     requirePdfDocumentAccess,
 } from '../../services/pdf-document-authorization.service';
 
@@ -62,6 +63,7 @@ export const previewPdfTemplateHandler: AppRouteHandler<typeof previewPdfTemplat
     });
 
     const { document_kind, header_config, footer_config, institution_id } = c.req.valid('json');
+    const userInstitutionId = c.get('institutionId');
 
     // 2. Lay constraints validation
     if (document_kind === 'ANALYTICS_OVERALL') {
@@ -86,6 +88,12 @@ export const previewPdfTemplateHandler: AppRouteHandler<typeof previewPdfTemplat
         if (!institution) {
             throw new HTTPException(400, {
                 message: `Institution ${institution_id} does not exist.`,
+            });
+        }
+
+        if (!(await canAccessPdfInstitutionScope(dbClient, userInstitutionId, institution_id))) {
+            throw new HTTPException(403, {
+                message: 'Forbidden. You cannot preview another institution\'s answer key template.',
             });
         }
     }

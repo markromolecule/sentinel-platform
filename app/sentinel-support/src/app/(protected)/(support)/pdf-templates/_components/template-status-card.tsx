@@ -16,13 +16,17 @@ function TemplateStatusContent({
 }: Omit<TemplateStatusCardProps, 'variant' | 'className'>) {
     return (
         <>
-            <div className="flex flex-wrap items-center gap-2">
+            <div className="flex flex-wrap items-center gap-1.5">
                 <Badge variant="outline">{scopeLabel}</Badge>
                 <Badge variant="outline">Version {template?.version ?? 1}</Badge>
                 <Badge variant="outline">{template?.status ?? 'DRAFT'}</Badge>
-                {hasUnsavedChanges ? <Badge variant="outline">Unsaved changes</Badge> : null}
+                {hasUnsavedChanges ? (
+                    <Badge variant="outline" className="border-amber-200 bg-amber-50 text-amber-700">
+                        Unsaved changes
+                    </Badge>
+                ) : null}
             </div>
-            <div className="text-muted-foreground text-sm">
+            <div className="text-muted-foreground text-xs">
                 {template ? (
                     <>
                         Last updated{' '}
@@ -48,8 +52,10 @@ export function TemplateStatusCard({
 }: TemplateStatusCardProps) {
     if (variant === 'inline') {
         return (
-            <div className={cn('space-y-2', className)}>
-                <p className="text-sm font-medium">Template status</p>
+            <div className={cn('space-y-1.5', className)}>
+                <p className="text-foreground/80 text-[11px] font-semibold uppercase tracking-[0.14em]">
+                    Template status
+                </p>
                 <TemplateStatusContent
                     template={template}
                     scopeLabel={scopeLabel}

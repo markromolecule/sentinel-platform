@@ -31,7 +31,7 @@ export function useGenerateAnalyticsReportMutation(
         mutationFn: (variables) => generateAnalyticsReport(apiClient, variables),
         onSuccess: async (data, variables, context) => {
             await queryClient.invalidateQueries({
-                queryKey: ANALYTICS_QUERY_KEYS.reports(variables.institutionId ?? null),
+                queryKey: [...ANALYTICS_QUERY_KEYS.all, 'reports'],
             });
 
             if (args.onSuccess) {

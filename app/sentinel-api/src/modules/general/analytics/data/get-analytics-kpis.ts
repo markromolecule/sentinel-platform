@@ -1,4 +1,6 @@
 import { type DbClient } from '@sentinel/db';
+import { DEFAULT_EXAMINATION_GLOBAL_SETTINGS } from '@sentinel/shared/constants';
+import { sql } from 'kysely';
 
 export type GetAnalyticsKPIsDataArgs = {
     institutionId?: string;
@@ -13,6 +15,8 @@ export type RawKPIAggregates = {
     totalIncidents: number;
     flaggedAttempts: number;
     activeExams: number;
+    averageScore: number;
+    passRate: number;
 };
 
 /**
@@ -24,6 +28,7 @@ export async function getAnalyticsKPIsData(
     args: GetAnalyticsKPIsDataArgs,
 ): Promise<RawKPIAggregates> {
     const { institutionId, startAt, endAtExclusive } = args;
+    const defaultPassingScore = DEFAULT_EXAMINATION_GLOBAL_SETTINGS.defaultPassingScore;
 
     // 1. Total Exams (non-draft) scheduled within the period
     let examsQuery = dbClient.selectFrom('exams').select((eb) => eb.fn.countAll().as('count'));
@@ -117,15 +122,73 @@ export async function getAnalyticsKPIsData(
         activeExamsQuery = activeExamsQuery.where('scheduled_date', '<', endAtExclusive);
     }
 
-    const [examsRes, attemptsRes, completedRes, incidentsRes, flaggedAttemptsRes, activeRes] =
-        await Promise.all([
-            examsQuery.executeTakeFirst(),
-            totalAttemptsQuery.executeTakeFirst(),
-            completedAttemptsQuery.executeTakeFirst(),
-            totalIncidentsQuery.executeTakeFirst(),
-            flaggedAttemptsQuery.executeTakeFirst(),
-            activeExamsQuery.executeTakeFirst(),
+    // 7. Aggregate score-based KPIs from completed attempts
+    let scoreMetricsQuery = dbClient
+        .selectFrom('exam_attempts as ea')
+        .innerJoin('exams as e', 'e.exam_id', 'ea.exam_id')
+        .select([
+            sql<number>`coalesce(
+                avg(
+                    case
+                        when ea.status = 'COMPLETED'
+                            and ea.total_score is not null
+                            and ea.total_score > 0
+                        then (coalesce(ea.score, ea.initial_score, 0)::numeric / nullif(ea.total_score, 0)::numeric) * 100
+                    end
+                ),
+                0
+            )`.as('average_score'),
+            sql<number>`count(
+                case
+                    when ea.status = 'COMPLETED'
+                        and ea.total_score is not null
+                        and ea.total_score > 0
+                    then 1
+                end
+            )`.as('graded_completed_count'),
+            sql<number>`count(
+                case
+                    when ea.status = 'COMPLETED'
+                        and ea.total_score is not null
+                        and ea.total_score > 0
+                        and ((coalesce(ea.score, ea.initial_score, 0)::numeric / nullif(ea.total_score, 0)::numeric) * 100)
+                            >= coalesce(e.passing_score, ${defaultPassingScore})
+                    then 1
+                end
+            )`.as('passed_count'),
         ]);
+    if (institutionId) {
+        scoreMetricsQuery = scoreMetricsQuery.where('e.institution_id', '=', institutionId);
+    }
+    if (startAt) {
+        scoreMetricsQuery = scoreMetricsQuery.where('ea.started_at', '>=', startAt);
+    }
+    if (endAtExclusive) {
+        scoreMetricsQuery = scoreMetricsQuery.where('ea.started_at', '<', endAtExclusive);
+    }
+
+    const [
+        examsRes,
+        attemptsRes,
+        completedRes,
+        incidentsRes,
+        flaggedAttemptsRes,
+        activeRes,
+        scoreMetricsRes,
+    ] = await Promise.all([
+        examsQuery.executeTakeFirst(),
+        totalAttemptsQuery.executeTakeFirst(),
+        completedAttemptsQuery.executeTakeFirst(),
+        totalIncidentsQuery.executeTakeFirst(),
+        flaggedAttemptsQuery.executeTakeFirst(),
+        activeExamsQuery.executeTakeFirst(),
+        scoreMetricsQuery.executeTakeFirst(),
+    ]);
+
+    const averageScore = Number((scoreMetricsRes as any)?.average_score ?? 0);
+    const gradedCompletedCount = Number((scoreMetricsRes as any)?.graded_completed_count ?? 0);
+    const passedCount = Number((scoreMetricsRes as any)?.passed_count ?? 0);
+    const passRate = gradedCompletedCount > 0 ? (passedCount / gradedCompletedCount) * 100 : 0;
 
     return {
         totalExams: Number(examsRes?.count ?? 0),
@@ -134,5 +197,7 @@ export async function getAnalyticsKPIsData(
         totalIncidents: Number(incidentsRes?.count ?? 0),
         flaggedAttempts: Number(flaggedAttemptsRes?.count ?? 0),
         activeExams: Number(activeRes?.count ?? 0),
+        averageScore,
+        passRate,
     };
 }

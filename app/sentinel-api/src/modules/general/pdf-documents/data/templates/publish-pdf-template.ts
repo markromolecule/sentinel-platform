@@ -1,4 +1,4 @@
-import { type DbClient } from '@sentinel/db';
+import { executeTransaction, type DbClient } from '@sentinel/db';
 
 /**
  * Publishes a DRAFT template by:
@@ -17,7 +17,7 @@ export async function publishPdfTemplate(
     templateId: string,
     userId: string
 ): Promise<{ templateId: string; version: number }> {
-    return await dbClient.transaction().execute(async (trx) => {
+    return await executeTransaction(async (trx) => {
         // Fetch the draft template
         const draft = await trx
             .selectFrom('pdf_templates')
