@@ -6,3 +6,5 @@ export * from './use-analytics-reports-query';
 export * from './use-generate-analytics-report-mutation';
 export * from './use-analytics-exam-completions-query';
 export * from './use-analytics-incident-trends-query';
+export * from './use-analytics-report-download-mutation';
+export * from './use-retry-analytics-report-mutation';

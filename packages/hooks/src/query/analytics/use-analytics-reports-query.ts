@@ -30,8 +30,22 @@ export function useAnalyticsReportsQuery({
 
     return useQuery<PaginatedAnalyticsReports, Error>({
         ...options,
-        queryKey: ANALYTICS_QUERY_KEYS.reports(payload?.institution_id),
+        queryKey: ANALYTICS_QUERY_KEYS.reports(
+            payload?.institutionId ?? payload?.institution_id,
+            payload?.page,
+            payload?.limit,
+            payload?.status,
+        ),
         queryFn: () => getAnalyticsReports(apiClient, payload),
         enabled: isAuthenticatedQueryEnabled && (options.enabled ?? true),
+        refetchInterval: (query) => {
+            const records =
+                (query.state.data as PaginatedAnalyticsReports | undefined)?.records ?? [];
+            return records.some(
+                (record) => record.status === 'PENDING' || record.status === 'GENERATING',
+            )
+                ? 5000
+                : false;
+        },
     });
 }

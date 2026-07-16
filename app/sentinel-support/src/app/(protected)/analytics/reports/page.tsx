@@ -1,71 +1,112 @@
 'use client';
 
 import * as React from 'react';
-import { AnalyticsReportsList } from '@/app/(protected)/analytics/_components';
-import { Button, Skeleton } from '@sentinel/ui';
-import { FileBarChart } from 'lucide-react';
+import { Button, PermissionDeniedState, Skeleton } from '@sentinel/ui';
+import { FileBarChart, Loader2 } from 'lucide-react';
 import { AnalyticsPageShell } from '../_components/layout';
-import { useAcademicScope } from '@/hooks/use-academic-scope';
-import { useAnalyticsReportsQuery, useGenerateAnalyticsReportMutation } from '@/data';
-import { useServerPagination } from '@sentinel/hooks';
+import { AnalyticsReportsList } from '@/app/(protected)/analytics/_components';
+import { QueueReportDialog } from './_components/queue-report-dialog';
+import { useReportsAnalytics } from './_hooks/use-reports-analytics';
 
-/**
- * ReportsAnalyticsPage displays historically generated analytical reports
- * and provides features to request new custom report generation.
- */
 export default function ReportsAnalyticsPage() {
-    const { institutionId, isLoading: isScopeLoading } = useAcademicScope();
+    const {
+        canViewReports,
+        canGenerateReports,
+        canExportReports,
+        isScopeLoading,
+        isReportsLoading,
+        isDialogOpen,
+        setIsDialogOpen,
+        selectedInstitutionId,
+        setSelectedInstitutionId,
+        title,
+        setTitle,
+        preset,
+        setPreset,
+        startDate,
+        setStartDate,
+        endDate,
+        setEndDate,
+        validationErrors,
+        activeDownloadId,
+        activeRetryId,
+        reports,
+        pagination,
+        setPagination,
+        pageCount,
+        availableInstitutions,
+        isInstitutionLocked,
+        scopedInstitutionId,
+        institutionNameById,
+        handleSubmit,
+        handleDownload,
+        handleRetry,
+        isGeneratePending,
+    } = useReportsAnalytics();
 
-    const { pagination, setPagination } = useServerPagination([institutionId]);
-
-    // Live backend queries with institution scoping
-    const { data: reportsData, isLoading: isReportsLoading } = useAnalyticsReportsQuery({
-        payload: {
-            institution_id: institutionId || undefined,
-            page: pagination.pageIndex + 1,
-            limit: pagination.pageSize,
-        },
-        enabled: !isScopeLoading,
-    });
-
-    // Report generation mutation
-    const { mutate: generateReport } = useGenerateAnalyticsReportMutation();
-
-    const pageCount = Math.max(
-        1,
-        Math.ceil((reportsData?.total_records ?? 0) / pagination.pageSize),
-    );
+    if (!canViewReports) {
+        return <PermissionDeniedState resourceName="reports" />;
+    }
 
     return (
         <AnalyticsPageShell
             title="Generated Reports"
-            description="Manage, preview, and generate official institution proctoring reports for audits and compliance standards."
+            description="Queue overall analytics PDFs, follow their lifecycle, and request a fresh signed download only when you need it."
             actions={
                 <Button
                     className="bg-[#323d8f] hover:bg-[#323d8f]/90"
-                    onClick={() =>
-                        generateReport({
-                            title: `Administrative Telemetry Report - ${new Date().toLocaleDateString()}`,
-                            type: 'incident',
-                            format: 'pdf',
-                        })
-                    }
+                    disabled={!canGenerateReports || isGeneratePending}
+                    onClick={() => setIsDialogOpen(true)}
                 >
-                    <FileBarChart className="mr-2 h-4 w-4" />
-                    Generate New Report
+                    {isGeneratePending ? (
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    ) : (
+                        <FileBarChart className="mr-2 h-4 w-4" />
+                    )}
+                    {isGeneratePending ? 'Queueing report...' : 'Generate Overall Report'}
                 </Button>
             }
         >
-            {isScopeLoading || isReportsLoading ? (
-                <Skeleton className="h-[400px] w-full rounded-xl" />
-            ) : (
-                <AnalyticsReportsList
-                    reports={reportsData?.records || []}
-                    pagination={pagination}
-                    onPaginationChange={setPagination}
-                    pageCount={pageCount}
-                />
-            )}
+            <div className="space-y-6">
+                {isScopeLoading || isReportsLoading ? (
+                    <Skeleton className="h-[400px] w-full rounded-xl" />
+                ) : (
+                    <AnalyticsReportsList
+                        reports={reports}
+                        pagination={pagination}
+                        onPaginationChange={setPagination}
+                        pageCount={pageCount}
+                        institutionNameById={institutionNameById}
+                        activeDownloadId={activeDownloadId}
+                        activeRetryId={activeRetryId}
+                        canExportReports={canExportReports}
+                        canRetryReports={canGenerateReports}
+                        onDownload={handleDownload}
+                        onRetry={handleRetry}
+                    />
+                )}
+            </div>
+
+            <QueueReportDialog
+                isOpen={isDialogOpen}
+                onOpenChange={setIsDialogOpen}
+                title={title}
+                onTitleChange={setTitle}
+                selectedInstitutionId={selectedInstitutionId}
+                onInstitutionChange={setSelectedInstitutionId}
+                preset={preset}
+                onPresetChange={setPreset}
+                startDate={startDate}
+                onStartDateChange={setStartDate}
+                endDate={endDate}
+                onEndDateChange={setEndDate}
+                validationErrors={validationErrors}
+                availableInstitutions={availableInstitutions}
+                isInstitutionLocked={isInstitutionLocked}
+                scopedInstitutionId={scopedInstitutionId}
+                onSubmit={handleSubmit}
+                isPending={isGeneratePending}
+            />
         </AnalyticsPageShell>
     );
 }

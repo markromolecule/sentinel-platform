@@ -2,6 +2,10 @@ import 'dotenv/config';
 import { Hono } from 'hono';
 import { serve } from '@hono/node-server';
 import app from './app';
+import {
+    startPdfGenerationWorker,
+    stopPdfGenerationWorker,
+} from './modules/general/pdf-documents/queue/pdf-generation.worker';
 
 const port = 3001;
 
@@ -58,6 +62,14 @@ function validateProductionInviteUrls() {
 
 validateProductionInviteUrls();
 
+const shouldStartEmbeddedPdfWorker = process.env.ENABLE_EMBEDDED_PDF_WORKER !== 'false';
+
+if (shouldStartEmbeddedPdfWorker) {
+    startPdfGenerationWorker().catch((error) => {
+        console.error('[startup] Failed to start embedded PDF worker:', error);
+    });
+}
+
 serve({
     fetch: app.fetch,
     port,
@@ -67,3 +79,21 @@ const isProduction = process.env.NODE_ENV === 'production';
 const baseUrl = isProduction ? 'https://api.sentinelph.tech' : `http://localhost:${port}`;
 
 console.log(`Server is running on ${baseUrl}`);
+
+const shutdown = async () => {
+    if (shouldStartEmbeddedPdfWorker) {
+        await stopPdfGenerationWorker().catch((error) => {
+            console.error('[shutdown] Failed to stop embedded PDF worker:', error);
+        });
+    }
+
+    process.exit(0);
+};
+
+process.on('SIGTERM', () => {
+    void shutdown();
+});
+
+process.on('SIGINT', () => {
+    void shutdown();
+});

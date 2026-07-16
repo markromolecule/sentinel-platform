@@ -10,12 +10,29 @@ vi.mock('@/hooks/use-academic-scope', () => ({
 }));
 
 vi.mock('@/data', () => ({
+    useActivePermissions: () => ({
+        hasPermission: () => true,
+    }),
+    useInstitutionsQuery: () => ({
+        data: [{ id: 'inst-123', name: 'Sentinel University' }],
+    }),
     useAnalyticsReportsQuery: () => ({
-        data: { records: [] },
+        data: { records: [], total_records: 0 },
         isLoading: false,
     }),
     useGenerateAnalyticsReportMutation: () => ({
-        mutate: vi.fn(),
+        mutateAsync: vi.fn(),
+        isPending: false,
+    }),
+    useAnalyticsReportDownloadMutation: () => ({
+        mutateAsync: vi.fn(),
+    }),
+    useRetryAnalyticsReportMutation: () => ({
+        mutateAsync: vi.fn(),
+    }),
+    useServerPagination: () => ({
+        pagination: { pageIndex: 0, pageSize: 10 },
+        setPagination: vi.fn(),
     }),
 }));
 
@@ -28,14 +45,17 @@ vi.mock('../_components/layout', () => ({
         children,
         title,
         description,
+        actions,
     }: {
         children: React.ReactNode;
         title: string;
         description: string;
+        actions?: React.ReactNode;
     }) => (
         <div data-testid="analytics-page-shell">
             <h1>{title}</h1>
             <p>{description}</p>
+            {actions}
             {children}
         </div>
     ),
@@ -52,5 +72,6 @@ describe('ReportsAnalyticsPage Component', () => {
         expect(screen.getByTestId('analytics-page-shell')).toBeTruthy();
         expect(screen.getByRole('heading', { level: 1, name: 'Generated Reports' })).toBeTruthy();
         expect(screen.getByTestId('reports-list')).toBeTruthy();
+        expect(screen.getByText('Generate Overall Report')).toBeTruthy();
     });
 });

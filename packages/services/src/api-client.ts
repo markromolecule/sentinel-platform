@@ -153,6 +153,10 @@ export const createApiClient = (defaultOptions: ApiClientOptions = {}) => {
             return mapPaginationMetadata(json);
         }
 
+        if (contentType && contentType.includes('application/pdf')) {
+            return response.blob();
+        }
+
         return response.text();
     };
 };

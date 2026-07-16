@@ -81,6 +81,8 @@ export async function getInstitutions(
     apiClient: ApiClientType,
     params?: {
         search?: string;
+        parentInstitutionId?: string;
+        institutionKind?: 'STANDALONE' | 'PARENT' | 'CHILD';
         page?: number;
         limit?: number;
     },
@@ -89,6 +91,8 @@ export async function getInstitutions(
     apiClient: ApiClientType,
     params: {
         search?: string;
+        parentInstitutionId?: string;
+        institutionKind?: 'STANDALONE' | 'PARENT' | 'CHILD';
         page?: number;
         limit?: number;
     } & ({ page: number; limit: number } | { page?: undefined; limit?: undefined }),
@@ -97,12 +101,18 @@ export async function getInstitutions(
     apiClient: ApiClientType,
     params: {
         search?: string;
+        parentInstitutionId?: string;
+        institutionKind?: 'STANDALONE' | 'PARENT' | 'CHILD';
         page?: number;
         limit?: number;
     } = {},
 ): Promise<Institution[] | PaginatedApiResponse<Institution>> {
     const queryParams = new URLSearchParams();
     if (params.search) queryParams.append('search', params.search);
+    if (params.parentInstitutionId) {
+        queryParams.append('parentInstitutionId', params.parentInstitutionId);
+    }
+    if (params.institutionKind) queryParams.append('institutionKind', params.institutionKind);
     if (params.page !== undefined) queryParams.append('page', String(params.page));
     if (params.limit !== undefined) queryParams.append('limit', String(params.limit));
     const queryString = queryParams.toString();

@@ -28,6 +28,9 @@ vi.mock('@sentinel/hooks', () => ({
             { conversationId: '2', unreadCount: 3, participants: [] },
         ],
     })),
+    useActivePermissions: vi.fn(() => ({
+        hasAnyPermission: () => true,
+    })),
     useMessageRealtime: vi.fn(),
 }));
 
@@ -98,14 +101,19 @@ describe('SuperAdminSidebar', () => {
         const analyticsItem = items.find((item) => item.getAttribute('data-url') === '/analytics');
         const logsItem = items.find((item) => item.getAttribute('data-url') === '/logs');
         const feedbackItem = items.find((item) => item.getAttribute('data-url') === '/feedbacks');
+        const pdfTemplatesItem = items.find(
+            (item) => item.getAttribute('data-url') === '/pdf-templates',
+        );
 
         expect(analyticsItem).toBeTruthy();
         expect(logsItem).toBeTruthy();
         expect(feedbackItem).toBeTruthy();
+        expect(pdfTemplatesItem).toBeTruthy();
 
         expect(analyticsItem?.getAttribute('data-url')).toBe('/analytics');
         expect(logsItem?.getAttribute('data-url')).toBe('/logs');
         expect(feedbackItem?.getAttribute('data-url')).toBe('/feedbacks');
+        expect(pdfTemplatesItem?.getAttribute('data-url')).toBe('/pdf-templates');
     });
 
     it('marks the analytics branch active when the pathname is under /analytics', () => {

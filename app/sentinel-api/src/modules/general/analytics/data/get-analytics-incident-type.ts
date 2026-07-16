@@ -2,6 +2,8 @@ import { type DbClient } from '@sentinel/db';
 
 export type GetAnalyticsIncidentTypeDataArgs = {
     institutionId?: string;
+    startAt?: Date;
+    endAtExclusive?: Date;
 };
 
 export type IncidentTypeMetric = {
@@ -11,13 +13,13 @@ export type IncidentTypeMetric = {
 };
 
 /**
- * Returns incident type distribution with counts and percentages.
+ * Returns incident type distribution with counts and percentages within a period.
  */
 export async function getAnalyticsIncidentTypeData(
     dbClient: DbClient,
     args: GetAnalyticsIncidentTypeDataArgs,
 ): Promise<IncidentTypeMetric[]> {
-    const { institutionId } = args;
+    const { institutionId, startAt, endAtExclusive } = args;
 
     let query = dbClient
         .selectFrom('flagged_incidents as fi')
@@ -27,6 +29,13 @@ export async function getAnalyticsIncidentTypeData(
 
     if (institutionId) {
         query = query.where('e.institution_id', '=', institutionId);
+    }
+
+    if (startAt) {
+        query = query.where('fi.timestamp', '>=', startAt);
+    }
+    if (endAtExclusive) {
+        query = query.where('fi.timestamp', '<', endAtExclusive);
     }
 
     const rows = await query.groupBy('fi.incident_type').execute();

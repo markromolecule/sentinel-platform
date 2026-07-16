@@ -10,7 +10,12 @@ describe('getAnalyticsKPIsData', () => {
             .mockResolvedValueOnce({ count: 80 }) // completedAttempts
             .mockResolvedValueOnce({ count: 25 }) // totalIncidents
             .mockResolvedValueOnce({ count: 15 }) // flaggedAttempts
-            .mockResolvedValueOnce({ count: 5 }); // activeExams
+            .mockResolvedValueOnce({ count: 5 }) // activeExams
+            .mockResolvedValueOnce({
+                average_score: 78.4,
+                graded_completed_count: 80,
+                passed_count: 68,
+            }); // score metrics
 
         const mockDbClient = {
             selectFrom: vi.fn().mockReturnThis(),
@@ -34,9 +39,11 @@ describe('getAnalyticsKPIsData', () => {
             totalIncidents: 25,
             flaggedAttempts: 15,
             activeExams: 5,
+            averageScore: 78.4,
+            passRate: 85,
         });
 
-        expect(mockDbClient.selectFrom).toHaveBeenCalledTimes(6);
+        expect(mockDbClient.selectFrom).toHaveBeenCalledTimes(7);
         expect(mockDbClient.where).toHaveBeenCalled();
     });
 });

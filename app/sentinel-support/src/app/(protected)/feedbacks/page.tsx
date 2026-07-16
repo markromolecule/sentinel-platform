@@ -6,11 +6,6 @@ import { useActivePermissions, useDebounce, useFeedbacksQuery } from '@sentinel/
 import {
     PageHeader,
     PermissionDeniedState,
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
     Separator,
 } from '@sentinel/ui';
 import type { FeedbackRecord } from '@sentinel/services';
@@ -22,7 +17,6 @@ export default function FeedbacksPage() {
     const { hasPermission } = useActivePermissions();
     const canViewFeedback = hasPermission('feedback:view');
     const [search, setSearch] = useState('');
-    const [rating, setRating] = useState<string>('all');
     const [selectedFeedback, setSelectedFeedback] = useState<FeedbackRecord | null>(null);
     const [pagination, setPagination] = useState<PaginationState>({
         pageIndex: 0,
@@ -30,13 +24,11 @@ export default function FeedbacksPage() {
     });
 
     const debouncedSearch = useDebounce(search, 300);
-    const ratingFilter = rating === 'all' ? undefined : Number(rating);
 
     const feedbackQuery = useFeedbacksQuery({
         params: {
             page: pagination.pageIndex + 1,
             pageSize: pagination.pageSize,
-            rating: ratingFilter,
             search: debouncedSearch || undefined,
         },
         enabled: canViewFeedback,
@@ -65,28 +57,6 @@ export default function FeedbacksPage() {
             <Separator />
 
             <FeedbackSummaryCards page={page} />
-
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-end">
-                <Select
-                    value={rating}
-                    onValueChange={(value) => {
-                        setRating(value);
-                        setPagination((current) => ({ ...current, pageIndex: 0 }));
-                    }}
-                >
-                    <SelectTrigger className="w-full sm:w-44">
-                        <SelectValue placeholder="Filter rating" />
-                    </SelectTrigger>
-                    <SelectContent>
-                        <SelectItem value="all">All ratings</SelectItem>
-                        <SelectItem value="5">5 / 5</SelectItem>
-                        <SelectItem value="4">4 / 5</SelectItem>
-                        <SelectItem value="3">3 / 5</SelectItem>
-                        <SelectItem value="2">2 / 5</SelectItem>
-                        <SelectItem value="1">1 / 5</SelectItem>
-                    </SelectContent>
-                </Select>
-            </div>
 
             <FeedbacksTable
                 feedbacks={page.items}

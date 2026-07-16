@@ -1,0 +1,85 @@
+import { Badge, Card, CardContent, CardDescription, CardHeader, CardTitle, cn } from '@sentinel/ui';
+import type { PdfTemplate } from '@/data';
+
+type TemplateStatusCardProps = {
+    template: PdfTemplate | null;
+    scopeLabel: string;
+    hasUnsavedChanges: boolean;
+    variant?: 'card' | 'inline';
+    className?: string;
+};
+
+function TemplateStatusContent({
+    template,
+    scopeLabel,
+    hasUnsavedChanges,
+}: Omit<TemplateStatusCardProps, 'variant' | 'className'>) {
+    return (
+        <>
+            <div className="flex flex-wrap items-center gap-1.5">
+                <Badge variant="outline">{scopeLabel}</Badge>
+                <Badge variant="outline">Version {template?.version ?? 1}</Badge>
+                <Badge variant="outline">{template?.status ?? 'DRAFT'}</Badge>
+                {hasUnsavedChanges ? (
+                    <Badge variant="outline" className="border-amber-200 bg-amber-50 text-amber-700">
+                        Unsaved changes
+                    </Badge>
+                ) : null}
+            </div>
+            <div className="text-muted-foreground text-xs">
+                {template ? (
+                    <>
+                        Last updated{' '}
+                        {template.updated_at
+                            ? new Date(template.updated_at).toLocaleString()
+                            : 'recently'}
+                        .
+                    </>
+                ) : (
+                    <>No template has been saved yet for this scope.</>
+                )}
+            </div>
+        </>
+    );
+}
+
+export function TemplateStatusCard({
+    template,
+    scopeLabel,
+    hasUnsavedChanges,
+    variant = 'card',
+    className,
+}: TemplateStatusCardProps) {
+    if (variant === 'inline') {
+        return (
+            <div className={cn('space-y-1.5', className)}>
+                <p className="text-foreground/80 text-[11px] font-semibold uppercase tracking-[0.14em]">
+                    Template status
+                </p>
+                <TemplateStatusContent
+                    template={template}
+                    scopeLabel={scopeLabel}
+                    hasUnsavedChanges={hasUnsavedChanges}
+                />
+            </div>
+        );
+    }
+
+    return (
+        <Card className={className}>
+            <CardHeader>
+                <CardTitle>Template status</CardTitle>
+                <CardDescription>
+                    Current scope, version, and whether the editor has unpublished local changes.
+                </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-3">
+                <TemplateStatusContent
+                    template={template}
+                    scopeLabel={scopeLabel}
+                    hasUnsavedChanges={hasUnsavedChanges}
+                />
+            </CardContent>
+        </Card>
+    );
+}

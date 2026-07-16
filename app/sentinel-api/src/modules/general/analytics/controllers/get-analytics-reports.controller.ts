@@ -29,6 +29,7 @@ export const getAnalyticsReportsRoute = createRoute({
         },
         401: { description: 'Unauthorized' },
         403: { description: 'Forbidden' },
+        404: { description: 'Target institution not found' },
         500: { description: 'Internal Server Error' },
     },
 });
@@ -37,23 +38,30 @@ export const getAnalyticsReportsRouteHandler: AppRouteHandler<
     typeof getAnalyticsReportsRoute
 > = async (c) => {
     try {
+        const role = c.get('role');
+
+        if (role !== 'support') {
+            return c.json({ success: false, error: 'Forbidden. Support role required.' }, 403 as any);
+        }
+
         requireActivePermission(
             c,
-            ['dashboard:view_analytics', 'reports:view'],
-            'Forbidden. You do not have permission to view analytics.',
+            ['reports:view'],
+            'Forbidden. You do not have permission to view reports.',
         );
 
         const query = c.req.valid('query');
-        const role = c.get('role');
-        const authedInstitutionId = c.get('institutionId');
+        const targetInstitutionId = query.institutionId || query.institution_id;
 
-        let targetInstitutionId = authedInstitutionId;
-        if ((role === 'support' || role === 'superadmin') && query.institution_id) {
-            targetInstitutionId = query.institution_id;
-        }
-
-        if (!targetInstitutionId && role !== 'support' && role !== 'superadmin') {
-            return c.json({ error: 'Unauthorized. Institution ID not found.' }, 401 as any);
+        if (targetInstitutionId) {
+            const instExists = await c.get('dbClient')
+                .selectFrom('institutions')
+                .select('id')
+                .where('id', '=', targetInstitutionId)
+                .executeTakeFirst();
+            if (!instExists) {
+                return c.json({ success: false, error: 'Target institution not found.' }, 404 as any);
+            }
         }
 
         const data = await AnalyticsService.getReports({

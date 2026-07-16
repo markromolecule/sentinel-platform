@@ -53,6 +53,37 @@ const sortedRoles = [
     },
 ];
 
+const groupedPermissions = [
+    {
+        categoryKey: 'SYSTEM',
+        categoryLabel: 'System Support',
+        modules: [
+            {
+                moduleKey: 'pdf_templates',
+                moduleLabel: 'PDF Templates',
+                helperText: 'Manage PDF template access.',
+                permissions: [
+                    {
+                        id: 'perm-pdf-templates-manage',
+                        key: 'pdf_templates:manage',
+                        moduleKey: 'pdf_templates',
+                        actionKey: 'manage',
+                        category: 'SYSTEM',
+                        scope: 'global',
+                        name: 'Manage PDF Templates',
+                        description: 'Create, update, and delete PDF templates.',
+                        isSystem: true,
+                        roleCount: 1,
+                        overrideCount: 0,
+                        createdAt: null,
+                        updatedAt: null,
+                    },
+                ],
+            },
+        ],
+    },
+];
+
 describe('RoleMatrixTable', () => {
     it('renders sync-mode badges and only shows reset for customized system roles', () => {
         const onSetRoleToDelete = vi.fn();
@@ -61,10 +92,10 @@ describe('RoleMatrixTable', () => {
         render(
             <RoleMatrixTable
                 sortedRoles={sortedRoles}
-                groupedPermissions={[]}
+                groupedPermissions={groupedPermissions}
                 draftPermissionIdsByRoleId={{
-                    1: ['perm-1'],
-                    2: ['perm-1'],
+                    1: ['perm-pdf-templates-manage'],
+                    2: ['perm-pdf-templates-manage'],
                     3: [],
                 }}
                 savingRoleIds={[]}
@@ -86,6 +117,12 @@ describe('RoleMatrixTable', () => {
 
         expect(screen.getByText('BLUEPRINT')).toBeDefined();
         expect(screen.getByText('CUSTOM')).toBeDefined();
+        expect(screen.getByText('Manage PDF Templates')).toBeTruthy();
+        expect(
+            screen.getByRole('checkbox', {
+                name: 'Manage PDF Templates for Support',
+            }),
+        ).toBeTruthy();
         expect(screen.queryByText('Reset')).toBeTruthy();
         expect(screen.queryByText('Delete')).toBeTruthy();
 

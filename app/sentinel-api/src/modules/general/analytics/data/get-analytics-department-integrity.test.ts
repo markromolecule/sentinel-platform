@@ -4,8 +4,24 @@ import { getAnalyticsDepartmentIntegrityData } from './get-analytics-department-
 describe('getAnalyticsDepartmentIntegrityData', () => {
     it('queries and returns department integrity metrics correctly', async () => {
         const mockRows = [
-            { department: 'Engineering', completed: 100, flagged: 5, dropped: 10 },
-            { department: 'Business', completed: 150, flagged: 15, dropped: 20 },
+            {
+                department: 'Engineering',
+                completed: 100,
+                flagged: 5,
+                dropped: 10,
+                courseCount: 4,
+                studentCount: 87,
+                averageScore: 82.5,
+            },
+            {
+                department: 'Business',
+                completed: 150,
+                flagged: 15,
+                dropped: 20,
+                courseCount: 5,
+                studentCount: 123,
+                averageScore: 79.2,
+            },
         ];
 
         const mockExecute = vi.fn().mockResolvedValue(mockRows);
@@ -25,8 +41,24 @@ describe('getAnalyticsDepartmentIntegrityData', () => {
         });
 
         expect(result).toEqual([
-            { department: 'Engineering', completed: 100, flagged: 5, dropped: 10 },
-            { department: 'Business', completed: 150, flagged: 15, dropped: 20 },
+            {
+                department: 'Engineering',
+                completed: 100,
+                flagged: 5,
+                dropped: 10,
+                courseCount: 4,
+                studentCount: 87,
+                averageScore: 82.5,
+            },
+            {
+                department: 'Business',
+                completed: 150,
+                flagged: 15,
+                dropped: 20,
+                courseCount: 5,
+                studentCount: 123,
+                averageScore: 79.2,
+            },
         ]);
 
         expect(mockDbClient.selectFrom).toHaveBeenCalledWith('departments as d');

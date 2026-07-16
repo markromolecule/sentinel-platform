@@ -17,6 +17,11 @@ export type AnalyticsReportRecord = {
     createdBy: string | null;
     creatorFirstName: string | null;
     creatorLastName: string | null;
+    institutionId: string | null;
+    failureCode: string | null;
+    failureMessage: string | null;
+    expiresAt: Date | null;
+    retryCount: number;
 };
 
 export type GetAnalyticsReportsResult = {
@@ -28,6 +33,7 @@ export type GetAnalyticsReportsResult = {
 
 /**
  * Retrieves a paginated list of generated analytics reports.
+ * Filters directly on analytics_reports.institution_id and excludes legacy null-institution rows.
  */
 export async function getAnalyticsReportsData(
     dbClient: DbClient,
@@ -41,7 +47,9 @@ export async function getAnalyticsReportsData(
         .leftJoin('user_profiles as up', 'up.user_id', 'ar.created_by');
 
     if (institutionId) {
-        baseQuery = baseQuery.where('up.institution_id', '=', institutionId);
+        baseQuery = baseQuery.where('ar.institution_id', '=', institutionId);
+    } else {
+        baseQuery = baseQuery.where('ar.institution_id', 'is not', null);
     }
 
     const countRes = await baseQuery
@@ -61,13 +69,17 @@ export async function getAnalyticsReportsData(
             'ar.created_by as createdBy',
             'up.first_name as creatorFirstName',
             'up.last_name as creatorLastName',
+            'ar.institution_id as institutionId',
+            'ar.failure_code as failureCode',
+            'ar.failure_message as failureMessage',
+            'ar.expires_at as expiresAt',
+            'ar.retry_count as retryCount',
         ])
         .orderBy('ar.generated_at', 'desc')
         .limit(limit)
         .offset(offset)
         .execute();
 
-    // Map Kysely output explicitly to ensure Date types remain clean
     const mappedRecords = records.map((r) => ({
         reportId: r.reportId,
         title: r.title,
@@ -79,6 +91,11 @@ export async function getAnalyticsReportsData(
         createdBy: r.createdBy,
         creatorFirstName: r.creatorFirstName,
         creatorLastName: r.creatorLastName,
+        institutionId: r.institutionId,
+        failureCode: r.failureCode,
+        failureMessage: r.failureMessage,
+        expiresAt: r.expiresAt ? new Date(r.expiresAt) : null,
+        retryCount: Number(r.retryCount ?? 0),
     }));
 
     return {

@@ -196,3 +196,4 @@ export * from './access-control/access-control-schema';
 // Messages
 export * from './messages/message-schema';
 export * from './feedbacks/feedback-schema';
+export * from './pdf-documents';
