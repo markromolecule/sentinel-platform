@@ -43,9 +43,11 @@ vi.mock('./pdf-generation-job-processor.service', () => ({
 
 describe('pdf-generation.worker', () => {
     beforeEach(async () => {
+        process.env.PDF_GENERATION_MODE = 'redis';
         vi.clearAllMocks();
         vi.resetModules();
     });
+
 
     it('starts the worker once with the expected queue settings', async () => {
         const { startPdfGenerationWorker, stopPdfGenerationWorker } = await import(
@@ -116,6 +118,22 @@ describe('pdf-generation.worker', () => {
                 },
             }),
         ).rejects.toThrow('render failed');
+
+        await stopPdfGenerationWorker();
+    });
+
+    it('does not start the worker and returns null when mode is sync', async () => {
+        process.env.PDF_GENERATION_MODE = 'sync';
+
+        const { startPdfGenerationWorker, stopPdfGenerationWorker } = await import(
+            './pdf-generation.worker'
+        );
+
+        const worker = await startPdfGenerationWorker();
+
+        expect(worker).toBeNull();
+        expect(createRedisConnectionMock).not.toHaveBeenCalled();
+        expect(workerCtorMock).not.toHaveBeenCalled();
 
         await stopPdfGenerationWorker();
     });

@@ -1,6 +1,8 @@
 import { Queue } from 'bullmq';
 import { createRedisConnection, closeRedisConnection } from '../../../../lib/redis/redis.service';
-import { PDF_QUEUE_NAME, getPdfJobOptions } from './pdf-generation-queue.config';
+import { PDF_QUEUE_NAME, getPdfJobOptions, getPdfGenerationMode } from './pdf-generation-queue.config';
+import { PdfGenerationJobProcessor } from './pdf-generation-job-processor.service';
+import { dbClient } from '@sentinel/db';
 
 export class PdfGenerationQueueService {
     private queue: Queue | null = null;
@@ -28,7 +30,27 @@ export class PdfGenerationQueueService {
      * @param documentKind type of document being generated
      */
     async submitPdfJob(exportId: string, documentKind: 'ANALYTICS_OVERALL' | 'EXAM_ANSWER_KEY'): Promise<void> {
+        const mode = getPdfGenerationMode();
+
+        if (mode === 'sync') {
+            console.log(
+                `[PdfGenerationQueueService] PDF generation mode is "sync". Executing job ${exportId} synchronously in process...`,
+            );
+
+            // Fire and forget: run the job asynchronously in background without blocking Hono route
+            void PdfGenerationJobProcessor.processJob(dbClient, exportId, documentKind)
+                .then(() => {
+                    console.log(`[PdfGenerationQueueService] Synchronous job ${exportId} completed successfully.`);
+                })
+                .catch((err) => {
+                    console.error(`[PdfGenerationQueueService] Synchronous job ${exportId} failed:`, err);
+                });
+
+            return;
+        }
+
         const queue = await this.getQueue();
+
         await queue.add('generate-pdf', { exportId, documentKind }, {
             jobId: exportId
         });
