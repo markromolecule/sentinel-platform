@@ -1,13 +1,14 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { PdfGenerationQueueService } from './pdf-generation-queue.service';
 
-const { addMock, closeMock, createRedisConnectionMock, closeRedisConnectionMock, queueCtorMock } =
+const { addMock, closeMock, createRedisConnectionMock, closeRedisConnectionMock, queueCtorMock, processJobMock } =
     vi.hoisted(() => ({
         addMock: vi.fn().mockResolvedValue(undefined),
         closeMock: vi.fn().mockResolvedValue(undefined),
         createRedisConnectionMock: vi.fn().mockReturnValue({ connection: 'redis' }),
         closeRedisConnectionMock: vi.fn().mockResolvedValue(undefined),
         queueCtorMock: vi.fn(),
+        processJobMock: vi.fn().mockResolvedValue(undefined),
     }));
 
 vi.mock('bullmq', () => ({
@@ -26,13 +27,25 @@ vi.mock('../../../../lib/redis/redis.service', () => ({
     closeRedisConnection: closeRedisConnectionMock,
 }));
 
+vi.mock('@sentinel/db', () => ({
+    dbClient: { connection: 'mock-db' },
+}));
+
+vi.mock('./pdf-generation-job-processor.service', () => ({
+    PdfGenerationJobProcessor: {
+        processJob: processJobMock,
+    },
+}));
+
 describe('PdfGenerationQueueService', () => {
     let service: PdfGenerationQueueService;
 
     beforeEach(() => {
+        process.env.PDF_GENERATION_MODE = 'redis';
         vi.clearAllMocks();
         service = new PdfGenerationQueueService();
     });
+
 
     it('creates the queue lazily and reuses it', async () => {
         const first = await service.getQueue();
@@ -59,6 +72,22 @@ describe('PdfGenerationQueueService', () => {
             'generate-pdf',
             { exportId: 'export-123', documentKind: 'ANALYTICS_OVERALL' },
             { jobId: 'export-123' },
+        );
+    });
+
+    it('submits jobs synchronously in-process when mode is sync', async () => {
+        process.env.PDF_GENERATION_MODE = 'sync';
+
+        await service.submitPdfJob('export-789', 'EXAM_ANSWER_KEY');
+
+        // Sleep briefly to let the asynchronous background promise fire
+        await new Promise((resolve) => setTimeout(resolve, 5));
+
+        expect(addMock).not.toHaveBeenCalled();
+        expect(processJobMock).toHaveBeenCalledWith(
+            expect.anything(),
+            'export-789',
+            'EXAM_ANSWER_KEY',
         );
     });
 

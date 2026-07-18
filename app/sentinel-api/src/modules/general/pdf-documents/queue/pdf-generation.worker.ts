@@ -1,7 +1,7 @@
 import { Worker, Job } from 'bullmq';
 import { dbClient } from '@sentinel/db';
 import { createRedisConnection, closeRedisConnection } from '../../../../lib/redis/redis.service';
-import { PDF_QUEUE_NAME } from './pdf-generation-queue.config';
+import { PDF_QUEUE_NAME, getPdfGenerationMode } from './pdf-generation-queue.config';
 import { PdfGenerationJobProcessor } from './pdf-generation-job-processor.service';
 
 let worker: Worker | null = null;
@@ -11,10 +11,18 @@ let workerConnection: any = null;
  * Initializes and starts the background BullMQ Worker for PDF generation.
  * Handles jobs concurrently (concurrency 2) and locks connections gracefully.
  */
-export async function startPdfGenerationWorker(): Promise<Worker> {
+export async function startPdfGenerationWorker(): Promise<Worker | null> {
     if (worker) return worker;
 
+    if (getPdfGenerationMode() !== 'redis') {
+        console.log(
+            `[PDFWorker] PDF generation mode is set to "${getPdfGenerationMode()}". PDF worker is inactive.`,
+        );
+        return null;
+    }
+
     workerConnection = createRedisConnection('worker');
+
 
     worker = new Worker(
         PDF_QUEUE_NAME,
