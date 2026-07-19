@@ -83,10 +83,10 @@ export function useAdminCalendar() {
                 event.targetAudience === 'ALL'
                     ? 'institution'
                     : event.targetAudience === 'ADMINS'
-                        ? 'administrator'
-                        : event.targetAudience === 'INSTRUCTORS'
-                            ? 'instructor'
-                            : 'student',
+                      ? 'administrator'
+                      : event.targetAudience === 'INSTRUCTORS'
+                        ? 'instructor'
+                        : 'student',
             startTime: event.startTime || undefined,
             endTime: event.endTime || undefined,
             createdBy: event.createdBy || '',
@@ -104,16 +104,16 @@ export function useAdminCalendar() {
                 newEventData.type === 'event'
                     ? 'EVENT'
                     : newEventData.type === 'announcement'
-                        ? 'ANNOUNCEMENT'
-                        : 'MAINTENANCE',
+                      ? 'ANNOUNCEMENT'
+                      : 'MAINTENANCE',
             targetAudience:
                 newEventData.targetAudience === 'institution'
                     ? 'ALL'
                     : newEventData.targetAudience === 'administrator'
-                        ? 'ADMINS'
-                        : newEventData.targetAudience === 'instructor'
-                            ? 'INSTRUCTORS'
-                            : 'STUDENTS',
+                      ? 'ADMINS'
+                      : newEventData.targetAudience === 'instructor'
+                        ? 'INSTRUCTORS'
+                        : 'STUDENTS',
             startDate: newEventData.date.toISOString(),
             startTime: newEventData.startTime || undefined,
             endTime: newEventData.endTime || undefined,

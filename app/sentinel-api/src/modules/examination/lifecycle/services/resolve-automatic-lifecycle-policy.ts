@@ -21,7 +21,7 @@ export type AutomaticLifecycleResolution =
  * attempt close. Reads the exam-specific automatic close configuration, applying
  * the configured highIncidentThreshold, windowMinutes, useOccurrenceCount,
  * and immediateCloseEventTypes.
- * 
+ *
  * @param args - Arguments including the DB client, target attempt ID, and optional triggering event type.
  * @returns Decision on whether to close the attempt and associated metadata.
  */
@@ -67,7 +67,8 @@ export async function resolveAutomaticLifecyclePolicy(args: {
         };
     }
 
-    const highIncidentThreshold = policy.highIncidentThreshold ?? AUTOMATIC_ATTEMPT_CLOSE_POLICY.thresholdCount;
+    const highIncidentThreshold =
+        policy.highIncidentThreshold ?? AUTOMATIC_ATTEMPT_CLOSE_POLICY.thresholdCount;
     const windowMinutes = policy.windowMinutes ?? AUTOMATIC_ATTEMPT_CLOSE_POLICY.windowMinutes;
     const useOccurrenceCount = policy.useOccurrenceCount === true;
     const immediateCloseEventTypes = policy.immediateCloseEventTypes || [];
@@ -84,9 +85,7 @@ export async function resolveAutomaticLifecyclePolicy(args: {
         };
     }
 
-    const threshold = new Date(
-        Date.now() - windowMinutes * 60 * 1000,
-    );
+    const threshold = new Date(Date.now() - windowMinutes * 60 * 1000);
     const highIncidents = await args.dbClient
         .selectFrom('flagged_incidents')
         .select(['incident_id', 'details'])
@@ -103,9 +102,8 @@ export async function resolveAutomaticLifecyclePolicy(args: {
         matchingIncidentIds.push(incident.incident_id);
         if (useOccurrenceCount) {
             const details = incident.details as any;
-            const count = typeof details?.occurrenceCount === 'number'
-                ? details.occurrenceCount
-                : 1;
+            const count =
+                typeof details?.occurrenceCount === 'number' ? details.occurrenceCount : 1;
             totalOccurrences += count;
         } else {
             totalOccurrences += 1;

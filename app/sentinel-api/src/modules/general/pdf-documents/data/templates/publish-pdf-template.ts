@@ -6,7 +6,7 @@ import { executeTransaction, type DbClient } from '@sentinel/db';
  * 2. Archiving any existing PUBLISHED template for the same scope and kind.
  * 3. Updating the DRAFT template's status to PUBLISHED with version and publisher metadata.
  * All operations run transactionally.
- * 
+ *
  * @param dbClient database client
  * @param templateId template ID to publish
  * @param userId publishing user ID
@@ -15,7 +15,7 @@ import { executeTransaction, type DbClient } from '@sentinel/db';
 export async function publishPdfTemplate(
     dbClient: DbClient,
     templateId: string,
-    userId: string
+    userId: string,
 ): Promise<{ templateId: string; version: number }> {
     return await executeTransaction(async (trx) => {
         // Fetch the draft template

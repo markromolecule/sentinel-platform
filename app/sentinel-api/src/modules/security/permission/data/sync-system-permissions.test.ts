@@ -46,8 +46,12 @@ describe('syncSystemPermissions', () => {
         expect(SYSTEM_ROLE_BLUEPRINTS.support.permissionKeys).toContain('reports:generate');
         expect(SYSTEM_ROLE_BLUEPRINTS.support.permissionKeys).toContain('pdf_templates:view');
         expect(SYSTEM_ROLE_BLUEPRINTS.support.permissionKeys).toContain('pdf_templates:manage');
-        expect(SYSTEM_ROLE_BLUEPRINTS.support.permissionKeys).toContain('institution_branding:manage');
-        expect(SYSTEM_ROLE_BLUEPRINTS.support.permissionKeys).toContain('examinations:export_answer_key');
+        expect(SYSTEM_ROLE_BLUEPRINTS.support.permissionKeys).toContain(
+            'institution_branding:manage',
+        );
+        expect(SYSTEM_ROLE_BLUEPRINTS.support.permissionKeys).toContain(
+            'examinations:export_answer_key',
+        );
     });
 
     it('should define feedback:view and grant it to the support blueprint', () => {

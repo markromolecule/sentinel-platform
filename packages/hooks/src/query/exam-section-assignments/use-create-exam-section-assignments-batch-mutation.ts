@@ -1,7 +1,7 @@
 import { useMutation, useQueryClient, type UseMutationOptions } from '@tanstack/react-query';
 import {
     createExamSectionAssignmentsBatch,
-    type CreateExamSectionAssignmentPayload,
+    type CreateExamSectionAssignmentBatchItemPayload,
     type ExamSectionAssignmentRecord,
 } from '@sentinel/services';
 import { EXAM_QUERY_KEYS } from '@sentinel/shared/constants';
@@ -11,7 +11,7 @@ import { useApi } from '../../api-provider';
 export type UseCreateExamSectionAssignmentsBatchMutationArgs = UseMutationOptions<
     ExamSectionAssignmentRecord[],
     Error,
-    { examId: string; payload: { assignments: CreateExamSectionAssignmentPayload[] } }
+    { examId: string; payload: { assignments: CreateExamSectionAssignmentBatchItemPayload[] } }
 >;
 
 /**

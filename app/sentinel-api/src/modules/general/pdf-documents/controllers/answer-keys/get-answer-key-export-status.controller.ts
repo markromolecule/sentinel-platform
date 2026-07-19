@@ -35,7 +35,9 @@ export const getAnswerKeyExportStatusRoute = createRoute({
     },
 });
 
-export const getAnswerKeyExportStatusHandler: AppRouteHandler<typeof getAnswerKeyExportStatusRoute> = async (c) => {
+export const getAnswerKeyExportStatusHandler: AppRouteHandler<
+    typeof getAnswerKeyExportStatusRoute
+> = async (c) => {
     const dbClient = c.get('dbClient');
 
     requirePdfDocumentAccess({
@@ -64,7 +66,13 @@ export const getAnswerKeyExportStatusHandler: AppRouteHandler<typeof getAnswerKe
         if (
             !(await canAccessPdfInstitutionScope(dbClient, userInstitutionId, row.institution_id))
         ) {
-            return c.json({ success: false, error: 'Forbidden: Access denied to this institution\'s exports.' }, 403 as any);
+            return c.json(
+                {
+                    success: false,
+                    error: "Forbidden: Access denied to this institution's exports.",
+                },
+                403 as any,
+            );
         }
 
         const data: z.infer<typeof answerKeyExportRecordSchema> = {
@@ -79,13 +87,26 @@ export const getAnswerKeyExportStatusHandler: AppRouteHandler<typeof getAnswerKe
             storageBucket: row.storage_bucket ?? null,
             storagePath: row.storage_path ?? null,
             createdBy: row.created_by ?? null,
-            createdAt: row.created_at instanceof Date ? row.created_at.toISOString() : String(row.created_at),
-            updatedAt: row.updated_at instanceof Date ? row.updated_at.toISOString() : String(row.updated_at),
-            completedAt: row.completed_at ? (row.completed_at instanceof Date ? row.completed_at.toISOString() : String(row.completed_at)) : null,
+            createdAt:
+                row.created_at instanceof Date
+                    ? row.created_at.toISOString()
+                    : String(row.created_at),
+            updatedAt:
+                row.updated_at instanceof Date
+                    ? row.updated_at.toISOString()
+                    : String(row.updated_at),
+            completedAt: row.completed_at
+                ? row.completed_at instanceof Date
+                    ? row.completed_at.toISOString()
+                    : String(row.completed_at)
+                : null,
         };
 
         return c.json({ success: true, data }) as any;
     } catch (e: any) {
-        return c.json({ success: false, error: e.message || 'Failed to retrieve export status.' }, 500 as any);
+        return c.json(
+            { success: false, error: e.message || 'Failed to retrieve export status.' },
+            500 as any,
+        );
     }
 };

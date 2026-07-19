@@ -3,10 +3,13 @@ import {
     type DocumentKind,
     type HeaderConfig,
     type FooterConfig,
-    type TemplateStatus
+    type TemplateStatus,
 } from '@sentinel/shared/types';
 import { getPdfTemplates } from './data/templates/get-pdf-templates';
-import { upsertPdfTemplateDraft, UpsertPdfTemplateDraftInput } from './data/templates/upsert-pdf-template-draft';
+import {
+    upsertPdfTemplateDraft,
+    UpsertPdfTemplateDraftInput,
+} from './data/templates/upsert-pdf-template-draft';
 import { publishPdfTemplate } from './data/templates/publish-pdf-template';
 import { deletePdfTemplateOverride } from './data/templates/delete-pdf-template-override';
 import { resolvePdfTemplate } from './services/resolve-pdf-template.service';
@@ -21,7 +24,7 @@ export class PdfTemplateService {
             institutionId?: string | null;
             documentKind?: DocumentKind | null;
             status?: TemplateStatus | null;
-        }
+        },
     ) {
         return await getPdfTemplates(dbClient, filters);
     }
@@ -29,21 +32,14 @@ export class PdfTemplateService {
     /**
      * Upserts a draft template.
      */
-    static async upsertDraft(
-        dbClient: DbClient,
-        input: UpsertPdfTemplateDraftInput
-    ) {
+    static async upsertDraft(dbClient: DbClient, input: UpsertPdfTemplateDraftInput) {
         return await upsertPdfTemplateDraft(dbClient, input);
     }
 
     /**
      * Publishes a draft template.
      */
-    static async publishTemplate(
-        dbClient: DbClient,
-        templateId: string,
-        userId: string
-    ) {
+    static async publishTemplate(dbClient: DbClient, templateId: string, userId: string) {
         return await publishPdfTemplate(dbClient, templateId, userId);
     }
 
@@ -53,7 +49,7 @@ export class PdfTemplateService {
     static async deleteDraftOverride(
         dbClient: DbClient,
         institutionId: string,
-        documentKind: DocumentKind
+        documentKind: DocumentKind,
     ) {
         return await deletePdfTemplateOverride(dbClient, institutionId, documentKind);
     }
@@ -64,7 +60,7 @@ export class PdfTemplateService {
     static async resolveActiveTemplate(
         dbClient: DbClient,
         institutionId: string | null,
-        documentKind: DocumentKind
+        documentKind: DocumentKind,
     ) {
         return await resolvePdfTemplate(dbClient, institutionId, documentKind);
     }

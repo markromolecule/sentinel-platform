@@ -1,6 +1,10 @@
 import { Queue } from 'bullmq';
 import { createRedisConnection, closeRedisConnection } from '../../../../lib/redis/redis.service';
-import { PDF_QUEUE_NAME, getPdfJobOptions, getPdfGenerationMode } from './pdf-generation-queue.config';
+import {
+    PDF_QUEUE_NAME,
+    getPdfJobOptions,
+    getPdfGenerationMode,
+} from './pdf-generation-queue.config';
 import { PdfGenerationJobProcessor } from './pdf-generation-job-processor.service';
 import { dbClient } from '@sentinel/db';
 
@@ -16,7 +20,7 @@ export class PdfGenerationQueueService {
             this.queueConnection = createRedisConnection('producer');
             this.queue = new Queue(PDF_QUEUE_NAME, {
                 connection: this.queueConnection,
-                defaultJobOptions: getPdfJobOptions()
+                defaultJobOptions: getPdfJobOptions(),
             });
         }
         return this.queue;
@@ -25,11 +29,14 @@ export class PdfGenerationQueueService {
     /**
      * Queues a PDF generation background job. Uses the export UUID as the jobId
      * to prevent duplicate concurrent generation requests for the same artifact.
-     * 
+     *
      * @param exportId unique PDF export document ID
      * @param documentKind type of document being generated
      */
-    async submitPdfJob(exportId: string, documentKind: 'ANALYTICS_OVERALL' | 'EXAM_ANSWER_KEY'): Promise<void> {
+    async submitPdfJob(
+        exportId: string,
+        documentKind: 'ANALYTICS_OVERALL' | 'EXAM_ANSWER_KEY',
+    ): Promise<void> {
         const mode = getPdfGenerationMode();
 
         if (mode === 'sync') {
@@ -40,10 +47,15 @@ export class PdfGenerationQueueService {
             // Fire and forget: run the job asynchronously in background without blocking Hono route
             void PdfGenerationJobProcessor.processJob(dbClient, exportId, documentKind)
                 .then(() => {
-                    console.log(`[PdfGenerationQueueService] Synchronous job ${exportId} completed successfully.`);
+                    console.log(
+                        `[PdfGenerationQueueService] Synchronous job ${exportId} completed successfully.`,
+                    );
                 })
                 .catch((err) => {
-                    console.error(`[PdfGenerationQueueService] Synchronous job ${exportId} failed:`, err);
+                    console.error(
+                        `[PdfGenerationQueueService] Synchronous job ${exportId} failed:`,
+                        err,
+                    );
                 });
 
             return;
@@ -51,9 +63,13 @@ export class PdfGenerationQueueService {
 
         const queue = await this.getQueue();
 
-        await queue.add('generate-pdf', { exportId, documentKind }, {
-            jobId: exportId
-        });
+        await queue.add(
+            'generate-pdf',
+            { exportId, documentKind },
+            {
+                jobId: exportId,
+            },
+        );
     }
 
     /**

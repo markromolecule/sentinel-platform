@@ -39,7 +39,10 @@ describe('updateUserRouteHandler', () => {
                     return 'inst-id';
                 }
                 if (key === 'user') {
-                    return { id: 'requester-id', user_profiles: { department_id: 'dept-id', course_id: 'course-id' } };
+                    return {
+                        id: 'requester-id',
+                        user_profiles: { department_id: 'dept-id', course_id: 'course-id' },
+                    };
                 }
                 if (key === 'dbClient') {
                     return {};
@@ -70,19 +73,22 @@ describe('updateUserRouteHandler', () => {
             'inst-id',
             'requester-id',
             'dept-id',
-            'course-id'
+            'course-id',
         );
         expect(json).toHaveBeenCalledWith(
             {
                 message: 'User updated successfully',
                 data: mockUser,
             },
-            200
+            200,
         );
     });
 
     it('returns 404 and suppresses console.error when user profile not found after update', async () => {
-        vi.mocked(UserService.updateUser).mockRejectedValue({ status: 404, message: 'User profile not found after update' });
+        vi.mocked(UserService.updateUser).mockRejectedValue({
+            status: 404,
+            message: 'User profile not found after update',
+        });
 
         const json = vi.fn();
         const c = {

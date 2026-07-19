@@ -1,6 +1,12 @@
 import { describe, expect, it, vi } from 'vitest';
 import { getAnalyticsDepartmentIntegrityData } from './get-analytics-department-integrity';
 
+vi.mock('../../notification/helper/resolve-related-institutions', () => ({
+    resolveRelatedInstitutions: vi.fn((_dbClient, institutionId) =>
+        Promise.resolve(institutionId ? [institutionId] : []),
+    ),
+}));
+
 describe('getAnalyticsDepartmentIntegrityData', () => {
     it('queries and returns department integrity metrics correctly', async () => {
         const mockRows = [
@@ -62,6 +68,6 @@ describe('getAnalyticsDepartmentIntegrityData', () => {
         ]);
 
         expect(mockDbClient.selectFrom).toHaveBeenCalledWith('departments as d');
-        expect(mockDbClient.where).toHaveBeenCalledWith('d.institution_id', '=', 'inst-123');
+        expect(mockDbClient.where).toHaveBeenCalledWith('d.institution_id', 'in', ['inst-123']);
     });
 });

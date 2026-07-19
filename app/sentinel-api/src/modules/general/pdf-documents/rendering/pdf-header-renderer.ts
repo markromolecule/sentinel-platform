@@ -17,7 +17,7 @@ export interface HeaderConfig {
 
 /**
  * Renders the header on the current page of the PDF.
- * 
+ *
  * @param doc PDFKit document instance
  * @param config header configuration
  * @param logoBuffer optional PNG buffer of the institution logo
@@ -27,17 +27,16 @@ export function renderPdfHeader(
     doc: typeof PDFDocument,
     config: HeaderConfig,
     logoBuffer?: Buffer | null,
-    sentinelLogoBuffer?: Buffer | null
+    sentinelLogoBuffer?: Buffer | null,
 ): void {
     const startY = PDF_LAYOUT.headerY;
     const endY = PDF_LAYOUT.marginTop - 15;
-    
+
     doc.save();
 
     // 1. Draw Accent Strip if configured
     if (config.accent_color) {
-        doc.rect(0, 0, PDF_LAYOUT.pageWidth, 8)
-           .fill(config.accent_color);
+        doc.rect(0, 0, PDF_LAYOUT.pageWidth, 8).fill(config.accent_color);
     }
 
     let logoWidth = 50;
@@ -65,8 +64,8 @@ export function renderPdfHeader(
         } catch (e) {
             // Fallback: draw box with text if image corrupt
             doc.rect(logoX, logoY, logoWidth, logoHeight)
-               .strokeColor(PDF_LAYOUT.colors.border)
-               .stroke();
+                .strokeColor(PDF_LAYOUT.colors.border)
+                .stroke();
         }
     }
 
@@ -82,9 +81,7 @@ export function renderPdfHeader(
             doc.image(sentinelLogoBuffer, sLogoX, sLogoY, { width: 70, height: 18 });
         } catch (e) {
             // Silent ignore or simple text
-            doc.fontSize(8)
-               .fillColor(PDF_LAYOUT.colors.textLight)
-               .text('SENTINEL', sLogoX, sLogoY);
+            doc.fontSize(8).fillColor(PDF_LAYOUT.colors.textLight).text('SENTINEL', sLogoX, sLogoY);
         }
     }
 
@@ -106,29 +103,28 @@ export function renderPdfHeader(
     }
 
     doc.fillColor(PDF_LAYOUT.colors.textPrimary);
-    
+
     // Draw Title
-    doc.font(PDF_LAYOUT.fonts.bold)
-       .fontSize(14);
-       
-    const titleAlign = config.title_alignment?.toLowerCase() as 'left' | 'right' | 'center' || 'left';
+    doc.font(PDF_LAYOUT.fonts.bold).fontSize(14);
+
+    const titleAlign =
+        (config.title_alignment?.toLowerCase() as 'left' | 'right' | 'center') || 'left';
     doc.text(titleText, textX, startY + 2, {
         width: textWidth,
         align: titleAlign,
-        lineBreak: false
+        lineBreak: false,
     });
 
     // Draw Subtitle if present
     if (subtitleText) {
-        doc.font(PDF_LAYOUT.fonts.regular)
-           .fontSize(9)
-           .fillColor(PDF_LAYOUT.colors.textSecondary);
-           
-        const subtitleAlign = config.subtitle_alignment?.toLowerCase() as 'left' | 'right' | 'center' || 'left';
+        doc.font(PDF_LAYOUT.fonts.regular).fontSize(9).fillColor(PDF_LAYOUT.colors.textSecondary);
+
+        const subtitleAlign =
+            (config.subtitle_alignment?.toLowerCase() as 'left' | 'right' | 'center') || 'left';
         doc.text(subtitleText, textX, startY + 20, {
             width: textWidth,
             align: subtitleAlign,
-            lineBreak: false
+            lineBreak: false,
         });
     }
 
@@ -136,10 +132,10 @@ export function renderPdfHeader(
     if (config.divider_visible !== false) {
         const divColor = config.divider_color || PDF_LAYOUT.colors.border;
         doc.moveTo(PDF_LAYOUT.marginLeft, endY)
-           .lineTo(PDF_LAYOUT.pageWidth - PDF_LAYOUT.marginRight, endY)
-           .strokeColor(divColor)
-           .lineWidth(0.75)
-           .stroke();
+            .lineTo(PDF_LAYOUT.pageWidth - PDF_LAYOUT.marginRight, endY)
+            .strokeColor(divColor)
+            .lineWidth(0.75)
+            .stroke();
     }
 
     doc.restore();

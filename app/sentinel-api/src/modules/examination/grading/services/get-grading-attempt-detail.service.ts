@@ -153,8 +153,8 @@ export async function getGradingAttemptDetail({
                 finalizedAt: attemptRow.finalizedAt
                     ? attemptRow.finalizedAt.toISOString()
                     : typeof grading.finalizedAt === 'string'
-                        ? grading.finalizedAt
-                        : null,
+                      ? grading.finalizedAt
+                      : null,
                 finalizedBy:
                     attemptRow.finalizedBy ??
                     (typeof grading.finalizedBy === 'string' ? grading.finalizedBy : null),

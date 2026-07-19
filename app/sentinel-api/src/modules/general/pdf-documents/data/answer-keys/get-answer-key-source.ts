@@ -1,6 +1,9 @@
 import { type DbClient } from '@sentinel/db';
 import { UnrecoverableError } from 'bullmq';
-import type { ExamAnswerKeyData, QuestionViewModel } from '../../rendering/exam-answer-key-view-model';
+import type {
+    ExamAnswerKeyData,
+    QuestionViewModel,
+} from '../../rendering/exam-answer-key-view-model';
 
 export type AnswerKeySource = {
     examId: string;
@@ -88,11 +91,14 @@ export async function getAnswerKeySource(
     // 3. Map raw questions to view model (unsanitized — never expose via student API)
     const questions: QuestionViewModel[] = rawQuestions.map((q, idx) => {
         const content: Record<string, any> =
-            typeof q.content === 'string' ? JSON.parse(q.content) : (q.content as Record<string, any>) ?? {};
+            typeof q.content === 'string'
+                ? JSON.parse(q.content)
+                : ((q.content as Record<string, any>) ?? {});
 
         return {
             questionId: q.question_id,
-            type: (q.question_type?.toUpperCase() ?? 'MULTIPLE_CHOICE') as QuestionViewModel['type'],
+            type: (q.question_type?.toUpperCase() ??
+                'MULTIPLE_CHOICE') as QuestionViewModel['type'],
             points: q.points ?? 1,
             text: content.text ?? '',
             passageText: q.passage_content ?? null,
@@ -100,17 +106,17 @@ export async function getAnswerKeySource(
             // Multiple-choice / multiple-select options WITH isCorrect flag
             options: Array.isArray(content.options)
                 ? content.options.map((opt: any) => ({
-                    optionId: opt.optionId ?? opt.id ?? `opt-${idx}`,
-                    optionText: opt.optionText ?? opt.text ?? '',
-                    isCorrect: opt.isCorrect ?? opt.is_correct ?? false,
-                }))
+                      optionId: opt.optionId ?? opt.id ?? `opt-${idx}`,
+                      optionText: opt.optionText ?? opt.text ?? '',
+                      isCorrect: opt.isCorrect ?? opt.is_correct ?? false,
+                  }))
                 : Array.isArray(content.choices)
-                    ? content.choices.map((opt: any) => ({
+                  ? content.choices.map((opt: any) => ({
                         optionId: opt.optionId ?? opt.id ?? `opt-${idx}`,
                         optionText: opt.optionText ?? opt.text ?? '',
                         isCorrect: opt.isCorrect ?? opt.is_correct ?? false,
                     }))
-                    : undefined,
+                  : undefined,
 
             // True/False
             trueFalseAnswer: content.trueFalseAnswer ?? content.correctAnswer,

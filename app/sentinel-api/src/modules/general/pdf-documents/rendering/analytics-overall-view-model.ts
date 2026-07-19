@@ -68,19 +68,21 @@ function sanitizeRoundedNumber(
 /**
  * Normalizes analytics raw data, formatting empty values, rounding percentages/scores,
  * and ensuring stable defaults for missing fields.
- * 
+ *
  * @param data input partial data
  * @returns validated, normalized view model
  */
-export function normalizeAnalyticsOverallData(data: Partial<AnalyticsOverallData>): AnalyticsOverallData {
+export function normalizeAnalyticsOverallData(
+    data: Partial<AnalyticsOverallData>,
+): AnalyticsOverallData {
     const kpis: AnalyticsKPIs = {
         averageScore: sanitizeRoundedNumber(data.kpis?.averageScore, { min: 0, max: 100 }),
         passRate: sanitizeRoundedNumber(data.kpis?.passRate, { min: 0, max: 100 }),
         totalCompletions: data.kpis?.totalCompletions || 0,
-        integrityIncidentsCount: data.kpis?.integrityIncidentsCount || 0
+        integrityIncidentsCount: data.kpis?.integrityIncidentsCount || 0,
     };
 
-    const departments: DepartmentPerformance[] = (data.departments || []).map(dept => ({
+    const departments: DepartmentPerformance[] = (data.departments || []).map((dept) => ({
         departmentName: dept.departmentName || 'Unknown Department',
         courseCount: dept.courseCount || 0,
         studentCount: dept.studentCount || 0,
@@ -89,24 +91,24 @@ export function normalizeAnalyticsOverallData(data: Partial<AnalyticsOverallData
             min: 0,
             max: 100,
             fallback: 0,
-        })
+        }),
     }));
 
-    const incidentTypes: IncidentTypeMetric[] = (data.incidentTypes || []).map(t => ({
+    const incidentTypes: IncidentTypeMetric[] = (data.incidentTypes || []).map((t) => ({
         type: t.type || 'Other',
         count: t.count || 0,
-        percentage: sanitizeRoundedNumber(t.percentage, { min: 0, max: 100 })
+        percentage: sanitizeRoundedNumber(t.percentage, { min: 0, max: 100 }),
     }));
 
     const severityMap = new Map<string, number>();
-    (data.incidentSeverities || []).forEach(s => {
+    (data.incidentSeverities || []).forEach((s) => {
         severityMap.set(s.severity.toUpperCase(), s.count);
     });
 
     const incidentSeverities: IncidentSeverityMetric[] = [
         { severity: 'LOW', count: severityMap.get('LOW') || 0 },
         { severity: 'MEDIUM', count: severityMap.get('MEDIUM') || 0 },
-        { severity: 'HIGH', count: severityMap.get('HIGH') || 0 }
+        { severity: 'HIGH', count: severityMap.get('HIGH') || 0 },
     ];
 
     return {
@@ -117,6 +119,6 @@ export function normalizeAnalyticsOverallData(data: Partial<AnalyticsOverallData
         kpis,
         departments,
         incidentTypes,
-        incidentSeverities
+        incidentSeverities,
     };
 }

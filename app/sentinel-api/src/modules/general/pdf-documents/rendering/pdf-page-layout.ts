@@ -14,7 +14,7 @@ export const PDF_LAYOUT = {
     fonts: {
         regular: 'Helvetica',
         bold: 'Helvetica-Bold',
-        oblique: 'Helvetica-Oblique'
+        oblique: 'Helvetica-Oblique',
     },
 
     // Safe Colors
@@ -24,12 +24,12 @@ export const PDF_LAYOUT = {
         textLight: '#9CA3AF', // light gray
         border: '#E5E7EB', // divider
         sentinelPrimary: '#3B82F6', // Sentinel Blue
-    }
+    },
 };
 
 /**
  * Calculates remaining height on the current page.
- * 
+ *
  * @param currentY current vertical offset
  * @returns remaining height in pt
  */

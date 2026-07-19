@@ -68,7 +68,7 @@ export class AnalyticsService {
         return getAnalyticsIncidentTrendsData(args.dbClient, {
             institutionId: args.institutionId,
             startAt: new Date(Date.now() - 5 * 7 * 24 * 3600 * 1000), // Fallback start range for live chart APIs
-            endAtExclusive: new Date()
+            endAtExclusive: new Date(),
         });
     }
 
@@ -205,8 +205,8 @@ export class AnalyticsService {
                     startDate: args.startDate,
                     endDate: args.endDate,
                     timezone: args.timezone,
-                    periodLabel
-                })
+                    periodLabel,
+                }),
             })
             .returningAll()
             .executeTakeFirstOrThrow();
@@ -224,8 +224,8 @@ export class AnalyticsService {
                     details: {
                         reportId: createdRow.report_id,
                         period: args.period,
-                        periodLabel
-                    }
+                        periodLabel,
+                    },
                 });
             } catch (logErr) {
                 console.error('Failed to log PDF_EXPORT_REQUESTED:', logErr);
@@ -245,7 +245,7 @@ export class AnalyticsService {
             failureCode: createdRow.failure_code,
             failureMessage: createdRow.failure_message,
             expiresAt: createdRow.expires_at ? createdRow.expires_at.toISOString() : null,
-            retryCount: Number(createdRow.retry_count ?? 0)
+            retryCount: Number(createdRow.retry_count ?? 0),
         };
     }
 }

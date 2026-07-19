@@ -1,5 +1,6 @@
 import { type DbClient } from '@sentinel/db';
 import { sql } from 'kysely';
+import { resolveRelatedInstitutions } from '../../notification/helper/resolve-related-institutions';
 
 export type GetIncidentTrendsArgs = {
     institutionId?: string;
@@ -24,6 +25,10 @@ export async function getAnalyticsIncidentTrendsData(
 ): Promise<IncidentTrendRow[]> {
     const { institutionId, startAt, endAtExclusive, timezone = 'Asia/Manila' } = args;
 
+    const institutionIds = institutionId
+        ? await resolveRelatedInstitutions(dbClient, institutionId)
+        : [];
+
     const diffMs = Math.abs(endAtExclusive.getTime() - startAt.getTime());
     const diffDays = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
 
@@ -39,14 +44,16 @@ export async function getAnalyticsIncidentTrendsData(
         .innerJoin('exam_attempts as ea', 'ea.attempt_id', 'fi.attempt_id')
         .innerJoin('exams as e', 'e.exam_id', 'ea.exam_id')
         .select([
-            sql<string>`to_char(date_trunc(${granularity}, fi.timestamp at time zone ${timezone}), 'YYYY-MM-DD')`.as('bucket_key'),
+            sql<string>`to_char(date_trunc(${granularity}, fi.timestamp at time zone ${timezone}), 'YYYY-MM-DD')`.as(
+                'bucket_key',
+            ),
             sql<number>`coalesce(count(fi.incident_id), 0)`.as('incidents_count'),
         ])
         .where('fi.timestamp', '>=', startAt)
         .where('fi.timestamp', '<', endAtExclusive);
 
-    if (institutionId) {
-        query = query.where('e.institution_id', '=', institutionId);
+    if (institutionIds.length > 0) {
+        query = query.where('e.institution_id', 'in', institutionIds);
     }
 
     const rows = await query
@@ -68,7 +75,20 @@ export async function getAnalyticsIncidentTrendsData(
         const count = matchedRow ? Number(matchedRow.incidents_count) : 0;
 
         let name = '';
-        const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+        const monthNames = [
+            'Jan',
+            'Feb',
+            'Mar',
+            'Apr',
+            'May',
+            'Jun',
+            'Jul',
+            'Aug',
+            'Sep',
+            'Oct',
+            'Nov',
+            'Dec',
+        ];
         if (granularity === 'day') {
             name = `${monthNames[current.getMonth()]} ${current.getDate()}`;
         } else if (granularity === 'week') {

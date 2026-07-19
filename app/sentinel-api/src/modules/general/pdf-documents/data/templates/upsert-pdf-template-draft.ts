@@ -12,14 +12,14 @@ export interface UpsertPdfTemplateDraftInput {
 
 /**
  * Creates or updates the singular DRAFT template for the given scope and document kind.
- * 
+ *
  * @param dbClient database client
  * @param input upsert data
  * @returns template ID
  */
 export async function upsertPdfTemplateDraft(
     dbClient: DbClient,
-    input: UpsertPdfTemplateDraftInput
+    input: UpsertPdfTemplateDraftInput,
 ): Promise<string> {
     const { institutionId, documentKind, headerConfig, footerConfig, userId } = input;
 

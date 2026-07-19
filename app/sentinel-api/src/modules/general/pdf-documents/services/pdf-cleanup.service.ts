@@ -7,7 +7,7 @@ export class PdfCleanupService {
      * Purges expired analytics PDF exports.
      * Deletes the files from private storage and sets status to EXPIRED in the database.
      * Never deletes answer keys, templates, or branding.
-     * 
+     *
      * @param dbClient database client
      * @returns count of successfully purged records
      */
@@ -29,11 +29,17 @@ export class PdfCleanupService {
                 // 2. Delete file from storage if bucket and path are set
                 if (record.storage_bucket && record.storage_path) {
                     try {
-                        await PdfStorageService.deletePdf(record.storage_bucket, record.storage_path);
+                        await PdfStorageService.deletePdf(
+                            record.storage_bucket,
+                            record.storage_path,
+                        );
                     } catch (storageErr: any) {
                         // If file already deleted or not found, we can proceed with DB update.
                         // Otherwise, log warning but continue to update DB to avoid getting stuck.
-                        console.warn(`[PDFCleanup] Storage deletion failed/skipped for export ${record.report_id}:`, storageErr.message);
+                        console.warn(
+                            `[PDFCleanup] Storage deletion failed/skipped for export ${record.report_id}:`,
+                            storageErr.message,
+                        );
                     }
                 }
 
@@ -44,7 +50,7 @@ export class PdfCleanupService {
                         .set({
                             status: 'EXPIRED',
                             storage_bucket: null,
-                            storage_path: null
+                            storage_path: null,
                         })
                         .where('report_id', '=', record.report_id)
                         .execute();
@@ -60,24 +66,34 @@ export class PdfCleanupService {
                             details: {
                                 exportId: record.report_id,
                                 documentKind: 'ANALYTICS_OVERALL',
-                                expiredAt: record.expires_at
-                            }
+                                expiredAt: record.expires_at,
+                            },
                         });
                     } catch (logErr: any) {
-                        console.warn(`[PDFCleanup] Audit logging failed for export ${record.report_id}:`, logErr.message);
+                        console.warn(
+                            `[PDFCleanup] Audit logging failed for export ${record.report_id}:`,
+                            logErr.message,
+                        );
                     }
                 } else {
-                    console.log(`[PDFCleanup] PDF_EXPORT_PURGED for global export ${record.report_id}`);
+                    console.log(
+                        `[PDFCleanup] PDF_EXPORT_PURGED for global export ${record.report_id}`,
+                    );
                 }
 
                 purgeCount++;
             } catch (err: any) {
-                console.error(`[PDFCleanup] Failed to purge expired PDF export ${record.report_id}:`, err.message);
+                console.error(
+                    `[PDFCleanup] Failed to purge expired PDF export ${record.report_id}:`,
+                    err.message,
+                );
             }
         }
 
         if (purgeCount > 0) {
-            console.log(`[PDFCleanup] Successfully purged ${purgeCount} expired analytics PDF reports.`);
+            console.log(
+                `[PDFCleanup] Successfully purged ${purgeCount} expired analytics PDF reports.`,
+            );
         }
         return purgeCount;
     }

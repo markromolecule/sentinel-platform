@@ -4,7 +4,7 @@ import {
     type HeaderConfig,
     type FooterConfig,
     HeaderConfigSchema,
-    FooterConfigSchema
+    FooterConfigSchema,
 } from '@sentinel/shared/types';
 import { randomUUID } from 'crypto';
 
@@ -20,7 +20,10 @@ type ResolvePdfTemplateOptions = {
 };
 
 // Code-owned built-in defaults
-const BUILT_IN_DEFAULTS: Record<DocumentKind, { headerConfig: HeaderConfig; footerConfig: FooterConfig }> = {
+const BUILT_IN_DEFAULTS: Record<
+    DocumentKind,
+    { headerConfig: HeaderConfig; footerConfig: FooterConfig }
+> = {
     ANALYTICS_OVERALL: {
         headerConfig: {
             logo_visible: true,
@@ -42,7 +45,7 @@ const BUILT_IN_DEFAULTS: Record<DocumentKind, { headerConfig: HeaderConfig; foot
             divider_color: '#E5E7EB',
             page_number_visible: true,
             page_number_format: 'PAGE_X_OF_Y',
-        }
+        },
     },
     EXAM_ANSWER_KEY: {
         headerConfig: {
@@ -65,8 +68,8 @@ const BUILT_IN_DEFAULTS: Record<DocumentKind, { headerConfig: HeaderConfig; foot
             divider_color: '#E5E7EB',
             page_number_visible: true,
             page_number_format: 'PAGE_X_OF_Y',
-        }
-    }
+        },
+    },
 };
 
 /**
@@ -74,7 +77,7 @@ const BUILT_IN_DEFAULTS: Record<DocumentKind, { headerConfig: HeaderConfig; foot
  * 1. Institution-published override.
  * 2. Global-published template.
  * 3. Code-owned built-in default.
- * 
+ *
  * @param dbClient database client
  * @param institutionId institution ID
  * @param documentKind document kind

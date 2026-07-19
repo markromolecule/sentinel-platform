@@ -1,6 +1,12 @@
 import { describe, expect, it, vi } from 'vitest';
 import { getAnalyticsIncidentSeverityData } from './get-analytics-incident-severity';
 
+vi.mock('../../notification/helper/resolve-related-institutions', () => ({
+    resolveRelatedInstitutions: vi.fn((_dbClient, institutionId) =>
+        Promise.resolve(institutionId ? [institutionId] : []),
+    ),
+}));
+
 describe('getAnalyticsIncidentSeverityData', () => {
     it('queries and returns severity distribution correctly', async () => {
         const mockRows = [
@@ -35,7 +41,7 @@ describe('getAnalyticsIncidentSeverityData', () => {
 
         expect(mockDbClient.selectFrom).toHaveBeenCalledWith('flagged_incidents as fi');
         expect(mockDbClient.groupBy).toHaveBeenCalledWith('fi.severity');
-        expect(mockDbClient.where).toHaveBeenCalledWith('e.institution_id', '=', 'inst-123');
+        expect(mockDbClient.where).toHaveBeenCalledWith('e.institution_id', 'in', ['inst-123']);
     });
 
     it('returns empty array percentage calculation if totalCount is zero', async () => {

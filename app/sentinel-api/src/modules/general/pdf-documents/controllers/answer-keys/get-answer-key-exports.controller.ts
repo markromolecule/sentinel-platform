@@ -32,7 +32,9 @@ export const getAnswerKeyExportsRoute = createRoute({
     },
 });
 
-export const getAnswerKeyExportsHandler: AppRouteHandler<typeof getAnswerKeyExportsRoute> = async (c) => {
+export const getAnswerKeyExportsHandler: AppRouteHandler<typeof getAnswerKeyExportsRoute> = async (
+    c,
+) => {
     const dbClient = c.get('dbClient');
 
     requirePdfDocumentAccess({
@@ -46,9 +48,15 @@ export const getAnswerKeyExportsHandler: AppRouteHandler<typeof getAnswerKeyExpo
     const { examId, institutionId, limit = 10, page = 1 } = c.req.valid('query');
     const userInstitutionId = c.get('institutionId');
 
-    if (institutionId && !(await canAccessPdfInstitutionScope(dbClient, userInstitutionId, institutionId))) {
+    if (
+        institutionId &&
+        !(await canAccessPdfInstitutionScope(dbClient, userInstitutionId, institutionId))
+    ) {
         return c.json(
-            { success: false, error: "Forbidden. Cannot list another institution's answer key exports." },
+            {
+                success: false,
+                error: "Forbidden. Cannot list another institution's answer key exports.",
+            },
             403 as any,
         );
     }
@@ -112,13 +120,22 @@ export const getAnswerKeyExportsHandler: AppRouteHandler<typeof getAnswerKeyExpo
             storageBucket: r.storage_bucket ?? null,
             storagePath: r.storage_path ?? null,
             createdBy: r.created_by ?? null,
-            createdAt: r.created_at instanceof Date ? r.created_at.toISOString() : String(r.created_at),
-            updatedAt: r.updated_at instanceof Date ? r.updated_at.toISOString() : String(r.updated_at),
-            completedAt: r.completed_at ? (r.completed_at instanceof Date ? r.completed_at.toISOString() : String(r.completed_at)) : null,
+            createdAt:
+                r.created_at instanceof Date ? r.created_at.toISOString() : String(r.created_at),
+            updatedAt:
+                r.updated_at instanceof Date ? r.updated_at.toISOString() : String(r.updated_at),
+            completedAt: r.completed_at
+                ? r.completed_at instanceof Date
+                    ? r.completed_at.toISOString()
+                    : String(r.completed_at)
+                : null,
         }));
 
         return c.json({ success: true, data: { records, total_records, limit, page } }) as any;
     } catch (e: any) {
-        return c.json({ success: false, error: e.message || 'Failed to list answer key exports.' }, 500 as any);
+        return c.json(
+            { success: false, error: e.message || 'Failed to list answer key exports.' },
+            500 as any,
+        );
     }
 };

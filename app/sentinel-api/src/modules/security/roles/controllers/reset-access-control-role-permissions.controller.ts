@@ -31,10 +31,7 @@ export const resetAccessControlRolePermissionsRouteHandler: AppRouteHandler<
     assertSupportAccess(supabaseUser?.user_metadata?.role);
 
     const { roleId } = c.req.valid('param');
-    const data = await RolesService.resetRolePermissionsToBlueprint(
-        c.get('dbClient'),
-        roleId,
-    );
+    const data = await RolesService.resetRolePermissionsToBlueprint(c.get('dbClient'), roleId);
 
     return c.json({ message: 'Access-control role permissions reset successfully.', data });
 };

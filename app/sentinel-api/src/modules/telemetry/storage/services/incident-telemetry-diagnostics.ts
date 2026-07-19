@@ -4,9 +4,7 @@ import type { PersistableProctoringEvent } from '../../ingestion/ingestion.dto';
  * The persistence outcome recorded for one telemetry ingestion attempt.
  */
 export type IncidentTelemetryDiagnosticDisposition =
-    | 'inserted'
-    | 'aggregated'
-    | 'duplicate-ignored';
+    'inserted' | 'aggregated' | 'duplicate-ignored';
 
 /**
  * Structured development diagnostic for telemetry persistence.

@@ -35,9 +35,7 @@ export const createExamSectionAssignmentsBatchSchema = {
     params: z.object({
         examId: z.string().uuid(),
     }),
-    body: z.object({
-        assignments: z.array(z.object(Schema.createExamSectionAssignmentBodySchema.shape)),
-    }),
+    body: Schema.createExamSectionAssignmentBatchBodySchema,
     response: z.object({
         message: z.string(),
         data: z.array(examSectionAssignmentResponseSchema),

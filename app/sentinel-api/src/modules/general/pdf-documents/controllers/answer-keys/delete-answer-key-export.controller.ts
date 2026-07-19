@@ -33,7 +33,9 @@ export const deleteAnswerKeyExportRoute = createRoute({
     },
 });
 
-export const deleteAnswerKeyExportHandler: AppRouteHandler<typeof deleteAnswerKeyExportRoute> = async (c) => {
+export const deleteAnswerKeyExportHandler: AppRouteHandler<
+    typeof deleteAnswerKeyExportRoute
+> = async (c) => {
     const user = c.get('user');
     const dbClient = c.get('dbClient');
 
@@ -63,7 +65,13 @@ export const deleteAnswerKeyExportHandler: AppRouteHandler<typeof deleteAnswerKe
         if (
             !(await canAccessPdfInstitutionScope(dbClient, userInstitutionId, row.institution_id))
         ) {
-            return c.json({ success: false, error: "Forbidden: Access denied to this institution's exports." }, 403 as any);
+            return c.json(
+                {
+                    success: false,
+                    error: "Forbidden: Access denied to this institution's exports.",
+                },
+                403 as any,
+            );
         }
 
         // Delete private storage object first (if present)
@@ -71,7 +79,10 @@ export const deleteAnswerKeyExportHandler: AppRouteHandler<typeof deleteAnswerKe
             try {
                 await PdfStorageService.deletePdf(row.storage_bucket, row.storage_path);
             } catch (storageErr: any) {
-                console.warn(`[AnswerKey] Storage delete failed for ${exportId}:`, storageErr.message);
+                console.warn(
+                    `[AnswerKey] Storage delete failed for ${exportId}:`,
+                    storageErr.message,
+                );
                 // Proceed with DB deletion even if storage fails — orphan object reconciliation is operational
             }
         }
@@ -96,6 +107,9 @@ export const deleteAnswerKeyExportHandler: AppRouteHandler<typeof deleteAnswerKe
 
         return c.json({ success: true, message: 'Answer key export deleted successfully.' }) as any;
     } catch (e: any) {
-        return c.json({ success: false, error: e.message || 'Failed to delete answer key export.' }, 500 as any);
+        return c.json(
+            { success: false, error: e.message || 'Failed to delete answer key export.' },
+            500 as any,
+        );
     }
 };

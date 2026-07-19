@@ -1,7 +1,2 @@
-export interface AssignmentRow {
-    localId: string;
-    classroomId: string;
-    sectionId: string;
-    roomId: string;
-    instructorId: string;
-}
+// Deleted local AssignmentRow type in favor of shared hook type.
+export {};

@@ -38,7 +38,9 @@ export const getAnswerKeyExportDownloadRoute = createRoute({
     },
 });
 
-export const getAnswerKeyExportDownloadHandler: AppRouteHandler<typeof getAnswerKeyExportDownloadRoute> = async (c) => {
+export const getAnswerKeyExportDownloadHandler: AppRouteHandler<
+    typeof getAnswerKeyExportDownloadRoute
+> = async (c) => {
     const user = c.get('user');
     const dbClient = c.get('dbClient');
 
@@ -68,11 +70,20 @@ export const getAnswerKeyExportDownloadHandler: AppRouteHandler<typeof getAnswer
         if (
             !(await canAccessPdfInstitutionScope(dbClient, userInstitutionId, row.institution_id))
         ) {
-            return c.json({ success: false, error: "Forbidden: Access denied to this institution's exports." }, 403 as any);
+            return c.json(
+                {
+                    success: false,
+                    error: "Forbidden: Access denied to this institution's exports.",
+                },
+                403 as any,
+            );
         }
 
         if (row.status !== 'READY' || !row.storage_path || !row.storage_bucket) {
-            return c.json({ success: false, error: 'Answer key PDF is not ready for download.' }, 400 as any);
+            return c.json(
+                { success: false, error: 'Answer key PDF is not ready for download.' },
+                400 as any,
+            );
         }
 
         // Audit log download
@@ -88,10 +99,17 @@ export const getAnswerKeyExportDownloadHandler: AppRouteHandler<typeof getAnswer
         }
 
         // Generate signed URL (5 minutes = 300 seconds)
-        const signedUrl = await PdfStorageService.createSignedUrl(row.storage_bucket, row.storage_path, 300);
+        const signedUrl = await PdfStorageService.createSignedUrl(
+            row.storage_bucket,
+            row.storage_path,
+            300,
+        );
 
         return c.json({ success: true, downloadUrl: signedUrl }) as any;
     } catch (e: any) {
-        return c.json({ success: false, error: e.message || 'Error resolving download.' }, 500 as any);
+        return c.json(
+            { success: false, error: e.message || 'Error resolving download.' },
+            500 as any,
+        );
     }
 };

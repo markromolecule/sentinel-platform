@@ -1,6 +1,12 @@
 import { describe, expect, it, vi } from 'vitest';
 import { getAnalyticsIncidentTypeData } from './get-analytics-incident-type';
 
+vi.mock('../../notification/helper/resolve-related-institutions', () => ({
+    resolveRelatedInstitutions: vi.fn((_dbClient, institutionId) =>
+        Promise.resolve(institutionId ? [institutionId] : []),
+    ),
+}));
+
 describe('getAnalyticsIncidentTypeData', () => {
     it('queries and returns incident type distribution correctly', async () => {
         const mockRows = [

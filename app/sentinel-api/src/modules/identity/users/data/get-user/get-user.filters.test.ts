@@ -59,7 +59,7 @@ describe('getUserFilters', () => {
                     id: 'target-user-id',
                     requesterRole: 'instructor',
                 },
-                false
+                false,
             );
 
             expect(result).toBe(query);
@@ -77,7 +77,7 @@ describe('getUserFilters', () => {
                     requesterRole: 'support',
                     requesterUserId: 'support-user-id',
                 },
-                false
+                false,
             );
 
             expect(result).toBe(query);

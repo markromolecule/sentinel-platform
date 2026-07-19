@@ -28,16 +28,13 @@ export async function getQuestionTypeCountsData({
     );
 
     const counts = await baseQuery
-        .select([
-            'qbq.question_type',
-            sql<number>`count(*)`.as('count')
-        ])
+        .select(['qbq.question_type', sql<number>`count(*)`.as('count')])
         .groupBy('qbq.question_type')
         .execute();
 
     const items: {
         type: QuestionType;
-        count: number
+        count: number;
     }[] = counts.map((row: any) => ({
         type: row.question_type as QuestionType,
         count: Number(row.count),

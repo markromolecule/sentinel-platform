@@ -1,6 +1,9 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { OpenAPIHono } from '@hono/zod-openapi';
-import { getQuestionTypeCountsRoute, getQuestionTypeCountsRouteHandler } from './get-question-type-counts.controller';
+import {
+    getQuestionTypeCountsRoute,
+    getQuestionTypeCountsRouteHandler,
+} from './get-question-type-counts.controller';
 import { getQuestionTypeCountsService } from '../services/get-question-type-counts.service';
 
 vi.mock('../../../../middleware/auth', () => ({

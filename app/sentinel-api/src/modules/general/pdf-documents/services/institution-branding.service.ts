@@ -4,7 +4,7 @@ import { PdfStorageService, UploadedLogoMetadata } from '../storage/pdf-storage.
 export class InstitutionBrandingService {
     /**
      * Gets the branding configuration for an institution.
-     * 
+     *
      * @param dbClient database client
      * @param institutionId institution ID
      * @returns branding record or null
@@ -19,7 +19,7 @@ export class InstitutionBrandingService {
 
     /**
      * Upserts the branding configuration for an institution, returning the old logo path if replaced.
-     * 
+     *
      * @param dbClient database client
      * @param institutionId institution ID
      * @param logo logo upload metadata
@@ -30,7 +30,7 @@ export class InstitutionBrandingService {
         dbClient: DbClient,
         institutionId: string,
         logo: UploadedLogoMetadata,
-        userId: string
+        userId: string,
     ) {
         return await dbClient.transaction().execute(async (trx) => {
             const oldBranding = await trx
@@ -91,7 +91,7 @@ export class InstitutionBrandingService {
 
     /**
      * Deletes the branding configuration for an institution.
-     * 
+     *
      * @param dbClient database client
      * @param institutionId institution ID
      * @returns old logo details to delete

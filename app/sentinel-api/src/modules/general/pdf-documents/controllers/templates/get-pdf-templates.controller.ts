@@ -66,7 +66,7 @@ export const getPdfTemplatesHandler: AppRouteHandler<typeof getPdfTemplatesRoute
 
         if (!(await canAccessPdfInstitutionScope(dbClient, userInstitutionId, institutionId))) {
             throw new HTTPException(403, {
-                message: 'Forbidden. You cannot access another institution\'s answer key template.',
+                message: "Forbidden. You cannot access another institution's answer key template.",
             });
         }
     }

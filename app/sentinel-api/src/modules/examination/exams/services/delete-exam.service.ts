@@ -29,12 +29,18 @@ async function finalizeDeletedExam(
                 try {
                     await PdfStorageService.deletePdf(ake.storage_bucket, ake.storage_path);
                 } catch (storageErr: any) {
-                    console.warn(`[ExamDelete] Storage cleanup failed for answer key ${ake.export_id}:`, storageErr.message);
+                    console.warn(
+                        `[ExamDelete] Storage cleanup failed for answer key ${ake.export_id}:`,
+                        storageErr.message,
+                    );
                 }
             }
         }
     } catch (cleanupErr: any) {
-        console.warn(`[ExamDelete] Answer key storage cleanup failed for exam ${deletedRecord.exam_id}:`, cleanupErr.message);
+        console.warn(
+            `[ExamDelete] Answer key storage cleanup failed for exam ${deletedRecord.exam_id}:`,
+            cleanupErr.message,
+        );
     }
 
     if (institutionId) {

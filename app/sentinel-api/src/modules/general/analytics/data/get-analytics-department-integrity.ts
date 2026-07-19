@@ -1,5 +1,6 @@
 import { type DbClient } from '@sentinel/db';
 import { sql } from 'kysely';
+import { resolveRelatedInstitutions } from '../../notification/helper/resolve-related-institutions';
 
 export type GetAnalyticsDepartmentIntegrityDataArgs = {
     institutionId?: string;
@@ -26,6 +27,10 @@ export async function getAnalyticsDepartmentIntegrityData(
     args: GetAnalyticsDepartmentIntegrityDataArgs,
 ): Promise<DepartmentIntegrityRow[]> {
     const { institutionId, startAt, endAtExclusive } = args;
+
+    const institutionIds = institutionId
+        ? await resolveRelatedInstitutions(dbClient, institutionId)
+        : [];
 
     const startFilter = startAt ? sql`and ea.started_at >= ${startAt}` : sql``;
     const endFilter = endAtExclusive ? sql`and ea.started_at < ${endAtExclusive}` : sql``;
@@ -61,8 +66,8 @@ export async function getAnalyticsDepartmentIntegrityData(
             ),
         ]);
 
-    if (institutionId) {
-        query = query.where('d.institution_id', '=', institutionId);
+    if (institutionIds.length > 0) {
+        query = query.where('d.institution_id', 'in', institutionIds);
     }
 
     const rows = await query

@@ -56,18 +56,18 @@ export async function getExamDetail(
         if (hasCompletedAttempt) {
             runtimeAccess = accessCheck.accessOverride
                 ? buildStudentOverrideRuntimeAccess({
-                    accessOverride: accessCheck.accessOverride,
-                    runtimeAccess: accessCheck.runtimeAccess,
-                })
+                      accessOverride: accessCheck.accessOverride,
+                      runtimeAccess: accessCheck.runtimeAccess,
+                  })
                 : {
-                    ...accessCheck.runtimeAccess,
-                    state: 'closed',
-                    reasonCode: 'CLOSED',
-                    message: 'This exam has already been turned in.',
-                    canStart: false,
-                    canResume: false,
-                    hasActiveAttempt: false,
-                };
+                      ...accessCheck.runtimeAccess,
+                      state: 'closed',
+                      reasonCode: 'CLOSED',
+                      message: 'This exam has already been turned in.',
+                      canStart: false,
+                      canResume: false,
+                      hasActiveAttempt: false,
+                  };
         }
     } else {
         runtimeAccess = await RuntimeAccessService.resolveExamRuntimeAccess({
@@ -100,7 +100,7 @@ export async function getExamDetail(
                     question.source_question_bank_question_id ?? undefined,
                 sourceCollectionId: question.source_collection_id ?? undefined,
                 sourceOrigin: (question.source_origin === 'AI_PDF' ||
-                    question.source_origin === 'MANUAL'
+                question.source_origin === 'MANUAL'
                     ? question.source_origin
                     : undefined) as 'MANUAL' | 'AI_PDF' | undefined,
                 sourceFileName: question.source_file_name ?? null,

@@ -66,7 +66,9 @@ describe('resolveEffectiveExamBaseline', () => {
             } as any,
         );
 
-        expect(result.durationMinutes).toBe(DEFAULT_EXAMINATION_GLOBAL_SETTINGS.defaultDurationMinutes);
+        expect(result.durationMinutes).toBe(
+            DEFAULT_EXAMINATION_GLOBAL_SETTINGS.defaultDurationMinutes,
+        );
         expect(result.passingScore).toBe(DEFAULT_EXAMINATION_GLOBAL_SETTINGS.defaultPassingScore);
     });
 });

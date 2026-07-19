@@ -52,11 +52,15 @@ describe('Analytics Constants', () => {
         });
 
         it('should generate correct reports key with and without institutionId', () => {
-            expect(ANALYTICS_QUERY_KEYS.reports()).toEqual(['analytics', 'reports', '']);
+            expect(ANALYTICS_QUERY_KEYS.reports()).toEqual([
+                'analytics',
+                'reports',
+                { institutionId: '', page: undefined, limit: undefined, status: undefined },
+            ]);
             expect(ANALYTICS_QUERY_KEYS.reports('inst-123')).toEqual([
                 'analytics',
                 'reports',
-                'inst-123',
+                { institutionId: 'inst-123', page: undefined, limit: undefined, status: undefined },
             ]);
         });
     });

@@ -86,7 +86,7 @@ export const upsertTemplateDraftHandler: AppRouteHandler<typeof upsertTemplateDr
 
         if (!(await canAccessPdfInstitutionScope(dbClient, userInstitutionId, institution_id))) {
             throw new HTTPException(403, {
-                message: 'Forbidden. You cannot manage another institution\'s answer key template.',
+                message: "Forbidden. You cannot manage another institution's answer key template.",
             });
         }
     }

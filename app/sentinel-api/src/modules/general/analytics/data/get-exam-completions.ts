@@ -1,5 +1,6 @@
 import { type DbClient } from '@sentinel/db';
 import { sql } from 'kysely';
+import { resolveRelatedInstitutions } from '../../notification/helper/resolve-related-institutions';
 
 export type GetExamCompletionsArgs = {
     institutionId?: string;
@@ -23,6 +24,10 @@ export async function getAnalyticsExamCompletionsData(
 ): Promise<ExamCompletionRow[]> {
     const { institutionId, startAt, endAtExclusive } = args;
 
+    const institutionIds = institutionId
+        ? await resolveRelatedInstitutions(dbClient, institutionId)
+        : [];
+
     let query = dbClient
         .selectFrom('exam_attempts as ea')
         .innerJoin('exams as e', 'e.exam_id', 'ea.exam_id')
@@ -36,8 +41,8 @@ export async function getAnalyticsExamCompletionsData(
             ),
         ]);
 
-    if (institutionId) {
-        query = query.where('e.institution_id', '=', institutionId);
+    if (institutionIds.length > 0) {
+        query = query.where('e.institution_id', 'in', institutionIds);
     }
 
     query = query.where('ea.started_at', 'is not', null);

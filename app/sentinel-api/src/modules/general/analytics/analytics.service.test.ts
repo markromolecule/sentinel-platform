@@ -134,9 +134,7 @@ describe('AnalyticsService', () => {
 
     describe('getDepartmentIntegrity', () => {
         it('should return department integrity metrics', async () => {
-            const mockMetrics = [
-                { department: 'CS', completed: 10, flagged: 1, dropped: 0 },
-            ];
+            const mockMetrics = [{ department: 'CS', completed: 10, flagged: 1, dropped: 0 }];
             vi.mocked(getAnalyticsDepartmentIntegrityData).mockResolvedValue(mockMetrics);
 
             const result = await AnalyticsService.getDepartmentIntegrity({

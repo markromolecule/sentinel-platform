@@ -1,15 +1,21 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { PdfGenerationQueueService } from './pdf-generation-queue.service';
 
-const { addMock, closeMock, createRedisConnectionMock, closeRedisConnectionMock, queueCtorMock, processJobMock } =
-    vi.hoisted(() => ({
-        addMock: vi.fn().mockResolvedValue(undefined),
-        closeMock: vi.fn().mockResolvedValue(undefined),
-        createRedisConnectionMock: vi.fn().mockReturnValue({ connection: 'redis' }),
-        closeRedisConnectionMock: vi.fn().mockResolvedValue(undefined),
-        queueCtorMock: vi.fn(),
-        processJobMock: vi.fn().mockResolvedValue(undefined),
-    }));
+const {
+    addMock,
+    closeMock,
+    createRedisConnectionMock,
+    closeRedisConnectionMock,
+    queueCtorMock,
+    processJobMock,
+} = vi.hoisted(() => ({
+    addMock: vi.fn().mockResolvedValue(undefined),
+    closeMock: vi.fn().mockResolvedValue(undefined),
+    createRedisConnectionMock: vi.fn().mockReturnValue({ connection: 'redis' }),
+    closeRedisConnectionMock: vi.fn().mockResolvedValue(undefined),
+    queueCtorMock: vi.fn(),
+    processJobMock: vi.fn().mockResolvedValue(undefined),
+}));
 
 vi.mock('bullmq', () => ({
     Queue: class MockQueue {
@@ -45,7 +51,6 @@ describe('PdfGenerationQueueService', () => {
         vi.clearAllMocks();
         service = new PdfGenerationQueueService();
     });
-
 
     it('creates the queue lazily and reuses it', async () => {
         const first = await service.getQueue();

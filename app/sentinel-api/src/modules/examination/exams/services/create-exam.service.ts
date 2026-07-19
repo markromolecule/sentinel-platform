@@ -156,8 +156,8 @@ export async function createExam(
         const normalizedQuestions = questionColumnSupport.hasSourceCollectionId
             ? structure.normalizedQuestions
             : structure.normalizedQuestions.map(
-                ({ source_collection_id: _sourceCollectionId, ...question }) => question,
-            );
+                  ({ source_collection_id: _sourceCollectionId, ...question }) => question,
+              );
 
         await replaceExamSectionsData({
             dbClient: trx,

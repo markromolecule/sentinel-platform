@@ -4,7 +4,10 @@ import { getAnalyticsIncidentSeverityData } from '../data/get-analytics-incident
 import { getAnalyticsIncidentTypeData } from '../data/get-analytics-incident-type';
 import { getAnalyticsDepartmentIntegrityData } from '../data/get-analytics-department-integrity';
 import { mapAnalyticsKPIs } from './map-analytics-kpis';
-import { normalizeAnalyticsOverallData, type AnalyticsOverallData } from '../../pdf-documents/rendering/analytics-overall-view-model';
+import {
+    normalizeAnalyticsOverallData,
+    type AnalyticsOverallData,
+} from '../../pdf-documents/rendering/analytics-overall-view-model';
 
 export interface BuildOverallAnalyticsSnapshotArgs {
     dbClient: DbClient;
@@ -21,7 +24,9 @@ export class BuildOverallAnalyticsSnapshotService {
      * Gathers and aggregates all period-scoped analytics data for an institution
      * and compiles it into the normalized executive PDF view model.
      */
-    static async buildSnapshot(args: BuildOverallAnalyticsSnapshotArgs): Promise<AnalyticsOverallData> {
+    static async buildSnapshot(
+        args: BuildOverallAnalyticsSnapshotArgs,
+    ): Promise<AnalyticsOverallData> {
         const {
             dbClient,
             institutionId,
@@ -29,7 +34,7 @@ export class BuildOverallAnalyticsSnapshotService {
             endAtExclusive,
             timezone = 'Asia/Manila',
             periodLabel = 'Custom Period',
-            generatedBy = 'Sentinel System'
+            generatedBy = 'Sentinel System',
         } = args;
 
         // 1. Resolve institution name
@@ -50,7 +55,11 @@ export class BuildOverallAnalyticsSnapshotService {
             getAnalyticsKPIsData(dbClient, { institutionId, startAt, endAtExclusive }),
             getAnalyticsIncidentSeverityData(dbClient, { institutionId, startAt, endAtExclusive }),
             getAnalyticsIncidentTypeData(dbClient, { institutionId, startAt, endAtExclusive }),
-            getAnalyticsDepartmentIntegrityData(dbClient, { institutionId, startAt, endAtExclusive })
+            getAnalyticsDepartmentIntegrityData(dbClient, {
+                institutionId,
+                startAt,
+                endAtExclusive,
+            }),
         ]);
 
         const mappedKPIs = mapAnalyticsKPIs(rawKPIs);
@@ -67,31 +76,32 @@ export class BuildOverallAnalyticsSnapshotService {
                 totalCompletions: mappedKPIs.completedAttempts,
                 integrityIncidentsCount: mappedKPIs.totalIncidents,
             },
-            departments: rawDepts.map(d => ({
+            departments: rawDepts.map((d) => ({
                 departmentName: d.department || 'Unknown Department',
                 courseCount: d.courseCount || 0,
                 studentCount: d.studentCount || 0,
                 averageScore: d.averageScore || 0,
                 // Derive integrity rate: % of completed attempts that were not flagged
-                integrityRate: d.completed > 0
-                    ? Math.max(
-                        0,
-                        Math.min(
-                            100,
-                            Math.round(((d.completed - d.flagged) / d.completed) * 1000) / 10,
-                        ),
-                    )
-                    : 0
+                integrityRate:
+                    d.completed > 0
+                        ? Math.max(
+                              0,
+                              Math.min(
+                                  100,
+                                  Math.round(((d.completed - d.flagged) / d.completed) * 1000) / 10,
+                              ),
+                          )
+                        : 0,
             })),
-            incidentTypes: rawTypes.map(t => ({
+            incidentTypes: rawTypes.map((t) => ({
                 type: t.type || 'Other',
                 count: t.count || 0,
-                percentage: t.percentage || 0
+                percentage: t.percentage || 0,
             })),
-            incidentSeverities: rawSeverity.map(s => ({
+            incidentSeverities: rawSeverity.map((s) => ({
                 severity: s.severity,
-                count: s.count
-            }))
+                count: s.count,
+            })),
         });
     }
 }

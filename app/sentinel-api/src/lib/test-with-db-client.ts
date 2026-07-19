@@ -2,7 +2,7 @@ import { type DbClient, prisma, transactionStorage } from '@sentinel/db';
 import { test } from 'vitest';
 
 export const testWithDbClient = test.extend<{ dbClient: DbClient }>({
-    dbClient: async ({ }, use) => {
+    dbClient: async ({}, use) => {
         await prisma
             .$transaction(
                 async (tx: any) => {

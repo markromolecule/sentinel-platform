@@ -23,13 +23,14 @@ export async function startPdfGenerationWorker(): Promise<Worker | null> {
 
     workerConnection = createRedisConnection('worker');
 
-
     worker = new Worker(
         PDF_QUEUE_NAME,
-        async (job: Job<{ exportId: string; documentKind: 'ANALYTICS_OVERALL' | 'EXAM_ANSWER_KEY' }>) => {
+        async (
+            job: Job<{ exportId: string; documentKind: 'ANALYTICS_OVERALL' | 'EXAM_ANSWER_KEY' }>,
+        ) => {
             const { exportId, documentKind } = job.data;
             console.log(`[PDFWorker] Processing job ${job.id} for export ${exportId}`);
-            
+
             try {
                 await PdfGenerationJobProcessor.processJob(dbClient, exportId, documentKind);
                 console.log(`[PDFWorker] Successfully completed export ${exportId}`);
@@ -41,8 +42,8 @@ export async function startPdfGenerationWorker(): Promise<Worker | null> {
         {
             connection: workerConnection,
             concurrency: 2,
-            lockDuration: 60000 // 60 seconds lock duration
-        }
+            lockDuration: 60000, // 60 seconds lock duration
+        },
     );
 
     worker.on('failed', (job, err) => {

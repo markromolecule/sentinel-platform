@@ -36,16 +36,15 @@ export function getPdfJobOptions(): JobsOptions {
         attempts: 3,
         backoff: {
             type: 'exponential',
-            delay: 5000 // 5 seconds initial delay
+            delay: 5000, // 5 seconds initial delay
         },
         removeOnComplete: {
             age: 24 * 3600, // Keep completed jobs for 24 hours
-            count: 100 // Keep at most 100 completed jobs
+            count: 100, // Keep at most 100 completed jobs
         },
         removeOnFail: {
             age: 7 * 24 * 3600, // Keep failed jobs for 7 days
-            count: 500 // Keep at most 500 failed jobs
-        }
+            count: 500, // Keep at most 500 failed jobs
+        },
     };
 }
-

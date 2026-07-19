@@ -34,7 +34,7 @@ function decodeHtmlEntities(str: string): string {
  * Parses plain text and a small allowlist of HTML structural elements
  * into structured text blocks for deterministic PDF rendering.
  * Strips script/style tags and all attributes (e.g. href, style, onload).
- * 
+ *
  * @param html input string containing HTML or plain text
  * @returns array of PdfTextBlocks
  */
@@ -119,7 +119,7 @@ export function parsePassageToPdfBlocks(html: string | null | undefined): PdfTex
                 currentBlock.runs.push({
                     text: textContent,
                     bold: isBold || undefined,
-                    italic: isItalic || undefined
+                    italic: isItalic || undefined,
                 });
             }
         }

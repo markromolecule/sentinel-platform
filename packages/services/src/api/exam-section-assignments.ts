@@ -34,6 +34,14 @@ export interface UpdateExamSectionAssignmentPayload {
     scheduledAt?: string | null;
 }
 
+export interface CreateExamSectionAssignmentBatchItemPayload {
+    sectionId: string;
+    classGroupId: string;
+    roomId: string;
+    instructorId: string;
+    scheduledAt?: string | null;
+}
+
 /**
  * Get all section assignments for an exam.
  *
@@ -153,7 +161,7 @@ export async function createExamSectionAssignmentsBatch(
         payload,
     }: {
         examId: string;
-        payload: { assignments: CreateExamSectionAssignmentPayload[] };
+        payload: { assignments: CreateExamSectionAssignmentBatchItemPayload[] };
     },
 ): Promise<ExamSectionAssignmentRecord[]> {
     const response: ApiResponse<ExamSectionAssignmentRecord[]> = await apiClient(

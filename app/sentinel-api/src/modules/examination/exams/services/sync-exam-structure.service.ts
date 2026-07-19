@@ -34,16 +34,16 @@ export async function syncExamStructure({
     const currentSections = body.questionSections
         ? []
         : await getExamSectionsData({
-            dbClient,
-            examId,
-        });
+              dbClient,
+              examId,
+          });
 
     const currentQuestions = body.questions
         ? []
         : await getExamQuestionsData({
-            dbClient,
-            examId,
-        });
+              dbClient,
+              examId,
+          });
 
     const structure = normalizeExamStructureInput({
         examId,
@@ -61,8 +61,8 @@ export async function syncExamStructure({
     const normalizedQuestions = hasSourceCollectionId
         ? structure.normalizedQuestions
         : structure.normalizedQuestions.map(
-            ({ source_collection_id: _sourceCollectionId, ...question }) => question,
-        );
+              ({ source_collection_id: _sourceCollectionId, ...question }) => question,
+          );
 
     await replaceExamSectionsData({
         dbClient,

@@ -34,7 +34,9 @@ export const postAnswerKeyExportRetryRoute = createRoute({
     },
 });
 
-export const postAnswerKeyExportRetryHandler: AppRouteHandler<typeof postAnswerKeyExportRetryRoute> = async (c) => {
+export const postAnswerKeyExportRetryHandler: AppRouteHandler<
+    typeof postAnswerKeyExportRetryRoute
+> = async (c) => {
     const user = c.get('user');
     const dbClient = c.get('dbClient');
 
@@ -63,7 +65,11 @@ export const postAnswerKeyExportRetryHandler: AppRouteHandler<typeof postAnswerK
 
             const userInstitutionId = c.get('institutionId');
             if (
-                !(await canAccessPdfInstitutionScope(dbClient, userInstitutionId, row.institution_id))
+                !(await canAccessPdfInstitutionScope(
+                    dbClient,
+                    userInstitutionId,
+                    row.institution_id,
+                ))
             ) {
                 return {
                     success: false,
@@ -82,7 +88,12 @@ export const postAnswerKeyExportRetryHandler: AppRouteHandler<typeof postAnswerK
 
             await trx
                 .updateTable('exam_answer_key_exports')
-                .set({ status: 'PENDING', failure_code: null, failure_message: null, updated_at: new Date() })
+                .set({
+                    status: 'PENDING',
+                    failure_code: null,
+                    failure_message: null,
+                    updated_at: new Date(),
+                })
                 .where('export_id', '=', exportId)
                 .execute();
 
@@ -108,8 +119,14 @@ export const postAnswerKeyExportRetryHandler: AppRouteHandler<typeof postAnswerK
 
         await pdfGenerationQueueService.submitPdfJob(exportId, 'EXAM_ANSWER_KEY');
 
-        return c.json({ success: true, message: 'Answer key export retry queued successfully.' }) as any;
+        return c.json({
+            success: true,
+            message: 'Answer key export retry queued successfully.',
+        }) as any;
     } catch (e: any) {
-        return c.json({ success: false, error: e.message || 'Failed to retry answer key export.' }, 500 as any);
+        return c.json(
+            { success: false, error: e.message || 'Failed to retry answer key export.' },
+            500 as any,
+        );
     }
 };

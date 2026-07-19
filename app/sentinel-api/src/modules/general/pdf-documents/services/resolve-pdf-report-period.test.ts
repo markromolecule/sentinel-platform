@@ -15,7 +15,9 @@ describe('resolvePdfReportPeriod', () => {
         const endLocal = new Date(`${result.endDateStr}T00:00:00+08:00`);
 
         // Check if start is exactly 6 days before end
-        const diffDays = Math.round((endLocal.getTime() - startLocal.getTime()) / (1000 * 60 * 60 * 24));
+        const diffDays = Math.round(
+            (endLocal.getTime() - startLocal.getTime()) / (1000 * 60 * 60 * 24),
+        );
         expect(diffDays).toBe(6);
 
         // Check UTC coordinates
@@ -34,7 +36,9 @@ describe('resolvePdfReportPeriod', () => {
         const startLocal = new Date(`${result.startDateStr}T00:00:00+08:00`);
         const endLocal = new Date(`${result.endDateStr}T00:00:00+08:00`);
 
-        const diffDays = Math.round((endLocal.getTime() - startLocal.getTime()) / (1000 * 60 * 60 * 24));
+        const diffDays = Math.round(
+            (endLocal.getTime() - startLocal.getTime()) / (1000 * 60 * 60 * 24),
+        );
         expect(diffDays).toBe(29);
     });
 

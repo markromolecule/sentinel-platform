@@ -427,7 +427,9 @@ describe('registerLifecycleRoutes', () => {
             } as any);
             vi.mocked(EntitlementsRepository.hasStudentExamEnrollment).mockResolvedValue(true);
             vi.mocked(grantMakeupExamWindow).mockRejectedValue(
-                new HTTPException(409, { message: 'Student already has an active, non-superseded attempt for this exam.' })
+                new HTTPException(409, {
+                    message: 'Student already has an active, non-superseded attempt for this exam.',
+                }),
             );
 
             const app = createApp(['examinations:update'], 'admin');
