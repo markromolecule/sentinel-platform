@@ -27,15 +27,26 @@ const EXAM_NAV_GROUPS: Array<{ title: string; items: ExamNavItem[] }> = [
 type SearchParamsLike = Pick<URLSearchParams, 'get'>;
 
 function resolveActiveSection(pathname: string, searchParams: SearchParamsLike): ExamSection {
-    if (pathname.startsWith('/exams/logs')) {
+    const parts = pathname.split('/').filter(Boolean);
+    const hasSubsegment = parts[0] === 'exams' && parts.length === 3;
+
+    if (pathname.startsWith('/exams/logs') || (hasSubsegment && parts[2] === 'logs')) {
         return 'logs';
     }
 
-    if (pathname.startsWith('/exams/assign') || searchParams.get('view') === 'assign') {
+    if (
+        pathname.startsWith('/exams/assign') ||
+        searchParams.get('view') === 'assign' ||
+        (hasSubsegment && parts[2] === 'assign')
+    ) {
         return 'assign';
     }
 
-    if (pathname.startsWith('/exams/grading') || searchParams.get('view') === 'grade') {
+    if (
+        pathname.startsWith('/exams/grading') ||
+        searchParams.get('view') === 'grade' ||
+        (hasSubsegment && parts[2] === 'grading')
+    ) {
         return 'grading';
     }
 
