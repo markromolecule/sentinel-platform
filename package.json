@@ -20,14 +20,14 @@
         "clean": "rm -rf node_modules"
     },
     "devDependencies": {
-        "@types/react": "~19.1.10",
+        "@types/react": "~19.2.17",
         "prettier": "latest",
         "prettier-plugin-tailwindcss": "^0.7.2",
         "turbo": "latest",
         "typescript": "~5.9.2"
     },
     "dependencies": {
-        "expo": "^54.0.33",
+        "expo": "^57.0.7",
         "pg": "^8.19.0"
     }
 }
