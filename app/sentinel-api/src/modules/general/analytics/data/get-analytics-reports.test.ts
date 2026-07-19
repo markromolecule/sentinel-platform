@@ -1,6 +1,12 @@
 import { describe, expect, it, vi } from 'vitest';
 import { getAnalyticsReportsData } from './get-analytics-reports';
 
+vi.mock('../../notification/helper/resolve-related-institutions', () => ({
+    resolveRelatedInstitutions: vi.fn((_dbClient, institutionId) =>
+        Promise.resolve(institutionId ? [institutionId] : []),
+    ),
+}));
+
 describe('getAnalyticsReportsData', () => {
     it('queries and returns paginated analytics reports correctly', async () => {
         const mockGeneratedAt = new Date('2026-05-22T10:00:00Z');
@@ -78,6 +84,6 @@ describe('getAnalyticsReportsData', () => {
         );
         expect(mockDbClient.limit).toHaveBeenCalledWith(5);
         expect(mockDbClient.offset).toHaveBeenCalledWith(5); // (2-1)*5 = 5
-        expect(mockDbClient.where).toHaveBeenCalledWith('ar.institution_id', '=', 'inst-123');
+        expect(mockDbClient.where).toHaveBeenCalledWith('ar.institution_id', 'in', ['inst-123']);
     });
 });

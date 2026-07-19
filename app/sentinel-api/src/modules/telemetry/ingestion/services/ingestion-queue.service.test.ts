@@ -273,7 +273,9 @@ describe('TelemetryIngestionQueueService', () => {
         const events = [payload, { ...payload, eventType: 'COPY_ATTEMPT' }];
 
         hoisted.mockRedisConnection.llen.mockResolvedValue(events.length);
-        hoisted.mockRedisConnection.lrange.mockResolvedValue(events.map((event) => JSON.stringify(event)));
+        hoisted.mockRedisConnection.lrange.mockResolvedValue(
+            events.map((event) => JSON.stringify(event)),
+        );
 
         const flushedCount = await queueService.flushBuffer(dbClient);
 

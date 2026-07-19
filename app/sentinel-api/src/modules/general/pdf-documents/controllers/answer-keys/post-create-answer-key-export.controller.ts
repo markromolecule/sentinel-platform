@@ -37,7 +37,9 @@ export const postCreateAnswerKeyExportRoute = createRoute({
     },
 });
 
-export const postCreateAnswerKeyExportHandler: AppRouteHandler<typeof postCreateAnswerKeyExportRoute> = async (c) => {
+export const postCreateAnswerKeyExportHandler: AppRouteHandler<
+    typeof postCreateAnswerKeyExportRoute
+> = async (c) => {
     const user = c.get('user');
     const dbClient = c.get('dbClient');
 
@@ -54,7 +56,10 @@ export const postCreateAnswerKeyExportHandler: AppRouteHandler<typeof postCreate
 
     if (!(await canAccessPdfInstitutionScope(dbClient, userInstitutionId, body.institution_id))) {
         return c.json(
-            { success: false, error: "Forbidden. Cannot create an answer key export for another institution." },
+            {
+                success: false,
+                error: 'Forbidden. Cannot create an answer key export for another institution.',
+            },
             403 as any,
         );
     }
@@ -80,7 +85,10 @@ export const postCreateAnswerKeyExportHandler: AppRouteHandler<typeof postCreate
             return c.json({ success: false, error: 'Exam not found.' }, 404 as any);
         }
         if (exam.institution_id !== body.institution_id) {
-            return c.json({ success: false, error: 'Exam does not belong to the specified institution.' }, 400 as any);
+            return c.json(
+                { success: false, error: 'Exam does not belong to the specified institution.' },
+                400 as any,
+            );
         }
 
         // Resolve and snapshot the template at request time
@@ -143,10 +151,17 @@ export const postCreateAnswerKeyExportHandler: AppRouteHandler<typeof postCreate
         };
 
         return c.json(
-            { success: true, message: 'Answer key export accepted and queued.', data: responseData },
+            {
+                success: true,
+                message: 'Answer key export accepted and queued.',
+                data: responseData,
+            },
             202 as any,
         );
     } catch (e: any) {
-        return c.json({ success: false, error: e.message || 'Failed to create answer key export.' }, 500 as any);
+        return c.json(
+            { success: false, error: e.message || 'Failed to create answer key export.' },
+            500 as any,
+        );
     }
 };

@@ -18,7 +18,7 @@ export class PdfStorageService {
     /**
      * Processes, validates, and uploads an institution branding logo to the private storage bucket.
      * Enforces size limits (2MB), format restrictions (PNG, JPEG, WebP), and dimensions limit (1000x1000px).
-     * 
+     *
      * @param institutionId institution ID
      * @param buffer file buffer
      * @param mimeType file MIME type
@@ -29,7 +29,7 @@ export class PdfStorageService {
         institutionId: string,
         buffer: Buffer,
         mimeType: string,
-        filename: string
+        filename: string,
     ): Promise<UploadedLogoMetadata> {
         const allowedMimes = ['image/png', 'image/jpeg', 'image/jpg', 'image/webp'];
         if (!allowedMimes.includes(mimeType.toLowerCase())) {
@@ -54,7 +54,7 @@ export class PdfStorageService {
                 width: metadata.width > 1000 ? 1000 : undefined,
                 height: metadata.height > 1000 ? 1000 : undefined,
                 fit: 'inside',
-                withoutEnlargement: true
+                withoutEnlargement: true,
             });
             processedBuffer = await image.toBuffer();
         }
@@ -64,10 +64,12 @@ export class PdfStorageService {
         const fileExt = mimeType.split('/')[1] === 'jpeg' ? 'jpg' : mimeType.split('/')[1];
         const storagePath = `logos/${institutionId}/${randomUUID()}-${sha256.substring(0, 16)}.${fileExt}`;
 
-        const { error: uploadError } = await supabaseAdmin.storage.from(bucket).upload(storagePath, processedBuffer, {
-            contentType: mimeType,
-            upsert: true
-        });
+        const { error: uploadError } = await supabaseAdmin.storage
+            .from(bucket)
+            .upload(storagePath, processedBuffer, {
+                contentType: mimeType,
+                upsert: true,
+            });
 
         if (uploadError) {
             throw new Error(`Failed to upload logo: ${uploadError.message}`);
@@ -79,13 +81,13 @@ export class PdfStorageService {
             sizeBytes: processedBuffer.length,
             hashSha256: sha256,
             mimeType,
-            originalName: filename
+            originalName: filename,
         };
     }
 
     /**
      * Removes a logo from Supabase storage.
-     * 
+     *
      * @param bucket bucket name
      * @param path file path
      */
@@ -104,7 +106,7 @@ export class PdfStorageService {
         const { error } = await supabaseAdmin.storage.from(bucket).upload(path, buffer, {
             contentType: 'application/pdf',
             upsert: false,
-            cacheControl: '300' // 5 minutes TTL
+            cacheControl: '300', // 5 minutes TTL
         });
         if (error) {
             throw new Error(`Storage upload error: ${error.message}`);
@@ -129,10 +131,18 @@ export class PdfStorageService {
     /**
      * Generates a temporary signed download URL for a private PDF artifact.
      */
-    static async createSignedUrl(bucket: string, path: string, expiresInSeconds = 300): Promise<string> {
-        const { data, error } = await supabaseAdmin.storage.from(bucket).createSignedUrl(path, expiresInSeconds);
+    static async createSignedUrl(
+        bucket: string,
+        path: string,
+        expiresInSeconds = 300,
+    ): Promise<string> {
+        const { data, error } = await supabaseAdmin.storage
+            .from(bucket)
+            .createSignedUrl(path, expiresInSeconds);
         if (error || !data?.signedUrl) {
-            throw new Error(`Storage signed URL generation error: ${error?.message || 'unknown error'}`);
+            throw new Error(
+                `Storage signed URL generation error: ${error?.message || 'unknown error'}`,
+            );
         }
         return data.signedUrl;
     }

@@ -40,7 +40,10 @@ describe('getUserRouteHandler', () => {
                     return 'inst-id';
                 }
                 if (key === 'user') {
-                    return { id: 'requester-id', user_profiles: { department_id: 'dept-id', course_id: 'course-id' } };
+                    return {
+                        id: 'requester-id',
+                        user_profiles: { department_id: 'dept-id', course_id: 'course-id' },
+                    };
                 }
                 if (key === 'dbClient') {
                     return {};
@@ -67,7 +70,7 @@ describe('getUserRouteHandler', () => {
             'admin',
             'requester-id',
             'dept-id',
-            'course-id'
+            'course-id',
         );
         expect(getUserActivePermissions).toHaveBeenCalledWith(expect.any(Object), 'target-user-id');
         expect(json).toHaveBeenCalledWith(
@@ -78,12 +81,15 @@ describe('getUserRouteHandler', () => {
                     active_permission_keys: ['perm1', 'perm2'],
                 },
             },
-            200
+            200,
         );
     });
 
     it('returns 404 and suppresses console.error when user is not found', async () => {
-        vi.mocked(UserService.getUserById).mockRejectedValue({ status: 404, message: 'User not found' });
+        vi.mocked(UserService.getUserById).mockRejectedValue({
+            status: 404,
+            message: 'User not found',
+        });
 
         const json = vi.fn();
         const c = {

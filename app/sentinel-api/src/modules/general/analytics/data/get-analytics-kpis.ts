@@ -1,6 +1,7 @@
 import { type DbClient } from '@sentinel/db';
 import { DEFAULT_EXAMINATION_GLOBAL_SETTINGS } from '@sentinel/shared/constants';
 import { sql } from 'kysely';
+import { resolveRelatedInstitutions } from '../../notification/helper/resolve-related-institutions';
 
 export type GetAnalyticsKPIsDataArgs = {
     institutionId?: string;
@@ -30,10 +31,14 @@ export async function getAnalyticsKPIsData(
     const { institutionId, startAt, endAtExclusive } = args;
     const defaultPassingScore = DEFAULT_EXAMINATION_GLOBAL_SETTINGS.defaultPassingScore;
 
+    const institutionIds = institutionId
+        ? await resolveRelatedInstitutions(dbClient, institutionId)
+        : [];
+
     // 1. Total Exams (non-draft) scheduled within the period
     let examsQuery = dbClient.selectFrom('exams').select((eb) => eb.fn.countAll().as('count'));
-    if (institutionId) {
-        examsQuery = examsQuery.where('institution_id', '=', institutionId);
+    if (institutionIds.length > 0) {
+        examsQuery = examsQuery.where('institution_id', 'in', institutionIds);
     }
     examsQuery = examsQuery.where('status', '!=', 'DRAFT');
     if (startAt) {
@@ -48,8 +53,8 @@ export async function getAnalyticsKPIsData(
         .selectFrom('exam_attempts as ea')
         .innerJoin('exams as e', 'e.exam_id', 'ea.exam_id')
         .select((eb) => eb.fn.countAll().as('count'));
-    if (institutionId) {
-        totalAttemptsQuery = totalAttemptsQuery.where('e.institution_id', '=', institutionId);
+    if (institutionIds.length > 0) {
+        totalAttemptsQuery = totalAttemptsQuery.where('e.institution_id', 'in', institutionIds);
     }
     if (startAt) {
         totalAttemptsQuery = totalAttemptsQuery.where('ea.started_at', '>=', startAt);
@@ -64,11 +69,11 @@ export async function getAnalyticsKPIsData(
         .innerJoin('exams as e', 'e.exam_id', 'ea.exam_id')
         .select((eb) => eb.fn.countAll().as('count'))
         .where('ea.status', '=', 'COMPLETED');
-    if (institutionId) {
+    if (institutionIds.length > 0) {
         completedAttemptsQuery = completedAttemptsQuery.where(
             'e.institution_id',
-            '=',
-            institutionId,
+            'in',
+            institutionIds,
         );
     }
     if (startAt) {
@@ -84,8 +89,8 @@ export async function getAnalyticsKPIsData(
         .innerJoin('exam_attempts as ea', 'ea.attempt_id', 'fi.attempt_id')
         .innerJoin('exams as e', 'e.exam_id', 'ea.exam_id')
         .select((eb) => eb.fn.countAll().as('count'));
-    if (institutionId) {
-        totalIncidentsQuery = totalIncidentsQuery.where('e.institution_id', '=', institutionId);
+    if (institutionIds.length > 0) {
+        totalIncidentsQuery = totalIncidentsQuery.where('e.institution_id', 'in', institutionIds);
     }
     if (startAt) {
         totalIncidentsQuery = totalIncidentsQuery.where('fi.timestamp', '>=', startAt);
@@ -100,8 +105,8 @@ export async function getAnalyticsKPIsData(
         .innerJoin('exams as e', 'e.exam_id', 'ea.exam_id')
         .innerJoin('flagged_incidents as fi', 'fi.attempt_id', 'ea.attempt_id')
         .select((eb) => eb.fn.count('ea.attempt_id').distinct().as('count'));
-    if (institutionId) {
-        flaggedAttemptsQuery = flaggedAttemptsQuery.where('e.institution_id', '=', institutionId);
+    if (institutionIds.length > 0) {
+        flaggedAttemptsQuery = flaggedAttemptsQuery.where('e.institution_id', 'in', institutionIds);
     }
     if (startAt) {
         flaggedAttemptsQuery = flaggedAttemptsQuery.where('fi.timestamp', '>=', startAt);
@@ -115,8 +120,8 @@ export async function getAnalyticsKPIsData(
         .selectFrom('exams')
         .select((eb) => eb.fn.countAll().as('count'))
         .where('status', 'in', ['AVAILABLE', 'IN_PROGRESS', 'ACTIVE']);
-    if (institutionId) {
-        activeExamsQuery = activeExamsQuery.where('institution_id', '=', institutionId);
+    if (institutionIds.length > 0) {
+        activeExamsQuery = activeExamsQuery.where('institution_id', 'in', institutionIds);
     }
     if (endAtExclusive) {
         activeExamsQuery = activeExamsQuery.where('scheduled_date', '<', endAtExclusive);
@@ -157,8 +162,8 @@ export async function getAnalyticsKPIsData(
                 end
             )`.as('passed_count'),
         ]);
-    if (institutionId) {
-        scoreMetricsQuery = scoreMetricsQuery.where('e.institution_id', '=', institutionId);
+    if (institutionIds.length > 0) {
+        scoreMetricsQuery = scoreMetricsQuery.where('e.institution_id', 'in', institutionIds);
     }
     if (startAt) {
         scoreMetricsQuery = scoreMetricsQuery.where('ea.started_at', '>=', startAt);

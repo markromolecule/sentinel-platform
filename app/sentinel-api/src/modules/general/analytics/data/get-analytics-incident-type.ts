@@ -1,4 +1,5 @@
 import { type DbClient } from '@sentinel/db';
+import { resolveRelatedInstitutions } from '../../notification/helper/resolve-related-institutions';
 
 export type GetAnalyticsIncidentTypeDataArgs = {
     institutionId?: string;
@@ -21,14 +22,18 @@ export async function getAnalyticsIncidentTypeData(
 ): Promise<IncidentTypeMetric[]> {
     const { institutionId, startAt, endAtExclusive } = args;
 
+    const institutionIds = institutionId
+        ? await resolveRelatedInstitutions(dbClient, institutionId)
+        : [];
+
     let query = dbClient
         .selectFrom('flagged_incidents as fi')
         .innerJoin('exam_attempts as ea', 'ea.attempt_id', 'fi.attempt_id')
         .innerJoin('exams as e', 'e.exam_id', 'ea.exam_id')
         .select(['fi.incident_type as type', (eb) => eb.fn.count('fi.incident_id').as('count')]);
 
-    if (institutionId) {
-        query = query.where('e.institution_id', '=', institutionId);
+    if (institutionIds.length > 0) {
+        query = query.where('e.institution_id', 'in', institutionIds);
     }
 
     if (startAt) {

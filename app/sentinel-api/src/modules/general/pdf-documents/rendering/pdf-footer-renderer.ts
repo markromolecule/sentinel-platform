@@ -12,7 +12,7 @@ export interface FooterConfig {
 
 /**
  * Renders the footer on the current page of the PDF.
- * 
+ *
  * @param doc PDFKit document instance
  * @param config footer configuration
  * @param currentPage 1-based current page number
@@ -22,7 +22,7 @@ export function renderPdfFooter(
     doc: typeof PDFDocument,
     config: FooterConfig,
     currentPage: number,
-    totalPages: number
+    totalPages: number,
 ): void {
     const yPos = PDF_LAYOUT.footerY;
 
@@ -38,9 +38,7 @@ export function renderPdfFooter(
             .stroke();
     }
 
-    doc.fontSize(8)
-        .fillColor(PDF_LAYOUT.colors.textLight)
-        .font(PDF_LAYOUT.fonts.regular);
+    doc.fontSize(8).fillColor(PDF_LAYOUT.colors.textLight).font(PDF_LAYOUT.fonts.regular);
 
     // 2. Draw Footer Text (Left)
     const footerText = config.text || '';
@@ -48,7 +46,7 @@ export function renderPdfFooter(
         doc.text(footerText, PDF_LAYOUT.marginLeft, yPos + 8, {
             width: 250,
             align: 'left',
-            lineBreak: false
+            lineBreak: false,
         });
     }
 
@@ -60,7 +58,7 @@ export function renderPdfFooter(
             .text(confidentiality, (PDF_LAYOUT.pageWidth - 150) / 2, yPos + 8, {
                 width: 150,
                 align: 'center',
-                lineBreak: false
+                lineBreak: false,
             });
     }
 
@@ -80,7 +78,7 @@ export function renderPdfFooter(
             .text(pageStr, PDF_LAYOUT.pageWidth - PDF_LAYOUT.marginRight - 100, yPos + 8, {
                 width: 100,
                 align: 'right',
-                lineBreak: false
+                lineBreak: false,
             });
     }
 

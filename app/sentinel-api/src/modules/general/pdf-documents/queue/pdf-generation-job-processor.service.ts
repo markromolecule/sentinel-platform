@@ -5,19 +5,26 @@ import { resolvePdfTemplate } from '../services/resolve-pdf-template.service';
 import { renderAnalyticsOverallPdf } from '../rendering/analytics-overall-renderer';
 import { renderExamAnswerKeyPdf } from '../rendering/exam-answer-key-renderer';
 import { BuildOverallAnalyticsSnapshotService } from '../../analytics/services/build-overall-analytics-snapshot.service';
-import { getAnswerKeySource, mapAnswerKeySourceToViewModel } from '../data/answer-keys/get-answer-key-source';
+import {
+    getAnswerKeySource,
+    mapAnswerKeySourceToViewModel,
+} from '../data/answer-keys/get-answer-key-source';
 import { LogsService } from '../../logs/logs.service';
 
 export class PdfGenerationJobProcessor {
     /**
      * Executes the PDF generation job logic, managing status transitions, template snapshots,
      * rendering, and storage uploads transactionally.
-     * 
+     *
      * @param dbClient database client
      * @param exportId export record UUID
      * @param documentKind type of document being generated
      */
-    static async processJob(dbClient: DbClient, exportId: string, documentKind: 'ANALYTICS_OVERALL' | 'EXAM_ANSWER_KEY'): Promise<void> {
+    static async processJob(
+        dbClient: DbClient,
+        exportId: string,
+        documentKind: 'ANALYTICS_OVERALL' | 'EXAM_ANSWER_KEY',
+    ): Promise<void> {
         const isAnalytics = documentKind === 'ANALYTICS_OVERALL';
         const tableName = isAnalytics ? 'analytics_reports' : 'exam_answer_key_exports';
         const idCol = isAnalytics ? 'report_id' : 'export_id';
@@ -49,7 +56,7 @@ export class PdfGenerationJobProcessor {
                 status: 'GENERATING',
                 retry_count: currentRetries + 1,
                 failure_code: null,
-                failure_message: null
+                failure_message: null,
             };
             if (!isAnalytics) {
                 updateSet.updated_at = new Date();
@@ -76,9 +83,10 @@ export class PdfGenerationJobProcessor {
         }
 
         const exportRecord = taskResult.record;
-        const requestData = typeof exportRecord.request_snapshot === 'string'
-            ? JSON.parse(exportRecord.request_snapshot)
-            : exportRecord.request_snapshot;
+        const requestData =
+            typeof exportRecord.request_snapshot === 'string'
+                ? JSON.parse(exportRecord.request_snapshot)
+                : exportRecord.request_snapshot;
 
         try {
             // 2. Resolve template layout and freeze snapshot
@@ -117,7 +125,7 @@ export class PdfGenerationJobProcessor {
                     try {
                         logoBuffer = await PdfStorageService.downloadFile(
                             branding.logo_storage_bucket,
-                            branding.logo_storage_path
+                            branding.logo_storage_path,
                         );
                     } catch (e) {
                         // Logo download failure is transient or non-fatal, fallback to null
@@ -134,8 +142,12 @@ export class PdfGenerationJobProcessor {
                 const instId = exportRecord.institution_id || 'global';
                 storagePath = `analytics/${instId}/${exportId}.pdf`;
 
-                const startAt = exportRecord.period_start_at ? new Date(exportRecord.period_start_at) : new Date();
-                const endAtExclusive = exportRecord.period_end_at ? new Date(exportRecord.period_end_at) : new Date();
+                const startAt = exportRecord.period_start_at
+                    ? new Date(exportRecord.period_start_at)
+                    : new Date();
+                const endAtExclusive = exportRecord.period_end_at
+                    ? new Date(exportRecord.period_end_at)
+                    : new Date();
                 const timezone = exportRecord.timezone || 'Asia/Manila';
 
                 const analyticsData = await BuildOverallAnalyticsSnapshotService.buildSnapshot({
@@ -145,23 +157,42 @@ export class PdfGenerationJobProcessor {
                     endAtExclusive,
                     timezone,
                     periodLabel: requestData?.periodLabel || 'Custom Period',
-                    generatedBy: 'Sentinel Analytics System'
+                    generatedBy: 'Sentinel Analytics System',
                 });
 
-                pdfBuffer = await renderAnalyticsOverallPdf(headerConfig, footerConfig, logoBuffer, analyticsData);
+                pdfBuffer = await renderAnalyticsOverallPdf(
+                    headerConfig,
+                    footerConfig,
+                    logoBuffer,
+                    analyticsData,
+                );
             } else {
                 // EXAM_ANSWER_KEY — use private loader that enforces institution ownership
                 const examId = exportRecord.exam_id;
                 if (!examId) {
-                    throw new UnrecoverableError('Invalid request parameters: missing exam_id on export record.');
+                    throw new UnrecoverableError(
+                        'Invalid request parameters: missing exam_id on export record.',
+                    );
                 }
                 const instId = exportRecord.institution_id || 'global';
                 storagePath = `answer-keys/${instId}/${examId}/${exportId}.pdf`;
 
-                const answerKeySource = await getAnswerKeySource(dbClient, examId, exportRecord.institution_id!);
-                const answerKeyData = mapAnswerKeySourceToViewModel(answerKeySource, 'Sentinel Support');
+                const answerKeySource = await getAnswerKeySource(
+                    dbClient,
+                    examId,
+                    exportRecord.institution_id!,
+                );
+                const answerKeyData = mapAnswerKeySourceToViewModel(
+                    answerKeySource,
+                    'Sentinel Support',
+                );
 
-                pdfBuffer = await renderExamAnswerKeyPdf(headerConfig, footerConfig, logoBuffer, answerKeyData);
+                pdfBuffer = await renderExamAnswerKeyPdf(
+                    headerConfig,
+                    footerConfig,
+                    logoBuffer,
+                    answerKeyData,
+                );
             }
 
             // 5. Upload file to private storage bucket
@@ -177,7 +208,7 @@ export class PdfGenerationJobProcessor {
                     storage_path: storagePath,
                     template_id: resolvedTemplate.templateId,
                     template_snapshot: JSON.stringify(resolvedTemplate),
-                    completed_at: completedAt
+                    completed_at: completedAt,
                 };
                 if (isAnalytics) {
                     updateSet.expires_at = new Date(completedAt.getTime() + 7 * 24 * 3600 * 1000);
@@ -202,16 +233,18 @@ export class PdfGenerationJobProcessor {
                         details: {
                             exportId,
                             documentKind,
-                            sizeBytes: pdfBuffer.length
-                        }
+                            sizeBytes: pdfBuffer.length,
+                        },
                     });
                 } catch (logErr: any) {
-                    console.warn(`[PDFWorker] Audit logging failed for export ${exportId}:`, logErr.message);
+                    console.warn(
+                        `[PDFWorker] Audit logging failed for export ${exportId}:`,
+                        logErr.message,
+                    );
                 }
             } else {
                 console.log(`[PDFWorker] PDF_EXPORT_COMPLETED for global export ${exportId}`);
             }
-
         } catch (error: any) {
             const isUnrecoverable = error instanceof UnrecoverableError;
             const status = 'FAILED';
@@ -220,7 +253,7 @@ export class PdfGenerationJobProcessor {
                 const updateSet: any = {
                     status,
                     failure_code: isUnrecoverable ? 'UNRECOVERABLE_ERROR' : 'TRANSIENT_ERROR',
-                    failure_message: error.message || 'Unknown processing failure.'
+                    failure_message: error.message || 'Unknown processing failure.',
                 };
                 if (!isAnalytics) {
                     updateSet.updated_at = new Date();
@@ -243,14 +276,20 @@ export class PdfGenerationJobProcessor {
                         details: {
                             exportId,
                             error: error.message,
-                            unrecoverable: isUnrecoverable
-                        }
+                            unrecoverable: isUnrecoverable,
+                        },
                     });
                 } catch (logErr: any) {
-                    console.warn(`[PDFWorker] Audit logging failed for failed export ${exportId}:`, logErr.message);
+                    console.warn(
+                        `[PDFWorker] Audit logging failed for failed export ${exportId}:`,
+                        logErr.message,
+                    );
                 }
             } else {
-                console.error(`[PDFWorker] PDF_EXPORT_FAILED for global export ${exportId}:`, error.message);
+                console.error(
+                    `[PDFWorker] PDF_EXPORT_FAILED for global export ${exportId}:`,
+                    error.message,
+                );
             }
 
             throw error;

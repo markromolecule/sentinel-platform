@@ -10,7 +10,7 @@ export interface ResolvedPdfReportPeriod {
 
 /**
  * Resolves a ReportPeriod schema input into canonical UTC dates and local date strings in Asia/Manila.
- * 
+ *
  * @param period The ReportPeriod input
  * @returns The resolved date coordinates
  */
@@ -25,17 +25,17 @@ export function resolvePdfReportPeriod(period: ReportPeriod): ResolvedPdfReportP
 
     const getTodayManila = (): Date => {
         const parts = formatter.formatToParts(new Date());
-        const year = parts.find(p => p.type === 'year')?.value;
-        const month = parts.find(p => p.type === 'month')?.value;
-        const day = parts.find(p => p.type === 'day')?.value;
+        const year = parts.find((p) => p.type === 'year')?.value;
+        const month = parts.find((p) => p.type === 'month')?.value;
+        const day = parts.find((p) => p.type === 'day')?.value;
         return new Date(`${year}-${month}-${day}T00:00:00+08:00`);
     };
 
     const formatLocalDate = (date: Date): string => {
         const parts = formatter.formatToParts(date);
-        const y = parts.find(p => p.type === 'year')?.value;
-        const m = parts.find(p => p.type === 'month')?.value;
-        const d = parts.find(p => p.type === 'day')?.value;
+        const y = parts.find((p) => p.type === 'year')?.value;
+        const m = parts.find((p) => p.type === 'month')?.value;
+        const d = parts.find((p) => p.type === 'day')?.value;
         return `${y}-${m}-${d}`;
     };
 

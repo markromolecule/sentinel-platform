@@ -6,6 +6,7 @@ import { NewAssignmentsBuilder } from './new-assignments-builder';
 
 export interface AddExamSectionAssignmentDialogProps {
     examId: string;
+    examTitle?: string;
     subjectId?: string;
     currentAssignments: any[];
     open: boolean;
@@ -15,19 +16,32 @@ export interface AddExamSectionAssignmentDialogProps {
 
 export function AddExamSectionAssignmentDialog({
     examId,
+    examTitle,
     subjectId,
     currentAssignments,
     open,
     onOpenChange,
     onSuccess,
 }: AddExamSectionAssignmentDialogProps) {
+    const [isSaving, setIsSaving] = React.useState(false);
+
     return (
-        <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="max-h-[90vh] overflow-y-auto bg-white sm:max-w-4xl md:max-w-5xl dark:bg-zinc-900">
+        <Dialog open={open} onOpenChange={(val) => {
+            if (isSaving) return;
+            onOpenChange(val);
+        }}>
+            <DialogContent
+                onEscapeKeyDown={(e) => isSaving && e.preventDefault()}
+                onPointerDownOutside={(e) => isSaving && e.preventDefault()}
+                className="max-h-[90vh] overflow-y-auto bg-white sm:max-w-4xl md:max-w-5xl dark:bg-zinc-900"
+            >
                 <DialogHeader>
-                    <DialogTitle className="text-lg font-bold">Assign Classrooms</DialogTitle>
+                    <DialogTitle className="text-lg font-bold">Assign instructors and classrooms</DialogTitle>
                     <DialogDescription>
-                        Select classrooms, rooms, and proctors to assign to this exam.
+                        {examTitle ? `For examination: ${examTitle}` : 'Manage classroom, room, and instructor assignments.'}
+                        <div className="mt-1 text-xs text-zinc-500 font-medium">
+                            All fields (Classroom, Room, and Instructor) are required for every assignment.
+                        </div>
                     </DialogDescription>
                 </DialogHeader>
                 <div className="py-2">
@@ -35,6 +49,7 @@ export function AddExamSectionAssignmentDialog({
                         examId={examId}
                         subjectId={subjectId}
                         currentAssignments={currentAssignments}
+                        onSavingChange={setIsSaving}
                         onSuccess={() => {
                             onSuccess?.();
                             onOpenChange(false);

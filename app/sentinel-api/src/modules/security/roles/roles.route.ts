@@ -36,9 +36,6 @@ rolesRoutes
         replaceAccessControlRolePermissionsRoute,
         replaceAccessControlRolePermissionsRouteHandler,
     )
-    .openapi(
-        resetAccessControlRolePermissionsRoute,
-        resetAccessControlRolePermissionsRouteHandler,
-    );
+    .openapi(resetAccessControlRolePermissionsRoute, resetAccessControlRolePermissionsRouteHandler);
 
 export default rolesRoutes;

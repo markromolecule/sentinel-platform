@@ -21,7 +21,9 @@ export type AssertRemediationEligibilityArgs = {
  * @param args - The assertion arguments.
  * @throws {HTTPException} If the remediation window or attempt state is ineligible.
  */
-export async function assertRemediationWindowEligibility(args: AssertRemediationEligibilityArgs): Promise<void> {
+export async function assertRemediationWindowEligibility(
+    args: AssertRemediationEligibilityArgs,
+): Promise<void> {
     const {
         dbClient,
         remediationType,
@@ -89,7 +91,10 @@ export async function assertRemediationWindowEligibility(args: AssertRemediation
 
         // Retakes require the source attempt to be SUBMITTED or CLOSED
         const eligibleStates = ['SUBMITTED', 'CLOSED'];
-        if (!sourceAttempt.lifecycle_state || !eligibleStates.includes(sourceAttempt.lifecycle_state)) {
+        if (
+            !sourceAttempt.lifecycle_state ||
+            !eligibleStates.includes(sourceAttempt.lifecycle_state)
+        ) {
             throw new HTTPException(409, {
                 message: 'Retakes can only be granted for submitted or closed attempts.',
             });

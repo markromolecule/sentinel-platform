@@ -71,12 +71,7 @@ export async function buildStaffExamVisibilityPredicates(args: {
     institutionId?: string;
     includePublicInstitutionExams?: boolean;
 }) {
-    const {
-        dbClient,
-        userId,
-        institutionId,
-        includePublicInstitutionExams = true,
-    } = args;
+    const { dbClient, userId, institutionId, includePublicInstitutionExams = true } = args;
 
     const visibilityPredicates = [];
 
@@ -88,7 +83,9 @@ export async function buildStaffExamVisibilityPredicates(args: {
     }
 
     visibilityPredicates.push(sql<boolean>`e.created_by = ${userId}`);
-    visibilityPredicates.push(...(await buildSharedAssignmentVisibilityPredicates({ dbClient, userId })));
+    visibilityPredicates.push(
+        ...(await buildSharedAssignmentVisibilityPredicates({ dbClient, userId })),
+    );
     visibilityPredicates.push(sql<boolean>`e.exam_id in (
         select es.exam_id
         from exam_shares as es

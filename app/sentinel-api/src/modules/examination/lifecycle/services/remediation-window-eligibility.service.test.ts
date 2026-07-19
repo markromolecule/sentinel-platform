@@ -100,7 +100,7 @@ describe('assertRemediationWindowEligibility', () => {
             end_date_time: new Date(Date.now() - 1000 * 60 * 60).toISOString(), // in past
         });
         selectFromMock.execute.mockResolvedValue([
-            { attempt_id: 'attempt-other', lifecycle_state: 'SUBMITTED' }
+            { attempt_id: 'attempt-other', lifecycle_state: 'SUBMITTED' },
         ]);
 
         await expect(
@@ -122,7 +122,7 @@ describe('assertRemediationWindowEligibility', () => {
             end_date_time: new Date(Date.now() - 1000 * 60 * 60).toISOString(), // in past
         });
         selectFromMock.execute.mockResolvedValue([
-            { attempt_id: 'attempt-1', lifecycle_state: 'IN_PROGRESS' }
+            { attempt_id: 'attempt-1', lifecycle_state: 'IN_PROGRESS' },
         ]);
 
         await expect(
@@ -144,7 +144,7 @@ describe('assertRemediationWindowEligibility', () => {
             end_date_time: new Date(Date.now() - 1000 * 60 * 60).toISOString(), // in past
         });
         selectFromMock.execute.mockResolvedValue([
-            { attempt_id: 'attempt-1', lifecycle_state: 'CLOSED' }
+            { attempt_id: 'attempt-1', lifecycle_state: 'CLOSED' },
         ]);
 
         await expect(
@@ -184,7 +184,7 @@ describe('assertRemediationWindowEligibility', () => {
             end_date_time: new Date(Date.now() - 1000 * 60 * 60).toISOString(), // in past
         });
         selectFromMock.execute.mockResolvedValue([
-            { attempt_id: 'attempt-1', lifecycle_state: 'SUBMITTED' }
+            { attempt_id: 'attempt-1', lifecycle_state: 'SUBMITTED' },
         ]);
 
         await expect(

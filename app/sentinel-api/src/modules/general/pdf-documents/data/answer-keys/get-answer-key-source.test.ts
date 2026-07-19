@@ -36,7 +36,9 @@ describe('getAnswerKeySource', () => {
             selectFrom: vi.fn().mockReturnValue(buildExamLookupStub(undefined)),
         } as any;
 
-        await expect(getAnswerKeySource(mockDb, 'exam-uuid', 'inst-uuid')).rejects.toThrow(UnrecoverableError);
+        await expect(getAnswerKeySource(mockDb, 'exam-uuid', 'inst-uuid')).rejects.toThrow(
+            UnrecoverableError,
+        );
     });
 
     it('throws UnrecoverableError when exam belongs to a different institution', async () => {
@@ -56,7 +58,9 @@ describe('getAnswerKeySource', () => {
             selectFrom: vi.fn().mockReturnValue(buildExamLookupStub(mockExam)),
         } as any;
 
-        await expect(getAnswerKeySource(mockDb, 'exam-uuid', 'inst-uuid')).rejects.toThrow(UnrecoverableError);
+        await expect(getAnswerKeySource(mockDb, 'exam-uuid', 'inst-uuid')).rejects.toThrow(
+            UnrecoverableError,
+        );
     });
 
     it('returns mapped questions with correct answers for MULTIPLE_CHOICE', async () => {
@@ -90,7 +94,8 @@ describe('getAnswerKeySource', () => {
         ];
 
         const mockDb = {
-            selectFrom: vi.fn()
+            selectFrom: vi
+                .fn()
                 .mockReturnValueOnce(buildExamLookupStub(mockExam))
                 .mockReturnValueOnce(buildQuestionLookupStub(mockQuestions)),
         } as any;
@@ -133,7 +138,8 @@ describe('getAnswerKeySource', () => {
         ];
 
         const mockDb = {
-            selectFrom: vi.fn()
+            selectFrom: vi
+                .fn()
                 .mockReturnValueOnce(buildExamLookupStub(mockExam))
                 .mockReturnValueOnce(buildQuestionLookupStub(mockQuestions)),
         } as any;
@@ -167,7 +173,8 @@ describe('getAnswerKeySource', () => {
         ];
 
         const mockDb = {
-            selectFrom: vi.fn()
+            selectFrom: vi
+                .fn()
                 .mockReturnValueOnce(buildExamLookupStub(mockExam))
                 .mockReturnValueOnce(buildQuestionLookupStub(mockQuestions)),
         } as any;

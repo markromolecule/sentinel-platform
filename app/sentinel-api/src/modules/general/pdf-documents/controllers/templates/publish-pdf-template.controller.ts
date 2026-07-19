@@ -76,7 +76,7 @@ export const publishTemplateHandler: AppRouteHandler<typeof publishTemplateRoute
         !(await canAccessPdfInstitutionScope(dbClient, userInstitutionId, template.institution_id))
     ) {
         throw new HTTPException(403, {
-            message: 'Forbidden. You cannot publish another institution\'s answer key template.',
+            message: "Forbidden. You cannot publish another institution's answer key template.",
         });
     }
 

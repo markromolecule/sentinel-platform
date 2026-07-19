@@ -1,6 +1,9 @@
 import { OpenAPIHono } from '@hono/zod-openapi';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { telemetryHealthRoute, telemetryHealthRouteHandler } from './telemetry-monitoring.controller';
+import {
+    telemetryHealthRoute,
+    telemetryHealthRouteHandler,
+} from './telemetry-monitoring.controller';
 import { telemetryIngestionQueueService } from './ingestion/services/ingestion-queue.service';
 import { telemetrySettingsResolverService } from './settings/telemetry-settings-resolver.service';
 

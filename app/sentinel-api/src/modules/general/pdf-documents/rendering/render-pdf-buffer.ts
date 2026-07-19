@@ -11,7 +11,7 @@ let cachedSentinelLogo: Buffer | null = null;
 /**
  * Loads the Sentinel co-branding logo and converts it to a PNG buffer on the fly.
  * Uses sharp for robust SVG rendering.
- * 
+ *
  * @returns PNG logo buffer or null if load fails
  */
 export async function getSentinelLogoBuffer(): Promise<Buffer | null> {
@@ -33,7 +33,7 @@ export async function getSentinelLogoBuffer(): Promise<Buffer | null> {
  * Compiles a deterministic PDF buffer. First generates all document body content
  * using the bodyRenderer callback, then switch-pages in a second pass to stamp
  * headers, footers, and page numbers.
- * 
+ *
  * @param headerConfig header layout parameters
  * @param footerConfig footer layout parameters
  * @param logoBuffer optional PNG buffer of the institution logo
@@ -44,7 +44,7 @@ export async function renderPdfDocumentBuffer(
     headerConfig: HeaderConfig,
     footerConfig: FooterConfig,
     logoBuffer: Buffer | null,
-    bodyRenderer: (doc: typeof PDFDocument) => void | Promise<void>
+    bodyRenderer: (doc: typeof PDFDocument) => void | Promise<void>,
 ): Promise<Buffer> {
     // 1. Initialize PDFKit document with bufferedPages enabled
     const doc = new PDFDocument({
@@ -53,9 +53,9 @@ export async function renderPdfDocumentBuffer(
             top: PDF_LAYOUT.marginTop,
             bottom: PDF_LAYOUT.marginBottom,
             left: PDF_LAYOUT.marginLeft,
-            right: PDF_LAYOUT.marginRight
+            right: PDF_LAYOUT.marginRight,
         },
-        bufferPages: true
+        bufferPages: true,
     });
 
     const chunks: Buffer[] = [];

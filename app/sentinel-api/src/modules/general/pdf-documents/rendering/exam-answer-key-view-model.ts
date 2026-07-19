@@ -60,7 +60,7 @@ export interface ExamAnswerKeyData {
 /**
  * Normalizes answer key raw data to protect against null pointer exceptions,
  * and normalizes formatting and question properties before rendering.
- * 
+ *
  * @param data input partial data
  * @returns validated, normalized view model
  */
@@ -75,24 +75,24 @@ export function normalizeExamAnswerKeyData(data: Partial<ExamAnswerKeyData>): Ex
             text: q.text || 'Missing question text.',
             passageText: q.passageText || null,
             imageUrl: q.imageUrl || null,
-            options: q.options?.map(opt => ({
+            options: q.options?.map((opt) => ({
                 optionId: opt.optionId || `opt-${Math.random()}`,
                 optionText: opt.optionText || '',
-                isCorrect: opt.isCorrect
+                isCorrect: opt.isCorrect,
             })),
             trueFalseAnswer: q.trueFalseAnswer,
             shortAnswerPattern: q.shortAnswerPattern || '',
-            rubric: q.rubric?.map(rub => ({
+            rubric: q.rubric?.map((rub) => ({
                 criterion: rub.criterion || 'Content Accuracy',
                 maxPoints: rub.maxPoints ?? 5,
-                description: rub.description || ''
+                description: rub.description || '',
             })),
             blankAnswers: q.blankAnswers || [],
-            matchingPairs: q.matchingPairs?.map(pair => ({
+            matchingPairs: q.matchingPairs?.map((pair) => ({
                 premise: pair.premise || '',
-                response: pair.response || ''
+                response: pair.response || '',
             })),
-            orderedItems: q.orderedItems || []
+            orderedItems: q.orderedItems || [],
         };
     });
 
@@ -107,6 +107,6 @@ export function normalizeExamAnswerKeyData(data: Partial<ExamAnswerKeyData>): Ex
         generatedAt: data.generatedAt || new Date().toISOString(),
         generatedBy: data.generatedBy || 'System',
         institutionName: data.institutionName || 'Sentinel Institution',
-        questions
+        questions,
     };
 }

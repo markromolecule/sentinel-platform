@@ -29,7 +29,9 @@ export async function getStudentExamHistory(
     ]);
 
     let items = records.map((record) =>
-        mapExamHistorySummaryResponse(applyEffectiveExamBaselineToRawRecord(record, globalSettings)),
+        mapExamHistorySummaryResponse(
+            applyEffectiveExamBaselineToRawRecord(record, globalSettings),
+        ),
     );
 
     if (filters?.status) {

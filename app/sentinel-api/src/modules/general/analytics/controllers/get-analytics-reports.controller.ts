@@ -41,7 +41,10 @@ export const getAnalyticsReportsRouteHandler: AppRouteHandler<
         const role = c.get('role');
 
         if (role !== 'support') {
-            return c.json({ success: false, error: 'Forbidden. Support role required.' }, 403 as any);
+            return c.json(
+                { success: false, error: 'Forbidden. Support role required.' },
+                403 as any,
+            );
         }
 
         requireActivePermission(
@@ -54,13 +57,17 @@ export const getAnalyticsReportsRouteHandler: AppRouteHandler<
         const targetInstitutionId = query.institutionId || query.institution_id;
 
         if (targetInstitutionId) {
-            const instExists = await c.get('dbClient')
+            const instExists = await c
+                .get('dbClient')
                 .selectFrom('institutions')
                 .select('id')
                 .where('id', '=', targetInstitutionId)
                 .executeTakeFirst();
             if (!instExists) {
-                return c.json({ success: false, error: 'Target institution not found.' }, 404 as any);
+                return c.json(
+                    { success: false, error: 'Target institution not found.' },
+                    404 as any,
+                );
             }
         }
 

@@ -10,7 +10,7 @@ export interface GetPdfTemplatesFilters {
 /**
  * Retrieves PDF templates from the database based on filters.
  * If filters.institutionId is specified and not null, it will return both global and institution-specific templates.
- * 
+ *
  * @param dbClient database client
  * @param filters query filters
  * @returns list of templates
@@ -32,10 +32,7 @@ export async function getPdfTemplates(dbClient: DbClient, filters: GetPdfTemplat
         } else {
             const instId = filters.institutionId;
             query = query.where((eb) =>
-                eb.or([
-                    eb('institution_id', '=', instId),
-                    eb('institution_id', 'is', null)
-                ])
+                eb.or([eb('institution_id', '=', instId), eb('institution_id', 'is', null)]),
             );
         }
     }

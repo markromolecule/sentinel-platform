@@ -231,132 +231,128 @@ describe('IncidentPersistenceService', () => {
         },
     );
 
-    test(
-        'emits structured persistence diagnostics for insert, duplicate retry, aggregation, and concurrent first writes',
-        async () => {
-            vi.stubEnv('NODE_ENV', 'development');
-            const diagnosticSpy = vi.spyOn(console, 'info').mockImplementation(() => undefined);
-            const dbClient = prisma.$kysely;
-            const fixture = await createTelemetryAttemptFixture(dbClient);
+    test('emits structured persistence diagnostics for insert, duplicate retry, aggregation, and concurrent first writes', async () => {
+        vi.stubEnv('NODE_ENV', 'development');
+        const diagnosticSpy = vi.spyOn(console, 'info').mockImplementation(() => undefined);
+        const dbClient = prisma.$kysely;
+        const fixture = await createTelemetryAttemptFixture(dbClient);
 
-            try {
-                const insertedPayload = buildPayload({
+        try {
+            const insertedPayload = buildPayload({
+                ...fixture,
+                metadata: {
+                    eventId: randomUUID(),
+                    dedupeKey: 'diag-right-click-1',
+                    clientActionAt: '2026-04-22T08:00:00.000Z',
+                },
+            });
+
+            await IncidentPersistenceService.appendEvent(dbClient, insertedPayload);
+            await IncidentPersistenceService.appendEvent(dbClient, insertedPayload);
+
+            await IncidentPersistenceService.appendEvent(
+                dbClient,
+                buildPayload({
                     ...fixture,
                     metadata: {
                         eventId: randomUUID(),
+                        dedupeKey: 'diag-right-click-2',
+                        clientActionAt: '2026-04-22T08:02:30.000Z',
+                    },
+                }),
+            );
+
+            const concurrentPayload = buildPayload({
+                ...fixture,
+                ruleKey: 'webSecurity.print_screen_disable',
+                eventType: 'PRINT_SCREEN_ATTEMPT',
+                metadata: {
+                    eventId: randomUUID(),
+                    dedupeKey: 'diag-print-screen-1',
+                    clientActionAt: '2026-04-22T08:03:00.000Z',
+                },
+            });
+
+            await Promise.allSettled([
+                IncidentPersistenceService.appendEvent(dbClient, concurrentPayload),
+                IncidentPersistenceService.appendEvent(dbClient, concurrentPayload),
+            ]);
+
+            const diagnostics = diagnosticSpy.mock.calls
+                .filter(([message]) => message === '[TelemetryStorage][Diagnostics]')
+                .map(([, diagnostic]) => diagnostic as Record<string, unknown>);
+
+            expect(diagnostics).toEqual(
+                expect.arrayContaining([
+                    expect.objectContaining({
+                        disposition: 'inserted',
                         dedupeKey: 'diag-right-click-1',
-                        clientActionAt: '2026-04-22T08:00:00.000Z',
-                    },
-                });
-
-                await IncidentPersistenceService.appendEvent(dbClient, insertedPayload);
-                await IncidentPersistenceService.appendEvent(dbClient, insertedPayload);
-
-                await IncidentPersistenceService.appendEvent(
-                    dbClient,
-                    buildPayload({
-                        ...fixture,
-                        metadata: {
-                            eventId: randomUUID(),
-                            dedupeKey: 'diag-right-click-2',
-                            clientActionAt: '2026-04-22T08:02:30.000Z',
-                        },
+                        occurrenceCount: 1,
                     }),
-                );
-
-                const concurrentPayload = buildPayload({
-                    ...fixture,
-                    ruleKey: 'webSecurity.print_screen_disable',
-                    eventType: 'PRINT_SCREEN_ATTEMPT',
-                    metadata: {
-                        eventId: randomUUID(),
+                    expect.objectContaining({
+                        disposition: 'duplicate-ignored',
+                        dedupeKey: 'diag-right-click-1',
+                        occurrenceCount: 1,
+                    }),
+                    expect.objectContaining({
+                        disposition: 'aggregated',
+                        dedupeKey: 'diag-right-click-2',
+                        occurrenceCount: 2,
+                    }),
+                    expect.objectContaining({
+                        disposition: 'inserted',
                         dedupeKey: 'diag-print-screen-1',
-                        clientActionAt: '2026-04-22T08:03:00.000Z',
-                    },
-                });
+                        occurrenceCount: 1,
+                    }),
+                    expect.objectContaining({
+                        disposition: 'duplicate-ignored',
+                        dedupeKey: 'diag-print-screen-1',
+                        occurrenceCount: 1,
+                    }),
+                ]),
+            );
 
-                await Promise.allSettled([
-                    IncidentPersistenceService.appendEvent(dbClient, concurrentPayload),
-                    IncidentPersistenceService.appendEvent(dbClient, concurrentPayload),
-                ]);
+            const rightClickIncident = await dbClient
+                .selectFrom('flagged_incidents')
+                .select(['details'])
+                .where('attempt_id', '=', fixture.attemptId)
+                .where('rule_key', '=', 'webSecurity.right_click_disable')
+                .executeTakeFirstOrThrow();
+            const printScreenIncidents = await dbClient
+                .selectFrom('flagged_incidents')
+                .select(['incident_id', 'details'])
+                .where('attempt_id', '=', fixture.attemptId)
+                .where('rule_key', '=', 'webSecurity.print_screen_disable')
+                .execute();
 
-                const diagnostics = diagnosticSpy.mock.calls
-                    .filter(([message]) => message === '[TelemetryStorage][Diagnostics]')
-                    .map(([, diagnostic]) => diagnostic as Record<string, unknown>);
-
-                expect(diagnostics).toEqual(
-                    expect.arrayContaining([
-                        expect.objectContaining({
-                            disposition: 'inserted',
-                            dedupeKey: 'diag-right-click-1',
-                            occurrenceCount: 1,
-                        }),
-                        expect.objectContaining({
-                            disposition: 'duplicate-ignored',
-                            dedupeKey: 'diag-right-click-1',
-                            occurrenceCount: 1,
-                        }),
-                        expect.objectContaining({
-                            disposition: 'aggregated',
-                            dedupeKey: 'diag-right-click-2',
-                            occurrenceCount: 2,
-                        }),
-                        expect.objectContaining({
-                            disposition: 'inserted',
-                            dedupeKey: 'diag-print-screen-1',
-                            occurrenceCount: 1,
-                        }),
-                        expect.objectContaining({
-                            disposition: 'duplicate-ignored',
-                            dedupeKey: 'diag-print-screen-1',
-                            occurrenceCount: 1,
-                        }),
-                    ]),
-                );
-
-                const rightClickIncident = await dbClient
-                    .selectFrom('flagged_incidents')
-                    .select(['details'])
-                    .where('attempt_id', '=', fixture.attemptId)
-                    .where('rule_key', '=', 'webSecurity.right_click_disable')
-                    .executeTakeFirstOrThrow();
-                const printScreenIncidents = await dbClient
-                    .selectFrom('flagged_incidents')
-                    .select(['incident_id', 'details'])
-                    .where('attempt_id', '=', fixture.attemptId)
-                    .where('rule_key', '=', 'webSecurity.print_screen_disable')
-                    .execute();
-
-                expect(parseIncidentDetails(rightClickIncident.details)).toMatchObject({
-                    occurrenceCount: 2,
-                });
-                expect(printScreenIncidents).toHaveLength(1);
-                expect(parseIncidentDetails(printScreenIncidents[0]?.details)).toMatchObject({
-                    occurrenceCount: 1,
-                });
-            } finally {
-                await dbClient
-                    .deleteFrom('flagged_incidents')
-                    .where('attempt_id', '=', fixture.attemptId)
-                    .execute();
-                await dbClient
-                    .deleteFrom('exam_attempts')
-                    .where('attempt_id', '=', fixture.attemptId)
-                    .execute();
-                await dbClient.deleteFrom('exams').where('exam_id', '=', fixture.examId).execute();
-                await dbClient
-                    .deleteFrom('students')
-                    .where('student_id', '=', fixture.studentId)
-                    .execute();
-                await dbClient
-                    .deleteFrom('institutions')
-                    .where('id', '=', fixture.institutionId)
-                    .execute();
-                await dbClient.deleteFrom('users').where('id', '=', fixture.studentUserId).execute();
-            }
-        },
-        30000,
-    );
+            expect(parseIncidentDetails(rightClickIncident.details)).toMatchObject({
+                occurrenceCount: 2,
+            });
+            expect(printScreenIncidents).toHaveLength(1);
+            expect(parseIncidentDetails(printScreenIncidents[0]?.details)).toMatchObject({
+                occurrenceCount: 1,
+            });
+        } finally {
+            await dbClient
+                .deleteFrom('flagged_incidents')
+                .where('attempt_id', '=', fixture.attemptId)
+                .execute();
+            await dbClient
+                .deleteFrom('exam_attempts')
+                .where('attempt_id', '=', fixture.attemptId)
+                .execute();
+            await dbClient.deleteFrom('exams').where('exam_id', '=', fixture.examId).execute();
+            await dbClient
+                .deleteFrom('students')
+                .where('student_id', '=', fixture.studentId)
+                .execute();
+            await dbClient
+                .deleteFrom('institutions')
+                .where('id', '=', fixture.institutionId)
+                .execute();
+            await dbClient.deleteFrom('users').where('id', '=', fixture.studentUserId).execute();
+        }
+    }, 30000);
 
     testWithDbClient(
         'escalates deduplicated occurrence counts without jumping to high at count two',
@@ -1144,59 +1140,49 @@ describe('IncidentPersistenceService', () => {
     );
 });
 
-test(
-    'IncidentPersistenceService keeps one row and occurrence count one for concurrent first-trigger writes with the same dedupe key',
-    async () => {
-        const dbClient = prisma.$kysely;
-        const fixture = await createTelemetryAttemptFixture(dbClient);
-        const payload = buildPayload({
-            attemptId: fixture.attemptId,
-            studentUserId: fixture.studentUserId,
-            metadata: {
-                dedupeKey: 'attempt:right-click:bucket-concurrent',
-                eventId: 'event-concurrent-1',
-                clientActionAt: '2026-04-22T08:00:00.000Z',
-            },
+test('IncidentPersistenceService keeps one row and occurrence count one for concurrent first-trigger writes with the same dedupe key', async () => {
+    const dbClient = prisma.$kysely;
+    const fixture = await createTelemetryAttemptFixture(dbClient);
+    const payload = buildPayload({
+        attemptId: fixture.attemptId,
+        studentUserId: fixture.studentUserId,
+        metadata: {
+            dedupeKey: 'attempt:right-click:bucket-concurrent',
+            eventId: 'event-concurrent-1',
+            clientActionAt: '2026-04-22T08:00:00.000Z',
+        },
+    });
+
+    try {
+        const results = await Promise.all([
+            IncidentPersistenceService.appendEvent(dbClient, payload),
+            IncidentPersistenceService.appendEvent(dbClient, payload),
+        ]);
+
+        const incidents = await dbClient
+            .selectFrom('flagged_incidents')
+            .select(['incident_id', 'details', 'dedupe_key'])
+            .where('attempt_id', '=', fixture.attemptId)
+            .execute();
+
+        expect(results.filter(Boolean)).toHaveLength(1);
+        expect(incidents).toHaveLength(1);
+        expect(incidents[0]?.dedupe_key).toBe('attempt:right-click:bucket-concurrent');
+        expect(parseIncidentDetails(incidents[0]?.details)).toMatchObject({
+            occurrenceCount: 1,
         });
-
-        try {
-            const results = await Promise.all([
-                IncidentPersistenceService.appendEvent(dbClient, payload),
-                IncidentPersistenceService.appendEvent(dbClient, payload),
-            ]);
-
-            const incidents = await dbClient
-                .selectFrom('flagged_incidents')
-                .select(['incident_id', 'details', 'dedupe_key'])
-                .where('attempt_id', '=', fixture.attemptId)
-                .execute();
-
-            expect(results.filter(Boolean)).toHaveLength(1);
-            expect(incidents).toHaveLength(1);
-            expect(incidents[0]?.dedupe_key).toBe('attempt:right-click:bucket-concurrent');
-            expect(parseIncidentDetails(incidents[0]?.details)).toMatchObject({
-                occurrenceCount: 1,
-            });
-        } finally {
-            await dbClient
-                .deleteFrom('flagged_incidents')
-                .where('attempt_id', '=', fixture.attemptId)
-                .execute();
-            await dbClient
-                .deleteFrom('exam_attempts')
-                .where('attempt_id', '=', fixture.attemptId)
-                .execute();
-            await dbClient.deleteFrom('exams').where('exam_id', '=', fixture.examId).execute();
-            await dbClient
-                .deleteFrom('students')
-                .where('student_id', '=', fixture.studentId)
-                .execute();
-            await dbClient
-                .deleteFrom('institutions')
-                .where('id', '=', fixture.institutionId)
-                .execute();
-            await dbClient.deleteFrom('users').where('id', '=', fixture.studentUserId).execute();
-        }
-    },
-    30000,
-);
+    } finally {
+        await dbClient
+            .deleteFrom('flagged_incidents')
+            .where('attempt_id', '=', fixture.attemptId)
+            .execute();
+        await dbClient
+            .deleteFrom('exam_attempts')
+            .where('attempt_id', '=', fixture.attemptId)
+            .execute();
+        await dbClient.deleteFrom('exams').where('exam_id', '=', fixture.examId).execute();
+        await dbClient.deleteFrom('students').where('student_id', '=', fixture.studentId).execute();
+        await dbClient.deleteFrom('institutions').where('id', '=', fixture.institutionId).execute();
+        await dbClient.deleteFrom('users').where('id', '=', fixture.studentUserId).execute();
+    }
+}, 30000);

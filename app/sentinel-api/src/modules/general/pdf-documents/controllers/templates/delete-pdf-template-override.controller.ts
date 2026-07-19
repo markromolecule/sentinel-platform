@@ -69,7 +69,7 @@ export const deleteTemplateOverrideHandler: AppRouteHandler<
 
         if (!(await canAccessPdfInstitutionScope(dbClient, userInstitutionId, institutionId))) {
             throw new HTTPException(403, {
-                message: 'Forbidden. You cannot reset another institution\'s answer key template.',
+                message: "Forbidden. You cannot reset another institution's answer key template.",
             });
         }
     }

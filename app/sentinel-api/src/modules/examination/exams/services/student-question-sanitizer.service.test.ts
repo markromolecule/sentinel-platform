@@ -127,7 +127,8 @@ describe('student-question-sanitizer.service', () => {
             type: 'ESSAY',
             content: {
                 prompt: 'Discuss the impact of climate change.',
-                correctAnswer: 'An acceptable essay should mention greenhouse gases, rising sea levels, etc.',
+                correctAnswer:
+                    'An acceptable essay should mention greenhouse gases, rising sea levels, etc.',
             },
         };
         const sanitized = sanitizeQuestionForStudentAttempt(question);

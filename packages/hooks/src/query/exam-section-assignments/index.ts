@@ -3,3 +3,4 @@ export * from './use-create-exam-section-assignment-mutation';
 export * from './use-update-exam-section-assignment-mutation';
 export * from './use-delete-exam-section-assignment-mutation';
 export * from './use-create-exam-section-assignments-batch-mutation';
+export * from './use-exam-assignment-builder';

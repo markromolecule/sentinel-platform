@@ -48,11 +48,9 @@ describe('pdf-generation.worker', () => {
         vi.resetModules();
     });
 
-
     it('starts the worker once with the expected queue settings', async () => {
-        const { startPdfGenerationWorker, stopPdfGenerationWorker } = await import(
-            './pdf-generation.worker'
-        );
+        const { startPdfGenerationWorker, stopPdfGenerationWorker } =
+            await import('./pdf-generation.worker');
 
         const worker = await startPdfGenerationWorker();
         const sameWorker = await startPdfGenerationWorker();
@@ -75,9 +73,8 @@ describe('pdf-generation.worker', () => {
     });
 
     it('invokes the job processor with export id and document kind', async () => {
-        const { startPdfGenerationWorker, stopPdfGenerationWorker } = await import(
-            './pdf-generation.worker'
-        );
+        const { startPdfGenerationWorker, stopPdfGenerationWorker } =
+            await import('./pdf-generation.worker');
 
         await startPdfGenerationWorker();
         const processor = workerCtorMock.mock.calls[0][1];
@@ -102,9 +99,8 @@ describe('pdf-generation.worker', () => {
     it('rethrows processor failures so BullMQ can mark the job failed', async () => {
         processJobMock.mockRejectedValueOnce(new Error('render failed'));
 
-        const { startPdfGenerationWorker, stopPdfGenerationWorker } = await import(
-            './pdf-generation.worker'
-        );
+        const { startPdfGenerationWorker, stopPdfGenerationWorker } =
+            await import('./pdf-generation.worker');
 
         await startPdfGenerationWorker();
         const processor = workerCtorMock.mock.calls[0][1];
@@ -125,9 +121,8 @@ describe('pdf-generation.worker', () => {
     it('does not start the worker and returns null when mode is sync', async () => {
         process.env.PDF_GENERATION_MODE = 'sync';
 
-        const { startPdfGenerationWorker, stopPdfGenerationWorker } = await import(
-            './pdf-generation.worker'
-        );
+        const { startPdfGenerationWorker, stopPdfGenerationWorker } =
+            await import('./pdf-generation.worker');
 
         const worker = await startPdfGenerationWorker();
 
@@ -139,9 +134,8 @@ describe('pdf-generation.worker', () => {
     });
 
     it('closes the worker and redis connection on shutdown', async () => {
-        const { startPdfGenerationWorker, stopPdfGenerationWorker } = await import(
-            './pdf-generation.worker'
-        );
+        const { startPdfGenerationWorker, stopPdfGenerationWorker } =
+            await import('./pdf-generation.worker');
 
         await startPdfGenerationWorker();
         await stopPdfGenerationWorker();

@@ -42,8 +42,7 @@ export function resolveEffectiveExamBaseline(
                 : defaults.defaultPassingScore,
         settings: {
             shuffleQuestions: record.shuffle_questions ?? defaults.defaultShuffleQuestions,
-            showCorrectAnswers:
-                record.show_correct_answers ?? defaults.defaultShowCorrectAnswers,
+            showCorrectAnswers: record.show_correct_answers ?? defaults.defaultShowCorrectAnswers,
             allowReview: record.allow_review ?? defaults.defaultAllowReview,
             randomizeChoices: record.randomize_choices ?? defaults.defaultRandomizeChoices,
         },

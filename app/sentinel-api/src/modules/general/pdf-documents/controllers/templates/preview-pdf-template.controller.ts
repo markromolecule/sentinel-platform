@@ -93,7 +93,7 @@ export const previewPdfTemplateHandler: AppRouteHandler<typeof previewPdfTemplat
 
         if (!(await canAccessPdfInstitutionScope(dbClient, userInstitutionId, institution_id))) {
             throw new HTTPException(403, {
-                message: 'Forbidden. You cannot preview another institution\'s answer key template.',
+                message: "Forbidden. You cannot preview another institution's answer key template.",
             });
         }
     }

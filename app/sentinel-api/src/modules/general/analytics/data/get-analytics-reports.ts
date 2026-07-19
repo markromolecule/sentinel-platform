@@ -1,4 +1,5 @@
 import { type DbClient } from '@sentinel/db';
+import { resolveRelatedInstitutions } from '../../notification/helper/resolve-related-institutions';
 
 export type GetAnalyticsReportsDataArgs = {
     institutionId?: string;
@@ -42,12 +43,16 @@ export async function getAnalyticsReportsData(
     const { institutionId, limit = 10, page = 1 } = args;
     const offset = (page - 1) * limit;
 
+    const institutionIds = institutionId
+        ? await resolveRelatedInstitutions(dbClient, institutionId)
+        : [];
+
     let baseQuery = dbClient
         .selectFrom('analytics_reports as ar')
         .leftJoin('user_profiles as up', 'up.user_id', 'ar.created_by');
 
-    if (institutionId) {
-        baseQuery = baseQuery.where('ar.institution_id', '=', institutionId);
+    if (institutionIds.length > 0) {
+        baseQuery = baseQuery.where('ar.institution_id', 'in', institutionIds);
     } else {
         baseQuery = baseQuery.where('ar.institution_id', 'is not', null);
     }

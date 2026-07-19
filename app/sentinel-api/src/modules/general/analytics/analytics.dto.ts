@@ -170,7 +170,8 @@ export const analyticsReportRecordSchema = z
         reportId: z.string().uuid().openapi({ description: 'Unique report identifier' }),
         title: z.string().openapi({ description: 'Report Title' }),
         type: z.string().openapi({
-            description: 'Report category type, e.g. completion, incident, performance, or ANALYTICS_OVERALL',
+            description:
+                'Report category type, e.g. completion, incident, performance, or ANALYTICS_OVERALL',
         }),
         generatedAt: z
             .string()
@@ -192,10 +193,19 @@ export const analyticsReportRecordSchema = z
         creatorFirstName: z.string().nullable().openapi({ description: 'Creator first name' }),
         creatorLastName: z.string().nullable().openapi({ description: 'Creator last name' }),
         institutionId: z.string().uuid().nullable().openapi({ description: 'Institution ID' }),
-        failureCode: z.string().nullable().openapi({ description: 'Error code if generation failed' }),
-        failureMessage: z.string().nullable().openapi({ description: 'Error message if generation failed' }),
-        expiresAt: z.string().nullable().openapi({ description: 'ISO-8601 date when report expires' }),
-        retryCount: z.number().int().openapi({ description: 'Retried attempts count' })
+        failureCode: z
+            .string()
+            .nullable()
+            .openapi({ description: 'Error code if generation failed' }),
+        failureMessage: z
+            .string()
+            .nullable()
+            .openapi({ description: 'Error message if generation failed' }),
+        expiresAt: z
+            .string()
+            .nullable()
+            .openapi({ description: 'ISO-8601 date when report expires' }),
+        retryCount: z.number().int().openapi({ description: 'Retried attempts count' }),
     })
     .openapi('AnalyticsReportRecord');
 
@@ -211,7 +221,7 @@ export const getReportsQuerySchema = z.object({
     institutionId: z.string().uuid().optional().openapi({
         description: 'Optional institution ID to filter list',
         example: 'd3b07384-d113-495f-a558-145c38d52367',
-    })
+    }),
 });
 
 export const analyticsReportsResponseSchema = z.object({
@@ -245,10 +255,13 @@ export const generateAnalyticsReportBodySchema = z
             description: 'Target institution ID to scope the overall analytics report',
             example: 'd3b07384-d113-495f-a558-145c38d52367',
         }),
-        period: z.enum(['LAST_7_DAYS', 'LAST_30_DAYS', 'LAST_90_DAYS', 'CUSTOM']).default('LAST_30_DAYS').openapi({
-            description: 'Predefined report period preset',
-            example: 'LAST_30_DAYS',
-        }),
+        period: z
+            .enum(['LAST_7_DAYS', 'LAST_30_DAYS', 'LAST_90_DAYS', 'CUSTOM'])
+            .default('LAST_30_DAYS')
+            .openapi({
+                description: 'Predefined report period preset',
+                example: 'LAST_30_DAYS',
+            }),
         startDate: z.string().optional().nullable().openapi({
             description: 'ISO start date (YYYY-MM-DD), required if period is CUSTOM',
             example: '2026-06-15',
@@ -260,7 +273,7 @@ export const generateAnalyticsReportBodySchema = z
         timezone: z.string().optional().default('Asia/Manila').openapi({
             description: 'Target timezone context for daily trend aggregation',
             example: 'Asia/Manila',
-        })
+        }),
     })
     .openapi('GenerateAnalyticsReportBody');
 

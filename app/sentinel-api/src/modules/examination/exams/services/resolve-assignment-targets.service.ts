@@ -44,10 +44,10 @@ export async function resolveAssignmentTargets({
         body.classroomId !== undefined
             ? body.classroomId
             : body.classroomIds !== undefined &&
-              body.classroomIds !== null &&
-              body.classroomIds.length > 0
-                ? body.classroomIds[0]
-                : (current.class_group_id ?? null);
+                body.classroomIds !== null &&
+                body.classroomIds.length > 0
+              ? body.classroomIds[0]
+              : (current.class_group_id ?? null);
 
     if (resolvedClassroomId === null) {
         return {
@@ -69,8 +69,8 @@ export async function resolveAssignmentTargets({
         body.sectionIds !== undefined
             ? (body.sectionIds ?? [])
             : current.section_id
-                ? [current.section_id]
-                : [];
+              ? [current.section_id]
+              : [];
 
     return await resolveInstructorExamAssignmentTargets({
         dbClient,

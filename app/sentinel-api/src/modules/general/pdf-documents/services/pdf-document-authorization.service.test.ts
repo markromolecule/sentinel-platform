@@ -124,13 +124,13 @@ describe('pdf-document-authorization.service', () => {
         await expect(resolvePdfAccessibleInstitutionIds(dbClient, 'branch-1')).resolves.toEqual([
             'branch-1',
         ]);
-        await expect(
-            canAccessPdfInstitutionScope(dbClient, 'branch-1', 'parent-1'),
-        ).resolves.toBe(false);
+        await expect(canAccessPdfInstitutionScope(dbClient, 'branch-1', 'parent-1')).resolves.toBe(
+            false,
+        );
 
-        await expect(
-            resolvePdfAccessibleInstitutionIds(dbClient, 'standalone-1'),
-        ).resolves.toEqual(['standalone-1']);
+        await expect(resolvePdfAccessibleInstitutionIds(dbClient, 'standalone-1')).resolves.toEqual(
+            ['standalone-1'],
+        );
     });
 
     it('allows parent-institution support accounts to access their branches', async () => {
@@ -146,9 +146,9 @@ describe('pdf-document-authorization.service', () => {
             'branch-1',
             'branch-2',
         ]);
-        await expect(
-            canAccessPdfInstitutionScope(dbClient, 'parent-1', 'branch-2'),
-        ).resolves.toBe(true);
+        await expect(canAccessPdfInstitutionScope(dbClient, 'parent-1', 'branch-2')).resolves.toBe(
+            true,
+        );
         await expect(
             canAccessPdfInstitutionScope(dbClient, 'parent-1', 'other-branch'),
         ).resolves.toBe(false);

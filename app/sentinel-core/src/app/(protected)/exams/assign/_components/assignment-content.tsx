@@ -104,6 +104,7 @@ export function InstructorAssignmentContent({ initialExamId }: { initialExamId?:
                     {/* Add/Edit Assignments Dialog */}
                     <AddExamSectionAssignmentDialog
                         examId={currentExamId}
+                        examTitle={selectedExam?.title}
                         subjectId={selectedExam?.subjectId}
                         currentAssignments={assignments}
                         open={isAssignDialogOpen}

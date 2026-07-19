@@ -1,6 +1,12 @@
 import { describe, expect, it, vi } from 'vitest';
 import { getAnalyticsKPIsData } from './get-analytics-kpis';
 
+vi.mock('../../notification/helper/resolve-related-institutions', () => ({
+    resolveRelatedInstitutions: vi.fn((_dbClient, institutionId) =>
+        Promise.resolve(institutionId ? [institutionId] : []),
+    ),
+}));
+
 describe('getAnalyticsKPIsData', () => {
     it('queries and aggregates KPIs correctly', async () => {
         const mockExecuteTakeFirst = vi

@@ -149,7 +149,9 @@ describe('getExamDetail service', () => {
         vi.mocked(getExamQuestionsData).mockResolvedValue([mockQuestion]);
         vi.mocked(getExamConfigurationState).mockResolvedValue(mockConfigState as any);
         vi.mocked(resolveExaminationGlobalSettings).mockResolvedValue({} as any);
-        vi.mocked(TelemetrySettingsService.getTelemetrySettings).mockResolvedValue(mockTelemetrySettings as any);
+        vi.mocked(TelemetrySettingsService.getTelemetrySettings).mockResolvedValue(
+            mockTelemetrySettings as any,
+        );
         vi.mocked(RuntimeAccessService.resolveExamRuntimeAccess).mockResolvedValue({
             state: 'open',
             canStart: true,
@@ -171,7 +173,9 @@ describe('getExamDetail service', () => {
         vi.mocked(getExamQuestionsData).mockResolvedValue([mockQuestion]);
         vi.mocked(getExamConfigurationState).mockResolvedValue(mockConfigState as any);
         vi.mocked(resolveExaminationGlobalSettings).mockResolvedValue({} as any);
-        vi.mocked(TelemetrySettingsService.getTelemetrySettings).mockResolvedValue(mockTelemetrySettings as any);
+        vi.mocked(TelemetrySettingsService.getTelemetrySettings).mockResolvedValue(
+            mockTelemetrySettings as any,
+        );
         vi.mocked(AccessGatekeeperService.verifyStudentExamEligibility).mockResolvedValue({
             runtimeAccess: {
                 state: 'open',

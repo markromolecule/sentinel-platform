@@ -16,7 +16,9 @@ export async function resetRolePermissionsToBlueprint(dbClient: DbClient, roleId
 
     const blueprint = SYSTEM_ROLE_BLUEPRINTS[role.role_name];
     if (!blueprint) {
-        throw new HTTPException(500, { message: `Blueprint not found for system role "${role.role_name}".` });
+        throw new HTTPException(500, {
+            message: `Blueprint not found for system role "${role.role_name}".`,
+        });
     }
 
     const permissions = await dbClient

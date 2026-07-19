@@ -64,7 +64,9 @@ describe('BuildOverallAnalyticsSnapshotService', () => {
             selectFrom: vi.fn().mockReturnValue({
                 select: vi.fn().mockReturnValue({
                     where: vi.fn().mockReturnValue({
-                        executeTakeFirst: vi.fn().mockResolvedValue({ name: 'Sentinel University' }),
+                        executeTakeFirst: vi
+                            .fn()
+                            .mockResolvedValue({ name: 'Sentinel University' }),
                     }),
                 }),
             }),

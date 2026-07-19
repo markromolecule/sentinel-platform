@@ -56,7 +56,9 @@ describe('Analytics Controllers', () => {
             selectFrom: () => ({
                 select: () => ({
                     where: () => ({
-                        executeTakeFirst: vi.fn().mockResolvedValue({ id: '12345678-1234-4234-8234-1234567890fe' }),
+                        executeTakeFirst: vi
+                            .fn()
+                            .mockResolvedValue({ id: '12345678-1234-4234-8234-1234567890fe' }),
                     }),
                 }),
             }),
@@ -242,7 +244,7 @@ describe('Analytics Controllers', () => {
                         failureCode: null,
                         failureMessage: null,
                         expiresAt: null,
-                        retryCount: 0
+                        retryCount: 0,
                     },
                 ],
                 total_records: 1,
@@ -252,7 +254,9 @@ describe('Analytics Controllers', () => {
             vi.spyOn(AnalyticsService, 'getReports').mockResolvedValue(mockData);
 
             const app = createTestApp(['reports:view'], 'support');
-            const res = await app.request('/reports?institutionId=12345678-1234-4234-8234-1234567890fe&limit=10&page=1');
+            const res = await app.request(
+                '/reports?institutionId=12345678-1234-4234-8234-1234567890fe&limit=10&page=1',
+            );
             const body = await res.json();
 
             expect(res.status).toBe(200);
@@ -292,7 +296,7 @@ describe('Analytics Controllers', () => {
                 failureCode: null,
                 failureMessage: null,
                 expiresAt: null,
-                retryCount: 0
+                retryCount: 0,
             };
             vi.spyOn(AnalyticsService, 'generateReport').mockResolvedValue(mockCreated);
 
@@ -304,7 +308,7 @@ describe('Analytics Controllers', () => {
                     title: 'New Report',
                     institutionId: '12345678-1234-4234-8234-1234567890fe',
                     period: 'LAST_30_DAYS',
-                    timezone: 'Asia/Manila'
+                    timezone: 'Asia/Manila',
                 }),
             });
             const body = await res.json();
@@ -335,7 +339,7 @@ describe('Analytics Controllers', () => {
                 body: JSON.stringify({
                     title: 'New Report',
                     institutionId: '12345678-1234-4234-8234-1234567890fe',
-                    period: 'LAST_30_DAYS'
+                    period: 'LAST_30_DAYS',
                 }),
             });
 
