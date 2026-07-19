@@ -2,6 +2,13 @@ import { type DbClient } from '@sentinel/db';
 import { LogsService } from '../../general/logs/logs.service';
 
 export class LiveKitService {
+    /**
+     * Records a managed-LiveKit token grant audit event.
+     *
+     * This helper must receive only opaque identities and correlation IDs. Token
+     * values, API keys, API secrets, and provider webhook secrets must never be
+     * passed to this method or persisted in log details.
+     */
     static async logLiveKitTokenGranted(
         dbClient: DbClient,
         args: {
@@ -10,6 +17,7 @@ export class LiveKitService {
             institutionId: string;
             roomName: string;
             identity: string;
+            role: 'publisher' | 'viewer';
         },
     ) {
         try {
@@ -23,6 +31,7 @@ export class LiveKitService {
                     attemptId: args.attemptId,
                     roomName: args.roomName,
                     identity: args.identity,
+                    role: args.role,
                 },
             });
         } catch (logErr) {
