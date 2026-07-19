@@ -174,6 +174,30 @@ export const exam_attempt_score_state = {
 } as const;
 export type exam_attempt_score_state =
     (typeof exam_attempt_score_state)[keyof typeof exam_attempt_score_state];
+export const live_inspection_lease_state = {
+    REQUESTED: 'REQUESTED',
+    PUBLISHER_CONNECTING: 'PUBLISHER_CONNECTING',
+    PUBLISHER_READY: 'PUBLISHER_READY',
+    LIVE: 'LIVE',
+    STOPPING: 'STOPPING',
+    ENDED: 'ENDED',
+    FAILED: 'FAILED',
+    EXPIRED: 'EXPIRED',
+} as const;
+export type live_inspection_lease_state =
+    (typeof live_inspection_lease_state)[keyof typeof live_inspection_lease_state];
+export const live_inspection_terminal_reason = {
+    VIEWER_STOPPED: 'VIEWER_STOPPED',
+    STUDENT_DISCONNECTED: 'STUDENT_DISCONNECTED',
+    VIEWER_DISCONNECTED: 'VIEWER_DISCONNECTED',
+    TIME_LIMIT_REACHED: 'TIME_LIMIT_REACHED',
+    TOKEN_ERROR: 'TOKEN_ERROR',
+    PROVIDER_ERROR: 'PROVIDER_ERROR',
+    EXAM_ENDED: 'EXAM_ENDED',
+    LEASE_EXPIRED: 'LEASE_EXPIRED',
+} as const;
+export type live_inspection_terminal_reason =
+    (typeof live_inspection_terminal_reason)[keyof typeof live_inspection_terminal_reason];
 export const proctor_assignment_status = {
     PENDING: 'PENDING',
     ACCEPTED: 'ACCEPTED',
@@ -892,6 +916,36 @@ export type instructors = {
     updated_at: Timestamp | null;
     course_id: string | null;
 };
+export type live_inspection_leases = {
+    lease_id: Generated<string>;
+    exam_id: string;
+    attempt_id: string;
+    student_user_id: string;
+    viewer_user_id: string;
+    institution_id: string;
+    provider_room_name: string;
+    state: Generated<live_inspection_lease_state>;
+    version: Generated<number>;
+    requested_at: Generated<Timestamp>;
+    publisher_connecting_at: Timestamp | null;
+    publisher_ready_at: Timestamp | null;
+    started_at: Timestamp | null;
+    stopping_at: Timestamp | null;
+    ended_at: Timestamp | null;
+    expires_at: Timestamp;
+    end_reason: live_inspection_terminal_reason | null;
+    last_error_code: string | null;
+    created_at: Generated<Timestamp>;
+    updated_at: Generated<Timestamp>;
+};
+export type livekit_webhook_events = {
+    provider_event_id: string;
+    lease_id: string | null;
+    event_type: string;
+    received_at: Generated<Timestamp>;
+    processed_at: Timestamp | null;
+    processing_result: string | null;
+};
 export type messages = {
     message_id: Generated<string>;
     conversation_id: string | null;
@@ -1513,6 +1567,8 @@ export type DB = {
     instructor_subject_requests: instructor_subject_requests;
     instructor_subjects: instructor_subjects;
     instructors: instructors;
+    live_inspection_leases: live_inspection_leases;
+    livekit_webhook_events: livekit_webhook_events;
     messages: messages;
     notifications: notifications;
     pdf_templates: pdf_templates;

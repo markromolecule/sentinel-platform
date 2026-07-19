@@ -26,3 +26,28 @@
     - The obsolete empty EC2 service file was deleted.
     - Lockfile review found two Expo peer-resolution line normalizations around React 19.1/19.2; no Expo package dependency was added or upgraded.
     - Dependency scan found no AWS SDK, recording, Egress, `@livekit/components-react`, or `NEXT_PUBLIC_LIVEKIT_*` usage in the package-01 dependency/configuration surface.
+
+## Work Package 02: Persistence, Contracts, and Authorization
+
+- Date: 2026-07-19
+- Entry gate:
+    - Work-package-01 commit present: `d8e48b6b feat(livekit): add managed service foundation`.
+    - Package 03-06 implementation status at entry: not started in this execution.
+    - `LIVE_INSPECTION_ENABLED` scan found no enabled shared environment value in tracked package-02 scope.
+- Implemented:
+    - Shared live-inspection state, response, and transition schemas.
+    - Prisma lease/webhook models, generated Kysely types, and migration SQL with active partial indexes, check constraints, private Realtime trigger, SELECT-only student policy, and no browser INSERT policy.
+    - Dedicated `examinations:monitor_live_video` permission for `superadmin`, `admin`, and `instructor`; support and student are excluded.
+    - Relationship-aware viewer/student access service, provider-independent repository helpers, and state-transition service.
+- Verification:
+    - `pnpm --dir packages/db generate`: passed.
+    - `pnpm --dir packages/shared test --run src/schema/exams/live-inspection-schema.test.ts`: passed, 1 file and 6 tests.
+    - `pnpm --dir packages/shared build`: passed.
+    - `pnpm --dir packages/db test --run src/tests/live-inspection-schema.test.ts src/tests/live-inspection-realtime-policy.test.ts`: passed, 2 files and 6 tests.
+    - `pnpm --dir packages/db build`: passed.
+    - Focused API live-inspection TypeScript check through a temporary scoped tsconfig: passed.
+    - `pnpm --dir app/sentinel-api test --run src/modules/security/permission/data/sync-system-permissions.test.ts src/modules/examination/live-inspection/live-inspection-access.service.test.ts src/modules/examination/live-inspection/live-inspection.repository.test.ts src/modules/examination/live-inspection/live-inspection-state.service.test.ts --testNamePattern "^(?!.*sync permissions into the database).*"`: passed, 4 files, 29 tests passed and 1 existing DB-backed sync test skipped.
+    - Targeted Prettier check for package-02 touched files: passed.
+- Blocked environment checks:
+    - Applying the migration to a clean database and running true concurrent partial-index tests require a reachable Postgres/Supabase test database. The current configured database host is unreachable from this workspace (`aws-1-ap-northeast-1.pooler.supabase.com`).
+    - The existing `sync permissions into the database` integration test is likewise blocked by the unreachable database host.

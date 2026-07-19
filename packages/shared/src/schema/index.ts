@@ -20,6 +20,7 @@ export * from './exams/monitoring-schema';
 export * from './exams/reporting-schema';
 export * from './exams/runtime-access-schema';
 export * from './exams/lifecycle-schema';
+export * from './exams/live-inspection-schema';
 export * from './exams/student-override-schema';
 export * from './exams/question-schema';
 export * from './exams/question-collection-schema';
