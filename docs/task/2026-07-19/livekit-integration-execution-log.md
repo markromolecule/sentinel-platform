@@ -48,6 +48,13 @@
     - Focused API live-inspection TypeScript check through a temporary scoped tsconfig: passed.
     - `pnpm --dir app/sentinel-api test --run src/modules/security/permission/data/sync-system-permissions.test.ts src/modules/examination/live-inspection/live-inspection-access.service.test.ts src/modules/examination/live-inspection/live-inspection.repository.test.ts src/modules/examination/live-inspection/live-inspection-state.service.test.ts --testNamePattern "^(?!.*sync permissions into the database).*"`: passed, 4 files, 29 tests passed and 1 existing DB-backed sync test skipped.
     - Targeted Prettier check for package-02 touched files: passed.
-- Blocked environment checks:
-    - Applying the migration to a clean database and running true concurrent partial-index tests require a reachable Postgres/Supabase test database. The current configured database host is unreachable from this workspace (`aws-1-ap-northeast-1.pooler.supabase.com`).
-    - The existing `sync permissions into the database` integration test is likewise blocked by the unreachable database host.
+- Database-backed validation:
+    - `pnpm --dir packages/db exec prisma migrate status`: confirmed `20260719143000_add_live_inspection_leases` was pending before provider endpoints were mounted.
+    - First deploy attempt failed on Supabase with `ERROR: must be owner of table messages` for `ALTER TABLE "realtime"."messages" ENABLE ROW LEVEL SECURITY`; follow-up catalog check confirmed `realtime.messages` already had RLS enabled and was owned by `supabase_realtime_admin`.
+    - Rollback-only permission probe confirmed the migration role can create the required SELECT policy on `realtime.messages`; the migration was corrected to remove the owner-only RLS enable statement.
+    - Reviewed and added `packages/db/prisma/migrations/20260719143000_add_live_inspection_leases/rollback.sql`; the empty partial LiveKit tables/functions from the failed attempt were dropped with that rollback script, then Prisma marked the failed attempt rolled back.
+    - `pnpm --dir packages/db exec prisma migrate deploy`: passed after repair, applying `20260719143000_add_live_inspection_leases`.
+    - DB-backed concurrent synthetic lease validation passed:
+        - duplicate active attempt rejected by `live_inspection_leases_active_attempt_key`;
+        - duplicate active viewer rejected by `live_inspection_leases_active_viewer_key`.
+    - Cleanup verification confirmed zero remaining synthetic `codex-livekit-*` leases, attempts, and auth users.

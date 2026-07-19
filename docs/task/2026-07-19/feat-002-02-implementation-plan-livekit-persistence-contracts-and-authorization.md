@@ -42,6 +42,7 @@ Live video needs stronger controls than the existing general monitoring read pat
 
 - `packages/db/prisma/schema.prisma`
 - `packages/db/prisma/migrations/[timestamp]_add_live_inspection_leases/migration.sql` **[NEW]**
+- `packages/db/prisma/migrations/[timestamp]_add_live_inspection_leases/rollback.sql` **[NEW]**
 - `packages/db/src/generated/types.ts`
 - `packages/db/src/tests/live-inspection-schema.test.ts` **[NEW]**
 - `packages/shared/src/schema/exams/live-inspection-schema.ts` **[NEW]**
@@ -118,12 +119,14 @@ Live video needs stronger controls than the existing general monitoring read pat
 
 ## Exit Gate
 
-- [ ] Migration applies to a clean database and the rollback script is reviewed before any provider endpoint is mounted.
-- [ ] Partial indexes reject duplicate attempt/viewer leases under concurrent tests.
+- [x] Migration applies to a clean database and the rollback script is reviewed before any provider endpoint is mounted.
+- [x] Partial indexes reject duplicate attempt/viewer leases under concurrent tests.
 - [x] Students can receive only their private topic and cannot send broadcasts.
 - [x] RBAC and relationship tests deny support, students, cross-tenant viewers, and share/public-only access.
 - [x] State-machine and repository tests pass with no LiveKit SDK calls.
 - [x] Commit this package before beginning work package 03.
+
+**Database validation note:** On 2026-07-20, the first Supabase deploy attempt caught an ownership issue on `realtime.messages`; Supabase already owns and enables RLS for that table, so the migration was corrected to create only the required SELECT policy. The empty partial LiveKit objects from the failed attempt were rolled back with the reviewed rollback script, Prisma marked the failed attempt rolled back, and `pnpm --dir packages/db exec prisma migrate deploy` then applied successfully. Synthetic concurrent inserts confirmed `live_inspection_leases_active_attempt_key` and `live_inspection_leases_active_viewer_key` reject duplicates, and the synthetic rows were removed.
 
 ## Compatibility, Configuration, and Rollback Notes
 

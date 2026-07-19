@@ -142,8 +142,6 @@ ON "public"."live_inspection_leases"
 FOR EACH ROW
 EXECUTE FUNCTION "public"."live_inspection_lease_changed"();
 
-ALTER TABLE "realtime"."messages" ENABLE ROW LEVEL SECURITY;
-
 CREATE POLICY "live_inspection_student_private_select"
 ON "realtime"."messages"
 FOR SELECT
@@ -164,4 +162,3 @@ USING (
 );
 
 -- No INSERT policy is intentionally created for authenticated browsers.
-
