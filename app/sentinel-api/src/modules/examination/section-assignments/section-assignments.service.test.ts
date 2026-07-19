@@ -5,6 +5,8 @@ import { createExamSectionAssignmentsBatch } from './data/create-exam-section-as
 import { updateExamSectionAssignment } from './data/update-exam-section-assignment';
 import { deleteExamSectionAssignment } from './data/delete-exam-section-assignment';
 import { syncExamAssignmentSummary } from './data/sync-exam-assignment-summary';
+import { LogsService } from '../../general/logs/logs.service';
+import { ExamNotificationService } from '../../general/notification/services/exam-notification.service';
 
 vi.mock('./data/create-exam-section-assignment', () => ({
     createExamSectionAssignment: vi.fn(),
@@ -24,6 +26,18 @@ vi.mock('./data/delete-exam-section-assignment', () => ({
 
 vi.mock('./data/sync-exam-assignment-summary', () => ({
     syncExamAssignmentSummary: vi.fn(),
+}));
+
+vi.mock('../../general/logs/logs.service', () => ({
+    LogsService: {
+        createLog: vi.fn(),
+    },
+}));
+
+vi.mock('../../general/notification/services/exam-notification.service', () => ({
+    ExamNotificationService: {
+        notifyExamAssignmentCreated: vi.fn(),
+    },
 }));
 
 describe('SectionAssignmentsService', () => {
@@ -52,6 +66,40 @@ describe('SectionAssignmentsService', () => {
         });
     });
 
+    it('creates logs and notifications for a single assignment when actor context is provided', async () => {
+        vi.mocked(createExamSectionAssignment).mockResolvedValue({ id: 'assignment-1' } as any);
+
+        const mockDbClient = {
+            selectFrom: vi.fn().mockImplementation(() => ({
+                select: vi.fn().mockImplementation(() => ({
+                    where: vi.fn().mockImplementation(() => ({
+                        executeTakeFirst: vi.fn().mockResolvedValue({
+                            title: 'Test Exam',
+                            institutionId: 'institution-1',
+                            fullName: 'Actor Name',
+                        }),
+                    })),
+                })),
+            })),
+        } as any;
+
+        await SectionAssignmentsService.createExamSectionAssignment({
+            dbClient: mockDbClient,
+            examId: 'exam-1',
+            body: {
+                sectionId: 'section-1',
+                classGroupId: 'classroom-1',
+                roomId: 'room-1',
+                instructorId: 'instructor-1',
+            } as any,
+            actorUserId: 'actor-1',
+            activeInstitutionId: 'institution-1',
+        });
+
+        expect(LogsService.createLog).toHaveBeenCalled();
+        expect(ExamNotificationService.notifyExamAssignmentCreated).toHaveBeenCalled();
+    });
+
     it('syncs the exam row after creating batch assignments', async () => {
         vi.mocked(createExamSectionAssignmentsBatch).mockResolvedValue([
             { id: 'assignment-1' },
@@ -76,6 +124,53 @@ describe('SectionAssignmentsService', () => {
             dbClient,
             examId: 'exam-1',
         });
+    });
+
+    it('creates logs and notifications for batch assignments when actor context is provided', async () => {
+        vi.mocked(createExamSectionAssignmentsBatch).mockResolvedValue([
+            {
+                id: 'assignment-1',
+                examId: 'exam-1',
+                sectionId: 'section-1',
+                classGroupId: 'classroom-1',
+                roomId: 'room-1',
+                instructorId: 'instructor-1',
+            },
+        ] as any);
+
+        const mockDbClient = {
+            selectFrom: vi.fn().mockImplementation(() => ({
+                select: vi.fn().mockImplementation(() => ({
+                    where: vi.fn().mockImplementation(() => ({
+                        executeTakeFirst: vi.fn().mockResolvedValue({
+                            title: 'Test Exam',
+                            institutionId: 'institution-1',
+                            fullName: 'Actor Name',
+                        }),
+                    })),
+                })),
+            })),
+        } as any;
+
+        await SectionAssignmentsService.createExamSectionAssignmentsBatch({
+            dbClient: mockDbClient,
+            examId: 'exam-1',
+            body: {
+                assignments: [
+                    {
+                        sectionId: 'section-1',
+                        classGroupId: 'classroom-1',
+                        roomId: 'room-1',
+                        instructorId: 'instructor-1',
+                    },
+                ],
+            } as any,
+            actorUserId: 'actor-1',
+            activeInstitutionId: 'institution-1',
+        });
+
+        expect(LogsService.createLog).toHaveBeenCalled();
+        expect(ExamNotificationService.notifyExamAssignmentCreated).toHaveBeenCalled();
     });
 
     it('syncs the exam row after updating an assignment', async () => {

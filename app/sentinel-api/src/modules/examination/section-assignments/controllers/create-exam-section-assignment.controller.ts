@@ -40,12 +40,16 @@ export const createExamSectionAssignmentRouteHandler: AppRouteHandler<
     requireActivePermission(c, 'examinations:assign');
     const { examId } = c.req.valid('param');
     const body = c.req.valid('json');
+    const user = c.get('user');
+    const activeInstitutionId = c.get('institutionId');
 
     try {
         const assignment = await SectionAssignmentsService.createExamSectionAssignment({
             dbClient: c.get('dbClient'),
             examId,
             body,
+            actorUserId: user?.id,
+            activeInstitutionId,
         });
 
         return c.json(

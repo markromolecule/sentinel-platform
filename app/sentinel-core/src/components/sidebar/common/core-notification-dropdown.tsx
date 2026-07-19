@@ -94,15 +94,16 @@ export function CoreNotificationDropdown() {
                 <Button
                     variant="ghost"
                     size="icon"
-                    className="relative"
                     aria-label="Open notifications"
                 >
-                    <Bell className="h-[22px] w-[22px]" />
-                    {unreadCount > 0 && (
-                        <span className="absolute -top-1 -right-2 flex h-4 min-w-4 items-center justify-center rounded-full bg-destructive px-1 text-[9px] font-bold leading-none text-white ring-2 ring-background shadow-sm animate-in fade-in zoom-in-75 duration-200">
-                            {unreadCount > 99 ? '99+' : unreadCount}
-                        </span>
-                    )}
+                    <div className="relative">
+                        <Bell className="h-[22px] w-[22px]" />
+                        {unreadCount > 0 && (
+                            <span className="absolute -top-1.5 -right-1.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-destructive px-1 text-[9px] font-bold leading-none text-white ring-2 ring-background shadow-sm animate-in fade-in zoom-in-75 duration-200">
+                                {unreadCount > 99 ? '99+' : unreadCount}
+                            </span>
+                        )}
+                    </div>
                 </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-96 p-0">

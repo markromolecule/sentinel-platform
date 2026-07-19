@@ -41,9 +41,9 @@ export function AddExamSectionAssignmentDialog({
                     <DialogTitle className="text-lg font-bold">Assign instructors and classrooms</DialogTitle>
                     <DialogDescription>
                         {examTitle ? `For examination: ${examTitle}` : 'Manage classroom, room, and instructor assignments.'}
-                        <div className="mt-1 text-xs text-zinc-500 font-medium">
+                        <span className="mt-1 block text-xs text-zinc-500 font-medium">
                             All fields (Classroom, Room, and Instructor) are required for every assignment.
-                        </div>
+                        </span>
                     </DialogDescription>
                 </DialogHeader>
                 <div className="py-2">

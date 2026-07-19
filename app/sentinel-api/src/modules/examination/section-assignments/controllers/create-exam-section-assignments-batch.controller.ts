@@ -40,12 +40,16 @@ export const createExamSectionAssignmentsBatchRouteHandler: AppRouteHandler<
     requireActivePermission(c, 'examinations:assign');
     const { examId } = c.req.valid('param');
     const { assignments } = c.req.valid('json');
+    const user = c.get('user');
+    const activeInstitutionId = c.get('institutionId');
 
     try {
         const result = await SectionAssignmentsService.createExamSectionAssignmentsBatch({
             dbClient: c.get('dbClient'),
             examId,
             body: { assignments },
+            actorUserId: user?.id,
+            activeInstitutionId,
         });
 
         return c.json(
