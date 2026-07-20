@@ -58,3 +58,27 @@
         - duplicate active attempt rejected by `live_inspection_leases_active_attempt_key`;
         - duplicate active viewer rejected by `live_inspection_leases_active_viewer_key`.
     - Cleanup verification confirmed zero remaining synthetic `codex-livekit-*` leases, attempts, and auth users.
+
+## Work Package 03: Managed Service and Lease API
+
+- Date: 2026-07-20
+- Entry gate:
+    - Work-package-02 commits present: `e9473f95 feat(livekit): add inspection persistence contracts` and `232165a9 fix(livekit): validate inspection lease migration`.
+    - `LIVE_INSPECTION_ENABLED` scan found no enabled shared environment value in tracked package-03 scope.
+- Implemented:
+    - Managed `LiveKitManagedService` adapter for two-participant rooms, publisher/viewer token grants, idempotent provider cleanup, participant listing, and raw-body webhook verification.
+    - Staff lease orchestration for start, redacted status, viewer connection, and idempotent stop under `/exams/:examId/monitoring/live-inspections`.
+    - Student directive and publisher connection/acknowledgement APIs under `/examination/flow/live-inspections`, resolving ownership exclusively through `sessionId`.
+    - Unauthenticated `/infrastructure/livekit/webhooks` ingress with verified SDK receiver, webhook dedupe processing, state transitions, and bounded event-result storage.
+    - Expiry reconciler with startup/shutdown hooks gated by `LIVE_INSPECTION_ENABLED`.
+    - Typed service clients and hooks, with token-bearing credential acquisition kept as imperative helpers outside TanStack Query caches.
+- Verification:
+    - Focused API implementation typecheck: `NODE_OPTIONS="--max-old-space-size=8192" pnpm --dir app/sentinel-api exec tsc --noEmit -p tsconfig.livekit-package03.tmp.json`: passed before removing the temporary config.
+    - `pnpm --dir app/sentinel-api test --run src/modules/infrastructure/livekit/services/livekit-managed.service.test.ts src/modules/examination/live-inspection/live-inspection.routes.test.ts src/modules/examination/live-inspection/services/start-live-inspection.service.test.ts src/modules/examination/live-inspection/services/live-inspection-webhook.service.test.ts src/modules/examination/live-inspection/services/live-inspection-reconciler.service.test.ts`: passed, 5 files and 13 tests.
+    - `pnpm --dir packages/shared build`: passed.
+    - `pnpm --dir packages/services build`: passed.
+    - `pnpm --dir packages/hooks build`: passed.
+    - `pnpm --dir packages/services test --run src/api/exams/live-inspection.test.ts`: passed as part of the package test command, 15 files and 32 tests.
+    - `pnpm --dir packages/hooks test --run src/query/exams/live-inspection/live-inspection-hooks.test.ts`: passed as part of the package test command, 46 files and 110 tests.
+- Known repo-wide validation caveat:
+    - The full API graph still has pre-existing unrelated TypeScript blockers outside this package, including older NodeNext explicit-extension issues in calendar controllers and `import.meta` in existing LiveKit config tests when pulled into CommonJS output. Package-03 validation therefore used the focused LiveKit API graph plus shared/service/hook builds.

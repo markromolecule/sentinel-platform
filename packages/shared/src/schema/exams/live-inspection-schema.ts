@@ -90,11 +90,14 @@ export const liveInspectionStopResponseSchema = z.object({
 
 export type LiveInspectionState = z.infer<typeof liveInspectionStateSchema>;
 export type LiveInspectionTerminalReason = z.infer<typeof liveInspectionTerminalReasonSchema>;
+export type LiveInspectionDirective = z.infer<typeof liveInspectionDirectiveSchema>;
 export type LiveInspectionStaffStatus = z.infer<typeof liveInspectionStaffStatusSchema>;
 export type LiveInspectionStartResponse = z.infer<typeof liveInspectionStartResponseSchema>;
 export type LiveInspectionConnectionResponse = z.infer<
     typeof liveInspectionConnectionResponseSchema
 >;
+export type LiveInspectionReadyAck = z.infer<typeof liveInspectionReadyAckSchema>;
+export type LiveInspectionFailureAck = z.infer<typeof liveInspectionFailureAckSchema>;
 
 const TERMINAL_STATES = new Set<LiveInspectionState>(['ENDED', 'FAILED', 'EXPIRED']);
 

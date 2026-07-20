@@ -6,6 +6,10 @@ import {
     startPdfGenerationWorker,
     stopPdfGenerationWorker,
 } from './modules/general/pdf-documents/queue/pdf-generation.worker';
+import {
+    startLiveInspectionReconciler,
+    stopLiveInspectionReconciler,
+} from './modules/examination/live-inspection/services/live-inspection-reconciler.service';
 
 const port = 3001;
 
@@ -70,6 +74,8 @@ if (shouldStartEmbeddedPdfWorker) {
     });
 }
 
+startLiveInspectionReconciler();
+
 serve({
     fetch: app.fetch,
     port,
@@ -86,6 +92,8 @@ const shutdown = async () => {
             console.error('[shutdown] Failed to stop embedded PDF worker:', error);
         });
     }
+
+    stopLiveInspectionReconciler();
 
     process.exit(0);
 };

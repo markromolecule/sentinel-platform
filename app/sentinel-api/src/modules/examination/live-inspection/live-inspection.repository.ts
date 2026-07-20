@@ -77,6 +77,48 @@ export async function getLiveInspectionLeaseForViewer(
         .executeTakeFirst();
 }
 
+/**
+ * Reads a lease by id without returning provider credentials or browser tokens.
+ */
+export async function getLiveInspectionLeaseById(dbClient: DbClient, leaseId: string) {
+    return dbClient
+        .selectFrom('live_inspection_leases')
+        .selectAll()
+        .where('lease_id', '=', leaseId)
+        .executeTakeFirst();
+}
+
+/**
+ * Reads the current active lease for an exam attempt, if any.
+ */
+export async function getActiveLiveInspectionLeaseForAttempt(
+    dbClient: DbClient,
+    args: { examId: string; attemptId: string },
+) {
+    return dbClient
+        .selectFrom('live_inspection_leases')
+        .selectAll()
+        .where('exam_id', '=', args.examId)
+        .where('attempt_id', '=', args.attemptId)
+        .where('state', 'in', ACTIVE_STATES)
+        .orderBy('requested_at', 'desc')
+        .executeTakeFirst();
+}
+
+/**
+ * Resolves a lease from the opaque provider room name carried by webhooks.
+ */
+export async function getLiveInspectionLeaseByRoomName(
+    dbClient: DbClient,
+    providerRoomName: string,
+) {
+    return dbClient
+        .selectFrom('live_inspection_leases')
+        .selectAll()
+        .where('provider_room_name', '=', providerRoomName)
+        .executeTakeFirst();
+}
+
 export async function getLiveInspectionLeaseForStudent(
     dbClient: DbClient,
     args: { leaseId: string; studentUserId: string },

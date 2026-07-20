@@ -19,3 +19,4 @@ export * from './use-assign-exam-mutation';
 export * from './use-update-exam-incidents-mutation';
 export * from './use-exam-reports-list-query';
 export * from './use-exam-attempt-lifecycle-mutation';
+export * from './live-inspection';

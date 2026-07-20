@@ -11,6 +11,7 @@ import {
 } from './controllers/start-session.controller';
 import { syncSessionRoute, syncSessionRouteHandler } from './controllers/sync-session.controller';
 import { authMiddleware } from '../../../middleware/auth';
+import studentLiveInspectionRoutes from '../live-inspection/live-inspection.routes';
 
 const flowRoutes = new OpenAPIHono<HonoEnv>();
 
@@ -20,5 +21,7 @@ flowRoutes
     .openapi(startSessionRoute, startSessionRouteHandler)
     .openapi(syncSessionRoute, syncSessionRouteHandler)
     .openapi(completeSessionRoute, completeSessionRouteHandler);
+
+flowRoutes.route('/', studentLiveInspectionRoutes);
 
 export default flowRoutes;
