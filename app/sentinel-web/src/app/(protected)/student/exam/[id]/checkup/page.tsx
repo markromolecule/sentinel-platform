@@ -308,6 +308,14 @@ export default function StudentExamCheckupPage() {
                             </p>
                         </div>
 
+                        {configuration.cameraRequired ? (
+                            <p className="text-muted-foreground rounded-2xl border px-4 py-3 text-sm leading-6">
+                                During the active exam, an authorized proctor may view your camera
+                                live if a live inspection is requested. This does not publish
+                                microphone audio and does not record the session.
+                            </p>
+                        ) : null}
+
                         <StudentFlowCheckupStatusCard checks={checks} />
                     </StudentFlowPanel>
                 </section>

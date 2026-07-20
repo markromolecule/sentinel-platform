@@ -92,6 +92,7 @@ describe('live inspection schemas', () => {
         expect(
             liveInspectionConnectionResponseSchema.parse({
                 leaseId: uuid,
+                revision: 2,
                 roomName: 'room-1',
                 token: 'jwt',
                 liveKitUrl: 'wss://sentinel-test.livekit.cloud',

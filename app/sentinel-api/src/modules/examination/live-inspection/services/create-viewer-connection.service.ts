@@ -74,6 +74,7 @@ export async function createViewerConnection(
 
     return liveInspectionConnectionResponseSchema.parse({
         leaseId: lease.lease_id,
+        revision: lease.version,
         roomName: lease.provider_room_name,
         token: token.token,
         liveKitUrl: token.liveKitUrl,

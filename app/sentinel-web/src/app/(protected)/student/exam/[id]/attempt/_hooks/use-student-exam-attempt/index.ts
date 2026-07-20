@@ -122,6 +122,15 @@ export function useStudentExamAttempt() {
             }),
         [effectiveConfiguration, mediaPipeSandbox],
     );
+    const canonicalAttemptId = examSession?.attemptId ?? exam?.attemptId ?? null;
+    const effectiveCameraRequired = Boolean(effectiveConfiguration?.cameraRequired);
+    const isLiveInspectionEligible =
+        Boolean(examSession?.sessionId) &&
+        Boolean(canonicalAttemptId) &&
+        effectiveCameraRequired &&
+        !effectiveBlockedState.isBlocked &&
+        !uiHook.isRedirectingToTurnIn &&
+        !isRedirectingToHistory;
     const audioSettingsQuery = useAudioSettingsQuery();
     const effectiveAudioSettings = useMemo(() => {
         if (!effectiveConfiguration?.aiRules?.audio_anomaly_detection) {
@@ -201,6 +210,10 @@ export function useStudentExamAttempt() {
     return {
         // Data
         examId,
+        examSessionId: examSession?.sessionId ?? null,
+        attemptId: canonicalAttemptId,
+        effectiveCameraRequired,
+        isLiveInspectionEligible,
         exam,
         questions,
         isLoading,

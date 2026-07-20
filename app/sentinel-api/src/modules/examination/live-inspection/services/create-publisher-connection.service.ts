@@ -51,7 +51,7 @@ export async function createPublisherConnection(
         throw new HTTPException(409, { message: 'Live inspection lease changed.' });
     }
 
-    await transitionLiveInspectionLeaseState({
+    const connecting = await transitionLiveInspectionLeaseState({
         dbClient: args.dbClient,
         leaseId: lease.lease_id,
         fromState: 'REQUESTED',
@@ -77,6 +77,7 @@ export async function createPublisherConnection(
 
         return liveInspectionConnectionResponseSchema.parse({
             leaseId: lease.lease_id,
+            revision: connecting.version,
             roomName: lease.provider_room_name,
             token: token.token,
             liveKitUrl: token.liveKitUrl,

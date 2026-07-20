@@ -4,6 +4,7 @@ import type { ExamAnswerValue } from '@/features/exams/_components/engine';
 export type StoredExamSession = {
     examId: string;
     sessionId: string;
+    attemptId?: string;
     configSnapshot?: StartExamSessionResult['configSnapshot'];
     isResumed?: boolean;
     storedAt: string;

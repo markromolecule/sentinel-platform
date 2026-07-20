@@ -53,6 +53,10 @@ vi.mock('@/app/(protected)/student/exam/[id]/_hooks/use-attempt-mediapipe-monito
     useAttemptMediaPipeMonitoring: () => mockAttemptMediaPipeMonitoring(),
 }));
 
+vi.mock('@/app/(protected)/student/exam/[id]/_components/student-live-inspection-bridge', () => ({
+    StudentLiveInspectionBridge: () => null,
+}));
+
 vi.mock('@/hooks/use-audio-anomaly-worker', () => ({
     useAudioAnomalyWorker: () => mockUseAudioAnomalyWorker(),
 }));

@@ -24,6 +24,11 @@ type StudentExamMediaPipeContextValue = {
     errorMessage: string | null;
     requestDeviceAccess: (configuration: ExamConfiguration) => Promise<void>;
     stopStream: () => void;
+    /**
+     * Returns the current MediaPipe-owned live video track without transferring
+     * ownership. Callers may clone it, but only this provider may stop it.
+     */
+    getLiveVideoTrack: () => MediaStreamTrack | null;
     // MediaPipe Initialization Management
     faceLandmarker: FaceLandmarker | null;
     isMediaPipeInitializing: boolean;
@@ -39,6 +44,7 @@ const DEFAULT_STUDENT_EXAM_MEDIAPIPE_CONTEXT: StudentExamMediaPipeContextValue =
     errorMessage: null,
     requestDeviceAccess: async () => undefined,
     stopStream: () => undefined,
+    getLiveVideoTrack: () => null,
     faceLandmarker: null,
     isMediaPipeInitializing: false,
     warmupMediaPipe: async () => undefined,
@@ -94,6 +100,12 @@ export function StudentExamMediaPipeProvider({ children }: { children: ReactNode
             setIsMediaPipeInitializing(false);
         }
     }, [isMediaPipeInitializing]);
+
+    const getLiveVideoTrack = useCallback(() => {
+        return (
+            streamRef.current?.getVideoTracks().find((track) => track.readyState === 'live') ?? null
+        );
+    }, []);
 
     useEffect(() => {
         return () => {
@@ -180,6 +192,7 @@ export function StudentExamMediaPipeProvider({ children }: { children: ReactNode
             errorMessage,
             requestDeviceAccess,
             stopStream,
+            getLiveVideoTrack,
             faceLandmarker,
             isMediaPipeInitializing,
             warmupMediaPipe,
@@ -187,6 +200,7 @@ export function StudentExamMediaPipeProvider({ children }: { children: ReactNode
         [
             cameraState,
             errorMessage,
+            getLiveVideoTrack,
             isRequesting,
             micState,
             requestDeviceAccess,

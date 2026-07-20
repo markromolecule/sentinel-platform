@@ -46,6 +46,7 @@ export function writeStoredExamSession(
     const storedSession: StoredExamSession = {
         examId,
         sessionId: session.sessionId,
+        attemptId: session.attemptId,
         configSnapshot: session.configSnapshot,
         isResumed: session.isResumed,
         storedAt: new Date().toISOString(),

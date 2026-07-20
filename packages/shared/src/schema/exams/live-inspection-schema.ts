@@ -61,6 +61,7 @@ export const liveInspectionStartResponseSchema = z.object({
 
 export const liveInspectionConnectionResponseSchema = z.object({
     leaseId: z.string().uuid(),
+    revision: z.number().int().positive(),
     roomName: z.string().min(1).max(128),
     token: z.string().min(1),
     liveKitUrl: z.string().url(),

@@ -276,6 +276,8 @@ describe('StudentExamCheckupPage', () => {
         expect(
             screen.getByText(/center your face in the guide to begin calibration/i),
         ).toBeTruthy();
+        expect(screen.getByText(/does not publish microphone audio/i)).toBeTruthy();
+        expect(screen.getByText(/does not record the session/i)).toBeTruthy();
         expect(screen.getByText(/progress 50/i)).toBeTruthy();
         expect(
             (screen.getByRole('button', { name: /finalizing setup/i }) as HTMLButtonElement)
@@ -316,9 +318,7 @@ describe('StudentExamCheckupPage', () => {
 
         expect(screen.getByText(/ready for lobby/i)).toBeTruthy();
         expect(
-            screen.getByText(
-                /previous device and identity verification are still valid/i,
-            ),
+            screen.getByText(/previous device and identity verification are still valid/i),
         ).toBeTruthy();
         expect(
             (screen.getByRole('button', { name: /continue to lobby/i }) as HTMLButtonElement)

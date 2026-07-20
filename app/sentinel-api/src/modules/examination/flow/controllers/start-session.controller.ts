@@ -74,6 +74,7 @@ export const startSessionRouteHandler: AppRouteHandler<typeof startSessionRoute>
                     sessionId,
                     configSnapshot,
                     isResumed,
+                    attemptId,
                 },
             },
             201,

@@ -110,6 +110,7 @@ describe('StudentExamPrivacyPage', () => {
                 runtimeAccess: null,
             },
             configuration: {
+                cameraRequired: true,
                 aiRules: {
                     gaze_tracking: true,
                     face_detection: true,
@@ -126,6 +127,10 @@ describe('StudentExamPrivacyPage', () => {
 
         expect(screen.getByText('Step 2 of 4')).toBeTruthy();
         expect(screen.getByText('Monitored signals')).toBeTruthy();
+        expect(screen.getByText('Authorized Live Camera Inspection')).toBeTruthy();
+        expect(
+            screen.getByText(/does not enable microphone publishing or recording/i),
+        ).toBeTruthy();
         expect(screen.queryByText('What this means')).toBeNull();
         expect(screen.getByText('Policies & terms')).toBeTruthy();
         expect(screen.getByText('RA 10173 compliance')).toBeTruthy();
