@@ -1,6 +1,7 @@
 import { HTTPException } from 'hono/http-exception';
 import type { DbClient } from '@sentinel/db';
 import { isLiveInspectionTerminalState } from '@sentinel/shared/schema';
+import { LiveKitService } from '../../../infrastructure/livekit/livekit.service';
 import { LiveKitManagedService } from '../../../infrastructure/livekit/services/livekit-managed.service';
 import { getLiveKitConfig } from '../../../infrastructure/livekit/livekit.config';
 import { getLiveInspectionLeaseForViewer } from '../live-inspection.repository';
@@ -87,6 +88,21 @@ export async function stopLiveInspection(
             endReason: lastErrorCode ? 'PROVIDER_ERROR' : 'VIEWER_STOPPED',
             lastErrorCode,
         })) ?? stopping;
+
+    await LiveKitService.logLiveInspectionLifecycleEvent(args.dbClient, {
+        metric: lastErrorCode ? 'failed' : 'ended',
+        leaseId: lease.lease_id,
+        attemptId: lease.attempt_id,
+        examId: lease.exam_id,
+        actorId: args.viewerUserId,
+        institutionId: lease.institution_id,
+        role: 'viewer',
+        state: lastErrorCode ? 'FAILED' : 'ENDED',
+        previousState: lease.state,
+        reason: lastErrorCode ? 'PROVIDER_ERROR' : 'VIEWER_STOPPED',
+        durationMs: Date.now() - lease.requested_at.getTime(),
+        boundedCode: lastErrorCode,
+    });
 
     return mapLiveInspectionLeaseStatus(ended as any);
 }

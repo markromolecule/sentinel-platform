@@ -66,6 +66,18 @@ export async function createPublisherConnection(
             roomName: lease.provider_room_name,
             leaseId: lease.lease_id,
         });
+        await LiveKitService.logLiveInspectionLifecycleEvent(args.dbClient, {
+            metric: 'publisher_connecting',
+            leaseId: lease.lease_id,
+            attemptId: lease.attempt_id,
+            examId: lease.exam_id,
+            actorId: args.studentUserId,
+            institutionId: lease.institution_id,
+            role: 'publisher',
+            state: 'PUBLISHER_CONNECTING',
+            previousState: 'REQUESTED',
+            durationMs: Date.now() - lease.requested_at.getTime(),
+        });
         await LiveKitService.logLiveKitTokenGranted(args.dbClient, {
             attemptId: lease.attempt_id,
             actorId: args.studentUserId,

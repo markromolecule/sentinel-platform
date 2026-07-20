@@ -82,3 +82,40 @@
     - `pnpm --dir packages/hooks test --run src/query/exams/live-inspection/live-inspection-hooks.test.ts`: passed as part of the package test command, 46 files and 110 tests.
 - Known repo-wide validation caveat:
     - The full API graph still has pre-existing unrelated TypeScript blockers outside this package, including older NodeNext explicit-extension issues in calendar controllers and `import.meta` in existing LiveKit config tests when pulled into CommonJS output. Package-03 validation therefore used the focused LiveKit API graph plus shared/service/hook builds.
+
+## Work Package 06: Resilience, Validation, and Rollout
+
+- Date: 2026-07-20
+- Entry gate:
+    - Work-package-01 commit present: `d8e48b6b feat(livekit): add managed service foundation`.
+    - Work-package-02 commits present: `e9473f95 feat(livekit): add inspection persistence contracts` and `232165a9 fix(livekit): validate inspection lease migration`.
+    - Work-package-03 commit present: `f9e5ac7d feat(livekit): add managed inspection api`.
+    - Work-package-04 commit present: `6168436f feat(livekit): add student publisher bridge`.
+    - Work-package-05 commit present: `d0493a00 feat(livekit): add cross-app viewer`.
+    - Production enablement remains guarded by `LIVE_INSPECTION_ENABLED=false` in examples and no committed institution allowlist value.
+- Implemented:
+    - Bounded LiveKit lifecycle audit/metric helper for requested, publisher-connecting, publisher-ready, viewer-connection-requested, live, ended, failed, expired, and cleanup-failed events.
+    - Lifecycle event calls across start, publisher connection, publisher-ready acknowledgement, viewer connection, stop, verified webhook transitions, publisher failure acknowledgement, and expiry reconciliation.
+    - OpenAPI registration for `/infrastructure/livekit/webhooks` so the generated API contract includes webhook ingress.
+    - Opt-in managed-provider smoke test guarded by `LIVEKIT_SMOKE_TEST_ENABLED=true`; skipped by default and deletes its smoke room in `finally`.
+    - Runbook, browser/network/cost matrix, and security/privacy checklist under `docs/testing/`.
+- Manual gates still required before production allowlisting:
+    - Two-browser Chrome/Firefox/Safari/WebKit validation with synthetic accounts.
+    - Dedicated non-production LiveKit dashboard evidence for first frame, participant counts, cleanup, and quota.
+    - Capacity scenarios for 60 uninspected attempts, 1 inspection, 10 inspections, duplicate starts, duplicate viewer leases, and cap exhaustion.
+    - Product/privacy approval for student disclosure, allowed staff roles, metadata retention, and no-recording/no-audio policy.
+- Verification:
+    - `pnpm --dir app/sentinel-api exec vitest run src/modules/infrastructure/livekit/livekit.service.test.ts src/modules/infrastructure/livekit/livekit.routes.test.ts src/modules/infrastructure/livekit/services/livekit-managed.service.test.ts src/modules/infrastructure/livekit/services/livekit-managed.smoke.test.ts src/modules/examination/live-inspection/live-inspection.routes.test.ts src/modules/examination/live-inspection/live-inspection-access.service.test.ts src/modules/examination/live-inspection/live-inspection-state.service.test.ts src/modules/examination/live-inspection/live-inspection.repository.test.ts src/modules/examination/live-inspection/services/start-live-inspection.service.test.ts src/modules/examination/live-inspection/services/live-inspection-webhook.service.test.ts src/modules/examination/live-inspection/services/live-inspection-reconciler.service.test.ts`: passed, 10 files and 36 tests; opt-in provider smoke skipped by default.
+    - Scoped LiveKit API source typecheck with temporary package-06 tsconfig and `NODE_OPTIONS=--max-old-space-size=8192`: passed; test compilation covered by Vitest.
+    - `pnpm --dir packages/hooks build`: passed.
+    - `pnpm --dir packages/ui build`: passed.
+    - `pnpm --dir packages/hooks test --run src/live-inspection/use-live-inspection-viewer.test.tsx src/live-inspection/use-student-live-inspection-publisher.test.tsx`: passed, 49 files and 122 tests.
+    - `pnpm --dir packages/ui test --run src/live-inspection/live-video-monitor.test.tsx`: passed, 1 file and 3 tests.
+    - `pnpm --dir app/sentinel-web test --run 'src/app/(protected)/student/exam/[id]/_components/student-live-inspection-bridge.test.tsx' 'src/features/exams/monitoring/_components/live-feed-monitor.test.tsx'`: passed, 2 files and 3 tests.
+    - `pnpm --dir app/sentinel-core test --run src/features/exams/monitoring/_components/live-feed-monitor.test.tsx`: passed, 1 file and 1 test.
+    - `pnpm --dir app/sentinel-core build`: passed when rerun with sandbox escalation after Turbopack process/port binding was blocked in the default sandbox.
+    - `pnpm --dir app/sentinel-web build`: passed when rerun with sandbox escalation after Google Fonts fetching was blocked in the default sandbox.
+    - Targeted Prettier check for package-06 touched files: passed.
+- Validation caveats:
+    - Default `pnpm --dir app/sentinel-api exec tsc --noEmit --pretty false` failed with Node out-of-memory before diagnostics, matching the earlier repo-wide API typecheck caveat.
+    - The provider smoke did not run because no non-production LiveKit credentials were intentionally enabled in this repository execution.

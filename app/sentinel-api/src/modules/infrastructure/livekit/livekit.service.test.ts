@@ -68,4 +68,61 @@ describe('LiveKitService', () => {
             expect.any(Error),
         );
     });
+
+    it('logs bounded lifecycle metrics without media, credentials, or personal fields', async () => {
+        await LiveKitService.logLiveInspectionLifecycleEvent(dbClient, {
+            metric: 'live',
+            leaseId: 'lease-1',
+            attemptId: 'attempt-1',
+            examId: 'exam-1',
+            actorId: 'viewer-1',
+            institutionId: 'institution-1',
+            role: 'viewer',
+            state: 'LIVE',
+            previousState: 'PUBLISHER_READY',
+            durationMs: 1_234,
+            activeGlobalCount: 1,
+            activeInstitutionCount: 1,
+            boundedCode: 'VIEWER_LIVE',
+        });
+
+        expect(LogsService.createLog).toHaveBeenCalledWith(dbClient, {
+            userId: 'viewer-1',
+            action: 'infrastructure.rtc_inspection_live',
+            resourceType: 'livekit',
+            resourceId: 'lease-1',
+            activeInstitutionId: 'institution-1',
+            details: {
+                metric: 'live',
+                leaseId: 'lease-1',
+                attemptId: 'attempt-1',
+                examId: 'exam-1',
+                institutionId: 'institution-1',
+                actorId: 'viewer-1',
+                role: 'viewer',
+                state: 'LIVE',
+                previousState: 'PUBLISHER_READY',
+                reason: null,
+                durationMs: 1234,
+                activeGlobalCount: 1,
+                activeInstitutionCount: 1,
+                boundedCode: 'VIEWER_LIVE',
+            },
+        });
+
+        const details = vi.mocked(LogsService.createLog).mock.calls[0]?.[1].details;
+        const serializedDetails = JSON.stringify(details).toLowerCase();
+
+        expect(serializedDetails).not.toContain('token');
+        expect(serializedDetails).not.toContain('secret');
+        expect(serializedDetails).not.toContain('api_key');
+        expect(serializedDetails).not.toContain('sdp');
+        expect(serializedDetails).not.toContain('ice');
+        expect(serializedDetails).not.toContain('email');
+        expect(serializedDetails).not.toContain('student_number');
+        expect(serializedDetails).not.toContain('landmark');
+        expect(serializedDetails).not.toContain('thumbnail');
+        expect(serializedDetails).not.toContain('image');
+        expect(serializedDetails).not.toContain('video');
+    });
 });

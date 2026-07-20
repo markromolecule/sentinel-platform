@@ -1,6 +1,7 @@
 import { HTTPException } from 'hono/http-exception';
 import type { DbClient } from '@sentinel/db';
 import { liveInspectionReadyAckSchema } from '@sentinel/shared/schema';
+import { LiveKitService } from '../../../infrastructure/livekit/livekit.service';
 import { getLiveInspectionLeaseForStudent } from '../live-inspection.repository';
 import { assertLiveInspectionStudentAccess } from '../live-inspection-access.service';
 import { transitionLiveInspectionLeaseState } from '../live-inspection-state.service';
@@ -37,6 +38,19 @@ export async function acknowledgePublisherReady(args: AcknowledgePublisherReadyA
         fromState: 'PUBLISHER_CONNECTING',
         toState: 'PUBLISHER_READY',
         expectedVersion: args.revision,
+    });
+
+    await LiveKitService.logLiveInspectionLifecycleEvent(args.dbClient, {
+        metric: 'publisher_ready',
+        leaseId: lease.lease_id,
+        attemptId: lease.attempt_id,
+        examId: lease.exam_id,
+        actorId: args.studentUserId,
+        institutionId: lease.institution_id,
+        role: 'publisher',
+        state: 'PUBLISHER_READY',
+        previousState: 'PUBLISHER_CONNECTING',
+        durationMs: Date.now() - lease.requested_at.getTime(),
     });
 
     return liveInspectionReadyAckSchema.parse({

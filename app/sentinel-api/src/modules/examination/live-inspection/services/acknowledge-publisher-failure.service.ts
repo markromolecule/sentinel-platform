@@ -1,6 +1,7 @@
 import { HTTPException } from 'hono/http-exception';
 import type { DbClient } from '@sentinel/db';
 import { liveInspectionFailureAckSchema } from '@sentinel/shared/schema';
+import { LiveKitService } from '../../../infrastructure/livekit/livekit.service';
 import { getLiveInspectionLeaseForStudent } from '../live-inspection.repository';
 import { assertLiveInspectionStudentAccess } from '../live-inspection-access.service';
 import { terminalizeLiveInspectionLeaseState } from '../live-inspection-state.service';
@@ -44,6 +45,21 @@ export async function acknowledgePublisherFailure(args: AcknowledgePublisherFail
             endReason: 'PROVIDER_ERROR',
             lastErrorCode: args.errorCode,
         })) ?? lease;
+
+    await LiveKitService.logLiveInspectionLifecycleEvent(args.dbClient, {
+        metric: 'failed',
+        leaseId: lease.lease_id,
+        attemptId: lease.attempt_id,
+        examId: lease.exam_id,
+        actorId: args.studentUserId,
+        institutionId: lease.institution_id,
+        role: 'publisher',
+        state: 'FAILED',
+        previousState: lease.state,
+        reason: 'PROVIDER_ERROR',
+        durationMs: Date.now() - lease.requested_at.getTime(),
+        boundedCode: args.errorCode,
+    });
 
     return liveInspectionFailureAckSchema.parse({
         leaseId: failed.lease_id,

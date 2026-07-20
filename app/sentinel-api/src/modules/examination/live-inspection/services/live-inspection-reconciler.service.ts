@@ -1,6 +1,7 @@
 import type { DbClient } from '@sentinel/db';
 import { dbClient as defaultDbClient } from '@sentinel/db';
 import { getLiveKitConfig } from '../../../infrastructure/livekit/livekit.config';
+import { LiveKitService } from '../../../infrastructure/livekit/livekit.service';
 import { LiveKitManagedService } from '../../../infrastructure/livekit/services/livekit-managed.service';
 import { findExpiredLiveInspectionLeases } from '../live-inspection.repository';
 import { terminalizeLiveInspectionLeaseState } from '../live-inspection-state.service';
@@ -50,7 +51,23 @@ export async function reconcileExpiredLiveInspections(
             lastErrorCode,
         });
 
-        if (terminal) expiredCount += 1;
+        if (terminal) {
+            expiredCount += 1;
+            await LiveKitService.logLiveInspectionLifecycleEvent(args.dbClient, {
+                metric: lastErrorCode ? 'cleanup_failed' : 'expired',
+                leaseId: lease.lease_id,
+                attemptId: lease.attempt_id,
+                examId: lease.exam_id,
+                actorId: null,
+                institutionId: lease.institution_id,
+                role: 'system',
+                state: lastErrorCode ? 'FAILED' : 'EXPIRED',
+                previousState: lease.state,
+                reason: lastErrorCode ? 'PROVIDER_ERROR' : 'LEASE_EXPIRED',
+                durationMs: Date.now() - lease.requested_at.getTime(),
+                boundedCode: lastErrorCode,
+            });
+        }
     }
 
     return { expiredCount };

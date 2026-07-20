@@ -63,6 +63,17 @@ export async function createViewerConnection(
         roomName: lease.provider_room_name,
         leaseId: lease.lease_id,
     });
+    await LiveKitService.logLiveInspectionLifecycleEvent(args.dbClient, {
+        metric: 'viewer_connection_requested',
+        leaseId: lease.lease_id,
+        attemptId: lease.attempt_id,
+        examId: lease.exam_id,
+        actorId: args.viewerUserId,
+        institutionId: lease.institution_id,
+        role: 'viewer',
+        state: lease.state,
+        durationMs: Date.now() - lease.requested_at.getTime(),
+    });
     await LiveKitService.logLiveKitTokenGranted(args.dbClient, {
         attemptId: lease.attempt_id,
         actorId: args.viewerUserId,

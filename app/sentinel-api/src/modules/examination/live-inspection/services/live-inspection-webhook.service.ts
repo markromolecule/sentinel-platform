@@ -13,6 +13,7 @@ import {
     getLiveKitWebhookRoomName,
     buildLiveKitParticipantIdentity,
 } from '../../../infrastructure/livekit/services/livekit-managed.service';
+import { LiveKitService } from '../../../infrastructure/livekit/livekit.service';
 
 export type ProcessLiveKitWebhookArgs = {
     dbClient: DbClient;
@@ -56,6 +57,19 @@ export async function processLiveKitWebhook(args: ProcessLiveKitWebhookArgs) {
                     toState: 'PUBLISHER_READY',
                     expectedVersion: lease.version,
                 });
+                await LiveKitService.logLiveInspectionLifecycleEvent(args.dbClient, {
+                    metric: 'publisher_ready',
+                    leaseId: lease.lease_id,
+                    attemptId: lease.attempt_id,
+                    examId: lease.exam_id,
+                    actorId: lease.student_user_id,
+                    institutionId: lease.institution_id,
+                    role: 'publisher',
+                    state: 'PUBLISHER_READY',
+                    previousState: 'PUBLISHER_CONNECTING',
+                    durationMs: Date.now() - lease.requested_at.getTime(),
+                    boundedCode: 'PUBLISHER_READY',
+                });
                 result = 'PUBLISHER_READY';
             } else if (
                 args.event.event === 'participant_joined' &&
@@ -69,6 +83,19 @@ export async function processLiveKitWebhook(args: ProcessLiveKitWebhookArgs) {
                     toState: 'LIVE',
                     expectedVersion: lease.version,
                 });
+                await LiveKitService.logLiveInspectionLifecycleEvent(args.dbClient, {
+                    metric: 'live',
+                    leaseId: lease.lease_id,
+                    attemptId: lease.attempt_id,
+                    examId: lease.exam_id,
+                    actorId: lease.viewer_user_id,
+                    institutionId: lease.institution_id,
+                    role: 'viewer',
+                    state: 'LIVE',
+                    previousState: 'PUBLISHER_READY',
+                    durationMs: Date.now() - lease.requested_at.getTime(),
+                    boundedCode: 'VIEWER_LIVE',
+                });
                 result = 'VIEWER_LIVE';
             } else if (args.event.event === 'room_finished') {
                 await terminalizeLiveInspectionLeaseState({
@@ -76,6 +103,20 @@ export async function processLiveKitWebhook(args: ProcessLiveKitWebhookArgs) {
                     leaseId: lease.lease_id,
                     state: 'ENDED',
                     endReason: 'EXAM_ENDED',
+                });
+                await LiveKitService.logLiveInspectionLifecycleEvent(args.dbClient, {
+                    metric: 'ended',
+                    leaseId: lease.lease_id,
+                    attemptId: lease.attempt_id,
+                    examId: lease.exam_id,
+                    actorId: lease.viewer_user_id,
+                    institutionId: lease.institution_id,
+                    role: 'system',
+                    state: 'ENDED',
+                    previousState: lease.state,
+                    reason: 'EXAM_ENDED',
+                    durationMs: Date.now() - lease.requested_at.getTime(),
+                    boundedCode: 'ROOM_FINISHED',
                 });
                 result = 'ROOM_FINISHED';
             } else if (
@@ -85,14 +126,32 @@ export async function processLiveKitWebhook(args: ProcessLiveKitWebhookArgs) {
                     'track_unpublished',
                 ].includes(args.event.event)
             ) {
+                const endReason =
+                    identity === buildLiveKitParticipantIdentity(lease.lease_id, 'publisher')
+                        ? 'STUDENT_DISCONNECTED'
+                        : 'VIEWER_DISCONNECTED';
                 await terminalizeLiveInspectionLeaseState({
                     dbClient: args.dbClient,
                     leaseId: lease.lease_id,
                     state: 'FAILED',
-                    endReason:
-                        identity === buildLiveKitParticipantIdentity(lease.lease_id, 'publisher')
-                            ? 'STUDENT_DISCONNECTED'
-                            : 'VIEWER_DISCONNECTED',
+                    endReason,
+                });
+                await LiveKitService.logLiveInspectionLifecycleEvent(args.dbClient, {
+                    metric: 'failed',
+                    leaseId: lease.lease_id,
+                    attemptId: lease.attempt_id,
+                    examId: lease.exam_id,
+                    actorId:
+                        endReason === 'STUDENT_DISCONNECTED'
+                            ? lease.student_user_id
+                            : lease.viewer_user_id,
+                    institutionId: lease.institution_id,
+                    role: endReason === 'STUDENT_DISCONNECTED' ? 'publisher' : 'viewer',
+                    state: 'FAILED',
+                    previousState: lease.state,
+                    reason: endReason,
+                    durationMs: Date.now() - lease.requested_at.getTime(),
+                    boundedCode: 'PARTICIPANT_DISCONNECTED',
                 });
                 result = 'PARTICIPANT_DISCONNECTED';
             }

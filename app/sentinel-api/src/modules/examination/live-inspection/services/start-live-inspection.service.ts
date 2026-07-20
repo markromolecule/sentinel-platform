@@ -1,6 +1,7 @@
 import { HTTPException } from 'hono/http-exception';
 import type { DbClient } from '@sentinel/db';
 import { getLiveKitConfig } from '../../../infrastructure/livekit/livekit.config';
+import { LiveKitService } from '../../../infrastructure/livekit/livekit.service';
 import { LiveKitManagedService } from '../../../infrastructure/livekit/services/livekit-managed.service';
 import {
     acquireLiveInspectionLease,
@@ -56,18 +57,18 @@ export async function startLiveInspection(
         throw new HTTPException(404, { message: 'Live inspection is not available.' });
     }
 
-    if (
-        (await countActiveLiveInspectionLeases(args.dbClient)) >= config.globalActiveInspectionLimit
-    ) {
+    const activeGlobalCount = await countActiveLiveInspectionLeases(args.dbClient);
+
+    if (activeGlobalCount >= config.globalActiveInspectionLimit) {
         throw new HTTPException(429, { message: 'Live inspection global capacity reached.' });
     }
 
-    if (
-        (await countActiveLiveInspectionLeasesByInstitution(
-            args.dbClient,
-            attempt.institutionId,
-        )) >= config.institutionActiveInspectionLimit
-    ) {
+    const activeInstitutionCount = await countActiveLiveInspectionLeasesByInstitution(
+        args.dbClient,
+        attempt.institutionId,
+    );
+
+    if (activeInstitutionCount >= config.institutionActiveInspectionLimit) {
         throw new HTTPException(429, { message: 'Live inspection institution capacity reached.' });
     }
 
@@ -101,6 +102,19 @@ export async function startLiveInspection(
         });
     }
 
+    await LiveKitService.logLiveInspectionLifecycleEvent(args.dbClient, {
+        metric: 'requested',
+        leaseId: acquired.leaseId,
+        attemptId: args.attemptId,
+        examId: args.examId,
+        actorId: args.viewerUserId,
+        institutionId: attempt.institutionId,
+        role: 'viewer',
+        state: 'REQUESTED',
+        activeGlobalCount: activeGlobalCount + 1,
+        activeInstitutionCount: activeInstitutionCount + 1,
+    });
+
     const liveKit =
         deps.liveKit ?? new LiveKitManagedService({ config: deps.config ?? getLiveKitConfig() });
 
@@ -110,11 +124,25 @@ export async function startLiveInspection(
             leaseId: acquired.leaseId,
         });
     } catch (error) {
+        const lastErrorCode = toLiveInspectionProviderFailureCode(error);
         await terminalizeLiveInspectionLease(args.dbClient, {
             leaseId: acquired.leaseId,
             state: 'FAILED',
             endReason: 'PROVIDER_ERROR',
-            lastErrorCode: toLiveInspectionProviderFailureCode(error),
+            lastErrorCode,
+        });
+        await LiveKitService.logLiveInspectionLifecycleEvent(args.dbClient, {
+            metric: 'failed',
+            leaseId: acquired.leaseId,
+            attemptId: args.attemptId,
+            examId: args.examId,
+            actorId: args.viewerUserId,
+            institutionId: attempt.institutionId,
+            role: 'viewer',
+            state: 'FAILED',
+            previousState: 'REQUESTED',
+            reason: 'PROVIDER_ERROR',
+            boundedCode: lastErrorCode,
         });
         throw error;
     }
