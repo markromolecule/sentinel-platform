@@ -78,6 +78,10 @@ export async function startLiveInspection(
     });
 
     if (existingLease) {
+        if (existingLease.viewer_user_id === args.viewerUserId) {
+            return mapLiveInspectionLeaseStatus(existingLease);
+        }
+
         throw new HTTPException(409, { message: 'Live inspection is already active.' });
     }
 

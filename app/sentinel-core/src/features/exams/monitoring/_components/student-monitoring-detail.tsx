@@ -8,6 +8,8 @@ import {
     IntegrityTimelineCard,
 } from '@/features/exams/monitoring/_components';
 
+const LIVE_INSPECTION_ELIGIBLE_STATUSES = new Set<StudentSession['status']>(['active', 'flagged']);
+
 interface StudentMonitoringDetailProps {
     student: StudentSession;
     examId: string;
@@ -23,7 +25,8 @@ export function StudentMonitoringDetail({
     onRefresh,
     isRefreshing,
 }: StudentMonitoringDetailProps) {
-    const canStartLiveInspection = liveInspectionEnabled && student.status === 'active';
+    const canStartLiveInspection =
+        liveInspectionEnabled && LIVE_INSPECTION_ELIGIBLE_STATUSES.has(student.status);
 
     return (
         <div className="mx-auto flex h-[calc(100vh-10rem)] w-full max-w-7xl flex-col gap-5 overflow-hidden px-4 pb-4">

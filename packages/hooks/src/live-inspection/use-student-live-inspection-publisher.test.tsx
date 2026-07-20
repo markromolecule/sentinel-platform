@@ -238,6 +238,41 @@ describe('useStudentLiveInspectionPublisher', () => {
         expect(intervalCallback).toEqual(expect.any(Function));
     });
 
+    it('keeps missed-event recovery active when the attempt page is hidden', async () => {
+        const { supabase } = createSupabase();
+        const { original } = createLiveTrack();
+        vi.useFakeTimers();
+        Object.defineProperty(document, 'visibilityState', {
+            configurable: true,
+            value: 'hidden',
+        });
+        mockDirective
+            .mockRejectedValueOnce(new Error('missed'))
+            .mockResolvedValue(createDirective(1));
+
+        renderHook(() =>
+            useStudentLiveInspectionPublisher({
+                supabase,
+                apiClient: vi.fn() as never,
+                sessionId: 'session-1',
+                attemptId,
+                enabled: true,
+                getLiveVideoTrack: () => original,
+            }),
+        );
+
+        await act(async () => {
+            await Promise.resolve();
+        });
+        expect(mockDirective).toHaveBeenCalledTimes(1);
+
+        await act(async () => {
+            await vi.advanceTimersByTimeAsync(10_000);
+        });
+
+        expect(mockDirective.mock.calls.length).toBeGreaterThan(1);
+    });
+
     it('cleans up only the clone when unmounted', async () => {
         const { supabase } = createSupabase();
         const { original, clone } = createLiveTrack();

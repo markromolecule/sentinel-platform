@@ -65,7 +65,7 @@ export async function resolveWebAuthState(
         };
     }
 
-    if (role && role !== 'student') {
+    if (role && role !== 'student' && !hasStudentRecord) {
         return {
             role,
             hasStudentRecord,

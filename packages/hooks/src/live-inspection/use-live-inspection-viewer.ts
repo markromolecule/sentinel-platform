@@ -189,7 +189,7 @@ export function useLiveInspectionViewer({
                 });
 
                 await room.connect(credentials.liveKitUrl, credentials.token, {
-                    autoSubscribe: false,
+                    autoSubscribe: true,
                 });
             } catch (error) {
                 cleanupRoom();

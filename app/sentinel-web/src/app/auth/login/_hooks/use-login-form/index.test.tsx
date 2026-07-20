@@ -172,4 +172,44 @@ describe('useLoginForm', () => {
         expect(mockToastError).toHaveBeenCalledWith('Access Denied.');
         expect(mockRouterPush).not.toHaveBeenCalled();
     });
+
+    it('routes a user into student portal if student record exists even if role metadata is non-student', async () => {
+        mockSupabaseMaybeSingle.mockResolvedValue({
+            data: {
+                student_number: '2024-0001',
+                department_id: 'department-1',
+            },
+            error: null,
+        });
+
+        let loginSuccessHandler: ((payload: { user: User | null }) => Promise<void>) | undefined;
+        mockUseLoginMutation.mockImplementation(({ onSuccess }) => {
+            loginSuccessHandler = onSuccess;
+            return {
+                mutate: vi.fn(),
+                isPending: false,
+            };
+        });
+
+        renderHook(() => useLoginForm());
+
+        await act(async () => {
+            await loginSuccessHandler?.({
+                user: createUser({
+                    user_metadata: {
+                        role: 'admin',
+                    },
+                }),
+            });
+        });
+
+        await waitFor(() => {
+            expect(mockRouterRefresh).toHaveBeenCalled();
+        });
+
+        expect(mockRouterPush).toHaveBeenCalledWith('/student/classroom');
+        expect(mockToastSuccess).toHaveBeenCalledWith('Welcome back Student!');
+        expect(mockSupabaseSignOut).not.toHaveBeenCalled();
+        expect(mockToastError).not.toHaveBeenCalled();
+    });
 });

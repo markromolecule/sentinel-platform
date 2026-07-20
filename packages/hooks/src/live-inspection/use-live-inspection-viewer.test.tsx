@@ -123,7 +123,7 @@ describe('useLiveInspectionViewer', () => {
             'wss://sentinel-test.livekit.cloud',
             'viewer-token',
             {
-                autoSubscribe: false,
+                autoSubscribe: true,
             },
         );
         expect(JSON.stringify(result.current).toLowerCase()).not.toContain('viewer-token');

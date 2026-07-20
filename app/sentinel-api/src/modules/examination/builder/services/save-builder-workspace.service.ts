@@ -11,6 +11,8 @@ export type SaveBuilderWorkspaceServiceArgs = {
     institutionId: string | undefined;
     userId: string;
     canBypassLock?: boolean;
+    canManageExam?: boolean;
+    role?: string;
 };
 
 /**
@@ -23,6 +25,8 @@ export async function saveBuilderWorkspaceService({
     institutionId,
     userId,
     canBypassLock = false,
+    canManageExam = false,
+    role,
 }: SaveBuilderWorkspaceServiceArgs) {
     const exam = await ExamService.updateExam(
         dbClient,
@@ -31,6 +35,8 @@ export async function saveBuilderWorkspaceService({
         institutionId,
         userId,
         canBypassLock,
+        canManageExam,
+        role,
     );
 
     // Telemetry logging

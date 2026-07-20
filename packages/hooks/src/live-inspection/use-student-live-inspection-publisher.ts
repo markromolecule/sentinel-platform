@@ -274,10 +274,6 @@ export function useStudentLiveInspectionPublisher({
         void reconcile();
 
         const intervalId = window.setInterval(() => {
-            if (document.visibilityState === 'hidden' && activePublicationRef.current === null) {
-                return;
-            }
-
             void reconcile();
         }, RECONCILE_INTERVAL_MS);
 
