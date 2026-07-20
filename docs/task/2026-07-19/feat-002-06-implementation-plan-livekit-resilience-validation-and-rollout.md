@@ -29,8 +29,8 @@ Passing unit tests is insufficient for camera monitoring because real WebRTC beh
 
 ### Entry Gate
 
-- [ ] Confirm work packages 01-05 are committed with all exit-gate evidence.
-- [ ] Confirm production remains globally disabled and no real institution is allowlisted.
+- [x] Confirm work packages 01-05 are committed with all exit-gate evidence.
+- [x] Confirm production remains globally disabled and no real institution is allowlisted.
 
 ## Pre-Planning Checklist
 
