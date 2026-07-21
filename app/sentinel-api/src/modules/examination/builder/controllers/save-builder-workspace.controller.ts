@@ -2,6 +2,7 @@ import { createRoute } from '@hono/zod-openapi';
 import { type AppRouteHandler } from '../../../../types/hono';
 import {
     assertAssessmentAccess,
+    resolveAssessmentActorRole,
     resolveAssessmentInstitutionId,
 } from '../../assessment/assessment-access';
 import { saveBuilderWorkspaceSchema } from '../builder.dto';
@@ -42,7 +43,11 @@ export const saveBuilderWorkspaceRouteHandler: AppRouteHandler<
     const body = c.req.valid('json');
     const supabaseUser = c.get('supabaseUser') as any;
     const user = c.get('user');
-    const role = supabaseUser?.user_metadata?.role;
+    const role = await resolveAssessmentActorRole({
+        dbClient: c.get('dbClient'),
+        userId: user?.id,
+        claimedRole: supabaseUser?.user_metadata?.role,
+    });
 
     assertAssessmentAccess(c);
     requireActivePermission(c, 'examinations:update');
@@ -54,6 +59,7 @@ export const saveBuilderWorkspaceRouteHandler: AppRouteHandler<
     });
 
     const canBypassLock = hasActivePermission(c, 'examinations:bypass_publish_lock');
+    const canManageExam = hasActivePermission(c, 'examinations:update');
 
     const workspace = await BuilderService.saveBuilderWorkspace(
         c.get('dbClient'),
@@ -62,6 +68,8 @@ export const saveBuilderWorkspaceRouteHandler: AppRouteHandler<
         institutionId,
         user.id,
         canBypassLock,
+        canManageExam,
+        role || undefined,
     );
 
     return c.json({

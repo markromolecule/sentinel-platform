@@ -6,7 +6,6 @@ import { OverviewView } from './overview-view';
 import { AttemptsView } from './attempts-view';
 import { ActionQueueView } from './action-queue-view';
 import { useExamReport } from '../_hooks/use-exam-report';
-import { ReportNavigation } from './report-navigation';
 import { ReportLoading } from './report-loading';
 import { ReportError } from './report-error';
 
@@ -23,7 +22,6 @@ export function ExamReportPageContent({ params }: { params: Promise<{ examId: st
         isFetching,
         refetch,
         activeSection,
-        setActiveSection,
         searchValue,
         setSearchValue,
         sectionFilter,
@@ -53,47 +51,44 @@ export function ExamReportPageContent({ params }: { params: Promise<{ examId: st
     }
 
     return (
-        <div className="relative flex min-h-[calc(100vh-64px)] flex-col lg:-m-6 lg:flex-row lg:items-stretch">
-            <ReportNavigation activeSection={activeSection} setActiveSection={setActiveSection} />
+        <div className="space-y-6">
+            {activeSection === 'overview' && (
+                <OverviewView report={report} refetch={refetch} isFetching={isFetching} />
+            )}
 
-            <main className="min-w-0 flex-1 space-y-6 p-4 md:p-6 lg:p-8">
-                {activeSection === 'overview' && (
-                    <OverviewView report={report} refetch={refetch} isFetching={isFetching} />
-                )}
+            {activeSection === 'attempts' && (
+                <AttemptsView
+                    report={report}
+                    columns={columns}
+                    searchValue={searchValue}
+                    setSearchValue={setSearchValue}
+                    sectionFilter={sectionFilter}
+                    setSectionFilter={setSectionFilter}
+                    sectionOptions={sectionOptions}
+                    studentPage={studentPage}
+                    setStudentPage={setStudentPage}
+                    pageSize={pageSize}
+                    onFinalizeAll={handleFinalizeAll}
+                    isFinalizingAll={isFinalizingAll}
+                />
+            )}
 
-                {activeSection === 'attempts' && (
-                    <AttemptsView
-                        report={report}
-                        columns={columns}
-                        searchValue={searchValue}
-                        setSearchValue={setSearchValue}
-                        sectionFilter={sectionFilter}
-                        setSectionFilter={setSectionFilter}
-                        sectionOptions={sectionOptions}
-                        studentPage={studentPage}
-                        setStudentPage={setStudentPage}
-                        pageSize={pageSize}
-                        onFinalizeAll={handleFinalizeAll}
-                        isFinalizingAll={isFinalizingAll}
-                    />
-                )}
+            {activeSection === 'queue' && (
+                <ActionQueueView
+                    actionQueues={actionQueues}
+                    activeQueue={activeQueue}
+                    setActiveQueue={setActiveQueue}
+                    actionPages={actionPages}
+                    setActionPages={setActionPages}
+                    activeActionId={activeActionId}
+                    examId={examId}
+                    sectionOptions={sectionOptions}
+                    onGrantOverride={handleGrantOverride}
+                />
+            )}
 
-                {activeSection === 'queue' && (
-                    <ActionQueueView
-                        actionQueues={actionQueues}
-                        activeQueue={activeQueue}
-                        setActiveQueue={setActiveQueue}
-                        actionPages={actionPages}
-                        setActionPages={setActionPages}
-                        activeActionId={activeActionId}
-                        examId={examId}
-                        sectionOptions={sectionOptions}
-                        onGrantOverride={handleGrantOverride}
-                    />
-                )}
-
-                {activeSection === 'logs' && <IncidentLogsView examId={examId} />}
-            </main>
+            {activeSection === 'logs' && <IncidentLogsView examId={examId} />}
         </div>
     );
 }
+

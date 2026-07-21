@@ -28,6 +28,8 @@ export class BuilderService {
         institutionId: string | undefined,
         userId: string,
         canBypassLock = false,
+        canManageExam = false,
+        role?: string,
     ) {
         return saveBuilderWorkspaceService({
             dbClient,
@@ -36,6 +38,8 @@ export class BuilderService {
             institutionId,
             userId,
             canBypassLock,
+            canManageExam,
+            role,
         });
     }
 

@@ -7,6 +7,8 @@ import { clearStoredExamSession } from '../_lib/exam-session-storage';
 import { clearStoredExamTurnInPreview } from '../_lib/exam-turn-in-storage';
 import { buildStudentHistoryAttemptHref } from '@/lib/routes/student-history-routes';
 
+import { resolveStudentExamStage } from '../_lib/student-exam-flow';
+
 type UseTurnedInExamRedirectArgs = {
     examId: string;
     status?: string | null;
@@ -21,8 +23,21 @@ export function useTurnedInExamRedirect({
     runtimeAccess,
 }: UseTurnedInExamRedirectArgs) {
     const router = useRouter();
-    const isOverrideActive = Boolean(runtimeAccess?.canStart || runtimeAccess?.canResume);
-    const isRedirecting = status === 'turned_in' && Boolean(attemptId) && !isOverrideActive;
+    const resolution = resolveStudentExamStage({
+        requestedStage: 'instruction',
+        privacyAccepted: true,
+        checkupCompleted: true,
+        mediaPipeStatus: 'ready',
+        admissionMode: 'AUTOMATIC',
+        admissionState: null,
+        runtimeAccess: {
+            isTurnedIn: status === 'turned_in',
+            canStart: runtimeAccess?.canStart,
+            canResume: runtimeAccess?.canResume,
+        },
+    });
+
+    const isRedirecting = resolution.targetStage === 'result' && Boolean(attemptId);
 
     useEffect(() => {
         if (!isRedirecting || !attemptId) {

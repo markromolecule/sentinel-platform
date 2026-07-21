@@ -31,9 +31,39 @@ vi.mock('@sentinel/hooks', () => ({
     useAudioSettingsQuery: () => mockUseAudioSettingsQuery(),
 }));
 
-vi.mock('@/app/(protected)/student/exam/[id]/_hooks/use-student-exam-data', () => ({
-    useStudentExamData: () => mockUseStudentExamData(),
-}));
+vi.mock('@/app/(protected)/student/exam/[id]/_hooks/use-student-exam-stage-guard', async () => {
+    const actual = await vi.importActual<
+        typeof import('@/app/(protected)/student/exam/[id]/_lib/student-exam-flow')
+    >('@/app/(protected)/student/exam/[id]/_lib/student-exam-flow');
+
+    return {
+        useStudentExamStageGuard: (requestedStage: string) => {
+            const data = mockUseStudentExamData();
+            const storedFlow = actual.readStoredStudentExamFlow(data?.examId ?? '');
+            const resolution = actual.resolveStudentExamStage({
+                requestedStage,
+                privacyAccepted: true,
+                checkupCompleted: true,
+                mediaPipeStatus: 'ready',
+                admissionMode: data?.configuration?.lobbyAdmissionMode ?? 'AUTOMATIC',
+                admissionState: null,
+                runtimeAccess: data?.exam?.runtimeAccess,
+            });
+
+            if (resolution.shouldRedirect && data?.examId) {
+                mockRouterReplace(`/student/exam/${data.examId}/${resolution.targetStage}`);
+            }
+
+            return {
+                ...data,
+                storedFlow,
+                resolution,
+                isResolving: data?.isLoading ?? false,
+                isLoading: data?.isLoading ?? false,
+            };
+        },
+    };
+});
 
 vi.mock('@/app/(protected)/student/exam/[id]/_hooks/use-exam-session', () => ({
     useExamSession: (args: unknown) => mockUseExamSession(args),
@@ -249,6 +279,18 @@ describe('useStudentExamAttempt', () => {
 
     it('redirects direct attempt access without a lobby marker or stored session', () => {
         mockReadStoredLobbyEntryMarker.mockReturnValue(false);
+        const baseData = mockUseStudentExamData();
+        mockUseStudentExamData.mockReturnValue({
+            ...baseData,
+            exam: {
+                ...baseData.exam,
+                runtimeAccess: {
+                    canStart: true,
+                    canResume: false,
+                    hasActiveAttempt: false,
+                },
+            },
+        });
 
         renderHook(() => useStudentExamAttempt());
 

@@ -1,6 +1,7 @@
 'use client';
 
 import { StudentExamLoadingState } from '@/app/(protected)/student/exam/[id]/_components/student-exam-loading-state';
+import { StudentLiveInspectionBridge } from '@/app/(protected)/student/exam/[id]/_components/student-live-inspection-bridge';
 import { AttemptView } from '@/app/(protected)/student/exam/[id]/attempt/_components/attempt-view';
 import { useStudentExamAttempt } from '@/app/(protected)/student/exam/[id]/attempt/_hooks/use-student-exam-attempt';
 import { StudentFlowShell } from '../_components/student-flow-shell';
@@ -40,5 +41,14 @@ export default function StudentExamAttemptPage() {
         );
     }
 
-    return <AttemptView attempt={attempt} />;
+    return (
+        <>
+            <StudentLiveInspectionBridge
+                sessionId={attempt.examSessionId}
+                attemptId={attempt.attemptId}
+                enabled={attempt.isLiveInspectionEligible}
+            />
+            <AttemptView attempt={attempt} />
+        </>
+    );
 }

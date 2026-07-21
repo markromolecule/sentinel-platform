@@ -20,10 +20,21 @@ import { useAttemptUIState } from './use-attempt-ui-state';
 import { useAttemptMonitoring } from './use-attempt-monitoring';
 import { useAttemptSubmission } from './use-attempt-submission';
 
+import { useStudentExamStageGuard } from '@/app/(protected)/student/exam/[id]/_hooks/use-student-exam-stage-guard';
+
 export function useStudentExamAttempt() {
     const { replace } = useRouter();
-    const { examId, exam, blockedState, configuration, mediaPipeSandbox, questions, isLoading } =
-        useStudentExamData();
+    const stageGuard = useStudentExamStageGuard('attempt');
+    const {
+        examId,
+        exam,
+        blockedState,
+        configuration,
+        mediaPipeSandbox,
+        questions,
+        isResolving,
+        isResolving: isLoading,
+    } = stageGuard;
 
     const [localBlockedMessage, setLocalBlockedMessage] = useState<string | null>(null);
 
@@ -47,26 +58,6 @@ export function useStudentExamAttempt() {
             }
         );
     }, [blockedState, localBlockedMessage]);
-
-    useEffect(() => {
-        if (isLoading || !examId) return;
-
-        const hasLobbyMarker = readStoredLobbyEntryMarker(examId);
-        const hasStoredSession = Boolean(readStoredExamSession(examId)?.sessionId);
-        const hasResumableAttempt = Boolean(
-            exam?.runtimeAccess?.canResume && exam?.runtimeAccess?.hasActiveAttempt,
-        );
-
-        if (!hasLobbyMarker && !hasStoredSession && !hasResumableAttempt) {
-            replace(`/student/exam/${examId}/lobby`);
-        }
-    }, [
-        exam?.runtimeAccess?.canResume,
-        exam?.runtimeAccess?.hasActiveAttempt,
-        examId,
-        isLoading,
-        replace,
-    ]);
 
     const answersHook = useAttemptAnswers();
     const uiHook = useAttemptUIState();
@@ -122,6 +113,15 @@ export function useStudentExamAttempt() {
             }),
         [effectiveConfiguration, mediaPipeSandbox],
     );
+    const canonicalAttemptId = examSession?.attemptId ?? exam?.attemptId ?? null;
+    const effectiveCameraRequired = Boolean(effectiveConfiguration?.cameraRequired);
+    const isLiveInspectionEligible =
+        Boolean(examSession?.sessionId) &&
+        Boolean(canonicalAttemptId) &&
+        effectiveCameraRequired &&
+        !effectiveBlockedState.isBlocked &&
+        !uiHook.isRedirectingToTurnIn &&
+        !isRedirectingToHistory;
     const audioSettingsQuery = useAudioSettingsQuery();
     const effectiveAudioSettings = useMemo(() => {
         if (!effectiveConfiguration?.aiRules?.audio_anomaly_detection) {
@@ -201,9 +201,13 @@ export function useStudentExamAttempt() {
     return {
         // Data
         examId,
+        examSessionId: examSession?.sessionId ?? null,
+        attemptId: canonicalAttemptId,
+        effectiveCameraRequired,
+        isLiveInspectionEligible,
         exam,
         questions,
-        isLoading,
+        isLoading: isResolving,
         isInitializingSession,
         isRedirectingHistory: isRedirectingToHistory,
         blockedState: effectiveBlockedState,

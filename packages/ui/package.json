@@ -8,6 +8,10 @@
         ".": "./src/index.ts",
         "./style.css": "./src/index.css"
     },
+    "scripts": {
+        "build": "tsc",
+        "test": "../hooks/node_modules/.bin/vitest run src"
+    },
     "dependencies": {
         "@base-ui/react": "^1.2.0",
         "@hookform/resolvers": "^5.2.2",

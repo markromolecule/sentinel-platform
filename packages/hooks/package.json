@@ -30,6 +30,7 @@
         "@sentinel/services": "workspace:*",
         "@sentinel/shared": "workspace:*",
         "@supabase/supabase-js": "*",
+        "livekit-client": "^2.20.1",
         "lucide-react": "*",
         "sonner": "2.0.1"
     }

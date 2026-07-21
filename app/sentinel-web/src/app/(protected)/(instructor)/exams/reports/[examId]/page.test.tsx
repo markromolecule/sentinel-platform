@@ -1,28 +1,45 @@
-'use client';
-
 import { Suspense } from 'react';
 import { act, fireEvent, render, screen } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import ExamReportPage from './page';
+import ExamReportLayout from './layout';
 
-const { mockApiClient, mockRefetch, mockUseExamReportQuery, mockSearchParamsGet } = vi.hoisted(
+const { mockApiClient, mockRefetch, mockUseExamReportQuery, mockSearchParamsGet, mockPathname, mockRouterPush } = vi.hoisted(
     () => ({
         mockApiClient: vi.fn(),
         mockRefetch: vi.fn(),
         mockUseExamReportQuery: vi.fn(),
         mockSearchParamsGet: vi.fn().mockReturnValue(null),
+        mockPathname: vi.fn().mockReturnValue('/exams/reports/exam-1'),
+        mockRouterPush: vi.fn(),
     }),
 );
 
 vi.mock('next/navigation', () => ({
+    usePathname: () => mockPathname(),
     useSearchParams: () => ({
         get: mockSearchParamsGet,
+        toString: () => '',
+    }),
+    useParams: () => ({ examId: 'exam-1' }),
+    useRouter: () => ({
+        push: mockRouterPush,
     }),
 }));
 
 vi.mock('next/link', () => ({
-    default: ({ children, href }: { children: React.ReactNode; href: string }) => (
-        <a href={href}>{children}</a>
+    default: ({
+        children,
+        href,
+        className,
+    }: {
+        children: React.ReactNode;
+        href: string;
+        className?: string;
+    }) => (
+        <a href={href} className={className}>
+            {children}
+        </a>
     ),
 }));
 
@@ -316,6 +333,7 @@ describe('ExamReportPage', () => {
 
     it('passes the selected section filter into the report query', async () => {
         const params = Promise.resolve({ examId: 'exam-1' });
+        mockSearchParamsGet.mockReturnValue('attempts');
 
         await act(async () => {
             render(
@@ -326,9 +344,6 @@ describe('ExamReportPage', () => {
 
             await params;
         });
-
-        // Switch to Attempt Summary tab
-        fireEvent.click(screen.getAllByText('Attempt Summary')[0]);
 
         expect(await screen.findByText('Santos, Ana')).toBeTruthy();
         expect(screen.getByText('Reyes, Luis')).toBeTruthy();
@@ -344,10 +359,12 @@ describe('ExamReportPage', () => {
             pageSize: 10,
         });
         expect(screen.getAllByText('BSCS 3B').length).toBeGreaterThan(0);
+        mockSearchParamsGet.mockReturnValue(null);
     });
 
     it('links each submitted attempt into the detailed report route', async () => {
         const params = Promise.resolve({ examId: 'exam-1' });
+        mockSearchParamsGet.mockReturnValue('attempts');
 
         await act(async () => {
             render(
@@ -359,14 +376,12 @@ describe('ExamReportPage', () => {
             await params;
         });
 
-        // Switch to Attempt Summary tab
-        fireEvent.click(screen.getAllByText('Attempt Summary')[0]);
-
         expect(
             screen
                 .getAllByRole('link', { name: 'View Attempt' })
                 .map((link) => link.getAttribute('href')),
         ).toContain('/exams/reports/exam-1/attempt-1');
+        mockSearchParamsGet.mockReturnValue(null);
     });
 
     it('initializes activeSection from search parameters', async () => {
@@ -402,6 +417,70 @@ describe('ExamReportPage', () => {
 
         expect(screen.getByTestId('incident-logs-view')).toBeTruthy();
         expect(screen.getByText('Incident Logs for exam-1')).toBeTruthy();
+        mockSearchParamsGet.mockReturnValue(null);
+    });
+
+    it('renders each query-selected view while its matching navigation link is active in shell', async () => {
+        // Overview default
+        mockSearchParamsGet.mockImplementation((key: string) => (key === 'section' ? 'overview' : null));
+        const overviewParams = Promise.resolve({ examId: 'exam-1' });
+        let viewResult: any;
+
+        await act(async () => {
+            viewResult = render(
+                <ExamReportLayout>
+                    <ExamReportPage params={overviewParams} />
+                </ExamReportLayout>,
+            );
+            await overviewParams;
+        });
+        expect(screen.getByText('Final Exam')).toBeTruthy();
+        expect(screen.getAllByRole('link', { name: 'Overview' })[0]?.className).toContain('bg-accent/50');
+        viewResult.unmount();
+
+        // Attempt Summary
+        mockSearchParamsGet.mockImplementation((key: string) => (key === 'section' ? 'attempts' : null));
+        const attemptsParams = Promise.resolve({ examId: 'exam-1' });
+        await act(async () => {
+            viewResult = render(
+                <ExamReportLayout>
+                    <ExamReportPage params={attemptsParams} />
+                </ExamReportLayout>,
+            );
+            await attemptsParams;
+        });
+        expect(screen.getAllByText('Attempt Summary Report').length).toBeGreaterThan(0);
+        expect(screen.getAllByRole('link', { name: 'Attempt Summary' })[0]?.className).toContain('bg-accent/50');
+        viewResult.unmount();
+
+        // Action Queue
+        mockSearchParamsGet.mockImplementation((key: string) => (key === 'section' ? 'queue' : null));
+        const queueParams = Promise.resolve({ examId: 'exam-1' });
+        await act(async () => {
+            viewResult = render(
+                <ExamReportLayout>
+                    <ExamReportPage params={queueParams} />
+                </ExamReportLayout>,
+            );
+            await queueParams;
+        });
+        expect(screen.getAllByRole('link', { name: 'Action Queue' })[0]?.className).toContain('bg-accent/50');
+        viewResult.unmount();
+
+        // Incident Logs
+        mockSearchParamsGet.mockImplementation((key: string) => (key === 'section' ? 'logs' : null));
+        const logsParams = Promise.resolve({ examId: 'exam-1' });
+        await act(async () => {
+            viewResult = render(
+                <ExamReportLayout>
+                    <ExamReportPage params={logsParams} />
+                </ExamReportLayout>,
+            );
+            await logsParams;
+        });
+        expect(screen.getAllByTestId('incident-logs-view')[0]).toBeTruthy();
+        expect(screen.getAllByRole('link', { name: 'Incident Logs' })[0]?.className).toContain('bg-accent/50');
+        viewResult.unmount();
         mockSearchParamsGet.mockReturnValue(null);
     });
 });

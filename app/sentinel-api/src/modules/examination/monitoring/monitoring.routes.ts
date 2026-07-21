@@ -9,8 +9,10 @@ import {
     getExamMonitoringStudentRoute,
     getExamMonitoringStudentRouteHandler,
 } from './controllers/get-exam-monitoring-student.controller';
+import { registerLiveInspectionStaffRoutes } from '../live-inspection/live-inspection.routes';
 
 export function registerMonitoringRoutes(app: OpenAPIHono<HonoEnv>) {
+    registerLiveInspectionStaffRoutes(app);
     app.openapi(getExamMonitoringOverviewRoute, getExamMonitoringOverviewRouteHandler);
     app.openapi(getExamMonitoringStudentRoute, getExamMonitoringStudentRouteHandler);
 }

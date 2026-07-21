@@ -89,9 +89,17 @@ export const checkInLobby = async (dbClient: DbClient, examId: string, studentId
             decided_at: mode === 'AUTOMATIC' ? now : null,
         })
         .onConflict((oc) =>
-            oc.columns(['exam_id', 'student_id']).doUpdateSet({
-                checked_in_at: now,
-            }),
+            oc.columns(['exam_id', 'student_id']).doUpdateSet(
+                mode === 'AUTOMATIC'
+                    ? {
+                          checked_in_at: now,
+                          status: 'APPROVED',
+                          decided_at: now,
+                      }
+                    : {
+                          checked_in_at: now,
+                      },
+            ),
         )
         .returningAll()
         .executeTakeFirstOrThrow();

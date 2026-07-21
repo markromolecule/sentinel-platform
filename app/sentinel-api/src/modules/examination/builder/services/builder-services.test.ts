@@ -110,6 +110,8 @@ describe('Builder Modular Services', () => {
                 'inst-1',
                 'user-1',
                 false,
+                false,
+                undefined,
             );
             expect(LogsService.createLog).toHaveBeenCalledWith(mockDbClient, {
                 userId: 'user-1',

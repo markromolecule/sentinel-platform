@@ -23,6 +23,7 @@ describe('syncSystemPermissions', () => {
             'examinations:update',
             'examinations:delete',
             'examinations:assign',
+            'examinations:monitor_live_video',
             'ai:generate_questions',
             'reports:generate',
             'pdf_templates:view',
@@ -176,6 +177,27 @@ describe('syncSystemPermissions', () => {
                 'examinations:delete',
                 'examinations:assign',
             ]),
+        );
+    });
+
+    it('should define live-video monitoring permission only for authorized staff blueprints', () => {
+        const activeKeys = ALL_PERMISSIONS.map((p) => p.id);
+
+        expect(activeKeys).toContain('examinations:monitor_live_video');
+        expect(SYSTEM_ROLE_BLUEPRINTS.superadmin.permissionKeys).toContain(
+            'examinations:monitor_live_video',
+        );
+        expect(SYSTEM_ROLE_BLUEPRINTS.admin.permissionKeys).toContain(
+            'examinations:monitor_live_video',
+        );
+        expect(SYSTEM_ROLE_BLUEPRINTS.instructor.permissionKeys).toContain(
+            'examinations:monitor_live_video',
+        );
+        expect(SYSTEM_ROLE_BLUEPRINTS.support.permissionKeys).not.toContain(
+            'examinations:monitor_live_video',
+        );
+        expect(SYSTEM_ROLE_BLUEPRINTS.student.permissionKeys).not.toContain(
+            'examinations:monitor_live_video',
         );
     });
 

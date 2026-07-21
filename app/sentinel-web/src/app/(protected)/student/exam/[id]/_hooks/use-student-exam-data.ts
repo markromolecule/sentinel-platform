@@ -103,11 +103,23 @@ function resolveLifecycleBlockedState(exam: ProctorExam | null) {
 export function useStudentExamData() {
     const params = useParams();
     const examId = params.id as string;
-    const { data: exam, isLoading: isExamLoading, refetch: refetchExam } = useExamQuery(examId, {
+    const {
+        data: exam,
+        isLoading: isExamLoading,
+        isError: isExamError,
+        refetch: refetchExam,
+    } = useExamQuery(examId, {
         viewer: 'student',
     });
-    const { data: configurationState, isLoading: isConfigurationLoading } =
-        useExamConfigurationQuery(examId);
+    const {
+        data: configurationState,
+        isLoading: isConfigurationLoading,
+        isError: isConfigurationError,
+    } = useExamConfigurationQuery(examId);
+
+    const hasAuthoritativeConfig = Boolean(
+        configurationState?.configuration || exam?.configuration,
+    );
 
     const settings = configurationState?.settings ?? exam?.settings ?? DEFAULT_SETTINGS;
     const configuration =
@@ -116,6 +128,8 @@ export function useStudentExamData() {
     const blockedState = useMemo(() => resolveLifecycleBlockedState(exam ?? null), [exam]);
 
     const mediaPipeSandbox = exam?.mediaPipeSandbox ?? DEFAULT_TELEMETRY_SETTINGS.mediaPipeSandbox;
+
+    const configQueryError = isConfigurationError && !hasAuthoritativeConfig;
 
     return {
         examId,
@@ -127,5 +141,9 @@ export function useStudentExamData() {
         questions,
         refetchExam,
         isLoading: isExamLoading || isConfigurationLoading,
+        isConfigurationError,
+        configQueryError,
+        isExamError,
+        hasAuthoritativeConfig,
     };
 }

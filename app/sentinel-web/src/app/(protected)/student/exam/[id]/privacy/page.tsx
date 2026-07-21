@@ -4,11 +4,10 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Checkbox, Label } from '@sentinel/ui';
-import { Eye, Mic, Monitor } from 'lucide-react';
+import { Camera, Eye, Mic, Monitor } from 'lucide-react';
 import { StudentExamLoadingState } from '../_components/student-exam-loading-state';
 import { StudentFlowShell } from '../_components/student-flow-shell';
-import { useStudentExamData } from '../_hooks/use-student-exam-data';
-import { useTurnedInExamRedirect } from '../_hooks/use-turned-in-exam-redirect';
+import { useStudentExamStageGuard } from '../_hooks/use-student-exam-stage-guard';
 import {
     buildStudentExamHref,
     patchStoredStudentExamFlow,
@@ -24,18 +23,13 @@ import { PRIVACY_POLICIES } from '@/app/(protected)/(instructor)/exams/[id]/prev
 
 export default function StudentExamPrivacyPage() {
     const router = useRouter();
-    const { examId, exam, blockedState, configuration, isLoading } = useStudentExamData();
+    const { examId, blockedState, configuration, isResolving } =
+        useStudentExamStageGuard('privacy');
     const [hasConsented, setHasConsented] = useState(
         () => readStoredStudentExamFlow(examId).privacyAccepted,
     );
-    const isRedirectingToHistory = useTurnedInExamRedirect({
-        examId,
-        status: exam?.status,
-        attemptId: exam?.attemptId,
-        runtimeAccess: exam?.runtimeAccess,
-    });
 
-    if (isLoading || isRedirectingToHistory) {
+    if (isResolving) {
         return <StudentExamLoadingState />;
     }
 
@@ -73,6 +67,13 @@ export default function StudentExamPrivacyPage() {
             desc: configuration.micRequired
                 ? 'Room audio is monitored for unauthorized communication or prohibited voices.'
                 : 'Microphone access is not required by the current proctoring policy.',
+        },
+        {
+            label: 'Authorized Live Camera Inspection',
+            icon: Camera,
+            desc: configuration.cameraRequired
+                ? 'During an active camera-required exam, an authorized proctor may view your camera live. This does not enable microphone publishing or recording.'
+                : 'Live camera inspection is not active because this exam does not require a camera. Microphone publishing and recording remain excluded from this feature.',
         },
         {
             label: 'Platform Security',
@@ -156,9 +157,20 @@ export default function StudentExamPrivacyPage() {
                                     onCheckedChange={(checked) => {
                                         const accepted = checked === true;
                                         setHasConsented(accepted);
-                                        patchStoredStudentExamFlow(examId, {
-                                            privacyAccepted: accepted,
-                                        });
+                                        if (!accepted) {
+                                            patchStoredStudentExamFlow(examId, {
+                                                privacyAccepted: false,
+                                                checkupCompleted: false,
+                                                mediaPipeActivatedAt: null,
+                                                mediaPipeCalibrationCompletedAt: null,
+                                                mediaPipeActivationSource: null,
+                                                mediaPipeCalibrationProfile: null,
+                                            });
+                                        } else {
+                                            patchStoredStudentExamFlow(examId, {
+                                                privacyAccepted: true,
+                                            });
+                                        }
                                     }}
                                     className="mt-1"
                                 />

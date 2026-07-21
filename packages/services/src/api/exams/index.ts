@@ -8,3 +8,4 @@ export * from './flow';
 export * from './lobby';
 export * from './assignment';
 export * from './incidents';
+export * from './live-inspection';

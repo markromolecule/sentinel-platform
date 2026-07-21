@@ -2,6 +2,7 @@
 
 export * from './api-provider';
 export * from './auth-provider';
+export * from './live-inspection';
 export * from './query';
 export * from './use-debounce';
 export * from './use-heartbeat';

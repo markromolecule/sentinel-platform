@@ -1,5 +1,5 @@
-import { useDeferredValue, useEffect, useMemo, useState } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { useCallback, useDeferredValue, useEffect, useMemo, useState } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useApi, useExamReportQuery } from '@sentinel/hooks';
 import { bulkFinalizeAttempts } from '@sentinel/services';
 import type { ExamReportActionItem } from '@sentinel/shared/types';
@@ -9,9 +9,9 @@ import type { ActionQueueType, ExamReportSection } from '../../_types';
 import { getColumns } from '../../_components/columns';
 import {
     DEFAULT_PAGE_SIZE,
-    DEFAULT_ACTIVE_SECTION,
     DEFAULT_ACTIVE_QUEUE,
     SECTION_PARAM_KEY,
+    resolveExamReportSection,
 } from '../../_constants';
 import type { UseExamReportOptions, UseExamReportResult } from './_types';
 
@@ -70,26 +70,21 @@ function buildGrantSuccessMessage(args: { overrideType: 'MAKEUP' | 'RETAKE'; res
  */
 export function useExamReport({ examId }: UseExamReportOptions): UseExamReportResult {
     const apiClient = useApi();
+    const router = useRouter();
     const searchParams = useSearchParams();
     const sectionParam = searchParams.get(SECTION_PARAM_KEY);
 
-    const [activeSection, setActiveSection] = useState<ExamReportSection>(() => {
-        if (sectionParam === 'attempts' || sectionParam === 'queue' || sectionParam === 'logs') {
-            return sectionParam;
-        }
-        return DEFAULT_ACTIVE_SECTION;
-    });
+    const activeSection = resolveExamReportSection(sectionParam);
 
-    useEffect(() => {
-        if (
-            sectionParam === 'attempts' ||
-            sectionParam === 'queue' ||
-            sectionParam === 'overview' ||
-            sectionParam === 'logs'
-        ) {
-            setActiveSection(sectionParam as ExamReportSection);
-        }
-    }, [sectionParam]);
+    const setActiveSection = useCallback(
+        (section: ExamReportSection) => {
+            const params = new URLSearchParams(searchParams.toString());
+            params.set(SECTION_PARAM_KEY, section);
+            router.push(`/exams/reports/${examId}?${params.toString()}`);
+        },
+        [examId, router, searchParams],
+    );
+
 
     const [searchValue, setSearchValue] = useState('');
     const [sectionFilter, setSectionFilter] = useState<string | undefined>(undefined);

@@ -4,8 +4,7 @@ import { useEffect } from 'react';
 import { useExamLobbyCountQuery } from '@sentinel/hooks';
 import { StudentExamLoadingState } from '../_components/student-exam-loading-state';
 import { StudentFlowShell } from '../_components/student-flow-shell';
-import { useStudentExamData } from '../_hooks/use-student-exam-data';
-import { useTurnedInExamRedirect } from '../_hooks/use-turned-in-exam-redirect';
+import { useStudentExamStageGuard } from '../_hooks/use-student-exam-stage-guard';
 import { useLobbyState } from './_hooks/use-lobby-state';
 import { useLobbyPresence } from './_hooks/use-lobby-presence';
 import { LobbyHeader } from './_components/lobby-header';
@@ -14,8 +13,15 @@ import { LobbyFooterActions } from './_components/lobby-footer-actions';
 import { MonitoringPreloader } from '../_components/monitoring-preloader';
 
 export default function StudentExamLobbyPage() {
-    const { examId, exam, blockedState, configuration, mediaPipeSandbox, refetchExam, isLoading } =
-        useStudentExamData();
+    const {
+        examId,
+        exam,
+        blockedState,
+        configuration,
+        mediaPipeSandbox,
+        refetchExam,
+        isResolving,
+    } = useStudentExamStageGuard('lobby');
     const {
         data: lobbyCount,
         isError,
@@ -59,14 +65,7 @@ export default function StudentExamLobbyPage() {
         void refetchLobbyCount();
     }, [admissionStatus, refetchLobbyCount]);
 
-    const isRedirectingToHistory = useTurnedInExamRedirect({
-        examId,
-        status: exam?.status,
-        attemptId: exam?.attemptId,
-        runtimeAccess: exam?.runtimeAccess,
-    });
-
-    if (isLoading || isRedirectingToHistory) {
+    if (isResolving) {
         return <StudentExamLoadingState />;
     }
 

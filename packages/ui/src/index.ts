@@ -62,6 +62,7 @@ export * from './components/ui/search-bar';
 export * from './components/ui/faceted-filter';
 export * from './components/ui/visually-hidden';
 export * from './components/passage-editor';
+export * from './components/live-video-monitor';
 
 // Hooks
 export * from './hooks/use-mobile';

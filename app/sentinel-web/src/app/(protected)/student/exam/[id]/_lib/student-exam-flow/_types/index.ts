@@ -1,4 +1,4 @@
-import type { MediaPipeCalibrationProfile } from '@sentinel/shared';
+import type { ExamRuntimeAccessState, MediaPipeCalibrationProfile } from '@sentinel/shared';
 
 export const STUDENT_EXAM_STAGES = [
     'instruction',
@@ -49,3 +49,49 @@ export type StoredStudentExamFlow = {
     mediaPipeActivationSource: StudentExamMediaPipeActivationSource | null;
     mediaPipeCalibrationProfile: MediaPipeCalibrationProfile | null;
 };
+
+export type StudentExamStageResolverReason =
+    | 'TURNED_IN'
+    | 'BLOCKED_LOCKED'
+    | 'BLOCKED_CLOSED'
+    | 'BLOCKED_SUPERSEDED'
+    | 'CONFIG_ERROR'
+    | 'MAX_RECONNECT_EXCEEDED'
+    | 'PRIVACY_REQUIRED'
+    | 'PRIVACY_ACCEPTED'
+    | 'CHECKUP_REQUIRED'
+    | 'MEDIAPIPE_STALE'
+    | 'LOBBY_GATED_WAITING'
+    | 'LOBBY_GATED_REJECTED'
+    | 'LOBBY_GATED_APPROVED'
+    | 'ATTEMPT_ACTIVE'
+    | 'AUTOMATIC_ADMISSION'
+    | 'INSTRUCTION';
+
+export type StudentExamStageResolverInput = {
+    requestedStage: StudentExamStage | 'result' | 'history' | string;
+    privacyAccepted: boolean;
+    checkupCompleted: boolean;
+    mediaPipeStatus: 'ready' | 'missing' | 'stale' | 'not-required';
+    admissionMode: 'AUTOMATIC' | 'INSTRUCTOR_GATED' | null;
+    admissionState: 'pending' | 'approved' | 'rejected' | null;
+    runtimeAccess?: {
+        canStart?: boolean;
+        canResume?: boolean;
+        isAttemptActive?: boolean;
+        isTurnedIn?: boolean;
+        reconnectCount?: number;
+        maxReconnectAttempts?: number;
+        state?: ExamRuntimeAccessState | null;
+        blockedCode?: 'LOCKED' | 'CLOSED' | 'SUPERSEDED' | null;
+    } | null;
+    configQueryError?: boolean;
+    examQueryError?: boolean;
+};
+
+export type StudentExamStageResolverResult = {
+    targetStage: StudentExamStage | 'result';
+    reasonCode: StudentExamStageResolverReason;
+    shouldRedirect: boolean;
+};
+

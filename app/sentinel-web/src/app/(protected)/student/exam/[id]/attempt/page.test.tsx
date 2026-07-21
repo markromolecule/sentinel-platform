@@ -33,8 +33,20 @@ vi.mock('../_components/student-exam-loading-state', () => ({
     StudentExamLoadingState: () => <div>Loading...</div>,
 }));
 
-vi.mock('@/app/(protected)/student/exam/[id]/_hooks/use-student-exam-data', () => ({
-    useStudentExamData: () => mockStudentExamData(),
+vi.mock('@/app/(protected)/student/exam/[id]/_hooks/use-student-exam-stage-guard', () => ({
+    useStudentExamStageGuard: () => {
+        const data = mockStudentExamData();
+        return {
+            ...data,
+            isResolving: data?.isLoading ?? false,
+            resolution: {
+                targetStage: 'attempt',
+                reasonCode: 'ATTEMPT_ACTIVE',
+                shouldRedirect: false,
+            },
+            storedFlow: { privacyAccepted: true, checkupCompleted: true },
+        };
+    },
 }));
 
 vi.mock('@/app/(protected)/student/exam/[id]/_hooks/use-exam-session', () => ({
@@ -51,6 +63,10 @@ vi.mock('@/app/(protected)/student/exam/[id]/_hooks/use-exam-monitoring', () => 
 
 vi.mock('@/app/(protected)/student/exam/[id]/_hooks/use-attempt-mediapipe-monitoring', () => ({
     useAttemptMediaPipeMonitoring: () => mockAttemptMediaPipeMonitoring(),
+}));
+
+vi.mock('@/app/(protected)/student/exam/[id]/_components/student-live-inspection-bridge', () => ({
+    StudentLiveInspectionBridge: () => null,
 }));
 
 vi.mock('@/hooks/use-audio-anomaly-worker', () => ({

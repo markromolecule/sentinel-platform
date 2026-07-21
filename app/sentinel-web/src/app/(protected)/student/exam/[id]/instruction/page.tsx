@@ -5,8 +5,7 @@ import { Button } from '@sentinel/ui';
 import { ArrowLeft } from 'lucide-react';
 import { StudentExamLoadingState } from '../_components/student-exam-loading-state';
 import { StudentFlowShell } from '../_components/student-flow-shell';
-import { useStudentExamData } from '../_hooks/use-student-exam-data';
-import { useTurnedInExamRedirect } from '../_hooks/use-turned-in-exam-redirect';
+import { useStudentExamStageGuard } from '../_hooks/use-student-exam-stage-guard';
 import { buildStudentExamHref } from '../_lib/student-exam-flow';
 import {
     StudentFlowFooterActions,
@@ -21,16 +20,10 @@ import {
 } from '@/app/(protected)/(instructor)/exams/[id]/preview/[sessionId]/_constants/preview-constants';
 
 export default function StudentExamInstructionPage() {
-    const { examId, exam, blockedState, configuration, questions, isLoading } =
-        useStudentExamData();
-    const isRedirectingToHistory = useTurnedInExamRedirect({
-        examId,
-        status: exam?.status,
-        attemptId: exam?.attemptId,
-        runtimeAccess: exam?.runtimeAccess,
-    });
+    const { examId, exam, blockedState, configuration, questions, isResolving } =
+        useStudentExamStageGuard('instruction');
 
-    if (isLoading || isRedirectingToHistory) {
+    if (isResolving) {
         return <StudentExamLoadingState />;
     }
 

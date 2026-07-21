@@ -171,7 +171,7 @@ describe('useLobbyState', () => {
         expect(result.current.admissionStatus).toBe('APPROVED');
     });
 
-    it('keeps entry enabled when approved instructor admission is refreshing stale runtime access', async () => {
+    it('keeps entry disabled while approved instructor admission is refreshing stale runtime access', async () => {
         vi.useFakeTimers();
         let resolveRefetch: (() => void) | undefined;
         const refetchExam = vi.fn(
@@ -219,10 +219,10 @@ describe('useLobbyState', () => {
 
         expect(result.current.admissionStatus).toBe('APPROVED');
         expect(result.current.isAdmissionPendingRefresh).toBe(true);
-        expect(result.current.canEnterExam).toBe(true);
+        expect(result.current.canEnterExam).toBe(false);
         expect(mockUseLobbyActions).toHaveBeenLastCalledWith(
             expect.objectContaining({
-                canEnterExam: true,
+                canEnterExam: false,
             }),
         );
 

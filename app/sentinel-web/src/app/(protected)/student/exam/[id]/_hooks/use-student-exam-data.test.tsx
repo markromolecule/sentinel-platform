@@ -86,4 +86,25 @@ describe('useStudentExamData', () => {
             message: 'This exam has been closed.',
         });
     });
+
+    it('exposes configQueryError when configuration query fails and no embedded config exists', () => {
+        mockUseExamQuery.mockReturnValue({
+            data: {
+                configuration: null,
+            },
+            isLoading: false,
+            isError: false,
+            refetch: vi.fn(),
+        });
+        mockUseExamConfigurationQuery.mockReturnValue({
+            data: null,
+            isLoading: false,
+            isError: true,
+        });
+
+        const { result } = renderHook(() => useStudentExamData());
+
+        expect(result.current.configQueryError).toBe(true);
+    });
 });
+

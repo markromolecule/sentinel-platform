@@ -37,8 +37,20 @@ vi.mock('../_components/student-flow-shell', () => ({
     StudentFlowShell: ({ children }: { children: ReactNode }) => <div>{children}</div>,
 }));
 
-vi.mock('../_hooks/use-student-exam-data', () => ({
-    useStudentExamData: () => mockStudentExamData(),
+vi.mock('../_hooks/use-student-exam-stage-guard', () => ({
+    useStudentExamStageGuard: () => {
+        const data = mockStudentExamData();
+        return {
+            ...data,
+            isResolving: data?.isLoading ?? false,
+            resolution: {
+                targetStage: 'checkup',
+                reasonCode: 'CHECKUP_REQUIRED',
+                shouldRedirect: false,
+            },
+            storedFlow: { privacyAccepted: true, checkupCompleted: false },
+        };
+    },
 }));
 
 vi.mock('../_hooks/use-turned-in-exam-redirect', () => ({
@@ -276,6 +288,8 @@ describe('StudentExamCheckupPage', () => {
         expect(
             screen.getByText(/center your face in the guide to begin calibration/i),
         ).toBeTruthy();
+        expect(screen.getByText(/does not publish microphone audio/i)).toBeTruthy();
+        expect(screen.getByText(/does not record the session/i)).toBeTruthy();
         expect(screen.getByText(/progress 50/i)).toBeTruthy();
         expect(
             (screen.getByRole('button', { name: /finalizing setup/i }) as HTMLButtonElement)
@@ -283,7 +297,7 @@ describe('StudentExamCheckupPage', () => {
         ).toBe(true);
     });
 
-    it('preserves a previously completed checkup across reload without clearing stored readiness', () => {
+    it('requires live device streams even when checkup was previously completed', () => {
         mockCheckupManager.mockReturnValue({
             videoRef: { current: null },
             cameraState: 'idle',
@@ -314,17 +328,11 @@ describe('StudentExamCheckupPage', () => {
 
         render(<StudentExamCheckupPage />);
 
-        expect(screen.getByText(/ready for lobby/i)).toBeTruthy();
+        expect(screen.getByText(/calibrating identity/i)).toBeTruthy();
         expect(
-            screen.getByText(
-                /previous device and identity verification are still valid/i,
-            ),
-        ).toBeTruthy();
-        expect(
-            (screen.getByRole('button', { name: /continue to lobby/i }) as HTMLButtonElement)
+            (screen.getByRole('button', { name: /finalizing setup/i }) as HTMLButtonElement)
                 .disabled,
-        ).toBe(false);
-        expect(mockPatchStoredStudentExamFlow).not.toHaveBeenCalled();
+        ).toBe(true);
     });
 
     it('clears stored readiness before re-requesting device access from a completed state', async () => {

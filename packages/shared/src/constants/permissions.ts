@@ -1135,6 +1135,16 @@ export const PERMISSIONS: Record<string, Permission> = {
         description: 'Export correct answer keys for examinations.',
         category: 'EXAM',
     },
+    MONITOR_LIVE_VIDEO: {
+        id: 'examinations:monitor_live_video',
+        moduleKey: 'examinations',
+        actionKey: 'monitor_live_video',
+        scope: 'institution',
+        name: 'Monitor Live Video',
+        description:
+            'Start and view on-demand live camera inspections for authorized examination attempts.',
+        category: 'PROCTORING',
+    },
 } as const;
 
 export const SYSTEM_ROLE_BLUEPRINTS: Record<string, SystemRoleBlueprint> = {
@@ -1296,6 +1306,7 @@ export const SYSTEM_ROLE_BLUEPRINTS: Record<string, SystemRoleBlueprint> = {
             'examinations:update',
             'examinations:delete',
             'examinations:assign',
+            'examinations:monitor_live_video',
             'assessments:view',
             'assessments:manage',
             'reports:view',
@@ -1377,6 +1388,7 @@ export const SYSTEM_ROLE_BLUEPRINTS: Record<string, SystemRoleBlueprint> = {
             'examinations:update',
             'examinations:delete',
             'examinations:assign',
+            'examinations:monitor_live_video',
             'assessments:view',
             'assessments:manage',
             'classrooms:view',
@@ -1448,6 +1460,7 @@ export const SYSTEM_ROLE_BLUEPRINTS: Record<string, SystemRoleBlueprint> = {
             'examinations:update',
             'examinations:delete',
             'examinations:assign',
+            'examinations:monitor_live_video',
             'examinations:bypass_publish_lock',
             'audio_incidents:read',
             'assessments:view',

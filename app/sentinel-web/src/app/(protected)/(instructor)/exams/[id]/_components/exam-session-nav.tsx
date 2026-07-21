@@ -4,6 +4,7 @@ import { Fragment } from 'react';
 import Link from 'next/link';
 import { usePathname, useSearchParams } from 'next/navigation';
 import { cn, Separator } from '@sentinel/ui';
+import { resolveExamReportSection } from '../../reports/[examId]/_constants';
 
 type ExamSessionSection = 'lobby' | 'monitoring' | 'overview' | 'report' | 'queue' | 'logs';
 
@@ -26,26 +27,11 @@ function resolveActiveSection(
     const reportSection = searchParams.get('section');
 
     if (parts[0] === 'exams' && parts[1] === 'reports' && parts[2]) {
-        // If parts[3] is present, we are on the student attempt page, which belongs to Attempt Summary (report)
-        if (parts[3]) {
+        const resolved = resolveExamReportSection(reportSection, pathname);
+        if (resolved === 'attempts') {
             return 'report';
         }
-
-        if (reportSection === 'queue') {
-            return 'queue';
-        }
-
-        if (reportSection === 'attempts') {
-            return 'report';
-        }
-
-        if (reportSection === 'logs') {
-            return 'logs';
-        }
-
-        if (reportSection === 'overview' || reportSection === null) {
-            return 'overview';
-        }
+        return resolved;
     }
 
     if (parts[0] !== 'exams' || !parts[1]) {

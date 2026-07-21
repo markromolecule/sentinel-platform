@@ -1,5 +1,6 @@
 import { type DbClient } from '@sentinel/db';
 import { describe, expect } from 'vitest';
+import { randomUUID } from 'node:crypto';
 import { DEFAULT_EXAMINATION_GLOBAL_SETTINGS } from '@sentinel/shared/constants';
 import { testWithDbClient } from '../../../lib/test-with-db-client';
 import { ConfigurationService } from './configuration.service';
@@ -32,6 +33,11 @@ describe('ConfigurationService', () => {
     testWithDbClient(
         'returns default exam settings and configuration data for an existing exam',
         async ({ dbClient }) => {
+            await dbClient
+                .deleteFrom('system_settings')
+                .where('setting_key', '=', 'examination.global_defaults')
+                .execute();
+
             const { institution, exam } = await createExamFixture(dbClient);
 
             const result = await ConfigurationService.getExamConfiguration(
@@ -41,14 +47,14 @@ describe('ConfigurationService', () => {
             );
 
             expect(result.settings).toEqual({
-                shuffleQuestions: false,
+                shuffleQuestions: true,
                 showCorrectAnswers: false,
-                allowReview: false,
-                randomizeChoices: false,
+                allowReview: true,
+                randomizeChoices: true,
             });
 
             expect(result.configuration).toEqual({
-                lobbyAdmissionMode: 'AUTOMATIC',
+                lobbyAdmissionMode: 'INSTRUCTOR_GATED',
                 releaseScoreMode: 'AUTO_RELEASE',
                 maxReconnectAttempts: 3,
                 strictMode: true,
@@ -217,15 +223,20 @@ describe('ConfigurationService', () => {
                         updated_at: new Date(),
                     }),
                 )
-                .execute();
+            try {
+                const result = await ConfigurationService.getExamConfiguration(
+                    dbClient,
+                    exam.exam_id,
+                    institution.id,
+                );
 
-            const result = await ConfigurationService.getExamConfiguration(
-                dbClient,
-                exam.exam_id,
-                institution.id,
-            );
-
-            expect(result.configuration.lobbyAdmissionMode).toBe('INSTRUCTOR_GATED');
+                expect(result.configuration.lobbyAdmissionMode).toBe('INSTRUCTOR_GATED');
+            } finally {
+                await dbClient
+                    .deleteFrom('system_settings')
+                    .where('setting_key', '=', 'examination.global_defaults')
+                    .execute();
+            }
         },
     );
 
@@ -270,21 +281,28 @@ describe('ConfigurationService', () => {
                 )
                 .execute();
 
-            const inherited = await ConfigurationService.getExamConfiguration(
-                dbClient,
-                exam.exam_id,
-                institution.id,
-            );
+            try {
+                const inherited = await ConfigurationService.getExamConfiguration(
+                    dbClient,
+                    exam.exam_id,
+                    institution.id,
+                );
 
-            expect(inherited.settings).toEqual({
-                shuffleQuestions: true,
-                showCorrectAnswers: false,
-                allowReview: true,
-                randomizeChoices: false,
-            });
-            expect(inherited.configuration.lobbyAdmissionMode).toBe('INSTRUCTOR_GATED');
-            expect(inherited.configuration.strictMode).toBe(false);
-            expect(inherited.configuration.webSecurity.clipboard_control).toBe(false);
+                expect(inherited.settings).toEqual({
+                    shuffleQuestions: true,
+                    showCorrectAnswers: false,
+                    allowReview: true,
+                    randomizeChoices: true,
+                });
+                expect(inherited.configuration.lobbyAdmissionMode).toBe('INSTRUCTOR_GATED');
+                expect(inherited.configuration.strictMode).toBe(false);
+                expect(inherited.configuration.webSecurity.clipboard_control).toBe(false);
+            } finally {
+                await dbClient
+                    .deleteFrom('system_settings')
+                    .where('setting_key', '=', 'examination.global_defaults')
+                    .execute();
+            }
         },
     );
 
@@ -317,36 +335,162 @@ describe('ConfigurationService', () => {
                 )
                 .execute();
 
+            try {
+                await ConfigurationService.updateExamConfiguration(
+                    dbClient,
+                    exam.exam_id,
+                    {
+                        settings: {
+                            shuffleQuestions: false,
+                        },
+                        configuration: {
+                            strictMode: true,
+                        },
+                    } as any,
+                    institution.id,
+                );
+
+                const reverted = await ConfigurationService.updateExamConfiguration(
+                    dbClient,
+                    exam.exam_id,
+                    {
+                        settings: {
+                            shuffleQuestions: null,
+                        },
+                        configuration: {
+                            strictMode: null,
+                        },
+                    } as any,
+                    institution.id,
+                );
+
+                expect(reverted.settings.shuffleQuestions).toBe(true);
+                expect(reverted.configuration.strictMode).toBe(false);
+            } finally {
+                await dbClient
+                    .deleteFrom('system_settings')
+                    .where('setting_key', '=', 'examination.global_defaults')
+                    .execute();
+            }
+        },
+    );
+
+    testWithDbClient(
+        'resets existing non-active approved lobby admissions to WAITING when mode changes to INSTRUCTOR_GATED',
+        async ({ dbClient }) => {
+            const { institution, exam } = await createExamFixture(dbClient);
+            const user1Id = randomUUID();
+            const user2Id = randomUUID();
+
+            for (const [id, email] of [
+                [user1Id, `user1-${Date.now()}@sentinel.test`],
+                [user2Id, `user2-${Date.now()}@sentinel.test`],
+            ] as const) {
+                await dbClient
+                    .insertInto('users')
+                    .values({
+                        id,
+                        email,
+                        role: 'student',
+                        created_at: new Date(),
+                        updated_at: new Date(),
+                    })
+                    .execute();
+            }
+
+            const student1 = await dbClient
+                .insertInto('students')
+                .values({
+                    user_id: user1Id,
+                    student_number: `S1-${Date.now()}`,
+                    institution_id: institution.id,
+                })
+                .returningAll()
+                .executeTakeFirstOrThrow();
+
+            const student2 = await dbClient
+                .insertInto('students')
+                .values({
+                    user_id: user2Id,
+                    student_number: `S2-${Date.now()}`,
+                    institution_id: institution.id,
+                })
+                .returningAll()
+                .executeTakeFirstOrThrow();
+
+            // Insert initial configuration with AUTOMATIC lobby admission mode
+            await dbClient
+                .insertInto('exam_configurations')
+                .values({
+                    exam_id: exam.exam_id,
+                    lobby_admission_mode: 'AUTOMATIC',
+                    created_at: new Date(),
+                    updated_at: new Date(),
+                })
+                .execute();
+
+            // Insert APPROVED admissions for both students under AUTOMATIC mode
+            await dbClient
+                .insertInto('exam_lobby_admissions')
+                .values([
+                    {
+                        exam_id: exam.exam_id,
+                        student_id: student1.student_id,
+                        status: 'APPROVED',
+                        checked_in_at: new Date(),
+                        decided_at: new Date(),
+                    },
+                    {
+                        exam_id: exam.exam_id,
+                        student_id: student2.student_id,
+                        status: 'APPROVED',
+                        checked_in_at: new Date(),
+                        decided_at: new Date(),
+                    },
+                ])
+                .execute();
+
+            // Insert an IN_PROGRESS attempt for student2
+            await dbClient
+                .insertInto('exam_attempts')
+                .values({
+                    exam_id: exam.exam_id,
+                    student_id: student2.student_id,
+                    status: 'IN_PROGRESS',
+                    started_at: new Date(),
+                })
+                .execute();
+
+            // Update configuration to INSTRUCTOR_GATED mode
             await ConfigurationService.updateExamConfiguration(
                 dbClient,
                 exam.exam_id,
                 {
-                    settings: {
-                        shuffleQuestions: false,
-                    },
                     configuration: {
-                        strictMode: true,
+                        lobbyAdmissionMode: 'INSTRUCTOR_GATED',
                     },
                 } as any,
                 institution.id,
             );
 
-            const reverted = await ConfigurationService.updateExamConfiguration(
-                dbClient,
-                exam.exam_id,
-                {
-                    settings: {
-                        shuffleQuestions: null,
-                    },
-                    configuration: {
-                        strictMode: null,
-                    },
-                } as any,
-                institution.id,
-            );
+            // Assert student1 (no active attempt) was reset to WAITING
+            const adm1 = await dbClient
+                .selectFrom('exam_lobby_admissions')
+                .selectAll()
+                .where('exam_id', '=', exam.exam_id)
+                .where('student_id', '=', student1.student_id)
+                .executeTakeFirst();
+            expect(adm1?.status).toBe('WAITING');
+            expect(adm1?.decided_at).toBeNull();
 
-            expect(reverted.settings.shuffleQuestions).toBe(true);
-            expect(reverted.configuration.strictMode).toBe(false);
+            // Assert student2 (active attempt IN_PROGRESS) remains APPROVED
+            const adm2 = await dbClient
+                .selectFrom('exam_lobby_admissions')
+                .selectAll()
+                .where('exam_id', '=', exam.exam_id)
+                .where('student_id', '=', student2.student_id)
+                .executeTakeFirst();
+            expect(adm2?.status).toBe('APPROVED');
         },
     );
 });

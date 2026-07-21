@@ -8,6 +8,7 @@ import { normalizeExamConfigurationState } from './normalize-exam-configuration-
 import { resolveExamSettings } from './resolve-exam-settings.service';
 import { LogsService } from '../../../general/logs/logs.service';
 import { resolveExaminationGlobalSettings } from './resolve-examination-global-settings.service';
+import { resetGatedLobbyAdmissions } from '../../lobby/services/reset-gated-lobby-admissions';
 
 function hasOwnProperty<Value extends object, Key extends PropertyKey>(
     value: Value | null | undefined,
@@ -30,8 +31,8 @@ function resolveInheritedScalar<Value>(args: {
         explicitValue === undefined
             ? fallbackValue
             : explicitValue === null
-              ? defaultValue
-              : explicitValue;
+                ? defaultValue
+                : explicitValue;
 
     return desiredValue === defaultValue ? null : desiredValue;
 }
@@ -265,6 +266,10 @@ export async function saveExamConfiguration(args: {
         }),
     };
 
+    const isGatedTransition =
+        currentState.configuration.lobbyAdmissionMode === 'AUTOMATIC' &&
+        configuration.lobbyAdmissionMode === 'INSTRUCTOR_GATED';
+
     const result = await upsertExamConfigurationData({
         dbClient,
         examId,
@@ -309,6 +314,10 @@ export async function saveExamConfiguration(args: {
             updated_at: new Date(),
         } as any,
     });
+
+    if (isGatedTransition) {
+        await resetGatedLobbyAdmissions({ dbClient, examId });
+    }
 
     // Telemetry logging
     try {
