@@ -97,6 +97,43 @@ describe('StudentExamMediaPipeProvider live track accessor', () => {
         await waitFor(() => expect(screen.getByTestId('track-state').textContent).toBe('none'));
         expect(getUserMedia).toHaveBeenCalledTimes(1);
     });
+
+    it('evaluates separate camera and landmarker readiness', async () => {
+        let apiSnapshot: ReturnType<typeof useStudentExamMediaPipeStream> | null = null;
+
+        function ReadinessProbe() {
+            const api = useStudentExamMediaPipeStream();
+            apiSnapshot = api;
+            return null;
+        }
+
+        render(
+            <StudentExamMediaPipeProvider>
+                <ReadinessProbe />
+            </StudentExamMediaPipeProvider>,
+        );
+
+        await waitFor(() => {
+            expect(apiSnapshot?.isCameraReady).toBeDefined();
+        });
+
+        // When camera is not required, isCameraReady is true
+        expect(apiSnapshot!.isCameraReady({ cameraRequired: false } as any)).toBe(true);
+
+        // When camera is required but no stream active, isCameraReady is false
+        expect(apiSnapshot!.isCameraReady({ cameraRequired: true } as any)).toBe(false);
+
+        // When AI rules are false, isLandmarkerReady is true
+        expect(
+            apiSnapshot!.isLandmarkerReady({
+                aiRules: {
+                    gaze_tracking: false,
+                    face_detection: false,
+                    multiple_faces_detection: false,
+                },
+            } as any),
+        ).toBe(true);
+    });
 });
 
 function actTrackEnded(track: { readyState: string }, handler: (() => void) | null) {

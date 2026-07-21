@@ -1,10 +1,13 @@
 import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { toast } from 'sonner';
 import type {
     AudioAnomalySettings,
     ExamConfig,
     ExamRuntimeAccess,
     TelemetryMediaPipeSandboxSettings,
 } from '@sentinel/shared/types';
+import { buildStudentExamHref } from '@/app/(protected)/student/exam/[id]/_lib/student-exam-flow';
 import { useAttemptMediaPipeMonitoring } from '@/app/(protected)/student/exam/[id]/_hooks/use-attempt-mediapipe-monitoring';
 import { useExamMonitoring, type AttemptMonitoringPhase } from '@/app/(protected)/student/exam/[id]/_hooks/use-exam-monitoring';
 import { useAudioAnomalyWorker } from '@/hooks/use-audio-anomaly-worker';
@@ -94,17 +97,33 @@ export function useAttemptMonitoring({
         worker: audioWorker,
     });
 
+    const router = useRouter();
+
     useEffect(() => {
-        if (process.env.NODE_ENV === 'development') {
-            console.log('[Audio Diagnostics]', {
-                hasStream: Boolean(audioStream),
-                isStreamLive: audioStream ? audioStream.getTracks().some((t) => t.kind === 'audio' && t.readyState === 'live') : false,
-                hasWorker: Boolean(audioWorker),
-                examSessionId,
-                audioMonitoringPhase,
-            });
+        if (isRedirectingToTurnIn || !configuration) return;
+
+        const isMicRequired = configuration.micRequired;
+        const isCameraRequired = configuration.cameraRequired;
+
+        if (isCameraRequired && mediaPipeErrorMessage && mediaPipeErrorMessage.toLowerCase().includes('blocked')) {
+            toast.error('Camera stream lost. Returning to lobby for system checkup.');
+            router.push(buildStudentExamHref(examId, 'lobby'));
+            return;
         }
-    }, [audioStream, audioWorker, examSessionId, audioMonitoringPhase]);
+
+        if (isMicRequired && audioErrorMessage && audioErrorMessage.toLowerCase().includes('denied')) {
+            toast.error('Microphone stream lost. Returning to lobby for system checkup.');
+            router.push(buildStudentExamHref(examId, 'lobby'));
+            return;
+        }
+    }, [
+        audioErrorMessage,
+        configuration,
+        examId,
+        isRedirectingToTurnIn,
+        mediaPipeErrorMessage,
+        router,
+    ]);
 
     return {
         securityLockReason,

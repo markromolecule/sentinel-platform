@@ -3,18 +3,22 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { toast } from 'sonner';
 import { useExamReport } from './index';
 
-const { mockApiClient, mockUseExamReportQuery, mockSearchParamsGet, mockRefetch } = vi.hoisted(
-    () => ({
+const { mockApiClient, mockUseExamReportQuery, mockSearchParamsGet, mockRefetch, mockRouterPush } =
+    vi.hoisted(() => ({
         mockApiClient: vi.fn(),
         mockUseExamReportQuery: vi.fn(),
         mockSearchParamsGet: vi.fn().mockReturnValue(null),
         mockRefetch: vi.fn().mockResolvedValue(undefined),
-    }),
-);
+        mockRouterPush: vi.fn(),
+    }));
 
 vi.mock('next/navigation', () => ({
     useSearchParams: () => ({
         get: mockSearchParamsGet,
+        toString: () => '',
+    }),
+    useRouter: () => ({
+        push: mockRouterPush,
     }),
 }));
 
@@ -151,5 +155,28 @@ describe('useExamReport', () => {
         });
 
         expect(toast.error).toHaveBeenCalledWith('Failed to grant remediation: Ineligible attempt state');
+    });
+
+    it('derives activeSection from valid query parameters', () => {
+        mockSearchParamsGet.mockReturnValue('queue');
+        const { result } = renderHook(() => useExamReport({ examId: 'exam-1' }));
+        expect(result.current.activeSection).toBe('queue');
+    });
+
+    it('falls back activeSection to overview for invalid query parameters', () => {
+        mockSearchParamsGet.mockReturnValue('invalid-section');
+        const { result } = renderHook(() => useExamReport({ examId: 'exam-1' }));
+        expect(result.current.activeSection).toBe('overview');
+    });
+
+    it('pushes updated section search parameter when setActiveSection is invoked', () => {
+        mockSearchParamsGet.mockReturnValue('overview');
+        const { result } = renderHook(() => useExamReport({ examId: 'exam-1' }));
+
+        act(() => {
+            result.current.setActiveSection('attempts');
+        });
+
+        expect(mockRouterPush).toHaveBeenCalledWith('/exams/reports/exam-1?section=attempts');
     });
 });

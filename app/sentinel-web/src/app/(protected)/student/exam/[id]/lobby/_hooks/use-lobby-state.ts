@@ -37,6 +37,7 @@ export function useLobbyState(args: {
     const { hasCompletedFlow } = useLobbyReadiness({
         examId,
         isMediaPipeValid: mediaPipeActivation.isValid,
+        configuration,
     });
 
     // 4. Derived Access State
@@ -56,15 +57,16 @@ export function useLobbyState(args: {
         runtimeAccess?.state === 'locked' ||
         runtimeAccess?.state === 'before_start';
     const hasApprovedInstructorAdmission =
-        admissionStatus === 'APPROVED' || (admissionStatus === null && isApprovedRuntimeAccess);
+        admissionStatus === 'APPROVED' && (isApprovedRuntimeAccess || Boolean(runtimeAccess?.canStart));
     const hasFreshInstructorAdmission =
         !requiresInstructorAdmission ||
         hasResumableAttempt ||
         (hasApprovedInstructorAdmission && !isHardRuntimeBlock);
     const canEnterExam = Boolean(
-        hasResumableAttempt ||
-        (hasFreshInstructorAdmission &&
-            (runtimeAccess?.canStart || isApprovedRuntimeAccess || admissionStatus === 'APPROVED')),
+        !isAdmissionPendingRefresh &&
+            (hasResumableAttempt ||
+                (hasFreshInstructorAdmission &&
+                    (runtimeAccess?.canStart || isApprovedRuntimeAccess))),
     );
 
     useEffect(() => {

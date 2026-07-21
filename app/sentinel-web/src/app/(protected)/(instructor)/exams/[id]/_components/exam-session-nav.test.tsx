@@ -162,4 +162,29 @@ describe('ExamSessionNav', () => {
         expect(activeLink.className).toContain('bg-accent/50');
         expect(activeLink.className).toContain('border-r-2');
     });
+
+    it('marks Overview active as fallback for invalid section parameter', () => {
+        mockPathname.mockReturnValue('/exams/reports/exam-1');
+        mockSearchParams.get.mockImplementation((key: string) =>
+            key === 'section' ? 'invalid-section-value' : null,
+        );
+
+        render(<ExamSessionNav examId="exam-1" />);
+
+        const activeLink = screen.getByRole('link', { name: 'Overview' });
+        expect(activeLink.className).toContain('bg-accent/50');
+        expect(activeLink.className).toContain('border-r-2');
+    });
+
+    it('marks Overview active as default when section parameter is missing', () => {
+        mockPathname.mockReturnValue('/exams/reports/exam-1');
+        mockSearchParams.get.mockReturnValue(null);
+
+        render(<ExamSessionNav examId="exam-1" />);
+
+        const activeLink = screen.getByRole('link', { name: 'Overview' });
+        expect(activeLink.className).toContain('bg-accent/50');
+        expect(activeLink.className).toContain('border-r-2');
+    });
 });
+

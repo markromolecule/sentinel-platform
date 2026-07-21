@@ -56,7 +56,7 @@ describe('ExamSessionWorkspaceShell', () => {
         expect(screen.getByTestId('shell-child')).toBeTruthy();
     });
 
-    it('renders the runtime sidebar for reports routes', () => {
+    it('renders the runtime sidebar for reports routes with exactly desktop and mobile navigation owners', () => {
         mockPathname.mockReturnValue('/exams/reports/exam-1');
         mockUseParams.mockReturnValue({ examId: 'exam-1' });
 
@@ -67,9 +67,9 @@ describe('ExamSessionWorkspaceShell', () => {
         );
 
         expect(screen.getByRole('heading', { name: 'Report Sections' })).toBeTruthy();
-        expect(screen.getAllByTestId('exam-session-nav')[0]?.getAttribute('data-exam-id')).toBe(
-            'exam-1',
-        );
+        const navInstances = screen.getAllByTestId('exam-session-nav');
+        expect(navInstances).toHaveLength(2); // One desktop sidebar and one mobile top bar
+        expect(navInstances[0]?.getAttribute('data-exam-id')).toBe('exam-1');
         expect(screen.getByTestId('shell-child')).toBeTruthy();
     });
 

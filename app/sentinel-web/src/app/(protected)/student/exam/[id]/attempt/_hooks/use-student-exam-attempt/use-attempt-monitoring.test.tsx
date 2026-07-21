@@ -3,6 +3,14 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { DEFAULT_AUDIO_ANOMALY_CONFIG } from '@sentinel/shared';
 import { useAttemptMonitoring } from './use-attempt-monitoring';
 
+const mockPush = vi.fn();
+
+vi.mock('next/navigation', () => ({
+    useRouter: () => ({
+        push: mockPush,
+    }),
+}));
+
 const { mockEnsureAudioAccess, mockUseAudioAnomalyWorker } = vi.hoisted(() => ({
     mockEnsureAudioAccess: vi.fn().mockResolvedValue(undefined),
     mockUseAudioAnomalyWorker: vi.fn(),

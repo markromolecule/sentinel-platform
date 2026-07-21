@@ -44,7 +44,9 @@ export function useLobbyActions({
 
     const handleEnterExam = async () => {
         if (!hasCompletedFlow || !canEnterExam) {
-            if (!canEnterExam && runtimeAccess?.message) {
+            if (!hasCompletedFlow) {
+                toast.error('Required device permissions or system checkup incomplete. Please complete checkup.');
+            } else if (runtimeAccess?.message) {
                 toast.error(runtimeAccess.message);
             }
             return;

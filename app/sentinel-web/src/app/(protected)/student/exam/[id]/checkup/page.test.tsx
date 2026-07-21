@@ -285,7 +285,7 @@ describe('StudentExamCheckupPage', () => {
         ).toBe(true);
     });
 
-    it('preserves a previously completed checkup across reload without clearing stored readiness', () => {
+    it('requires live device streams even when checkup was previously completed', () => {
         mockCheckupManager.mockReturnValue({
             videoRef: { current: null },
             cameraState: 'idle',
@@ -316,15 +316,11 @@ describe('StudentExamCheckupPage', () => {
 
         render(<StudentExamCheckupPage />);
 
-        expect(screen.getByText(/ready for lobby/i)).toBeTruthy();
+        expect(screen.getByText(/calibrating identity/i)).toBeTruthy();
         expect(
-            screen.getByText(/previous device and identity verification are still valid/i),
-        ).toBeTruthy();
-        expect(
-            (screen.getByRole('button', { name: /continue to lobby/i }) as HTMLButtonElement)
+            (screen.getByRole('button', { name: /finalizing setup/i }) as HTMLButtonElement)
                 .disabled,
-        ).toBe(false);
-        expect(mockPatchStoredStudentExamFlow).not.toHaveBeenCalled();
+        ).toBe(true);
     });
 
     it('clears stored readiness before re-requesting device access from a completed state', async () => {

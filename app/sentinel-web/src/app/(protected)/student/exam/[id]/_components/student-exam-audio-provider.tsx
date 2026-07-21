@@ -25,6 +25,11 @@ type StudentExamAudioContextValue = {
     worker: Worker | null;
     warmupAudioAnomaly: () => void;
     ensureAudioAccess: (configuration: ExamConfiguration) => Promise<void>;
+    /**
+     * Evaluates live audio readiness based on exam configuration.
+     * Returns true if mic is not required, or if a live stream exists and worker is ready (if anomaly detection enabled).
+     */
+    isAudioReady: (configuration: ExamConfiguration) => boolean;
 };
 
 const DEFAULT_CONTEXT: StudentExamAudioContextValue = {
@@ -38,6 +43,7 @@ const DEFAULT_CONTEXT: StudentExamAudioContextValue = {
     worker: null,
     warmupAudioAnomaly: () => undefined,
     ensureAudioAccess: async () => undefined,
+    isAudioReady: () => false,
 };
 
 const StudentExamAudioContext = createContext<StudentExamAudioContextValue>(DEFAULT_CONTEXT);
@@ -56,6 +62,7 @@ export function isLiveAudioStream(stream: MediaStream | null): boolean {
 export function StudentExamAudioProvider({ children }: { children: ReactNode }) {
     const streamRef = useRef<MediaStream | null>(null);
     const workerRef = useRef<Worker | null>(null);
+    const pendingRequestRef = useRef<Promise<void> | null>(null);
     const [audioStream, setAudioStream] = useState<MediaStream | null>(null);
     const [audioState, setAudioState] = useState<StudentExamPermissionState>('idle');
     const [isRequestingAudio, setIsRequestingAudio] = useState(false);
@@ -149,10 +156,31 @@ export function StudentExamAudioProvider({ children }: { children: ReactNode }) 
             if (isLiveAudioStream(streamRef.current)) {
                 return;
             }
-            await requestAudioAccess(configuration);
+            if (pendingRequestRef.current) {
+                return pendingRequestRef.current;
+            }
+            const promise = requestAudioAccess(configuration).finally(() => {
+                pendingRequestRef.current = null;
+            });
+            pendingRequestRef.current = promise;
+            return promise;
         },
         [requestAudioAccess],
     );
+
+    const isAudioReady = useCallback((configuration: ExamConfiguration) => {
+        if (!configuration.micRequired) {
+            return true;
+        }
+        const hasLiveStream = isLiveAudioStream(streamRef.current);
+        if (!hasLiveStream) {
+            return false;
+        }
+        if (configuration.aiRules.audio_anomaly_detection) {
+            return Boolean(workerRef.current);
+        }
+        return true;
+    }, []);
 
     const value = useMemo(
         () => ({
@@ -168,6 +196,7 @@ export function StudentExamAudioProvider({ children }: { children: ReactNode }) 
             worker,
             warmupAudioAnomaly,
             ensureAudioAccess,
+            isAudioReady,
         }),
         [
             audioStream,
@@ -179,6 +208,7 @@ export function StudentExamAudioProvider({ children }: { children: ReactNode }) 
             worker,
             warmupAudioAnomaly,
             ensureAudioAccess,
+            isAudioReady,
         ],
     );
 
