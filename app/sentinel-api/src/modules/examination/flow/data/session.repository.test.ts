@@ -256,4 +256,79 @@ describe('SessionRepository.createSession', () => {
             errorCode: 'ATTEMPT_ALREADY_COMPLETED',
         });
     });
+
+    it('rejects resume request when reconnect_attempt_count reaches maxReconnectAttempts limit', async () => {
+        const dbClient = {
+            selectFrom: vi
+                .fn()
+                .mockReturnValueOnce(createRemediationSelect(undefined))
+                .mockReturnValueOnce(
+                    createExistingAttemptSelect({
+                        attempt_id: 'attempt-maxed',
+                        completed_at: null,
+                        status: 'IN_PROGRESS',
+                        lifecycle_state: 'IN_PROGRESS',
+                        reopened_until: null,
+                        created_at: new Date('2026-04-13T05:00:00.000Z'),
+                        answer_snapshot: {},
+                        time_spent_minutes: 5,
+                        reconnect_attempt_count: 3,
+                    }),
+                ),
+        } as unknown as DbClient;
+
+        await expect(
+            SessionRepository.createSession(dbClient, {
+                examId: 'exam-1',
+                studentId: 'student-1',
+                maxReconnectAttempts: 3,
+            }),
+        ).rejects.toThrow('Maximum reconnect attempts reached for this exam session.');
+    });
+
+    it('does not double-increment reconnect count for rapid duplicate resume submissions', async () => {
+        const updateBuilder = {
+            set: vi.fn().mockReturnThis(),
+            where: vi.fn().mockReturnThis(),
+            execute: vi.fn().mockResolvedValue(undefined),
+        };
+        const dbClient = {
+            selectFrom: vi
+                .fn()
+                .mockReturnValueOnce(createRemediationSelect(undefined))
+                .mockReturnValueOnce(
+                    createExistingAttemptSelect({
+                        attempt_id: 'attempt-rapid',
+                        completed_at: null,
+                        status: 'IN_PROGRESS',
+                        lifecycle_state: 'IN_PROGRESS',
+                        reopened_until: null,
+                        created_at: new Date('2026-04-13T05:00:00.000Z'),
+                        last_synced_at: new Date(Date.now() - 1000), // 1 sec ago
+                        answer_snapshot: { 'question-1': 'A' },
+                        time_spent_minutes: 4,
+                        reconnect_attempt_count: 1,
+                    }),
+                ),
+            updateTable: vi.fn().mockReturnValue(updateBuilder),
+        } as unknown as DbClient;
+
+        const result = await SessionRepository.createSession(dbClient, {
+            examId: 'exam-1',
+            studentId: 'student-1',
+            maxReconnectAttempts: 3,
+        });
+
+        expect(result).toMatchObject({
+            sessionId: 'attempt-rapid',
+            isResumed: true,
+            reconnectAttemptCount: 1,
+        });
+        expect(updateBuilder.set).toHaveBeenCalledWith(
+            expect.objectContaining({
+                reconnect_attempt_count: 1,
+            }),
+        );
+    });
 });
+

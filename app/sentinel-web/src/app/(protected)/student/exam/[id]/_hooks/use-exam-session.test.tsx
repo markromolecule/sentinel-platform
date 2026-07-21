@@ -18,6 +18,9 @@ const {
     mockClearStoredExamTurnInPreview,
     mockReadStoredLobbyEntryMarker,
     mockClearStoredLobbyEntryMarker,
+    mockConsumeStoredLobbyEntry,
+    mockWriteStoredReconnectIntent,
+    mockReconcileExamAnswerDraft,
     mockGetStudentExamSessionAttemptId,
     mockIsStudentExamAlreadyTurnedInError,
 } = vi.hoisted(() => ({
@@ -35,6 +38,13 @@ const {
     mockClearStoredExamTurnInPreview: vi.fn(),
     mockReadStoredLobbyEntryMarker: vi.fn(),
     mockClearStoredLobbyEntryMarker: vi.fn(),
+    mockConsumeStoredLobbyEntry: vi.fn(),
+    mockWriteStoredReconnectIntent: vi.fn(),
+    mockReconcileExamAnswerDraft: vi.fn((local) => ({
+        answers: local?.answers ?? {},
+        elapsedSeconds: local?.elapsedSeconds ?? 0,
+        source: local ? 'local' : 'empty',
+    })),
     mockGetStudentExamSessionAttemptId: vi.fn(),
     mockIsStudentExamAlreadyTurnedInError: vi.fn(() => false),
 }));
@@ -68,6 +78,9 @@ vi.mock('../_lib/exam-session-storage', () => ({
     writeStoredExamAnswerDraft: mockWriteStoredExamAnswerDraft,
     readStoredLobbyEntryMarker: mockReadStoredLobbyEntryMarker,
     clearStoredLobbyEntryMarker: mockClearStoredLobbyEntryMarker,
+    consumeStoredLobbyEntry: mockConsumeStoredLobbyEntry,
+    writeStoredReconnectIntent: mockWriteStoredReconnectIntent,
+    reconcileExamAnswerDraft: mockReconcileExamAnswerDraft,
 }));
 
 vi.mock('../_lib/exam-turn-in-storage', () => ({
@@ -107,6 +120,12 @@ describe('useExamSession', () => {
         mockReadStoredExamTurnInPreview.mockReturnValue(null);
         mockReadStoredExamAnswerDraft.mockReturnValue(null);
         mockReadStoredLobbyEntryMarker.mockReturnValue(true);
+        mockConsumeStoredLobbyEntry.mockReturnValue({
+            token: 'mock-token',
+            version: 1,
+            examId: '11111111-1111-1111-1111-111111111111',
+            createdAt: new Date().toISOString(),
+        });
         mockSyncExamProgress.mockResolvedValue({
             message: 'Session progress synced successfully.',
         });
@@ -424,11 +443,11 @@ describe('useExamSession', () => {
         expect(mockToastError).not.toHaveBeenCalled();
     });
 
-    it('redirects to the lobby if the lobby entry marker is missing on the attempt page', async () => {
+    it('redirects to the lobby if the lobby entry token is missing on the attempt page', async () => {
         const examId = '11111111-1111-1111-1111-111111111111';
         const restoreLocation = mockAttemptLocation(examId);
 
-        mockReadStoredLobbyEntryMarker.mockReturnValue(false);
+        mockConsumeStoredLobbyEntry.mockReturnValue(null);
 
         renderHook(() =>
             useExamSession({
@@ -453,10 +472,13 @@ describe('useExamSession', () => {
             expect(mockRouterReplace).toHaveBeenCalledWith(`/student/exam/${examId}/lobby`);
         });
 
+        expect(mockWriteStoredReconnectIntent).toHaveBeenCalled();
+        expect(mockClearStoredExamSession).not.toHaveBeenCalled();
+
         restoreLocation();
     });
 
-    it('does not redirect from the attempt page when a valid stored session exists without a lobby marker', async () => {
+    it('redirects from attempt page to lobby when stored session exists but fresh lobby entry token is missing', async () => {
         const examId = '11111111-1111-1111-1111-111111111111';
         const restoreLocation = mockAttemptLocation(examId);
         const storedSession = {
@@ -466,9 +488,9 @@ describe('useExamSession', () => {
         };
 
         mockReadStoredExamSession.mockReturnValue(storedSession);
-        mockReadStoredLobbyEntryMarker.mockReturnValue(false);
+        mockConsumeStoredLobbyEntry.mockReturnValue(null);
 
-        const { result } = renderHook(() =>
+        renderHook(() =>
             useExamSession({
                 examId,
                 runtimeAccess: {
@@ -488,11 +510,11 @@ describe('useExamSession', () => {
         );
 
         await waitFor(() => {
-            expect(result.current.examSession).toEqual(storedSession);
+            expect(mockRouterReplace).toHaveBeenCalledWith(`/student/exam/${examId}/lobby`);
         });
 
-        expect(mockRouterReplace).not.toHaveBeenCalled();
-        expect(mockClearStoredLobbyEntryMarker).not.toHaveBeenCalled();
+        expect(mockWriteStoredReconnectIntent).toHaveBeenCalledWith(examId, storedSession.sessionId, 'navigation');
+        expect(mockClearStoredExamSession).not.toHaveBeenCalled();
 
         restoreLocation();
     });
@@ -527,7 +549,7 @@ describe('useExamSession', () => {
             expect(result.current.isInitializingSession).toBe(false);
         });
 
-        expect(mockClearStoredLobbyEntryMarker).toHaveBeenCalledWith(examId);
+        expect(mockConsumeStoredLobbyEntry).toHaveBeenCalledWith(examId);
         expect(mockRouterReplace).not.toHaveBeenCalled();
         expect(mockStartExamSession).not.toHaveBeenCalled();
 
@@ -542,7 +564,12 @@ describe('useExamSession', () => {
         );
 
         mockReadStoredExamSession.mockReturnValue(null);
-        mockReadStoredLobbyEntryMarker.mockReturnValueOnce(true).mockReturnValue(false);
+        mockConsumeStoredLobbyEntry.mockReturnValueOnce({
+            token: 'token-1',
+            version: 1,
+            examId,
+            createdAt: new Date().toISOString(),
+        }).mockReturnValue(null);
 
         const { result } = renderHook(
             () =>
@@ -569,7 +596,7 @@ describe('useExamSession', () => {
             expect(result.current.isInitializingSession).toBe(false);
         });
 
-        expect(mockClearStoredLobbyEntryMarker).toHaveBeenCalledTimes(1);
+        expect(mockConsumeStoredLobbyEntry).toHaveBeenCalledTimes(1);
         expect(mockRouterReplace).not.toHaveBeenCalled();
 
         restoreLocation();

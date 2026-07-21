@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useApi } from '@sentinel/hooks';
 import { startExamSession } from '@sentinel/services';
@@ -7,9 +7,13 @@ import { toast } from 'sonner';
 import { buildStudentExamHref } from '../../_lib/student-exam-flow';
 import {
     clearStoredExamSession,
+    readStoredExamAnswerDraft,
     writeStoredExamAnswerDraft,
     writeStoredExamSession,
-    writeStoredLobbyEntryMarker,
+    writeStoredLobbyEntry,
+    clearStoredReconnectIntent,
+    reconcileExamAnswerDraft,
+    type StoredExamSession,
 } from '../../_lib/exam-session-storage';
 import { clearStoredExamTurnInPreview } from '../../_lib/exam-turn-in-storage';
 import {
@@ -18,7 +22,6 @@ import {
     resolveStudentExamSessionError,
 } from '../../_lib/student-exam-session-feedback';
 import type { ExamConfig, ExamRuntimeAccess } from '@sentinel/shared/types';
-import { type StoredExamSession } from '../../_lib/exam-session-storage';
 import { buildStudentHistoryAttemptHref } from '@/lib/routes/student-history-routes';
 
 export type UseLobbyActionsArgs = {
@@ -41,6 +44,7 @@ export function useLobbyActions({
     const router = useRouter();
     const apiClient = useApi();
     const [isStartingSession, setIsStartingSession] = useState(false);
+    const inFlightRequestRef = useRef(false);
 
     const handleEnterExam = async () => {
         if (!hasCompletedFlow || !canEnterExam) {
@@ -52,33 +56,44 @@ export function useLobbyActions({
             return;
         }
 
+        if (inFlightRequestRef.current) {
+            return;
+        }
+
+        inFlightRequestRef.current = true;
         setIsStartingSession(true);
 
         try {
-            if (!storedSession) {
-                const session = await startExamSession(apiClient, { examId });
-                const nextStoredSession = writeStoredExamSession(examId, session);
+            // Call startExamSession regardless of existing storedSession so server validates access and counts reconnect.
+            const session = await startExamSession(apiClient, { examId });
+            const nextStoredSession = writeStoredExamSession(examId, session);
 
-                if (!nextStoredSession) {
-                    toast.error('Exam session could not be initialized.');
-                    return;
-                }
+            if (!nextStoredSession) {
+                toast.error('Exam session could not be initialized.');
+                return;
+            }
 
-                if (session.answers) {
-                    writeStoredExamAnswerDraft({
-                        examId,
-                        sessionId: nextStoredSession.sessionId,
-                        answers: session.answers,
-                        elapsedSeconds: session.elapsedSeconds ?? 0,
-                    });
-                }
+            const localDraft = readStoredExamAnswerDraft(examId, session.sessionId);
+            const reconciled = reconcileExamAnswerDraft(localDraft, {
+                answers: session.answers,
+                elapsedSeconds: session.elapsedSeconds,
+            });
+
+            if (reconciled.source !== 'empty') {
+                writeStoredExamAnswerDraft({
+                    examId,
+                    sessionId: nextStoredSession.sessionId,
+                    answers: reconciled.answers,
+                    elapsedSeconds: reconciled.elapsedSeconds,
+                });
             }
 
             if (configuration.webSecurity.full_screen_required) {
                 await document.documentElement.requestFullscreen?.()?.catch(() => null);
             }
 
-            writeStoredLobbyEntryMarker(examId);
+            clearStoredReconnectIntent(examId);
+            writeStoredLobbyEntry(examId, nextStoredSession.sessionId);
             router.push(buildStudentExamHref(examId, 'attempt'));
         } catch (error) {
             if (isStudentExamAlreadyTurnedInError(error)) {
@@ -92,9 +107,11 @@ export function useLobbyActions({
             }
             toast.error(resolveStudentExamSessionError(error));
         } finally {
+            inFlightRequestRef.current = false;
             setIsStartingSession(false);
         }
     };
+
 
     return {
         isStartingSession,

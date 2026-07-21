@@ -38,27 +38,27 @@ Answers are already written to `localStorage`, but the active `useExamSession()`
 
 **Goal:** An interrupted attempt lands in the lobby, retains answers, and resumes exactly once after approval/readiness gates pass.
 
-- [ ] In `app/sentinel-web/src/app/(protected)/student/exam/[id]/_lib/exam-session-storage/types.ts` and `constants.ts`, define versioned lobby-entry and reconnect-intent records keyed by exam/session, including creation time and consumed state; document exported builders with JSDoc.
-- [ ] Replace the boolean marker functions in `app/sentinel-web/src/app/(protected)/student/exam/[id]/_lib/exam-session-storage/lobby-storage.ts` with atomic write/read/consume helpers that reject malformed, expired, wrong-exam, or already-consumed entries.
-- [ ] Keep answer content in `localStorage` through `app/sentinel-web/src/app/(protected)/student/exam/[id]/_lib/exam-session-storage/answer-storage.ts`; add a last-write timestamp and a deterministic merge helper that chooses the newest valid local/server snapshot without clearing either during lobby redirection.
-- [ ] In `app/sentinel-web/src/app/(protected)/student/exam/[id]/attempt/_hooks/use-student-exam-attempt/index.ts`, redirect whenever an active/resumable attempt lacks a fresh consumed lobby-entry token; remove stored-session presence as an attempt-entry bypass.
-- [ ] In `app/sentinel-web/src/app/(protected)/student/exam/[id]/_hooks/use-exam-session.ts`, remove the `isResuming` lobby bypass, do not clear the stored session/draft when redirecting for reconnect, and start/resume only after intentional lobby entry.
-- [ ] Remove or consolidate the unused duplicate hook tree at `app/sentinel-web/src/app/(protected)/student/exam/[id]/_hooks/use-exam-session/` after verifying imports resolve to `_hooks/use-exam-session.ts`, preventing future fixes from landing in dead code.
-- [ ] In `app/sentinel-web/src/app/(protected)/student/exam/[id]/attempt/_hooks/use-student-exam-attempt/use-attempt-sync.ts`, checkpoint answer and elapsed-time changes locally before remote sync, retain them on network failure, and retry reconciliation after reconnection.
-- [ ] Add an exported interruption hook under `app/sentinel-web/src/app/(protected)/student/exam/[id]/_hooks/` that records reconnect intent on `pagehide`, `beforeunload`, and `offline`, and routes to the lobby on the next viable render/`online` event without attempting an unload fetch.
-- [ ] In `app/sentinel-web/src/app/(protected)/student/exam/[id]/lobby/_hooks/use-lobby-actions.ts`, call `startExamSession()` for a resumable attempt even when a stored session exists, guard the request with one in-flight/idempotency key, persist returned answers/counter, then issue a fresh entry token only after success.
-- [ ] In `app/sentinel-api/src/modules/examination/flow/data/session.repository.ts`, verify the active-attempt resume branch increments `reconnect_attempt_count` once per accepted resume request and rejects requests beyond `max_reconnect_attempts`; add idempotency support if the current repository cannot distinguish duplicate client submissions.
-- [ ] Add storage and hook tests beside `lobby-storage.ts`, `answer-storage.ts`, `use-exam-session.ts`, `use-attempt-sync.ts`, and `use-lobby-actions.ts` for reload, closed/reopened tab, offline/online, malformed token, duplicate click, stale session, local-newer draft, server-newer draft, and successful resume.
-- [ ] Extend `app/sentinel-api/src/modules/examination/flow/flow.test.ts` and the session repository tests for counter increment, duplicate request, maximum reconnect rejection, draft restoration, completed attempt, locked attempt, and superseded attempt.
+- [x] In `app/sentinel-web/src/app/(protected)/student/exam/[id]/_lib/exam-session-storage/types.ts` and `constants.ts`, define versioned lobby-entry and reconnect-intent records keyed by exam/session, including creation time and consumed state; document exported builders with JSDoc.
+- [x] Replace the boolean marker functions in `app/sentinel-web/src/app/(protected)/student/exam/[id]/_lib/exam-session-storage/lobby-storage.ts` with atomic write/read/consume helpers that reject malformed, expired, wrong-exam, or already-consumed entries.
+- [x] Keep answer content in `localStorage` through `app/sentinel-web/src/app/(protected)/student/exam/[id]/_lib/exam-session-storage/answer-storage.ts`; add a last-write timestamp and a deterministic merge helper that chooses the newest valid local/server snapshot without clearing either during lobby redirection.
+- [x] In `app/sentinel-web/src/app/(protected)/student/exam/[id]/attempt/_hooks/use-student-exam-attempt/index.ts`, redirect whenever an active/resumable attempt lacks a fresh consumed lobby-entry token; remove stored-session presence as an attempt-entry bypass.
+- [x] In `app/sentinel-web/src/app/(protected)/student/exam/[id]/_hooks/use-exam-session.ts`, remove the `isResuming` lobby bypass, do not clear the stored session/draft when redirecting for reconnect, and start/resume only after intentional lobby entry.
+- [x] Remove or consolidate the unused duplicate hook tree at `app/sentinel-web/src/app/(protected)/student/exam/[id]/_hooks/use-exam-session/` after verifying imports resolve to `_hooks/use-exam-session.ts`, preventing future fixes from landing in dead code.
+- [x] In `app/sentinel-web/src/app/(protected)/student/exam/[id]/attempt/_hooks/use-student-exam-attempt/use-attempt-sync.ts`, checkpoint answer and elapsed-time changes locally before remote sync, retain them on network failure, and retry reconciliation after reconnection.
+- [x] Add an exported interruption hook under `app/sentinel-web/src/app/(protected)/student/exam/[id]/_hooks/` that records reconnect intent on `pagehide`, `beforeunload`, and `offline`, and routes to the lobby on the next viable render/`online` event without attempting an unload fetch.
+- [x] In `app/sentinel-web/src/app/(protected)/student/exam/[id]/lobby/_hooks/use-lobby-actions.ts`, call `startExamSession()` for a resumable attempt even when a stored session exists, guard the request with one in-flight/idempotency key, persist returned answers/counter, then issue a fresh entry token only after success.
+- [x] In `app/sentinel-api/src/modules/examination/flow/data/session.repository.ts`, verify the active-attempt resume branch increments `reconnect_attempt_count` once per accepted resume request and rejects requests beyond `max_reconnect_attempts`; add idempotency support if the current repository cannot distinguish duplicate client submissions.
+- [x] Add storage and hook tests beside `lobby-storage.ts`, `answer-storage.ts`, `use-exam-session.ts`, `use-attempt-sync.ts`, and `use-lobby-actions.ts` for reload, closed/reopened tab, offline/online, malformed token, duplicate click, stale session, local-newer draft, server-newer draft, and successful resume.
+- [x] Extend `app/sentinel-api/src/modules/examination/flow/flow.test.ts` and the session repository tests for counter increment, duplicate request, maximum reconnect rejection, draft restoration, completed attempt, locked attempt, and superseded attempt.
       **Migration required:** No — the schema already stores `reconnect_attempt_count`, `max_reconnect_attempts`, answers, elapsed time, and attempt lifecycle state; use an existing request/session identifier for idempotency if available.
 
 ## Done Criteria
 
-- [ ] Reload, close/reopen, and offline recovery cannot render attempt content before lobby re-entry.
-- [ ] Lobby redirect never clears the latest valid local answer draft.
-- [ ] Resume restores answers and elapsed time before the attempt becomes interactive.
-- [ ] One user resume consumes at most one reconnect count.
-- [ ] Completed, locked, closed, and superseded attempts never resume.
+- [x] Reload, close/reopen, and offline recovery cannot render attempt content before lobby re-entry.
+- [x] Lobby redirect never clears the latest valid local answer draft.
+- [x] Resume restores answers and elapsed time before the attempt becomes interactive.
+- [x] One user resume consumes at most one reconnect count.
+- [x] Completed, locked, closed, and superseded attempts never resume.
 
 ## Additional Considerations
 
