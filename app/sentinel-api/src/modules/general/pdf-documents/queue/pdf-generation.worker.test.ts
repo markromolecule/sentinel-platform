@@ -65,6 +65,8 @@ describe('pdf-generation.worker', () => {
                 connection: { connection: 'worker-redis' },
                 concurrency: 2,
                 lockDuration: 60000,
+                drainDelay: 120,
+                stalledInterval: 300000,
             }),
         );
         expect(workerOnMock).toHaveBeenCalledWith('failed', expect.any(Function));

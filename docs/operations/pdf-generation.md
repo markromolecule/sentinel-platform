@@ -7,30 +7,52 @@ This runbook covers the Support PDF worker, private storage behavior, retention,
 - published template assets
 - institution branding logos
 
-## Worker startup
+## Trigger-only production mode
 
-API requests only queue jobs. Rendering must happen in the dedicated worker process.
+For low-volume production deployments using a command-limited Redis plan, generate PDFs only
+when an export is requested:
 
-- Development:
-  - `pnpm --dir app/sentinel-api dev`
-  - `pnpm --dir app/sentinel-api dev:pdf-worker`
-- Production:
-  - start the API service
-  - start `pnpm --dir app/sentinel-api start:pdf-worker`
+```env
+PDF_GENERATION_MODE=sync
+ENABLE_EMBEDDED_PDF_WORKER=false
+```
 
-Do not rely on synchronous fallback when Redis is unavailable. If Redis or the worker is down, job submission should fail clearly and be treated as an operator-visible incident.
+Do not run `pnpm --dir app/sentinel-api start:pdf-worker` in this mode. The API invokes the PDF
+processor directly only after an export request, so PDF generation creates no idle Redis traffic.
 
-## Required environment
+Direct processing is fire-and-forget inside the API process. An API restart during rendering can
+interrupt a job, so operators must monitor exports stuck in `PENDING` and allow users to retry.
 
-Required production values:
+## Redis worker topology
 
-- `REDIS_URL`
+API requests queue jobs when `PDF_GENERATION_MODE=redis`. Redis mode is opt-in and is appropriate
+when durable BullMQ retries are more important than eliminating idle Redis commands.
+
+Worker ownership rules:
+
+- **API Processes:** `ENABLE_EMBEDDED_PDF_WORKER` defaults to `false` (opt-in only). API replicas will NOT start embedded PDF workers unless `ENABLE_EMBEDDED_PDF_WORKER=true` is explicitly configured.
+- **Dedicated Worker:** Production environments should run exactly **one** dedicated worker process via `pnpm --dir app/sentinel-api start:pdf-worker` with `PDF_GENERATION_MODE=redis`. API replicas should keep `ENABLE_EMBEDDED_PDF_WORKER=false`.
+- **Single-Process Deployments:** Set `ENABLE_EMBEDDED_PDF_WORKER=true` on the API container and do not launch a separate dedicated worker process.
+
+When Redis mode is selected, do not fall back silently to direct processing. If Redis or the
+worker is down, job submission should fail clearly and be treated as an operator-visible incident.
+
+## Required environment & worker tuning
+
+Required values for both modes:
+
 - `SUPABASE_URL`
 - `SUPABASE_SERVICE_ROLE_KEY`
 - `PDF_ARTIFACTS_BUCKET`
 - `PDF_ASSETS_BUCKET`
-- `PDF_GENERATION_QUEUE_NAME`
-- `PDF_WORKER_CONCURRENCY`
+
+Required only for Redis worker mode:
+
+- `REDIS_URL`
+- `PDF_GENERATION_QUEUE_NAME` (default: `pdf-generation`)
+- `PDF_WORKER_CONCURRENCY` (default: `2`)
+- `PDF_WORKER_DRAIN_DELAY_SECONDS` (default: `120` seconds)
+- `PDF_WORKER_STALLED_INTERVAL_MS` (default: `300000` ms / 5 minutes)
 - `PDF_GLOBAL_CONCURRENCY`
 - `PDF_JOB_ATTEMPTS`
 - `PDF_JOB_BACKOFF_MS`
@@ -41,6 +63,15 @@ Required production values:
 - `PDF_MAX_ARTIFACT_BYTES`
 
 Safe defaults for local development are documented in [app/sentinel-api/.env.example](/Applications/XAMPP/xamppfiles/htdocs/sentinel/app/sentinel-api/.env.example).
+
+## Redis command budget & polling trade-offs
+
+To prevent idle BullMQ workers from consuming Redis command allowances (e.g. Upstash limits):
+
+- **Drain Delay (`PDF_WORKER_DRAIN_DELAY_SECONDS`):** Set to `120` seconds. On an empty queue, BullMQ long-polls Redis up to 120 seconds per blocking loop. When a new job arrives, Redis marker pops wake the worker immediately without latency penalty.
+- **Stalled Interval (`PDF_WORKER_STALLED_INTERVAL_MS`):** Set to `300000` ms (5 minutes). This reduces background `moveToActive` / `stalled` Lua script invocations to 12 per hour while preserving lock renewal for active jobs.
+- **Idle Budget:** A single worker with these parameters executes ~233,000 commands per 30 days while idle, leaving sufficient allowance for actual PDF generation workloads on a 500k monthly plan.
+- **Trade-off:** Increasing the stalled check interval means that if a worker process crashes abruptly during job execution, BullMQ will wait up to 5 minutes before re-assigning the stalled job to another worker. Lock renewal remains enabled to ensure active jobs are not misidentified as stalled.
 
 ## Buckets and privacy
 
