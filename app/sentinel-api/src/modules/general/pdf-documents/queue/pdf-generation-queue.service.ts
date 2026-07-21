@@ -1,7 +1,7 @@
 import { Queue } from 'bullmq';
 import { createRedisConnection, closeRedisConnection } from '../../../../lib/redis/redis.service';
 import {
-    PDF_QUEUE_NAME,
+    getPdfQueueName,
     getPdfJobOptions,
     getPdfGenerationMode,
 } from './pdf-generation-queue.config';
@@ -18,7 +18,7 @@ export class PdfGenerationQueueService {
     async getQueue(): Promise<Queue> {
         if (!this.queue) {
             this.queueConnection = createRedisConnection('producer');
-            this.queue = new Queue(PDF_QUEUE_NAME, {
+            this.queue = new Queue(getPdfQueueName(), {
                 connection: this.queueConnection,
                 defaultJobOptions: getPdfJobOptions(),
             });
@@ -41,19 +41,19 @@ export class PdfGenerationQueueService {
 
         if (mode === 'sync') {
             console.log(
-                `[PdfGenerationQueueService] PDF generation mode is "sync". Executing job ${exportId} synchronously in process...`,
+                `[PdfGenerationQueueService] PDF generation mode is "sync". Executing job ${exportId} directly in the API process...`,
             );
 
             // Fire and forget: run the job asynchronously in background without blocking Hono route
             void PdfGenerationJobProcessor.processJob(dbClient, exportId, documentKind)
                 .then(() => {
                     console.log(
-                        `[PdfGenerationQueueService] Synchronous job ${exportId} completed successfully.`,
+                        `[PdfGenerationQueueService] Direct job ${exportId} completed successfully.`,
                     );
                 })
                 .catch((err) => {
                     console.error(
-                        `[PdfGenerationQueueService] Synchronous job ${exportId} failed:`,
+                        `[PdfGenerationQueueService] Direct job ${exportId} failed:`,
                         err,
                     );
                 });

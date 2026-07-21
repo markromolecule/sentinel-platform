@@ -6,6 +6,7 @@ import {
     startPdfGenerationWorker,
     stopPdfGenerationWorker,
 } from './modules/general/pdf-documents/queue/pdf-generation.worker';
+import { shouldStartEmbeddedPdfWorker } from './modules/general/pdf-documents/queue/pdf-generation-queue.config';
 import {
     startLiveInspectionReconciler,
     stopLiveInspectionReconciler,
@@ -66,9 +67,9 @@ function validateProductionInviteUrls() {
 
 validateProductionInviteUrls();
 
-const shouldStartEmbeddedPdfWorker = process.env.ENABLE_EMBEDDED_PDF_WORKER !== 'false';
+const startEmbeddedPdfWorker = shouldStartEmbeddedPdfWorker();
 
-if (shouldStartEmbeddedPdfWorker) {
+if (startEmbeddedPdfWorker) {
     startPdfGenerationWorker().catch((error) => {
         console.error('[startup] Failed to start embedded PDF worker:', error);
     });
@@ -87,7 +88,7 @@ const baseUrl = isProduction ? 'https://api.sentinelph.tech' : `http://localhost
 console.log(`Server is running on ${baseUrl}`);
 
 const shutdown = async () => {
-    if (shouldStartEmbeddedPdfWorker) {
+    if (startEmbeddedPdfWorker) {
         await stopPdfGenerationWorker().catch((error) => {
             console.error('[shutdown] Failed to stop embedded PDF worker:', error);
         });
