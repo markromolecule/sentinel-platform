@@ -33,8 +33,20 @@ vi.mock('../_components/student-exam-loading-state', () => ({
     StudentExamLoadingState: () => <div>Loading...</div>,
 }));
 
-vi.mock('@/app/(protected)/student/exam/[id]/_hooks/use-student-exam-data', () => ({
-    useStudentExamData: () => mockStudentExamData(),
+vi.mock('@/app/(protected)/student/exam/[id]/_hooks/use-student-exam-stage-guard', () => ({
+    useStudentExamStageGuard: () => {
+        const data = mockStudentExamData();
+        return {
+            ...data,
+            isResolving: data?.isLoading ?? false,
+            resolution: {
+                targetStage: 'attempt',
+                reasonCode: 'ATTEMPT_ACTIVE',
+                shouldRedirect: false,
+            },
+            storedFlow: { privacyAccepted: true, checkupCompleted: true },
+        };
+    },
 }));
 
 vi.mock('@/app/(protected)/student/exam/[id]/_hooks/use-exam-session', () => ({

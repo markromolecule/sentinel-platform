@@ -37,8 +37,20 @@ vi.mock('../_components/student-flow-shell', () => ({
     StudentFlowShell: ({ children }: { children: ReactNode }) => <div>{children}</div>,
 }));
 
-vi.mock('../_hooks/use-student-exam-data', () => ({
-    useStudentExamData: () => mockStudentExamData(),
+vi.mock('../_hooks/use-student-exam-stage-guard', () => ({
+    useStudentExamStageGuard: () => {
+        const data = mockStudentExamData();
+        return {
+            ...data,
+            isResolving: data?.isLoading ?? false,
+            resolution: {
+                targetStage: 'checkup',
+                reasonCode: 'CHECKUP_REQUIRED',
+                shouldRedirect: false,
+            },
+            storedFlow: { privacyAccepted: true, checkupCompleted: false },
+        };
+    },
 }));
 
 vi.mock('../_hooks/use-turned-in-exam-redirect', () => ({

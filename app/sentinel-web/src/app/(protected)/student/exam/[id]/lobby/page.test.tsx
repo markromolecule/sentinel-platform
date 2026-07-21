@@ -30,8 +30,20 @@ vi.mock('../_components/monitoring-preloader', () => ({
     MonitoringPreloader: () => null,
 }));
 
-vi.mock('../_hooks/use-student-exam-data', () => ({
-    useStudentExamData: () => mockStudentExamData(),
+vi.mock('../_hooks/use-student-exam-stage-guard', () => ({
+    useStudentExamStageGuard: () => {
+        const data = mockStudentExamData();
+        return {
+            ...data,
+            isResolving: data?.isLoading ?? false,
+            resolution: {
+                targetStage: 'lobby',
+                reasonCode: 'AUTOMATIC_ADMISSION',
+                shouldRedirect: false,
+            },
+            storedFlow: { privacyAccepted: true, checkupCompleted: true },
+        };
+    },
 }));
 
 vi.mock('../_hooks/use-turned-in-exam-redirect', () => ({

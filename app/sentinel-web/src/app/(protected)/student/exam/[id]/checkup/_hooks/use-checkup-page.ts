@@ -2,8 +2,7 @@
 
 import { useCallback, useEffect, useMemo } from 'react';
 import { Camera, Mic, ScanFace } from 'lucide-react';
-import { useStudentExamData } from '../../_hooks/use-student-exam-data';
-import { useTurnedInExamRedirect } from '../../_hooks/use-turned-in-exam-redirect';
+import { useStudentExamStageGuard } from '../../_hooks/use-student-exam-stage-guard';
 import { useCheckupMediaPipe } from '../../_hooks/use-checkup-mediapipe';
 import { useStudentCheckupManager } from '../../_hooks/use-student-checkup-manager';
 import {
@@ -25,8 +24,14 @@ function formatCalibrationHoldDuration(seconds: number) {
  * derived status messages, and state persistence for the Student Exam Checkup page.
  */
 export function useCheckupPage() {
-    const { examId, exam, blockedState, configuration, mediaPipeSandbox, isLoading } =
-        useStudentExamData();
+    const stageGuard = useStudentExamStageGuard('checkup');
+    const {
+        examId,
+        blockedState,
+        configuration,
+        mediaPipeSandbox,
+        isResolving,
+    } = stageGuard;
 
     const effectiveMediaPipeSandbox = useMemo(
         () =>
@@ -36,13 +41,6 @@ export function useCheckupPage() {
             }),
         [configuration, mediaPipeSandbox],
     );
-
-    const isRedirectingToHistory = useTurnedInExamRedirect({
-        examId,
-        status: exam?.status,
-        attemptId: exam?.attemptId,
-        runtimeAccess: exam?.runtimeAccess,
-    });
 
     const {
         videoRef,
@@ -144,6 +142,9 @@ export function useCheckupPage() {
 
     useEffect(() => {
         if (!isCheckupReady) {
+            patchStoredStudentExamFlow(examId, {
+                checkupCompleted: false,
+            });
             return;
         }
 
@@ -168,8 +169,8 @@ export function useCheckupPage() {
         examId,
         blockedState,
         configuration,
-        isLoading,
-        isRedirectingToHistory,
+        isLoading: isResolving,
+        isRedirectingToHistory: false,
         videoRef,
         overlayCanvasRef,
         isRequesting,
