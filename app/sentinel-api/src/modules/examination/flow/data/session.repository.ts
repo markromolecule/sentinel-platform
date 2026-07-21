@@ -22,18 +22,18 @@ export class SessionRepository {
     ): Promise<
         | { sessionId: string; isResumed: boolean }
         | {
-              sessionId: string;
-              isResumed: true;
-              answers: ExamAttemptAnswers;
-              elapsedSeconds: number;
-              reconnectAttemptCount: number;
-              maxReconnectAttempts: number;
-          }
+            sessionId: string;
+            isResumed: true;
+            answers: ExamAttemptAnswers;
+            elapsedSeconds: number;
+            reconnectAttemptCount: number;
+            maxReconnectAttempts: number;
+        }
         | {
-              attemptId: string;
-              error: string;
-              errorCode: 'ATTEMPT_ALREADY_COMPLETED';
-          }
+            attemptId: string;
+            error: string;
+            errorCode: 'ATTEMPT_ALREADY_COMPLETED';
+        }
     > {
         const { studentId, examId, maxReconnectAttempts, accessOverride } = args;
         const remediationSchedule = await db
@@ -58,6 +58,7 @@ export class SessionRepository {
                 'ea.answer_snapshot',
                 'ea.time_spent_minutes',
                 'ea.reconnect_attempt_count',
+                'ea.last_synced_at',
                 'ea.lifecycle_state',
                 'ea.reopened_until',
             ])
@@ -113,9 +114,16 @@ export class SessionRepository {
                 });
             }
 
-            const nextReconnectAttemptCount = accessOverride
-                ? reconnectAttemptCount
-                : reconnectAttemptCount + 1;
+            const lastSyncedAtTime = existingAttempt.last_synced_at
+                ? new Date(existingAttempt.last_synced_at).getTime()
+                : 0;
+            const isRecentDuplicateRequest =
+                lastSyncedAtTime > 0 && Date.now() - lastSyncedAtTime < 3000;
+
+            const nextReconnectAttemptCount =
+                accessOverride || isRecentDuplicateRequest
+                    ? reconnectAttemptCount
+                    : reconnectAttemptCount + 1;
 
             await db
                 .updateTable('exam_attempts')

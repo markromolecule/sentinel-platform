@@ -53,9 +53,17 @@ vi.mock('sonner', () => ({
 
 vi.mock('../../_lib/exam-session-storage', () => ({
     clearStoredExamSession: (...args: unknown[]) => mockClearStoredExamSession(...args),
+    readStoredExamAnswerDraft: vi.fn(),
     writeStoredExamAnswerDraft: (...args: unknown[]) => mockWriteStoredExamAnswerDraft(...args),
     writeStoredExamSession: (...args: unknown[]) => mockWriteStoredExamSession(...args),
     writeStoredLobbyEntryMarker: (...args: unknown[]) => mockWriteStoredLobbyEntryMarker(...args),
+    writeStoredLobbyEntry: vi.fn(),
+    clearStoredReconnectIntent: vi.fn(),
+    reconcileExamAnswerDraft: vi.fn((local, server) => ({
+        answers: server?.answers ?? local?.answers ?? {},
+        elapsedSeconds: server?.elapsedSeconds ?? local?.elapsedSeconds ?? 0,
+        source: 'server',
+    })),
 }));
 
 vi.mock('../../_lib/exam-turn-in-storage', () => ({
@@ -156,4 +164,54 @@ describe('useLobbyActions', () => {
         expect(mockRouterReplace).toHaveBeenCalledWith('/student/history/attempts/attempt-123');
         expect(mockToastError).not.toHaveBeenCalled();
     });
+
+    it('calls startExamSession even when storedSession exists to count reconnect and issue fresh entry token', async () => {
+        const sessionResult = {
+            sessionId: 'session-resumed',
+            examId: 'exam-1',
+            isResumed: true,
+            answers: { q1: 'A' },
+            elapsedSeconds: 50,
+        };
+
+        mockStartExamSession.mockResolvedValue(sessionResult);
+        mockWriteStoredExamSession.mockReturnValue({
+            examId: 'exam-1',
+            sessionId: 'session-resumed',
+            storedAt: new Date().toISOString(),
+        });
+
+        const { result } = renderHook(() =>
+            useLobbyActions(
+                createArgs({
+                    storedSession: {
+                        examId: 'exam-1',
+                        sessionId: 'session-resumed',
+                        storedAt: new Date().toISOString(),
+                    },
+                    canEnterExam: true,
+                    runtimeAccess: {
+                        state: 'open',
+                        reasonCode: 'OPEN',
+                        message: 'Open',
+                        canStart: false,
+                        canResume: true,
+                        hasActiveAttempt: true,
+                        startsAt: null,
+                        endsAt: null,
+                        reopenedUntil: null,
+                    },
+                }),
+            ),
+        );
+
+        await act(async () => {
+            await result.current.handleEnterExam();
+        });
+
+        expect(mockStartExamSession).toHaveBeenCalledWith(expect.anything(), { examId: 'exam-1' });
+        expect(mockWriteStoredExamSession).toHaveBeenCalledWith('exam-1', sessionResult);
+        expect(mockRouterPush).toHaveBeenCalledWith('/student/exam/exam-1/attempt');
+    });
 });
+

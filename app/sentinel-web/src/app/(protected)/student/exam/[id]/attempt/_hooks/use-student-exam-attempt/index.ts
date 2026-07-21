@@ -7,10 +7,11 @@ import { DEFAULT_AUDIO_ANOMALY_CONFIG } from '@sentinel/shared';
 import { getRuntimePassageDetails, hasAnswer } from '@/features/exams/_components/engine';
 import { useStudentExamData } from '@/app/(protected)/student/exam/[id]/_hooks/use-student-exam-data';
 import { useExamSession } from '@/app/(protected)/student/exam/[id]/_hooks/use-exam-session';
+import { useExamInterruption } from '@/app/(protected)/student/exam/[id]/_hooks/use-exam-interruption';
 import { useTurnedInExamRedirect } from '@/app/(protected)/student/exam/[id]/_hooks/use-turned-in-exam-redirect';
 import { resolveStudentExamMediaPipeSandbox } from '@/app/(protected)/student/exam/[id]/_lib/student-exam-flow';
 import {
-    readStoredLobbyEntryMarker,
+    readStoredLobbyEntry,
     readStoredExamSession,
 } from '@/app/(protected)/student/exam/[id]/_lib/exam-session-storage';
 import { useAttemptNavigation } from './use-attempt-navigation';
@@ -92,6 +93,13 @@ export function useStudentExamAttempt() {
         saveAnswerDraft,
         syncProgress,
     });
+
+    useExamInterruption({
+        examId,
+        sessionId: examSession?.sessionId,
+        isEnabled: !effectiveBlockedState.isBlocked && !uiHook.isRedirectingToTurnIn,
+    });
+
 
     const isRedirectingToHistory = useTurnedInExamRedirect({
         examId,

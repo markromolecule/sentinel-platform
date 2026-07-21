@@ -15,6 +15,7 @@ export type UseAttemptSyncArgs = {
     ) => Promise<void>;
 };
 
+
 export function useAttemptSync({
     isInitializingSession,
     sessionId,
@@ -24,11 +25,28 @@ export function useAttemptSync({
     syncProgress,
 }: UseAttemptSyncArgs) {
     const elapsedSecondsRef = useRef(elapsedSeconds);
+    const selectedAnswersRef = useRef(selectedAnswers);
 
     useEffect(() => {
         elapsedSecondsRef.current = elapsedSeconds;
     }, [elapsedSeconds]);
 
+    useEffect(() => {
+        selectedAnswersRef.current = selectedAnswers;
+    }, [selectedAnswers]);
+
+    // Local checkpoint on every change
+    useEffect(() => {
+        if (isInitializingSession || !sessionId) {
+            return;
+        }
+
+        if (Object.keys(selectedAnswers).length > 0) {
+            saveAnswerDraft(selectedAnswers, elapsedSecondsRef.current);
+        }
+    }, [isInitializingSession, saveAnswerDraft, selectedAnswers, sessionId]);
+
+    // Remote sync with debounce and offline retry
     useEffect(() => {
         if (isInitializingSession || !sessionId) {
             return;
@@ -36,16 +54,36 @@ export function useAttemptSync({
 
         const answeredCount = Object.values(selectedAnswers).filter(hasAnswer).length;
 
-        // Skip saving empty answers immediately after initialization to prevent race conditions
-        // where the hook state hasn't yet received the restored draft answers.
-        if (Object.keys(selectedAnswers).length > 0) {
-            saveAnswerDraft(selectedAnswers, elapsedSecondsRef.current);
-        }
-
         const timer = setTimeout(() => {
-            void syncProgress(answeredCount, selectedAnswers, elapsedSecondsRef.current);
+            try {
+                const syncPromise = syncProgress(answeredCount, selectedAnswers, elapsedSecondsRef.current);
+                if (syncPromise && typeof syncPromise.catch === 'function') {
+                    syncPromise.catch(() => {
+                        if (Object.keys(selectedAnswersRef.current).length > 0) {
+                            saveAnswerDraft(selectedAnswersRef.current, elapsedSecondsRef.current);
+                        }
+                    });
+                }
+            } catch {
+                if (Object.keys(selectedAnswersRef.current).length > 0) {
+                    saveAnswerDraft(selectedAnswersRef.current, elapsedSecondsRef.current);
+                }
+            }
         }, SYNC_PROGRESS_DEBOUNCE_MS);
 
-        return () => clearTimeout(timer);
+        const handleOnline = () => {
+            if (Object.keys(selectedAnswersRef.current).length > 0) {
+                const currentAnsweredCount = Object.values(selectedAnswersRef.current).filter(hasAnswer).length;
+                void syncProgress(currentAnsweredCount, selectedAnswersRef.current, elapsedSecondsRef.current);
+            }
+        };
+
+        window.addEventListener('online', handleOnline);
+
+        return () => {
+            clearTimeout(timer);
+            window.removeEventListener('online', handleOnline);
+        };
     }, [sessionId, isInitializingSession, saveAnswerDraft, selectedAnswers, syncProgress]);
 }
+

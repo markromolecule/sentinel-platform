@@ -84,3 +84,71 @@ export function clearStoredExamAnswerDraft(examId: string) {
 
     window.localStorage.removeItem(buildExamAnswerDraftStorageKey(examId));
 }
+
+export type MergedAnswerDraftResult = {
+    answers: Record<string, ExamAnswerValue>;
+    elapsedSeconds: number;
+    source: 'local' | 'server' | 'empty';
+};
+
+/**
+ * Deterministically reconciles local answer draft with authoritative server snapshot.
+ * Chooses local draft if it is newer or server snapshot has no answers, otherwise chooses server snapshot.
+ * Merges missing entries so no answered questions are lost.
+ */
+export function reconcileExamAnswerDraft(
+    localDraft?: StoredExamAnswerDraft | null,
+    serverSnapshot?: {
+        answers?: Record<string, ExamAnswerValue> | null;
+        elapsedSeconds?: number | null;
+        updatedAt?: string | null;
+    } | null,
+): MergedAnswerDraftResult {
+    const serverAnswers = (serverSnapshot?.answers ?? {}) as Record<string, ExamAnswerValue>;
+    const serverElapsed = Math.max(0, Math.floor(serverSnapshot?.elapsedSeconds ?? 0));
+    const serverHasAnswers = Object.keys(serverAnswers).length > 0;
+
+    const localAnswers = (localDraft?.answers ?? {}) as Record<string, ExamAnswerValue>;
+    const localElapsed = Math.max(0, Math.floor(localDraft?.elapsedSeconds ?? 0));
+    const localHasAnswers = Object.keys(localAnswers).length > 0;
+
+    if (!localHasAnswers && !serverHasAnswers) {
+        return {
+            answers: {},
+            elapsedSeconds: Math.max(localElapsed, serverElapsed),
+            source: 'empty',
+        };
+    }
+
+    if (localHasAnswers && !serverHasAnswers) {
+        return {
+            answers: localAnswers,
+            elapsedSeconds: Math.max(localElapsed, serverElapsed),
+            source: 'local',
+        };
+    }
+
+    if (!localHasAnswers && serverHasAnswers) {
+        return {
+            answers: serverAnswers,
+            elapsedSeconds: Math.max(localElapsed, serverElapsed),
+            source: 'server',
+        };
+    }
+
+    const localTime = new Date(localDraft?.storedAt ?? 0).getTime();
+    const serverTime = serverSnapshot?.updatedAt ? new Date(serverSnapshot.updatedAt).getTime() : 0;
+
+    const isLocalNewerOrEqual = localTime >= serverTime;
+    const primary = isLocalNewerOrEqual ? localAnswers : serverAnswers;
+    const secondary = isLocalNewerOrEqual ? serverAnswers : localAnswers;
+
+    const mergedAnswers = { ...secondary, ...primary };
+
+    return {
+        answers: mergedAnswers,
+        elapsedSeconds: Math.max(localElapsed, serverElapsed),
+        source: isLocalNewerOrEqual ? 'local' : 'server',
+    };
+}
+

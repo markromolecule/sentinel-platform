@@ -10,8 +10,9 @@ import {
     readStoredExamSession,
     writeStoredExamAnswerDraft,
     writeStoredExamSession,
-    readStoredLobbyEntryMarker,
-    clearStoredLobbyEntryMarker,
+    consumeStoredLobbyEntry,
+    writeStoredReconnectIntent,
+    reconcileExamAnswerDraft,
     type StoredExamSession,
 } from '../_lib/exam-session-storage';
 import {
@@ -72,22 +73,14 @@ export function useExamSession({
         }
 
         const storedSession = readStoredExamSession(examId);
-        const hasLobbyMarker = readStoredLobbyEntryMarker(examId);
+        const consumedLobbyEntry = consumeStoredLobbyEntry(examId);
 
-        // If we have a valid session in storage, we are resuming/refreshing.
-        // We skip the lobby marker check to prevent redirect loops.
-        const isResuming = Boolean(storedSession?.sessionId);
-
-        if (isAttemptPage && !hasLobbyMarker && !isResuming) {
-            // Force redirect to lobby for reconnect confirmation
-            clearStoredExamSession(examId);
+        // Active attempt on attempt route MUST consume a valid, fresh lobby-entry token.
+        // Stored session presence alone is NOT an attempt-entry bypass.
+        if (isAttemptPage && !consumedLobbyEntry) {
+            writeStoredReconnectIntent(examId, storedSession?.sessionId, 'navigation');
             replace(`/student/exam/${examId}/lobby`);
             return;
-        }
-
-        // Consume the marker if it exists
-        if (hasLobbyMarker) {
-            clearStoredLobbyEntryMarker(examId);
         }
 
         if (isAttemptPage) {
@@ -103,11 +96,12 @@ export function useExamSession({
             setElapsedSeconds(pendingTurnInPreview.elapsedSeconds);
         } else if (storedSession?.sessionId) {
             const answerDraft = readStoredExamAnswerDraft(examId, storedSession.sessionId);
+            const reconciled = reconcileExamAnswerDraft(answerDraft, null);
 
-            if (answerDraft) {
-                onInitializeAnswers?.(answerDraft.answers);
-                onInitializeElapsedSeconds?.(answerDraft.elapsedSeconds);
-                setElapsedSeconds(answerDraft.elapsedSeconds);
+            if (reconciled.source !== 'empty') {
+                onInitializeAnswers?.(reconciled.answers);
+                onInitializeElapsedSeconds?.(reconciled.elapsedSeconds);
+                setElapsedSeconds(reconciled.elapsedSeconds);
             }
         }
 
