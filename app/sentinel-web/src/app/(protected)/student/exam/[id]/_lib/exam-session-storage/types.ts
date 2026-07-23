@@ -52,6 +52,6 @@ export type StoredReconnectIntentRecord = {
     examId: string;
     sessionId?: string;
     reason: ReconnectReason;
+    resumeRequestId: string;
     createdAt: string;
 };
-

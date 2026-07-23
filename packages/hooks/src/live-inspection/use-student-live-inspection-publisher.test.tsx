@@ -438,6 +438,7 @@ describe('useStudentLiveInspectionPublisher', () => {
         const forbiddenError = new ApiError({
             message: 'Forbidden',
             status: 403,
+            statusText: 'Forbidden',
         });
         mockDirective.mockRejectedValueOnce(forbiddenError);
 
@@ -467,6 +468,7 @@ describe('useStudentLiveInspectionPublisher', () => {
         const notFoundError = new ApiError({
             message: 'Not Found',
             status: 404,
+            statusText: 'Not Found',
         });
         mockDirective.mockRejectedValueOnce(notFoundError);
 
@@ -490,6 +492,7 @@ describe('useStudentLiveInspectionPublisher', () => {
         const forbiddenError = new ApiError({
             message: 'Forbidden',
             status: 403,
+            statusText: 'Forbidden',
         });
         mockDirective.mockRejectedValue(forbiddenError);
 

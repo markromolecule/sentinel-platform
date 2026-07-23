@@ -67,11 +67,41 @@ describe('lobby-storage', () => {
     it('writes, reads, and clears reconnect intent records', () => {
         const intent = writeStoredReconnectIntent(examId, sessionId, 'offline');
         expect(intent?.reason).toBe('offline');
+        expect(intent?.resumeRequestId).toMatch(/^[0-9a-f-]{36}$/i);
 
         const readIntent = readStoredReconnectIntent(examId);
         expect(readIntent?.reason).toBe('offline');
 
         clearStoredReconnectIntent(examId);
+        expect(readStoredReconnectIntent(examId)).toBeNull();
+    });
+
+    it('rejects expired or malformed reconnect intents', () => {
+        const key = `sentinel-web:exam-reconnect-intent:${examId}`;
+        window.sessionStorage.setItem(
+            key,
+            JSON.stringify({
+                version: 1,
+                examId,
+                sessionId,
+                reason: 'reload',
+                resumeRequestId: 'not-a-uuid',
+                createdAt: new Date().toISOString(),
+            }),
+        );
+        expect(readStoredReconnectIntent(examId)).toBeNull();
+
+        window.sessionStorage.setItem(
+            key,
+            JSON.stringify({
+                version: 1,
+                examId,
+                sessionId,
+                reason: 'reload',
+                resumeRequestId: '66666666-6666-4666-8666-666666666666',
+                createdAt: new Date(Date.now() - 16 * 60 * 1000).toISOString(),
+            }),
+        );
         expect(readStoredReconnectIntent(examId)).toBeNull();
     });
 });

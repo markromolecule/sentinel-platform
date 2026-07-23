@@ -3,7 +3,7 @@
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import type { ExamRuntimeAccess } from '@sentinel/shared/types';
-import { clearStoredExamSession } from '../_lib/exam-session-storage';
+import { clearStoredExamSession, clearStoredReconnectIntent } from '../_lib/exam-session-storage';
 import { clearStoredExamTurnInPreview } from '../_lib/exam-turn-in-storage';
 import { buildStudentHistoryAttemptHref } from '@/lib/routes/student-history-routes';
 
@@ -46,6 +46,7 @@ export function useTurnedInExamRedirect({
 
         clearStoredExamTurnInPreview(examId);
         clearStoredExamSession(examId);
+        clearStoredReconnectIntent(examId);
         router.replace(buildStudentHistoryAttemptHref(attemptId));
     }, [attemptId, examId, isRedirecting, router]);
 

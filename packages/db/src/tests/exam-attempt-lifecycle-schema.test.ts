@@ -52,6 +52,7 @@ describe('exam attempt lifecycle schema types', () => {
             finalized_at: null,
             finalized_by: null,
             score_state: 'DRAFT',
+            last_reconnect_request_id: null,
         };
 
         expect(record.lifecycle_state).toBe('LOCKED');

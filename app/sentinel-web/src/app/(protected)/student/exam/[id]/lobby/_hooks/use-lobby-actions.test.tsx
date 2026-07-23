@@ -59,6 +59,7 @@ vi.mock('../../_lib/exam-session-storage', () => ({
     writeStoredLobbyEntryMarker: (...args: unknown[]) => mockWriteStoredLobbyEntryMarker(...args),
     writeStoredLobbyEntry: vi.fn(),
     clearStoredReconnectIntent: vi.fn(),
+    readStoredReconnectIntent: vi.fn(),
     reconcileExamAnswerDraft: vi.fn((local, server) => ({
         answers: server?.answers ?? local?.answers ?? {},
         elapsedSeconds: server?.elapsedSeconds ?? local?.elapsedSeconds ?? 0,

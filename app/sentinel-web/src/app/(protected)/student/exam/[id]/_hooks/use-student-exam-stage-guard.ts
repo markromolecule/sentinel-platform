@@ -8,6 +8,7 @@ import {
     readStoredExamSession,
     readStoredLobbyEntry,
     consumeStoredLobbyEntry,
+    clearStoredReconnectIntent,
 } from '../_lib/exam-session-storage';
 import { clearStoredExamTurnInPreview } from '../_lib/exam-turn-in-storage';
 import {
@@ -103,27 +104,27 @@ export function useStudentExamStageGuard(requestedStage: StudentExamStage) {
             admissionState: resolveStudentExamAdmissionState(exam?.runtimeAccess),
             runtimeAccess: exam?.runtimeAccess
                 ? {
-                      canStart: exam.runtimeAccess.canStart,
-                      canResume: exam.runtimeAccess.canResume,
-                      isAttemptActive: exam.runtimeAccess.hasActiveAttempt,
-                      isTurnedIn: exam.status === 'turned_in',
-                      reconnectCount:
-                          typeof exam.runtimeAccess.totalReconnectAttempts === 'number' &&
-                          typeof exam.runtimeAccess.reconnectAttemptsRemaining === 'number'
-                              ? Math.max(
-                                    0,
-                                    exam.runtimeAccess.totalReconnectAttempts -
-                                        exam.runtimeAccess.reconnectAttemptsRemaining,
-                                )
-                              : 0,
-                      maxReconnectAttempts: configuration?.maxReconnectAttempts ?? 3,
-                      state: exam.runtimeAccess.state,
-                      blockedCode: studentData.blockedState.code,
-                  }
+                    canStart: exam.runtimeAccess.canStart,
+                    canResume: exam.runtimeAccess.canResume,
+                    isAttemptActive: exam.runtimeAccess.hasActiveAttempt,
+                    isTurnedIn: exam.status === 'turned_in',
+                    reconnectCount:
+                        typeof exam.runtimeAccess.totalReconnectAttempts === 'number' &&
+                            typeof exam.runtimeAccess.reconnectAttemptsRemaining === 'number'
+                            ? Math.max(
+                                0,
+                                exam.runtimeAccess.totalReconnectAttempts -
+                                exam.runtimeAccess.reconnectAttemptsRemaining,
+                            )
+                            : 0,
+                    maxReconnectAttempts: configuration?.maxReconnectAttempts ?? 3,
+                    state: exam.runtimeAccess.state,
+                    blockedCode: studentData.blockedState.code,
+                }
                 : {
-                      isTurnedIn: exam?.status === 'turned_in',
-                      blockedCode: studentData.blockedState.code,
-                  },
+                    isTurnedIn: exam?.status === 'turned_in',
+                    blockedCode: studentData.blockedState.code,
+                },
             configQueryError,
             examQueryError: isExamError,
             hasFreshLobbyEntry: Boolean(lobbyEntry),
@@ -165,6 +166,7 @@ export function useStudentExamStageGuard(requestedStage: StudentExamStage) {
                 redirectedTargetRef.current = `result:${exam.attemptId}`;
                 clearStoredExamTurnInPreview(examId);
                 clearStoredExamSession(examId);
+                clearStoredReconnectIntent(examId);
                 router.replace(buildStudentHistoryAttemptHref(exam.attemptId));
             }
             return;

@@ -230,21 +230,21 @@ The in-progress Stop/Restart, polling, camera-track grace, and retry changes fro
 
 **Goal:** One logical reload/reconnect consumes exactly one reconnect attempt.
 
-- [ ] Add nullable `last_reconnect_request_id UUID` to `exam_attempts`.
-- [ ] Add `resumeRequestId` to `StoredReconnectIntentRecord`, generate it once per interruption, and preserve it across reload/lobby rendering.
-- [ ] Add optional `resumeRequestId` to the start-session DTO and shared service payload.
-- [ ] Require `resumeRequestId` when resuming an existing active attempt; do not require it for the first attempt creation.
-- [ ] Replace the `last_synced_at < 3 seconds` duplicate heuristic with an atomic conditional update on `last_reconnect_request_id`.
-- [ ] Within one database transaction:
+- [x] Add nullable `last_reconnect_request_id UUID` to `exam_attempts`.
+- [x] Add `resumeRequestId` to `StoredReconnectIntentRecord`, generate it once per interruption, and preserve it across reload/lobby rendering.
+- [x] Add optional `resumeRequestId` to the start-session DTO and shared service payload.
+- [x] Require `resumeRequestId` when resuming an existing active attempt; do not require it for the first attempt creation.
+- [x] Replace the `last_synced_at < 3 seconds` duplicate heuristic with an atomic conditional update on `last_reconnect_request_id`.
+- [x] Within one database transaction:
     1. read/lock the current active attempt;
     2. validate lifecycle and maximum reconnect policy;
     3. if the same `resumeRequestId` was already accepted, return the current session without incrementing;
     4. otherwise increment `reconnect_attempt_count`, store the request ID, and return the updated count.
-- [ ] Leave `last_synced_at` exclusively for answer/progress synchronization.
-- [ ] Return `reconnectAttemptCount` and `maxReconnectAttempts` in both first-start and resume responses.
-- [ ] Clear reconnect intent only after a successful resume response and after the fresh lobby entry is safely written.
-- [ ] Preserve reconnect intent and answer drafts when the resume request fails or the network drops.
-- [ ] Add repository/API tests for first start, first reconnect, duplicate request ID, two distinct reconnects, concurrent duplicate requests, recent answer sync before reconnect, maximum reconnect rejection, lifecycle block, and override-based resume.
+- [x] Leave `last_synced_at` exclusively for answer/progress synchronization.
+- [x] Return `reconnectAttemptCount` and `maxReconnectAttempts` in both first-start and resume responses.
+- [x] Clear reconnect intent only after a successful resume response and after the fresh lobby entry is safely written.
+- [x] Preserve reconnect intent and answer drafts when the resume request fails or the network drops.
+- [x] Add repository/API tests for first start, first reconnect, duplicate request ID, two distinct reconnects, concurrent duplicate requests, recent answer sync before reconnect, maximum reconnect rejection, lifecycle block, and override-based resume.
 
 **Migration required:** Yes — one nullable UUID column on `exam_attempts`. Rollback drops `last_reconnect_request_id` after reverting the new resume request contract.
 
@@ -252,14 +252,14 @@ The in-progress Stop/Restart, polling, camera-track grace, and retry changes fro
 
 **Goal:** Reload, close/reopen, and offline recovery consistently use the lobby without counting intentional completion/navigation.
 
-- [ ] Keep `beforeunload`, `pagehide`, and `offline` as best-effort reconnect-intent signals.
-- [ ] Suppress reconnect intent when navigation is already committed to Turn In, result, feedback, history, or an authorized lifecycle redirect.
-- [ ] On `online`, redirect an active attempt to the lobby only when a valid reconnect intent exists.
-- [ ] Preserve local answers and elapsed time before any interruption signal; never clear the local draft during lobby redirection.
-- [ ] Restore and reconcile local/server answers before making the resumed attempt interactive.
-- [ ] Add browser-hook tests for reload, close/reopen, offline/online, direct attempt URL, expired intent, stale entry, mismatched session entry, StrictMode effects, Turn In, locked attempt, and max reconnect reached.
-- [ ] Add an integration regression test proving the route history contains no repeating `/lobby → /attempt → /lobby` sequence.
-- [ ] Confirm monitoring providers and LiveKit publisher cleanup run on attempt unmount and restart only after the resumed attempt is admitted.
+- [x] Keep `beforeunload`, `pagehide`, and `offline` as best-effort reconnect-intent signals.
+- [x] Suppress reconnect intent when navigation is already committed to Turn In, result, feedback, history, or an authorized lifecycle redirect.
+- [x] On `online`, redirect an active attempt to the lobby only when a valid reconnect intent exists.
+- [x] Preserve local answers and elapsed time before any interruption signal; never clear the local draft during lobby redirection.
+- [x] Restore and reconcile local/server answers before making the resumed attempt interactive.
+- [x] Add browser-hook tests for reload, close/reopen, offline/online, direct attempt URL, expired intent, stale entry, mismatched session entry, StrictMode effects, Turn In, locked attempt, and max reconnect reached.
+- [x] Add an integration regression test proving the route history contains no repeating `/lobby → /attempt → /lobby` sequence.
+- [x] Confirm monitoring providers and LiveKit publisher cleanup run on attempt unmount and restart only after the resumed attempt is admitted.
 
 **Migration required:** No additional migration beyond Phase 4.
 

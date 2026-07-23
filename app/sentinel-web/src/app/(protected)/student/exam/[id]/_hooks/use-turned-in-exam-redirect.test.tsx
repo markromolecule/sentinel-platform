@@ -17,6 +17,7 @@ vi.mock('next/navigation', () => ({
 
 vi.mock('../_lib/exam-session-storage', () => ({
     clearStoredExamSession: mockClearStoredExamSession,
+    clearStoredReconnectIntent: vi.fn(),
 }));
 
 vi.mock('../_lib/exam-turn-in-storage', () => ({

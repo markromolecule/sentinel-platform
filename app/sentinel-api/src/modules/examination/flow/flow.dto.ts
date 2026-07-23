@@ -4,6 +4,7 @@ import { Schema } from '@sentinel/shared';
 export const startSessionSchema = {
     body: z.object({
         examId: z.string().uuid(),
+        resumeRequestId: z.string().uuid().optional(),
     }),
     response: z.object({
         message: z.string(),

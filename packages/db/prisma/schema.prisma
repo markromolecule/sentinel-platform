@@ -1542,6 +1542,7 @@ model exam_attempts {
   answer_snapshot         Json?
   last_synced_at          DateTime?           @db.Timestamptz(6)
   reconnect_attempt_count Int?                @default(0)
+  last_reconnect_request_id String?             @db.Uuid
   lifecycle_state         exam_attempt_lifecycle_state? @default(IN_PROGRESS)
   lifecycle_reason        String?             @db.VarChar(100)
   lifecycle_note          String?

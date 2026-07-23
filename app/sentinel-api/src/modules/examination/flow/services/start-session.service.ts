@@ -11,6 +11,7 @@ export type StartSessionServiceArgs = {
     dbClient: DbClient;
     studentId: string;
     examId: string;
+    resumeRequestId?: string | null;
 };
 
 export type StartSessionResult = {
@@ -36,6 +37,7 @@ export async function startSessionService({
     dbClient,
     studentId,
     examId,
+    resumeRequestId,
 }: StartSessionServiceArgs): Promise<StartSessionResult> {
     // 1. Cross-Domain Call: Verify access constraints
     const accessCheck = await AccessGatekeeperService.verifyStudentExamEligibility(
@@ -72,6 +74,7 @@ export async function startSessionService({
         maxReconnectAttempts: configSnapshot.configuration.maxReconnectAttempts,
         accessOverride: accessCheck.accessOverride ?? null,
         updatedBy: studentId,
+        resumeRequestId,
     });
 
     if ('errorCode' in session) {

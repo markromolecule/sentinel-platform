@@ -45,8 +45,23 @@ export const startSessionRouteHandler: AppRouteHandler<typeof startSessionRoute>
         const body = c.req.valid('json');
         const user = c.get('user');
 
-        const { sessionId, configSnapshot, isResumed, error, errorCode, attemptId } =
-            await SessionManagerService.startSession(c.get('dbClient'), user.id, body.examId);
+        const {
+            sessionId,
+            configSnapshot,
+            isResumed,
+            error,
+            errorCode,
+            attemptId,
+            answers,
+            elapsedSeconds,
+            reconnectAttemptCount,
+            maxReconnectAttempts,
+        } = await SessionManagerService.startSession(
+            c.get('dbClient'),
+            user.id,
+            body.examId,
+            body.resumeRequestId,
+        );
 
         if (error) {
             const status = errorCode === 'ATTEMPT_ALREADY_COMPLETED' ? 409 : 403;
@@ -75,6 +90,10 @@ export const startSessionRouteHandler: AppRouteHandler<typeof startSessionRoute>
                     configSnapshot,
                     isResumed,
                     attemptId,
+                    answers,
+                    elapsedSeconds,
+                    reconnectAttemptCount,
+                    maxReconnectAttempts,
                 },
             },
             201,
