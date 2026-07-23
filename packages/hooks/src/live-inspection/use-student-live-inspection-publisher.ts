@@ -157,7 +157,14 @@ export function useStudentLiveInspectionPublisher({
             return;
         }
 
-        if (directive.state === 'REQUESTED') {
+        if (
+            directive.state === 'REQUESTED' ||
+            ((directive.state === 'PUBLISHER_READY' || directive.state === 'LIVE') &&
+                isRoomDisconnected)
+        ) {
+            if (isRoomDisconnected) {
+                cleanupPublication();
+            }
             setPublisherStatus('requested');
             await startPublication(directive, sequence);
             return;

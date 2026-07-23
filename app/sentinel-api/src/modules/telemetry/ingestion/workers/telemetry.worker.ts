@@ -8,7 +8,6 @@ import {
 } from '../../../../lib/redis/redis.service';
 import type { PersistableProctoringEvent } from '../ingestion.dto';
 import {
-    getTelemetryIngestionMode,
     getTelemetryQueueName,
     getTelemetryWorkerConcurrency,
 } from '../config/ingestion-queue.config';
@@ -16,6 +15,8 @@ import {
     buildTelemetryJobLogContext,
     processQueuedTelemetryEvent,
 } from '../services/telemetry-job-processor.service';
+import { telemetrySettingsResolverService } from '../../settings/telemetry-settings-resolver.service';
+import { TelemetryIngestionQueueService } from '../services/ingestion-queue.service';
 
 export function getRedisConnectionTarget() {
     const redisUrl = process.env.REDIS_URL?.trim();
@@ -52,10 +53,27 @@ export const buildWorkerFailureContext = (
     };
 };
 
+export const resolveTelemetryWorkerMode = async (): Promise<'sync' | 'redis'> => {
+    try {
+        const settingsRecord = await telemetrySettingsResolverService.resolve(dbClient);
+        const operations =
+            settingsRecord.updatedAt === null ? undefined : settingsRecord.value.operations;
+
+        return new TelemetryIngestionQueueService().getMode({ operations });
+    } catch (error) {
+        console.warn('[TelemetryWorker] Failed to resolve telemetry settings; using environment.', {
+            error: error instanceof Error ? error.message : String(error),
+        });
+        return new TelemetryIngestionQueueService().getMode();
+    }
+};
+
 export const startWorker = async (): Promise<void> => {
-    if (getTelemetryIngestionMode() !== 'redis') {
+    const mode = await resolveTelemetryWorkerMode();
+
+    if (mode !== 'redis') {
         console.log(
-            `[TelemetryWorker] Ingestion mode is set to "${getTelemetryIngestionMode()}". Telemetry worker is inactive and exiting gracefully.`,
+            `[TelemetryWorker] Ingestion mode is set to "${mode}". Telemetry worker is inactive and exiting gracefully.`,
         );
         return;
     }
@@ -110,17 +128,12 @@ export const startWorker = async (): Promise<void> => {
         });
     });
 
-    worker.on('stalled', async (jobId) => {
-        const job = typeof jobId === 'string' ? await worker.getJob(jobId) : undefined;
-
+    worker.on('stalled', (jobId) => {
         console.error('[TelemetryWorker] Job stalled', {
             queueName: getTelemetryQueueName(),
             redisHost: redisTarget.host,
             redisPort: redisTarget.port,
-            ...buildWorkerFailureContext(
-                (job?.data as PersistableProctoringEvent | undefined) ?? null,
-                jobId?.toString?.() ?? null,
-            ),
+            jobId: jobId?.toString?.() ?? null,
         });
     });
 
