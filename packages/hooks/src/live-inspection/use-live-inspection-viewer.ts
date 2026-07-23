@@ -138,6 +138,20 @@ export function useLiveInspectionViewer({
         setReason(null);
     }, []);
 
+    const markRemoteVideoLost = useCallback(() => {
+        if (stopRequestedRef.current) {
+            return;
+        }
+
+        detachLocalVideo();
+        setState((current) =>
+            current === 'live' || current === 'connecting' || current === 'reconnecting'
+                ? 'reconnecting'
+                : current,
+        );
+        setReason('LIVEKIT_RUNTIME_LOST');
+    }, [detachLocalVideo]);
+
     const setVideoRef = useCallback(
         (element: HTMLVideoElement | null) => {
             const current = videoElementRef.current;
@@ -186,11 +200,32 @@ export function useLiveInspectionViewer({
 
                     attachedTrackRef.current = track;
                     track.attach(videoElement);
+
+                    track.mediaStreamTrack?.addEventListener?.('ended', markRemoteVideoLost, {
+                        once: true,
+                    });
+                });
+                room.on(RoomEvent.TrackUnsubscribed, (track: any) => {
+                    if (attachedTrackRef.current === track) {
+                        markRemoteVideoLost();
+                    }
+                });
+                room.on(RoomEvent.TrackMuted, (_publication: any, participant: any) => {
+                    if (!participant?.isLocal) {
+                        markRemoteVideoLost();
+                    }
+                });
+                room.on(RoomEvent.TrackUnmuted, () => {
+                    setReason(null);
+                    setState((current) => (current === 'reconnecting' ? 'connecting' : current));
                 });
                 room.on(RoomEvent.Reconnecting, () => setState('reconnecting'));
                 room.on(RoomEvent.Reconnected, () =>
                     setState((current) => (current === 'reconnecting' ? 'connecting' : current)),
                 );
+                room.on(RoomEvent.Disconnected, () => {
+                    markRemoteVideoLost();
+                });
                 room.on(RoomEvent.ConnectionQualityChanged, (quality: unknown) => {
                     setConnectionQuality(String(quality));
                 });
@@ -204,7 +239,7 @@ export function useLiveInspectionViewer({
                 setReason(mapErrorReason(error) ?? 'CONNECT_FAILED');
             }
         },
-        [apiClient, cleanupRoom, examId],
+        [apiClient, cleanupRoom, examId, markRemoteVideoLost],
     );
 
     const pollUntilPublisherReady = useCallback(

@@ -42,8 +42,12 @@ vi.mock('livekit-client', () => ({
     },
     RoomEvent: {
         TrackSubscribed: 'trackSubscribed',
+        TrackUnsubscribed: 'trackUnsubscribed',
+        TrackMuted: 'trackMuted',
+        TrackUnmuted: 'trackUnmuted',
         Reconnecting: 'reconnecting',
         Reconnected: 'reconnected',
+        Disconnected: 'disconnected',
         ConnectionQualityChanged: 'connectionQualityChanged',
     },
     Room: vi.fn().mockImplementation(function Room(options) {
@@ -168,6 +172,48 @@ describe('useLiveInspectionViewer', () => {
         });
 
         expect(result.current.state).toBe('live');
+    });
+
+    it('marks the live view reconnecting when the remote camera track is lost', async () => {
+        const video = document.createElement('video');
+        const track = { kind: 'video', attach: mockAttach, detach: mockDetach };
+        const { result } = renderHook(
+            () =>
+                useLiveInspectionViewer({
+                    examId: 'exam-1',
+                    studentId: 'student-1',
+                    attemptId: lease.attemptId,
+                    enabled: true,
+                }),
+            { wrapper },
+        );
+
+        act(() => result.current.setVideoRef(video));
+        await act(async () => {
+            await result.current.start();
+        });
+
+        const subscribedHandler = mockOn.mock.calls.find(
+            ([event]) => event === 'trackSubscribed',
+        )?.[1];
+        const unsubscribedHandler = mockOn.mock.calls.find(
+            ([event]) => event === 'trackUnsubscribed',
+        )?.[1];
+
+        act(() => {
+            subscribedHandler?.(track, { source: 'camera', kind: 'video' });
+            video.dispatchEvent(new Event('playing'));
+        });
+
+        expect(result.current.state).toBe('live');
+
+        act(() => {
+            unsubscribedHandler?.(track);
+        });
+
+        expect(mockDetach).toHaveBeenCalledWith(video);
+        expect(result.current.state).toBe('reconnecting');
+        expect(result.current.reason).toBe('LIVEKIT_RUNTIME_LOST');
     });
 
     it('rejects audio/screen-share tracks and never shows false LIVE', async () => {

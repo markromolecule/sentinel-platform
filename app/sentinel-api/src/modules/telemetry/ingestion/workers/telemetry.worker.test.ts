@@ -2,7 +2,6 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 const hoisted = vi.hoisted(() => {
     const handlers = new Map<string, (...args: any[]) => any>();
-    const workerGetJob = vi.fn();
     const workerClose = vi.fn().mockResolvedValue(undefined);
     const WorkerMock = vi.fn(function Worker() {
         return {
@@ -10,7 +9,6 @@ const hoisted = vi.hoisted(() => {
                 handlers.set(event, handler);
                 return this;
             }),
-            getJob: workerGetJob,
             close: workerClose,
         };
     });
@@ -19,11 +17,19 @@ const hoisted = vi.hoisted(() => {
         WorkerMock,
         handlers,
         workerClose,
-        workerGetJob,
         createRedisConnection: vi.fn(() => ({ quit: vi.fn(), disconnect: vi.fn() })),
         closeRedisConnection: vi.fn().mockResolvedValue(undefined),
+        hasRedisConfigured: vi.fn(() => Boolean(process.env.REDIS_URL)),
         validateRedisConfig: vi.fn().mockResolvedValue(undefined),
         processQueuedTelemetryEvent: vi.fn().mockResolvedValue('inserted'),
+        resolveTelemetrySettings: vi.fn().mockResolvedValue({
+            updatedAt: null,
+            value: {
+                operations: {
+                    ingestionMode: 'sync',
+                },
+            },
+        }),
     };
 });
 
@@ -34,6 +40,7 @@ vi.mock('bullmq', () => ({
 vi.mock('../../../../lib/redis/redis.service', () => ({
     createRedisConnection: hoisted.createRedisConnection,
     closeRedisConnection: hoisted.closeRedisConnection,
+    hasRedisConfigured: hoisted.hasRedisConfigured,
     validateRedisConfig: hoisted.validateRedisConfig,
 }));
 
@@ -50,6 +57,12 @@ vi.mock('../services/telemetry-job-processor.service', () => ({
     processQueuedTelemetryEvent: hoisted.processQueuedTelemetryEvent,
 }));
 
+vi.mock('../../settings/telemetry-settings-resolver.service', () => ({
+    telemetrySettingsResolverService: {
+        resolve: hoisted.resolveTelemetrySettings,
+    },
+}));
+
 vi.mock('@sentinel/db', () => ({
     dbClient: {},
 }));
@@ -62,6 +75,14 @@ describe('telemetry.worker', () => {
         delete process.env.TELEMETRY_INGESTION_MODE;
         delete process.env.REDIS_URL;
         delete process.env.TELEMETRY_REDIS_QUEUE_NAME;
+        hoisted.resolveTelemetrySettings.mockResolvedValue({
+            updatedAt: null,
+            value: {
+                operations: {
+                    ingestionMode: 'sync',
+                },
+            },
+        });
     });
 
     afterEach(() => {
@@ -80,6 +101,32 @@ describe('telemetry.worker', () => {
         });
 
         expect(hoisted.WorkerMock).not.toHaveBeenCalled();
+    });
+
+    it('starts when persisted telemetry settings request redis mode even if the environment is sync', async () => {
+        process.env.TELEMETRY_INGESTION_MODE = 'sync';
+        process.env.REDIS_URL = 'redis://127.0.0.1:6379';
+        hoisted.resolveTelemetrySettings.mockResolvedValueOnce({
+            updatedAt: new Date('2026-07-24T00:00:00.000Z'),
+            value: {
+                operations: {
+                    ingestionMode: 'redis',
+                },
+            },
+        });
+
+        await import('./telemetry.worker');
+
+        await vi.waitFor(() => {
+            expect(hoisted.WorkerMock).toHaveBeenCalledWith(
+                'telemetry-ingestion',
+                expect.any(Function),
+                expect.objectContaining({
+                    connection: expect.anything(),
+                    concurrency: 5,
+                }),
+            );
+        });
     });
 
     it('logs attempt and event identifiers for failed jobs', async () => {
@@ -125,24 +172,11 @@ describe('telemetry.worker', () => {
         });
     });
 
-    it('looks up stalled jobs and logs attempt and event identifiers when available', async () => {
+    it('logs stalled job identifiers without relying on Worker job lookup APIs', async () => {
         process.env.TELEMETRY_INGESTION_MODE = 'redis';
         process.env.REDIS_URL = 'redis://127.0.0.1:6379';
         process.env.TELEMETRY_REDIS_QUEUE_NAME = 'telemetry-ingestion';
         const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
-        hoisted.workerGetJob.mockResolvedValue({
-            data: {
-                examSessionId: 'attempt-2',
-                studentId: 'student-2',
-                eventType: 'COPY_ATTEMPT',
-                ruleKey: 'webSecurity.clipboard_monitor',
-                timestamp: '2026-07-11T10:01:00.000Z',
-                metadata: {
-                    eventId: '223e4567-e89b-12d3-a456-426614174999',
-                    dedupeKey: 'attempt-2:COPY_ATTEMPT:bucket-1',
-                },
-            },
-        });
 
         await import('./telemetry.worker');
         const stalledHandler = hoisted.handlers.get('stalled');
@@ -151,19 +185,11 @@ describe('telemetry.worker', () => {
 
         await stalledHandler?.('job-2');
 
-        expect(hoisted.workerGetJob).toHaveBeenCalledWith('job-2');
         expect(errorSpy).toHaveBeenCalledWith('[TelemetryWorker] Job stalled', {
             queueName: 'telemetry-ingestion',
             redisHost: '127.0.0.1',
             redisPort: '6379',
             jobId: 'job-2',
-            attemptId: 'attempt-2',
-            studentId: 'student-2',
-            eventType: 'COPY_ATTEMPT',
-            ruleKey: 'webSecurity.clipboard_monitor',
-            timestamp: '2026-07-11T10:01:00.000Z',
-            eventId: '223e4567-e89b-12d3-a456-426614174999',
-            dedupeKey: 'attempt-2:COPY_ATTEMPT:bucket-1',
         });
     });
 
