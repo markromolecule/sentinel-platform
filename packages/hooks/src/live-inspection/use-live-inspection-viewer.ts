@@ -88,6 +88,7 @@ export function useLiveInspectionViewer({
     const leaseRef = useRef<LiveInspectionStaffStatus | null>(null);
     const attachedTrackRef = useRef<any>(null);
     const pollTimerRef = useRef<number | null>(null);
+    const pollStartTimeRef = useRef<number | null>(null);
     const stopRequestedRef = useRef(false);
     const [state, setState] = useState<LiveInspectionViewerState>('idle');
     const [reason, setReason] = useState<LiveInspectionViewerReason>(null);
@@ -208,6 +209,13 @@ export function useLiveInspectionViewer({
                 return;
             }
 
+            if (pollStartTimeRef.current && Date.now() - pollStartTimeRef.current > 15_000) {
+                cleanupRoom();
+                setState('failed');
+                setReason('TIMEOUT');
+                return;
+            }
+
             try {
                 const status = await getLiveInspectionStatus(apiClient, { examId, leaseId });
                 leaseRef.current = status;
@@ -252,6 +260,7 @@ export function useLiveInspectionViewer({
             const lease = await startLiveInspection(apiClient, { examId, attemptId });
             leaseRef.current = lease;
             setState('waiting_for_student');
+            pollStartTimeRef.current = Date.now();
             await pollUntilPublisherReady(lease.leaseId);
         } catch (error) {
             setState('failed');

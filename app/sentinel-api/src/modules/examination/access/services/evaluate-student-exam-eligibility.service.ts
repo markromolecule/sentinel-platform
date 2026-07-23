@@ -2,12 +2,12 @@ import { type DbClient } from '@sentinel/db';
 import type { ExamAccessEligibility } from '../access.dto';
 import { EntitlementsRepository } from '../data/entitlements.repository';
 import { RuntimeAccessService } from '../../runtime-access/runtime-access.service';
-import {
-    buildStudentOverrideRuntimeAccess,
-    StudentOverridesService,
-} from '../../student-overrides/student-overrides.service';
+import { StudentOverridesService } from '../../student-overrides/student-overrides.service';
 import { validateBasicEligibility } from './validate-basic-eligibility';
 import { resolveLobbyRuntimeAccess } from './resolve-lobby-runtime-access';
+import { validateRemediationAccess } from './validate-remediation-access';
+import { validateStudentEnrollment } from './validate-student-enrollment';
+import { resolveStudentOverrideAccess } from './resolve-student-override-access';
 
 export type EvaluateStudentExamEligibilityArgs = {
     dbClient: DbClient;
@@ -121,13 +121,13 @@ function buildEligibilityContext(args: {
         institutionId: resolvedExam.institution_id,
         remediation: resolvedExam.remediation_id
             ? {
-                  remediationId: resolvedExam.remediation_id,
-                  sourceExamId: resolvedExam.remediation_source_exam_id!,
-                  sourceAttemptId: resolvedExam.remediation_source_attempt_id ?? null,
-                  remediationType: resolvedExam.remediation_type!,
-                  scheduledDate: resolvedExam.remediation_scheduled_date ?? null,
-                  endDateTime: resolvedExam.remediation_end_date_time ?? null,
-              }
+                remediationId: resolvedExam.remediation_id,
+                sourceExamId: resolvedExam.remediation_source_exam_id!,
+                sourceAttemptId: resolvedExam.remediation_source_attempt_id ?? null,
+                remediationType: resolvedExam.remediation_type!,
+                scheduledDate: resolvedExam.remediation_scheduled_date ?? null,
+                endDateTime: resolvedExam.remediation_end_date_time ?? null,
+            }
             : null,
     };
 }
@@ -135,6 +135,9 @@ function buildEligibilityContext(args: {
 /**
  * Performs core eligibility and access rule evaluations for a student exam access request.
  * Delegates basic constraints and lobby gating checks to modular helpers.
+ *
+ * @param args - The evaluation arguments containing database client, student, and exam identifiers.
+ * @returns The resolved student access and eligibility payload.
  */
 export async function evaluateStudentExamEligibilityService({
     dbClient,
@@ -157,60 +160,31 @@ export async function evaluateStudentExamEligibilityService({
     // Student and Exam are verified non-nullable here by validateBasicEligibility
     const resolvedStudent = student!;
     const resolvedExam = exam!;
-    const isRemediationExam = Boolean(resolvedExam.remediation_id);
-    const isLinkedRemediationStudent =
-        resolvedExam.remediation_student_id === resolvedStudent.user_id ||
-        resolvedExam.remediation_student_id === resolvedStudent.student_id;
 
-    if (isRemediationExam && !isLinkedRemediationStudent) {
-        return {
-            isEligible: false,
-            reason: 'This remediation exam is only available to the assigned student.',
-            reasonCode: 'CLOSED',
-            runtimeAccess: {
-                state: 'closed',
-                reasonCode: 'CLOSED',
-                message: 'This remediation exam is only available to the assigned student.',
-                canStart: false,
-                canResume: false,
-                hasActiveAttempt: false,
-                startsAt,
-                endsAt,
-                reopenedUntil: null,
-            },
-        };
+    // 1. Remediation check
+    const remediationCheck = validateRemediationAccess({
+        resolvedExam,
+        resolvedStudent,
+        startsAt,
+        endsAt,
+    });
+    if (!remediationCheck.isEligible) {
+        return remediationCheck.errorResponse;
     }
 
-    const isEnrolled = isRemediationExam
-        ? true
-        : await EntitlementsRepository.hasStudentExamEnrollment(dbClient, {
-              studentId: resolvedStudent.student_id,
-              classGroupId: resolvedExam.class_group_id,
-              subjectId: resolvedExam.subject_id!,
-              sectionId: resolvedExam.section_id,
-              sectionIds: resolvedExam.assigned_section_ids,
-          });
-
-    if (!isEnrolled) {
-        return {
-            isEligible: false,
-            reason: 'Student is not actively enrolled in the exam subject or assigned section.',
-            reasonCode: 'CLOSED',
-            runtimeAccess: {
-                state: 'closed',
-                reasonCode: 'CLOSED',
-                message:
-                    'Student is not actively enrolled in the exam subject or assigned section.',
-                canStart: false,
-                canResume: false,
-                hasActiveAttempt: false,
-                startsAt,
-                endsAt,
-                reopenedUntil: null,
-            },
-        };
+    // 2. Enrollment check
+    const enrollmentCheck = await validateStudentEnrollment({
+        dbClient,
+        resolvedStudent,
+        resolvedExam,
+        startsAt,
+        endsAt,
+    });
+    if (!enrollmentCheck.isEligible) {
+        return enrollmentCheck.errorResponse;
     }
 
+    // 3. Data retrieval for attempt, override and lobby resolution
     const latestAttempt = await EntitlementsRepository.getStudentLatestExamAttempt(dbClient, {
         studentId: resolvedStudent.student_id,
         examId: resolvedExam.exam_id,
@@ -259,85 +233,36 @@ export async function evaluateStudentExamEligibilityService({
         latestAttempt?.status === 'IN_PROGRESS' &&
         latestAttemptLifecycle.isResumable;
     const runtimeAccess =
-        resolvedExam.lobby_admission_mode === 'INSTRUCTOR_GATED' &&
-        !latestAttempt?.completed_at &&
-        latestAttempt?.status !== 'IN_PROGRESS' &&
-        (scheduledRuntimeAccess.canStart || accessOverride)
+        (resolvedExam.lobby_admission_mode ?? 'INSTRUCTOR_GATED') === 'INSTRUCTOR_GATED' &&
+            !latestAttempt?.completed_at &&
+            latestAttempt?.status !== 'IN_PROGRESS' &&
+            (scheduledRuntimeAccess.canStart || accessOverride)
             ? resolveLobbyRuntimeAccess({
-                  scheduledRuntimeAccess,
-                  admissionStatus: latestLobbyAdmission?.status ?? null,
-              })
+                scheduledRuntimeAccess,
+                admissionStatus: latestLobbyAdmission?.status ?? null,
+            })
             : scheduledRuntimeAccess;
 
-    if (accessOverride?.overrideType === 'REOPEN' && !hasValidReopenOverride) {
-        return {
-            isEligible: false,
-            reason: 'This reopen window no longer applies because the original attempt can no longer be resumed.',
-            reasonCode: 'CLOSED',
-            runtimeAccess: {
-                state: 'closed',
-                reasonCode: 'CLOSED',
-                message:
-                    'This reopen window no longer applies because the original attempt can no longer be resumed.',
-                canStart: false,
-                canResume: false,
-                hasActiveAttempt: false,
-                startsAt,
-                endsAt,
-                reopenedUntil: null,
-            },
-            accessOverride,
-        };
+    // 4. Student Override and Attempt Lifecycle Gating checks
+    const overrideResult = resolveStudentOverrideAccess({
+        accessOverride,
+        latestAttempt,
+        latestAttemptLifecycle,
+        hasResumableAttempt,
+        scheduledRuntimeAccess,
+        persistedRuntimeAccess,
+        hasValidReopenOverride,
+        runtimeAccess,
+        startsAt,
+        endsAt,
+        buildContext: () => buildEligibilityContext({ resolvedExam, resolvedStudent }),
+    });
+
+    if (overrideResult) {
+        return overrideResult;
     }
 
-    if (latestAttemptLifecycle.isBlocked && accessOverride?.overrideType !== 'REOPEN') {
-        if (
-            accessOverride &&
-            (accessOverride.overrideType === 'MAKEUP' || accessOverride.overrideType === 'RETAKE')
-        ) {
-            return {
-                isEligible: true,
-                context: buildEligibilityContext({ resolvedExam, resolvedStudent }),
-                runtimeAccess: buildStudentOverrideRuntimeAccess({
-                    accessOverride,
-                    runtimeAccess: scheduledRuntimeAccess,
-                    hasActiveAttempt: false,
-                }),
-                accessOverride,
-            };
-        }
-
-        return {
-            isEligible: false,
-            reason: latestAttemptLifecycle.runtimeAccess!.message,
-            reasonCode: latestAttemptLifecycle.runtimeAccess!.reasonCode,
-            runtimeAccess: {
-                ...latestAttemptLifecycle.runtimeAccess!,
-                startsAt,
-                endsAt,
-            },
-            accessOverride: accessOverride ?? null,
-        };
-    }
-
-    if (
-        accessOverride &&
-        persistedRuntimeAccess?.state !== 'closed' &&
-        !scheduledRuntimeAccess.canStart &&
-        !scheduledRuntimeAccess.canResume
-    ) {
-        return {
-            isEligible: true,
-            context: buildEligibilityContext({ resolvedExam, resolvedStudent }),
-            runtimeAccess: buildStudentOverrideRuntimeAccess({
-                accessOverride,
-                runtimeAccess: scheduledRuntimeAccess,
-                hasActiveAttempt: hasValidReopenOverride || hasResumableAttempt,
-            }),
-            accessOverride,
-        };
-    }
-
+    // 5. Standard schedule / lobby validation fallback
     if (!runtimeAccess.canStart && !runtimeAccess.canResume) {
         return {
             isEligible: false,

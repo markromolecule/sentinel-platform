@@ -13,7 +13,7 @@ export const getAdmissionStatus = async (dbClient: DbClient, examId: string, stu
         throw new HTTPException(404, { message: 'Exam not found' });
     }
 
-    if ((exam.lobby_admission_mode ?? 'AUTOMATIC') === 'AUTOMATIC') {
+    if ((exam.lobby_admission_mode ?? 'INSTRUCTOR_GATED') === 'AUTOMATIC') {
         return {
             status: 'APPROVED' as const,
             checkedInAt: null,

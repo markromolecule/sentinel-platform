@@ -252,4 +252,36 @@ describe('useLiveInspectionViewer', () => {
         expect(result.current.reason).toBe('CONFLICT');
         expect(JSON.stringify(result.current).toLowerCase()).not.toContain('token');
     });
+
+    it('times out and transitions to failed state when student camera response is delayed', async () => {
+        vi.useFakeTimers();
+        mockStatus.mockResolvedValue({ ...lease, state: 'REQUESTED' });
+
+        const { result } = renderHook(
+            () =>
+                useLiveInspectionViewer({
+                    examId: 'exam-1',
+                    studentId: 'student-1',
+                    attemptId: lease.attemptId,
+                    enabled: true,
+                }),
+            { wrapper },
+        );
+
+        await act(async () => {
+            await result.current.start();
+        });
+
+        expect(result.current.state).toBe('waiting_for_student');
+
+        // Advance timers by 16 seconds to exceed the 15-second timeout limit
+        await act(async () => {
+            await vi.advanceTimersByTimeAsync(16000);
+        });
+
+        expect(result.current.state).toBe('failed');
+        expect(result.current.reason).toBe('TIMEOUT');
+
+        vi.useRealTimers();
+    });
 });

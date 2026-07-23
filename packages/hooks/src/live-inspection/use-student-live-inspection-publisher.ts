@@ -219,7 +219,14 @@ export function useStudentLiveInspectionPublisher({
             return;
         }
 
-        if (!isNewerDirective(directive, currentLeaseIdRef.current, currentRevisionRef.current)) {
+        const isRoomDisconnected =
+            activePublicationRef.current?.room &&
+            activePublicationRef.current.room.state === 'disconnected';
+
+        if (
+            !isNewerDirective(directive, currentLeaseIdRef.current, currentRevisionRef.current) &&
+            !isRoomDisconnected
+        ) {
             return;
         }
 
