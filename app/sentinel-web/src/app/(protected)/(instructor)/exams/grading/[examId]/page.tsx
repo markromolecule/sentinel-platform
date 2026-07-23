@@ -84,7 +84,9 @@ export default function ExamGradingPage({ params }: ExamGradingPageProps) {
                         <p className="text-muted-foreground">
                             {exam.classroomName || exam.subject} •{' '}
                             {exam.scheduledDate || exam.createdAt
-                                ? new Date(exam.scheduledDate || exam.createdAt).toLocaleDateString()
+                                ? new Date(
+                                      exam.scheduledDate || exam.createdAt,
+                                  ).toLocaleDateString()
                                 : 'No schedule'}
                         </p>
                     </div>

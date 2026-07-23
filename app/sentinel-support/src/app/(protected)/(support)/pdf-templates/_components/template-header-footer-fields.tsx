@@ -42,7 +42,7 @@ function SettingToggleRow({
     return (
         <div className="grid grid-cols-[minmax(0,1fr)_auto] items-start gap-4 py-4">
             <div className="min-w-0 space-y-1">
-                <p className="text-sm font-medium leading-5">{title}</p>
+                <p className="text-sm leading-5 font-medium">{title}</p>
                 <p className="text-muted-foreground text-xs leading-5">{description}</p>
             </div>
             <div className="flex min-h-10 items-center">
@@ -173,7 +173,7 @@ function HeaderFields({
                 </div>
             </div>
 
-            <div className="divide-border/70 rounded-xl border bg-muted/15 px-4 divide-y">
+            <div className="divide-border/70 bg-muted/15 divide-y rounded-xl border px-4">
                 <SettingToggleRow
                     title="Show institution logo"
                     description="Uses the uploaded institution branding logo when available. Manage the file in Report Template > Branding."
@@ -303,7 +303,7 @@ function FooterFields({
                 </div>
             </div>
 
-            <div className="divide-border/70 rounded-xl border bg-muted/15 px-4 divide-y">
+            <div className="divide-border/70 bg-muted/15 divide-y rounded-xl border px-4">
                 <SettingToggleRow
                     title="Show divider"
                     description="Adds a rule above the footer content."

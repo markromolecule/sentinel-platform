@@ -719,22 +719,22 @@ rollback operations before release.
 ### Phase 10 Remaining Work Handoff
 
 - Restore database connectivity for `testWithDbClient`, then implement the three DB-backed PDF tests listed above:
-  - overall report lifecycle/integration
-  - answer-key snapshot persistence/integration
-  - full PDF document authorization coverage
+    - overall report lifecycle/integration
+    - answer-key snapshot persistence/integration
+    - full PDF document authorization coverage
 - After DB access is restored, run the broader validation set:
-  - `pnpm --dir app/sentinel-api test`
-  - `pnpm --dir app/sentinel-support test`
-  - focused shared package tests
-  - `pnpm lint`
-  - `pnpm format:check`
-  - affected builds/typechecks
+    - `pnpm --dir app/sentinel-api test`
+    - `pnpm --dir app/sentinel-support test`
+    - focused shared package tests
+    - `pnpm lint`
+    - `pnpm format:check`
+    - affected builds/typechecks
 - Perform release-only verification that cannot be proven from local unit tests:
-  - PDF accessibility review
-  - load testing for 30-day, 366-day, and large answer-key cases
-  - final audit that lifecycle/download behavior matches the six Phase 10 verification bullets
+    - PDF accessibility review
+    - load testing for 30-day, 366-day, and large answer-key cases
+    - final audit that lifecycle/download behavior matches the six Phase 10 verification bullets
 - Keep the current log-minimization posture:
-  - do not reintroduce signed URLs, storage paths, report titles, correct answers, or raw branding bytes into audit details or console logs unless a new operational requirement explicitly justifies it.
+    - do not reintroduce signed URLs, storage paths, report titles, correct answers, or raw branding bytes into audit details or console logs unless a new operational requirement explicitly justifies it.
 
 ---
 

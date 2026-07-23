@@ -1,6 +1,7 @@
 # Eligibility Service Modularization Implementation Plan
 
 ## Goal
+
 Refactor the monolith eligibility evaluation engine `evaluate-student-exam-eligibility.service.ts` into clean, testable sub-modules. This refactoring will isolate distinct domain concerns (Remediation, Enrollments, Overrides, and Lifecycle state blocks) into independent helper files, while preserving 100% of the existing functional contract and test coverage.
 
 ---
@@ -38,6 +39,7 @@ Refactor the monolith eligibility evaluation engine `evaluate-student-exam-eligi
 ---
 
 ## Done Criteria
+
 - [ ] Mon monolith `evaluate-student-exam-eligibility.service.ts` is under 150 lines, focused solely on fetching data and orchestrating validators.
 - [ ] All 105 tests in `access.test.ts` pass successfully.
 - [ ] All exported functions contain proper JSDoc.

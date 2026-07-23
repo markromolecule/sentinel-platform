@@ -27,16 +27,10 @@ vi.mock('@sentinel/shared', async (importOriginal) => {
             ) {
                 return 0.7;
             }
-            if (
-                anomalyType === 'TALKING' &&
-                scoresArray[0] === MIXED_SPEECH_TYPING_SCORES[0]
-            ) {
+            if (anomalyType === 'TALKING' && scoresArray[0] === MIXED_SPEECH_TYPING_SCORES[0]) {
                 return 0.8;
             }
-            if (
-                anomalyType === 'TYPING' &&
-                scoresArray[378] === MIXED_SPEECH_TYPING_SCORES[378]
-            ) {
+            if (anomalyType === 'TYPING' && scoresArray[378] === MIXED_SPEECH_TYPING_SCORES[378]) {
                 return 0.9;
             }
             return null;

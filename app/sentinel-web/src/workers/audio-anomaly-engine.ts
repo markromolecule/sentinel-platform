@@ -322,8 +322,7 @@ export class AudioAnomalyEngine {
                             triggerDecision.acceptedConfidence !== null
                         ) {
                             this.lastAlertTime.set(anomalyType, now);
-                            triggeredAnomalies[anomalyType] =
-                                triggerDecision.acceptedConfidence;
+                            triggeredAnomalies[anomalyType] = triggerDecision.acceptedConfidence;
                         }
                     } else {
                         // Reset counter for this type because it didn't trigger this frame

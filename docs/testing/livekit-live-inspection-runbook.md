@@ -35,6 +35,7 @@ Expected evidence:
 > Testing both roles in two tabs of the same browser profile will share cookies/localStorage, overwriting the Supabase authentication JWT, which violates RLS and breaks Realtime signaling and API authorization.
 >
 > **Valid Same-Device Setups:**
+>
 > - Setup A: Chrome Normal Window (Student) + Chrome Incognito Window (Instructor)
 > - Setup B: Chrome Profile 1 (Student) + Chrome Profile 2 (Instructor)
 > - Setup C: Chrome (Student) + Safari/Firefox/Edge (Instructor)

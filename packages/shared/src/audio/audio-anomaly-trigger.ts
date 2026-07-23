@@ -25,8 +25,7 @@ export function evaluateAudioAnomalyTrigger(args: {
     cooldownActive: boolean;
     acceptedConfidence: number | null;
 } {
-    const confidenceMeetsThreshold =
-        args.confidence !== null && args.confidence >= args.threshold;
+    const confidenceMeetsThreshold = args.confidence !== null && args.confidence >= args.threshold;
 
     if (!confidenceMeetsThreshold) {
         return {

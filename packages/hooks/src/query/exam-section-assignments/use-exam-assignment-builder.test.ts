@@ -8,16 +8,14 @@ describe('useExamAssignmentBuilder', () => {
         { id: 'class-2', sectionId: 'sect-2' },
         { id: 'class-3', sectionId: 'sect-3' },
     ];
-    const mockCurrentAssignments = [
-        { classGroupId: 'class-3', sectionId: 'sect-3' },
-    ];
+    const mockCurrentAssignments = [{ classGroupId: 'class-3', sectionId: 'sect-3' }];
 
     it('initializes with a single empty row and default bulk instructor', () => {
         const { result } = renderHook(() =>
             useExamAssignmentBuilder({
                 classrooms: mockClassrooms,
                 currentAssignments: [],
-            })
+            }),
         );
 
         expect(result.current.rows).toHaveLength(1);
@@ -33,7 +31,7 @@ describe('useExamAssignmentBuilder', () => {
             useExamAssignmentBuilder({
                 classrooms: mockClassrooms,
                 currentAssignments: [],
-            })
+            }),
         );
 
         // Add a second row first
@@ -65,7 +63,7 @@ describe('useExamAssignmentBuilder', () => {
             useExamAssignmentBuilder({
                 classrooms: mockClassrooms,
                 currentAssignments: [],
-            })
+            }),
         );
 
         act(() => {
@@ -74,7 +72,11 @@ describe('useExamAssignmentBuilder', () => {
 
         // Override second row's instructor
         act(() => {
-            result.current.updateRowField(result.current.rows[0].localId, 'instructorId', 'inst-override');
+            result.current.updateRowField(
+                result.current.rows[0].localId,
+                'instructorId',
+                'inst-override',
+            );
         });
 
         expect(result.current.rows[0].instructorId).toBe('inst-override');
@@ -85,7 +87,7 @@ describe('useExamAssignmentBuilder', () => {
             useExamAssignmentBuilder({
                 classrooms: mockClassrooms,
                 currentAssignments: [],
-            })
+            }),
         );
 
         act(() => {
@@ -108,7 +110,7 @@ describe('useExamAssignmentBuilder', () => {
             useExamAssignmentBuilder({
                 classrooms: mockClassrooms,
                 currentAssignments: mockCurrentAssignments, // class-3 is already assigned
-            })
+            }),
         );
 
         act(() => {
@@ -123,7 +125,7 @@ describe('useExamAssignmentBuilder', () => {
             useExamAssignmentBuilder({
                 classrooms: mockClassrooms,
                 currentAssignments: [],
-            })
+            }),
         );
 
         expect(result.current.firstInvalidField).toBeNull();
@@ -155,7 +157,7 @@ describe('useExamAssignmentBuilder', () => {
             useExamAssignmentBuilder({
                 classrooms: mockClassrooms,
                 currentAssignments: [],
-            })
+            }),
         );
 
         // Initially invalid, returns null
@@ -165,7 +167,11 @@ describe('useExamAssignmentBuilder', () => {
         act(() => {
             result.current.updateRowField(result.current.rows[0].localId, 'classroomId', 'class-1');
             result.current.updateRowField(result.current.rows[0].localId, 'roomId', 'room-abc');
-            result.current.updateRowField(result.current.rows[0].localId, 'instructorId', 'inst-xyz');
+            result.current.updateRowField(
+                result.current.rows[0].localId,
+                'instructorId',
+                'inst-xyz',
+            );
         });
 
         expect(result.current.readinessCount).toBe(1);
@@ -189,7 +195,7 @@ describe('useExamAssignmentBuilder', () => {
             useExamAssignmentBuilder({
                 classrooms: mockClassrooms,
                 currentAssignments: [],
-            })
+            }),
         );
 
         act(() => {

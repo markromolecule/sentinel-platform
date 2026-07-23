@@ -25,12 +25,8 @@ export function useRoleMatrix() {
         pageError,
     } = useRoleMatrixSearch();
 
-    const {
-        collapsedCategoryKeys,
-        collapsedModuleKeys,
-        toggleCategory,
-        toggleModule,
-    } = useRoleMatrixCollapsing(groupedPermissions);
+    const { collapsedCategoryKeys, collapsedModuleKeys, toggleCategory, toggleModule } =
+        useRoleMatrixCollapsing(groupedPermissions);
 
     const {
         editingRoleId,

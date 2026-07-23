@@ -66,12 +66,12 @@ export function RoleMatrixHeader({
                                         className="border-muted/50 bg-background text-foreground h-8 w-full rounded-none border px-2 text-[13px] font-semibold outline-none"
                                     />
                                 ) : (
-                                    <div className="flex flex-col min-h-[32px] items-start gap-1">
+                                    <div className="flex min-h-[32px] flex-col items-start gap-1">
                                         <div className="flex items-start gap-1.5">
                                             <button
                                                 type="button"
                                                 onClick={() => onStartRoleNameEdit(role)}
-                                                className="text-foreground hover:text-primary text-[13px] leading-tight font-semibold transition-colors text-left"
+                                                className="text-foreground hover:text-primary text-left text-[13px] leading-tight font-semibold transition-colors"
                                             >
                                                 {formatRoleLabel(role.name)}
                                             </button>
@@ -84,8 +84,12 @@ export function RoleMatrixHeader({
                                         </div>
                                         {role.isSystem && (
                                             <Badge
-                                                variant={role.permissionSyncMode === 'BLUEPRINT' ? 'secondary' : 'default'}
-                                                className="text-[9px] px-1 h-4 rounded-none font-bold uppercase shrink-0"
+                                                variant={
+                                                    role.permissionSyncMode === 'BLUEPRINT'
+                                                        ? 'secondary'
+                                                        : 'default'
+                                                }
+                                                className="h-4 shrink-0 rounded-none px-1 text-[9px] font-bold uppercase"
                                             >
                                                 {role.permissionSyncMode}
                                             </Badge>

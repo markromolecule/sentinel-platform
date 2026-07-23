@@ -34,8 +34,12 @@ export function Footer() {
                 {/* Main row */}
                 <div className="grid gap-12 pb-14 lg:grid-cols-[1fr_2fr]">
                     {/* Brand */}
-                    <div className="flex items-start flex-col gap-5">
-                        <Link href="/" aria-label="Sentinel home" className="inline-flex items-start">
+                    <div className="flex flex-col items-start gap-5">
+                        <Link
+                            href="/"
+                            aria-label="Sentinel home"
+                            className="inline-flex items-start"
+                        >
                             <Image
                                 src="/icons/dark-sentinel-logo.svg"
                                 alt="Sentinel"

@@ -3,7 +3,7 @@ import type { MatrixCategory } from '../_components/table/role-matrix-types';
 
 /**
  * Custom hook to manage the collapsed and expanded state of category and module groupings in the Role Matrix table.
- * 
+ *
  * @param groupedPermissions The structured tree of category and module permissions to dynamically initialize collapse state for.
  */
 export function useRoleMatrixCollapsing(groupedPermissions: MatrixCategory[]) {

@@ -104,7 +104,9 @@ async function main() {
         await client.query('DROP FUNCTION IF EXISTS public.refresh_institution_hierarchy_state()');
         await client.query('DROP FUNCTION IF EXISTS public.apply_institution_hierarchy_state()');
         await client.query('DROP FUNCTION IF EXISTS public.rebuild_institution_hierarchy_paths()');
-        await client.query('DROP FUNCTION IF EXISTS public.assert_institution_hierarchy_no_cycle()');
+        await client.query(
+            'DROP FUNCTION IF EXISTS public.assert_institution_hierarchy_no_cycle()',
+        );
 
         await client.query(
             'ALTER TABLE public.audit_logs DROP CONSTRAINT IF EXISTS audit_logs_membership_id_fkey',

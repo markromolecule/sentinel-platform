@@ -39,7 +39,9 @@ vi.mock('@sentinel/hooks', async (importOriginal) => {
             isLoading: false,
         })),
         useUsersQuery: vi.fn(() => ({
-            data: [{ id: 'user-1', firstName: 'John', lastName: 'Doe', email: 'john@sentinel.edu' }],
+            data: [
+                { id: 'user-1', firstName: 'John', lastName: 'Doe', email: 'john@sentinel.edu' },
+            ],
             isLoading: false,
         })),
         useProfileQuery: vi.fn(() => ({
@@ -47,54 +49,64 @@ vi.mock('@sentinel/hooks', async (importOriginal) => {
             isLoading: false,
         })),
         useUserSearch: vi.fn(() => ({
-            users: [{ id: 'user-1', firstName: 'John', lastName: 'Doe', email: 'john@sentinel.edu' }],
+            users: [
+                { id: 'user-1', firstName: 'John', lastName: 'Doe', email: 'john@sentinel.edu' },
+            ],
             isLoading: false,
         })),
     };
 });
 
 vi.mock('./row-classroom-combobox', () => ({
-    RowClassroomCombobox: React.forwardRef(({ value, onValueChange, classrooms }: any, ref: any) => (
-        <div data-testid="mock-classroom-combobox">
-            <input
-                ref={ref}
-                data-testid="classroom-input"
-                value={value}
-                onChange={(e) => onValueChange(e.target.value)}
-            />
-            {classrooms.map((cls: any) => (
-                <button
-                    key={cls.id}
-                    data-testid={`classroom-select-${cls.id}`}
-                    onClick={() => onValueChange(cls.id)}
-                >
-                    {cls.className}
-                </button>
-            ))}
-        </div>
-    )),
+    RowClassroomCombobox: React.forwardRef(
+        ({ value, onValueChange, classrooms }: any, ref: any) => (
+            <div data-testid="mock-classroom-combobox">
+                <input
+                    ref={ref}
+                    data-testid="classroom-input"
+                    value={value}
+                    onChange={(e) => onValueChange(e.target.value)}
+                />
+                {classrooms.map((cls: any) => (
+                    <button
+                        key={cls.id}
+                        data-testid={`classroom-select-${cls.id}`}
+                        onClick={() => onValueChange(cls.id)}
+                    >
+                        {cls.className}
+                    </button>
+                ))}
+            </div>
+        ),
+    ),
 }));
 
 vi.mock('./row-instructor-combobox', () => ({
-    RowInstructorCombobox: React.forwardRef(({ value, onValueChange, users, placeholder }: any, ref: any) => (
-        <div data-testid="mock-instructor-combobox">
-            <input
-                ref={ref}
-                data-testid={placeholder === 'Apply instructor to all...' ? 'bulk-instructor-input' : 'instructor-input'}
-                value={value}
-                onChange={(e) => onValueChange(e.target.value)}
-            />
-            {users.map((usr: any) => (
-                <button
-                    key={usr.id}
-                    data-testid={`instructor-select-${usr.id}`}
-                    onClick={() => onValueChange(usr.id)}
-                >
-                    {usr.firstName}
-                </button>
-            ))}
-        </div>
-    )),
+    RowInstructorCombobox: React.forwardRef(
+        ({ value, onValueChange, users, placeholder }: any, ref: any) => (
+            <div data-testid="mock-instructor-combobox">
+                <input
+                    ref={ref}
+                    data-testid={
+                        placeholder === 'Apply instructor to all...'
+                            ? 'bulk-instructor-input'
+                            : 'instructor-input'
+                    }
+                    value={value}
+                    onChange={(e) => onValueChange(e.target.value)}
+                />
+                {users.map((usr: any) => (
+                    <button
+                        key={usr.id}
+                        data-testid={`instructor-select-${usr.id}`}
+                        onClick={() => onValueChange(usr.id)}
+                    >
+                        {usr.firstName}
+                    </button>
+                ))}
+            </div>
+        ),
+    ),
 }));
 
 vi.mock('@sentinel/ui', async (importOriginal) => {
@@ -112,7 +124,9 @@ vi.mock('@sentinel/ui', async (importOriginal) => {
             </div>
         ),
         SelectTrigger: React.forwardRef(({ children }: any, ref: any) => (
-            <button ref={ref} data-testid="select-trigger">{children}</button>
+            <button ref={ref} data-testid="select-trigger">
+                {children}
+            </button>
         )),
         SelectValue: ({ placeholder }: any) => <span>{placeholder}</span>,
         SelectContent: ({ children }: any) => <div>{children}</div>,
@@ -190,13 +204,7 @@ describe('NewAssignmentsBuilder', () => {
     });
 
     it('filters classrooms by subjectId if provided', () => {
-        render(
-            <NewAssignmentsBuilder
-                examId="exam-1"
-                subjectId="sub-2"
-                currentAssignments={[]}
-            />,
-        );
+        render(<NewAssignmentsBuilder examId="exam-1" subjectId="sub-2" currentAssignments={[]} />);
 
         // Assert only subject matched classroom cls-2 is shown, while cls-1 is filtered out
         expect(screen.queryByTestId('classroom-select-cls-2')).not.toBeNull();

@@ -1,7 +1,7 @@
 import type { AudioAnomalySettings, ExamConfig } from '@sentinel/shared';
 import type { AudioEngineDetection } from '../../workers/audio-anomaly-engine';
 
-export type AudioWorkerPhase = 'idle' | 'initializing' | 'running' | 'error';
+export type AudioWorkerPhase = 'idle' | 'initializing' | 'running' | 'warning' | 'error';
 
 export interface UseAudioAnomalyWorkerArgs {
     configuration?: ExamConfig;

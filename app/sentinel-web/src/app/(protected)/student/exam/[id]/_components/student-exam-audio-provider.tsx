@@ -50,7 +50,7 @@ const StudentExamAudioContext = createContext<StudentExamAudioContextValue>(DEFA
 
 /**
  * Helper to determine if a MediaStream is active and contains at least one live audio track.
- * 
+ *
  * @param stream - The MediaStream to check.
  * @returns True if the stream exists and has at least one live track, false otherwise.
  */

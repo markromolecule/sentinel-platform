@@ -9,6 +9,7 @@ export type CheckupCalibrationPanelProps = {
     calibrationProgress: number;
     calibrationHoldDurationLabel: string;
     mediaPipeAnalysis: MediaPipeFrameAnalysis | null;
+    calibrationFeedback?: string | null;
 };
 
 /**
@@ -19,6 +20,7 @@ export function CheckupCalibrationPanel({
     calibrationProgress,
     calibrationHoldDurationLabel,
     mediaPipeAnalysis,
+    calibrationFeedback,
 }: CheckupCalibrationPanelProps) {
     return (
         <div className="flex w-full flex-col gap-2 border-t pt-3">
@@ -48,9 +50,11 @@ export function CheckupCalibrationPanel({
                 <div className="space-y-2">
                     <Progress value={calibrationProgress} className="h-1.5 rounded-full" />
                     <p className="text-foreground/90 text-center text-sm leading-5 font-medium">
-                        {mediaPipeAnalysis?.status === 'ready'
-                            ? `Please stay still for ${calibrationHoldDurationLabel}...`
-                            : 'Center your face in the guide to begin calibration'}
+                        {calibrationFeedback
+                            ? calibrationFeedback
+                            : mediaPipeAnalysis?.status === 'ready'
+                              ? `Please stay still for ${calibrationHoldDurationLabel}...`
+                              : 'Center your face in the guide to begin calibration'}
                     </p>
                 </div>
             ) : (

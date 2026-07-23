@@ -7,7 +7,6 @@ import { ExamAttemptMobileQuestionNavigation } from './exam-attempt-mobile-quest
 import { ExamAttemptScrollableContentPane } from './exam-attempt-scrollable-content-pane';
 
 type ExamAttemptWorkspaceProps = {
-    isMobile: boolean;
     questionRail: ReactNode;
     passagePanel?: ReactNode;
     children: ReactNode;
@@ -15,7 +14,6 @@ type ExamAttemptWorkspaceProps = {
 };
 
 export function ExamAttemptWorkspace({
-    isMobile,
     questionRail,
     passagePanel,
     children,
@@ -45,63 +43,49 @@ export function ExamAttemptWorkspace({
 
                 <div className="min-w-0 flex-1">
                     {passagePanel ? (
-                        isMobile ? (
-                            <div className="grid h-full min-h-0 grid-rows-[minmax(0,1fr)_minmax(220px,0.85fr)]">
-                                <div className="min-h-0">
+                        <>
+                            {/* Below xl: Render only the question content pane */}
+                            <div className="flex h-full min-h-0 flex-col xl:hidden">
+                                <div className="min-h-0 flex-1">
                                     {questionContentPane('min-h-full px-4 py-4 sm:px-6 sm:py-5')}
                                 </div>
-                                <div className="border-border/60 min-h-0 border-t">
-                                    {passageContentPane('min-h-full px-4 py-4 sm:px-6 sm:py-5')}
-                                </div>
                             </div>
-                        ) : (
-                            <>
-                                <div className="flex h-full min-h-0 flex-col xl:hidden">
-                                    <div className="min-h-0 flex-1">
-                                        {questionContentPane('min-h-full px-6 py-5')}
-                                    </div>
-                                    <div className="border-border/60 min-h-[240px] border-t">
-                                        {passageContentPane('min-h-full px-6 py-5')}
-                                    </div>
-                                </div>
 
-                                <div className="hidden h-full min-h-0 min-w-0 xl:block">
-                                    <ResizablePanelGroup
-                                        id="exam-attempt-layout"
-                                        orientation="horizontal"
-                                        className="h-full min-h-0 min-w-0"
-                                        resizeTargetMinimumSize={{ fine: 24, coarse: 36 }}
+                            {/* xl and above: Render the resizable layout */}
+                            <div className="hidden h-full min-h-0 min-w-0 xl:block">
+                                <ResizablePanelGroup
+                                    id="exam-attempt-layout"
+                                    orientation="horizontal"
+                                    className="h-full min-h-0 min-w-0"
+                                    resizeTargetMinimumSize={{ fine: 24, coarse: 36 }}
+                                >
+                                    <ResizablePanel
+                                        id="exam-attempt-passage-panel"
+                                        defaultSize="50%"
+                                        minSize="25%"
+                                        maxSize="65%"
+                                        className="min-w-0 overflow-hidden"
                                     >
-                                        <ResizablePanel
-                                            id="exam-attempt-passage-panel"
-                                            defaultSize="50%"
-                                            minSize="25%"
-                                            maxSize="65%"
-                                            className="min-w-0 overflow-hidden"
-                                        >
-                                            <div className="border-border/60 h-full min-h-0 min-w-0 overflow-hidden border-r">
-                                                {passageContentPane(
-                                                    'min-h-full min-w-0 px-6 py-5 xl:px-8',
-                                                )}
-                                            </div>
-                                        </ResizablePanel>
-                                        <ResizableHandle withHandle />
-                                        <ResizablePanel
-                                            id="exam-attempt-question-panel"
-                                            defaultSize="50%"
-                                            minSize="35%"
-                                            className="min-w-0 overflow-hidden"
-                                        >
-                                            <div className="h-full min-h-0 min-w-0 overflow-hidden">
-                                                {questionContentPane(
-                                                    'min-h-full px-6 py-5 xl:px-8',
-                                                )}
-                                            </div>
-                                        </ResizablePanel>
-                                    </ResizablePanelGroup>
-                                </div>
-                            </>
-                        )
+                                        <div className="border-border/60 h-full min-h-0 min-w-0 overflow-hidden border-r">
+                                            {passageContentPane(
+                                                'min-h-full min-w-0 px-6 py-5 xl:px-8',
+                                            )}
+                                        </div>
+                                    </ResizablePanel>
+                                    <ResizableHandle withHandle />
+                                    <ResizablePanel
+                                        id="exam-attempt-question-panel"
+                                        defaultSize="50%"
+                                        minSize="35%"
+                                        className="min-w-0 overflow-hidden"
+                                    >
+                                        <div className="h-full min-h-0 min-w-0 overflow-hidden">
+                                            {questionContentPane('min-h-full px-6 py-5 xl:px-8')}
+                                        </div>
+                                    </ResizablePanel>
+                                </ResizablePanelGroup>
+                            </div>
+                        </>
                     ) : (
                         questionContentPane('min-h-full px-4 py-4 sm:px-6 sm:py-5 xl:px-8')
                     )}

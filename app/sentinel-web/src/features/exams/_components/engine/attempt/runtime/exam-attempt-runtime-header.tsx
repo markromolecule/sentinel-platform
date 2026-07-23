@@ -15,6 +15,8 @@ type ExamAttemptRuntimeHeaderProps = {
     flaggedCount: number;
     showPassagePanel: boolean;
     onTogglePassagePanel: () => void;
+    onToggleCompactPassage: () => void;
+    hasPassage?: boolean;
     onSubmit: () => void;
     isSubmitting?: boolean;
 };
@@ -25,6 +27,8 @@ export function ExamAttemptRuntimeHeader({
     flaggedCount,
     showPassagePanel,
     onTogglePassagePanel,
+    onToggleCompactPassage,
+    hasPassage = true,
     onSubmit,
     isSubmitting,
 }: ExamAttemptRuntimeHeaderProps) {
@@ -43,30 +47,48 @@ export function ExamAttemptRuntimeHeader({
                 {flaggedCount} flagged
             </Badge>
 
-            <TooltipProvider delayDuration={150}>
-                <Tooltip>
-                    <TooltipTrigger asChild>
-                        <Button
-                            type="button"
-                            variant="outline"
-                            className="h-10 gap-2 rounded-md px-3"
-                            onClick={onTogglePassagePanel}
-                        >
-                            {showPassagePanel ? (
-                                <PanelLeftClose className="h-4 w-4" />
-                            ) : (
-                                <PanelLeftOpen className="h-4 w-4" />
-                            )}
-                            <span className="hidden sm:inline">
-                                {showPassagePanel ? 'Hide passage' : 'Show passage'}
-                            </span>
-                        </Button>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                        {showPassagePanel ? 'Hide passage panel' : 'Show passage panel'}
-                    </TooltipContent>
-                </Tooltip>
-            </TooltipProvider>
+            {hasPassage ? (
+                <>
+                    {/* Compact Screen: Trigger that opens the sheet */}
+                    <Button
+                        type="button"
+                        variant="outline"
+                        className="h-10 gap-2 rounded-md px-3 xl:hidden"
+                        onClick={onToggleCompactPassage}
+                    >
+                        <PanelLeftOpen className="h-4 w-4" />
+                        <span className="hidden sm:inline">Show passage</span>
+                    </Button>
+
+                    {/* Desktop Screen: Toggle that hides/shows the panel */}
+                    <div className="hidden xl:block">
+                        <TooltipProvider delayDuration={150}>
+                            <Tooltip>
+                                <TooltipTrigger asChild>
+                                    <Button
+                                        type="button"
+                                        variant="outline"
+                                        className="h-10 gap-2 rounded-md px-3"
+                                        onClick={onTogglePassagePanel}
+                                    >
+                                        {showPassagePanel ? (
+                                            <PanelLeftClose className="h-4 w-4" />
+                                        ) : (
+                                            <PanelLeftOpen className="h-4 w-4" />
+                                        )}
+                                        <span className="hidden sm:inline">
+                                            {showPassagePanel ? 'Hide passage' : 'Show passage'}
+                                        </span>
+                                    </Button>
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                    {showPassagePanel ? 'Hide passage panel' : 'Show passage panel'}
+                                </TooltipContent>
+                            </Tooltip>
+                        </TooltipProvider>
+                    </div>
+                </>
+            ) : null}
 
             <Button
                 type="button"

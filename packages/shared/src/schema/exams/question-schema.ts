@@ -99,4 +99,3 @@ export const questionTypeCountsResponseSchema = z.object({
     items: z.array(questionTypeCountSchema),
     total: z.number().int().nonnegative(),
 });
-

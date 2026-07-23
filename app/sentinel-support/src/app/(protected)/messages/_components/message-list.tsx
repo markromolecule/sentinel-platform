@@ -234,7 +234,7 @@ export function MessageList({
                                             {conversation.lastMessage?.content || 'No messages yet'}
                                         </p>
                                         {conversation.unreadCount &&
-                                            conversation.unreadCount > 0 ? (
+                                        conversation.unreadCount > 0 ? (
                                             <span className="bg-primary text-primary-foreground flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[10px] font-bold">
                                                 {conversation.unreadCount}
                                             </span>

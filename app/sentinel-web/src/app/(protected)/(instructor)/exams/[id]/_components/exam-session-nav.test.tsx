@@ -133,7 +133,7 @@ describe('ExamSessionNav', () => {
 
         expect(screen.queryByRole('link', { name: 'Lobby' })).toBeNull();
         expect(screen.queryByRole('link', { name: 'Monitoring' })).toBeNull();
-        
+
         expect(screen.getByRole('link', { name: 'Overview' }).getAttribute('href')).toBe(
             '/exams/reports/exam-1?section=overview',
         );
@@ -207,4 +207,3 @@ describe('ExamSessionNav', () => {
         expect(activeLink.className).toContain('border-r-2');
     });
 });
-

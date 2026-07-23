@@ -100,7 +100,7 @@ export const RowClassroomCombobox = React.forwardRef<HTMLInputElement, RowClassr
                     ref={ref}
                     placeholder={placeholder}
                     disabled={disabled}
-                    value={open ? displayValue : (selectedName || '')}
+                    value={open ? displayValue : selectedName || ''}
                     onChange={handleInputChange}
                     showClear={value !== 'none'}
                     aria-invalid={ariaInvalid}

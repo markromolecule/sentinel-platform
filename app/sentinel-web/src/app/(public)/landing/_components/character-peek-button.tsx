@@ -27,7 +27,7 @@ export function CharacterPeekButton({
             className={cn(
                 'group relative inline-flex h-14 items-center overflow-visible rounded-full px-6 pr-5 text-sm font-semibold shadow-[0_18px_60px_rgba(0,0,0,0.22)] transition-transform duration-300 hover:-translate-y-0.5 md:h-16 md:px-8 md:pr-6 md:text-base',
                 variant === 'dark'
-                    ? 'bg-[#323d8f] text-white hover:bg-[#2a34a4] transition-colors'
+                    ? 'bg-[#323d8f] text-white transition-colors hover:bg-[#2a34a4]'
                     : 'bg-[#101522] text-white',
                 className,
             )}

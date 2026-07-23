@@ -24,7 +24,9 @@ describe('examSectionAssignmentSchema', () => {
             const result = createExamSectionAssignmentBatchBodySchema.safeParse(emptyBatch);
             expect(result.success).toBe(false);
             if (!result.success) {
-                expect(result.error.issues[0].message).toBe('At least one classroom assignment is required.');
+                expect(result.error.issues[0].message).toBe(
+                    'At least one classroom assignment is required.',
+                );
             }
         });
 
@@ -35,7 +37,9 @@ describe('examSectionAssignmentSchema', () => {
                 roomId: '22222222-2222-4222-8222-222222222222',
                 instructorId: '33333333-3333-4333-8333-333333333333',
             };
-            const result = createExamSectionAssignmentBatchBodySchema.safeParse({ assignments: [invalidItem] });
+            const result = createExamSectionAssignmentBatchBodySchema.safeParse({
+                assignments: [invalidItem],
+            });
             expect(result.success).toBe(false);
             if (!result.success) {
                 expect(result.error.issues[0].message).toBe('Classroom is required.');

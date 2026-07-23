@@ -55,7 +55,7 @@ export function useKeyboardListener(options: KeyboardListenerOptions) {
             if (shortcutDetection.detected) {
                 const clientActionAt = new Date().toISOString();
                 const now = new Date(clientActionAt).getTime();
-                
+
                 const burstResult = evaluateActionBurst({
                     lastAcceptedAt: lastPrintScreenIncidentAtRef.current,
                     candidateAt: now,
@@ -73,7 +73,7 @@ export function useKeyboardListener(options: KeyboardListenerOptions) {
                     clientActionAt,
                     bucketMs: 800,
                 });
-                
+
                 emitTelemetryEvent('PRINT_SCREEN_ATTEMPT', metadata);
                 lockExam('screen-capture');
                 toast.warning('A screen capture shortcut was detected for this exam.', {

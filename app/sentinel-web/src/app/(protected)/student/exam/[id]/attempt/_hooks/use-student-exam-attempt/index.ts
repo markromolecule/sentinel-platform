@@ -205,6 +205,12 @@ export function useStudentExamAttempt() {
         ? uiHook.reviewQuestionIds.includes(currentQuestion.id)
         : false;
 
+    // Close the compact passage sheet on question change
+    const currentQuestionId = currentQuestion?.id;
+    useEffect(() => {
+        uiHook.setIsCompactPassageOpen(false);
+    }, [currentQuestionId]);
+
     const currentContext = getRuntimePassageDetails({
         questionPassageContent: currentQuestion?.passageContent,
         questionPassageType: currentQuestion?.passageType,
@@ -238,6 +244,8 @@ export function useStudentExamAttempt() {
         reviewQuestionIds: uiHook.reviewQuestionIds,
         showPassagePanel: uiHook.showPassagePanel,
         setShowPassagePanel: uiHook.setShowPassagePanel,
+        isCompactPassageOpen: uiHook.isCompactPassageOpen,
+        setIsCompactPassageOpen: uiHook.setIsCompactPassageOpen,
         crossOutEnabled: uiHook.crossOutEnabled,
         setCrossOutEnabled: uiHook.setCrossOutEnabled,
         crossedOutOptions: uiHook.crossedOutOptions,

@@ -53,14 +53,11 @@ export function useStudentLiveInspectionPublisher({
     const statusRef = useRef<StudentLiveInspectionPublisherStatus>('idle');
     const isSuspendedRef = useRef(false);
 
-    const setPublisherStatus = useCallback(
-        (nextStatus: StudentLiveInspectionPublisherStatus) => {
-            statusRef.current = nextStatus;
-            setStatus(nextStatus);
-            onStatusChangeRef.current?.(nextStatus);
-        },
-        []
-    );
+    const setPublisherStatus = useCallback((nextStatus: StudentLiveInspectionPublisherStatus) => {
+        statusRef.current = nextStatus;
+        setStatus(nextStatus);
+        onStatusChangeRef.current?.(nextStatus);
+    }, []);
 
     // ------------------------------------------------------------------------
     // 3. Delegate publication actions and state to sub-hook

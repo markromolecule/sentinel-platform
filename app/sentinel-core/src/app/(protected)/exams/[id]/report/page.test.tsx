@@ -152,7 +152,8 @@ vi.mock('@sentinel/services', () => ({
 }));
 
 vi.mock('@sentinel/ui', () => ({
-    Dialog: ({ children, open }: { children: React.ReactNode; open?: boolean }) => open ? <div data-testid="dialog">{children}</div> : null,
+    Dialog: ({ children, open }: { children: React.ReactNode; open?: boolean }) =>
+        open ? <div data-testid="dialog">{children}</div> : null,
     DialogContent: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
     DialogHeader: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
     DialogTitle: ({ children }: { children: React.ReactNode }) => <h3>{children}</h3>,

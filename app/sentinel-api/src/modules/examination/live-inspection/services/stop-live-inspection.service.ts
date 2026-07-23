@@ -9,9 +9,7 @@ import {
     compareAndSetLiveInspectionLeaseState,
 } from '../live-inspection.repository';
 import { assertLiveInspectionViewerAccess } from '../live-inspection-access.service';
-import {
-    terminalizeLiveInspectionLeaseState,
-} from '../live-inspection-state.service';
+import { terminalizeLiveInspectionLeaseState } from '../live-inspection-state.service';
 import {
     assertLiveInspectionEnabled,
     cleanupLiveInspectionProviderRoom,
@@ -72,11 +70,15 @@ export async function stopLiveInspection(
         }
 
         // Attempt transition to STOPPING
-        const updated = await compareAndSetLiveInspectionLeaseState(args.dbClient, currentLease.lease_id, {
-            fromState: currentLease.state as any,
-            toState: 'STOPPING',
-            expectedVersion: currentLease.version,
-        });
+        const updated = await compareAndSetLiveInspectionLeaseState(
+            args.dbClient,
+            currentLease.lease_id,
+            {
+                fromState: currentLease.state as any,
+                toState: 'STOPPING',
+                expectedVersion: currentLease.version,
+            },
+        );
 
         if (updated) {
             currentLease = updated;
@@ -100,7 +102,9 @@ export async function stopLiveInspection(
     }
 
     if (currentLease.state !== 'STOPPING') {
-        throw new HTTPException(409, { message: 'Live inspection lease state transition conflict.' });
+        throw new HTTPException(409, {
+            message: 'Live inspection lease state transition conflict.',
+        });
     }
 
     const liveKit =

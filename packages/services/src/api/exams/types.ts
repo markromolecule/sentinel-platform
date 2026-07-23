@@ -532,7 +532,7 @@ export type StartExamSessionResult = {
     attemptId?: string;
     error?: string;
     errorCode?:
-    'ATTEMPT_ALREADY_COMPLETED' | 'ATTEMPT_LOCKED' | 'ATTEMPT_CLOSED' | 'ATTEMPT_SUPERSEDED';
+        'ATTEMPT_ALREADY_COMPLETED' | 'ATTEMPT_LOCKED' | 'ATTEMPT_CLOSED' | 'ATTEMPT_SUPERSEDED';
 };
 
 export type CompleteExamSessionPayload = {

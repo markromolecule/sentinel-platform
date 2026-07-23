@@ -5,13 +5,8 @@ import { evaluateActionBurst } from '../../../_lib/web-telemetry-client/_utils/a
 import { type BaseListenerOptions } from './types';
 
 export function useClipboardListener(options: BaseListenerOptions) {
-    const {
-        configuration,
-        examSessionId,
-        isMonitoringSuspended,
-        isMobile,
-        emitTelemetryEvent,
-    } = options;
+    const { configuration, examSessionId, isMonitoringSuspended, isMobile, emitTelemetryEvent } =
+        options;
 
     const lastClipboardIncidentAtRef = useRef(0);
 
@@ -19,7 +14,7 @@ export function useClipboardListener(options: BaseListenerOptions) {
         (clientActionAt = new Date().toISOString()) => {
             if (isMonitoringSuspended.current) return;
             const now = new Date(clientActionAt).getTime();
-            
+
             const burstResult = evaluateActionBurst({
                 lastAcceptedAt: lastClipboardIncidentAtRef.current,
                 candidateAt: now,
@@ -36,7 +31,7 @@ export function useClipboardListener(options: BaseListenerOptions) {
                 clientActionAt,
                 bucketMs: 800,
             });
-            
+
             emitTelemetryEvent('CLIPBOARD_ATTEMPT', metadata);
             toast.warning('Clipboard actions are disabled for this exam.');
         },

@@ -28,21 +28,29 @@ export function AddExamSectionAssignmentDialog({
     const [isSaving, setIsSaving] = React.useState(false);
 
     return (
-        <Dialog open={open} onOpenChange={(val) => {
-            if (isSaving) return;
-            onOpenChange(val);
-        }}>
+        <Dialog
+            open={open}
+            onOpenChange={(val) => {
+                if (isSaving) return;
+                onOpenChange(val);
+            }}
+        >
             <DialogContent
                 onEscapeKeyDown={(e) => isSaving && e.preventDefault()}
                 onPointerDownOutside={(e) => isSaving && e.preventDefault()}
                 className="max-h-[90vh] overflow-y-auto bg-white sm:max-w-4xl md:max-w-5xl dark:bg-zinc-900"
             >
                 <DialogHeader>
-                    <DialogTitle className="text-lg font-bold">Assign instructors and classrooms</DialogTitle>
+                    <DialogTitle className="text-lg font-bold">
+                        Assign instructors and classrooms
+                    </DialogTitle>
                     <DialogDescription>
-                        {examTitle ? `For examination: ${examTitle}` : 'Manage classroom, room, and instructor assignments.'}
-                        <span className="mt-1 block text-xs text-zinc-500 font-medium">
-                            All fields (Classroom, Room, and Instructor) are required for every assignment.
+                        {examTitle
+                            ? `For examination: ${examTitle}`
+                            : 'Manage classroom, room, and instructor assignments.'}
+                        <span className="mt-1 block text-xs font-medium text-zinc-500">
+                            All fields (Classroom, Room, and Instructor) are required for every
+                            assignment.
                         </span>
                     </DialogDescription>
                 </DialogHeader>

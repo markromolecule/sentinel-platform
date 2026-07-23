@@ -652,7 +652,7 @@ describe('use-attempt-mediapipe-monitoring', () => {
             faceLandmarks: [buildLowConfidenceFace()],
         });
         const configuration = createExamConfiguration();
-        const mediaPipeSandbox = createSandbox();
+        const mediaPipeSandbox = createSandbox({ offScreenDurationMs: 1500 });
         const runtimeAccess = createRuntimeAccess();
 
         const { result } = renderHook(() =>
@@ -673,9 +673,11 @@ describe('use-attempt-mediapipe-monitoring', () => {
             expect(result.current.phase).toBe('running');
         });
 
-        [500, 1000, 1500, 2000].forEach((frameTime) => {
-            advanceAnimationFrame(frameTime);
-        });
+        [500, 1000, 1500, 2000, 2500, 3000, 3500, 4000, 4500, 5000, 5500, 6000].forEach(
+            (frameTime) => {
+                advanceAnimationFrame(frameTime);
+            },
+        );
 
         await waitFor(() => {
             expect(mockEmitMediaPipeTelemetryEvent).toHaveBeenCalledTimes(1);
@@ -711,7 +713,7 @@ describe('use-attempt-mediapipe-monitoring', () => {
             faceLandmarks: [buildPartialFaceLookingAwayFace()],
         });
         const configuration = createExamConfiguration();
-        const mediaPipeSandbox = createSandbox();
+        const mediaPipeSandbox = createSandbox({ offScreenDurationMs: 1500 });
         const runtimeAccess = createRuntimeAccess();
 
         const { result } = renderHook(() =>
@@ -817,7 +819,7 @@ describe('use-attempt-mediapipe-monitoring', () => {
                 }),
             {
                 initialProps: {
-                    mediaPipeSandbox: createSandbox(),
+                    mediaPipeSandbox: createSandbox({ offScreenDurationMs: 1500 }),
                 },
             },
         );
@@ -833,10 +835,10 @@ describe('use-attempt-mediapipe-monitoring', () => {
         advanceAnimationFrame(500);
 
         rerender({
-            mediaPipeSandbox: createSandbox(),
+            mediaPipeSandbox: createSandbox({ offScreenDurationMs: 1500 }),
         });
 
-        [1000, 1500, 2000].forEach((frameTime) => {
+        [1000, 1500, 2000, 2500, 3000, 3500, 4000, 4500, 5000, 5500, 6000].forEach((frameTime) => {
             advanceAnimationFrame(frameTime);
         });
 
@@ -922,6 +924,58 @@ describe('use-attempt-mediapipe-monitoring', () => {
                 eventType: 'GAZE_OFF_SCREEN',
                 metadata: expect.objectContaining({
                     durationMs: 1000,
+                }),
+            }),
+        );
+    });
+
+    it('uses configured duration thresholds without clamping them to ATTEMPT_MAX_SIGNAL_DURATION_MS', async () => {
+        mockDetectForVideo.mockReturnValue({
+            faceLandmarks: [buildOffscreenFace()],
+        });
+        const configuration = createExamConfiguration();
+        const mediaPipeSandbox = createSandbox({ offScreenDurationMs: 4000 });
+        const runtimeAccess = createRuntimeAccess();
+
+        const { result } = renderHook(() =>
+            useAttemptMediaPipeMonitoring({
+                examId: EXAM_ID,
+                configuration,
+                mediaPipeSandbox,
+                examSessionId: '123e4567-e89b-12d3-a456-426614174000',
+                runtimeAccess,
+            }),
+        );
+
+        act(() => {
+            result.current.videoRef.current = createVideoElement();
+        });
+
+        await waitFor(() => {
+            expect(result.current.phase).toBe('running');
+        });
+
+        [500, 1000, 1500, 2000, 2500, 3000, 3500].forEach((frameTime) => {
+            advanceAnimationFrame(frameTime);
+        });
+
+        expect(mockEmitMediaPipeTelemetryEvent).not.toHaveBeenCalled();
+
+        [4000, 4500].forEach((frameTime) => {
+            advanceAnimationFrame(frameTime);
+        });
+
+        await waitFor(() => {
+            expect(mockEmitMediaPipeTelemetryEvent).toHaveBeenCalledTimes(1);
+        });
+
+        expect(mockEmitMediaPipeTelemetryEvent).toHaveBeenNthCalledWith(
+            1,
+            mockApiClient,
+            expect.objectContaining({
+                eventType: 'GAZE_OFF_SCREEN',
+                metadata: expect.objectContaining({
+                    durationMs: 4000,
                 }),
             }),
         );

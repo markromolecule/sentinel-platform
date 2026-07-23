@@ -9,11 +9,14 @@ import { normalizeStudentExam } from '@/app/(protected)/student/_lib/normalize-s
  */
 export function useExamList() {
     const [searchQuery, setSearchQuery] = useState('');
-    const { data: exams = [], isLoading } = useExamsQuery({ viewer: 'student' }, {
-        staleTime: 0,
-        refetchOnMount: 'always',
-        refetchOnWindowFocus: true,
-    });
+    const { data: exams = [], isLoading } = useExamsQuery(
+        { viewer: 'student' },
+        {
+            staleTime: 0,
+            refetchOnMount: 'always',
+            refetchOnWindowFocus: true,
+        },
+    );
 
     const filteredExams = useStableValue(() => {
         return exams.map(normalizeStudentExam).filter((exam) => {

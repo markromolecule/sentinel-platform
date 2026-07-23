@@ -101,7 +101,7 @@ export function Header() {
                     <SheetTrigger asChild>
                         <button
                             type="button"
-                            className="flex size-10 items-center justify-center rounded-lg border border-white/10 lg:hidden text-zinc-400 hover:text-white"
+                            className="flex size-10 items-center justify-center rounded-lg border border-white/10 text-zinc-400 hover:text-white lg:hidden"
                             aria-label="Open menu"
                         >
                             <Menu className="size-5" />
@@ -151,7 +151,7 @@ export function Header() {
                             </Link>
                             <Link
                                 href={getAuthUrl('/auth/register')}
-                                className="rounded-lg bg-[#323d8f] px-5 py-3 text-center font-black text-white hover:bg-[#2a34a4] transition-colors"
+                                className="rounded-lg bg-[#323d8f] px-5 py-3 text-center font-black text-white transition-colors hover:bg-[#2a34a4]"
                                 onClick={() => setMobileMenuOpen(false)}
                             >
                                 Register

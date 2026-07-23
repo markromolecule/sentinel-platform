@@ -49,7 +49,7 @@ export function LogsNav({ activeSection }: LogsNavProps) {
                     {groupIndex > 0 && <Separator className="bg-border/40 my-3" />}
 
                     <h3 className="text-muted-foreground/60 mb-2 px-4 text-xs font-semibold tracking-wider uppercase">
-                         {group.title}
+                        {group.title}
                     </h3>
 
                     <div className="flex flex-col gap-0.5">

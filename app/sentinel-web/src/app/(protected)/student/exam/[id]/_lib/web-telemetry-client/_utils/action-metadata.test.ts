@@ -13,7 +13,9 @@ describe('createTelemetryActionMetadata', () => {
         });
 
         expect(metadata.eventId).toBeDefined();
-        expect(metadata.eventId).toMatch(/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i);
+        expect(metadata.eventId).toMatch(
+            /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i,
+        );
         expect(metadata.dedupeKey).toBe(
             '123e4567-e89b-12d3-a456-426614174000:TAB_SWITCH:focus-visibility:2026-07-07T00:00:00.000Z',
         );

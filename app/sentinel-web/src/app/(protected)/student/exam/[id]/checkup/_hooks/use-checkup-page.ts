@@ -25,13 +25,7 @@ function formatCalibrationHoldDuration(seconds: number) {
  */
 export function useCheckupPage() {
     const stageGuard = useStudentExamStageGuard('checkup');
-    const {
-        examId,
-        blockedState,
-        configuration,
-        mediaPipeSandbox,
-        isResolving,
-    } = stageGuard;
+    const { examId, blockedState, configuration, mediaPipeSandbox, isResolving } = stageGuard;
 
     const effectiveMediaPipeSandbox = useMemo(
         () =>
@@ -56,6 +50,7 @@ export function useCheckupPage() {
     const {
         overlayCanvasRef,
         analysis: mediaPipeAnalysis,
+        calibrationFeedback,
         calibrationProgress,
         calibrationHoldSecondsRemaining,
         calibrationProfile,
@@ -152,9 +147,7 @@ export function useCheckupPage() {
 
         patchStoredStudentExamFlow(examId, {
             checkupCompleted: true,
-            mediaPipeActivatedAt: hasCompletedMediaPipeActivation
-                ? new Date().toISOString()
-                : null,
+            mediaPipeActivatedAt: hasCompletedMediaPipeActivation ? new Date().toISOString() : null,
             mediaPipeCalibrationCompletedAt: hasCompletedMediaPipeActivation
                 ? new Date().toISOString()
                 : null,
@@ -177,6 +170,7 @@ export function useCheckupPage() {
         isStreamActive,
         errorMessage,
         mediaPipeAnalysis,
+        calibrationFeedback,
         calibrationProgress,
         calibrationHoldDurationLabel,
         isCalibrated,

@@ -3,12 +3,6 @@ import { resolveMediaPipeThresholds } from '@sentinel/shared';
 import type { ResolvedMediaPipeSandbox } from '../_types';
 
 /**
- * Maximum duration threshold (ms) enforced for the attempt page, regardless
- * of what the sandbox configuration specifies.
- */
-const ATTEMPT_MAX_SIGNAL_DURATION_MS = 1500;
-
-/**
  * Fallback sandbox used when the live sandbox is not yet resolved, so
  * thresholds can still be computed with safe defaults.
  */
@@ -65,20 +59,8 @@ export function useMediapipeRuntimeThresholds({
     activeSandbox,
 }: UseMediapipeRuntimeThresholdsArgs) {
     return useMemo(() => {
-        const thresholds = resolveMediaPipeThresholds({
+        return resolveMediaPipeThresholds({
             sandbox: activeSandbox ?? FALLBACK_SANDBOX,
         });
-
-        thresholds.GAZE_OFF_SCREEN.durationThresholdMs = Math.min(
-            thresholds.GAZE_OFF_SCREEN.durationThresholdMs ?? ATTEMPT_MAX_SIGNAL_DURATION_MS,
-            ATTEMPT_MAX_SIGNAL_DURATION_MS,
-        );
-
-        thresholds.NO_FACE_DETECTED.durationThresholdMs = Math.min(
-            thresholds.NO_FACE_DETECTED.durationThresholdMs ?? ATTEMPT_MAX_SIGNAL_DURATION_MS,
-            ATTEMPT_MAX_SIGNAL_DURATION_MS,
-        );
-
-        return thresholds;
     }, [activeSandbox]);
 }

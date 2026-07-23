@@ -75,9 +75,7 @@ export default function PdfTemplateExaminationsPage() {
     const { data: institutions = [] } = useInstitutionsQuery();
     const [selectedInstitutionId, setSelectedInstitutionId] = React.useState('');
     const [selectedExamId, setSelectedExamId] = React.useState('');
-    const [activeTab, setActiveTab] = React.useState<'header' | 'footer' | 'answer-key'>(
-        'header',
-    );
+    const [activeTab, setActiveTab] = React.useState<'header' | 'footer' | 'answer-key'>('header');
     const [headerConfig, setHeaderConfig] = React.useState<HeaderConfig>(DEFAULT_HEADER_CONFIG);
     const [footerConfig, setFooterConfig] = React.useState<FooterConfig>(DEFAULT_FOOTER_CONFIG);
     const [activeDownloadId, setActiveDownloadId] = React.useState<string | null>(null);
@@ -111,7 +109,7 @@ export default function PdfTemplateExaminationsPage() {
 
     const isInstitutionLocked = Boolean(
         scopedInstitutionId &&
-            (!scopedInstitution || scopedInstitution.institutionKind !== 'PARENT'),
+        (!scopedInstitution || scopedInstitution.institutionKind !== 'PARENT'),
     );
 
     const templatesQuery = usePdfTemplatesQuery({
@@ -188,16 +186,11 @@ export default function PdfTemplateExaminationsPage() {
         }
 
         setSelectedInstitutionId((current) =>
-            current &&
-            availableInstitutions.some((institution) => institution.id === current)
+            current && availableInstitutions.some((institution) => institution.id === current)
                 ? current
                 : '',
         );
-    }, [
-        availableInstitutions,
-        isAcademicScopeLoading,
-        scopedInstitutionId,
-    ]);
+    }, [availableInstitutions, isAcademicScopeLoading, scopedInstitutionId]);
 
     React.useEffect(() => {
         setHeaderConfig(workingTemplate?.header_config ?? DEFAULT_HEADER_CONFIG);
@@ -312,15 +305,15 @@ export default function PdfTemplateExaminationsPage() {
                                         }}
                                         disabled={isInstitutionLocked}
                                     >
-                                        <SelectTrigger
-                                            id="answer-key-institution"
-                                            className="h-9"
-                                        >
+                                        <SelectTrigger id="answer-key-institution" className="h-9">
                                             <SelectValue placeholder="Choose an institution" />
                                         </SelectTrigger>
                                         <SelectContent>
                                             {availableInstitutions.map((institution) => (
-                                                <SelectItem key={institution.id} value={institution.id}>
+                                                <SelectItem
+                                                    key={institution.id}
+                                                    value={institution.id}
+                                                >
                                                     {institution.name}
                                                 </SelectItem>
                                             ))}
@@ -401,7 +394,7 @@ export default function PdfTemplateExaminationsPage() {
                         </div>
 
                         <div className="flex flex-col space-y-2 xl:pl-4">
-                            <p className="text-foreground/80 text-[11px] font-semibold uppercase tracking-[0.14em]">
+                            <p className="text-foreground/80 text-[11px] font-semibold tracking-[0.14em] uppercase">
                                 Preview
                             </p>
                             <div className="space-y-1">

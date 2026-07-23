@@ -68,7 +68,9 @@ export function CoreAdminSidebar() {
                                             onOpenChange={(open) => toggleMenu(item.title, open)}
                                             isChildActive={isChildActive}
                                             sidebarState={state}
-                                            unreadCount={item.url === '/messages' ? unreadCount : undefined}
+                                            unreadCount={
+                                                item.url === '/messages' ? unreadCount : undefined
+                                            }
                                         />
                                     ))}
                                 </SidebarMenu>

@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import {
     PdfTemplateSchema,
     ReportPeriodSchema,
-    PdfReportGenerationRequestSchema
+    PdfReportGenerationRequestSchema,
 } from './pdf-document-schema';
 
 describe('PdfTemplateSchema', () => {
@@ -78,7 +78,9 @@ describe('PdfTemplateSchema', () => {
 
         expect(result.success).toBe(false);
         if (!result.success) {
-            expect(result.error.issues[0].message).toContain('Sentinel logo visibility must be true');
+            expect(result.error.issues[0].message).toContain(
+                'Sentinel logo visibility must be true',
+            );
         }
     });
 

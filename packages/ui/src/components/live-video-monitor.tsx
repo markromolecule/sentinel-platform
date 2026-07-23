@@ -38,7 +38,7 @@ function getStatusLabel(state: LiveVideoMonitorState, reason?: string | null) {
     if (state === 'reconnecting') return 'Reconnecting live camera';
     if (state === 'stopping') return 'Stopping live view';
     if (state === 'ended') return 'Live view ended';
-    
+
     // Bounded reason codes
     if (reason === 'PERMISSION_DENIED') return 'Live view denied';
     if (reason === 'CAPACITY_REACHED') return 'Live view capacity reached';
@@ -119,9 +119,7 @@ export function LiveVideoMonitor({
             </div>
 
             <div role="status" aria-live="polite" className="text-muted-foreground text-xs">
-                {state === 'live'
-                    ? 'Live camera view is active.'
-                    : displayText}
+                {state === 'live' ? 'Live camera view is active.' : displayText}
             </div>
 
             {state === 'live' && connectionQuality ? (

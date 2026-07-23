@@ -3,6 +3,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { useAudioAnomalyWorker } from './use-audio-anomaly-worker';
 import { ingestTelemetryEvent } from '@sentinel/services';
 import { DEFAULT_AUDIO_ANOMALY_CONFIG, type ExamConfig } from '@sentinel/shared';
+import { AudioAnomalyController } from './audio-anomaly-controller';
 
 const { mockApiClient, mockAuth, mockToastWarning } = vi.hoisted(() => ({
     mockApiClient: vi.fn(),
@@ -29,10 +30,14 @@ vi.mock('sonner', () => ({
 // Mock audio worker class
 class MockWorker implements Partial<Worker> {
     onmessage: ((this: Worker, ev: MessageEvent) => any) | null = null;
+    onerror: ((this: Worker, ev: any) => any) | null = null;
     postMessage = vi.fn();
     addEventListener(type: string, handler: any) {
         if (type === 'message') {
             this.onmessage = handler;
+        }
+        if (type === 'error') {
+            this.onerror = handler;
         }
     }
     removeEventListener = vi.fn();
@@ -663,5 +668,188 @@ describe('useAudioAnomalyWorker', () => {
         ).length;
 
         expect(updatedInitCallCount).toBe(initCallCount);
+    });
+
+    it('does not repeatedly construct and dispose controller on rerenders with same configuration', async () => {
+        const startSpy = vi.spyOn(AudioAnomalyController.prototype, 'start');
+        const disposeSpy = vi.spyOn(AudioAnomalyController.prototype, 'dispose');
+
+        const { rerender } = renderHook(
+            ({ config }) =>
+                useAudioAnomalyWorker({
+                    configuration: config,
+                    examSessionId: 'session-123',
+                    isSuspended: false,
+                    runtimeConfig: DEFAULT_AUDIO_ANOMALY_CONFIG,
+                    worker: mockWorker as any,
+                }),
+            {
+                initialProps: {
+                    config: validConfig,
+                },
+            },
+        );
+
+        await waitFor(() => {
+            expect(startSpy).toHaveBeenCalledTimes(1);
+        });
+
+        // Rerender with equivalent config
+        rerender({
+            config: { ...validConfig },
+        });
+
+        // Ensure start was not called again and dispose was not called
+        expect(startSpy).toHaveBeenCalledTimes(1);
+        expect(disposeSpy).not.toHaveBeenCalled();
+
+        startSpy.mockRestore();
+        disposeSpy.mockRestore();
+    });
+
+    describe('Bounded Retry & Reconnection Backoff', () => {
+        beforeEach(() => {
+            vi.useFakeTimers();
+        });
+
+        it('transitions to warning, retries up to 5 times with backoff, and then transitions to error', async () => {
+            const { result } = renderHook(() =>
+                useAudioAnomalyWorker({
+                    configuration: validConfig,
+                    examSessionId: 'session-123',
+                    isSuspended: false,
+                    runtimeConfig: DEFAULT_AUDIO_ANOMALY_CONFIG,
+                    worker: mockWorker as any,
+                }),
+            );
+
+            // Expect phase to start as initializing
+            expect(result.current.phase).toBe('initializing');
+
+            // Trigger worker error to trigger retry 1 (delay = 2000ms)
+            act(() => {
+                if (mockWorker.onerror) {
+                    mockWorker.onerror(new ErrorEvent('error'));
+                }
+            });
+
+            expect(result.current.phase).toBe('warning');
+            expect(result.current.errorMessage).toContain('Reconnecting (Attempt 1/5)');
+
+            // Advance by 2000ms to run retry 1
+            act(() => {
+                vi.advanceTimersByTime(2000);
+            });
+
+            // Trigger worker error to trigger retry 2 (delay = 4000ms)
+            act(() => {
+                if (mockWorker.onerror) {
+                    mockWorker.onerror(new ErrorEvent('error'));
+                }
+            });
+            expect(result.current.errorMessage).toContain('Reconnecting (Attempt 2/5)');
+
+            // Advance by 4000ms to run retry 2
+            act(() => {
+                vi.advanceTimersByTime(4000);
+            });
+
+            // Trigger worker error to trigger retry 3 (delay = 8000ms)
+            act(() => {
+                if (mockWorker.onerror) {
+                    mockWorker.onerror(new ErrorEvent('error'));
+                }
+            });
+            expect(result.current.errorMessage).toContain('Reconnecting (Attempt 3/5)');
+
+            // Advance by 8000ms to run retry 3
+            act(() => {
+                vi.advanceTimersByTime(8000);
+            });
+
+            // Trigger worker error to trigger retry 4 (delay = 16000ms)
+            act(() => {
+                if (mockWorker.onerror) {
+                    mockWorker.onerror(new ErrorEvent('error'));
+                }
+            });
+            expect(result.current.errorMessage).toContain('Reconnecting (Attempt 4/5)');
+
+            // Advance by 16000ms to run retry 4
+            act(() => {
+                vi.advanceTimersByTime(16000);
+            });
+
+            // Trigger worker error to trigger retry 5 (delay = 32000ms)
+            act(() => {
+                if (mockWorker.onerror) {
+                    mockWorker.onerror(new ErrorEvent('error'));
+                }
+            });
+            expect(result.current.errorMessage).toContain('Reconnecting (Attempt 5/5)');
+
+            // Advance by 32000ms to run retry 5
+            act(() => {
+                vi.advanceTimersByTime(32000);
+            });
+
+            // Trigger worker error once more - retries exhausted
+            act(() => {
+                if (mockWorker.onerror) {
+                    mockWorker.onerror(new ErrorEvent('error'));
+                }
+            });
+
+            expect(result.current.phase).toBe('error');
+            expect(result.current.errorMessage).toContain(
+                'Failed to establish audio connection after 5 attempts',
+            );
+        });
+
+        it('resets retry count when INIT_SUCCESS is received during warning phase', async () => {
+            const { result } = renderHook(() =>
+                useAudioAnomalyWorker({
+                    configuration: validConfig,
+                    examSessionId: 'session-123',
+                    isSuspended: false,
+                    runtimeConfig: DEFAULT_AUDIO_ANOMALY_CONFIG,
+                    worker: mockWorker as any,
+                }),
+            );
+
+            // Trigger error -> retry 1
+            act(() => {
+                if (mockWorker.onerror) {
+                    mockWorker.onerror(new ErrorEvent('error'));
+                }
+            });
+            expect(result.current.phase).toBe('warning');
+            expect(result.current.errorMessage).toContain('Attempt 1/5');
+
+            // Run retry 1
+            act(() => {
+                vi.advanceTimersByTime(2000);
+            });
+
+            // Simulate worker INIT_SUCCESS
+            act(() => {
+                if (mockWorker.onmessage) {
+                    mockWorker.onmessage({
+                        data: { type: 'INIT_SUCCESS' },
+                    } as MessageEvent);
+                }
+            });
+
+            expect(result.current.phase).toBe('running');
+
+            // Trigger another error -> should be Attempt 1/5 again because count was reset!
+            act(() => {
+                if (mockWorker.onerror) {
+                    mockWorker.onerror(new ErrorEvent('error'));
+                }
+            });
+            expect(result.current.phase).toBe('warning');
+            expect(result.current.errorMessage).toContain('Attempt 1/5');
+        });
     });
 });

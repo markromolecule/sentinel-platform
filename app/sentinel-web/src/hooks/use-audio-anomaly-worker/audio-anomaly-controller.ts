@@ -33,6 +33,10 @@ export class AudioAnomalyController {
     private initTimeout: ReturnType<typeof setTimeout> | null = null;
     private isDisposed = false;
 
+    private retryCount = 0;
+    private maxRetries = 5;
+    private reconnectTimeout: ReturnType<typeof setTimeout> | null = null;
+
     constructor(private config: AudioAnomalyControllerConfig) {}
 
     /**
@@ -41,7 +45,9 @@ export class AudioAnomalyController {
      */
     public async start(): Promise<void> {
         this.isDisposed = false;
-        this.config.onPhaseChange('initializing');
+        if (this.retryCount === 0) {
+            this.config.onPhaseChange('initializing');
+        }
         this.config.onErrorMessage(null);
 
         // 1. Resolve or construct Worker
@@ -116,11 +122,7 @@ export class AudioAnomalyController {
             // 5. Start timeout guard
             this.initTimeout = setTimeout(() => {
                 if (this.isDisposed) return;
-                this.config.onPhaseChange('error');
-                this.config.onErrorMessage(
-                    'Audio monitoring took too long to start. The exam will continue without audio anomaly detection.',
-                );
-                void this.stopRuntime();
+                this.triggerRetry('Audio monitoring took too long to start.');
             }, INIT_TIMEOUT_MS);
 
             // 6. Post INIT message to worker
@@ -133,10 +135,21 @@ export class AudioAnomalyController {
         } catch (error) {
             if (this.isDisposed) return;
 
-            this.config.onPhaseChange('error');
-            this.config.onErrorMessage(
-                'Microphone access was denied or unavailable. Audio monitoring is inactive for this attempt.',
-            );
+            const isPermissionError =
+                error instanceof Error &&
+                (error.name === 'NotAllowedError' ||
+                    error.name === 'PermissionDeniedError' ||
+                    error.message.toLowerCase().includes('denied') ||
+                    error.message.toLowerCase().includes('permission'));
+
+            if (isPermissionError) {
+                this.config.onPhaseChange('error');
+                this.config.onErrorMessage(
+                    'Microphone access was denied or unavailable. Audio monitoring is inactive for this attempt.',
+                );
+            } else {
+                this.triggerRetry('Microphone access failed.');
+            }
             console.error('Failed to start audio anomaly monitoring.', error);
         }
     }
@@ -158,6 +171,10 @@ export class AudioAnomalyController {
      */
     public dispose(): void {
         this.isDisposed = true;
+        if (this.reconnectTimeout) {
+            clearTimeout(this.reconnectTimeout);
+            this.reconnectTimeout = null;
+        }
 
         if (this.worker) {
             this.worker.postMessage({ type: 'STOP_DETECTION' });
@@ -200,6 +217,39 @@ export class AudioAnomalyController {
         }
     };
 
+    private triggerRetry(errorMsg: string): void {
+        if (this.isDisposed) return;
+        this.clearInitTimeout();
+
+        if (this.retryCount < this.maxRetries) {
+            this.retryCount++;
+            this.config.onPhaseChange('warning');
+            this.config.onErrorMessage(
+                `${errorMsg} Reconnecting (Attempt ${this.retryCount}/${this.maxRetries})...`,
+            );
+
+            void this.stopRuntime();
+            if (this.worker && this.isOwnWorker) {
+                this.worker.postMessage({ type: 'STOP_DETECTION' });
+                this.worker.removeEventListener('message', this.handleMessage);
+                this.worker.removeEventListener('error', this.handleError);
+                this.worker.terminate();
+                this.worker = null;
+            }
+
+            const delay = Math.pow(2, this.retryCount) * 1000;
+            this.reconnectTimeout = setTimeout(() => {
+                void this.start();
+            }, delay);
+        } else {
+            this.config.onPhaseChange('error');
+            this.config.onErrorMessage(
+                `Failed to establish audio connection after ${this.maxRetries} attempts. ${errorMsg}`,
+            );
+            void this.stopRuntime();
+        }
+    }
+
     private handleMessage = (event: MessageEvent): void => {
         if (this.isDisposed) return;
 
@@ -208,6 +258,7 @@ export class AudioAnomalyController {
         switch (data.type) {
             case 'INIT_SUCCESS':
                 this.clearInitTimeout();
+                this.retryCount = 0;
                 if (this.worker) {
                     this.worker.postMessage({ type: 'START_DETECTION' });
                 }
@@ -224,8 +275,7 @@ export class AudioAnomalyController {
 
             case 'INIT_FAILURE':
                 this.clearInitTimeout();
-                this.config.onPhaseChange('error');
-                this.config.onErrorMessage(
+                this.triggerRetry(
                     data.payload?.message ?? 'Audio monitoring could not start for this attempt.',
                 );
                 break;
@@ -240,10 +290,6 @@ export class AudioAnomalyController {
 
     private handleError = (): void => {
         if (this.isDisposed) return;
-
-        this.config.onPhaseChange('error');
-        this.config.onErrorMessage(
-            'Audio monitoring could not start for this attempt. Existing browser security monitoring remains active.',
-        );
+        this.triggerRetry('Audio worker encountered an error.');
     };
 }

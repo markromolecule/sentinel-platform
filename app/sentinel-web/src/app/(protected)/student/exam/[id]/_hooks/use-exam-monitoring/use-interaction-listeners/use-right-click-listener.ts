@@ -26,7 +26,7 @@ export function useRightClickListener(options: BaseListenerOptions) {
                 const clientActionAt = new Date().toISOString();
                 const now = new Date(clientActionAt).getTime();
                 e.preventDefault();
-                
+
                 const burstResult = evaluateActionBurst({
                     lastAcceptedAt: lastRightClickIncidentAtRef.current,
                     candidateAt: now,
@@ -43,7 +43,7 @@ export function useRightClickListener(options: BaseListenerOptions) {
                     clientActionAt,
                     bucketMs: 800,
                 });
-                
+
                 emitTelemetryEvent('RIGHT_CLICK_ATTEMPT', metadata);
                 lockExam('right-click');
                 toast.warning('Right-click actions are disabled for this exam.', {

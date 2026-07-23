@@ -4,9 +4,7 @@ import { RowInstructorCombobox } from './row-instructor-combobox';
 
 vi.mock('@sentinel/hooks', () => ({
     useUserSearch: vi.fn(() => ({
-        users: [
-            { id: 'user-2', firstName: 'Jane', lastName: 'Smith', email: 'jane@sentinel.edu' },
-        ],
+        users: [{ id: 'user-2', firstName: 'Jane', lastName: 'Smith', email: 'jane@sentinel.edu' }],
         isLoading: false,
     })),
 }));
@@ -32,7 +30,7 @@ describe('RowInstructorCombobox', () => {
                 onValueChange={mockOnValueChange}
                 users={mockUsers}
                 placeholder="Select instructor"
-            />
+            />,
         );
 
         // Display value should be the formatted name
@@ -47,7 +45,7 @@ describe('RowInstructorCombobox', () => {
                 onValueChange={mockOnValueChange}
                 users={mockUsers}
                 placeholder="Select instructor"
-            />
+            />,
         );
 
         // Open combobox

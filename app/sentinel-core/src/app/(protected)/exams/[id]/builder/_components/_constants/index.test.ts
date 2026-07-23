@@ -136,11 +136,9 @@ describe('exam builder rule toggles', () => {
         });
 
         expect(rows.some((row) => row.label === 'Session Lock')).toBe(true);
-        expect(rows.find((row) => row.label === 'Session Lock')?.value).toBe(
-            'Locked exam surface',
-        );
+        expect(rows.find((row) => row.label === 'Session Lock')?.value).toBe('Locked exam surface');
     });
-    
+
     it('does not include lobby gate, score release, or strict mode in the configuration summary rows', () => {
         const rows = getSystemConfigurationRows(configuration);
         expect(rows.some((row) => row.label === 'Lobby Gate')).toBe(false);

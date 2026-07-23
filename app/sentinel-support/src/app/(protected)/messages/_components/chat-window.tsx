@@ -103,7 +103,7 @@ export function ChatWindow({
     const participant = conversation.participants[0];
 
     return (
-        <div className="bg-background relative flex h-full w-full min-h-0 flex-1 flex-col overflow-hidden">
+        <div className="bg-background relative flex h-full min-h-0 w-full flex-1 flex-col overflow-hidden">
             {/* Header */}
             <div className="border-border bg-card flex h-16 shrink-0 items-center justify-between border-b px-4 md:h-20 md:px-6">
                 <div className="flex items-center gap-3">

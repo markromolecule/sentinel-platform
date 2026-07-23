@@ -58,8 +58,9 @@ export const RowInstructorCombobox = React.forwardRef<HTMLInputElement, RowInstr
         const selectedName = React.useMemo(() => {
             if (!selectedInstructor) return '';
             return (
-                [selectedInstructor.firstName, selectedInstructor.lastName].filter(Boolean).join(' ') ||
-                selectedInstructor.email
+                [selectedInstructor.firstName, selectedInstructor.lastName]
+                    .filter(Boolean)
+                    .join(' ') || selectedInstructor.email
             );
         }, [selectedInstructor]);
 
@@ -114,7 +115,7 @@ export const RowInstructorCombobox = React.forwardRef<HTMLInputElement, RowInstr
                     ref={ref}
                     placeholder={placeholder}
                     disabled={disabled}
-                    value={open ? displayValue : (selectedName || '')}
+                    value={open ? displayValue : selectedName || ''}
                     onChange={handleInputChange}
                     showClear={value !== 'none'}
                     aria-invalid={ariaInvalid}
@@ -131,7 +132,8 @@ export const RowInstructorCombobox = React.forwardRef<HTMLInputElement, RowInstr
                     <ComboboxList className="max-h-60 overflow-y-auto p-1">
                         {filteredUsers.map((user) => {
                             const name =
-                                [user.firstName, user.lastName].filter(Boolean).join(' ') || user.email;
+                                [user.firstName, user.lastName].filter(Boolean).join(' ') ||
+                                user.email;
                             return (
                                 <ComboboxItem key={user.id} value={user.id}>
                                     <div className="flex flex-col text-left">
@@ -149,7 +151,9 @@ export const RowInstructorCombobox = React.forwardRef<HTMLInputElement, RowInstr
                         })}
                         {filteredUsers.length === 0 && (
                             <ComboboxEmpty className="py-2 text-center text-xs text-zinc-500">
-                                {isSearchLoading ? 'Loading instructors...' : 'No instructors found'}
+                                {isSearchLoading
+                                    ? 'Loading instructors...'
+                                    : 'No instructors found'}
                             </ComboboxEmpty>
                         )}
                     </ComboboxList>

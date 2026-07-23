@@ -164,3 +164,18 @@ export type MediaPipeRuntimeEnabledArgs = {
     hasCameraStream?: boolean;
     runtimeAccessAllowed?: boolean;
 };
+
+export type MediaPipeCalibrationCandidateReason =
+    | 'accepted'
+    | 'too-close'
+    | 'too-far'
+    | 'cropped'
+    | 'off-center'
+    | 'low-confidence'
+    | 'eyes-closed';
+
+export type MediaPipeCalibrationEvaluationResult = {
+    isValid: boolean;
+    reason: MediaPipeCalibrationCandidateReason;
+    details?: string;
+};

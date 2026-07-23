@@ -73,7 +73,10 @@ describe('answer-storage', () => {
                 storedAt: new Date().toISOString(),
             };
 
-            const result = reconcileExamAnswerDraft(localDraft, { answers: {}, elapsedSeconds: 10 });
+            const result = reconcileExamAnswerDraft(localDraft, {
+                answers: {},
+                elapsedSeconds: 10,
+            });
             expect(result.source).toBe('local');
             expect(result.answers).toEqual({ q1: 'A' });
             expect(result.elapsedSeconds).toBe(30);

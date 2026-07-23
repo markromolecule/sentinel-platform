@@ -8,7 +8,9 @@ export const acknowledgePublisherFailureRoute = createRoute({
     path: '/live-inspections/publisher-failure',
     tags: ['Live Inspection'],
     request: {
-        body: { content: { 'application/json': { schema: acknowledgePublisherFailureSchema.body } } },
+        body: {
+            content: { 'application/json': { schema: acknowledgePublisherFailureSchema.body } },
+        },
     },
     responses: {
         200: {

@@ -118,7 +118,9 @@ describe('useRoleMatrix hook', () => {
             mutate: vi.fn(),
         } as any);
         vi.mocked(sentinelHooks.useDeleteAccessControlRoleMutation).mockReturnValue({} as any);
-        vi.mocked(sentinelHooks.useResetAccessControlRolePermissionsToBlueprintMutation).mockReturnValue({
+        vi.mocked(
+            sentinelHooks.useResetAccessControlRolePermissionsToBlueprintMutation,
+        ).mockReturnValue({
             mutateAsync: mockResetMutateAsync,
             isPending: false,
         } as any);

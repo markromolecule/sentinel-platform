@@ -6,6 +6,7 @@ import type { AttemptMonitoringPhase } from '@/app/(protected)/student/exam/[id]
 export function useAttemptUIState() {
     const [reviewQuestionIds, setReviewQuestionIds] = useState<string[]>([]);
     const [showPassagePanel, setShowPassagePanel] = useState(true);
+    const [isCompactPassageOpen, setIsCompactPassageOpen] = useState(false);
     const [crossOutEnabled, setCrossOutEnabled] = useState(false);
     const [crossedOutOptions, setCrossedOutOptions] = useState<Record<string, number[]>>({});
     const [isSubmitDialogOpen, setIsSubmitDialogOpen] = useState(false);
@@ -35,6 +36,8 @@ export function useAttemptUIState() {
         setReviewQuestionIds,
         showPassagePanel,
         setShowPassagePanel,
+        isCompactPassageOpen,
+        setIsCompactPassageOpen,
         crossOutEnabled,
         setCrossOutEnabled,
         crossedOutOptions,

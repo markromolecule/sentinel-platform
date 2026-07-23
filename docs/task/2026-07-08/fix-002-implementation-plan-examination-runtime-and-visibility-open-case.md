@@ -174,9 +174,12 @@ Why: The current source already includes deterministic telemetry metadata, clien
 - [x] If `/student/exam` or `/student/history` hides the exam after the API returns it, update `app/sentinel-web/src/app/(protected)/student/exam/_hooks/use-exam-list.ts`, `app/sentinel-web/src/app/(protected)/student/history/_hooks/use-student-history/index.ts`, or `app/sentinel-web/src/app/(protected)/student/_lib/normalize-student-exam.ts` so private assigned exams are not filtered out by frontend status mapping.
 - [x] Write or update tests in `app/sentinel-api/src/modules/examination/exams/data/build-student-exam-scope-predicates.test.ts` proving private published classroom-assigned exams are visible to enrolled students and public unassigned exams remain hidden.
 - [x] Write or update tests in `app/sentinel-api/src/modules/examination/exams/data/get-exams.test.ts` and `app/sentinel-api/src/modules/examination/exams/data/get-exam-by-id.test.ts` proving list and detail use the same student assignment gates and do not require `e.is_public = true`.
+
 <!-- NOTE: Added explicit no-public-gate assertions to both suites on 2026-07-10; the focused `sentinel-api` visibility run passed with 29/29 tests. -->
+
 - [ ] Write or update tests in `app/sentinel-api/src/modules/examination/exams/services/create-exam.service.test.ts` and `app/sentinel-api/src/modules/examination/exams/services/update-exam.service.test.ts` proving assignment rows persist for private and public classroom-assigned exams and survive an `isPublic`-only update.
 - [x] Write or update tests in `app/sentinel-web/src/app/(protected)/student/exam/_hooks/use-exam-list.test.ts` and `app/sentinel-web/src/app/(protected)/student/history/_hooks/use-student-history/index.test.ts` proving the student available surfaces consume `useExamsQuery()` results without filtering private assigned exams out.
+
 <!-- NOTE: `use-exam-list.test.ts` was added on 2026-07-10 and `use-student-history/index.test.ts` already covered the assigned published/private exam path; both passed together in the focused `sentinel-web` visibility suite. -->
 
 **Migration required:** No - this phase changes read/write logic over existing assignment, exam, and enrollment tables. Use a documented data remediation only for existing bad rows.

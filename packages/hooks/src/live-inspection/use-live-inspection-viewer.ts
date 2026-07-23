@@ -215,7 +215,10 @@ export function useLiveInspectionViewer({
                 return;
             }
 
-            if (pollStartTimeRef.current && Date.now() - pollStartTimeRef.current > PUBLISHER_READY_TIMEOUT_MS) {
+            if (
+                pollStartTimeRef.current &&
+                Date.now() - pollStartTimeRef.current > PUBLISHER_READY_TIMEOUT_MS
+            ) {
                 cleanupRoom();
                 setState('failed');
                 setReason('TIMEOUT');
@@ -229,11 +232,11 @@ export function useLiveInspectionViewer({
 
             try {
                 const status = await getLiveInspectionStatus(apiClient, { examId, leaseId });
-                
+
                 if (leaseRef.current?.leaseId !== leaseId) {
                     return;
                 }
-                
+
                 leaseRef.current = status;
 
                 if (status.state === 'PUBLISHER_READY' || status.state === 'LIVE') {
@@ -243,7 +246,7 @@ export function useLiveInspectionViewer({
 
                 if (TERMINAL_STATES.has(status.state)) {
                     cleanupRoom();
-                    
+
                     if (status.state === 'FAILED') {
                         setState('failed');
                         if (status.lastErrorCode === 'NO_LIVE_CAMERA_TRACK') {
@@ -277,32 +280,35 @@ export function useLiveInspectionViewer({
         [apiClient, cleanupRoom, clearPollTimer, connectViewer, examId],
     );
 
-    const start = useCallback(async (options?: { restart?: boolean }) => {
-        if (!enabled || !attemptId) {
-            setReason('NOT_ELIGIBLE');
-            return;
-        }
+    const start = useCallback(
+        async (options?: { restart?: boolean }) => {
+            if (!enabled || !attemptId) {
+                setReason('NOT_ELIGIBLE');
+                return;
+            }
 
-        stopRequestedRef.current = false;
-        cleanupRoom();
-        setState('requesting');
-        setReason(null);
+            stopRequestedRef.current = false;
+            cleanupRoom();
+            setState('requesting');
+            setReason(null);
 
-        try {
-            const lease = await startLiveInspection(apiClient, {
-                examId,
-                attemptId,
-                restart: options?.restart ?? false,
-            });
-            leaseRef.current = lease;
-            setState('waiting_for_student');
-            pollStartTimeRef.current = Date.now();
-            await pollUntilPublisherReady(lease.leaseId);
-        } catch (error) {
-            setState('failed');
-            setReason(mapErrorReason(error));
-        }
-    }, [apiClient, attemptId, cleanupRoom, enabled, examId, pollUntilPublisherReady]);
+            try {
+                const lease = await startLiveInspection(apiClient, {
+                    examId,
+                    attemptId,
+                    restart: options?.restart ?? false,
+                });
+                leaseRef.current = lease;
+                setState('waiting_for_student');
+                pollStartTimeRef.current = Date.now();
+                await pollUntilPublisherReady(lease.leaseId);
+            } catch (error) {
+                setState('failed');
+                setReason(mapErrorReason(error));
+            }
+        },
+        [apiClient, attemptId, cleanupRoom, enabled, examId, pollUntilPublisherReady],
+    );
 
     const stop = useCallback(async () => {
         stopRequestedRef.current = true;

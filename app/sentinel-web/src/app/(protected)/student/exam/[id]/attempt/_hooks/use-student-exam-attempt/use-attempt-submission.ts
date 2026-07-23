@@ -24,7 +24,7 @@ export type UseAttemptSubmissionArgs = {
 /**
  * Hook to manage the submission process of a student's exam attempt.
  * Validates unanswered questions, transitions to the turn-in review state, and performs final cleanup before redirection.
- * 
+ *
  * @param args - Object containing exam, answer, and UI control arguments.
  * @returns Submit handler and turn-in redirection function.
  */

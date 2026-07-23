@@ -5,9 +5,8 @@ import type { ApiExamResponse, ExamConfigurationState } from './types';
 export async function getExaminationConfigurationDefaults(
     apiClient: ApiClientType,
 ): Promise<ExaminationGlobalSettings> {
-    const response: ApiExamResponse<ExaminationGlobalSettings> = await apiClient(
-        '/configuration/defaults',
-    );
+    const response: ApiExamResponse<ExaminationGlobalSettings> =
+        await apiClient('/configuration/defaults');
 
     return response.data;
 }

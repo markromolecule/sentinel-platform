@@ -86,7 +86,9 @@ describe('startLiveInspection', () => {
         mockLiveKit = {
             createInspectionRoom: vi.fn().mockResolvedValue({}),
         };
-        vi.mocked(accessService.assertLiveInspectionViewerAccess).mockResolvedValue({ examId: 'exam-123' } as any);
+        vi.mocked(accessService.assertLiveInspectionViewerAccess).mockResolvedValue({
+            examId: 'exam-123',
+        } as any);
         vi.mocked(helpers.getLiveInspectionAttemptForStaff).mockResolvedValue(mockAttempt as any);
     });
 
@@ -108,7 +110,9 @@ describe('startLiveInspection', () => {
     });
 
     it('returns existing lease owned by same viewer if restart is false', async () => {
-        vi.mocked(repository.getActiveLiveInspectionLeaseForAttempt).mockResolvedValueOnce(mockLease as any);
+        vi.mocked(repository.getActiveLiveInspectionLeaseForAttempt).mockResolvedValueOnce(
+            mockLease as any,
+        );
 
         const result = await startLiveInspection(
             {
@@ -128,7 +132,9 @@ describe('startLiveInspection', () => {
 
     it('throws 409 if active lease is owned by another viewer (regardless of restart flag)', async () => {
         const otherViewerLease = { ...mockLease, viewer_user_id: 'viewer-other' };
-        vi.mocked(repository.getActiveLiveInspectionLeaseForAttempt).mockResolvedValueOnce(otherViewerLease as any);
+        vi.mocked(repository.getActiveLiveInspectionLeaseForAttempt).mockResolvedValueOnce(
+            otherViewerLease as any,
+        );
 
         await expect(
             startLiveInspection(
@@ -143,7 +149,9 @@ describe('startLiveInspection', () => {
                 },
                 { config: enabledConfig, liveKit: mockLiveKit },
             ),
-        ).rejects.toThrow(new HTTPException(409, { message: 'Live inspection is already active.' }));
+        ).rejects.toThrow(
+            new HTTPException(409, { message: 'Live inspection is already active.' }),
+        );
     });
 
     it('calls stopLiveInspection, checks capacity, acquires a new lease, and creates a room when restart is true', async () => {
@@ -153,7 +161,10 @@ describe('startLiveInspection', () => {
 
         vi.mocked(repository.countActiveLiveInspectionLeases).mockResolvedValue(0);
         vi.mocked(repository.countActiveLiveInspectionLeasesByInstitution).mockResolvedValue(0);
-        vi.mocked(repository.acquireLiveInspectionLease).mockResolvedValue({ ok: true, leaseId: 'lease-new' });
+        vi.mocked(repository.acquireLiveInspectionLease).mockResolvedValue({
+            ok: true,
+            leaseId: 'lease-new',
+        });
 
         const result = await startLiveInspection(
             {
@@ -175,12 +186,14 @@ describe('startLiveInspection', () => {
         );
         expect(repository.acquireLiveInspectionLease).toHaveBeenCalled();
         expect(mockLiveKit.createInspectionRoom).toHaveBeenCalledWith(
-            expect.objectContaining({ leaseId: 'lease-new' })
+            expect.objectContaining({ leaseId: 'lease-new' }),
         );
     });
 
     it('throws 429 when global capacity is reached after stopping the old lease', async () => {
-        vi.mocked(repository.getActiveLiveInspectionLeaseForAttempt).mockResolvedValueOnce(mockLease as any);
+        vi.mocked(repository.getActiveLiveInspectionLeaseForAttempt).mockResolvedValueOnce(
+            mockLease as any,
+        );
         vi.mocked(repository.countActiveLiveInspectionLeases).mockResolvedValue(20); // Limit is 20
 
         await expect(
@@ -195,8 +208,10 @@ describe('startLiveInspection', () => {
                     activeInstitutionId: 'inst-123',
                 },
                 { config: enabledConfig, liveKit: mockLiveKit },
-            )
-        ).rejects.toThrow(new HTTPException(429, { message: 'Live inspection global capacity reached.' }));
+            ),
+        ).rejects.toThrow(
+            new HTTPException(429, { message: 'Live inspection global capacity reached.' }),
+        );
     });
 
     it('converges on same viewer lease if concurrent restarts result in unique key conflict', async () => {
@@ -206,7 +221,10 @@ describe('startLiveInspection', () => {
 
         vi.mocked(repository.countActiveLiveInspectionLeases).mockResolvedValue(0);
         vi.mocked(repository.countActiveLiveInspectionLeasesByInstitution).mockResolvedValue(0);
-        vi.mocked(repository.acquireLiveInspectionLease).mockResolvedValue({ ok: false, code: 'INSPECTION_ALREADY_ACTIVE' });
+        vi.mocked(repository.acquireLiveInspectionLease).mockResolvedValue({
+            ok: false,
+            code: 'INSPECTION_ALREADY_ACTIVE',
+        });
 
         const result = await startLiveInspection(
             {

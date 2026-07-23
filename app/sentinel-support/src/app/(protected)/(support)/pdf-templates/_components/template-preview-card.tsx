@@ -29,12 +29,17 @@ export function TemplatePreviewCard({
         <>
             <div className="space-y-3">
                 <div className="space-y-1">
-                    <p className="text-foreground/80 text-[11px] font-semibold uppercase tracking-[0.14em]">
+                    <p className="text-foreground/80 text-[11px] font-semibold tracking-[0.14em] uppercase">
                         Preview
                     </p>
                     <h3 className="text-sm font-semibold">Open PDF in a new tab</h3>
                 </div>
-                <Button size="sm" className="w-full" onClick={onGeneratePreview} disabled={isGenerating}>
+                <Button
+                    size="sm"
+                    className="w-full"
+                    onClick={onGeneratePreview}
+                    disabled={isGenerating}
+                >
                     <Eye className="mr-2 h-4 w-4" />
                     {isGenerating ? 'Generating preview...' : 'Generate preview'}
                     {!isGenerating ? <ExternalLink className="ml-2 h-4 w-4" /> : null}
@@ -45,12 +50,7 @@ export function TemplatePreviewCard({
 
     if (variant === 'panel') {
         return (
-            <section
-                className={cn(
-                    'bg-background rounded-2xl border p-4',
-                    className,
-                )}
-            >
+            <section className={cn('bg-background rounded-2xl border p-4', className)}>
                 {content}
             </section>
         );

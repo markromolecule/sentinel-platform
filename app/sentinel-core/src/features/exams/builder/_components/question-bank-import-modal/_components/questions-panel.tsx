@@ -102,7 +102,10 @@ export function QuestionsPanel({
 
     const activeFacetLabel = useMemo(() => {
         if (selectedQuestionType === 'all') return 'All';
-        return questionTypes.find((qt) => qt.value === selectedQuestionType)?.label ?? selectedQuestionType;
+        return (
+            questionTypes.find((qt) => qt.value === selectedQuestionType)?.label ??
+            selectedQuestionType
+        );
     }, [selectedQuestionType, questionTypes]);
 
     const activeFacetCount = useMemo(() => {
@@ -112,9 +115,15 @@ export function QuestionsPanel({
 
     const handleScroll = (event: React.UIEvent<HTMLDivElement>) => {
         const container = event.currentTarget;
-        const isNearBottom = container.scrollHeight - container.scrollTop - container.clientHeight <= 30;
+        const isNearBottom =
+            container.scrollHeight - container.scrollTop - container.clientHeight <= 30;
 
-        if (isNearBottom && !isQuestionsLoading && !isFetchingMoreQuestions && currentPage < totalPages) {
+        if (
+            isNearBottom &&
+            !isQuestionsLoading &&
+            !isFetchingMoreQuestions &&
+            currentPage < totalPages
+        ) {
             onPageChange(currentPage + 1);
         }
     };
@@ -142,29 +151,32 @@ export function QuestionsPanel({
 
                     <div className="shrink-0">
                         {isQuestionTypesLoading || isTypeCountsLoading ? (
-                            <p className="text-muted-foreground text-xs py-2">Loading...</p>
+                            <p className="text-muted-foreground py-2 text-xs">Loading...</p>
                         ) : (
                             <DropdownMenu>
                                 <DropdownMenuTrigger asChild>
                                     <button
                                         type="button"
-                                        className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold transition-colors border border-zinc-200 bg-white hover:bg-zinc-50 text-zinc-700 cursor-pointer dark:bg-zinc-900 dark:border-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-800/80"
+                                        className="inline-flex cursor-pointer items-center gap-1.5 rounded-full border border-zinc-200 bg-white px-3 py-1.5 text-xs font-semibold text-zinc-700 transition-colors hover:bg-zinc-50 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-300 dark:hover:bg-zinc-800/80"
                                     >
                                         <span>Type: {activeFacetLabel}</span>{' '}
-                                        <span className="rounded-full px-1.5 py-0.25 text-[10px] font-bold bg-zinc-100 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400">
+                                        <span className="rounded-full bg-zinc-100 px-1.5 py-0.25 text-[10px] font-bold text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400">
                                             {activeFacetCount}
                                         </span>
-                                        <ChevronDown className="h-3.5 w-3.5 opacity-60 ml-0.5" />
+                                        <ChevronDown className="ml-0.5 h-3.5 w-3.5 opacity-60" />
                                     </button>
                                 </DropdownMenuTrigger>
-                                <DropdownMenuContent align="end" className="w-52 max-h-[280px] overflow-y-auto">
+                                <DropdownMenuContent
+                                    align="end"
+                                    className="max-h-[280px] w-52 overflow-y-auto"
+                                >
                                     {selectedQuestionType !== 'all' && (
                                         <DropdownMenuItem
-                                            className="cursor-pointer flex justify-between items-center text-xs"
+                                            className="flex cursor-pointer items-center justify-between text-xs"
                                             onClick={() => onQuestionTypeChange('all')}
                                         >
                                             <span>All Types</span>
-                                            <span className="text-muted-foreground text-[10px] font-bold bg-zinc-100 px-1.5 py-0.5 rounded dark:bg-zinc-800">
+                                            <span className="text-muted-foreground rounded bg-zinc-100 px-1.5 py-0.5 text-[10px] font-bold dark:bg-zinc-800">
                                                 {totalFacetCount}
                                             </span>
                                         </DropdownMenuItem>
@@ -174,11 +186,11 @@ export function QuestionsPanel({
                                         return (
                                             <DropdownMenuItem
                                                 key={facet.value}
-                                                className="cursor-pointer flex justify-between items-center text-xs"
+                                                className="flex cursor-pointer items-center justify-between text-xs"
                                                 onClick={() => onQuestionTypeChange(facet.value)}
                                             >
                                                 <span>{facet.label}</span>
-                                                <span className="text-muted-foreground text-[10px] font-bold bg-zinc-100 px-1.5 py-0.5 rounded dark:bg-zinc-800">
+                                                <span className="text-muted-foreground rounded bg-zinc-100 px-1.5 py-0.5 text-[10px] font-bold dark:bg-zinc-800">
                                                     {facet.count}
                                                 </span>
                                             </DropdownMenuItem>
@@ -191,7 +203,9 @@ export function QuestionsPanel({
                 </div>
 
                 <div className="flex items-center justify-between px-1">
-                    <span className="text-xs text-muted-foreground font-medium">Available questions</span>
+                    <span className="text-muted-foreground text-xs font-medium">
+                        Available questions
+                    </span>
                     {importableQuestionRecords.length > 0 ? (
                         <div
                             role="button"
@@ -262,12 +276,10 @@ export function QuestionsPanel({
                 </div>
             </div>
 
-            <div className="border-t px-4 py-3 bg-zinc-50/50 dark:bg-zinc-950/20 shrink-0 text-right">
+            <div className="shrink-0 border-t bg-zinc-50/50 px-4 py-3 text-right dark:bg-zinc-950/20">
                 <p className="text-muted-foreground text-xs">
                     Showing{' '}
-                    <span className="text-foreground font-semibold">
-                        {questionRecords.length}
-                    </span>{' '}
+                    <span className="text-foreground font-semibold">{questionRecords.length}</span>{' '}
                     of <span className="text-foreground font-semibold">{totalQuestionCount}</span>{' '}
                     question{totalQuestionCount !== 1 ? 's' : ''}
                 </p>

@@ -1,5 +1,5 @@
 import type { NormalizedLandmark } from '@mediapipe/tasks-vision';
-import type { MediaPipeFrameAnalysis } from '@sentinel/shared';
+import { type MediaPipeFrameAnalysis, isMediaPipePartialFaceVisible } from '@sentinel/shared';
 import type { ExamConfig } from '@sentinel/shared/types';
 
 /**
@@ -39,7 +39,8 @@ export function attachMediaPipeStreamToVideo(
 
 /**
  * Normalizes low-confidence analysis results based on exam configuration.
- * If face detection is required, low confidence is treated as a "no-face" signal.
+ * If face detection is required, low confidence is treated as a "no-face" signal,
+ * unless it is a detected-but-low-confidence partial face.
  */
 export function normalizeAttemptMediaPipeAnalysis(args: {
     analysis: MediaPipeFrameAnalysis;
@@ -48,6 +49,11 @@ export function normalizeAttemptMediaPipeAnalysis(args: {
     const { analysis, configuration } = args;
 
     if (analysis.status !== 'low-confidence' || !configuration.aiRules.face_detection) {
+        return analysis;
+    }
+
+    // Do not translate a detected-but-low-confidence partial face directly into NO_FACE_DETECTED.
+    if (analysis.faceBounds && isMediaPipePartialFaceVisible(analysis.faceBounds)) {
         return analysis;
     }
 

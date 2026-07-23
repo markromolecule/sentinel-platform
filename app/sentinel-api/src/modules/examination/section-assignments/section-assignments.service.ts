@@ -72,7 +72,9 @@ export class SectionAssignmentsService {
                 if (args.body.instructorId && args.body.instructorId !== args.actorUserId) {
                     const actorProfile = await args.dbClient
                         .selectFrom('user_profiles')
-                        .select([sql<string>`trim(concat(first_name, ' ', last_name))`.as('fullName')])
+                        .select([
+                            sql<string>`trim(concat(first_name, ' ', last_name))`.as('fullName'),
+                        ])
                         .where('user_id', '=', args.actorUserId)
                         .executeTakeFirst();
                     const assignerName = actorProfile?.fullName || 'An administrator';

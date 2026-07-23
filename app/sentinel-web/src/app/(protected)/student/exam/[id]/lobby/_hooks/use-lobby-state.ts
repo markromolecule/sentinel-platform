@@ -57,16 +57,16 @@ export function useLobbyState(args: {
         runtimeAccess?.state === 'locked' ||
         runtimeAccess?.state === 'before_start';
     const hasApprovedInstructorAdmission =
-        admissionStatus === 'APPROVED' && (isApprovedRuntimeAccess || Boolean(runtimeAccess?.canStart));
+        admissionStatus === 'APPROVED' &&
+        (isApprovedRuntimeAccess || Boolean(runtimeAccess?.canStart));
     const hasFreshInstructorAdmission =
         !requiresInstructorAdmission ||
         hasResumableAttempt ||
         (hasApprovedInstructorAdmission && !isHardRuntimeBlock);
     const canEnterExam = Boolean(
         !isAdmissionPendingRefresh &&
-            (hasResumableAttempt ||
-                (hasFreshInstructorAdmission &&
-                    (runtimeAccess?.canStart || isApprovedRuntimeAccess))),
+        (hasResumableAttempt ||
+            (hasFreshInstructorAdmission && (runtimeAccess?.canStart || isApprovedRuntimeAccess))),
     );
 
     useEffect(() => {

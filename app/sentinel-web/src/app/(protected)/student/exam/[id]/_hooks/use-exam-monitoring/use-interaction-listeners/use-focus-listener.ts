@@ -32,7 +32,7 @@ export function useFocusListener(options: FocusListenerOptions) {
         ) => {
             if (isMonitoringSuspended.current) return;
             const now = new Date(clientActionAt).getTime();
-            
+
             const burstResult = evaluateActionBurst({
                 lastAcceptedAt: lastFocusIncidentAtRef.current,
                 candidateAt: now,
@@ -53,7 +53,7 @@ export function useFocusListener(options: FocusListenerOptions) {
                     clientActionAt,
                     bucketMs: 1000,
                 });
-                
+
                 emitTelemetryEvent('APP_BACKGROUNDING', metadata);
                 toast.warning('Backgrounding the exam app was detected.', {
                     description: 'Incident logged.',
@@ -69,7 +69,7 @@ export function useFocusListener(options: FocusListenerOptions) {
                 clientActionAt,
                 bucketMs: 1000,
             });
-            
+
             emitTelemetryEvent('TAB_SWITCH', metadata);
             lockExam('focus-loss');
             toast.warning('Navigation away from the exam was detected.', {
@@ -101,7 +101,7 @@ export function useFocusListener(options: FocusListenerOptions) {
         const handleWindowBlur = () => {
             if (!shouldMonitorVisibility) return;
             if (isMobile) return;
-            
+
             setTimeout(() => {
                 // Policy: Window blur/loss of focus is tracked separately from fullscreen state.
                 if (!isMonitoringSuspended.current && !document.hasFocus() && !document.hidden) {

@@ -176,4 +176,27 @@ describe('analysis helpers', () => {
             estimateMediaPipeGazeDirection(buildUpwardLookingMediaPipeLandmarks()).direction,
         ).toBe('up');
     });
+
+    it('relaxes viewport-edge and partial-face bounds under close mobile framing (face area > 0.35)', () => {
+        // Face area is width * height = 0.8 * 0.9 = 0.72 (close framing)
+        const closeFaceBounds = {
+            minX: 0.02,
+            maxX: 0.98,
+            minY: 0.02,
+            maxY: 0.98,
+            width: 0.8,
+            height: 0.9,
+            centerX: 0.5,
+            centerY: 0.5,
+        };
+
+        // For close framing, minX=0.02 and maxX=0.98 are within the relaxed edgeLimitX of 0.01.
+        // centerX = 0.08 is within the relaxed centerLimitX of 0.05.
+        expect(isMediaPipePartialFaceVisible(closeFaceBounds)).toBe(false);
+        expect(isMediaPipeFaceNearViewportEdge(closeFaceBounds)).toBe(false);
+
+        // However, if it moves past the relaxed bounds (e.g. minX = 0.005), it is still flagged.
+        const offscreenCloseFaceBounds = { ...closeFaceBounds, minX: 0.005 };
+        expect(isMediaPipePartialFaceVisible(offscreenCloseFaceBounds)).toBe(true);
+    });
 });

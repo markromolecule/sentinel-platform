@@ -10,10 +10,7 @@ export type ScreenCaptureShortcutKeyboardEvent = Pick<
 /**
  * Canonical shortcut identifiers used by attempt-page monitoring.
  */
-export type ScreenCaptureShortcutType =
-    | 'print-screen'
-    | 'macos-screenshot'
-    | 'windows-snipping';
+export type ScreenCaptureShortcutType = 'print-screen' | 'macos-screenshot' | 'windows-snipping';
 
 /**
  * Result returned from browser screen-capture shortcut detection.

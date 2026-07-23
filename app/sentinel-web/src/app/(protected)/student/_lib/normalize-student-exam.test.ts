@@ -1,8 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import {
-    isActiveStudentExamStatus,
-    normalizeStudentExam,
-} from './normalize-student-exam';
+import { isActiveStudentExamStatus, normalizeStudentExam } from './normalize-student-exam';
 
 describe('normalizeStudentExam', () => {
     it('maps published exams without a scheduled date into the available student status', () => {

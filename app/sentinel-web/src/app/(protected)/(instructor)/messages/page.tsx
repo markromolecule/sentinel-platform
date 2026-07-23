@@ -33,7 +33,7 @@ function ProctorMessagesPageContent() {
     } = useProctorMessages();
 
     return (
-        <div className="flex h-[calc(100dvh-4rem)] min-h-0 max-h-[calc(100dvh-4rem)] flex-1 overflow-hidden">
+        <div className="flex h-[calc(100dvh-4rem)] max-h-[calc(100dvh-4rem)] min-h-0 flex-1 overflow-hidden">
             <MessageList
                 conversations={filteredConversations}
                 selectedId={selectedConversationId}

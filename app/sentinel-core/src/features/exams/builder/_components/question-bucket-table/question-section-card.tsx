@@ -61,7 +61,7 @@ export function QuestionSectionCard({
                 onDropCapture={onSectionDrop}
             >
                 {/* Header Row */}
-                <div className="bg-muted/10 flex flex-col border-b px-3 py-2 gap-1">
+                <div className="bg-muted/10 flex flex-col gap-1 border-b px-3 py-2">
                     <div className="flex items-center justify-between">
                         <div className="flex min-w-0 flex-1 items-center gap-2">
                             {/* Drag Grip */}
@@ -70,7 +70,7 @@ export function QuestionSectionCard({
                                 draggable
                                 onDragStart={onSectionDragStart}
                                 onDragEnd={onSectionDragEnd}
-                                className="text-zinc-400 hover:bg-zinc-100 hover:text-zinc-600 flex h-8 w-8 shrink-0 cursor-grab items-center justify-center rounded-md transition active:cursor-grabbing"
+                                className="flex h-8 w-8 shrink-0 cursor-grab items-center justify-center rounded-md text-zinc-400 transition hover:bg-zinc-100 hover:text-zinc-600 active:cursor-grabbing"
                                 aria-label={`Reorder ${section.title}`}
                                 title="Drag to reorder section"
                             >
@@ -81,7 +81,7 @@ export function QuestionSectionCard({
                             <button
                                 type="button"
                                 onClick={onToggleCollapse}
-                                className="text-zinc-400 hover:bg-zinc-100 hover:text-zinc-600 flex h-8 w-8 shrink-0 items-center justify-center rounded-md transition"
+                                className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-zinc-400 transition hover:bg-zinc-100 hover:text-zinc-600"
                                 aria-label={
                                     isOpen ? `Collapse ${section.title}` : `Expand ${section.title}`
                                 }
@@ -99,13 +99,12 @@ export function QuestionSectionCard({
                                 <input
                                     aria-label={`${section.title} title`}
                                     value={section.title}
-                                    onChange={(event) =>
-                                        onSectionTitleChange(event.target.value)
-                                    }
-                                    className="bg-transparent border-transparent px-1.5 py-0.5 hover:bg-zinc-100/50 focus:bg-background focus:border-zinc-200 text-sm font-semibold rounded-md shadow-none focus:ring-0 focus:outline-none transition min-w-[120px] max-w-[240px] truncate"
+                                    onChange={(event) => onSectionTitleChange(event.target.value)}
+                                    className="focus:bg-background max-w-[240px] min-w-[120px] truncate rounded-md border-transparent bg-transparent px-1.5 py-0.5 text-sm font-semibold shadow-none transition hover:bg-zinc-100/50 focus:border-zinc-200 focus:ring-0 focus:outline-none"
                                 />
-                                <span className="text-zinc-400 font-normal text-xs shrink-0 select-none">
-                                    {questionCount} question{questionCount === 1 ? '' : 's'} · {totalPoints} pt{totalPoints === 1 ? '' : 's'}
+                                <span className="shrink-0 text-xs font-normal text-zinc-400 select-none">
+                                    {questionCount} question{questionCount === 1 ? '' : 's'} ·{' '}
+                                    {totalPoints} pt{totalPoints === 1 ? '' : 's'}
                                 </span>
                             </div>
                         </div>
@@ -117,7 +116,7 @@ export function QuestionSectionCard({
                                 variant="outline"
                                 size="sm"
                                 onClick={onImportQuestions}
-                                className="h-8 text-xs gap-1.5 px-3 border-zinc-200 bg-background text-zinc-700 hover:bg-zinc-50 shadow-none rounded-md"
+                                className="bg-background h-8 gap-1.5 rounded-md border-zinc-200 px-3 text-xs text-zinc-700 shadow-none hover:bg-zinc-50"
                             >
                                 <Database className="h-3.5 w-3.5" />
                                 Import from Bank
@@ -127,7 +126,7 @@ export function QuestionSectionCard({
                                 type="button"
                                 size="sm"
                                 onClick={onAddQuestion}
-                                className="h-8 text-xs gap-1.5 px-3 bg-primary text-primary-foreground hover:bg-primary/90 shadow-none rounded-md"
+                                className="bg-primary text-primary-foreground hover:bg-primary/90 h-8 gap-1.5 rounded-md px-3 text-xs shadow-none"
                             >
                                 <Plus className="h-3.5 w-3.5" />
                                 Add Question
@@ -140,10 +139,11 @@ export function QuestionSectionCard({
                                 size="icon"
                                 onClick={() => setIsInstructionEditorOpen((curr) => !curr)}
                                 className={cn(
-                                    "h-8 w-8 text-zinc-400 hover:text-zinc-600 rounded-md",
-                                    isInstructionEditorOpen && "text-primary bg-primary/5 hover:text-primary hover:bg-primary/10"
+                                    'h-8 w-8 rounded-md text-zinc-400 hover:text-zinc-600',
+                                    isInstructionEditorOpen &&
+                                        'text-primary bg-primary/5 hover:text-primary hover:bg-primary/10',
                                 )}
-                                title={hasInstruction ? "Edit Instruction" : "Add Instruction"}
+                                title={hasInstruction ? 'Edit Instruction' : 'Add Instruction'}
                             >
                                 <PencilLine className="h-4 w-4" />
                             </Button>
@@ -155,7 +155,7 @@ export function QuestionSectionCard({
                                     variant="ghost"
                                     size="icon"
                                     onClick={onDeleteSection}
-                                    className="h-8 w-8 text-zinc-400 hover:text-destructive hover:bg-destructive/5 rounded-md transition"
+                                    className="hover:text-destructive hover:bg-destructive/5 h-8 w-8 rounded-md text-zinc-400 transition"
                                     title="Delete Section"
                                 >
                                     <Trash2 className="h-4 w-4" />
@@ -166,8 +166,8 @@ export function QuestionSectionCard({
 
                     {/* Inline Static Instructions (when editor closed but instruction exists) */}
                     {hasInstruction && !isInstructionEditorOpen && (
-                        <div className="pl-[76px] pb-1.5 pr-4">
-                            <p className="text-zinc-500 text-xs italic line-clamp-2">
+                        <div className="pr-4 pb-1.5 pl-[76px]">
+                            <p className="line-clamp-2 text-xs text-zinc-500 italic">
                                 {section.description}
                             </p>
                         </div>
@@ -175,17 +175,15 @@ export function QuestionSectionCard({
 
                     {/* Expandable Instruction Editor */}
                     {isInstructionEditorOpen && (
-                        <div className="pl-[76px] pb-2.5 pr-4 pt-1">
+                        <div className="pt-1 pr-4 pb-2.5 pl-[76px]">
                             <Textarea
                                 aria-label={`${section.title} instructions`}
                                 value={section.description ?? ''}
-                                onChange={(event) =>
-                                    onSectionDescriptionChange(event.target.value)
-                                }
+                                onChange={(event) => onSectionDescriptionChange(event.target.value)}
                                 placeholder="Section instruction (optional)"
-                                className="bg-background min-h-16 resize-y text-xs shadow-none border-zinc-200 focus-visible:ring-1 focus-visible:ring-primary rounded-md"
+                                className="bg-background focus-visible:ring-primary min-h-16 resize-y rounded-md border-zinc-200 text-xs shadow-none focus-visible:ring-1"
                             />
-                            <p className="text-zinc-400 mt-1 text-[10px]">
+                            <p className="mt-1 text-[10px] text-zinc-400">
                                 Plain text only. Keep instructions clear and concise.
                             </p>
                         </div>

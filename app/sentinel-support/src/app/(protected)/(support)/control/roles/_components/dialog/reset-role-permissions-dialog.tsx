@@ -28,7 +28,7 @@ export function ResetRolePermissionsDialog({
 }: ResetRolePermissionsDialogProps) {
     return (
         <AlertDialog open={Boolean(role)} onOpenChange={(open) => !open && onClose()}>
-            <AlertDialogContent className="rounded-none border-muted/50 max-w-md">
+            <AlertDialogContent className="border-muted/50 max-w-md rounded-none">
                 <AlertDialogHeader>
                     <AlertDialogTitle className="text-foreground text-[16px] font-bold">
                         Reset role permissions
@@ -38,7 +38,8 @@ export function ResetRolePermissionsDialog({
                         <strong className="text-foreground font-bold">
                             &ldquo;{role ? formatRoleLabel(role.name) : ''}&rdquo;
                         </strong>{' '}
-                        back to its hardcoded code-blueprint defaults? This will erase all Support customizations for this role.
+                        back to its hardcoded code-blueprint defaults? This will erase all Support
+                        customizations for this role.
                     </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter className="mt-6">

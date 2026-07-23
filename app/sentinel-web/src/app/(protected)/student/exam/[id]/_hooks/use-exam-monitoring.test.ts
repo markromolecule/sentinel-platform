@@ -34,14 +34,18 @@ vi.mock('../_lib/web-telemetry-client', async (importOriginal) => {
     return {
         ...actual,
         emitWebTelemetryEvent: vi.fn().mockResolvedValue(true),
-        createTelemetryActionMetadata: (args: string | {
-            eventType: string;
-            examSessionId?: string;
-            actionSource?: string;
-            actionBucketId?: string;
-            clientActionAt?: string;
-            bucketMs?: number;
-        }) => {
+        createTelemetryActionMetadata: (
+            args:
+                | string
+                | {
+                      eventType: string;
+                      examSessionId?: string;
+                      actionSource?: string;
+                      actionBucketId?: string;
+                      clientActionAt?: string;
+                      bucketMs?: number;
+                  },
+        ) => {
             const eventType = typeof args === 'string' ? args : args.eventType;
             const examSessionId =
                 typeof args === 'string' ? 'mock-session' : (args.examSessionId ?? 'mock-session');
@@ -478,9 +482,8 @@ describe('use-exam-monitoring', () => {
     });
 
     it('keeps one listener set active through StrictMode remounts', async () => {
-        const wrapper = ({ children }: { children: ReactNode }) => (
-            createElement(StrictMode, null, children)
-        );
+        const wrapper = ({ children }: { children: ReactNode }) =>
+            createElement(StrictMode, null, children);
 
         renderHook(
             () =>
@@ -1112,7 +1115,9 @@ describe('use-exam-monitoring', () => {
         );
 
         act(() => {
-            document.dispatchEvent(new MouseEvent('contextmenu', { bubbles: true, cancelable: true }));
+            document.dispatchEvent(
+                new MouseEvent('contextmenu', { bubbles: true, cancelable: true }),
+            );
         });
 
         expect(emitWebTelemetryEvent).toHaveBeenCalledWith(
@@ -1140,8 +1145,12 @@ describe('use-exam-monitoring', () => {
         );
 
         act(() => {
-            document.dispatchEvent(new MouseEvent('contextmenu', { bubbles: true, cancelable: true }));
-            document.dispatchEvent(new MouseEvent('contextmenu', { bubbles: true, cancelable: true }));
+            document.dispatchEvent(
+                new MouseEvent('contextmenu', { bubbles: true, cancelable: true }),
+            );
+            document.dispatchEvent(
+                new MouseEvent('contextmenu', { bubbles: true, cancelable: true }),
+            );
         });
 
         expect(emitWebTelemetryEvent).toHaveBeenCalledTimes(1);
@@ -1216,7 +1225,9 @@ describe('use-exam-monitoring', () => {
         );
 
         act(() => {
-            document.dispatchEvent(new KeyboardEvent('keydown', { key: 'c', ctrlKey: true, bubbles: true }));
+            document.dispatchEvent(
+                new KeyboardEvent('keydown', { key: 'c', ctrlKey: true, bubbles: true }),
+            );
             document.dispatchEvent(new Event('copy', { bubbles: true }));
         });
 
