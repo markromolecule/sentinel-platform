@@ -52,12 +52,17 @@ export const ingestProctoringEventRouteHandler: AppRouteHandler<
             });
         }
 
-        await TelemetryService.ingestEvent(c.get('dbClient'), body);
+        const result = await TelemetryService.ingestEvent(c.get('dbClient'), body);
 
         return c.json(
             {
                 message: 'Event accepted for processing',
-                data: null,
+                data: result
+                    ? {
+                          mode: result.mode,
+                          jobId: result.jobId,
+                      }
+                    : null,
             },
             202,
         );

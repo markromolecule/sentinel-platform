@@ -8,13 +8,18 @@ import { telemetryIngestionQueueService } from './services/ingestion-queue.servi
 import { telemetryPolicyService } from './services/telemetry-policy.service';
 import { telemetrySettingsResolverService } from '../settings/telemetry-settings-resolver.service';
 
+import type { TelemetryQueueMode } from './config/ingestion-queue.config';
+
 export class TelemetryIngestionService {
     /**
      * Process an incoming telemetry event.
      * This acts as the buffer/orchestrator before hitting the append-only storage tier.
      * `sync` mode writes inline, while `redis` mode hands work off to BullMQ workers.
      */
-    static async processEvent(db: DbClient, payload: ProctoringEventBody): Promise<void> {
+    static async processEvent(
+        db: DbClient,
+        payload: ProctoringEventBody,
+    ): Promise<{ mode: TelemetryQueueMode; jobId?: string } | null> {
         const resolvedSettingsRecord = await telemetrySettingsResolverService.resolve(db);
         const settingsRecord =
             resolvedSettingsRecord.updatedAt === null ? undefined : resolvedSettingsRecord;
@@ -25,7 +30,7 @@ export class TelemetryIngestionService {
                 eventType: payload.eventType,
                 settingsVersion: settingsRecord.value.version,
             });
-            return;
+            return null;
         }
 
         console.log('[TelemetryIngestion] Received event', {
@@ -42,7 +47,7 @@ export class TelemetryIngestionService {
         );
 
         if (decision.action === 'ignore') {
-            return;
+            return null;
         }
 
         console.log('[TelemetryIngestion] Submitting event to queue', {
@@ -52,7 +57,7 @@ export class TelemetryIngestionService {
             settingsVersion: settingsRecord?.value.version ?? null,
         });
 
-        await telemetryIngestionQueueService.submit(db, decision.payload, {
+        return await telemetryIngestionQueueService.submit(db, decision.payload, {
             operations: settingsRecord?.value.operations,
         });
     }

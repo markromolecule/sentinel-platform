@@ -254,6 +254,71 @@ describe('useMonitoring', () => {
         });
     });
 
+    it('announces attempt replacement only after hydration and ignores duplicate initial snapshots', async () => {
+        const { toast } = await import('sonner');
+        currentMonitoringOverview = {
+            ...currentMonitoringOverview,
+            students: currentMonitoringOverview.students.map((student) =>
+                student.id === 'student-1'
+                    ? {
+                          ...student,
+                          attemptId: 'attempt-old',
+                          incidentCount: 1,
+                          openIncidentCount: 1,
+                          latestIncidentType: 'TAB_SWITCH',
+                      }
+                    : student,
+            ),
+        };
+
+        const { rerender } = renderHook(() => useMonitoring('exam-1'));
+
+        expect(toast.warning).not.toHaveBeenCalled();
+
+        rerender();
+
+        expect(toast.warning).not.toHaveBeenCalled();
+
+        currentMonitoringOverview = {
+            ...currentMonitoringOverview,
+            students: currentMonitoringOverview.students.map((student) =>
+                student.id === 'student-1'
+                    ? {
+                          ...student,
+                          attemptId: 'attempt-new',
+                          incidentCount: 1,
+                          openIncidentCount: 1,
+                          latestIncidentType: 'FULL_SCREEN_EXIT',
+                      }
+                    : student,
+            ),
+        };
+
+        rerender();
+
+        await waitFor(() => {
+            expect(toast.warning).toHaveBeenCalledTimes(1);
+        });
+        expect(toast.warning).toHaveBeenCalledWith('New proctoring incident detected.', {
+            description: 'Pat Student received FULL_SCREEN_EXIT.',
+        });
+    });
+
+    it('keeps background refetch state available while rendering updated monitoring data', () => {
+        mockUseExamMonitoringOverviewQuery.mockImplementation(() => ({
+            data: currentMonitoringOverview,
+            isLoading: false,
+            isFetching: true,
+            isError: false,
+            refetch: vi.fn(),
+        }));
+
+        const { result } = renderHook(() => useMonitoring('exam-1'));
+
+        expect(result.current.isFetching).toBe(true);
+        expect(result.current.filteredStudents).toHaveLength(2);
+    });
+
     it('routes per-student lifecycle actions through the dedicated mutation hooks', async () => {
         const lockMutateAsync = vi.fn().mockResolvedValue(undefined);
         mockUseLockExamAttemptMutation.mockReturnValue({

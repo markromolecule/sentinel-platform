@@ -3,13 +3,16 @@ import { TelemetryIngestionQueueService } from './ingestion-queue.service';
 import { TelemetryStorageService } from '../../storage/storage.service';
 
 const hoisted = vi.hoisted(() => {
-    const mockQueueAdd = vi.fn();
+    const mockQueueAdd = vi.fn().mockResolvedValue({ id: 'mock-job-id' });
     const mockQueueClose = vi.fn().mockResolvedValue(undefined);
     const mockQueueWaitUntilReady = vi.fn().mockResolvedValue(undefined);
     const mockQueueGetWaitingCount = vi.fn().mockResolvedValue(0);
     const mockQueueGetActiveCount = vi.fn().mockResolvedValue(0);
     const mockQueueGetFailedCount = vi.fn().mockResolvedValue(0);
     const mockQueueGetCompletedCount = vi.fn().mockResolvedValue(0);
+    const mockQueueGetDelayedCount = vi.fn().mockResolvedValue(0);
+    const mockQueueGetWorkersCount = vi.fn().mockResolvedValue(0);
+    const mockQueueGetWaiting = vi.fn().mockResolvedValue([]);
     const mockHasRedisConfigured = vi.fn(() => Boolean(process.env.REDIS_URL));
     const mockValidateRedisConfig = vi.fn().mockResolvedValue(undefined);
     const mockCreateRedisConnection = vi.fn();
@@ -31,6 +34,9 @@ const hoisted = vi.hoisted(() => {
             getActiveCount: mockQueueGetActiveCount,
             getFailedCount: mockQueueGetFailedCount,
             getCompletedCount: mockQueueGetCompletedCount,
+            getDelayedCount: mockQueueGetDelayedCount,
+            getWorkersCount: mockQueueGetWorkersCount,
+            getWaiting: mockQueueGetWaiting,
         };
     });
 
@@ -46,6 +52,9 @@ const hoisted = vi.hoisted(() => {
         mockQueueGetCompletedCount,
         mockQueueGetFailedCount,
         mockQueueGetWaitingCount,
+        mockQueueGetDelayedCount,
+        mockQueueGetWorkersCount,
+        mockQueueGetWaiting,
         mockQueueWaitUntilReady,
         mockRedisConnection,
         mockValidateRedisConfig,
@@ -92,15 +101,22 @@ describe('TelemetryIngestionQueueService', () => {
         hoisted.mockQueueGetActiveCount.mockReset();
         hoisted.mockQueueGetFailedCount.mockReset();
         hoisted.mockQueueGetCompletedCount.mockReset();
+        hoisted.mockQueueGetDelayedCount.mockReset();
+        hoisted.mockQueueGetWorkersCount.mockReset();
+        hoisted.mockQueueGetWaiting.mockReset();
         hoisted.mockQueueWaitUntilReady.mockClear();
         hoisted.mockHasRedisConfigured.mockClear();
         hoisted.mockValidateRedisConfig.mockClear();
         hoisted.mockCreateRedisConnection.mockClear();
 
+        hoisted.mockQueueAdd.mockResolvedValue({ id: 'mock-job-id' });
         hoisted.mockQueueGetWaitingCount.mockResolvedValue(0);
         hoisted.mockQueueGetActiveCount.mockResolvedValue(0);
         hoisted.mockQueueGetFailedCount.mockResolvedValue(0);
         hoisted.mockQueueGetCompletedCount.mockResolvedValue(0);
+        hoisted.mockQueueGetDelayedCount.mockResolvedValue(0);
+        hoisted.mockQueueGetWorkersCount.mockResolvedValue(0);
+        hoisted.mockQueueGetWaiting.mockResolvedValue([]);
 
         hoisted.mockRedisConnection.llen.mockReset();
         hoisted.mockRedisConnection.rpush.mockReset();
@@ -160,6 +176,51 @@ describe('TelemetryIngestionQueueService', () => {
         );
     });
 
+    it('uses a valid event UUID as the redis job id', async () => {
+        process.env.TELEMETRY_INGESTION_MODE = 'redis';
+        process.env.REDIS_URL = 'redis://127.0.0.1:6379';
+        const queueService = new TelemetryIngestionQueueService();
+        const eventId = '123e4567-e89b-42d3-a456-426614174999';
+
+        await queueService.submit(dbClient, {
+            ...payload,
+            metadata: {
+                ...payload.metadata,
+                eventId,
+            },
+        });
+
+        expect(hoisted.mockQueueAdd).toHaveBeenCalledWith(
+            'append-proctoring-event',
+            expect.anything(),
+            expect.objectContaining({
+                jobId: eventId,
+            }),
+        );
+    });
+
+    it('does not use malformed event ids as redis job ids', async () => {
+        process.env.TELEMETRY_INGESTION_MODE = 'redis';
+        process.env.REDIS_URL = 'redis://127.0.0.1:6379';
+        const queueService = new TelemetryIngestionQueueService();
+
+        await queueService.submit(dbClient, {
+            ...payload,
+            metadata: {
+                ...payload.metadata,
+                eventId: 'not-a-uuid',
+            },
+        });
+
+        expect(hoisted.mockQueueAdd).toHaveBeenCalledWith(
+            'append-proctoring-event',
+            expect.anything(),
+            expect.not.objectContaining({
+                jobId: expect.any(String),
+            }),
+        );
+    });
+
     it('falls back to sync mode when redis is requested by environment but REDIS_URL is missing', async () => {
         process.env.TELEMETRY_INGESTION_MODE = 'redis';
         const queueService = new TelemetryIngestionQueueService();
@@ -212,12 +273,15 @@ describe('TelemetryIngestionQueueService', () => {
         hoisted.mockQueueGetActiveCount.mockResolvedValue(2);
         hoisted.mockQueueGetFailedCount.mockResolvedValue(1);
         hoisted.mockQueueGetCompletedCount.mockResolvedValue(9);
+        hoisted.mockQueueGetDelayedCount.mockResolvedValue(3);
+        hoisted.mockQueueGetWorkersCount.mockResolvedValue(2);
+        hoisted.mockQueueGetWaiting.mockResolvedValue([{ timestamp: Date.now() - 5000 }]);
         hoisted.mockRedisConnection.llen.mockResolvedValue(7);
 
         await queueService.submit(dbClient, payload);
         const stats = await queueService.getStats();
 
-        expect(stats).toEqual({
+        expect(stats).toMatchObject({
             mode: 'redis',
             queueName: 'telemetry-ingestion',
             bufferName: 'telemetry-buffer',
@@ -225,8 +289,28 @@ describe('TelemetryIngestionQueueService', () => {
             active: 2,
             failed: 1,
             completed: 9,
+            delayed: 3,
             buffered: 7,
+            workerCount: 2,
         });
+        expect(stats.oldestWaitingJobAgeMs).toBeGreaterThanOrEqual(4999);
+    });
+
+    it('uses a bounded worker count fallback when redis cannot report workers', async () => {
+        process.env.TELEMETRY_INGESTION_MODE = 'redis';
+        process.env.REDIS_URL = 'redis://127.0.0.1:6379';
+        const queueService = new TelemetryIngestionQueueService();
+        const infoSpy = vi.spyOn(console, 'info').mockImplementation(() => {});
+
+        hoisted.mockQueueGetWorkersCount.mockRejectedValue(new Error('unsupported'));
+
+        const stats = await queueService.getStats();
+
+        expect(stats.workerCount).toBe(-1);
+        expect(infoSpy).toHaveBeenCalledWith(
+            '[TelemetryQueue] Could not get workers count:',
+            'unsupported',
+        );
     });
 
     it('buffers telemetry batches into redis using the configured batch size', async () => {

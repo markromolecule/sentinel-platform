@@ -14,7 +14,8 @@ export const telemetryHealthRoute = createRoute({
             content: {
                 'application/json': {
                     schema: z.object({
-                        status: z.string(),
+                        status: z.enum(['healthy', 'degraded']),
+                        reasons: z.array(z.string()),
                         timestamp: z.string(),
                         ingestion: z.object({
                             mode: z.string(),
@@ -24,7 +25,11 @@ export const telemetryHealthRoute = createRoute({
                             active: z.number().optional(),
                             failed: z.number().optional(),
                             completed: z.number().optional(),
+                            delayed: z.number().optional(),
                             buffered: z.number().optional(),
+                            workerCount: z.number().optional(),
+                            oldestWaitingJobAgeMs: z.number().nullable().optional(),
+                            oldestWaitingJobTimestamp: z.number().nullable().optional(),
                         }),
                     }),
                 },
@@ -45,8 +50,33 @@ export const telemetryHealthRouteHandler: AppRouteHandler<typeof telemetryHealth
         operations: settingsRecord?.value.operations,
     });
 
+    let status: 'healthy' | 'degraded' = 'healthy';
+    const reasons: string[] = [];
+
+    if (stats.mode === 'redis') {
+        const MAX_WAITING_JOB_AGE_MS = 60_000; // 60 seconds
+
+        if (stats.workerCount === -1) {
+            status = 'degraded';
+            reasons.push('WORKER_COUNT_UNAVAILABLE');
+        } else if (stats.workerCount === 0) {
+            status = 'degraded';
+            reasons.push('NO_WORKERS');
+        }
+
+        if (
+            stats.oldestWaitingJobAgeMs !== undefined &&
+            stats.oldestWaitingJobAgeMs !== null &&
+            stats.oldestWaitingJobAgeMs > MAX_WAITING_JOB_AGE_MS
+        ) {
+            status = 'degraded';
+            reasons.push('BACKLOG_STALE');
+        }
+    }
+
     return c.json({
-        status: 'ok',
+        status,
+        reasons,
         timestamp: new Date().toISOString(),
         ingestion: stats,
     });

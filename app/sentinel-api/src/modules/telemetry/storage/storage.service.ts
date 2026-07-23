@@ -6,6 +6,7 @@ import {
     type UpdateTelemetryIncidentBody,
 } from './storage.dto';
 import { IncidentPersistenceService } from './services/incident-persistence.service';
+import type { AppendEventResult } from './services/incident-persistence.types';
 import { IncidentQueryService } from './services/incident-query.service';
 import { IncidentReviewService } from './services/incident-review.service';
 import { type UserQueryScope } from './data/query-scoping';
@@ -18,8 +19,11 @@ export class TelemetryStorageService {
     /**
      * Appends a single proctoring event into the incident log.
      */
-    static async appendEvent(db: DbClient, payload: PersistableProctoringEvent): Promise<void> {
-        await IncidentPersistenceService.appendEvent(db, payload);
+    static async appendEvent(
+        db: DbClient,
+        payload: PersistableProctoringEvent,
+    ): Promise<AppendEventResult | null> {
+        return IncidentPersistenceService.appendEvent(db, payload);
     }
 
     /**

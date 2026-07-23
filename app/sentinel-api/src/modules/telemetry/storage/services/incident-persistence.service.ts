@@ -20,6 +20,10 @@ async function executeWithTransactionFallback<T>(
     db: DbClient,
     callback: (trx: DbClient) => Promise<T>,
 ): Promise<T> {
+    if (typeof db.transaction !== 'function') {
+        return callback(db);
+    }
+
     try {
         return await db.transaction().execute(callback);
     } catch (error) {

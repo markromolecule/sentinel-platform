@@ -86,7 +86,12 @@ export const ingestProctoringEventSchema = {
     body: proctoringEventSchemaOpenApi.strict(),
     response: z.object({
         message: z.string(),
-        data: z.null(),
+        data: z
+            .object({
+                mode: z.string(),
+                jobId: z.string().optional(),
+            })
+            .nullable(),
     }),
 };
 

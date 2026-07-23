@@ -30,10 +30,22 @@ describe('processQueuedTelemetryEvent', () => {
         vi.clearAllMocks();
     });
 
-    it('marks successfully stored jobs as persisted', async () => {
-        appendEventMock.mockResolvedValueOnce(undefined);
+    it('marks successfully stored new jobs as inserted', async () => {
+        appendEventMock.mockResolvedValueOnce({ isNew: true } as any);
 
-        await expect(processQueuedTelemetryEvent({} as never, payload)).resolves.toBe('persisted');
+        await expect(processQueuedTelemetryEvent({} as never, payload)).resolves.toBe('inserted');
+    });
+
+    it('marks successfully stored existing jobs as aggregated', async () => {
+        appendEventMock.mockResolvedValueOnce({ isNew: false } as any);
+
+        await expect(processQueuedTelemetryEvent({} as never, payload)).resolves.toBe('aggregated');
+    });
+
+    it('marks duplicate enqueued jobs as duplicate-ignored', async () => {
+        appendEventMock.mockResolvedValueOnce(null);
+
+        await expect(processQueuedTelemetryEvent({} as never, payload)).resolves.toBe('duplicate-ignored');
     });
 
     it('drops terminal not-found storage errors without retrying the queue job', async () => {

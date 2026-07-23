@@ -11,6 +11,8 @@ import {
     type MonitoringStudentRow,
 } from './map-monitoring-response';
 
+import { applyMonitoringAttemptOrdering } from './attempt-selection.helper';
+
 type GetExamMonitoringStudentDetailArgs = {
     dbClient: DbClient;
     examId: string;
@@ -36,7 +38,7 @@ export async function getExamMonitoringStudentDetail({
         userId,
     });
 
-    const latestAttempt = (await dbClient
+    const latestAttemptQuery = dbClient
         .selectFrom('exam_attempts as ea')
         .distinctOn('ea.student_id')
         .innerJoin('students as st', 'st.student_id', 'ea.student_id')
@@ -106,9 +108,9 @@ export async function getExamMonitoringStudentDetail({
             )`.as('latest_incident_at'),
         ])
         .where('ea.exam_id', '=', examId)
-        .where(sql<boolean>`(st.user_id = ${studentId} or st.student_id = ${studentId})`)
-        .orderBy('ea.student_id')
-        .orderBy('ea.created_at', 'desc')
+        .where(sql<boolean>`(st.user_id = ${studentId} or st.student_id = ${studentId})`);
+
+    const latestAttempt = (await applyMonitoringAttemptOrdering(latestAttemptQuery)
         .executeTakeFirst()) as MonitoringStudentRow | undefined;
 
     if (!latestAttempt) {
