@@ -13,6 +13,7 @@ import {
     writeStoredLobbyEntry,
     clearStoredReconnectIntent,
     readStoredReconnectIntent,
+    writeStoredReconnectIntent,
     reconcileExamAnswerDraft,
     type StoredExamSession,
 } from '../../_lib/exam-session-storage';
@@ -67,7 +68,12 @@ export function useLobbyActions({
         setIsStartingSession(true);
 
         const reconnectIntent = readStoredReconnectIntent(examId);
-        const resumeRequestId = reconnectIntent?.resumeRequestId;
+        const resumeRequestId =
+            reconnectIntent?.resumeRequestId ??
+            (runtimeAccess?.canResume
+                ? writeStoredReconnectIntent(examId, storedSession?.sessionId, 'navigation')
+                      ?.resumeRequestId
+                : undefined);
 
         try {
             // Call startExamSession regardless of existing storedSession so server validates access and counts reconnect.

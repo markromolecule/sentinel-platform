@@ -56,6 +56,13 @@ export function useExamSession({
     const [isInitializingSession, setIsInitializingSession] = useState(true);
     const [elapsedSeconds, setElapsedSeconds] = useState(0);
     const processedLobbyEntryExamIdRef = useRef<string | null>(null);
+    const onInitializeAnswersRef = useRef(onInitializeAnswers);
+    const onInitializeElapsedSecondsRef = useRef(onInitializeElapsedSeconds);
+
+    useEffect(() => {
+        onInitializeAnswersRef.current = onInitializeAnswers;
+        onInitializeElapsedSecondsRef.current = onInitializeElapsedSeconds;
+    }, [onInitializeAnswers, onInitializeElapsedSeconds]);
 
     useEffect(() => {
         return () => {
@@ -72,22 +79,24 @@ export function useExamSession({
         const pendingTurnInPreview = readStoredExamTurnInPreview(examId);
 
         if (pendingTurnInPreview) {
-            onInitializeAnswers?.(pendingTurnInPreview.answers as Record<string, ExamAnswerValue>);
-            onInitializeElapsedSeconds?.(pendingTurnInPreview.elapsedSeconds);
+            onInitializeAnswersRef.current?.(
+                pendingTurnInPreview.answers as Record<string, ExamAnswerValue>,
+            );
+            onInitializeElapsedSecondsRef.current?.(pendingTurnInPreview.elapsedSeconds);
             setElapsedSeconds(pendingTurnInPreview.elapsedSeconds);
         } else if (storedSession?.sessionId) {
             const answerDraft = readStoredExamAnswerDraft(examId, storedSession.sessionId);
             const reconciled = reconcileExamAnswerDraft(answerDraft, null);
 
             if (reconciled.source !== 'empty') {
-                onInitializeAnswers?.(reconciled.answers);
-                onInitializeElapsedSeconds?.(reconciled.elapsedSeconds);
+                onInitializeAnswersRef.current?.(reconciled.answers);
+                onInitializeElapsedSecondsRef.current?.(reconciled.elapsedSeconds);
                 setElapsedSeconds(reconciled.elapsedSeconds);
             }
         }
 
         setIsInitializingSession(false);
-    }, [examId, onInitializeAnswers, onInitializeElapsedSeconds]);
+    }, [examId]);
 
     useEffect(() => {
         if (!examDurationMinutes) {

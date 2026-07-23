@@ -223,6 +223,32 @@ describe('useExamSession', () => {
         expect(onInitializeElapsedSeconds).toHaveBeenCalledWith(95);
     });
 
+    it('does not reinitialize the session when callback props change', async () => {
+        const examId = '11111111-1111-1111-1111-111111111111';
+        const firstCallback = vi.fn();
+        const replacementCallback = vi.fn();
+
+        const { rerender, result } = renderHook(
+            ({ onInitializeAnswers }) =>
+                useExamSession({
+                    examId,
+                    isLoadingData: false,
+                    isSessionStartBlocked: false,
+                    onInitializeAnswers,
+                }),
+            { initialProps: { onInitializeAnswers: firstCallback } },
+        );
+
+        await waitFor(() => {
+            expect(result.current.isInitializingSession).toBe(false);
+        });
+
+        rerender({ onInitializeAnswers: replacementCallback });
+
+        expect(mockReadStoredExamSession).toHaveBeenCalledTimes(1);
+        expect(replacementCallback).not.toHaveBeenCalled();
+    });
+
     it('keeps an already-active stored session when runtime access later blocks new starts', async () => {
         const storedSession = {
             examId: '11111111-1111-1111-1111-111111111111',

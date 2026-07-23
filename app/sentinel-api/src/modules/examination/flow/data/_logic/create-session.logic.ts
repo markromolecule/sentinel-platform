@@ -1,4 +1,4 @@
-import { type DbClient } from '@sentinel/db';
+import { executeTransaction, type DbClient } from '@sentinel/db';
 import { HTTPException } from 'hono/http-exception';
 import type { ExamAttemptAnswers } from '@sentinel/shared/types';
 import type { StudentExamAccessOverride } from '../../../student-overrides/student-overrides.dto';
@@ -145,8 +145,9 @@ async function handleResume(
         });
     }
 
-    // The fallback keeps lightweight repository mocks usable. DbClient always
-    // provides transactions in production, where the row is re-read under lock.
+    // The fallback keeps lightweight repository mocks usable. Production uses
+    // Prisma's transaction bridge because prisma-extension-kysely does not
+    // support native Kysely transactions.
     if (typeof db.transaction !== 'function') {
         return resumeLockedAttempt(db, {
             existingAttempt: args.existingAttempt,
@@ -157,7 +158,7 @@ async function handleResume(
         });
     }
 
-    return await db.transaction().execute(async (tx) => {
+    return await executeTransaction(async (tx) => {
         const existingAttempt = await findExistingAttempt(tx, examId, studentId, true);
 
         if (!existingAttempt) {

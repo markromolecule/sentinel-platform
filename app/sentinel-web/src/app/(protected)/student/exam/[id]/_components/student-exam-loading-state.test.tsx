@@ -7,7 +7,8 @@ describe('StudentExamLoadingState', () => {
         const { container } = render(<StudentExamLoadingState />);
 
         expect(screen.getByText('Loading exam flow...')).toBeDefined();
-        expect(screen.getByText('Preparing the current exam state.')).toBeDefined();
+        expect(screen.getByLabelText('Loading exam flow')).toBeDefined();
+        expect(screen.queryByText('Preparing the current exam state.')).toBeNull();
 
         // Ensure there are no card-like bordered or shadow container classes in the outer wrapper
         const outerDiv = container.firstChild as HTMLElement;
