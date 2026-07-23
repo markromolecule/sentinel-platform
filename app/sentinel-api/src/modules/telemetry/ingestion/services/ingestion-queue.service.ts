@@ -23,6 +23,8 @@ type TelemetryQueueRuntimeOptions = {
     useBatchDelay?: boolean;
 };
 
+const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
 export class TelemetryIngestionQueueService {
     private queue: Queue<PersistableProctoringEvent> | null = null;
     private queueConnection: ReturnType<typeof createRedisConnection> | null = null;
@@ -51,7 +53,11 @@ export class TelemetryIngestionQueueService {
             active?: number;
             failed?: number;
             completed?: number;
+            delayed?: number;
             buffered?: number;
+            workerCount?: number;
+            oldestWaitingJobAgeMs?: number | null;
+            oldestWaitingJobTimestamp?: number | null;
         } = {
             mode,
             queueName: mode === 'redis' ? getTelemetryQueueName() : null,
@@ -63,19 +69,49 @@ export class TelemetryIngestionQueueService {
                 this.getQueue(),
                 this.getRedisConnection(),
             ]);
-            const [waiting, active, failed, completed, buffered] = await Promise.all([
-                queue.getWaitingCount(),
-                queue.getActiveCount(),
-                queue.getFailedCount(),
-                queue.getCompletedCount(),
-                connection.llen(getTelemetryBufferName()),
-            ]);
+            const [waiting, active, failed, completed, delayed, buffered, workerCount] =
+                await Promise.all([
+                    queue.getWaitingCount(),
+                    queue.getActiveCount(),
+                    queue.getFailedCount(),
+                    queue.getCompletedCount(),
+                    queue.getDelayedCount(),
+                    connection.llen(getTelemetryBufferName()),
+                    queue.getWorkersCount().catch((error: any) => {
+                        console.info(
+                            '[TelemetryQueue] Could not get workers count:',
+                            error.message,
+                        );
+                        return -1;
+                    }),
+                ]);
 
             stats.waiting = waiting;
             stats.active = active;
             stats.failed = failed;
             stats.completed = completed;
+            stats.delayed = delayed;
             stats.buffered = buffered;
+            stats.workerCount = workerCount;
+
+            let oldestWaitingJobAgeMs: number | null = null;
+            let oldestWaitingJobTimestamp: number | null = null;
+
+            try {
+                const waitingJobs = await queue.getWaiting(0, 0);
+                if (waitingJobs.length > 0 && waitingJobs[0]) {
+                    oldestWaitingJobTimestamp = waitingJobs[0].timestamp;
+                    oldestWaitingJobAgeMs = Date.now() - oldestWaitingJobTimestamp;
+                }
+            } catch (error: any) {
+                console.warn(
+                    '[TelemetryQueue] Failed to fetch oldest waiting job stats:',
+                    error.message,
+                );
+            }
+
+            stats.oldestWaitingJobAgeMs = oldestWaitingJobAgeMs;
+            stats.oldestWaitingJobTimestamp = oldestWaitingJobTimestamp;
         }
 
         return stats;
@@ -85,10 +121,11 @@ export class TelemetryIngestionQueueService {
         db: DbClient,
         payload: PersistableProctoringEvent,
         options?: TelemetryQueueRuntimeOptions,
-    ): Promise<void> {
-        if (this.getMode(options) === 'sync') {
+    ): Promise<{ mode: TelemetryQueueMode; jobId?: string }> {
+        const mode = this.getMode(options);
+        if (mode === 'sync') {
             await TelemetryStorageService.appendEvent(db, payload);
-            return;
+            return { mode };
         }
 
         const queue = await this.getQueue();
@@ -98,7 +135,24 @@ export class TelemetryIngestionQueueService {
             jobOptions.delay = options.operations.batchWindowMs;
         }
 
-        await queue.add(getTelemetryJobName(), payload, jobOptions);
+        const eventId = payload.metadata?.eventId;
+        if (eventId && UUID_PATTERN.test(eventId)) {
+            jobOptions.jobId = eventId;
+        }
+
+        const job = await queue.add(getTelemetryJobName(), payload, jobOptions);
+        const jobId = job.id;
+
+        console.log('[TelemetryQueue] Event enqueued successfully', {
+            mode,
+            jobId,
+            attemptId: payload.examSessionId,
+            eventId: payload.metadata?.eventId ?? null,
+            eventType: payload.eventType,
+            dedupeKey: payload.metadata?.dedupeKey ?? null,
+        });
+
+        return { mode, jobId };
     }
 
     /**

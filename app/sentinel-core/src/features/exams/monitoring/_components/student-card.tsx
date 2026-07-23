@@ -41,24 +41,27 @@ export function StudentCard({
             onClick={onClick}
         >
             <div className="mb-2.5 flex items-start justify-between gap-2.5">
-                <div className="flex items-start gap-2.5 min-w-0 flex-1">
+                <div className="flex min-w-0 flex-1 items-start gap-2.5">
                     <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-[#323d8f] to-[#4a5bb8] text-xs font-bold text-white">
                         {student.firstName[0]}
                         {student.lastName[0]}
                     </div>
                     <div className="min-w-0 flex-1">
-                        <p className="text-foreground text-sm font-medium truncate" title={`${student.firstName} ${student.lastName}`}>
+                        <p
+                            className="text-foreground truncate text-sm font-medium"
+                            title={`${student.firstName} ${student.lastName}`}
+                        >
                             {student.firstName} {student.lastName}
                         </p>
-                        <p className="text-muted-foreground font-mono text-[10px] leading-none mt-0.5">
+                        <p className="text-muted-foreground mt-0.5 font-mono text-[10px] leading-none">
                             {student.studentNo}
                         </p>
-                        <div className="mt-1.5 flex items-center gap-1.5 flex-nowrap">
+                        <div className="mt-1.5 flex flex-nowrap items-center gap-1.5">
                             <AttemptLifecycleBadge student={student} />
                         </div>
                     </div>
                 </div>
-                <Badge className={cn('text-[10px] px-1.5 py-0.5 shrink-0', status.color)}>
+                <Badge className={cn('shrink-0 px-1.5 py-0.5 text-[10px]', status.color)}>
                     {status.icon}
                     <span className="ml-1">{status.label}</span>
                 </Badge>

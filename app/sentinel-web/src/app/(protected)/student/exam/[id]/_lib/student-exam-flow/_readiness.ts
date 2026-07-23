@@ -107,13 +107,7 @@ export function resolveStudentExamAdmissionState(
               state?: ExamRuntimeAccessState | null;
               reasonCode?: string | null;
               admissionStatus?:
-                  | 'pending'
-                  | 'approved'
-                  | 'rejected'
-                  | 'APPROVED'
-                  | 'WAITING'
-                  | 'REJECTED'
-                  | null;
+                  'pending' | 'approved' | 'rejected' | 'APPROVED' | 'WAITING' | 'REJECTED' | null;
           }
         | null,
 ): 'pending' | 'approved' | 'rejected' | null {
@@ -137,10 +131,7 @@ export function resolveStudentExamAdmissionState(
         return 'rejected';
     }
 
-    if (
-        runtimeAccess.state === 'lobby_waiting' ||
-        runtimeAccess.reasonCode === 'LOBBY_WAITING'
-    ) {
+    if (runtimeAccess.state === 'lobby_waiting' || runtimeAccess.reasonCode === 'LOBBY_WAITING') {
         return 'pending';
     }
 

@@ -30,6 +30,7 @@ export default function StudentExamCheckupPage() {
         isStreamActive,
         errorMessage,
         mediaPipeAnalysis,
+        calibrationFeedback,
         calibrationProgress,
         calibrationHoldDurationLabel,
         isCalibrated,
@@ -47,12 +48,7 @@ export default function StudentExamCheckupPage() {
     }
 
     if (blockedState.isBlocked) {
-        return (
-            <CheckupBlockedState
-                title={blockedState.title}
-                message={blockedState.message}
-            />
-        );
+        return <CheckupBlockedState title={blockedState.title} message={blockedState.message} />;
     }
 
     return (
@@ -101,6 +97,7 @@ export default function StudentExamCheckupPage() {
                                         calibrationProgress={calibrationProgress}
                                         calibrationHoldDurationLabel={calibrationHoldDurationLabel}
                                         mediaPipeAnalysis={mediaPipeAnalysis}
+                                        calibrationFeedback={calibrationFeedback}
                                     />
                                 ) : null
                             }
@@ -132,8 +129,8 @@ export default function StudentExamCheckupPage() {
                         isCheckupFlowReady
                             ? 'Continue to Lobby'
                             : isCalibrationPending
-                                ? 'Finalizing Setup'
-                                : 'Continue to Lobby'
+                              ? 'Finalizing Setup'
+                              : 'Continue to Lobby'
                     }
                     primaryDisabled={!isCheckupFlowReady}
                     primaryOnClick={() => router.push(buildStudentExamHref(examId, 'lobby'))}

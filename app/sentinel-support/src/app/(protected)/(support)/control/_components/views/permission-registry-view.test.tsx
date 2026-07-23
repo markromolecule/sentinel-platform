@@ -102,13 +102,9 @@ vi.mock('@sentinel/ui', () => ({
     AlertDialogFooter: ({ children }: { children: ReactNode }) => <div>{children}</div>,
     AlertDialogHeader: ({ children }: { children: ReactNode }) => <div>{children}</div>,
     AlertDialogTitle: ({ children }: { children: ReactNode }) => <div>{children}</div>,
-    Button: ({
-        children,
-        onClick,
-    }: {
-        children: ReactNode;
-        onClick?: () => void;
-    }) => <button onClick={onClick}>{children}</button>,
+    Button: ({ children, onClick }: { children: ReactNode; onClick?: () => void }) => (
+        <button onClick={onClick}>{children}</button>
+    ),
     SearchBar: ({
         value,
         onChange,
@@ -126,13 +122,7 @@ vi.mock('@sentinel/ui', () => ({
 }));
 
 vi.mock('@/app/(protected)/(support)/control/_components', () => ({
-    AccessControlEmptyState: ({
-        title,
-        description,
-    }: {
-        title: string;
-        description: string;
-    }) => (
+    AccessControlEmptyState: ({ title, description }: { title: string; description: string }) => (
         <div>
             <div>{title}</div>
             <div>{description}</div>
@@ -144,26 +134,14 @@ vi.mock('@/app/(protected)/(support)/control/_components', () => ({
 }));
 
 vi.mock('../permissions/permission-table-components', () => ({
-    PermissionCategoryRow: ({
-        label,
-        onToggle,
-    }: {
-        label: string;
-        onToggle: () => void;
-    }) => (
+    PermissionCategoryRow: ({ label, onToggle }: { label: string; onToggle: () => void }) => (
         <tr>
             <td>
                 <button onClick={onToggle}>{label}</button>
             </td>
         </tr>
     ),
-    PermissionModuleRow: ({
-        label,
-        onToggle,
-    }: {
-        label: string;
-        onToggle: () => void;
-    }) => (
+    PermissionModuleRow: ({ label, onToggle }: { label: string; onToggle: () => void }) => (
         <tr>
             <td>
                 <button onClick={onToggle}>{label}</button>
@@ -220,9 +198,12 @@ describe('PermissionRegistryView', () => {
     it('lets support search narrow the registry to a new PDF template permission', () => {
         render(<PermissionRegistryView />);
 
-        fireEvent.change(screen.getByRole('textbox', { name: /search by key, action, or module/i }), {
-            target: { value: 'pdf_templates:manage' },
-        });
+        fireEvent.change(
+            screen.getByRole('textbox', { name: /search by key, action, or module/i }),
+            {
+                target: { value: 'pdf_templates:manage' },
+            },
+        );
 
         fireEvent.click(screen.getByRole('button', { name: 'System Support' }));
         fireEvent.click(screen.getByRole('button', { name: 'Pdf Templates' }));

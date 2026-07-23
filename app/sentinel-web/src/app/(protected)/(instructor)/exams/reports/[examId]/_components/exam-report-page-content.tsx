@@ -91,4 +91,3 @@ export function ExamReportPageContent({ params }: { params: Promise<{ examId: st
         </div>
     );
 }
-

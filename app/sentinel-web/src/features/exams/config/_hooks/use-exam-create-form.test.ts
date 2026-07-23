@@ -2,10 +2,7 @@ import { describe, expect, it, vi, beforeEach } from 'vitest';
 import { renderHook, act, waitFor } from '@testing-library/react';
 import { DEFAULT_EXAMINATION_GLOBAL_SETTINGS } from '@sentinel/shared/constants';
 import { useExamCreateForm } from './use-exam-create-form';
-import {
-    useCreateExamMutation,
-    useExaminationConfigurationDefaultsQuery,
-} from '@sentinel/hooks';
+import { useCreateExamMutation, useExaminationConfigurationDefaultsQuery } from '@sentinel/hooks';
 
 const mockPush = vi.fn();
 const mockSetSetupDraft = vi.fn();
@@ -51,11 +48,9 @@ describe('useExamCreateForm', () => {
             passingScore: DEFAULT_EXAMINATION_GLOBAL_SETTINGS.defaultPassingScore,
             settings: {
                 shuffleQuestions: DEFAULT_EXAMINATION_GLOBAL_SETTINGS.defaultShuffleQuestions,
-                showCorrectAnswers:
-                    DEFAULT_EXAMINATION_GLOBAL_SETTINGS.defaultShowCorrectAnswers,
+                showCorrectAnswers: DEFAULT_EXAMINATION_GLOBAL_SETTINGS.defaultShowCorrectAnswers,
                 allowReview: DEFAULT_EXAMINATION_GLOBAL_SETTINGS.defaultAllowReview,
-                randomizeChoices:
-                    DEFAULT_EXAMINATION_GLOBAL_SETTINGS.defaultRandomizeChoices,
+                randomizeChoices: DEFAULT_EXAMINATION_GLOBAL_SETTINGS.defaultRandomizeChoices,
             },
         });
         vi.mocked(useCreateExamMutation).mockReturnValue({

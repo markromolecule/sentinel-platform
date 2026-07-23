@@ -23,16 +23,23 @@ export default function StudentLayout({ children }: { children: React.ReactNode 
     }
 
     return (
-        <div className={cn(
-            "bg-background text-foreground flex min-h-screen flex-col pb-20 md:pb-0",
-            isMessages && "h-screen !min-h-0 overflow-hidden"
-        )}>
+        <div
+            className={cn(
+                'bg-background text-foreground flex min-h-screen flex-col pb-20 md:pb-0',
+                isMessages && 'h-screen !min-h-0 overflow-hidden',
+            )}
+        >
             <StudentHeader />
-            <main className={cn("flex-1", isMessages ? "flex-1 flex flex-col min-h-0 overflow-hidden" : "")}>
+            <main
+                className={cn(
+                    'flex-1',
+                    isMessages ? 'flex min-h-0 flex-1 flex-col overflow-hidden' : '',
+                )}
+            >
                 <PageShell
-                    maxWidth={isMessages ? "full" : "2xl"}
+                    maxWidth={isMessages ? 'full' : '2xl'}
                     container={!isMessages}
-                    className={cn(isMessages ? "flex-1 min-h-0 overflow-hidden gap-0 p-0" : "")}
+                    className={cn(isMessages ? 'min-h-0 flex-1 gap-0 overflow-hidden p-0' : '')}
                 >
                     {children}
                 </PageShell>

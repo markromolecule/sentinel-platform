@@ -56,7 +56,9 @@ export function RemediationGrantDialog({
             setAvailableFrom(formatDateTimeLocal(now));
             // default to 2 hours (120 minutes) duration
             setAvailableUntil(formatDateTimeLocal(new Date(now.getTime() + 120 * 60_000)));
-            setNotes(overrideType === 'MAKEUP' ? 'Approved makeup window.' : 'Approved retake window.');
+            setNotes(
+                overrideType === 'MAKEUP' ? 'Approved makeup window.' : 'Approved retake window.',
+            );
         }
     }, [isOpen, item, overrideType]);
 
@@ -94,13 +96,14 @@ export function RemediationGrantDialog({
                     <DialogHeader>
                         <DialogTitle>Setup Scheduled {label}</DialogTitle>
                         <DialogDescription>
-                            Schedule a cloned remediation exam with the same questions for {studentName} ({item.studentNo}).
+                            Schedule a cloned remediation exam with the same questions for{' '}
+                            {studentName} ({item.studentNo}).
                         </DialogDescription>
                     </DialogHeader>
 
                     <div className="space-y-3 py-2">
                         <div className="space-y-1">
-                            <label className="text-xs font-semibold text-muted-foreground">
+                            <label className="text-muted-foreground text-xs font-semibold">
                                 Start Date & Time
                             </label>
                             <input
@@ -108,12 +111,12 @@ export function RemediationGrantDialog({
                                 required
                                 value={availableFrom}
                                 onChange={(e) => setAvailableFrom(e.target.value)}
-                                className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-xs transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+                                className="border-input bg-background placeholder:text-muted-foreground focus-visible:ring-ring flex h-9 w-full rounded-md border px-3 py-1 text-sm shadow-xs transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium focus-visible:ring-1 focus-visible:outline-hidden disabled:cursor-not-allowed disabled:opacity-50"
                             />
                         </div>
 
                         <div className="space-y-1">
-                            <label className="text-xs font-semibold text-muted-foreground">
+                            <label className="text-muted-foreground text-xs font-semibold">
                                 End Date & Time
                             </label>
                             <input
@@ -121,19 +124,19 @@ export function RemediationGrantDialog({
                                 required
                                 value={availableUntil}
                                 onChange={(e) => setAvailableUntil(e.target.value)}
-                                className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-xs transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+                                className="border-input bg-background placeholder:text-muted-foreground focus-visible:ring-ring flex h-9 w-full rounded-md border px-3 py-1 text-sm shadow-xs transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium focus-visible:ring-1 focus-visible:outline-hidden disabled:cursor-not-allowed disabled:opacity-50"
                             />
                         </div>
 
                         <div className="space-y-1">
-                            <label className="text-xs font-semibold text-muted-foreground">
+                            <label className="text-muted-foreground text-xs font-semibold">
                                 Notes (Optional)
                             </label>
                             <textarea
                                 value={notes}
                                 onChange={(e) => setNotes(e.target.value)}
                                 rows={2}
-                                className="flex min-h-[60px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm shadow-xs placeholder:text-muted-foreground focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+                                className="border-input bg-background placeholder:text-muted-foreground focus-visible:ring-ring flex min-h-[60px] w-full rounded-md border px-3 py-2 text-sm shadow-xs focus-visible:ring-1 focus-visible:outline-hidden disabled:cursor-not-allowed disabled:opacity-50"
                                 placeholder="E.g., Approved makeup exam window."
                             />
                         </div>

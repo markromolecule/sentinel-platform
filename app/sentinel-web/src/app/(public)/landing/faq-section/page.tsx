@@ -87,11 +87,15 @@ export default function FAQSection() {
                                 <div
                                     className={cn(
                                         'grid transition-all duration-300 ease-in-out',
-                                        isOpen ? 'mt-4 grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0',
+                                        isOpen
+                                            ? 'mt-4 grid-rows-[1fr] opacity-100'
+                                            : 'grid-rows-[0fr] opacity-0',
                                     )}
                                 >
                                     <div className="overflow-hidden">
-                                        <p className="max-w-3xl pb-2 text-sm leading-7 text-white/50">{faq.answer}</p>
+                                        <p className="max-w-3xl pb-2 text-sm leading-7 text-white/50">
+                                            {faq.answer}
+                                        </p>
                                     </div>
                                 </div>
                             </div>

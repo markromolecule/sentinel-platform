@@ -31,8 +31,8 @@ function resolveInheritedScalar<Value>(args: {
         explicitValue === undefined
             ? fallbackValue
             : explicitValue === null
-                ? defaultValue
-                : explicitValue;
+              ? defaultValue
+              : explicitValue;
 
     return desiredValue === defaultValue ? null : desiredValue;
 }

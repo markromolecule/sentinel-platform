@@ -68,7 +68,13 @@ export const startWorker = async (): Promise<void> => {
     const worker = new Worker<PersistableProctoringEvent>(
         getTelemetryQueueName(),
         async (job) => {
-            await processQueuedTelemetryEvent(dbClient, job.data);
+            const outcome = await processQueuedTelemetryEvent(dbClient, job.data);
+            console.log('[TelemetryWorker] Job completed', {
+                queueName: getTelemetryQueueName(),
+                jobId: job.id,
+                outcome,
+                ...buildTelemetryJobLogContext(job.data),
+            });
         },
         {
             connection: workerConnection,

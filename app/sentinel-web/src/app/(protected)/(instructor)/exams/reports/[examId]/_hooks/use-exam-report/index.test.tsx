@@ -154,7 +154,9 @@ describe('useExamReport', () => {
             );
         });
 
-        expect(toast.error).toHaveBeenCalledWith('Failed to grant remediation: Ineligible attempt state');
+        expect(toast.error).toHaveBeenCalledWith(
+            'Failed to grant remediation: Ineligible attempt state',
+        );
     });
 
     it('derives activeSection from valid query parameters', () => {

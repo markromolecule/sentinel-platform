@@ -19,7 +19,13 @@ const COLUMNS: readonly Column[] = [
     { key: 'respondus', label: 'Respondus' },
 ];
 
-function CompareCell({ value, highlight = false }: { value: string | boolean; highlight?: boolean }) {
+function CompareCell({
+    value,
+    highlight = false,
+}: {
+    value: string | boolean;
+    highlight?: boolean;
+}) {
     if (typeof value === 'boolean') {
         return value ? (
             <span
@@ -44,7 +50,7 @@ function CompareCell({ value, highlight = false }: { value: string | boolean; hi
             className={[
                 'text-sm font-medium transition-transform duration-200',
                 highlight
-                    ? 'inline-flex items-center justify-center rounded-full bg-[rgba(70,84,233,0.08)] border border-[rgba(70,84,233,0.18)] px-4 py-1.5 font-semibold text-[#323d8f] shadow-[0_2px_6px_rgba(70,84,233,0.04)]'
+                    ? 'inline-flex items-center justify-center rounded-full border border-[rgba(70,84,233,0.18)] bg-[rgba(70,84,233,0.08)] px-4 py-1.5 font-semibold text-[#323d8f] shadow-[0_2px_6px_rgba(70,84,233,0.04)]'
                     : 'text-slate-500',
             ].join(' ')}
         >
@@ -70,7 +76,6 @@ export default function CompareSection() {
                 </>
             }
         >
-
             <div className="relative z-10 pt-20 pb-20 md:pt-28 md:pb-28 lg:pt-32 lg:pb-32">
                 <motion.div
                     initial={reduceMotion ? false : { opacity: 0, y: 24 }}
@@ -92,16 +97,14 @@ export default function CompareSection() {
                     className="overflow-hidden rounded-none border border-slate-200/80 bg-white/80 shadow-[0_24px_70px_rgba(15,23,42,0.06)] backdrop-blur-md"
                 >
                     <div className="grid grid-cols-[minmax(260px,1.35fr)_repeat(5,minmax(120px,1fr))] border-b border-slate-100/80 bg-slate-50/50">
-                        <div className="px-6 py-6 text-xs font-bold uppercase tracking-[0.2em] text-slate-400">
-
-                        </div>
+                        <div className="px-6 py-6 text-xs font-bold tracking-[0.2em] text-slate-400 uppercase"></div>
                         {COLUMNS.map((column) => (
                             <div
                                 key={column.key}
                                 className={[
-                                    'px-5 py-6 text-center text-xs font-bold uppercase tracking-[0.2em]',
+                                    'px-5 py-6 text-center text-xs font-bold tracking-[0.2em] uppercase',
                                     column.accent
-                                        ? 'bg-[rgba(70,84,233,0.06)] text-[#323d8f] border-x border-[rgba(70,84,233,0.12)] font-extrabold'
+                                        ? 'border-x border-[rgba(70,84,233,0.12)] bg-[rgba(70,84,233,0.06)] font-extrabold text-[#323d8f]'
                                         : 'text-slate-400',
                                 ].join(' ')}
                             >
@@ -119,8 +122,12 @@ export default function CompareSection() {
                             ].join(' ')}
                         >
                             <div className="flex flex-col justify-center px-6 py-6">
-                                <p className="text-[1.05rem] font-bold text-slate-800 tracking-tight transition-colors group-hover:text-slate-900">{feature.name}</p>
-                                <p className="mt-1.5 max-w-md text-xs leading-5 text-slate-400 font-normal transition-colors group-hover:text-slate-500">{feature.description}</p>
+                                <p className="text-[1.05rem] font-bold tracking-tight text-slate-800 transition-colors group-hover:text-slate-900">
+                                    {feature.name}
+                                </p>
+                                <p className="mt-1.5 max-w-md text-xs leading-5 font-normal text-slate-400 transition-colors group-hover:text-slate-500">
+                                    {feature.description}
+                                </p>
                             </div>
 
                             {COLUMNS.map((column) => (
@@ -129,7 +136,7 @@ export default function CompareSection() {
                                     className={[
                                         'flex items-center justify-center px-5 py-6 text-center text-sm transition-colors duration-200',
                                         column.accent
-                                            ? 'bg-[rgba(70,84,233,0.03)] border-x border-[rgba(70,84,233,0.06)] group-hover:bg-[rgba(70,84,233,0.055)]'
+                                            ? 'border-x border-[rgba(70,84,233,0.06)] bg-[rgba(70,84,233,0.03)] group-hover:bg-[rgba(70,84,233,0.055)]'
                                             : '',
                                     ].join(' ')}
                                 >
@@ -143,8 +150,6 @@ export default function CompareSection() {
                     ))}
                 </motion.div>
             </div>
-
-
         </LandingSectionShell>
     );
 }

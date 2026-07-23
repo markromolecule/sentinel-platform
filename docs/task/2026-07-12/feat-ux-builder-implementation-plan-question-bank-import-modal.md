@@ -93,7 +93,6 @@ The question-bank import modal in `sentinel-web` and `sentinel-core` currently u
 
 **Migration required:** No — this phase changes React/query state only.
 
-
 **Migration required:** No — this phase changes React/query state only.
 
 ## Phase 4: Facets, Pagination, Loading, and Responsive Layout
@@ -109,7 +108,6 @@ The question-bank import modal in `sentinel-web` and `sentinel-core` currently u
 - [x] Update both root `question-bank-import-modal.tsx` files to remove scroll-container refs and infinite-scroll props, pass facet/page state to `QuestionsPanel`, and refine modal/sidebar/panel borders, spacing, overflow, and mobile stacking without changing import/cancel behavior.
 - [x] Add `questions-panel.test.tsx` and `question-panel-empty-state.test.tsx` beside the components in both portals to verify facet labels/counts and zero-count hiding, active/keyboard behavior, select-page checked state, numbered/ellipsis pagination, disabled boundaries, page callbacks, loading spinner semantics, empty state, and stable layout classes.
 - [x] Add or extend a root `question-bank-import-modal.test.tsx` in both portals to exercise the integrated flow: select on page 1, navigate to page 2, change search/type/collection, return to page 1, and confirm selections and import count persist while page resets occur.
-
 
 **Migration required:** No — this phase changes component composition and styling only.
 

@@ -9,7 +9,10 @@ import type {
 } from '@sentinel/shared/types';
 import { buildStudentExamHref } from '@/app/(protected)/student/exam/[id]/_lib/student-exam-flow';
 import { useAttemptMediaPipeMonitoring } from '@/app/(protected)/student/exam/[id]/_hooks/use-attempt-mediapipe-monitoring';
-import { useExamMonitoring, type AttemptMonitoringPhase } from '@/app/(protected)/student/exam/[id]/_hooks/use-exam-monitoring';
+import {
+    useExamMonitoring,
+    type AttemptMonitoringPhase,
+} from '@/app/(protected)/student/exam/[id]/_hooks/use-exam-monitoring';
 import { useAudioAnomalyWorker } from '@/hooks/use-audio-anomaly-worker';
 import { useCheckupAudio } from '@/app/(protected)/student/exam/[id]/_components/student-exam-audio-provider';
 
@@ -27,7 +30,7 @@ export type UseAttemptMonitoringArgs = {
 /**
  * Hook to orchestrate student attempt security monitoring.
  * Coordinates browser interaction security, MediaPipe camera proctoring, and audio anomaly detection.
- * 
+ *
  * @param args - Configuration settings and state for security, media, and audio monitoring.
  * @returns Combined status states, references, and error messages for attempt proctoring.
  */
@@ -52,7 +55,8 @@ export function useAttemptMonitoring({
         configuration,
         examSessionId,
         isMonitoringSuspended: isRedirectingToTurnIn,
-        monitoringPhase: monitoringPhase ?? (isRedirectingToTurnIn ? 'navigating-to-turn-in' : 'active'),
+        monitoringPhase:
+            monitoringPhase ?? (isRedirectingToTurnIn ? 'navigating-to-turn-in' : 'active'),
     });
 
     const {
@@ -105,13 +109,22 @@ export function useAttemptMonitoring({
         const isMicRequired = configuration.micRequired;
         const isCameraRequired = configuration.cameraRequired;
 
-        if (isCameraRequired && mediaPipeErrorMessage && mediaPipeErrorMessage.toLowerCase().includes('blocked')) {
+        if (
+            isCameraRequired &&
+            mediaPipeErrorMessage &&
+            mediaPipeErrorMessage.toLowerCase().includes('blocked')
+        ) {
             toast.error('Camera stream lost. Returning to lobby for system checkup.');
             router.push(buildStudentExamHref(examId, 'lobby'));
             return;
         }
 
-        if (isMicRequired && audioErrorMessage && audioErrorMessage.toLowerCase().includes('denied')) {
+        if (
+            isMicRequired &&
+            audioErrorMessage &&
+            (audioErrorMessage.toLowerCase().includes('denied') ||
+                audioErrorMessage.toLowerCase().includes('failed to establish'))
+        ) {
             toast.error('Microphone stream lost. Returning to lobby for system checkup.');
             router.push(buildStudentExamHref(examId, 'lobby'));
             return;

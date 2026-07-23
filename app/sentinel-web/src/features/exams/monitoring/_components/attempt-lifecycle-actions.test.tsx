@@ -10,14 +10,19 @@ vi.mock('@sentinel/ui', async () => {
         DropdownMenu: ({ children }: any) => <div>{children}</div>,
         DropdownMenuTrigger: ({ children }: any) => <>{children}</>,
         DropdownMenuContent: ({ children }: any) => <div>{children}</div>,
-        DropdownMenuItem: ({ children, onClick, disabled, 'aria-label': ariaLabel, title }: any) => (
+        DropdownMenuItem: ({
+            children,
+            onClick,
+            disabled,
+            'aria-label': ariaLabel,
+            title,
+        }: any) => (
             <button onClick={onClick} disabled={disabled} aria-label={ariaLabel} title={title}>
                 {children}
             </button>
         ),
     };
 });
-
 
 const student: StudentSession = {
     id: 'student-1',

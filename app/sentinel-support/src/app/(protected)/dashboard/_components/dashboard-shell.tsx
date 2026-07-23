@@ -22,7 +22,7 @@ interface DashboardShellProps {
  */
 export function DashboardShell({ children }: DashboardShellProps) {
     return (
-        <div className="relative flex min-h-[calc(100vh-64px)] flex-col lg:h-[calc(100svh-64px)] lg:min-h-0 lg:-m-6 lg:flex-row lg:items-stretch lg:overflow-hidden">
+        <div className="relative flex min-h-[calc(100vh-64px)] flex-col lg:-m-6 lg:h-[calc(100svh-64px)] lg:min-h-0 lg:flex-row lg:items-stretch lg:overflow-hidden">
             {/* Main Content */}
             <main
                 data-lenis-prevent

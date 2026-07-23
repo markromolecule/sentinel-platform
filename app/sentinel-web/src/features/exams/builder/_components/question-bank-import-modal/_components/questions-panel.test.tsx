@@ -54,7 +54,7 @@ describe('QuestionsPanel', () => {
 
     it('renders single facet dropdown trigger with correct active counts', () => {
         render(<QuestionsPanel {...defaultProps} />);
-        
+
         // Active facet trigger should show "Type: All 8"
         const trigger = screen.getByRole('button', { name: /Type: All 8/i });
         expect(trigger).toBeTruthy();

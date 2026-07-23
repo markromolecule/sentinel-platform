@@ -19,13 +19,14 @@ export function useTelemetry(args: {
     const apiClient = useApi();
 
     const emitTelemetryEvent = useCallback(
-        (
-            eventType: BrowserTelemetryEventType,
-            metadataOptions?: TelemetryActionMetadata,
-        ) => {
+        (eventType: BrowserTelemetryEventType, metadataOptions?: TelemetryActionMetadata) => {
             const requestedPlatform = isMobile ? 'MOBILE' : 'WEB';
-            const shouldSkipEmission = isMonitoringSuspended.current || !examSessionId || !studentId;
-            const detectionTime = metadataOptions?.detectionTimestamp ?? metadataOptions?.clientActionAt ?? new Date().toISOString();
+            const shouldSkipEmission =
+                isMonitoringSuspended.current || !examSessionId || !studentId;
+            const detectionTime =
+                metadataOptions?.detectionTimestamp ??
+                metadataOptions?.clientActionAt ??
+                new Date().toISOString();
             const emissionTime = new Date().toISOString();
             const traceBase = {
                 detectorSource: metadataOptions?.detectorSource ?? 'browser',
@@ -44,8 +45,8 @@ export function useTelemetry(args: {
                     reason: isMonitoringSuspended.current
                         ? 'monitoring-suspended'
                         : !examSessionId || !studentId
-                            ? 'missing-session-context'
-                            : 'rule-disabled',
+                          ? 'missing-session-context'
+                          : 'rule-disabled',
                 });
                 return;
             }

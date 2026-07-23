@@ -15,7 +15,6 @@ export type UseAttemptSyncArgs = {
     ) => Promise<void>;
 };
 
-
 export function useAttemptSync({
     isInitializingSession,
     sessionId,
@@ -56,7 +55,11 @@ export function useAttemptSync({
 
         const timer = setTimeout(() => {
             try {
-                const syncPromise = syncProgress(answeredCount, selectedAnswers, elapsedSecondsRef.current);
+                const syncPromise = syncProgress(
+                    answeredCount,
+                    selectedAnswers,
+                    elapsedSecondsRef.current,
+                );
                 if (syncPromise && typeof syncPromise.catch === 'function') {
                     syncPromise.catch(() => {
                         if (Object.keys(selectedAnswersRef.current).length > 0) {
@@ -73,8 +76,14 @@ export function useAttemptSync({
 
         const handleOnline = () => {
             if (Object.keys(selectedAnswersRef.current).length > 0) {
-                const currentAnsweredCount = Object.values(selectedAnswersRef.current).filter(hasAnswer).length;
-                void syncProgress(currentAnsweredCount, selectedAnswersRef.current, elapsedSecondsRef.current);
+                const currentAnsweredCount = Object.values(selectedAnswersRef.current).filter(
+                    hasAnswer,
+                ).length;
+                void syncProgress(
+                    currentAnsweredCount,
+                    selectedAnswersRef.current,
+                    elapsedSecondsRef.current,
+                );
             }
         };
 
@@ -86,4 +95,3 @@ export function useAttemptSync({
         };
     }, [sessionId, isInitializingSession, saveAnswerDraft, selectedAnswers, syncProgress]);
 }
-

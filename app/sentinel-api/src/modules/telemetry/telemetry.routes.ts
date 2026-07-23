@@ -8,7 +8,21 @@ import {
     telemetryHealthRouteHandler,
 } from './telemetry-monitoring.controller';
 
+import { authMiddleware } from '../../middleware/auth';
+import { HTTPException } from 'hono/http-exception';
+
 const telemetryRoutes = new OpenAPIHono<HonoEnv>();
+
+telemetryRoutes.use('/health', authMiddleware);
+telemetryRoutes.use('/health', async (c, next) => {
+    const role = c.get('role');
+    if (role !== 'support' && role !== 'admin' && role !== 'superadmin') {
+        throw new HTTPException(403, {
+            message: 'Forbidden: Telemetry health is restricted to operational/support roles.',
+        });
+    }
+    await next();
+});
 
 telemetryRoutes.openapi(telemetryHealthRoute, telemetryHealthRouteHandler);
 telemetryRoutes.route('/', telemetryIngestionRoutes);

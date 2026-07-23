@@ -21,7 +21,10 @@ function TemplateStatusContent({
                 <Badge variant="outline">Version {template?.version ?? 1}</Badge>
                 <Badge variant="outline">{template?.status ?? 'DRAFT'}</Badge>
                 {hasUnsavedChanges ? (
-                    <Badge variant="outline" className="border-amber-200 bg-amber-50 text-amber-700">
+                    <Badge
+                        variant="outline"
+                        className="border-amber-200 bg-amber-50 text-amber-700"
+                    >
                         Unsaved changes
                     </Badge>
                 ) : null}
@@ -53,7 +56,7 @@ export function TemplateStatusCard({
     if (variant === 'inline') {
         return (
             <div className={cn('space-y-1.5', className)}>
-                <p className="text-foreground/80 text-[11px] font-semibold uppercase tracking-[0.14em]">
+                <p className="text-foreground/80 text-[11px] font-semibold tracking-[0.14em] uppercase">
                     Template status
                 </p>
                 <TemplateStatusContent

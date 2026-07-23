@@ -1,15 +1,19 @@
 import Link from 'next/link';
-import {
-    ArrowRight,
-} from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 
 function GooglePlayIcon({ className = '' }: { className?: string }) {
     return (
         <svg viewBox="0 0 24 24" aria-hidden="true" className={className}>
-            <path d="M3.2 2.8L13.9 12 3.2 21.2c-.3-.3-.5-.7-.5-1.2V4c0-.5.2-.9.5-1.2z" fill="#34A853" />
+            <path
+                d="M3.2 2.8L13.9 12 3.2 21.2c-.3-.3-.5-.7-.5-1.2V4c0-.5.2-.9.5-1.2z"
+                fill="#34A853"
+            />
             <path d="M16.7 14.4L6.1 23.6c.5.2 1 .2 1.5-.1l12.5-7.1-3.4-2z" fill="#FBBC04" />
             <path d="M20.1 7.6L7.6.5c-.5-.3-1-.3-1.5-.1l10.6 9.2 3.4-2z" fill="#EA4335" />
-            <path d="M20.1 7.6L16.7 9.6 13.9 12l2.8 2.4 3.4 2c.8-.4 1.3-1.1 1.3-2V9c0-.9-.5-1.6-1.3-2z" fill="#4285F4" />
+            <path
+                d="M20.1 7.6L16.7 9.6 13.9 12l2.8 2.4 3.4 2c.8-.4 1.3-1.1 1.3-2V9c0-.9-.5-1.6-1.3-2z"
+                fill="#4285F4"
+            />
         </svg>
     );
 }
@@ -71,7 +75,8 @@ const features = [
     },
     {
         title: 'Guided Permission Check',
-        description: 'Walks students through camera and microphone access before they enter the exam.',
+        description:
+            'Walks students through camera and microphone access before they enter the exam.',
     },
 ];
 
@@ -86,9 +91,9 @@ export default function DownloadPage() {
                                 Sentinel for Mobile.
                             </h1>
                             <p className="mt-6 max-w-2xl text-base leading-7 text-white/60 md:text-lg">
-                                Choose the operating system for your students. Android and iOS
-                                both lead into the same Sentinel experience with guided setup,
-                                device checks, and real-time monitoring.
+                                Choose the operating system for your students. Android and iOS both
+                                lead into the same Sentinel experience with guided setup, device
+                                checks, and real-time monitoring.
                             </p>
                         </div>
 
@@ -137,7 +142,9 @@ export default function DownloadPage() {
                                         key={platform}
                                         className={[
                                             'flex flex-col justify-between',
-                                            index === 0 ? 'lg:pr-8' : 'lg:border-l lg:border-white/10 lg:pl-8',
+                                            index === 0
+                                                ? 'lg:pr-8'
+                                                : 'lg:border-l lg:border-white/10 lg:pl-8',
                                         ].join(' ')}
                                     >
                                         <div>
@@ -148,7 +155,9 @@ export default function DownloadPage() {
                                                 </p>
                                             </div>
 
-                                            <p className="mt-6 text-lg font-medium text-white">{title}</p>
+                                            <p className="mt-6 text-lg font-medium text-white">
+                                                {title}
+                                            </p>
                                             <p className="mt-2 text-sm font-medium text-[var(--sentinel-primary)]">
                                                 {storeLabel}
                                             </p>

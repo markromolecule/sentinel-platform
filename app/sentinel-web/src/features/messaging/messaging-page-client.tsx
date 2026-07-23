@@ -303,7 +303,7 @@ export function MessagingPageClient() {
         <div
             className={cn(
                 isMessagesRoute
-                    ? 'flex flex-1 min-h-0 h-full overflow-hidden'
+                    ? 'flex h-full min-h-0 flex-1 overflow-hidden'
                     : 'grid h-[calc(100vh-11rem)] min-h-[560px] gap-4 md:grid-cols-[22rem_minmax(0,1fr)]',
             )}
         >

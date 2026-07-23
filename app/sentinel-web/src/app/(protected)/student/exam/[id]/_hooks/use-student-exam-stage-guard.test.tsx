@@ -99,9 +99,7 @@ describe('useStudentExamStageGuard', () => {
 
         renderHook(() => useStudentExamStageGuard('instruction'));
 
-        expect(mockRouterReplace).toHaveBeenCalledWith(
-            '/student/exam/test-exam-id/lobby',
-        );
+        expect(mockRouterReplace).toHaveBeenCalledWith('/student/exam/test-exam-id/lobby');
     });
 
     it('consumes fresh lobby entry marker on attempt page', () => {
@@ -128,18 +126,20 @@ describe('useStudentExamStageGuard', () => {
             <StrictMode>{children}</StrictMode>
         );
 
-        mockReadStoredLobbyEntry.mockReturnValueOnce({
-            token: 'strict-token',
-            version: 1,
-            examId: 'test-exam-id',
-            createdAt: new Date().toISOString(),
-        }).mockReturnValue({
-            token: 'strict-token',
-            version: 1,
-            examId: 'test-exam-id',
-            createdAt: new Date().toISOString(),
-            consumedAt: new Date().toISOString(),
-        });
+        mockReadStoredLobbyEntry
+            .mockReturnValueOnce({
+                token: 'strict-token',
+                version: 1,
+                examId: 'test-exam-id',
+                createdAt: new Date().toISOString(),
+            })
+            .mockReturnValue({
+                token: 'strict-token',
+                version: 1,
+                examId: 'test-exam-id',
+                createdAt: new Date().toISOString(),
+                consumedAt: new Date().toISOString(),
+            });
 
         mockResolveStudentExamStage.mockReturnValue({
             targetStage: 'attempt',

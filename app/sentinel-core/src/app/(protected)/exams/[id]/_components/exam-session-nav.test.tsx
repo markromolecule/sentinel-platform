@@ -115,7 +115,7 @@ describe('ExamSessionNav', () => {
 
         expect(screen.queryByRole('link', { name: 'Lobby' })).toBeNull();
         expect(screen.queryByRole('link', { name: 'Monitoring' })).toBeNull();
-        
+
         expect(screen.getByRole('link', { name: 'Attempt Summary' }).getAttribute('href')).toBe(
             '/exams/exam-1/report',
         );

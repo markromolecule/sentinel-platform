@@ -1,7 +1,8 @@
 import type { ExamConfig } from '@sentinel/shared/types';
 import { type SecurityLockReason } from '../../_lib/exam-session-storage';
 
-export type AttemptMonitoringPhase = 'active' | 'submitting' | 'navigating-to-turn-in' | 'suspended';
+export type AttemptMonitoringPhase =
+    'active' | 'submitting' | 'navigating-to-turn-in' | 'suspended';
 
 export type UseExamMonitoringArgs = {
     configuration?: ExamConfig;

@@ -48,7 +48,7 @@ export function AttemptLifecycleActions({
                     type="button"
                     variant="ghost"
                     size="icon"
-                    className="h-7 w-7 text-muted-foreground hover:text-foreground shrink-0 rounded-full"
+                    className="text-muted-foreground hover:text-foreground h-7 w-7 shrink-0 rounded-full"
                     aria-label={`Manage attempt for ${studentName}`}
                     title={`Manage attempt for ${studentName}`}
                     onClick={(event) => {
@@ -77,7 +77,7 @@ export function AttemptLifecycleActions({
                         <DropdownMenuItem
                             key={action}
                             disabled={disabled || activeLifecycleActionId === actionId}
-                            className="gap-2 cursor-pointer text-xs"
+                            className="cursor-pointer gap-2 text-xs"
                             aria-label={`${label} attempt for ${studentName}`}
                             title={`${label} attempt for ${studentName}`}
                             onClick={(event) => {

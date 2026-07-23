@@ -53,8 +53,8 @@ function NewAssignmentsBuilder({
         const subjectMatchedClassrooms = !subjectId
             ? []
             : (classrooms as ClassroomSummary[]).filter(
-                (classroom) => classroom.subjectId === subjectId
-            );
+                  (classroom) => classroom.subjectId === subjectId,
+              );
 
         if (subjectMatchedClassrooms.length > 0) {
             return subjectMatchedClassrooms;
@@ -110,11 +110,16 @@ function NewAssignmentsBuilder({
     }, [isPending, onSavingChange]);
 
     // Setup element refs for focus management
-    const rowRefs = React.useRef<Record<string, {
-        classroomId?: HTMLInputElement | null;
-        roomId?: HTMLButtonElement | null;
-        instructorId?: HTMLInputElement | null;
-    }>>({});
+    const rowRefs = React.useRef<
+        Record<
+            string,
+            {
+                classroomId?: HTMLInputElement | null;
+                roomId?: HTMLButtonElement | null;
+                instructorId?: HTMLInputElement | null;
+            }
+        >
+    >({});
 
     // Focusing the first invalid control reactively after a submit attempt
     React.useEffect(() => {
@@ -138,7 +143,7 @@ function NewAssignmentsBuilder({
     };
 
     return (
-        <div className="flex flex-col h-full min-h-[450px]">
+        <div className="flex h-full min-h-[450px] flex-col">
             {/* Top Warnings */}
             {(hasDuplicatesInRows || hasConflictsWithExisting) && (
                 <div className="mb-4 flex items-center gap-2 rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-600 dark:border-amber-900/50 dark:bg-amber-950/20 dark:text-amber-400">
@@ -161,7 +166,7 @@ function NewAssignmentsBuilder({
             />
 
             {/* Assignments Row Editor List */}
-            <div className="flex-1 max-h-[42vh] space-y-4 overflow-y-auto pr-1 pb-4">
+            <div className="max-h-[42vh] flex-1 space-y-4 overflow-y-auto pr-1 pb-4">
                 <AnimatePresence initial={false}>
                     {rows.map((row, index) => (
                         <AssignmentBuilderRow

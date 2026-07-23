@@ -54,8 +54,8 @@ export function QueueReportDialog({
                 <DialogHeader>
                     <DialogTitle>Queue Overall Report</DialogTitle>
                     <DialogDescription>
-                        Choose the target institution and period for the PDF export. The report
-                        will be generated asynchronously.
+                        Choose the target institution and period for the PDF export. The report will
+                        be generated asynchronously.
                     </DialogDescription>
                 </DialogHeader>
 

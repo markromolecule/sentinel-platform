@@ -53,7 +53,7 @@ export default function HeroSection() {
     };
 
     return (
-        <section className="relative flex min-h-[100svh] overflow-hidden bg-[#050505] px-4 pb-16 pt-28 text-[#f5f7fb] md:px-6 md:pb-20 lg:px-8">
+        <section className="relative flex min-h-[100svh] overflow-hidden bg-[#050505] px-4 pt-28 pb-16 text-[#f5f7fb] md:px-6 md:pb-20 lg:px-8">
             <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_28%_34%,rgba(63,89,210,0.18),transparent_24%),radial-gradient(circle_at_68%_72%,rgba(35,48,112,0.16),transparent_22%),linear-gradient(180deg,#07070a_0%,#050505_55%,#030303_100%)]" />
             <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(90deg,rgba(255,255,255,0.02),transparent_18%,transparent_82%,rgba(255,255,255,0.02))]" />
             <div className="pointer-events-none absolute inset-x-0 bottom-0 h-48 bg-gradient-to-t from-[#050505] via-[#050505]/92 to-transparent" />
@@ -89,7 +89,7 @@ export default function HeroSection() {
             </motion.div>
 
             <div className="relative z-10 mx-auto flex w-full max-w-[90rem] flex-1 flex-col justify-end px-4 pb-10 md:px-6 md:pb-14 lg:px-8 lg:pb-16">
-                <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(420px,0.92fr)] lg:gap-28 lg:items-end">
+                <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(420px,0.92fr)] lg:items-end lg:gap-28">
                     <motion.div
                         initial={reduceMotion ? false : { opacity: 0, y: 28 }}
                         animate={reduceMotion ? undefined : { opacity: 1, y: 0 }}
@@ -97,10 +97,10 @@ export default function HeroSection() {
                         className="flex min-h-[18rem] max-w-[42rem] flex-col justify-end"
                     >
                         <div className="space-y-4">
-                            <p className="whitespace-nowrap text-[clamp(1.9rem,3.4vw,3rem)] font-medium leading-[0.96] tracking-[-0.06em] text-white/40">
+                            <p className="text-[clamp(1.9rem,3.4vw,3rem)] leading-[0.96] font-medium tracking-[-0.06em] whitespace-nowrap text-white/40">
                                 Take your exam with
                             </p>
-                            <p className="text-[clamp(4rem,7.6vw,7.2rem)] font-semibold leading-[0.9] tracking-[-0.09em] text-white">
+                            <p className="text-[clamp(4rem,7.6vw,7.2rem)] leading-[0.9] font-semibold tracking-[-0.09em] text-white">
                                 SENTINEL
                             </p>
                         </div>
@@ -113,8 +113,8 @@ export default function HeroSection() {
                         className="flex max-w-[34rem] flex-col gap-5 lg:ml-auto lg:justify-end"
                     >
                         <p className="max-w-[32rem] text-[1rem] leading-7 text-white/[0.86] md:text-[1.05rem]">
-                            A mobile and web-based examination security system. Built
-                            for educators, ensuring fair testing everywhere.
+                            A mobile and web-based examination security system. Built for educators,
+                            ensuring fair testing everywhere.
                         </p>
 
                         <div className="flex flex-col gap-3 sm:flex-row">
@@ -123,11 +123,7 @@ export default function HeroSection() {
                                 icon={<Smartphone className="size-5" />}
                                 label="Download Sentinel"
                             />
-                            <DownloadButton
-                                href="#features"
-                                label="View Features"
-                                inverted
-                            />
+                            <DownloadButton href="#features" label="View Features" inverted />
                         </div>
 
                         <Link

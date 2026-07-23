@@ -3,11 +3,7 @@
 import { useState } from 'react';
 import { type PaginationState } from '@tanstack/react-table';
 import { useActivePermissions, useDebounce, useFeedbacksQuery } from '@sentinel/hooks';
-import {
-    PageHeader,
-    PermissionDeniedState,
-    Separator,
-} from '@sentinel/ui';
+import { PageHeader, PermissionDeniedState, Separator } from '@sentinel/ui';
 import type { FeedbackRecord } from '@sentinel/services';
 import { FeedbackDetailDialog } from './_components/feedback-detail-dialog';
 import { FeedbackSummaryCards } from './_components/feedback-summary-cards';

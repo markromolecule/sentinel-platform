@@ -1,8 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import {
-    getMonitoringEventTraceBuffer,
-    writeMonitoringEventTrace,
-} from './monitoring-event-trace';
+import { getMonitoringEventTraceBuffer, writeMonitoringEventTrace } from './monitoring-event-trace';
 
 describe('monitoring-event-trace', () => {
     afterEach(() => {

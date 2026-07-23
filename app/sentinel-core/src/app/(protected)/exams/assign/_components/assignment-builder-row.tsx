@@ -14,10 +14,7 @@ import {
     SelectValue,
     cn,
 } from '@sentinel/ui';
-import {
-    type AssignmentRow,
-    type AssignmentRowErrors,
-} from '@sentinel/hooks';
+import { type AssignmentRow, type AssignmentRowErrors } from '@sentinel/hooks';
 import { type ClassroomSummary, type Room } from '@sentinel/shared/types';
 import { type User } from '@sentinel/services';
 
@@ -37,11 +34,7 @@ interface AssignmentBuilderRowProps {
     isUsersLoading: boolean;
     isPending: boolean;
     removeRow: (localId: string) => void;
-    updateRowField: (
-        localId: string,
-        field: keyof AssignmentRow,
-        value: string
-    ) => void;
+    updateRowField: (localId: string, field: keyof AssignmentRow, value: string) => void;
     rowRefs: React.MutableRefObject<
         Record<
             string,
@@ -83,7 +76,7 @@ function AssignmentBuilderRow({
             className="relative flex flex-col gap-3 rounded-lg border bg-zinc-50/50 p-4 dark:bg-zinc-950/20"
         >
             <div className="flex items-center justify-between border-b pb-2">
-                <span className="text-xs font-bold text-zinc-500 uppercase tracking-wider">
+                <span className="text-xs font-bold tracking-wider text-zinc-500 uppercase">
                     Assignment {index + 1}
                 </span>
                 {showRemoveButton && (
@@ -91,7 +84,7 @@ function AssignmentBuilderRow({
                         type="button"
                         variant="ghost"
                         size="sm"
-                        className="h-8 text-red-500 hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-950/30 gap-1.5"
+                        className="h-8 gap-1.5 text-red-500 hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-950/30"
                         onClick={() => removeRow(row.localId)}
                         disabled={isPending}
                     >
@@ -101,7 +94,7 @@ function AssignmentBuilderRow({
                 )}
             </div>
 
-            <div className="grid grid-cols-1 gap-4 items-start md:grid-cols-12">
+            <div className="grid grid-cols-1 items-start gap-4 md:grid-cols-12">
                 {/* Classroom Select */}
                 <div className="space-y-1.5 md:col-span-4">
                     <Label className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">
@@ -115,13 +108,12 @@ function AssignmentBuilderRow({
                     ) : (
                         <RowClassroomCombobox
                             ref={(el) => {
-                                if (!rowRefs.current[row.localId]) rowRefs.current[row.localId] = {};
+                                if (!rowRefs.current[row.localId])
+                                    rowRefs.current[row.localId] = {};
                                 rowRefs.current[row.localId].classroomId = el;
                             }}
                             value={row.classroomId}
-                            onValueChange={(val) =>
-                                updateRowField(row.localId, 'classroomId', val)
-                            }
+                            onValueChange={(val) => updateRowField(row.localId, 'classroomId', val)}
                             classrooms={classrooms}
                             disabled={isPending}
                             placeholder="Select classroom"
@@ -136,7 +128,7 @@ function AssignmentBuilderRow({
                     {submitAttempted && rowErrs.classroomId && (
                         <p
                             id={`err-classroom-${row.localId}`}
-                            className="text-[11px] font-medium text-red-500 mt-1"
+                            className="mt-1 text-[11px] font-medium text-red-500"
                         >
                             {rowErrs.classroomId}
                         </p>
@@ -156,14 +148,13 @@ function AssignmentBuilderRow({
                     ) : (
                         <Select
                             value={row.roomId}
-                            onValueChange={(val) =>
-                                updateRowField(row.localId, 'roomId', val)
-                            }
+                            onValueChange={(val) => updateRowField(row.localId, 'roomId', val)}
                             disabled={isPending}
                         >
                             <SelectTrigger
                                 ref={(el) => {
-                                    if (!rowRefs.current[row.localId]) rowRefs.current[row.localId] = {};
+                                    if (!rowRefs.current[row.localId])
+                                        rowRefs.current[row.localId] = {};
                                     rowRefs.current[row.localId].roomId = el;
                                 }}
                                 aria-invalid={submitAttempted && !!rowErrs.roomId}
@@ -188,7 +179,7 @@ function AssignmentBuilderRow({
                                                     'ml-2 rounded-xs border px-1.5 py-0.5 text-[10px] font-semibold tracking-wider uppercase',
                                                     room.status === 'AVAILABLE'
                                                         ? 'border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-900/50 dark:bg-emerald-950/20 dark:text-emerald-400'
-                                                        : 'border-amber-200 bg-amber-50 text-amber-700 dark:border-amber-900/50 dark:bg-amber-950/20 dark:text-amber-400'
+                                                        : 'border-amber-200 bg-amber-50 text-amber-700 dark:border-amber-900/50 dark:bg-amber-950/20 dark:text-amber-400',
                                                 )}
                                             >
                                                 {room.status === 'AVAILABLE'
@@ -204,7 +195,7 @@ function AssignmentBuilderRow({
                     {submitAttempted && rowErrs.roomId && (
                         <p
                             id={`err-room-${row.localId}`}
-                            className="text-[11px] font-medium text-red-500 mt-1"
+                            className="mt-1 text-[11px] font-medium text-red-500"
                         >
                             {rowErrs.roomId}
                         </p>
@@ -224,7 +215,8 @@ function AssignmentBuilderRow({
                     ) : (
                         <RowInstructorCombobox
                             ref={(el) => {
-                                if (!rowRefs.current[row.localId]) rowRefs.current[row.localId] = {};
+                                if (!rowRefs.current[row.localId])
+                                    rowRefs.current[row.localId] = {};
                                 rowRefs.current[row.localId].instructorId = el;
                             }}
                             value={row.instructorId}
@@ -245,7 +237,7 @@ function AssignmentBuilderRow({
                     {submitAttempted && rowErrs.instructorId && (
                         <p
                             id={`err-instructor-${row.localId}`}
-                            className="text-[11px] font-medium text-red-500 mt-1"
+                            className="mt-1 text-[11px] font-medium text-red-500"
                         >
                             {rowErrs.instructorId}
                         </p>

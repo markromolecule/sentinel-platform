@@ -39,7 +39,7 @@ export function ExamAttemptRuntimePassage({
                 {currentContext.body ? (
                     <div
                         data-testid="runtime-passage-body"
-                        className="text-foreground min-w-0 break-words text-sm leading-7 sm:text-[15px] sm:leading-8 [&_a]:break-all [&_a]:underline [&_blockquote]:border-l-2 [&_blockquote]:border-border/60 [&_blockquote]:pl-4 [&_code]:rounded [&_code]:bg-muted [&_code]:px-1.5 [&_img]:h-auto [&_img]:max-w-full [&_img]:rounded-lg [&_img]:border [&_img]:border-border/60 [&_img]:object-contain [&_ol]:pl-5 [&_pre]:overflow-x-auto [&_pre]:rounded-lg [&_pre]:bg-muted [&_pre]:p-3 [&_ul]:pl-5"
+                        className="text-foreground [&_blockquote]:border-border/60 [&_code]:bg-muted [&_img]:border-border/60 [&_pre]:bg-muted min-w-0 text-sm leading-7 break-words sm:text-[15px] sm:leading-8 [&_a]:break-all [&_a]:underline [&_blockquote]:border-l-2 [&_blockquote]:pl-4 [&_code]:rounded [&_code]:px-1.5 [&_img]:h-auto [&_img]:max-w-full [&_img]:rounded-lg [&_img]:border [&_img]:object-contain [&_ol]:pl-5 [&_pre]:overflow-x-auto [&_pre]:rounded-lg [&_pre]:p-3 [&_ul]:pl-5"
                         dangerouslySetInnerHTML={{ __html: currentContext.body }}
                     />
                 ) : (

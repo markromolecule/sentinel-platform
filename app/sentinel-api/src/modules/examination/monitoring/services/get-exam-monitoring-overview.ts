@@ -10,6 +10,8 @@ import {
     type MonitoringStudentRow,
 } from './map-monitoring-response';
 
+import { applyMonitoringAttemptOrdering } from './attempt-selection.helper';
+
 type GetExamMonitoringOverviewArgs = {
     dbClient: DbClient;
     examId: string;
@@ -33,7 +35,7 @@ export async function getExamMonitoringOverview({
         userId,
     });
 
-    const latestAttempts = dbClient
+    const latestAttemptsQuery = dbClient
         .selectFrom('exam_attempts as ea')
         .distinctOn('ea.student_id')
         .select([
@@ -55,10 +57,9 @@ export async function getExamMonitoringOverview({
             'ea.created_at',
         ])
         .where('ea.exam_id', '=', examId)
-        .where('ea.student_id', 'is not', null)
-        .orderBy('ea.student_id')
-        .orderBy('ea.created_at', 'desc')
-        .as('latest_attempts');
+        .where('ea.student_id', 'is not', null);
+
+    const latestAttempts = applyMonitoringAttemptOrdering(latestAttemptsQuery).as('latest_attempts');
 
     const incidentSummary = dbClient
         .selectFrom('flagged_incidents as fi')

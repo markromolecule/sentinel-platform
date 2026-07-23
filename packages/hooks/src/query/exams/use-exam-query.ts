@@ -9,7 +9,9 @@ export function useExamQuery(id?: string, params?: GetExamParams) {
     const isAuthenticatedQueryEnabled = useAuthenticatedQueryEnabled();
 
     return useQuery({
-        queryKey: id ? [...EXAM_QUERY_KEYS.details(id), params ?? {}] : [...EXAM_QUERY_KEYS.all, 'detail'],
+        queryKey: id
+            ? [...EXAM_QUERY_KEYS.details(id), params ?? {}]
+            : [...EXAM_QUERY_KEYS.all, 'detail'],
         queryFn: () => getExam(apiClient, id as string, params),
         enabled: Boolean(id) && isAuthenticatedQueryEnabled,
     });

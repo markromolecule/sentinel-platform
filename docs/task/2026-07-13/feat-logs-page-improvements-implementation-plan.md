@@ -2,7 +2,7 @@
 
 ## 1. The Context
 
-The logs pages in `sentinel-core` and `sentinel-support` show a default pagination size of 10 instead of 20, render redundant icons on their sidebar navigations, and lack background process auditing for critical jobs like the telemetry flush cron. The system logs page is currently empty because cron executions from GitHub Actions are anonymous (having no active institution scope) and the API strictly scopes all logs queries to the user's active tenant institution. 
+The logs pages in `sentinel-core` and `sentinel-support` show a default pagination size of 10 instead of 20, render redundant icons on their sidebar navigations, and lack background process auditing for critical jobs like the telemetry flush cron. The system logs page is currently empty because cron executions from GitHub Actions are anonymous (having no active institution scope) and the API strictly scopes all logs queries to the user's active tenant institution.
 
 ---
 
@@ -47,10 +47,10 @@ The logs pages in `sentinel-core` and `sentinel-support` show a default paginati
 - [ ] In [flush-telemetry.controller.ts](file:///Applications/XAMPP/xamppfiles/htdocs/sentinel/app/sentinel-api/src/modules/telemetry/ingestion/controllers/flush-telemetry.controller.ts), import `SystemLogsService` and invoke `logSystemEvent` to record `telemetry.flush_success` (with count and stats details) and `telemetry.flush_failure` (with error details) during cron runs.
 - [ ] In [flush-telemetry.controller.test.ts](file:///Applications/XAMPP/xamppfiles/htdocs/sentinel/app/sentinel-api/src/modules/telemetry/ingestion/controllers/flush-telemetry.controller.test.ts), mock `SystemLogsService.logSystemEvent` to avoid database connections in unit tests.
 - [ ] Run focused Vitest suites for logs and telemetry:
-  ```bash
-  pnpm --dir app/sentinel-api test modules/general/logs
-  pnpm --dir app/sentinel-api test modules/telemetry/ingestion
-  ```
+    ```bash
+    pnpm --dir app/sentinel-api test modules/general/logs
+    pnpm --dir app/sentinel-api test modules/telemetry/ingestion
+    ```
 
 ---
 
@@ -58,25 +58,25 @@ The logs pages in `sentinel-core` and `sentinel-support` show a default paginati
 
 **Goal:** Apply page size changes, remove sidebar navigation icons, and simplify the loading UI.
 
-- [ ] In core's [auth-log-table.tsx](file:///Applications/XAMPP/xamppfiles/htdocs/sentinel/app/sentinel-core/src/app/(protected)/logs/_components/auth-log-table.tsx), pass `{ pageIndex: 0, pageSize: 20 }` to `useServerPagination`.
-- [ ] In core's [activity-log-table.tsx](file:///Applications/XAMPP/xamppfiles/htdocs/sentinel/app/sentinel-core/src/app/(protected)/logs/_components/activity-log-table.tsx), pass `{ pageIndex: 0, pageSize: 20 }` to `useServerPagination`.
-- [ ] In core's [system-log-table.tsx](file:///Applications/XAMPP/xamppfiles/htdocs/sentinel/app/sentinel-core/src/app/(protected)/logs/_components/system-log-table.tsx), pass `{ pageIndex: 0, pageSize: 20 }` to `useServerPagination`.
-- [ ] In support's [auth-log-table.tsx](file:///Applications/XAMPP/xamppfiles/htdocs/sentinel/app/sentinel-support/src/app/(protected)/logs/_components/auth-log-table.tsx), set `pageSize: 20` in the initial state of `useState`.
-- [ ] In support's [activity-log-table.tsx](file:///Applications/XAMPP/xamppfiles/htdocs/sentinel/app/sentinel-support/src/app/(protected)/logs/_components/activity-log-table.tsx), set `pageSize: 20` in the initial state of `useState`.
-- [ ] In support's [system-log-table.tsx](file:///Applications/XAMPP/xamppfiles/htdocs/sentinel/app/sentinel-support/src/app/(protected)/logs/_components/system-log-table.tsx), set `pageSize: 20` in the initial state of `useState`.
-- [ ] In core's [logs-nav.tsx](file:///Applications/XAMPP/xamppfiles/htdocs/sentinel/app/sentinel-core/src/app/(protected)/logs/_components/layout/logs-nav.tsx), remove the `icon` and `iconColor` fields, remove `<Icon />` from the Link render, and clean up Lucide imports.
-- [ ] In support's [logs-nav.tsx](file:///Applications/XAMPP/xamppfiles/htdocs/sentinel/app/sentinel-support/src/app/(protected)/logs/_components/layout/logs-nav.tsx), apply the same sidebar layout updates to remove icons.
-- [ ] In core's [audit-log-table.tsx](file:///Applications/XAMPP/xamppfiles/htdocs/sentinel/app/sentinel-core/src/app/(protected)/logs/_components/audit-log-table.tsx), import `Spinner` from `@sentinel/ui` and replace the loading wrapper with:
-  ```typescript
-  if (isLoading) {
-      return (
-          <div className="flex h-64 items-center justify-center">
-              <Spinner className="size-8 text-[#323d8f]" />
-          </div>
-      );
-  }
-  ```
-- [ ] In support's [audit-log-table.tsx](file:///Applications/XAMPP/xamppfiles/htdocs/sentinel/app/sentinel-support/src/app/(protected)/logs/_components/audit-log-table.tsx), apply the same loading spinner simplification.
+- [ ] In core's [auth-log-table.tsx](<file:///Applications/XAMPP/xamppfiles/htdocs/sentinel/app/sentinel-core/src/app/(protected)/logs/_components/auth-log-table.tsx>), pass `{ pageIndex: 0, pageSize: 20 }` to `useServerPagination`.
+- [ ] In core's [activity-log-table.tsx](<file:///Applications/XAMPP/xamppfiles/htdocs/sentinel/app/sentinel-core/src/app/(protected)/logs/_components/activity-log-table.tsx>), pass `{ pageIndex: 0, pageSize: 20 }` to `useServerPagination`.
+- [ ] In core's [system-log-table.tsx](<file:///Applications/XAMPP/xamppfiles/htdocs/sentinel/app/sentinel-core/src/app/(protected)/logs/_components/system-log-table.tsx>), pass `{ pageIndex: 0, pageSize: 20 }` to `useServerPagination`.
+- [ ] In support's [auth-log-table.tsx](<file:///Applications/XAMPP/xamppfiles/htdocs/sentinel/app/sentinel-support/src/app/(protected)/logs/_components/auth-log-table.tsx>), set `pageSize: 20` in the initial state of `useState`.
+- [ ] In support's [activity-log-table.tsx](<file:///Applications/XAMPP/xamppfiles/htdocs/sentinel/app/sentinel-support/src/app/(protected)/logs/_components/activity-log-table.tsx>), set `pageSize: 20` in the initial state of `useState`.
+- [ ] In support's [system-log-table.tsx](<file:///Applications/XAMPP/xamppfiles/htdocs/sentinel/app/sentinel-support/src/app/(protected)/logs/_components/system-log-table.tsx>), set `pageSize: 20` in the initial state of `useState`.
+- [ ] In core's [logs-nav.tsx](<file:///Applications/XAMPP/xamppfiles/htdocs/sentinel/app/sentinel-core/src/app/(protected)/logs/_components/layout/logs-nav.tsx>), remove the `icon` and `iconColor` fields, remove `<Icon />` from the Link render, and clean up Lucide imports.
+- [ ] In support's [logs-nav.tsx](<file:///Applications/XAMPP/xamppfiles/htdocs/sentinel/app/sentinel-support/src/app/(protected)/logs/_components/layout/logs-nav.tsx>), apply the same sidebar layout updates to remove icons.
+- [ ] In core's [audit-log-table.tsx](<file:///Applications/XAMPP/xamppfiles/htdocs/sentinel/app/sentinel-core/src/app/(protected)/logs/_components/audit-log-table.tsx>), import `Spinner` from `@sentinel/ui` and replace the loading wrapper with:
+    ```typescript
+    if (isLoading) {
+        return (
+            <div className="flex h-64 items-center justify-center">
+                <Spinner className="size-8 text-[#323d8f]" />
+            </div>
+        );
+    }
+    ```
+- [ ] In support's [audit-log-table.tsx](<file:///Applications/XAMPP/xamppfiles/htdocs/sentinel/app/sentinel-support/src/app/(protected)/logs/_components/audit-log-table.tsx>), apply the same loading spinner simplification.
 
 ---
 
@@ -85,13 +85,13 @@ The logs pages in `sentinel-core` and `sentinel-support` show a default paginati
 **Goal:** Ensure all styling, pagination, and logging changes function correctly in the local dev environment.
 
 - [ ] Run the Turborepo dev server:
-  ```bash
-  pnpm dev
-  ```
+    ```bash
+    pnpm dev
+    ```
 - [ ] Verify logs sidebar has no icons and default page size is 20 for auth, activity, and system logs in both apps.
 - [ ] Check loading state in the browser and verify the clean primary-blue spinner layout.
 - [ ] Manually run telemetry flush endpoint with curl:
-  ```bash
-  curl -X GET "http://localhost:3001/telemetry/internal/flush"
-  ```
+    ```bash
+    curl -X GET "http://localhost:3001/telemetry/internal/flush"
+    ```
 - [ ] Check system logs in the Core Admin UI to verify that the flush operations (e.g. `telemetry.flush_success`) are recorded.

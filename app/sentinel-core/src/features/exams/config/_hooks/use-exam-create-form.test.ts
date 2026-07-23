@@ -2,9 +2,7 @@ import { describe, expect, it, vi, beforeEach } from 'vitest';
 import { renderHook, act, waitFor } from '@testing-library/react';
 import { DEFAULT_EXAMINATION_GLOBAL_SETTINGS } from '@sentinel/shared/constants';
 import { useExamCreateForm } from './use-exam-create-form';
-import {
-    useCreateExamMutation,
-} from '@sentinel/hooks';
+import { useCreateExamMutation } from '@sentinel/hooks';
 
 const mockPush = vi.fn();
 let mockedDefaults: any;

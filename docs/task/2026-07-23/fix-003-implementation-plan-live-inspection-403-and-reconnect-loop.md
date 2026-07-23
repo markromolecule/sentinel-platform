@@ -285,20 +285,20 @@ Run focused tests first for the live-inspection access service, flow/session rep
 
 ## Manual Acceptance Matrix
 
-| Scenario | Expected outcome |
-| :--- | :--- |
-| Inherited camera-required configuration | Student directive returns `200`; publication begins |
-| Explicit camera-required configuration | Same successful media path |
-| Effective camera disabled | No live-inspection publisher is enabled; access remains denied |
-| Normal live inspection | LiveKit reaches one publisher and two total participants |
-| Reload during active attempt | One redirect to lobby; no automatic bounce |
-| Resume after reload | Reconnect count increments once, then attempt opens |
-| Double-click/duplicate resume request | Same session response; reconnect count increments once |
-| Answer sync immediately before reload | Real reconnect still increments |
-| Offline then online | Lobby shown when connectivity returns; answers preserved |
-| Turn In/result navigation | No reconnect intent or reconnect increment |
-| Maximum reconnect reached | Lobby/instruction shows bounded denial; attempt does not reopen |
-| Locked/closed/superseded attempt | Lifecycle block wins; no resume or LiveKit publication |
+| Scenario                                | Expected outcome                                                |
+| :-------------------------------------- | :-------------------------------------------------------------- |
+| Inherited camera-required configuration | Student directive returns `200`; publication begins             |
+| Explicit camera-required configuration  | Same successful media path                                      |
+| Effective camera disabled               | No live-inspection publisher is enabled; access remains denied  |
+| Normal live inspection                  | LiveKit reaches one publisher and two total participants        |
+| Reload during active attempt            | One redirect to lobby; no automatic bounce                      |
+| Resume after reload                     | Reconnect count increments once, then attempt opens             |
+| Double-click/duplicate resume request   | Same session response; reconnect count increments once          |
+| Answer sync immediately before reload   | Real reconnect still increments                                 |
+| Offline then online                     | Lobby shown when connectivity returns; answers preserved        |
+| Turn In/result navigation               | No reconnect intent or reconnect increment                      |
+| Maximum reconnect reached               | Lobby/instruction shows bounded denial; attempt does not reopen |
+| Locked/closed/superseded attempt        | Lifecycle block wins; no resume or LiveKit publication          |
 
 ## Done Criteria
 

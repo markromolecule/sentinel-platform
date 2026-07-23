@@ -66,49 +66,49 @@ export function ExamSessionNav({ examId }: ExamSessionNavProps) {
 
     const items: ExamSessionNavItem[] = showReportSectionSidebar
         ? [
-            {
-                id: 'report',
-                label: 'Attempt Summary',
-                href: `/exams/${examId}/report`,
-            },
-            {
-                id: 'queue',
-                label: 'Action Queue',
-                href: `/exams/${examId}/report?section=queue`,
-            },
-            {
-                id: 'logs',
-                label: 'Incident Logs',
-                href: `/exams/${examId}/logs`,
-            },
-        ]
+              {
+                  id: 'report',
+                  label: 'Attempt Summary',
+                  href: `/exams/${examId}/report`,
+              },
+              {
+                  id: 'queue',
+                  label: 'Action Queue',
+                  href: `/exams/${examId}/report?section=queue`,
+              },
+              {
+                  id: 'logs',
+                  label: 'Incident Logs',
+                  href: `/exams/${examId}/logs`,
+              },
+          ]
         : [
-            {
-                id: 'lobby',
-                label: 'Lobby',
-                href: `/exams/${examId}/lobby`,
-            },
-            {
-                id: 'monitoring',
-                label: 'Monitoring',
-                href: `/exams/${examId}/monitoring`,
-            },
-            {
-                id: 'report',
-                label: 'Attempt Summary',
-                href: `/exams/${examId}/report`,
-            },
-            {
-                id: 'queue',
-                label: 'Action Queue',
-                href: `/exams/${examId}/report?section=queue`,
-            },
-            {
-                id: 'logs',
-                label: 'Incident Logs',
-                href: `/exams/${examId}/logs`,
-            },
-        ];
+              {
+                  id: 'lobby',
+                  label: 'Lobby',
+                  href: `/exams/${examId}/lobby`,
+              },
+              {
+                  id: 'monitoring',
+                  label: 'Monitoring',
+                  href: `/exams/${examId}/monitoring`,
+              },
+              {
+                  id: 'report',
+                  label: 'Attempt Summary',
+                  href: `/exams/${examId}/report`,
+              },
+              {
+                  id: 'queue',
+                  label: 'Action Queue',
+                  href: `/exams/${examId}/report?section=queue`,
+              },
+              {
+                  id: 'logs',
+                  label: 'Incident Logs',
+                  href: `/exams/${examId}/logs`,
+              },
+          ];
 
     return (
         <nav className="mt-1 flex flex-col gap-1">

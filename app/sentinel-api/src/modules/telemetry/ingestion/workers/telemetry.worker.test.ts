@@ -23,7 +23,7 @@ const hoisted = vi.hoisted(() => {
         createRedisConnection: vi.fn(() => ({ quit: vi.fn(), disconnect: vi.fn() })),
         closeRedisConnection: vi.fn().mockResolvedValue(undefined),
         validateRedisConfig: vi.fn().mockResolvedValue(undefined),
-        processQueuedTelemetryEvent: vi.fn().mockResolvedValue('persisted'),
+        processQueuedTelemetryEvent: vi.fn().mockResolvedValue('inserted'),
     };
 });
 
@@ -164,6 +164,83 @@ describe('telemetry.worker', () => {
             timestamp: '2026-07-11T10:01:00.000Z',
             eventId: '223e4567-e89b-12d3-a456-426614174999',
             dedupeKey: 'attempt-2:COPY_ATTEMPT:bucket-1',
+        });
+    });
+
+    it('logs completion details for successfully processed jobs', async () => {
+        process.env.TELEMETRY_INGESTION_MODE = 'redis';
+        process.env.REDIS_URL = 'redis://127.0.0.1:6379';
+        const logSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
+        hoisted.processQueuedTelemetryEvent.mockResolvedValueOnce('inserted');
+
+        await import('./telemetry.worker');
+
+        const processor = hoisted.WorkerMock.mock.calls.find(
+            (call) => call[0] === 'telemetry-ingestion',
+        )?.[1];
+
+        expect(processor).toBeTypeOf('function');
+
+        const mockJob = {
+            id: 'job-success-1',
+            data: {
+                examSessionId: 'attempt-3',
+                studentId: 'student-3',
+                eventType: 'TAB_SWITCH',
+                ruleKey: 'webSecurity.tab_switching_monitor',
+                timestamp: '2026-07-11T10:02:00.000Z',
+                metadata: {
+                    eventId: 'success-event-1',
+                    dedupeKey: 'attempt-3:TAB_SWITCH:bucket-1',
+                },
+            },
+        };
+
+        await processor(mockJob);
+
+        expect(hoisted.processQueuedTelemetryEvent).toHaveBeenCalledWith(
+            expect.anything(),
+            mockJob.data,
+        );
+        expect(logSpy).toHaveBeenCalledWith('[TelemetryWorker] Job completed', {
+            queueName: 'telemetry-ingestion',
+            jobId: 'job-success-1',
+            outcome: 'inserted',
+            attemptId: 'attempt-3',
+            studentId: 'student-3',
+            eventType: 'TAB_SWITCH',
+            ruleKey: 'webSecurity.tab_switching_monitor',
+            timestamp: '2026-07-11T10:02:00.000Z',
+            eventId: 'success-event-1',
+            dedupeKey: 'attempt-3:TAB_SWITCH:bucket-1',
+        });
+    });
+
+    it('closes the worker and Redis connection on SIGTERM before exiting', async () => {
+        process.env.TELEMETRY_INGESTION_MODE = 'redis';
+        process.env.REDIS_URL = 'redis://127.0.0.1:6379';
+        const logSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
+        const exitSpy = vi.spyOn(process, 'exit').mockImplementation((() => undefined) as never);
+        const processHandlers = new Map<string, (...args: any[]) => void>();
+        const processOnSpy = vi
+            .spyOn(process, 'on')
+            .mockImplementation((event: string | symbol, handler: (...args: any[]) => void) => {
+                processHandlers.set(event.toString(), handler);
+                return process;
+            });
+
+        await import('./telemetry.worker');
+
+        expect(processOnSpy).toHaveBeenCalledWith('SIGTERM', expect.any(Function));
+        processHandlers.get('SIGTERM')?.();
+
+        await vi.waitFor(() => {
+            expect(logSpy).toHaveBeenCalledWith('Shutting down telemetry worker after SIGTERM.');
+            expect(hoisted.workerClose).toHaveBeenCalledOnce();
+            expect(hoisted.closeRedisConnection).toHaveBeenCalledWith(
+                hoisted.createRedisConnection.mock.results[0].value,
+            );
+            expect(exitSpy).toHaveBeenCalledWith(0);
         });
     });
 });

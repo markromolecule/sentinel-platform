@@ -260,25 +260,25 @@ A small database table is recommended because it provides atomic lease acquisiti
 
 Suggested fields:
 
-| Field | Purpose |
-| --- | --- |
-| `lease_id` | Opaque UUID primary key and room correlation ID |
-| `exam_id` | Exam scope |
-| `attempt_id` | Canonical targeted attempt |
-| `student_user_id` | Ownership check; do not put this in the room name |
-| `viewer_user_id` | Authorized staff member who owns the lease |
-| `institution_id` | Tenant scope |
-| `provider_room_name` | Opaque unique LiveKit room name |
-| `state` | Lease state machine value |
-| `version` | Optimistic transition/version guard |
-| `requested_at` | Request timestamp |
-| `publisher_ready_at` | Camera track readiness timestamp |
-| `viewer_joined_at` | Start of actual inspection |
-| `ended_at` | Terminal timestamp |
-| `expires_at` | Hard server-controlled expiry |
-| `end_reason` | Bounded terminal reason code |
-| `last_error_code` | Bounded operational code; no secrets or raw SDP |
-| `created_at` / `updated_at` | Operational traceability |
+| Field                       | Purpose                                           |
+| --------------------------- | ------------------------------------------------- |
+| `lease_id`                  | Opaque UUID primary key and room correlation ID   |
+| `exam_id`                   | Exam scope                                        |
+| `attempt_id`                | Canonical targeted attempt                        |
+| `student_user_id`           | Ownership check; do not put this in the room name |
+| `viewer_user_id`            | Authorized staff member who owns the lease        |
+| `institution_id`            | Tenant scope                                      |
+| `provider_room_name`        | Opaque unique LiveKit room name                   |
+| `state`                     | Lease state machine value                         |
+| `version`                   | Optimistic transition/version guard               |
+| `requested_at`              | Request timestamp                                 |
+| `publisher_ready_at`        | Camera track readiness timestamp                  |
+| `viewer_joined_at`          | Start of actual inspection                        |
+| `ended_at`                  | Terminal timestamp                                |
+| `expires_at`                | Hard server-controlled expiry                     |
+| `end_reason`                | Bounded terminal reason code                      |
+| `last_error_code`           | Bounded operational code; no secrets or raw SDP   |
+| `created_at` / `updated_at` | Operational traceability                          |
 
 Required invariants:
 

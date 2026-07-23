@@ -6,14 +6,18 @@ import { MOBILE_USER_AGENT_REGEX } from '@sentinel/shared/constants';
 import { useTelemetry } from './use-telemetry';
 import { useSecurityLock } from './use-security-lock';
 import { useInteractionListeners } from './use-interaction-listeners';
-import type { AttemptMonitoringPhase, UseExamMonitoringArgs, UseExamMonitoringResult } from './_types';
+import type {
+    AttemptMonitoringPhase,
+    UseExamMonitoringArgs,
+    UseExamMonitoringResult,
+} from './_types';
 
 export * from './_types';
 
 /**
  * Hook to monitor student behavior during an exam.
  * Handles tab switches, fullscreen checks, and security locking.
- * 
+ *
  * @param args - Configuration, session info, and suspension/phase controls.
  * @returns Object containing state (tabSwitches, securityLockReason) and handlers.
  */

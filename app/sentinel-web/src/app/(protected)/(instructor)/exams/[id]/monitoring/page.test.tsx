@@ -1,7 +1,6 @@
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import ExamMonitoringPage from './page';
-import { ExamSessionWorkspaceShell } from '../_components/exam-session-workspace-shell';
 
 const { mockPush, mockUseMonitoring } = vi.hoisted(() => ({
     mockPush: vi.fn(),
@@ -20,14 +19,33 @@ vi.mock('./_hooks/use-monitoring', () => ({
 }));
 
 vi.mock('@/features/exams', () => ({
-    MonitoringHeader: ({ examTitle }: { examTitle: string }) => (
-        <div data-testid="monitoring-header">{examTitle}</div>
+    MonitoringHeader: ({ examTitle, onRefresh }: { examTitle: string; onRefresh: () => void }) => (
+        <div>
+            <div data-testid="monitoring-header">{examTitle}</div>
+            <button type="button" onClick={onRefresh}>
+                Refresh Monitoring
+            </button>
+        </div>
     ),
     MonitoringStats: () => <div data-testid="monitoring-stats" />,
-    StudentList: ({ onSelect }: { onSelect: (student: { id: string }) => void }) => (
-        <button type="button" onClick={() => onSelect({ id: 'student-1' })}>
-            Open Student
-        </button>
+    StudentList: ({
+        students,
+        onSelect,
+    }: {
+        students: Array<{ id: string; firstName?: string; incidentCount?: number }>;
+        onSelect: (student: { id: string }) => void;
+    }) => (
+        <div>
+            {students.map((student) => (
+                <div key={student.id}>
+                    <span>{student.firstName}</span>
+                    <span>{student.incidentCount}</span>
+                </div>
+            ))}
+            <button type="button" onClick={() => onSelect({ id: 'student-1' })}>
+                Open Student
+            </button>
+        </div>
     ),
 }));
 
@@ -41,7 +59,9 @@ afterEach(() => {
 });
 
 describe('ExamMonitoringPage', () => {
-    it('renders in the runtime shell and routes selected students to detail pages', () => {
+    function mockMonitoringPageState(overrides?: Record<string, unknown>) {
+        const refetch = vi.fn();
+
         mockUseMonitoring.mockReturnValue({
             monitoring: {
                 exam: {
@@ -64,7 +84,13 @@ describe('ExamMonitoringPage', () => {
             isLoading: false,
             isFetching: false,
             isError: false,
-            filteredStudents: [],
+            filteredStudents: [
+                {
+                    id: 'student-1',
+                    firstName: 'Pat',
+                    incidentCount: 1,
+                },
+            ],
             searchQuery: '',
             filterStatus: 'all',
             page: 1,
@@ -83,20 +109,35 @@ describe('ExamMonitoringPage', () => {
             handleConfirmAction: vi.fn(),
             handleSubmitReopen: vi.fn(),
             handleOverrideReconnect: vi.fn(),
-            refetch: vi.fn(),
+            refetch,
+            ...overrides,
         });
 
-        render(
-            <ExamSessionWorkspaceShell>
-                <ExamMonitoringPage />
-            </ExamSessionWorkspaceShell>,
-        );
+        return { refetch };
+    }
 
-        expect(screen.getByRole('heading', { name: 'Exam Session' })).toBeTruthy();
+    it('renders in the runtime shell and routes selected students to detail pages', () => {
+        mockMonitoringPageState();
+
+        render(<ExamMonitoringPage />);
+
         expect(screen.getByTestId('monitoring-header')).toBeTruthy();
 
         fireEvent.click(screen.getByRole('button', { name: 'Open Student' }));
 
         expect(mockPush).toHaveBeenCalledWith('/exams/exam-1/monitoring/student-1');
+    });
+
+    it('passes refreshed incident rows to the list and triggers manual refresh', () => {
+        const { refetch } = mockMonitoringPageState();
+
+        render(<ExamMonitoringPage />);
+
+        expect(screen.getByText('Pat')).toBeTruthy();
+        expect(screen.getByText('1')).toBeTruthy();
+
+        fireEvent.click(screen.getByRole('button', { name: 'Refresh Monitoring' }));
+
+        expect(refetch).toHaveBeenCalledOnce();
     });
 });

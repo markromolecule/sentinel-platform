@@ -85,7 +85,6 @@ export function useExamReport({ examId }: UseExamReportOptions): UseExamReportRe
         [examId, router, searchParams],
     );
 
-
     const [searchValue, setSearchValue] = useState('');
     const [sectionFilter, setSectionFilter] = useState<string | undefined>(undefined);
     const [studentPage, setStudentPage] = useState(1);
@@ -166,7 +165,11 @@ export function useExamReport({ examId }: UseExamReportOptions): UseExamReportRe
             toast.success(buildGrantSuccessMessage({ overrideType, response }));
             await refetch();
         } catch (error) {
-            toast.error(error instanceof Error ? `Failed to grant remediation: ${error.message}` : 'Failed to grant remediation.');
+            toast.error(
+                error instanceof Error
+                    ? `Failed to grant remediation: ${error.message}`
+                    : 'Failed to grant remediation.',
+            );
         } finally {
             setActiveActionId(null);
         }

@@ -98,8 +98,8 @@ export function ExamIncidentLogsContent({ initialExamId }: { initialExamId?: str
                                         Incident Logs & Analytics
                                     </h1>
                                     <p className="text-muted-foreground">
-                                        Review, confirm, or dismiss proctoring telemetry alerts recorded during
-                                        examinations.
+                                        Review, confirm, or dismiss proctoring telemetry alerts
+                                        recorded during examinations.
                                     </p>
                                 </div>
                                 <div className="relative w-full md:w-72">
@@ -111,7 +111,7 @@ export function ExamIncidentLogsContent({ initialExamId }: { initialExamId?: str
                                 {Array.from({ length: 6 }).map((_, i) => (
                                     <div
                                         key={i}
-                                        className="border border-border/70 flex flex-col gap-4 rounded-xl p-6 shadow-sm bg-card"
+                                        className="border-border/70 bg-card flex flex-col gap-4 rounded-xl border p-6 shadow-sm"
                                     >
                                         <div className="flex items-start justify-between gap-3">
                                             <div className="flex-1 space-y-2">

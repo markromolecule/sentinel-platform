@@ -1,4 +1,8 @@
-import type { StudentExamStage, StudentExamStageResolverInput, StudentExamStageResolverResult } from './_types';
+import type {
+    StudentExamStage,
+    StudentExamStageResolverInput,
+    StudentExamStageResolverResult,
+} from './_types';
 import { STUDENT_EXAM_STAGES } from './_types';
 import { resolveStudentExamAdmissionState } from './_readiness';
 
@@ -136,7 +140,9 @@ export function resolveStudentExamStage(
 
         const hasSessionMatchedEntry = Boolean(
             input.hasFreshLobbyEntry &&
-            (!input.lobbyEntrySessionId || !input.storedSessionId || input.lobbyEntrySessionId === input.storedSessionId),
+            (!input.lobbyEntrySessionId ||
+                !input.storedSessionId ||
+                input.lobbyEntrySessionId === input.storedSessionId),
         );
 
         if (requestedStage === 'lobby') {

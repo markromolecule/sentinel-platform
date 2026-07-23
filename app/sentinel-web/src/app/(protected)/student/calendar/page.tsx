@@ -18,7 +18,11 @@ import {
     Skeleton,
 } from '@sentinel/ui';
 import { useCalendar, CalendarHeader, CalendarGrid, DayDetailsSheet } from '@/features/calendar';
-import { useCalendarEventsQuery, useCreateCalendarEventMutation, useDeleteCalendarEventMutation } from '@sentinel/hooks';
+import {
+    useCalendarEventsQuery,
+    useCreateCalendarEventMutation,
+    useDeleteCalendarEventMutation,
+} from '@sentinel/hooks';
 
 export default function StudentCalendarPage() {
     const [isAddNoteOpen, setIsAddNoteOpen] = useState(false);

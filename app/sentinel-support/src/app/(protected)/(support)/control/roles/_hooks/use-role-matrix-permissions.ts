@@ -25,7 +25,7 @@ function arePermissionIdsEqual(left: string[], right: string[]) {
 
 /**
  * Custom hook to manage permission drafting, toggle updates, reset actions, and debounced auto-saving.
- * 
+ *
  * @param sortedRoles The list of active roles sorted and ready for comparison with draft changes.
  */
 export function useRoleMatrixPermissions(sortedRoles: AccessControlRole[]) {
@@ -243,7 +243,8 @@ export function useRoleMatrixPermissions(sortedRoles: AccessControlRole[]) {
                 toast.success(`Role "${updatedRole.name}" reset to blueprint permissions.`);
                 return updatedRole;
             } catch (error: unknown) {
-                const message = error instanceof Error ? error.message : 'Failed to reset role permissions.';
+                const message =
+                    error instanceof Error ? error.message : 'Failed to reset role permissions.';
                 toast.error(message);
                 return null;
             } finally {

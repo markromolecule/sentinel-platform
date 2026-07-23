@@ -30,4 +30,3 @@ export function buildExamLobbyEntryStorageKey(examId: string) {
 export function buildExamReconnectIntentStorageKey(examId: string) {
     return `${EXAM_RECONNECT_INTENT_STORAGE_PREFIX}:${examId}`;
 }
-

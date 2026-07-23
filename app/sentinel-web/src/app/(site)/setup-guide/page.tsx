@@ -42,17 +42,20 @@ const checklist = [
     },
     {
         title: 'Working camera access',
-        description: 'Make sure the front camera is available and not blocked by other apps or system settings.',
+        description:
+            'Make sure the front camera is available and not blocked by other apps or system settings.',
         icon: Camera,
     },
     {
         title: 'Working microphone access',
-        description: 'Check that microphone permission is enabled so Sentinel can complete the required audio checks.',
+        description:
+            'Check that microphone permission is enabled so Sentinel can complete the required audio checks.',
         icon: Mic,
     },
     {
         title: 'Quiet exam space',
-        description: 'Prepare a well-lit place with minimal interruptions before launching your scheduled exam.',
+        description:
+            'Prepare a well-lit place with minimal interruptions before launching your scheduled exam.',
         icon: ShieldCheck,
     },
 ] as const;
@@ -106,7 +109,9 @@ export default function SetupGuidePage() {
                                     key={item.step}
                                     className={[
                                         'flex flex-col justify-between',
-                                        index % 2 === 0 ? 'lg:pr-8' : 'lg:border-l lg:border-white/10 lg:pl-8',
+                                        index % 2 === 0
+                                            ? 'lg:pr-8'
+                                            : 'lg:border-l lg:border-white/10 lg:pl-8',
                                         index > 1 ? 'lg:mt-14' : '',
                                     ].join(' ')}
                                 >
@@ -151,7 +156,8 @@ export default function SetupGuidePage() {
                         <div className="max-w-[36rem]">
                             <p className="text-lg font-semibold text-white">Need the app first?</p>
                             <p className="mt-1 text-sm leading-6 text-white/50">
-                                Return to the download page to choose the correct store for your device.
+                                Return to the download page to choose the correct store for your
+                                device.
                             </p>
                         </div>
                         <Link

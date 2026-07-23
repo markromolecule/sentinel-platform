@@ -51,7 +51,8 @@ export function useReportsAnalytics(): UseReportsAnalyticsResult {
 
     const availableInstitutions = React.useMemo(() => {
         if (!scopedInstitutionId) return institutions;
-        if (!scopedInstitution) return institutions.filter((inst) => inst.id === scopedInstitutionId);
+        if (!scopedInstitution)
+            return institutions.filter((inst) => inst.id === scopedInstitutionId);
         if (scopedInstitution.institutionKind === 'PARENT') {
             return institutions.filter(
                 (inst) =>
@@ -64,7 +65,7 @@ export function useReportsAnalytics(): UseReportsAnalyticsResult {
 
     const isInstitutionLocked = Boolean(
         scopedInstitutionId &&
-            (!scopedInstitution || scopedInstitution.institutionKind !== 'PARENT'),
+        (!scopedInstitution || scopedInstitution.institutionKind !== 'PARENT'),
     );
 
     React.useEffect(() => {
@@ -76,7 +77,7 @@ export function useReportsAnalytics(): UseReportsAnalyticsResult {
         setSelectedInstitutionId((current) =>
             current && availableInstitutions.some((inst) => inst.id === current)
                 ? current
-                : availableInstitutions[0]?.id ?? '',
+                : (availableInstitutions[0]?.id ?? ''),
         );
     }, [availableInstitutions, isInstitutionLocked, isScopeLoading, scopedInstitutionId]);
 
@@ -151,7 +152,8 @@ export function useReportsAnalytics(): UseReportsAnalyticsResult {
             toast.success('PDF download is ready.', { id: loadingToastId });
             window.open(response.downloadUrl, '_blank', 'noopener,noreferrer');
         } catch (error) {
-            const message = error instanceof Error ? error.message : 'Failed to prepare the report download.';
+            const message =
+                error instanceof Error ? error.message : 'Failed to prepare the report download.';
             toast.error(message, { id: loadingToastId });
         } finally {
             setActiveDownloadId(null);
@@ -169,7 +171,8 @@ export function useReportsAnalytics(): UseReportsAnalyticsResult {
             });
             toast.success('Report retry queued');
         } catch (error) {
-            const message = error instanceof Error ? error.message : 'Failed to queue the report retry.';
+            const message =
+                error instanceof Error ? error.message : 'Failed to queue the report retry.';
             toast.error(message);
         } finally {
             setActiveRetryId(null);

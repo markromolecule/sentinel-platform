@@ -77,7 +77,9 @@ describe('LiveVideoMonitor', () => {
             />,
         );
 
-        expect(screen.getAllByText(/Waiting for student device \(10s\)\.\.\./i).length).toBeGreaterThan(0);
+        expect(
+            screen.getAllByText(/Waiting for student device \(10s\)\.\.\./i).length,
+        ).toBeGreaterThan(0);
     });
 
     it('renders correct labels for new reason codes like TIMEOUT and NO_LIVE_CAMERA_TRACK', () => {

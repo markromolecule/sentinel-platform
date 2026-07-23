@@ -82,3 +82,41 @@ export function estimateMediaPipeConfidenceScore(landmarks: MediaPipeLandmark[])
 
     return clamp(faceAreaScore * 0.65 + centeringScore * 0.35, 0, 1);
 }
+
+/**
+ * Returns whether the face center sits too close to the viewport edge.
+ */
+export function isMediaPipeFaceNearViewportEdge(faceBounds: MediaPipeFaceBounds | null) {
+    if (!faceBounds) return false;
+    const area = faceBounds.width * faceBounds.height;
+    const isCloseFraming = area > 0.35;
+
+    const centerLimitX = isCloseFraming ? 0.05 : 0.12;
+    const centerLimitY = isCloseFraming ? 0.04 : 0.08;
+
+    return (
+        faceBounds.centerX < centerLimitX ||
+        faceBounds.centerX > 1 - centerLimitX ||
+        faceBounds.centerY < centerLimitY ||
+        faceBounds.centerY > 1 - centerLimitY
+    );
+}
+
+/**
+ * Returns whether the visible face bounds indicate a partial face near the frame edge.
+ */
+export function isMediaPipePartialFaceVisible(faceBounds: MediaPipeFaceBounds | null) {
+    if (!faceBounds) return false;
+    const area = faceBounds.width * faceBounds.height;
+    const isCloseFraming = area > 0.35;
+
+    const edgeLimitX = isCloseFraming ? 0.01 : 0.05;
+    const edgeLimitY = isCloseFraming ? 0.01 : 0.04;
+
+    return (
+        faceBounds.minX < edgeLimitX ||
+        faceBounds.maxX > 1 - edgeLimitX ||
+        faceBounds.minY < edgeLimitY ||
+        faceBounds.maxY > 1 - edgeLimitY
+    );
+}

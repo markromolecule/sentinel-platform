@@ -1,7 +1,4 @@
-import {
-    DEFAULT_STUDENT_EXAM_FLOW,
-    STUDENT_EXAM_FLOW_STORAGE_PREFIX,
-} from './_constants';
+import { DEFAULT_STUDENT_EXAM_FLOW, STUDENT_EXAM_FLOW_STORAGE_PREFIX } from './_constants';
 import type { StoredStudentExamFlow } from './_types';
 import {
     normalizeMediaPipeCalibrationProfile,

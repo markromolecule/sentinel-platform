@@ -69,12 +69,12 @@ save, publish, branding, download, or retry request to fail for the same reason.
 - Global remains selected after first render and after the institution query resolves; asynchronously
   loaded institutions must not replace it.
 - The page uses one editor workspace rather than a grid of independent cards:
-  - a compact top toolbar contains scope, status/version, and unsaved-change state;
-  - Header, Footer, and Branding are progressive-disclosure tabs;
-  - preview remains visible in a right-side panel on desktop and follows the settings on smaller
-    screens;
-  - Save draft and Publish remain the primary page actions;
-  - Reset to global is a secondary/destructive override action shown only for a parent scope.
+    - a compact top toolbar contains scope, status/version, and unsaved-change state;
+    - Header, Footer, and Branding are progressive-disclosure tabs;
+    - preview remains visible in a right-side panel on desktop and follows the settings on smaller
+      screens;
+    - Save draft and Publish remain the primary page actions;
+    - Reset to global is a secondary/destructive override action shown only for a parent scope.
 - Branding is unavailable in global scope and shows a short explanatory empty state instead of a
   disabled file-input card.
 - Generating a preview uses the current unsaved form values and does not require saving a draft.
@@ -333,30 +333,30 @@ database structure.
 
 - Date: 2026-07-15
 - Implemented:
-  - parent-only institution filtering in the shared institutions API and hook;
-  - centralized PDF Support-role and permission enforcement using `c.get('role')`;
-  - overall-report parent/global scope validation in template and branding flows;
-  - compact report template editor with tabbed settings, sticky preview, global branding empty
-    state, and confirmed reset action;
-  - report page integration with stable `Global (Sentinel)` default and parent-only overrides.
+    - parent-only institution filtering in the shared institutions API and hook;
+    - centralized PDF Support-role and permission enforcement using `c.get('role')`;
+    - overall-report parent/global scope validation in template and branding flows;
+    - compact report template editor with tabbed settings, sticky preview, global branding empty
+      state, and confirmed reset action;
+    - report page integration with stable `Global (Sentinel)` default and parent-only overrides.
 - Executed commands:
-  - `pnpm exec prettier --write ...touched files...`
-  - `pnpm --dir packages/services exec vitest run src/api/institutions.test.ts`
-  - `pnpm --dir packages/hooks exec vitest run src/query/institutions/use-institutions-query.test.tsx`
-  - `pnpm --dir app/sentinel-api exec vitest run src/modules/general/pdf-documents/services/pdf-document-authorization.service.test.ts src/modules/general/pdf-documents/tests/pdf-document-scope-authorization.test.ts`
-  - `pnpm --dir app/sentinel-support exec vitest run 'src/app/(protected)/(support)/pdf-templates/_components/report-template-editor.test.tsx' 'src/app/(protected)/(support)/pdf-templates/reports/page.test.tsx' 'src/app/(protected)/(support)/pdf-templates/_components/pdf-template-nav.test.tsx' 'src/app/(protected)/(support)/pdf-templates/examinations/page.test.tsx'`
-  - `pnpm --dir app/sentinel-api exec vitest run src/modules/general/pdf-documents`
-  - `pnpm --dir app/sentinel-api exec tsc --noEmit`
-  - `pnpm --dir app/sentinel-support exec tsc --noEmit`
-  - `git diff --check`
+    - `pnpm exec prettier --write ...touched files...`
+    - `pnpm --dir packages/services exec vitest run src/api/institutions.test.ts`
+    - `pnpm --dir packages/hooks exec vitest run src/query/institutions/use-institutions-query.test.tsx`
+    - `pnpm --dir app/sentinel-api exec vitest run src/modules/general/pdf-documents/services/pdf-document-authorization.service.test.ts src/modules/general/pdf-documents/tests/pdf-document-scope-authorization.test.ts`
+    - `pnpm --dir app/sentinel-support exec vitest run 'src/app/(protected)/(support)/pdf-templates/_components/report-template-editor.test.tsx' 'src/app/(protected)/(support)/pdf-templates/reports/page.test.tsx' 'src/app/(protected)/(support)/pdf-templates/_components/pdf-template-nav.test.tsx' 'src/app/(protected)/(support)/pdf-templates/examinations/page.test.tsx'`
+    - `pnpm --dir app/sentinel-api exec vitest run src/modules/general/pdf-documents`
+    - `pnpm --dir app/sentinel-api exec tsc --noEmit`
+    - `pnpm --dir app/sentinel-support exec tsc --noEmit`
+    - `git diff --check`
 - Results:
-  - focused service, hook, API, and support tests passed;
-  - `git diff --check` passed.
+    - focused service, hook, API, and support tests passed;
+    - `git diff --check` passed.
 - Environment-only blockers:
-  - full `app/sentinel-api` PDF integration suite failed because Prisma could not reach
-    `aws-1-ap-northeast-1.pooler.supabase.com`;
-  - `pnpm --dir app/sentinel-support exec tsc --noEmit` failed on pre-existing unrelated test
-    typing errors in courses, institutions, rooms, semesters, and notification-dropdown tests;
-  - `pnpm --dir app/sentinel-api exec tsc --noEmit` aborted with Node heap OOM before finishing.
+    - full `app/sentinel-api` PDF integration suite failed because Prisma could not reach
+      `aws-1-ap-northeast-1.pooler.supabase.com`;
+    - `pnpm --dir app/sentinel-support exec tsc --noEmit` failed on pre-existing unrelated test
+      typing errors in courses, institutions, rooms, semesters, and notification-dropdown tests;
+    - `pnpm --dir app/sentinel-api exec tsc --noEmit` aborted with Node heap OOM before finishing.
 - Manual verification:
-  - not completed in this turn.
+    - not completed in this turn.

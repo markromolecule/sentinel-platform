@@ -90,7 +90,10 @@ export function buildImportedExamQuestions(selectedQuestions: SelectedImportQues
  * @param totalPages - The total count of pages
  * @returns Array containing page numbers and 'ellipsis' placeholders.
  */
-export function getPaginationItems(currentPage: number, totalPages: number): (number | 'ellipsis')[] {
+export function getPaginationItems(
+    currentPage: number,
+    totalPages: number,
+): (number | 'ellipsis')[] {
     if (totalPages <= 1) {
         return [];
     }
@@ -121,4 +124,3 @@ export function getPaginationItems(currentPage: number, totalPages: number): (nu
 
     return items;
 }
-

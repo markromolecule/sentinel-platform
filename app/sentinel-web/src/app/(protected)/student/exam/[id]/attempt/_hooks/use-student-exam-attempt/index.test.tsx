@@ -55,8 +55,6 @@ vi.mock('@/app/(protected)/student/exam/[id]/_hooks/use-student-exam-stage-guard
                 lobbyEntrySessionId: storedSession?.sessionId,
             });
 
-
-
             if (resolution.shouldRedirect && data?.examId) {
                 mockRouterReplace(`/student/exam/${data.examId}/${resolution.targetStage}`);
             }
@@ -111,8 +109,7 @@ function createQuestions(count: number) {
             prompt: `Question ${index + 1}`,
             options: ['A', 'B', 'C', 'D'],
         },
-        passageType:
-            index === 0 ? 'plain' : index === 1 ? 'html' : null,
+        passageType: index === 0 ? 'plain' : index === 1 ? 'html' : null,
         passageContent:
             index === 0
                 ? 'Passage for question 1'
@@ -427,5 +424,21 @@ describe('useStudentExamAttempt', () => {
         expect(result.current.currentQuestion?.id).toBe('question-2');
         expect(result.current.currentContext.body).toContain('Passage');
         expect(result.current.currentContext.body).not.toContain('question 1');
+    });
+
+    it('defaults isCompactPassageOpen to false and closes it on question change', () => {
+        const { result } = renderHook(() => useStudentExamAttempt());
+
+        expect(result.current.isCompactPassageOpen).toBe(false);
+
+        act(() => {
+            result.current.setIsCompactPassageOpen(true);
+        });
+        expect(result.current.isCompactPassageOpen).toBe(true);
+
+        act(() => {
+            result.current.setCurrentQuestionIndex(1);
+        });
+        expect(result.current.isCompactPassageOpen).toBe(false);
     });
 });

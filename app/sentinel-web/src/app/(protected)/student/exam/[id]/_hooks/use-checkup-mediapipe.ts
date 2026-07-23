@@ -12,6 +12,7 @@ import {
     buildMediaPipeCalibrationProfile,
     calculateMediaPipeFaceBounds,
     createMediaPipeCalibrationSample,
+    evaluateMediaPipeCalibrationCandidate,
     getMediaPipeClientCapabilities,
     isMediaPipeCalibrationCandidate,
     isMediaPipeRuntimeEnabled,
@@ -211,6 +212,7 @@ export function useCheckupMediaPipe({
     const [calibrationProfile, setCalibrationProfile] =
         useState<MediaPipeCalibrationProfile | null>(null);
     const [isCalibrated, setIsCalibrated] = useState(false);
+    const [calibrationFeedback, setCalibrationFeedback] = useState<string | null>(null);
 
     const isEnabled = useMemo(
         () =>
@@ -245,6 +247,7 @@ export function useCheckupMediaPipe({
             setCalibrationHoldSecondsRemaining(0);
             setCalibrationProfile(null);
             setIsCalibrated(false);
+            setCalibrationFeedback(null);
             lastFrameAtRef.current = 0;
             drawOverlay({
                 canvas: overlayCanvasRef.current,
@@ -344,16 +347,20 @@ export function useCheckupMediaPipe({
                         Math.abs(bounds.centerX - 0.5) < 0.15 &&
                         Math.abs(bounds.centerY - 0.45) < 0.2;
 
+                    let currentFeedback: string | null = null;
                     if (!hasCompletedCalibration) {
-                        const calibrationCandidate =
-                            isCentered &&
-                            isMediaPipeCalibrationCandidate({
-                                analysis: nextAnalysis,
-                                landmarks: landmarksByFace[0] ?? [],
-                                confidenceThreshold: activeConfidenceThreshold,
-                            });
+                        const evaluation = evaluateMediaPipeCalibrationCandidate({
+                            analysis: nextAnalysis,
+                            landmarks: landmarksByFace[0] ?? [],
+                            confidenceThreshold: activeConfidenceThreshold,
+                        });
+
+                        if (!evaluation.isValid) {
+                            currentFeedback = evaluation.details ?? 'Align face in guide';
+                        }
+
                         const calibrationSample =
-                            calibrationCandidate && landmarksByFace[0]
+                            evaluation.isValid && landmarksByFace[0]
                                 ? createMediaPipeCalibrationSample({
                                       landmarks: landmarksByFace[0],
                                       confidenceScore: nextAnalysis.confidenceScore,
@@ -385,6 +392,8 @@ export function useCheckupMediaPipe({
                             hasCompletedCalibration = true;
                         }
                     }
+
+                    setCalibrationFeedback(currentFeedback);
 
                     const nextProgress = hasCompletedCalibration
                         ? 100
@@ -436,6 +445,7 @@ export function useCheckupMediaPipe({
                 setCalibrationHoldSecondsRemaining(0);
                 setCalibrationProfile(null);
                 setIsCalibrated(false);
+                setCalibrationFeedback(null);
                 setErrorMessage(
                     'MediaPipe could not start during checkup. Refresh the page or re-allow camera access to complete calibration.',
                 );
@@ -466,6 +476,7 @@ export function useCheckupMediaPipe({
         overlayCanvasRef,
         analysis,
         errorMessage,
+        calibrationFeedback,
         calibrationProgress,
         calibrationReadyFrames,
         calibrationHoldSecondsRemaining,

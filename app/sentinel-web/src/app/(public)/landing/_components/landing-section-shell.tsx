@@ -43,7 +43,11 @@ export function LandingSectionShell({
     return (
         <section
             id={id}
-            className={cn('relative isolate scroll-mt-28 overflow-hidden', TONE_CLASSES[tone], className)}
+            className={cn(
+                'relative isolate scroll-mt-28 overflow-hidden',
+                TONE_CLASSES[tone],
+                className,
+            )}
         >
             {background}
             <motion.div
@@ -51,7 +55,10 @@ export function LandingSectionShell({
                 whileInView={reduceMotion ? undefined : { opacity: 1, y: 0 }}
                 viewport={{ once: true, amount: 0.28 }}
                 transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
-                className={cn('relative z-10 mx-auto w-full max-w-[90rem] px-4 md:px-6 lg:px-8', innerClassName)}
+                className={cn(
+                    'relative z-10 mx-auto w-full max-w-[90rem] px-4 md:px-6 lg:px-8',
+                    innerClassName,
+                )}
             >
                 {children}
             </motion.div>

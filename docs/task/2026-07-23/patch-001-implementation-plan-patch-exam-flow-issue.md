@@ -1,11 +1,13 @@
 # Patch Exam Flow Issue Implementation Plan
 
 ## Goal
+
 Resolve exam lobby auto-approval, fix live inspection publisher/viewer synchronization when backgrounded, and refine the standalone loading UI spinner during exam state initialization.
 
 ---
 
 ## Pre-Planning Summary
+
 - **Task Summary**: Ensure student lobby check-in correctly enforces `MANUAL` instructor admission mode, stabilize LiveKit inspection publishing across active/background tab contexts, and elevate the `StudentExamLoadingState` UI with a sleek standalone spinner.
 - **Affected DB Tables**: `exam_configurations`, `exam_lobby_admissions`, `exam_live_inspection_leases`.
 - **Prisma Migration Required**: No (reusing existing `lobby_admission_mode`, `status`, and `exam_live_inspection_leases` schemas).
@@ -43,8 +45,8 @@ Resolve exam lobby auto-approval, fix live inspection publisher/viewer synchroni
 
 **Goal:** Provide an engaging, modern, standalone multi-ring animated spinner without box wrappers for `StudentExamLoadingState`.
 
-- [ ] In [`student-exam-loading-state.tsx`](file:///Applications/XAMPP/xamppfiles/htdocs/sentinel/app/sentinel-web/src/app/(protected)/student/exam/[id]/_components/student-exam-loading-state.tsx), render a standalone, centered multi-ring spinner with animated pulse/ring elements and styled typography.
-- [ ] Write unit test [`student-exam-loading-state.test.tsx`](file:///Applications/XAMPP/xamppfiles/htdocs/sentinel/app/sentinel-web/src/app/(protected)/student/exam/[id]/_components/student-exam-loading-state.test.tsx) asserting loading text and spinner elements render cleanly without outer card containers.
+- [ ] In [`student-exam-loading-state.tsx`](<file:///Applications/XAMPP/xamppfiles/htdocs/sentinel/app/sentinel-web/src/app/(protected)/student/exam/[id]/_components/student-exam-loading-state.tsx>), render a standalone, centered multi-ring spinner with animated pulse/ring elements and styled typography.
+- [ ] Write unit test [`student-exam-loading-state.test.tsx`](<file:///Applications/XAMPP/xamppfiles/htdocs/sentinel/app/sentinel-web/src/app/(protected)/student/exam/[id]/_components/student-exam-loading-state.test.tsx>) asserting loading text and spinner elements render cleanly without outer card containers.
 - [ ] Run `pnpm --dir app/sentinel-web test` to verify frontend tests pass.
 
 **Migration required:** No
@@ -52,6 +54,7 @@ Resolve exam lobby auto-approval, fix live inspection publisher/viewer synchroni
 ---
 
 ## Done Criteria
+
 - [ ] All checkboxes in the execution log are marked `- [x]`
 - [ ] Every new or modified file matches the plan's specified paths
 - [ ] `checkInLobby` correctly keeps student in `WAITING` status under `MANUAL` admission mode

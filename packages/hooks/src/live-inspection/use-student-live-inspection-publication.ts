@@ -90,7 +90,7 @@ export function useStudentLiveInspectionPublication({
     const acknowledgeFailure = useCallback(
         async (
             directive: LiveInspectionDirective,
-            errorCode: StudentLiveInspectionPublisherFailureCode
+            errorCode: StudentLiveInspectionPublisherFailureCode,
         ) => {
             onFailureRef.current?.(errorCode);
             setPublisherStatus('failed');
@@ -106,7 +106,7 @@ export function useStudentLiveInspectionPublication({
                 // A stale/terminal lease might reject the acknowledgement; do not retry.
             }
         },
-        [sessionId, setPublisherStatus]
+        [sessionId, setPublisherStatus],
     );
 
     const startPublication = useCallback(
@@ -163,7 +163,9 @@ export function useStudentLiveInspectionPublication({
 
                 room = new Room({ dynacast: true });
                 room.on('disconnected', () => {
-                    logLocalDiagnostic('room_disconnected', { message: 'LiveKit room disconnected.' });
+                    logLocalDiagnostic('room_disconnected', {
+                        message: 'LiveKit room disconnected.',
+                    });
                     void runReconcileNowRef.current?.();
                 });
 
@@ -205,11 +207,11 @@ export function useStudentLiveInspectionPublication({
                 stopClonedInspectionTrack(clonedTrack);
                 await acknowledgeFailure(
                     directive,
-                    room ? 'LIVEKIT_PUBLISH_FAILED' : 'LIVEKIT_CONNECT_FAILED'
+                    room ? 'LIVEKIT_PUBLISH_FAILED' : 'LIVEKIT_CONNECT_FAILED',
                 );
             }
         },
-        [acknowledgeFailure, enabled, sessionId, setPublisherStatus]
+        [acknowledgeFailure, enabled, sessionId, setPublisherStatus],
     );
 
     return {

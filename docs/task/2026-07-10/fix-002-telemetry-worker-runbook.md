@@ -51,15 +51,15 @@ The current `.env.example` defaults and contracts are:
 Before considering the worker healthy:
 
 1. Confirm the API health surface reports Redis ingestion:
-   - `curl http://localhost:3001/telemetry/health`
+    - `curl http://localhost:3001/telemetry/health`
 2. Confirm the response includes:
-   - `ingestion.mode = "redis"`
-   - the expected `queueName`
-   - the expected `bufferName`
+    - `ingestion.mode = "redis"`
+    - the expected `queueName`
+    - the expected `bufferName`
 3. Start the worker and verify the logs include:
-   - `Validating Redis configuration...`
-   - Redis config validation output
-   - `Worker ready`
+    - `Validating Redis configuration...`
+    - Redis config validation output
+    - `Worker ready`
 
 ## Flush path and recovery contract
 

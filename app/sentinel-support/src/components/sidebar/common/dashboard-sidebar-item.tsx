@@ -127,10 +127,10 @@ export function DashboardSidebarItem({
             {item.url === '/messages' && unreadCount !== undefined && unreadCount > 0 && (
                 <span
                     className={cn(
-                        'pointer-events-none absolute rounded-full bg-destructive text-white font-semibold flex items-center justify-center shadow-xs transition-all duration-300 select-none animate-in zoom-in-50 duration-200',
+                        'bg-destructive animate-in zoom-in-50 pointer-events-none absolute flex items-center justify-center rounded-full font-semibold text-white shadow-xs transition-all duration-200 duration-300 select-none',
                         sidebarState === 'collapsed'
                             ? 'top-0.5 right-0.5 h-4 w-4 text-[9px]'
-                            : 'top-1/2 -translate-y-1/2 right-3 h-5 min-w-[20px] px-1.5 text-[10px]',
+                            : 'top-1/2 right-3 h-5 min-w-[20px] -translate-y-1/2 px-1.5 text-[10px]',
                     )}
                 >
                     {unreadCount}

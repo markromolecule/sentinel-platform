@@ -16,10 +16,10 @@ export function QuestionPanelEmptyState({
     isLoading = false,
 }: QuestionPanelEmptyStateProps) {
     return (
-        <div className="flex flex-col items-center justify-center gap-3 py-20 text-center min-h-[300px]">
+        <div className="flex min-h-[300px] flex-col items-center justify-center gap-3 py-20 text-center">
             {isLoading ? (
                 <div className="flex items-center justify-center">
-                    <Loader2 className="h-10 w-10 animate-spin text-primary" />
+                    <Loader2 className="text-primary h-10 w-10 animate-spin" />
                 </div>
             ) : (
                 <>

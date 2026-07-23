@@ -5,3 +5,4 @@ export * from './runtime/exam-attempt-runtime-navigation';
 export * from './runtime/exam-attempt-runtime-passage';
 export * from './runtime/exam-attempt-runtime-security';
 export * from './runtime/exam-attempt-runtime-question';
+export * from './exam-attempt-passage-sheet';

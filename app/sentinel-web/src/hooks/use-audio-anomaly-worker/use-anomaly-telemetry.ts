@@ -1,5 +1,6 @@
 import { useCallback } from 'react';
 import { useApi } from '@sentinel/hooks';
+import type { AudioWorkerPhase } from './_types';
 import {
     DEFAULT_AUDIO_ANOMALY_CONFIG,
     TELEMETRY_EVENT_DEFINITIONS,
@@ -110,7 +111,9 @@ function getAudioStreamPhase(audioStream?: MediaStream | null) {
         return 'unavailable' as const;
     }
 
-    return tracks.some((track) => track.readyState === 'live') ? ('live' as const) : ('ended' as const);
+    return tracks.some((track) => track.readyState === 'live')
+        ? ('live' as const)
+        : ('ended' as const);
 }
 
 /**
@@ -128,7 +131,7 @@ export function useAnomalyTelemetry(
     isSuspendedRef?: React.RefObject<boolean>,
     cooldownMs = 10_000,
     runtimeConfigRef?: React.RefObject<AudioAnomalySettings | null | undefined>,
-    workerPhaseRef?: React.RefObject<'idle' | 'initializing' | 'running' | 'error'>,
+    workerPhaseRef?: React.RefObject<AudioWorkerPhase>,
     audioStreamRef?: React.RefObject<MediaStream | null | undefined>,
 ) {
     return useCallback(
@@ -170,7 +173,7 @@ export function useAnomalyTelemetry(
                             runtimeConfig?.thresholds[anomalyType] ??
                             DEFAULT_AUDIO_ANOMALY_CONFIG.thresholds[anomalyType],
                         configVersion: createAudioConfigVersion(runtimeConfig),
-                        workerPhase,
+                        workerPhase: workerPhase === 'warning' ? 'initializing' : workerPhase,
                         streamPhase: getAudioStreamPhase(audioStream),
                     },
                     aggregation: {
@@ -183,6 +186,15 @@ export function useAnomalyTelemetry(
                 },
             });
         },
-        [apiClient, cooldownMs, examSessionId, isSuspendedRef, runtimeConfigRef, studentId, workerPhaseRef, audioStreamRef],
+        [
+            apiClient,
+            cooldownMs,
+            examSessionId,
+            isSuspendedRef,
+            runtimeConfigRef,
+            studentId,
+            workerPhaseRef,
+            audioStreamRef,
+        ],
     );
 }

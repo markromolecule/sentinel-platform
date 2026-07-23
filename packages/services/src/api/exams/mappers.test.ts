@@ -241,6 +241,11 @@ describe('mapExam', () => {
         });
 
         expect(student.lifecycleState).toBe('LOCKED');
+        expect(student.attemptId).toBe('attempt-1');
+        expect(student.incidentCount).toBe(1);
+        expect(student.openIncidentCount).toBe(1);
+        expect(student.latestIncidentType).toBe('TAB_SWITCH');
+        expect(student.lastActivityAt).toBe('2026-07-04T00:00:00.000Z');
         expect(student.reopenedUntil).toBe('2026-07-04T01:00:00.000Z');
         expect(student.lifecycleEvents?.[0]?.eventType).toBe('LOCKED');
     });

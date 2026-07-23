@@ -118,11 +118,16 @@ export function NewAssignmentsBuilder({
     }, [isPending, onSavingChange]);
 
     // Setup element refs for focus management
-    const rowRefs = React.useRef<Record<string, {
-        classroomId?: HTMLInputElement | null;
-        roomId?: HTMLButtonElement | null;
-        instructorId?: HTMLInputElement | null;
-    }>>({});
+    const rowRefs = React.useRef<
+        Record<
+            string,
+            {
+                classroomId?: HTMLInputElement | null;
+                roomId?: HTMLButtonElement | null;
+                instructorId?: HTMLInputElement | null;
+            }
+        >
+    >({});
 
     // Focusing the first invalid control reactively after a submit attempt
     React.useEffect(() => {
@@ -146,7 +151,7 @@ export function NewAssignmentsBuilder({
     };
 
     return (
-        <div className="flex flex-col h-full min-h-[450px]">
+        <div className="flex h-full min-h-[450px] flex-col">
             {/* Top Warnings */}
             {(hasDuplicatesInRows || hasConflictsWithExisting) && (
                 <div className="mb-4 flex items-center gap-2 rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-600 dark:border-amber-900/50 dark:bg-amber-950/20 dark:text-amber-400">
@@ -161,20 +166,23 @@ export function NewAssignmentsBuilder({
 
             {/* Bulk Actions Bar */}
             <div className="mb-4 rounded-lg border bg-zinc-50/50 p-4 dark:bg-zinc-950/20">
-                <div className="flex flex-col gap-2 md:flex-row md:items-center justify-between">
+                <div className="flex flex-col justify-between gap-2 md:flex-row md:items-center">
                     <div className="space-y-1 md:max-w-md">
                         <h4 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">
                             Apply instructor to all rows
                         </h4>
                         <p className="text-xs text-zinc-500">
-                            Fills the instructor field for all current rows and sets the default for any newly added rows.
+                            Fills the instructor field for all current rows and sets the default for
+                            any newly added rows.
                         </p>
                     </div>
                     <div className="w-full md:w-80">
                         {isUsersLoading ? (
                             <div className="flex h-10 items-center rounded-md border bg-white px-3 dark:bg-zinc-950">
                                 <Loader2 className="mr-2 h-4 w-4 animate-spin text-zinc-500" />
-                                <span className="text-xs text-zinc-500">Loading instructors...</span>
+                                <span className="text-xs text-zinc-500">
+                                    Loading instructors...
+                                </span>
                             </div>
                         ) : (
                             <RowInstructorCombobox
@@ -190,7 +198,7 @@ export function NewAssignmentsBuilder({
             </div>
 
             {/* Assignments Row Editor List */}
-            <div className="flex-1 max-h-[42vh] space-y-4 overflow-y-auto pr-1 pb-4">
+            <div className="max-h-[42vh] flex-1 space-y-4 overflow-y-auto pr-1 pb-4">
                 <AnimatePresence initial={false}>
                     {rows.map((row, index) => {
                         const rowErrs = errors[row.localId] || {};
@@ -204,7 +212,7 @@ export function NewAssignmentsBuilder({
                                 className="relative flex flex-col gap-3 rounded-lg border bg-zinc-50/50 p-4 dark:bg-zinc-950/20"
                             >
                                 <div className="flex items-center justify-between border-b pb-2">
-                                    <span className="text-xs font-bold text-zinc-500 uppercase tracking-wider">
+                                    <span className="text-xs font-bold tracking-wider text-zinc-500 uppercase">
                                         Assignment {index + 1}
                                     </span>
                                     {rows.length > 1 && (
@@ -212,7 +220,7 @@ export function NewAssignmentsBuilder({
                                             type="button"
                                             variant="ghost"
                                             size="sm"
-                                            className="h-8 text-red-500 hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-950/30 gap-1.5"
+                                            className="h-8 gap-1.5 text-red-500 hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-950/30"
                                             onClick={() => removeRow(row.localId)}
                                             disabled={isPending}
                                         >
@@ -222,7 +230,7 @@ export function NewAssignmentsBuilder({
                                     )}
                                 </div>
 
-                                <div className="grid grid-cols-1 gap-4 items-start md:grid-cols-12">
+                                <div className="grid grid-cols-1 items-start gap-4 md:grid-cols-12">
                                     {/* Classroom Select */}
                                     <div className="space-y-1.5 md:col-span-4">
                                         <Label className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">
@@ -231,12 +239,15 @@ export function NewAssignmentsBuilder({
                                         {isClassroomsLoading ? (
                                             <div className="flex h-10 items-center rounded-md border bg-white px-3 dark:bg-zinc-950">
                                                 <Loader2 className="mr-1.5 h-3 w-3 animate-spin text-zinc-500" />
-                                                <span className="text-xs text-zinc-500">Loading...</span>
+                                                <span className="text-xs text-zinc-500">
+                                                    Loading...
+                                                </span>
                                             </div>
                                         ) : (
                                             <RowClassroomCombobox
                                                 ref={(el) => {
-                                                    if (!rowRefs.current[row.localId]) rowRefs.current[row.localId] = {};
+                                                    if (!rowRefs.current[row.localId])
+                                                        rowRefs.current[row.localId] = {};
                                                     rowRefs.current[row.localId].classroomId = el;
                                                 }}
                                                 value={row.classroomId}
@@ -246,12 +257,21 @@ export function NewAssignmentsBuilder({
                                                 classrooms={filteredClassrooms}
                                                 disabled={isPending}
                                                 placeholder="Select classroom"
-                                                aria-invalid={submitAttempted && !!rowErrs.classroomId}
-                                                aria-describedby={submitAttempted && rowErrs.classroomId ? `err-classroom-${row.localId}` : undefined}
+                                                aria-invalid={
+                                                    submitAttempted && !!rowErrs.classroomId
+                                                }
+                                                aria-describedby={
+                                                    submitAttempted && rowErrs.classroomId
+                                                        ? `err-classroom-${row.localId}`
+                                                        : undefined
+                                                }
                                             />
                                         )}
                                         {submitAttempted && rowErrs.classroomId && (
-                                            <p id={`err-classroom-${row.localId}`} className="text-[11px] font-medium text-red-500 mt-1">
+                                            <p
+                                                id={`err-classroom-${row.localId}`}
+                                                className="mt-1 text-[11px] font-medium text-red-500"
+                                            >
                                                 {rowErrs.classroomId}
                                             </p>
                                         )}
@@ -265,7 +285,9 @@ export function NewAssignmentsBuilder({
                                         {isRoomsLoading ? (
                                             <div className="flex h-10 items-center rounded-md border bg-white px-3 dark:bg-zinc-950">
                                                 <Loader2 className="mr-1.5 h-3 w-3 animate-spin text-zinc-500" />
-                                                <span className="text-xs text-zinc-500">Loading...</span>
+                                                <span className="text-xs text-zinc-500">
+                                                    Loading...
+                                                </span>
                                             </div>
                                         ) : (
                                             <Select
@@ -277,11 +299,18 @@ export function NewAssignmentsBuilder({
                                             >
                                                 <SelectTrigger
                                                     ref={(el) => {
-                                                        if (!rowRefs.current[row.localId]) rowRefs.current[row.localId] = {};
+                                                        if (!rowRefs.current[row.localId])
+                                                            rowRefs.current[row.localId] = {};
                                                         rowRefs.current[row.localId].roomId = el;
                                                     }}
-                                                    aria-invalid={submitAttempted && !!rowErrs.roomId}
-                                                    aria-describedby={submitAttempted && rowErrs.roomId ? `err-room-${row.localId}` : undefined}
+                                                    aria-invalid={
+                                                        submitAttempted && !!rowErrs.roomId
+                                                    }
+                                                    aria-describedby={
+                                                        submitAttempted && rowErrs.roomId
+                                                            ? `err-room-${row.localId}`
+                                                            : undefined
+                                                    }
                                                     className="bg-white dark:bg-zinc-950"
                                                 >
                                                     <SelectValue placeholder="Select room" />
@@ -312,7 +341,10 @@ export function NewAssignmentsBuilder({
                                             </Select>
                                         )}
                                         {submitAttempted && rowErrs.roomId && (
-                                            <p id={`err-room-${row.localId}`} className="text-[11px] font-medium text-red-500 mt-1">
+                                            <p
+                                                id={`err-room-${row.localId}`}
+                                                className="mt-1 text-[11px] font-medium text-red-500"
+                                            >
                                                 {rowErrs.roomId}
                                             </p>
                                         )}
@@ -326,12 +358,15 @@ export function NewAssignmentsBuilder({
                                         {isUsersLoading ? (
                                             <div className="flex h-10 items-center rounded-md border bg-white px-3 dark:bg-zinc-950">
                                                 <Loader2 className="mr-1.5 h-3 w-3 animate-spin text-zinc-500" />
-                                                <span className="text-xs text-zinc-500">Loading...</span>
+                                                <span className="text-xs text-zinc-500">
+                                                    Loading...
+                                                </span>
                                             </div>
                                         ) : (
                                             <RowInstructorCombobox
                                                 ref={(el) => {
-                                                    if (!rowRefs.current[row.localId]) rowRefs.current[row.localId] = {};
+                                                    if (!rowRefs.current[row.localId])
+                                                        rowRefs.current[row.localId] = {};
                                                     rowRefs.current[row.localId].instructorId = el;
                                                 }}
                                                 value={row.instructorId}
@@ -341,12 +376,21 @@ export function NewAssignmentsBuilder({
                                                 users={users as User[]}
                                                 disabled={isPending}
                                                 placeholder="Select instructor"
-                                                aria-invalid={submitAttempted && !!rowErrs.instructorId}
-                                                aria-describedby={submitAttempted && rowErrs.instructorId ? `err-instructor-${row.localId}` : undefined}
+                                                aria-invalid={
+                                                    submitAttempted && !!rowErrs.instructorId
+                                                }
+                                                aria-describedby={
+                                                    submitAttempted && rowErrs.instructorId
+                                                        ? `err-instructor-${row.localId}`
+                                                        : undefined
+                                                }
                                             />
                                         )}
                                         {submitAttempted && rowErrs.instructorId && (
-                                            <p id={`err-instructor-${row.localId}`} className="text-[11px] font-medium text-red-500 mt-1">
+                                            <p
+                                                id={`err-instructor-${row.localId}`}
+                                                className="mt-1 text-[11px] font-medium text-red-500"
+                                            >
                                                 {rowErrs.instructorId}
                                             </p>
                                         )}
@@ -359,7 +403,7 @@ export function NewAssignmentsBuilder({
             </div>
 
             {/* Bottom Actions Footer (Sticky/Fixed style inside dialog) */}
-            <div className="mt-auto border-t bg-zinc-50 p-4 -mx-6 -mb-6 rounded-b-xl flex flex-col justify-between gap-3 sm:flex-row sm:items-center dark:bg-zinc-950/20">
+            <div className="-mx-6 mt-auto -mb-6 flex flex-col justify-between gap-3 rounded-b-xl border-t bg-zinc-50 p-4 sm:flex-row sm:items-center dark:bg-zinc-950/20">
                 <div className="flex items-center gap-3">
                     <Button
                         type="button"
@@ -378,7 +422,7 @@ export function NewAssignmentsBuilder({
                 </div>
 
                 <div className="flex w-full gap-2 sm:w-auto">
-                    <span className="inline-flex items-center text-xs font-semibold text-zinc-500 sm:hidden self-center mr-auto">
+                    <span className="mr-auto inline-flex items-center self-center text-xs font-semibold text-zinc-500 sm:hidden">
                         {readinessCount}/{totalCount} ready
                     </span>
                     <Button

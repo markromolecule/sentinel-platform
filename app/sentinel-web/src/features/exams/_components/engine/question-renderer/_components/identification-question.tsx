@@ -12,9 +12,15 @@ export function IdentificationQuestion({
         question.content.acceptedAnswers?.[0] ??
         'No answer key provided.';
 
+    const inputId = `id-input-${question.id}`;
+
     return (
         <div className="space-y-4">
+            <label htmlFor={inputId} className="sr-only">
+                {question.content.prompt}
+            </label>
             <Input
+                id={inputId}
                 value={(value as string) ?? ''}
                 onChange={(event) => onChange(event.target.value)}
                 placeholder="Type the response here..."

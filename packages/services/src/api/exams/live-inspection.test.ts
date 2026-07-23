@@ -15,7 +15,11 @@ describe('live inspection service client', () => {
         const apiClient = vi.fn().mockResolvedValue({ data: { leaseId: 'lease-1' } });
 
         await startLiveInspection(apiClient as any, { examId: 'exam-1', attemptId: 'attempt-1' });
-        await startLiveInspection(apiClient as any, { examId: 'exam-1', attemptId: 'attempt-1', restart: true });
+        await startLiveInspection(apiClient as any, {
+            examId: 'exam-1',
+            attemptId: 'attempt-1',
+            restart: true,
+        });
         await getLiveInspectionStatus(apiClient as any, {
             examId: 'exam-1',
             attemptId: 'attempt-1',

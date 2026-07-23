@@ -50,7 +50,7 @@ export function logLocalDiagnostic(phase: string, error: any) {
     }
 
     console.warn(
-        `[LiveInspection Diagnostic] Phase: ${phase}, Status: ${status}, Code: ${boundedCode}`
+        `[LiveInspection Diagnostic] Phase: ${phase}, Status: ${status}, Code: ${boundedCode}`,
     );
 }
 

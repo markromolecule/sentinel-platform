@@ -55,7 +55,7 @@ describe('AiRulesSection', () => {
 
         function Harness() {
             const form = useForm<ExamConfigurationState>({ defaultValues });
-            
+
             useEffect(() => {
                 formRef = form;
             });
@@ -117,11 +117,15 @@ describe('AiRulesSection', () => {
 
         // Toggle occurrence count
         fireEvent.click(screen.getByRole('switch', { name: /use incident occurrence count/i }));
-        expect(formRef?.getValues('configuration.automaticClosePolicy.useOccurrenceCount')).toBe(true);
+        expect(formRef?.getValues('configuration.automaticClosePolicy.useOccurrenceCount')).toBe(
+            true,
+        );
 
         // Toggle fullscreen_exit checkbox
         const fullscreenCheckbox = screen.getByLabelText(/fullscreen exit/i);
         fireEvent.click(fullscreenCheckbox);
-        expect(formRef?.getValues('configuration.automaticClosePolicy.immediateCloseEventTypes')).toContain('fullscreen_exit');
+        expect(
+            formRef?.getValues('configuration.automaticClosePolicy.immediateCloseEventTypes'),
+        ).toContain('fullscreen_exit');
     });
 });

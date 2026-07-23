@@ -222,7 +222,7 @@ describe('ConfigurationService', () => {
                         }),
                         updated_at: new Date(),
                     }),
-                )
+                );
             try {
                 const result = await ConfigurationService.getExamConfiguration(
                     dbClient,

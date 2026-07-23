@@ -35,7 +35,7 @@ describe('QueueReportDialog Component', () => {
                 isInstitutionLocked={false}
                 onSubmit={handleSubmit}
                 isPending={false}
-            />
+            />,
         );
 
         expect(screen.getByText('Queue Overall Report')).toBeTruthy();

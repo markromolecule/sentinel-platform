@@ -29,16 +29,23 @@ export const updateExamSectionAssignmentBodySchema = z.object({
 });
 
 export const createExamSectionAssignmentBatchItemSchema = z.object({
-    sectionId: z.string({ message: "Section ID is required and must be a valid UUID." }).uuid({ message: "Section ID is required and must be a valid UUID." }),
-    classGroupId: z.string({ message: "Classroom is required." }).uuid({ message: "Classroom is required." }),
-    roomId: z.string({ message: "Room is required." }).uuid({ message: "Room is required." }),
-    instructorId: z.string({ message: "Instructor is required." }).uuid({ message: "Instructor is required." }),
+    sectionId: z
+        .string({ message: 'Section ID is required and must be a valid UUID.' })
+        .uuid({ message: 'Section ID is required and must be a valid UUID.' }),
+    classGroupId: z
+        .string({ message: 'Classroom is required.' })
+        .uuid({ message: 'Classroom is required.' }),
+    roomId: z.string({ message: 'Room is required.' }).uuid({ message: 'Room is required.' }),
+    instructorId: z
+        .string({ message: 'Instructor is required.' })
+        .uuid({ message: 'Instructor is required.' }),
     scheduledAt: z.union([z.string(), z.date()]).nullable().optional(),
 });
 
 export const createExamSectionAssignmentBatchBodySchema = z.object({
-    assignments: z.array(createExamSectionAssignmentBatchItemSchema)
-        .min(1, { message: "At least one classroom assignment is required." }),
+    assignments: z
+        .array(createExamSectionAssignmentBatchItemSchema)
+        .min(1, { message: 'At least one classroom assignment is required.' }),
 });
 
 export type ExamSectionAssignment = z.infer<typeof examSectionAssignmentSchema>;

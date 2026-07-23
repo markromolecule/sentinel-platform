@@ -14,9 +14,9 @@ The student attempt route mounts `useStudentExamAttempt()` in both `page.tsx` an
 - `app/sentinel-web/src/app/(protected)/student/exam/[id]/_components/monitoring-preloader.tsx`
 - `app/sentinel-web/src/app/(protected)/student/exam/[id]/_components/monitoring-preloader.test.tsx` (new)
 - Existing regression suites to run without changing their production contracts:
-  - `app/sentinel-web/src/app/(protected)/student/exam/[id]/attempt/_hooks/use-student-exam-attempt/index.test.tsx`
-  - `app/sentinel-web/src/app/(protected)/student/exam/[id]/attempt/_hooks/use-student-exam-attempt/use-attempt-monitoring.test.tsx`
-  - `app/sentinel-web/src/hooks/use-audio-anomaly-worker/use-audio-anomaly-worker.test.tsx`
+    - `app/sentinel-web/src/app/(protected)/student/exam/[id]/attempt/_hooks/use-student-exam-attempt/index.test.tsx`
+    - `app/sentinel-web/src/app/(protected)/student/exam/[id]/attempt/_hooks/use-student-exam-attempt/use-attempt-monitoring.test.tsx`
+    - `app/sentinel-web/src/hooks/use-audio-anomaly-worker/use-audio-anomaly-worker.test.tsx`
 
 **Services and database tables:** No backend service or database table changes; `AudioAnomalyRule` and its configured confidence/repeat behavior remain unchanged.
 

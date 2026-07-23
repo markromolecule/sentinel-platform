@@ -235,16 +235,16 @@ The task docs above may already contain stronger file-level anchors and test ide
 
 ### Expected Visibility Matrix
 
-| Exam State / Assignment | Student Should See It? | Notes |
-| --- | --- | --- |
-| Published, not assigned to student's classroom | No | Publishing alone is not enough for student access. |
-| Published, assigned to student's classroom | Yes | Applies whether public or private. |
-| Draft | No | Draft exams should not appear to students. |
-| Unpublished | No | Unpublished exams should not appear to students. |
-| Deleted/archived | No | Deleted/archived exams should not appear to students. |
-| Public, assigned to student's classroom | Yes | Public does not remove assignment requirement for student views unless product rules explicitly say otherwise. |
-| Private, assigned to student's classroom | Yes | This is the currently broken case. |
-| Private, not assigned to student's classroom | No | Private and unassigned should remain hidden. |
+| Exam State / Assignment                        | Student Should See It? | Notes                                                                                                          |
+| ---------------------------------------------- | ---------------------- | -------------------------------------------------------------------------------------------------------------- |
+| Published, not assigned to student's classroom | No                     | Publishing alone is not enough for student access.                                                             |
+| Published, assigned to student's classroom     | Yes                    | Applies whether public or private.                                                                             |
+| Draft                                          | No                     | Draft exams should not appear to students.                                                                     |
+| Unpublished                                    | No                     | Unpublished exams should not appear to students.                                                               |
+| Deleted/archived                               | No                     | Deleted/archived exams should not appear to students.                                                          |
+| Public, assigned to student's classroom        | Yes                    | Public does not remove assignment requirement for student views unless product rules explicitly say otherwise. |
+| Private, assigned to student's classroom       | Yes                    | This is the currently broken case.                                                                             |
+| Private, not assigned to student's classroom   | No                     | Private and unassigned should remain hidden.                                                                   |
 
 ### Important Product Rule To Confirm
 

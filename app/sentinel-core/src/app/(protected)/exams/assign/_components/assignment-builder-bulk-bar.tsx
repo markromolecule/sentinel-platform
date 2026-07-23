@@ -24,13 +24,14 @@ function AssignmentBuilderBulkBar({
 }: AssignmentBuilderBulkBarProps) {
     return (
         <div className="mb-4 rounded-lg border bg-zinc-50/50 p-4 dark:bg-zinc-950/20">
-            <div className="flex flex-col gap-2 md:flex-row md:items-center justify-between">
+            <div className="flex flex-col justify-between gap-2 md:flex-row md:items-center">
                 <div className="space-y-1 md:max-w-md">
                     <h4 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">
                         Apply instructor to all rows
                     </h4>
                     <p className="text-xs text-zinc-500">
-                        Fills the instructor field for all current rows and sets the default for any newly added rows.
+                        Fills the instructor field for all current rows and sets the default for any
+                        newly added rows.
                     </p>
                 </div>
                 <div className="w-full md:w-80">

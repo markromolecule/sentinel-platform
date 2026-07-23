@@ -76,7 +76,9 @@ export function InstructorSidebar() {
                                                         : pathname === item.url
                                             }
                                             sidebarState={state}
-                                            unreadCount={item.url === '/messages' ? unreadCount : undefined}
+                                            unreadCount={
+                                                item.url === '/messages' ? unreadCount : undefined
+                                            }
                                         />
                                     ))}
                                 </SidebarMenu>

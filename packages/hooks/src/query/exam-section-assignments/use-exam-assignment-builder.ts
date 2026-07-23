@@ -65,26 +65,25 @@ export function useExamAssignmentBuilder({
         });
     }, []);
 
-    const updateRowField = useCallback((
-        localId: string,
-        field: keyof AssignmentRow,
-        value: string
-    ) => {
-        setRows((prev) =>
-            prev.map((row) => {
-                if (row.localId !== localId) return row;
-                if (field === 'classroomId') {
-                    const matchedClassroom = classrooms.find((c) => c.id === value);
-                    return {
-                        ...row,
-                        classroomId: value,
-                        sectionId: matchedClassroom?.sectionId || 'none',
-                    };
-                }
-                return { ...row, [field]: value };
-            })
-        );
-    }, [classrooms]);
+    const updateRowField = useCallback(
+        (localId: string, field: keyof AssignmentRow, value: string) => {
+            setRows((prev) =>
+                prev.map((row) => {
+                    if (row.localId !== localId) return row;
+                    if (field === 'classroomId') {
+                        const matchedClassroom = classrooms.find((c) => c.id === value);
+                        return {
+                            ...row,
+                            classroomId: value,
+                            sectionId: matchedClassroom?.sectionId || 'none',
+                        };
+                    }
+                    return { ...row, [field]: value };
+                }),
+            );
+        },
+        [classrooms],
+    );
 
     const updateBulkInstructor = useCallback((instructorId: string) => {
         setBulkInstructorId(instructorId);
@@ -92,7 +91,7 @@ export function useExamAssignmentBuilder({
             prev.map((row) => ({
                 ...row,
                 instructorId: instructorId !== 'none' ? instructorId : row.instructorId,
-            }))
+            })),
         );
     }, []);
 
@@ -162,9 +161,7 @@ export function useExamAssignmentBuilder({
     // Check conflicts with existing database assignments
     const assignedClassroomIds = useMemo(() => {
         return new Set(
-            currentAssignments
-                .map((a) => a.classGroupId)
-                .filter((id): id is string => Boolean(id))
+            currentAssignments.map((a) => a.classGroupId).filter((id): id is string => Boolean(id)),
         );
     }, [currentAssignments]);
 
@@ -173,7 +170,7 @@ export function useExamAssignmentBuilder({
             currentAssignments
                 .filter((a) => !a.classGroupId)
                 .map((a) => a.sectionId)
-                .filter((id): id is string => Boolean(id))
+                .filter((id): id is string => Boolean(id)),
         );
     }, [currentAssignments]);
 
@@ -196,7 +193,8 @@ export function useExamAssignmentBuilder({
             const rowErrs = errors[row.localId];
             if (rowErrs.classroomId) return { localId: row.localId, field: 'classroomId' as const };
             if (rowErrs.roomId) return { localId: row.localId, field: 'roomId' as const };
-            if (rowErrs.instructorId) return { localId: row.localId, field: 'instructorId' as const };
+            if (rowErrs.instructorId)
+                return { localId: row.localId, field: 'instructorId' as const };
         }
         return null;
     }, [rows, errors, submitAttempted]);

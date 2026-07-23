@@ -31,8 +31,7 @@ export function ExamBuilderSidebar({
 }: ExamBuilderSidebarProps) {
     const params = useParams();
     const id = params?.id as string;
-    const { isLoading: isConfigurationLoading } =
-        useExamConfigurationQuery(id);
+    const { isLoading: isConfigurationLoading } = useExamConfigurationQuery(id);
     const systemConfigurationRows = getSystemConfigurationRows(configuration);
     const enabledRuleCount = TOGGLE_OPTIONS.filter((option) =>
         getExamRuleToggleState({

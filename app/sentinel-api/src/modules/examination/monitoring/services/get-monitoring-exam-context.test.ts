@@ -4,7 +4,7 @@ import { sql } from 'kysely';
 import { buildStaffExamVisibilityPredicates } from '../../assign/services/exam-access.service';
 import { getMonitoringExamContext } from './get-monitoring-exam-context';
 
-vi.mock('../../assign/services/exam-access', () => ({
+vi.mock('../../assign/services/exam-access.service', () => ({
     buildStaffExamVisibilityPredicates: vi.fn(),
 }));
 

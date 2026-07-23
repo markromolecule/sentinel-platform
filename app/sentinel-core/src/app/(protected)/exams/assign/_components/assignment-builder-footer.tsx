@@ -23,7 +23,7 @@ function AssignmentBuilderFooter({
     onSubmit,
 }: AssignmentBuilderFooterProps) {
     return (
-        <div className="mt-auto border-t bg-zinc-50 p-4 -mx-6 -mb-6 rounded-b-xl flex flex-col justify-between gap-3 sm:flex-row sm:items-center dark:bg-zinc-950/20">
+        <div className="-mx-6 mt-auto -mb-6 flex flex-col justify-between gap-3 rounded-b-xl border-t bg-zinc-50 p-4 sm:flex-row sm:items-center dark:bg-zinc-950/20">
             <div className="flex items-center gap-3">
                 <Button
                     type="button"
@@ -42,7 +42,7 @@ function AssignmentBuilderFooter({
             </div>
 
             <div className="flex w-full gap-2 sm:w-auto">
-                <span className="inline-flex items-center text-xs font-semibold text-zinc-500 sm:hidden self-center mr-auto">
+                <span className="mr-auto inline-flex items-center self-center text-xs font-semibold text-zinc-500 sm:hidden">
                     {readinessCount}/{totalCount} ready
                 </span>
                 <Button

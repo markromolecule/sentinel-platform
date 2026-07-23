@@ -71,59 +71,59 @@ export function ExamSessionNav({ examId }: ExamSessionNavProps) {
 
     const items: ExamSessionNavItem[] = showReportSectionSidebar
         ? [
-            {
-                id: 'overview',
-                label: 'Overview',
-                href: `/exams/reports/${examId}?section=overview`,
-            },
-            {
-                id: 'report',
-                label: 'Attempt Summary',
-                href: `/exams/reports/${examId}?section=attempts`,
-            },
-            {
-                id: 'queue',
-                label: 'Action Queue',
-                href: `/exams/reports/${examId}?section=queue`,
-            },
-            {
-                id: 'logs',
-                label: 'Incident Logs',
-                href: `/exams/reports/${examId}?section=logs`,
-            },
-        ]
+              {
+                  id: 'overview',
+                  label: 'Overview',
+                  href: `/exams/reports/${examId}?section=overview`,
+              },
+              {
+                  id: 'report',
+                  label: 'Attempt Summary',
+                  href: `/exams/reports/${examId}?section=attempts`,
+              },
+              {
+                  id: 'queue',
+                  label: 'Action Queue',
+                  href: `/exams/reports/${examId}?section=queue`,
+              },
+              {
+                  id: 'logs',
+                  label: 'Incident Logs',
+                  href: `/exams/reports/${examId}?section=logs`,
+              },
+          ]
         : [
-            {
-                id: 'lobby',
-                label: 'Lobby',
-                href: `/exams/${examId}/lobby`,
-            },
-            {
-                id: 'monitoring',
-                label: 'Monitoring',
-                href: `/exams/${examId}/monitoring`,
-            },
-            {
-                id: 'overview',
-                label: 'Overview',
-                href: `/exams/reports/${examId}?section=overview`,
-            },
-            {
-                id: 'report',
-                label: 'Attempt Summary',
-                href: `/exams/reports/${examId}?section=attempts`,
-            },
-            {
-                id: 'queue',
-                label: 'Action Queue',
-                href: `/exams/reports/${examId}?section=queue`,
-            },
-            {
-                id: 'logs',
-                label: 'Incident Logs',
-                href: `/exams/${examId}/logs`,
-            },
-        ];
+              {
+                  id: 'lobby',
+                  label: 'Lobby',
+                  href: `/exams/${examId}/lobby`,
+              },
+              {
+                  id: 'monitoring',
+                  label: 'Monitoring',
+                  href: `/exams/${examId}/monitoring`,
+              },
+              {
+                  id: 'overview',
+                  label: 'Overview',
+                  href: `/exams/reports/${examId}?section=overview`,
+              },
+              {
+                  id: 'report',
+                  label: 'Attempt Summary',
+                  href: `/exams/reports/${examId}?section=attempts`,
+              },
+              {
+                  id: 'queue',
+                  label: 'Action Queue',
+                  href: `/exams/reports/${examId}?section=queue`,
+              },
+              {
+                  id: 'logs',
+                  label: 'Incident Logs',
+                  href: `/exams/${examId}/logs`,
+              },
+          ];
 
     return (
         <nav className="mt-1 flex flex-col gap-1">

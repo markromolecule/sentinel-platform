@@ -359,9 +359,12 @@ describe('useStudentLiveInspectionPublisher', () => {
         }
 
         expect(result.current.status).toBe('failed');
-        expect(mockPublisherFailure).toHaveBeenCalledWith(expect.anything(), expect.objectContaining({
-            errorCode: 'NO_LIVE_CAMERA_TRACK'
-        }));
+        expect(mockPublisherFailure).toHaveBeenCalledWith(
+            expect.anything(),
+            expect.objectContaining({
+                errorCode: 'NO_LIVE_CAMERA_TRACK',
+            }),
+        );
     });
 
     it('reconciles immediately when LiveKit room is disconnected', async () => {
@@ -386,7 +389,7 @@ describe('useStudentLiveInspectionPublisher', () => {
         // Simulate disconnection
         mockDirective.mockClear();
         mockDirective.mockResolvedValue(createDirective(2, 'REQUESTED', leaseId));
-        
+
         act(() => {
             lastRoomInstance.emit('disconnected');
         });
@@ -409,7 +412,7 @@ describe('useStudentLiveInspectionPublisher', () => {
                     enabled,
                     getLiveVideoTrack: () => null,
                 }),
-            { initialProps: { enabled: true } }
+            { initialProps: { enabled: true } },
         );
 
         // Allow mount reconcile to run and enter waitForCameraTrack
@@ -452,13 +455,15 @@ describe('useStudentLiveInspectionPublisher', () => {
                     enabled: true,
                     getLiveVideoTrack: () => null,
                 }),
-            { initialProps: { sessionId: 'session-1' } }
+            { initialProps: { sessionId: 'session-1' } },
         );
 
         await waitFor(() =>
             expect(consoleWarnSpy).toHaveBeenCalledWith(
-                expect.stringContaining('[LiveInspection Diagnostic] Phase: fetch_directive_suspended, Status: 403, Code: UNAUTHORIZED')
-            )
+                expect.stringContaining(
+                    '[LiveInspection Diagnostic] Phase: fetch_directive_suspended, Status: 403, Code: UNAUTHORIZED',
+                ),
+            ),
         );
 
         // Reset warn spy
@@ -476,7 +481,7 @@ describe('useStudentLiveInspectionPublisher', () => {
 
         // Wait a bit to ensure it reconciles
         await waitFor(() => expect(mockDirective).toHaveBeenCalled());
-        
+
         // It should NOT call console.warn because 404 is normal/idle
         expect(consoleWarnSpy).not.toHaveBeenCalled();
 
@@ -524,7 +529,7 @@ describe('useStudentLiveInspectionPublisher', () => {
 
         // Simulate visibilitychange event which should wake it up and un-suspend
         mockDirective.mockResolvedValue(createDirective(1));
-        
+
         // Dispatch event
         act(() => {
             document.dispatchEvent(new Event('visibilitychange'));

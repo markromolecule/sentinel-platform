@@ -10,6 +10,7 @@ import {
     ExamAttemptRuntimePassage,
     ExamAttemptRuntimeSecurity,
     ExamAttemptRuntimeQuestion,
+    ExamAttemptPassageSheet,
 } from '@/features/exams/_components/engine';
 import config from '@/lib/config';
 import { useStudentExamAttempt } from '@/app/(protected)/student/exam/[id]/attempt/_hooks/use-student-exam-attempt';
@@ -47,6 +48,8 @@ export function AttemptView({ attempt }: AttemptViewProps) {
         reviewQuestionIds,
         showPassagePanel,
         setShowPassagePanel,
+        isCompactPassageOpen,
+        setIsCompactPassageOpen,
         crossOutEnabled,
         setCrossOutEnabled,
         crossedOutOptions,
@@ -76,6 +79,8 @@ export function AttemptView({ attempt }: AttemptViewProps) {
         setCurrentQuestionIndex,
     } = attempt;
 
+    const hasPassage = Boolean(currentContext?.body && currentContext.body.trim().length > 0);
+
     return (
         <div
             ref={(node) => {
@@ -83,7 +88,7 @@ export function AttemptView({ attempt }: AttemptViewProps) {
                     fullScreenContainerRef.current = node;
                 }
             }}
-            className="bg-background flex h-screen flex-col overflow-hidden"
+            className="bg-background flex h-[100dvh] h-[100vh] min-h-0 flex-col overflow-hidden"
         >
             <video
                 ref={mediaPipeVideoRef}
@@ -99,6 +104,16 @@ export function AttemptView({ attempt }: AttemptViewProps) {
                 incident={mediaPipeIncident}
                 onDismiss={dismissMediaPipeIncident}
             />
+
+            {hasPassage ? (
+                <ExamAttemptPassageSheet
+                    isOpen={isCompactPassageOpen}
+                    onOpenChange={setIsCompactPassageOpen}
+                    title={currentContext.title}
+                    description={currentContext.description}
+                    body={currentContext.body}
+                />
+            ) : null}
 
             <ExamAttemptRuntimeSecurity
                 isSubmitDialogOpen={isSubmitDialogOpen}
@@ -149,11 +164,18 @@ export function AttemptView({ attempt }: AttemptViewProps) {
                             {isAudioMonitoringEnabled && !config.isProduction ? (
                                 <Badge
                                     variant={
-                                        audioMonitoringPhase === 'running' ? 'default' : 'outline'
+                                        audioMonitoringPhase === 'running'
+                                            ? 'default'
+                                            : audioMonitoringPhase === 'warning'
+                                              ? 'destructive'
+                                              : 'outline'
                                     }
-                                    className="rounded-md px-2.5 py-1 text-[11px] sm:px-3 sm:text-xs"
+                                    className={`rounded-md px-2.5 py-1 text-[11px] sm:px-3 sm:text-xs ${audioMonitoringPhase === 'warning' ? 'animate-pulse border-transparent bg-amber-500 text-white hover:bg-amber-600' : ''}`}
                                 >
-                                    Audio {audioMonitoringPhase}
+                                    Audio{' '}
+                                    {audioMonitoringPhase === 'warning'
+                                        ? 'reconnecting'
+                                        : audioMonitoringPhase}
                                 </Badge>
                             ) : null}
                         </>
@@ -165,6 +187,8 @@ export function AttemptView({ attempt }: AttemptViewProps) {
                             flaggedCount={reviewQuestionIds.length}
                             showPassagePanel={showPassagePanel}
                             onTogglePassagePanel={() => setShowPassagePanel((c) => !c)}
+                            onToggleCompactPassage={() => setIsCompactPassageOpen((c) => !c)}
+                            hasPassage={hasPassage}
                             onSubmit={handleSubmit}
                             isSubmitting={isRedirectingToTurnIn}
                         />
@@ -179,7 +203,7 @@ export function AttemptView({ attempt }: AttemptViewProps) {
                         />
                     }
                     passagePanel={
-                        showPassagePanel && currentQuestion ? (
+                        hasPassage && showPassagePanel && currentQuestion ? (
                             <ExamAttemptRuntimePassage
                                 showPassagePanel={showPassagePanel}
                                 currentQuestion={currentQuestion}

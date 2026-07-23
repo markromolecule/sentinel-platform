@@ -417,7 +417,7 @@ describe('useLiveInspectionViewer', () => {
         // Start a restart (updates leaseRef.current to restartLease)
         const restartLease = { ...lease, leaseId: '55555555-5555-5555-5555-555555555555' };
         mockStart.mockResolvedValueOnce(restartLease);
-        
+
         await act(async () => {
             await result.current.retry();
         });
@@ -451,7 +451,11 @@ describe('useLiveInspectionViewer', () => {
         );
 
         // Test NO_LIVE_CAMERA_TRACK
-        mockStatus.mockResolvedValueOnce({ ...lease, state: 'FAILED', lastErrorCode: 'NO_LIVE_CAMERA_TRACK' });
+        mockStatus.mockResolvedValueOnce({
+            ...lease,
+            state: 'FAILED',
+            lastErrorCode: 'NO_LIVE_CAMERA_TRACK',
+        });
         await act(async () => {
             await result.current.start();
         });
@@ -459,7 +463,11 @@ describe('useLiveInspectionViewer', () => {
         expect(result.current.reason).toBe('NO_LIVE_CAMERA_TRACK');
 
         // Test LIVEKIT_CONNECT_FAILED
-        mockStatus.mockResolvedValueOnce({ ...lease, state: 'FAILED', lastErrorCode: 'LIVEKIT_CONNECT_FAILED' });
+        mockStatus.mockResolvedValueOnce({
+            ...lease,
+            state: 'FAILED',
+            lastErrorCode: 'LIVEKIT_CONNECT_FAILED',
+        });
         await act(async () => {
             await result.current.start();
         });
@@ -467,7 +475,11 @@ describe('useLiveInspectionViewer', () => {
         expect(result.current.reason).toBe('LIVEKIT_CONNECT_FAILED');
 
         // Test LIVEKIT_PUBLISH_FAILED
-        mockStatus.mockResolvedValueOnce({ ...lease, state: 'FAILED', lastErrorCode: 'LIVEKIT_PUBLISH_FAILED' });
+        mockStatus.mockResolvedValueOnce({
+            ...lease,
+            state: 'FAILED',
+            lastErrorCode: 'LIVEKIT_PUBLISH_FAILED',
+        });
         await act(async () => {
             await result.current.start();
         });
@@ -475,7 +487,11 @@ describe('useLiveInspectionViewer', () => {
         expect(result.current.reason).toBe('LIVEKIT_PUBLISH_FAILED');
 
         // Test LIVEKIT_RUNTIME_LOST
-        mockStatus.mockResolvedValueOnce({ ...lease, state: 'FAILED', lastErrorCode: 'LIVEKIT_RUNTIME_LOST' });
+        mockStatus.mockResolvedValueOnce({
+            ...lease,
+            state: 'FAILED',
+            lastErrorCode: 'LIVEKIT_RUNTIME_LOST',
+        });
         await act(async () => {
             await result.current.start();
         });

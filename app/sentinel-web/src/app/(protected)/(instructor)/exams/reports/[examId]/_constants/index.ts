@@ -51,4 +51,3 @@ export function resolveExamReportSection(
 
     return DEFAULT_ACTIVE_SECTION;
 }
-

@@ -98,4 +98,3 @@ export type StudentExamStageResolverResult = {
     reasonCode: StudentExamStageResolverReason;
     shouldRedirect: boolean;
 };
-

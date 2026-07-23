@@ -47,8 +47,7 @@ export const useExamStore = create(
                 state.durationMinutes =
                     exam.duration ?? DEFAULT_EXAMINATION_GLOBAL_SETTINGS.defaultDurationMinutes;
                 state.passingScore =
-                    exam.passingScore ??
-                    DEFAULT_EXAMINATION_GLOBAL_SETTINGS.defaultPassingScore;
+                    exam.passingScore ?? DEFAULT_EXAMINATION_GLOBAL_SETTINGS.defaultPassingScore;
                 state.settings = exam.settings || { ...DEFAULT_EXAM_SETTINGS };
                 state.configuration = exam.configuration || { ...DEFAULT_EXAM_CONFIGURATION };
                 if (!shouldPreserveLocalQuestions) {

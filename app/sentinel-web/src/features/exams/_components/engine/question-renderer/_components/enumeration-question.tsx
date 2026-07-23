@@ -18,26 +18,35 @@ export function EnumerationQuestion({
 
     return (
         <div className="grid gap-3">
-            {blanks.map((_, index) => (
-                <div key={`${question.id}:enum:${index}`} className="space-y-2">
-                    <div className="flex items-center gap-3">
-                        <span className="text-muted-foreground bg-muted/60 flex h-9 w-9 shrink-0 items-center justify-center text-sm font-semibold">
-                            {index + 1}
-                        </span>
-                        <Input
-                            value={(values[index] as string) ?? ''}
-                            onChange={(event) => updateItem(index, event.target.value)}
-                            placeholder={`Item ${index + 1}`}
-                            className="h-12 rounded-md"
-                        />
-                    </div>
-                    {showCorrectAnswer && blanks[index] ? (
-                        <div className="rounded-md border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-900">
-                            <span className="font-semibold">Accepted answer:</span> {blanks[index]}
+            {blanks.map((_, index) => {
+                const inputId = `enum-input-${question.id}-${index}`;
+                return (
+                    <div key={`${question.id}:enum:${index}`} className="space-y-2">
+                        <div className="flex items-center gap-3">
+                            <label
+                                htmlFor={inputId}
+                                className="text-muted-foreground bg-muted/60 flex h-9 w-9 shrink-0 cursor-pointer items-center justify-center text-sm font-semibold"
+                            >
+                                <span className="sr-only">{`${question.content.prompt} - Item `}</span>
+                                <span>{index + 1}</span>
+                            </label>
+                            <Input
+                                id={inputId}
+                                value={(values[index] as string) ?? ''}
+                                onChange={(event) => updateItem(index, event.target.value)}
+                                placeholder={`Item ${index + 1}`}
+                                className="h-12 rounded-md"
+                            />
                         </div>
-                    ) : null}
-                </div>
-            ))}
+                        {showCorrectAnswer && blanks[index] ? (
+                            <div className="rounded-md border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-900">
+                                <span className="font-semibold">Accepted answer:</span>{' '}
+                                {blanks[index]}
+                            </div>
+                        ) : null}
+                    </div>
+                );
+            })}
         </div>
     );
 }

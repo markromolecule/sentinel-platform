@@ -59,14 +59,15 @@ describe('useCreateExamSectionAssignmentsBatchMutation', () => {
             },
         };
 
-        vi.mocked(createExamSectionAssignmentsBatch).mockResolvedValue([
-            { id: 'assign-1' },
-        ] as any);
+        vi.mocked(createExamSectionAssignmentsBatch).mockResolvedValue([{ id: 'assign-1' }] as any);
 
         const mutation = useCreateExamSectionAssignmentsBatchMutation();
         await (mutation as any).mutateAsync(variables);
 
-        expect(createExamSectionAssignmentsBatch).toHaveBeenCalledWith({ mockClient: true }, variables);
+        expect(createExamSectionAssignmentsBatch).toHaveBeenCalledWith(
+            { mockClient: true },
+            variables,
+        );
         expect(mockInvalidateQueries).toHaveBeenCalledWith({
             queryKey: ['exams', 'exam-123', 'section-assignments'],
         });

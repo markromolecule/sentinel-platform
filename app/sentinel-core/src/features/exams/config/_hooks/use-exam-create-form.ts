@@ -18,9 +18,7 @@ function buildInheritedCreatePayload(
     return {
         ...(dirtyFields.passingScore ? { passingScore: data.passingScore } : {}),
         ...(dirtyFields.shuffleQuestions ? { shuffleQuestions: data.shuffleQuestions } : {}),
-        ...(dirtyFields.showCorrectAnswers
-            ? { showCorrectAnswers: data.showCorrectAnswers }
-            : {}),
+        ...(dirtyFields.showCorrectAnswers ? { showCorrectAnswers: data.showCorrectAnswers } : {}),
         ...(dirtyFields.allowReview ? { allowReview: data.allowReview } : {}),
         ...(dirtyFields.randomizeChoices ? { randomizeChoices: data.randomizeChoices } : {}),
     };

@@ -166,4 +166,88 @@ describe('getExamMonitoringStudentDetail', () => {
             reasonCode: 'MANUAL_MONITORING_LOCK',
         });
     });
+
+    it('fetches incidents only for the selected operational attempt', async () => {
+        mockDb.executeTakeFirst.mockResolvedValueOnce({
+            student_user_id: 'student-user-1',
+            student_record_id: 'student-record-1',
+            student_number: '2024-0001',
+            first_name: 'Ana',
+            last_name: 'Santos',
+            last_seen_at: '2026-07-11T10:00:00.000Z',
+            attempt_id: 'active-attempt',
+            attempt_status: 'IN_PROGRESS',
+            lifecycle_state: 'IN_PROGRESS',
+            score_state: 'DRAFT',
+            started_at: '2026-07-11T09:45:00.000Z',
+            completed_at: null,
+            time_spent_minutes: 10,
+            answered_question_count: 4,
+            score: null,
+            total_score: null,
+            closed_reason: null,
+            reopened_until: null,
+            finalized_at: null,
+            incident_count: 1,
+            open_incident_count: 1,
+            has_high_severity: true,
+            latest_incident_type: 'TAB_SWITCH',
+            latest_incident_at: '2026-07-11T09:58:00.000Z',
+        });
+        mockDb.execute.mockResolvedValueOnce([]);
+        vi.mocked(TelemetryStorageService.getIncidents).mockResolvedValueOnce([
+            {
+                incidentId: 'active-incident',
+                attemptId: 'active-attempt',
+                examId: 'exam-1',
+                examTitle: 'Physics Final',
+                institutionId: 'institution-1',
+                studentId: 'student-user-1',
+                studentRecordId: 'student-record-1',
+                studentName: 'Ana Santos',
+                platform: 'WEB',
+                source: 'CLIENT',
+                ruleKey: 'webSecurity.tab_switching_monitor',
+                incidentType: 'TAB_SWITCH',
+                severity: 'HIGH',
+                status: 'PENDING',
+                timestamp: '2026-07-11T09:58:00.000Z',
+                evidenceUrl: null,
+                reviewedBy: null,
+                reviewedAt: null,
+                reviewNotes: null,
+                configurationSnapshot: null,
+                sessionContext: null,
+                details: {
+                    occurrenceCount: 3,
+                    severityReason: 'repeat-escalated',
+                },
+            } as any,
+        ]);
+
+        const result = await getExamMonitoringStudentDetail({
+            dbClient: mockDb as DbClient,
+            examId: 'exam-1',
+            studentId: 'student-user-1',
+            institutionId: 'institution-1',
+            viewerRole: 'instructor',
+            userId: 'user-1',
+        });
+
+        expect(TelemetryStorageService.getIncidents).toHaveBeenCalledWith(
+            mockDb,
+            {
+                attemptId: 'active-attempt',
+                limit: 200,
+            },
+            'institution-1',
+        );
+        expect(result.attemptId).toBe('active-attempt');
+        expect(result.flags).toHaveLength(1);
+        expect(result.flags[0]).toMatchObject({
+            id: 'active-incident',
+            severity: 'high',
+        });
+        expect(result.flags.map((flag) => flag.attemptId)).not.toContain('completed-attempt');
+    });
 });

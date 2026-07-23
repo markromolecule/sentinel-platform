@@ -27,7 +27,11 @@ export function FillBlankQuestion({
                         <Input
                             value={(values[index] as string) ?? ''}
                             onChange={(event) => updateBlank(index, event.target.value)}
-                            placeholder={showCorrectAnswer ? (blank || `Response ${index + 1}`) : `Response ${index + 1}`}
+                            placeholder={
+                                showCorrectAnswer
+                                    ? blank || `Response ${index + 1}`
+                                    : `Response ${index + 1}`
+                            }
                             className="h-12 rounded-md"
                         />
                         {showCorrectAnswer && blank ? (
@@ -42,7 +46,11 @@ export function FillBlankQuestion({
                     <Input
                         value={(values[0] as string) ?? ''}
                         onChange={(event) => updateBlank(0, event.target.value)}
-                        placeholder={showCorrectAnswer ? (blanks[0] || 'Type the missing value...') : 'Type the missing value...'}
+                        placeholder={
+                            showCorrectAnswer
+                                ? blanks[0] || 'Type the missing value...'
+                                : 'Type the missing value...'
+                        }
                         className="h-12 rounded-md"
                     />
                     {showCorrectAnswer && blanks[0] ? (
