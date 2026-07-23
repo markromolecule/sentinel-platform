@@ -19,6 +19,7 @@ import {
 export * from './use-student-live-inspection-publisher.types';
 
 const LIVE_INSPECTION_SIGNAL_EVENT = 'LIVE_INSPECTION_CHANGED';
+const LIVE_INSPECTION_RECONCILE_INTERVAL_MS = 1_000;
 const TERMINAL_STATES = new Set<LiveInspectionState>(['ENDED', 'FAILED', 'EXPIRED']);
 
 /**
@@ -197,7 +198,7 @@ export function useStudentLiveInspectionPublisher({
                 isReconcilingRef.current = false;
                 scheduleReconcile();
             }
-        }, 3000);
+        }, LIVE_INSPECTION_RECONCILE_INTERVAL_MS);
     }, [enabled, sessionId, reconcile]);
 
     const runReconcileNow = useCallback(async () => {

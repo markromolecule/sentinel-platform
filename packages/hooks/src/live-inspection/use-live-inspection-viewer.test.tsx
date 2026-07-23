@@ -216,6 +216,51 @@ describe('useLiveInspectionViewer', () => {
         expect(result.current.reason).toBe('LIVEKIT_RUNTIME_LOST');
     });
 
+    it('does not auto-stop the live inspection when connection quality updates', async () => {
+        const video = document.createElement('video');
+        const track = { kind: 'video', attach: mockAttach, detach: mockDetach };
+        const { result } = renderHook(
+            () =>
+                useLiveInspectionViewer({
+                    examId: 'exam-1',
+                    studentId: 'student-1',
+                    attemptId: lease.attemptId,
+                    enabled: true,
+                }),
+            { wrapper },
+        );
+
+        act(() => result.current.setVideoRef(video));
+        await act(async () => {
+            await result.current.start();
+        });
+
+        const subscribedHandler = mockOn.mock.calls.find(
+            ([event]) => event === 'trackSubscribed',
+        )?.[1];
+        const qualityHandler = mockOn.mock.calls.find(
+            ([event]) => event === 'connectionQualityChanged',
+        )?.[1];
+
+        act(() => {
+            subscribedHandler?.(track, { source: 'camera', kind: 'video' });
+            video.dispatchEvent(new Event('playing'));
+        });
+
+        expect(result.current.state).toBe('live');
+
+        act(() => {
+            qualityHandler?.('excellent');
+        });
+
+        await waitFor(() => {
+            expect(result.current.connectionQuality).toBe('excellent');
+        });
+
+        expect(result.current.state).toBe('live');
+        expect(mockStop).not.toHaveBeenCalled();
+    });
+
     it('rejects audio/screen-share tracks and never shows false LIVE', async () => {
         const video = document.createElement('video');
         const { result } = renderHook(
@@ -338,12 +383,12 @@ describe('useLiveInspectionViewer', () => {
         vi.useRealTimers();
     });
 
-    it('succeeds after 15 seconds but before 30 seconds', async () => {
+    it('succeeds after about 15 seconds but before the 30 second deadline', async () => {
         vi.useFakeTimers();
         let pollCount = 0;
         mockStatus.mockImplementation(async () => {
             pollCount++;
-            if (pollCount <= 9) {
+            if (pollCount <= 15) {
                 return { ...lease, state: 'REQUESTED' };
             }
             return { ...lease, state: 'PUBLISHER_READY', revision: 2 };
@@ -366,21 +411,19 @@ describe('useLiveInspectionViewer', () => {
 
         expect(result.current.state).toBe('waiting_for_student');
 
-        // Advance 16 seconds in 2-second steps (8 steps)
-        for (let i = 0; i < 8; i++) {
+        // Advance 14 seconds in 1-second steps; the student is still not ready.
+        for (let i = 0; i < 14; i++) {
             await act(async () => {
-                await vi.advanceTimersByTimeAsync(2000);
+                await vi.advanceTimersByTimeAsync(1000);
             });
         }
 
         expect(result.current.state).toBe('waiting_for_student');
 
-        // Advance another 4 seconds (total 20 seconds) - should poll 10th time and connect
-        for (let i = 0; i < 2; i++) {
-            await act(async () => {
-                await vi.advanceTimersByTimeAsync(2000);
-            });
-        }
+        // Advance once more; the next poll receives PUBLISHER_READY and connects.
+        await act(async () => {
+            await vi.advanceTimersByTimeAsync(1000);
+        });
 
         expect(result.current.state).toBe('connecting');
         expect(mockCredentials).toHaveBeenCalled();
