@@ -70,7 +70,7 @@ export async function assertLiveInspectionStudentAccess(args: LiveInspectionStud
         studentUserId: args.studentUserId,
     });
 
-    if (!attempt) {
+    if (!attempt?.exam_id) {
         throwNotFound();
     }
 

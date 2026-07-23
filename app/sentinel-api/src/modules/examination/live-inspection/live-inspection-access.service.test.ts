@@ -191,6 +191,16 @@ describe('live inspection access service', () => {
     it.each([
         ['missing owned attempt', undefined, { cameraRequired: true }],
         [
+            'owned attempt without an exam',
+            {
+                exam_id: null,
+                completed_at: null,
+                status: 'IN_PROGRESS',
+                lifecycle_state: 'IN_PROGRESS',
+            },
+            { cameraRequired: true },
+        ],
+        [
             'camera optional (raw NULL, effective default = false)',
             {
                 exam_id: 'exam-1',
