@@ -12,7 +12,7 @@ import {
 } from '@sentinel/services';
 import { useApi } from '../api-provider';
 
-const VIEWER_STATUS_POLL_MS = 2_000;
+const VIEWER_STATUS_POLL_MS = 1_000;
 const PUBLISHER_READY_TIMEOUT_MS = 30_000;
 const TERMINAL_STATES = new Set<LiveInspectionState>(['ENDED', 'FAILED', 'EXPIRED']);
 
@@ -128,8 +128,8 @@ export function useLiveInspectionViewer({
         detachLocalVideo();
         roomRef.current?.disconnect();
         roomRef.current = null;
-        connectionQuality && setConnectionQuality(null);
-    }, [clearPollTimer, connectionQuality, detachLocalVideo]);
+        setConnectionQuality(null);
+    }, [clearPollTimer, detachLocalVideo]);
 
     const markVideoPlayable = useCallback(() => {
         setState((current) =>

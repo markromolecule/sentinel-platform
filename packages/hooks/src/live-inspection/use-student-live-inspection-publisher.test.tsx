@@ -245,7 +245,7 @@ describe('useStudentLiveInspectionPublisher', () => {
         // Let the mount effects run
         await vi.runOnlyPendingTimersAsync();
 
-        expect(setTimeoutSpy).toHaveBeenCalledWith(expect.any(Function), 3000);
+        expect(setTimeoutSpy).toHaveBeenCalledWith(expect.any(Function), 1000);
     });
 
     it('keeps missed-event recovery active when the attempt page is hidden', async () => {
