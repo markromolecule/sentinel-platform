@@ -40,6 +40,8 @@ vi.mock('@/app/(protected)/student/exam/[id]/_hooks/use-student-exam-stage-guard
         useStudentExamStageGuard: (requestedStage: string) => {
             const data = mockUseStudentExamData();
             const storedFlow = actual.readStoredStudentExamFlow(data?.examId ?? '');
+            const hasFreshLobbyEntry = mockReadStoredLobbyEntryMarker(data?.examId ?? '');
+            const storedSession = mockReadStoredExamSession(data?.examId ?? '');
             const resolution = actual.resolveStudentExamStage({
                 requestedStage,
                 privacyAccepted: true,
@@ -48,7 +50,12 @@ vi.mock('@/app/(protected)/student/exam/[id]/_hooks/use-student-exam-stage-guard
                 admissionMode: data?.configuration?.lobbyAdmissionMode ?? 'AUTOMATIC',
                 admissionState: null,
                 runtimeAccess: data?.exam?.runtimeAccess,
+                hasFreshLobbyEntry,
+                storedSessionId: storedSession?.sessionId,
+                lobbyEntrySessionId: storedSession?.sessionId,
             });
+
+
 
             if (resolution.shouldRedirect && data?.examId) {
                 mockRouterReplace(`/student/exam/${data.examId}/${resolution.targetStage}`);
@@ -233,7 +240,7 @@ describe('useStudentExamAttempt', () => {
         expect(mockRouterReplace).not.toHaveBeenCalled();
     });
 
-    it('allows a hard reload when a stored session exists', () => {
+    it('redirects a hard reload when a stored session exists to lobby', () => {
         mockReadStoredLobbyEntryMarker.mockReturnValue(false);
         mockReadStoredExamSession.mockReturnValue({
             examId: '11111111-1111-1111-1111-111111111111',
@@ -245,10 +252,12 @@ describe('useStudentExamAttempt', () => {
 
         renderHook(() => useStudentExamAttempt());
 
-        expect(mockRouterReplace).not.toHaveBeenCalled();
+        expect(mockRouterReplace).toHaveBeenCalledWith(
+            '/student/exam/11111111-1111-1111-1111-111111111111/lobby',
+        );
     });
 
-    it('allows a resumable active attempt without a lobby marker', () => {
+    it('redirects a resumable active attempt without a lobby marker to lobby', () => {
         mockReadStoredLobbyEntryMarker.mockReturnValue(false);
         mockUseStudentExamData.mockReturnValue({
             examId: '11111111-1111-1111-1111-111111111111',
@@ -274,7 +283,9 @@ describe('useStudentExamAttempt', () => {
 
         renderHook(() => useStudentExamAttempt());
 
-        expect(mockRouterReplace).not.toHaveBeenCalled();
+        expect(mockRouterReplace).toHaveBeenCalledWith(
+            '/student/exam/11111111-1111-1111-1111-111111111111/lobby',
+        );
     });
 
     it('redirects direct attempt access without a lobby marker or stored session', () => {

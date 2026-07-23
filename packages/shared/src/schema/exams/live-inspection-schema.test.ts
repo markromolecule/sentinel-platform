@@ -40,6 +40,17 @@ describe('live inspection schemas', () => {
         }
     });
 
+    it('specifically allows REQUESTED -> STOPPING transition', () => {
+        expect(canTransitionLiveInspectionState('REQUESTED', 'STOPPING')).toBe(true);
+    });
+
+    it('rejects terminal to active state transitions', () => {
+        expect(canTransitionLiveInspectionState('ENDED', 'REQUESTED')).toBe(false);
+        expect(canTransitionLiveInspectionState('ENDED', 'LIVE')).toBe(false);
+        expect(canTransitionLiveInspectionState('FAILED', 'LIVE')).toBe(false);
+        expect(canTransitionLiveInspectionState('EXPIRED', 'LIVE')).toBe(false);
+    });
+
     it('detects terminal states', () => {
         expect(isLiveInspectionTerminalState('ENDED')).toBe(true);
         expect(isLiveInspectionTerminalState('FAILED')).toBe(true);

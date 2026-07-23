@@ -4,11 +4,13 @@ import { isLiveInspectionTerminalState } from '@sentinel/shared/schema';
 import { LiveKitService } from '../../../infrastructure/livekit/livekit.service';
 import { LiveKitManagedService } from '../../../infrastructure/livekit/services/livekit-managed.service';
 import { getLiveKitConfig } from '../../../infrastructure/livekit/livekit.config';
-import { getLiveInspectionLeaseForViewer } from '../live-inspection.repository';
+import {
+    getLiveInspectionLeaseForViewer,
+    compareAndSetLiveInspectionLeaseState,
+} from '../live-inspection.repository';
 import { assertLiveInspectionViewerAccess } from '../live-inspection-access.service';
 import {
     terminalizeLiveInspectionLeaseState,
-    transitionLiveInspectionLeaseState,
 } from '../live-inspection-state.service';
 import {
     assertLiveInspectionEnabled,
@@ -55,54 +57,94 @@ export async function stopLiveInspection(
         activePermissionKeys: args.activePermissionKeys,
     });
 
-    if (isLiveInspectionTerminalState(lease.state as any)) {
-        return mapLiveInspectionLeaseStatus(lease);
+    const maxRetries = 5;
+    let currentLease = lease;
+    let isTerminal = false;
+
+    for (let attempt = 0; attempt < maxRetries; attempt++) {
+        if (isLiveInspectionTerminalState(currentLease.state as any)) {
+            isTerminal = true;
+            break;
+        }
+
+        if (currentLease.state === 'STOPPING') {
+            break;
+        }
+
+        // Attempt transition to STOPPING
+        const updated = await compareAndSetLiveInspectionLeaseState(args.dbClient, currentLease.lease_id, {
+            fromState: currentLease.state as any,
+            toState: 'STOPPING',
+            expectedVersion: currentLease.version,
+        });
+
+        if (updated) {
+            currentLease = updated;
+            break;
+        }
+
+        // Conflict: re-read the lease and retry
+        const reRead = await getLiveInspectionLeaseForViewer(args.dbClient, {
+            leaseId: args.leaseId,
+            viewerUserId: args.viewerUserId,
+        });
+
+        if (!reRead || reRead.exam_id !== args.examId) {
+            throw new HTTPException(404, { message: 'Live inspection is not available.' });
+        }
+        currentLease = reRead;
     }
 
-    const stopping =
-        lease.state === 'STOPPING'
-            ? lease
-            : await transitionLiveInspectionLeaseState({
-                  dbClient: args.dbClient,
-                  leaseId: lease.lease_id,
-                  fromState: lease.state as any,
-                  toState: 'STOPPING',
-                  expectedVersion: lease.version,
-              });
+    if (isLiveInspectionTerminalState(currentLease.state as any) || isTerminal) {
+        return mapLiveInspectionLeaseStatus(currentLease);
+    }
+
+    if (currentLease.state !== 'STOPPING') {
+        throw new HTTPException(409, { message: 'Live inspection lease state transition conflict.' });
+    }
 
     const liveKit =
         deps.liveKit ?? new LiveKitManagedService({ config: deps.config ?? getLiveKitConfig() });
     let lastErrorCode: string | null = null;
 
     try {
-        await cleanupLiveInspectionProviderRoom(liveKit, stopping as any);
+        await cleanupLiveInspectionProviderRoom(liveKit, currentLease as any);
     } catch (error) {
         lastErrorCode = toLiveInspectionProviderFailureCode(error);
     }
 
-    const ended =
-        (await terminalizeLiveInspectionLeaseState({
-            dbClient: args.dbClient,
-            leaseId: lease.lease_id,
-            state: lastErrorCode ? 'FAILED' : 'ENDED',
-            endReason: lastErrorCode ? 'PROVIDER_ERROR' : 'VIEWER_STOPPED',
-            lastErrorCode,
-        })) ?? stopping;
-
-    await LiveKitService.logLiveInspectionLifecycleEvent(args.dbClient, {
-        metric: lastErrorCode ? 'failed' : 'ended',
-        leaseId: lease.lease_id,
-        attemptId: lease.attempt_id,
-        examId: lease.exam_id,
-        actorId: args.viewerUserId,
-        institutionId: lease.institution_id,
-        role: 'viewer',
+    const terminalized = await terminalizeLiveInspectionLeaseState({
+        dbClient: args.dbClient,
+        leaseId: currentLease.lease_id,
         state: lastErrorCode ? 'FAILED' : 'ENDED',
-        previousState: lease.state,
-        reason: lastErrorCode ? 'PROVIDER_ERROR' : 'VIEWER_STOPPED',
-        durationMs: Date.now() - lease.requested_at.getTime(),
-        boundedCode: lastErrorCode,
+        endReason: lastErrorCode ? 'PROVIDER_ERROR' : 'VIEWER_STOPPED',
+        lastErrorCode,
     });
 
-    return mapLiveInspectionLeaseStatus(ended as any);
+    let endedLease;
+    if (terminalized) {
+        endedLease = terminalized;
+        await LiveKitService.logLiveInspectionLifecycleEvent(args.dbClient, {
+            metric: lastErrorCode ? 'failed' : 'ended',
+            leaseId: currentLease.lease_id,
+            attemptId: currentLease.attempt_id,
+            examId: currentLease.exam_id,
+            actorId: args.viewerUserId,
+            institutionId: currentLease.institution_id,
+            role: 'viewer',
+            state: lastErrorCode ? 'FAILED' : 'ENDED',
+            previousState: lease.state,
+            reason: lastErrorCode ? 'PROVIDER_ERROR' : 'VIEWER_STOPPED',
+            durationMs: Date.now() - currentLease.requested_at.getTime(),
+            boundedCode: lastErrorCode,
+        });
+    } else {
+        const reRead = await getLiveInspectionLeaseForViewer(args.dbClient, {
+            leaseId: args.leaseId,
+            viewerUserId: args.viewerUserId,
+        });
+        endedLease = reRead ?? currentLease;
+    }
+
+    return mapLiveInspectionLeaseStatus(endedLease as any);
 }

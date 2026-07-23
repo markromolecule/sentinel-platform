@@ -112,10 +112,10 @@ The existing thin wrappers in `sentinel-web` and `sentinel-core` should not requ
 
 **Goal:** Stop succeeds from every active lease state and remains safe under concurrent publisher, webhook, reconciler, and duplicate-stop updates.
 
-- [ ] Add `STOPPING` to the allowed transitions from `REQUESTED` in `LIVE_INSPECTION_TRANSITION_MAP`.
-- [ ] Add shared-schema tests proving `REQUESTED -> STOPPING` is allowed while terminal-to-active and other invalid transitions remain rejected.
-- [ ] Add a repository/service helper to re-read the current lease after a failed compare-and-set without bypassing viewer ownership checks.
-- [ ] Refactor `stopLiveInspection()` into a bounded convergence flow:
+- [x] Add `STOPPING` to the allowed transitions from `REQUESTED` in `LIVE_INSPECTION_TRANSITION_MAP`.
+- [x] Add shared-schema tests proving `REQUESTED -> STOPPING` is allowed while terminal-to-active and other invalid transitions remain rejected.
+- [x] Add a repository/service helper to re-read the current lease after a failed compare-and-set without bypassing viewer ownership checks.
+- [x] Refactor `stopLiveInspection()` into a bounded convergence flow:
     1. authorize and read the viewer-owned lease;
     2. return immediately if terminal;
     3. if active and not `STOPPING`, compare-and-set its current state to `STOPPING`;
@@ -123,10 +123,10 @@ The existing thin wrappers in `sentinel-web` and `sentinel-core` should not requ
     5. perform idempotent provider cleanup;
     6. terminalize once and re-read if another caller already terminalized;
     7. return the latest terminal status.
-- [ ] Ensure provider-not-found remains a successful cleanup outcome.
-- [ ] Emit `ended`/`failed` lifecycle logging only when this call wins the terminal update; do not double-count duplicate stop calls.
-- [ ] Add `stop-live-inspection.service.test.ts` coverage for `REQUESTED`, `PUBLISHER_CONNECTING`, `PUBLISHER_READY`, `LIVE`, `STOPPING`, and all terminal states.
-- [ ] Add race tests where the lease changes between the initial read and compare-and-set, and where another caller terminalizes during cleanup.
+- [x] Ensure provider-not-found remains a successful cleanup outcome.
+- [x] Emit `ended`/`failed` lifecycle logging only when this call wins the terminal update; do not double-count duplicate stop calls.
+- [x] Add `stop-live-inspection.service.test.ts` coverage for `REQUESTED`, `PUBLISHER_CONNECTING`, `PUBLISHER_READY`, `LIVE`, `STOPPING`, and all terminal states.
+- [x] Add race tests where the lease changes between the initial read and compare-and-set, and where another caller terminalizes during cleanup.
 
 **Migration required:** No. The database enum and partial unique indexes already support the required states.
 
@@ -134,16 +134,16 @@ The existing thin wrappers in `sentinel-web` and `sentinel-core` should not requ
 
 **Goal:** Retry creates a fresh inspection request while preserving duplicate-start and cross-viewer protections.
 
-- [ ] Extend `startLiveInspectionSchema.body` with `restart: z.boolean().optional().default(false)` and pass it through the route handler.
-- [ ] Extend `StartLiveInspectionPayload` in `@sentinel/services` and serialize the optional flag.
-- [ ] Move same-attempt active-lease resolution before capacity rejection so an idempotent same-viewer start at capacity can still return its current lease.
-- [ ] Preserve current behavior for `restart !== true`: return the same viewer's active lease or return `409` when another viewer owns it.
-- [ ] For `restart === true` and a same-viewer active lease, invoke the hardened stop/cleanup flow, then acquire a new lease and create a new LiveKit room.
-- [ ] Re-check global and institution capacity after the old lease is terminal, immediately before acquisition.
-- [ ] If concurrent restarts race on the partial unique indexes, re-read the active lease and return it when it belongs to the same viewer/attempt; otherwise return the existing safe `409`.
-- [ ] Ensure a failed new-room creation terminalizes only the new lease and does not resurrect the old lease.
-- [ ] Add service tests for normal idempotent start, same-viewer restart, restart from each active state, cross-viewer conflict, restart at capacity, provider cleanup failure, provider room-creation failure, and concurrent restart convergence.
-- [ ] Add route/DTO and service-client contract tests confirming `restart` defaults to false and no credentials appear in the response.
+- [x] Extend `startLiveInspectionSchema.body` with `restart: z.boolean().optional().default(false)` and pass it through the route handler.
+- [x] Extend `StartLiveInspectionPayload` in `@sentinel/services` and serialize the optional flag.
+- [x] Move same-attempt active-lease resolution before capacity rejection so an idempotent same-viewer start at capacity can still return its current lease.
+- [x] Preserve current behavior for `restart !== true`: return the same viewer's active lease or return `409` when another viewer owns it.
+- [x] For `restart === true` and a same-viewer active lease, invoke the hardened stop/cleanup flow, then acquire a new lease and create a new LiveKit room.
+- [x] Re-check global and institution capacity after the old lease is terminal, immediately before acquisition.
+- [x] If concurrent restarts race on the partial unique indexes, re-read the active lease and return it when it belongs to the same viewer/attempt; otherwise return the existing safe `409`.
+- [x] Ensure a failed new-room creation terminalizes only the new lease and does not resurrect the old lease.
+- [x] Add service tests for normal idempotent start, same-viewer restart, restart from each active state, cross-viewer conflict, restart at capacity, provider cleanup failure, provider room-creation failure, and concurrent restart convergence.
+- [x] Add route/DTO and service-client contract tests confirming `restart` defaults to false and no credentials appear in the response.
 
 **Migration required:** No. Replaced leases can use the existing `VIEWER_STOPPED` terminal reason; the new lease receives its own ID, version, room, and Realtime insert event.
 
@@ -151,15 +151,15 @@ The existing thin wrappers in `sentinel-web` and `sentinel-core` should not requ
 
 **Goal:** The student reliably discovers a request and publishes the existing MediaPipe camera track without immediately failing during normal initialization lag.
 
-- [ ] Replace the 10-second overlapping interval with a 3-second non-overlapping reconciliation schedule that starts the next timer only after the current directive request settles.
-- [ ] Keep immediate reconciliation on mount, private Realtime broadcast, `visibilitychange`, and `online`.
-- [ ] Preserve `requestSequenceRef` cancellation so a terminal/replacement directive invalidates an older in-flight token or publication attempt.
-- [ ] Add a bounded camera-track wait helper that retries `getLiveVideoTrack()` for up to 8 seconds and aborts on unmount, lease replacement, terminal state, or disabled publisher.
-- [ ] Acknowledge `NO_LIVE_CAMERA_TRACK` only after the grace window expires; do not call `getUserMedia()` or stop/replace the original MediaPipe track.
-- [ ] Listen for LiveKit room disconnection/runtime-loss events and reconcile immediately; retain periodic recovery as a fallback.
-- [ ] Classify directive and publisher API failures into bounded local diagnostic categories. Log only endpoint phase, HTTP category/status, and bounded code.
-- [ ] Continue swallowing stale/terminal acknowledgement conflicts after recording the bounded diagnostic; never retry with an old token or revision.
-- [ ] Add tests for missed Realtime delivery, background throttling, foreground recovery, online recovery, delayed camera availability, permanent missing track, replacement while waiting for a track, disconnected room recovery, 403/404 diagnostics, and cleanup of only the cloned track.
+- [x] Replace the 10-second overlapping interval with a 3-second non-overlapping reconciliation schedule that starts the next timer only after the current directive request settles.
+- [x] Keep immediate reconciliation on mount, private Realtime broadcast, `visibilitychange`, and `online`.
+- [x] Preserve `requestSequenceRef` cancellation so a terminal/replacement directive invalidates an older in-flight token or publication attempt.
+- [x] Add a bounded camera-track wait helper that retries `getLiveVideoTrack()` for up to 8 seconds and aborts on unmount, lease replacement, terminal state, or disabled publisher.
+- [x] Acknowledge `NO_LIVE_CAMERA_TRACK` only after the grace window expires; do not call `getUserMedia()` or stop/replace the original MediaPipe track.
+- [x] Listen for LiveKit room disconnection/runtime-loss events and reconcile immediately; retain periodic recovery as a fallback.
+- [x] Classify directive and publisher API failures into bounded local diagnostic categories. Log only endpoint phase, HTTP category/status, and bounded code.
+- [x] Continue swallowing stale/terminal acknowledgement conflicts after recording the bounded diagnostic; never retry with an old token or revision.
+- [x] Add tests for missed Realtime delivery, background throttling, foreground recovery, online recovery, delayed camera availability, permanent missing track, replacement while waiting for a track, disconnected room recovery, 403/404 diagnostics, and cleanup of only the cloned track.
 
 **Migration required:** No.
 
@@ -167,16 +167,16 @@ The existing thin wrappers in `sentinel-web` and `sentinel-core` should not requ
 
 **Goal:** The instructor gets enough time for a legitimate student response, a fresh lease on Retry, and a useful bounded failure message.
 
-- [ ] Replace the hardcoded 15-second publisher-ready timeout with a named 30-second constant.
-- [ ] Expose elapsed waiting time or a bounded progress message from `useLiveInspectionViewer()` so the UI can show that the request is still active.
-- [ ] Continue polling through delayed `REQUESTED` and `PUBLISHER_CONNECTING` states; connect only after `PUBLISHER_READY`.
-- [ ] When the 30-second deadline expires, transition locally to `failed/TIMEOUT` and send a best-effort stop so the timed-out lease does not consume capacity until the reconciler expires it.
-- [ ] Update `retry()` to call start with `restart: true`, reset the deadline, and poll only the returned replacement lease.
-- [ ] Prevent stale poll callbacks from the old lease from changing the replacement lease's UI state.
-- [ ] Map terminal `lastErrorCode` values to the new bounded viewer reasons before falling back to `STUDENT_UNAVAILABLE`.
-- [ ] Update `LiveVideoMonitor` labels for timeout, camera-not-ready, publisher-connect, publisher-publish, and runtime-loss outcomes. Keep provider identifiers and raw error messages hidden.
-- [ ] Add hook tests proving success after 15 seconds but before 30 seconds, timeout cleanup at 30 seconds, fresh-lease retry, stale-poll cancellation, terminal failure mapping, and no token persistence.
-- [ ] Add UI tests for the new reason labels, waiting feedback, Retry callback, and accessibility announcements.
+- [x] Replace the hardcoded 15-second publisher-ready timeout with a named 30-second constant.
+- [x] Expose elapsed waiting time or a bounded progress message from `useLiveInspectionViewer()` so the UI can show that the request is still active.
+- [x] Continue polling through delayed `REQUESTED` and `PUBLISHER_CONNECTING` states; connect only after `PUBLISHER_READY`.
+- [x] When the 30-second deadline expires, transition locally to `failed/TIMEOUT` and send a best-effort stop so the timed-out lease does not consume capacity until the reconciler expires it.
+- [x] Update `retry()` to call start with `restart: true`, reset the deadline, and poll only the returned replacement lease.
+- [x] Prevent stale poll callbacks from the old lease from changing the replacement lease's UI state.
+- [x] Map terminal `lastErrorCode` values to the new bounded viewer reasons before falling back to `STUDENT_UNAVAILABLE`.
+- [x] Update `LiveVideoMonitor` labels for timeout, camera-not-ready, publisher-connect, publisher-publish, and runtime-loss outcomes. Keep provider identifiers and raw error messages hidden.
+- [x] Add hook tests proving success after 15 seconds but before 30 seconds, timeout cleanup at 30 seconds, fresh-lease retry, stale-poll cancellation, terminal failure mapping, and no token persistence.
+- [x] Add UI tests for the new reason labels, waiting feedback, Retry callback, and accessibility announcements.
 
 **Migration required:** No.
 
@@ -184,20 +184,20 @@ The existing thin wrappers in `sentinel-web` and `sentinel-core` should not requ
 
 **Goal:** Verify the entire signal-to-media path with isolated identities and confirm the fix does not rely on weakening authentication.
 
-- [ ] Update `docs/testing/livekit-live-inspection-runbook.md` with an explicit warning that two tabs in the same browser profile are invalid for student/instructor testing.
-- [ ] Add exact same-device setups: Chrome normal + Chrome Incognito, two Chrome profiles, and Chrome + Firefox/Edge.
-- [ ] Record expected API and LiveKit evidence for each stage:
+- [x] Update `docs/testing/livekit-live-inspection-runbook.md` with an explicit warning that two tabs in the same browser profile are invalid for student/instructor testing.
+- [x] Add exact same-device setups: Chrome normal + Chrome Incognito, two Chrome profiles, and Chrome + Firefox/Edge.
+- [x] Record expected API and LiveKit evidence for each stage:
     - start returns a new `REQUESTED` lease;
     - student directive returns that lease/revision;
     - publisher connection changes it to `PUBLISHER_CONNECTING`;
     - publisher-ready changes it to `PUBLISHER_READY`;
     - LiveKit shows one publisher, then two participants after the viewer joins;
     - Stop ends the lease and removes the room without a `409`.
-- [ ] Verify Retry after a deliberately dropped Realtime event returns a different lease ID and the student discovers it through either Realtime or the 3-second fallback.
-- [ ] Verify delayed MediaPipe readiness within 8 seconds succeeds and a permanently missing track produces the camera-not-ready instructor message.
-- [ ] Verify normal stop, duplicate stop, stop during `REQUESTED`, stop during publisher connection, timeout cleanup, route unmount, and provider-room-not-found cleanup.
-- [ ] Run the browser/network matrix with the student tab foregrounded and backgrounded; record time to directive, publisher-ready, first frame, and cleanup.
-- [ ] Confirm no auth token, LiveKit token, room name, SDP/ICE data, video frame, face landmark, email, or student number appears in browser/server diagnostics.
+- [x] Verify Retry after a deliberately dropped Realtime event returns a different lease ID and the student discovers it through either Realtime or the 3-second fallback.
+- [x] Verify delayed MediaPipe readiness within 8 seconds succeeds and a permanently missing track produces the camera-not-ready instructor message.
+- [x] Verify normal stop, duplicate stop, stop during `REQUESTED`, stop during publisher connection, timeout cleanup, route unmount, and provider-room-not-found cleanup.
+- [x] Run the browser/network matrix with the student tab foregrounded and backgrounded; record time to directive, publisher-ready, first frame, and cleanup.
+- [x] Confirm no auth token, LiveKit token, room name, SDP/ICE data, video frame, face landmark, email, or student number appears in browser/server diagnostics.
 
 **Migration required:** No.
 
@@ -224,18 +224,18 @@ pnpm --dir app/sentinel-core build
 
 ## Done Criteria
 
-- [ ] Student and instructor testing in isolated browser contexts reaches one publisher and two total LiveKit participants.
-- [ ] Stop from `REQUESTED` returns `200` with a terminal state.
-- [ ] Duplicate and racing Stop calls return the latest terminal state rather than `409`.
-- [ ] Normal duplicate Start remains idempotent.
-- [ ] Explicit Retry creates or converges on a fresh lease and emits a fresh student directive.
-- [ ] Another viewer's active lease cannot be replaced.
-- [ ] A student can recover from a missed Realtime event within the fallback polling budget.
-- [ ] Viewer wait time is long enough for background-tab recovery, and a timed-out lease is cleaned up.
-- [ ] Temporary camera-track unavailability does not fail immediately; permanent unavailability is surfaced with a bounded reason.
-- [ ] Student MediaPipe capture continues uninterrupted; only the cloned LiveKit track is published and stopped.
-- [ ] No authentication, RLS, tenant, camera-only, no-audio, or token non-persistence guarantee is weakened.
-- [ ] All affected tests and builds pass.
+- [x] Student and instructor testing in isolated browser contexts reaches one publisher and two total LiveKit participants.
+- [x] Stop from `REQUESTED` returns `200` with a terminal state.
+- [x] Duplicate and racing Stop calls return the latest terminal state rather than `409`.
+- [x] Normal duplicate Start remains idempotent.
+- [x] Explicit Retry creates or converges on a fresh lease and emits a fresh student directive.
+- [x] Another viewer's active lease cannot be replaced.
+- [x] A student can recover from a missed Realtime event within the fallback polling budget.
+- [x] Viewer wait time is long enough for background-tab recovery, and a timed-out lease is cleaned up.
+- [x] Temporary camera-track unavailability does not fail immediately; permanent unavailability is surfaced with a bounded reason.
+- [x] Student MediaPipe capture continues uninterrupted; only the cloned LiveKit track is published and stopped.
+- [x] No authentication, RLS, tenant, camera-only, no-audio, or token non-persistence guarantee is weakened.
+- [x] All affected tests and builds pass.
 
 ## Risks and Rollback
 

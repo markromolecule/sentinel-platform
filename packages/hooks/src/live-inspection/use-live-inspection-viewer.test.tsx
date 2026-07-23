@@ -118,6 +118,7 @@ describe('useLiveInspectionViewer', () => {
         expect(mockStart).toHaveBeenCalledWith(expect.anything(), {
             examId: 'exam-1',
             attemptId: lease.attemptId,
+            restart: false,
         });
         expect(mockConnect).toHaveBeenCalledWith(
             'wss://sentinel-test.livekit.cloud',
@@ -274,14 +275,211 @@ describe('useLiveInspectionViewer', () => {
 
         expect(result.current.state).toBe('waiting_for_student');
 
-        // Advance timers by 16 seconds to exceed the 15-second timeout limit
-        await act(async () => {
-            await vi.advanceTimersByTimeAsync(16000);
-        });
+        // Advance timers by 32 seconds to exceed the 30-second timeout limit in 2-second steps
+        for (let i = 0; i < 16; i++) {
+            await act(async () => {
+                await vi.advanceTimersByTimeAsync(2000);
+            });
+        }
 
         expect(result.current.state).toBe('failed');
         expect(result.current.reason).toBe('TIMEOUT');
+        expect(mockStop).toHaveBeenCalledWith(expect.anything(), {
+            examId: 'exam-1',
+            leaseId: lease.leaseId,
+        });
 
         vi.useRealTimers();
+    });
+
+    it('succeeds after 15 seconds but before 30 seconds', async () => {
+        vi.useFakeTimers();
+        let pollCount = 0;
+        mockStatus.mockImplementation(async () => {
+            pollCount++;
+            if (pollCount <= 9) {
+                return { ...lease, state: 'REQUESTED' };
+            }
+            return { ...lease, state: 'PUBLISHER_READY', revision: 2 };
+        });
+
+        const { result } = renderHook(
+            () =>
+                useLiveInspectionViewer({
+                    examId: 'exam-1',
+                    studentId: 'student-1',
+                    attemptId: lease.attemptId,
+                    enabled: true,
+                }),
+            { wrapper },
+        );
+
+        await act(async () => {
+            await result.current.start();
+        });
+
+        expect(result.current.state).toBe('waiting_for_student');
+
+        // Advance 16 seconds in 2-second steps (8 steps)
+        for (let i = 0; i < 8; i++) {
+            await act(async () => {
+                await vi.advanceTimersByTimeAsync(2000);
+            });
+        }
+
+        expect(result.current.state).toBe('waiting_for_student');
+
+        // Advance another 4 seconds (total 20 seconds) - should poll 10th time and connect
+        for (let i = 0; i < 2; i++) {
+            await act(async () => {
+                await vi.advanceTimersByTimeAsync(2000);
+            });
+        }
+
+        expect(result.current.state).toBe('connecting');
+        expect(mockCredentials).toHaveBeenCalled();
+
+        vi.useRealTimers();
+    });
+
+    it('retries with restart: true, resetting the deadline and polling the new lease', async () => {
+        const { result } = renderHook(
+            () =>
+                useLiveInspectionViewer({
+                    examId: 'exam-1',
+                    studentId: 'student-1',
+                    attemptId: lease.attemptId,
+                    enabled: true,
+                }),
+            { wrapper },
+        );
+
+        await act(async () => {
+            await result.current.start();
+        });
+
+        expect(mockStart).toHaveBeenLastCalledWith(expect.anything(), {
+            examId: 'exam-1',
+            attemptId: lease.attemptId,
+            restart: false,
+        });
+
+        // Mock a new lease for restart
+        const restartLease = { ...lease, leaseId: '55555555-5555-5555-5555-555555555555' };
+        mockStart.mockResolvedValueOnce(restartLease);
+
+        await act(async () => {
+            await result.current.retry();
+        });
+
+        expect(mockStart).toHaveBeenLastCalledWith(expect.anything(), {
+            examId: 'exam-1',
+            attemptId: lease.attemptId,
+            restart: true,
+        });
+    });
+
+    it('ignores stale poll callbacks from the old lease', async () => {
+        let resolveFirstPoll: Function = () => {};
+        const firstPollPromise = new Promise((resolve) => {
+            resolveFirstPoll = resolve;
+        });
+
+        // First poll returns a deferred promise; subsequent polls resolve immediately
+        mockStatus.mockImplementation((apiClient, args) => {
+            if (args.leaseId === lease.leaseId) {
+                return firstPollPromise;
+            }
+            return Promise.resolve({
+                leaseId: args.leaseId,
+                attemptId: lease.attemptId,
+                state: 'REQUESTED',
+                revision: 1,
+            });
+        });
+
+        const { result } = renderHook(
+            () =>
+                useLiveInspectionViewer({
+                    examId: 'exam-1',
+                    studentId: 'student-1',
+                    attemptId: lease.attemptId,
+                    enabled: true,
+                }),
+            { wrapper },
+        );
+
+        // Start the first lease (first poll remains pending)
+        act(() => {
+            void result.current.start();
+        });
+
+        // Start a restart (updates leaseRef.current to restartLease)
+        const restartLease = { ...lease, leaseId: '55555555-5555-5555-5555-555555555555' };
+        mockStart.mockResolvedValueOnce(restartLease);
+        
+        await act(async () => {
+            await result.current.retry();
+        });
+
+        // Now resolve the first poll (from the old lease) as FAILED
+        await act(async () => {
+            resolveFirstPoll({
+                leaseId: lease.leaseId,
+                attemptId: lease.attemptId,
+                state: 'FAILED',
+                lastErrorCode: 'NO_LIVE_CAMERA_TRACK',
+            });
+            await Promise.resolve();
+        });
+
+        // State should still be waiting_for_student (not failed)
+        expect(result.current.state).toBe('waiting_for_student');
+        expect(result.current.reason).toBeNull();
+    });
+
+    it('maps terminal failure codes to corresponding bounded reasons', async () => {
+        const { result } = renderHook(
+            () =>
+                useLiveInspectionViewer({
+                    examId: 'exam-1',
+                    studentId: 'student-1',
+                    attemptId: lease.attemptId,
+                    enabled: true,
+                }),
+            { wrapper },
+        );
+
+        // Test NO_LIVE_CAMERA_TRACK
+        mockStatus.mockResolvedValueOnce({ ...lease, state: 'FAILED', lastErrorCode: 'NO_LIVE_CAMERA_TRACK' });
+        await act(async () => {
+            await result.current.start();
+        });
+        expect(result.current.state).toBe('failed');
+        expect(result.current.reason).toBe('NO_LIVE_CAMERA_TRACK');
+
+        // Test LIVEKIT_CONNECT_FAILED
+        mockStatus.mockResolvedValueOnce({ ...lease, state: 'FAILED', lastErrorCode: 'LIVEKIT_CONNECT_FAILED' });
+        await act(async () => {
+            await result.current.start();
+        });
+        expect(result.current.state).toBe('failed');
+        expect(result.current.reason).toBe('LIVEKIT_CONNECT_FAILED');
+
+        // Test LIVEKIT_PUBLISH_FAILED
+        mockStatus.mockResolvedValueOnce({ ...lease, state: 'FAILED', lastErrorCode: 'LIVEKIT_PUBLISH_FAILED' });
+        await act(async () => {
+            await result.current.start();
+        });
+        expect(result.current.state).toBe('failed');
+        expect(result.current.reason).toBe('LIVEKIT_PUBLISH_FAILED');
+
+        // Test LIVEKIT_RUNTIME_LOST
+        mockStatus.mockResolvedValueOnce({ ...lease, state: 'FAILED', lastErrorCode: 'LIVEKIT_RUNTIME_LOST' });
+        await act(async () => {
+            await result.current.start();
+        });
+        expect(result.current.state).toBe('failed');
+        expect(result.current.reason).toBe('LIVEKIT_RUNTIME_LOST');
     });
 });

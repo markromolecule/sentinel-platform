@@ -13,6 +13,7 @@ import {
 import { useApi } from '../api-provider';
 
 const VIEWER_STATUS_POLL_MS = 2_000;
+const PUBLISHER_READY_TIMEOUT_MS = 30_000;
 const TERMINAL_STATES = new Set<LiveInspectionState>(['ENDED', 'FAILED', 'EXPIRED']);
 
 export type LiveInspectionViewerState =
@@ -37,6 +38,10 @@ export type LiveInspectionViewerReason =
     | 'UNEXPECTED_TRACK'
     | 'CONNECT_FAILED'
     | 'STOPPED'
+    | 'NO_LIVE_CAMERA_TRACK'
+    | 'LIVEKIT_CONNECT_FAILED'
+    | 'LIVEKIT_PUBLISH_FAILED'
+    | 'LIVEKIT_RUNTIME_LOST'
     | null;
 
 export type UseLiveInspectionViewerArgs = {
@@ -93,6 +98,7 @@ export function useLiveInspectionViewer({
     const [state, setState] = useState<LiveInspectionViewerState>('idle');
     const [reason, setReason] = useState<LiveInspectionViewerReason>(null);
     const [connectionQuality, setConnectionQuality] = useState<string | null>(null);
+    const [elapsedSeconds, setElapsedSeconds] = useState<number>(0);
 
     const clearPollTimer = useCallback(() => {
         if (pollTimerRef.current !== null) {
@@ -209,26 +215,52 @@ export function useLiveInspectionViewer({
                 return;
             }
 
-            if (pollStartTimeRef.current && Date.now() - pollStartTimeRef.current > 15_000) {
+            if (pollStartTimeRef.current && Date.now() - pollStartTimeRef.current > PUBLISHER_READY_TIMEOUT_MS) {
                 cleanupRoom();
                 setState('failed');
                 setReason('TIMEOUT');
+                try {
+                    void stopLiveInspection(apiClient, { examId, leaseId });
+                } catch {
+                    // Best-effort cleanup
+                }
                 return;
             }
 
             try {
                 const status = await getLiveInspectionStatus(apiClient, { examId, leaseId });
+                
+                if (leaseRef.current?.leaseId !== leaseId) {
+                    return;
+                }
+                
                 leaseRef.current = status;
 
-                if (status.state === 'PUBLISHER_READY') {
+                if (status.state === 'PUBLISHER_READY' || status.state === 'LIVE') {
                     await connectViewer(status);
                     return;
                 }
 
                 if (TERMINAL_STATES.has(status.state)) {
                     cleanupRoom();
-                    setState(status.state === 'FAILED' ? 'failed' : 'ended');
-                    setReason(status.state === 'FAILED' ? 'STUDENT_UNAVAILABLE' : 'STOPPED');
+                    
+                    if (status.state === 'FAILED') {
+                        setState('failed');
+                        if (status.lastErrorCode === 'NO_LIVE_CAMERA_TRACK') {
+                            setReason('NO_LIVE_CAMERA_TRACK');
+                        } else if (status.lastErrorCode === 'LIVEKIT_CONNECT_FAILED') {
+                            setReason('LIVEKIT_CONNECT_FAILED');
+                        } else if (status.lastErrorCode === 'LIVEKIT_PUBLISH_FAILED') {
+                            setReason('LIVEKIT_PUBLISH_FAILED');
+                        } else if (status.lastErrorCode === 'LIVEKIT_RUNTIME_LOST') {
+                            setReason('LIVEKIT_RUNTIME_LOST');
+                        } else {
+                            setReason('STUDENT_UNAVAILABLE');
+                        }
+                    } else {
+                        setState('ended');
+                        setReason('STOPPED');
+                    }
                     return;
                 }
 
@@ -245,7 +277,7 @@ export function useLiveInspectionViewer({
         [apiClient, cleanupRoom, clearPollTimer, connectViewer, examId],
     );
 
-    const start = useCallback(async () => {
+    const start = useCallback(async (options?: { restart?: boolean }) => {
         if (!enabled || !attemptId) {
             setReason('NOT_ELIGIBLE');
             return;
@@ -257,7 +289,11 @@ export function useLiveInspectionViewer({
         setReason(null);
 
         try {
-            const lease = await startLiveInspection(apiClient, { examId, attemptId });
+            const lease = await startLiveInspection(apiClient, {
+                examId,
+                attemptId,
+                restart: options?.restart ?? false,
+            });
             leaseRef.current = lease;
             setState('waiting_for_student');
             pollStartTimeRef.current = Date.now();
@@ -290,7 +326,7 @@ export function useLiveInspectionViewer({
     }, [apiClient, cleanupRoom, clearPollTimer, examId]);
 
     const retry = useCallback(() => {
-        void start();
+        void start({ restart: true });
     }, [start]);
 
     useEffect(() => {
@@ -313,6 +349,28 @@ export function useLiveInspectionViewer({
         };
     }, [apiClient, cleanupRoom, examId]);
 
+    useEffect(() => {
+        const isWaiting = ['requesting', 'waiting_for_student', 'connecting'].includes(state);
+        if (!isWaiting || !pollStartTimeRef.current) {
+            setElapsedSeconds(0);
+            return;
+        }
+
+        const updateElapsed = () => {
+            if (pollStartTimeRef.current) {
+                setElapsedSeconds(Math.floor((Date.now() - pollStartTimeRef.current) / 1000));
+            }
+        };
+        updateElapsed();
+
+        const timer = window.setInterval(updateElapsed, 1000);
+        return () => window.clearInterval(timer);
+    }, [state]);
+
+    const waitingProgress = ['requesting', 'waiting_for_student', 'connecting'].includes(state)
+        ? `Waiting for student device (${elapsedSeconds}s)...`
+        : null;
+
     return {
         state,
         reason,
@@ -322,6 +380,7 @@ export function useLiveInspectionViewer({
             ? null
             : 'Live camera viewing is unavailable for this attempt.',
         studentId,
+        waitingProgress,
         start,
         stop,
         retry,

@@ -327,10 +327,41 @@ export function resolveStudentExamStage(
                 shouldRedirect: requestedStage !== 'instruction',
             };
         }
+
+        const hasSessionMatchedEntry = Boolean(
+            input.hasFreshLobbyEntry &&
+            (!input.lobbyEntrySessionId || !input.storedSessionId || input.lobbyEntrySessionId === input.storedSessionId)
+        );
+
+        if (requestedStage === 'lobby') {
+            return {
+                targetStage: 'lobby',
+                reasonCode: 'ATTEMPT_ACTIVE',
+                shouldRedirect: false,
+            };
+        }
+
+        if (requestedStage === 'attempt') {
+            if (hasSessionMatchedEntry) {
+                return {
+                    targetStage: 'attempt',
+                    reasonCode: 'ATTEMPT_ACTIVE',
+                    shouldRedirect: false,
+                };
+            } else {
+                return {
+                    targetStage: 'lobby',
+                    reasonCode: 'ATTEMPT_ACTIVE',
+                    shouldRedirect: true,
+                };
+            }
+        }
+
+        const target = hasSessionMatchedEntry ? 'attempt' : 'lobby';
         return {
-            targetStage: 'attempt',
+            targetStage: target,
             reasonCode: 'ATTEMPT_ACTIVE',
-            shouldRedirect: requestedStage !== 'attempt',
+            shouldRedirect: requestedStage !== target,
         };
     }
 

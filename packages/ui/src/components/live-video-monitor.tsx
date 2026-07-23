@@ -25,6 +25,7 @@ export type LiveVideoMonitorProps = {
     onStop: () => void;
     onRetry: () => void;
     disabledExplanation?: string | null;
+    waitingProgress?: string | null;
     className?: string;
 };
 
@@ -37,9 +38,19 @@ function getStatusLabel(state: LiveVideoMonitorState, reason?: string | null) {
     if (state === 'reconnecting') return 'Reconnecting live camera';
     if (state === 'stopping') return 'Stopping live view';
     if (state === 'ended') return 'Live view ended';
+    
+    // Bounded reason codes
     if (reason === 'PERMISSION_DENIED') return 'Live view denied';
     if (reason === 'CAPACITY_REACHED') return 'Live view capacity reached';
     if (reason === 'CONFLICT') return 'Another live view is active';
+    if (reason === 'TIMEOUT') return 'Student connection timed out';
+    if (reason === 'NO_LIVE_CAMERA_TRACK') return 'Student camera not ready';
+    if (reason === 'LIVEKIT_CONNECT_FAILED') return 'Student live connection failed';
+    if (reason === 'LIVEKIT_PUBLISH_FAILED') return 'Student camera publication failed';
+    if (reason === 'LIVEKIT_RUNTIME_LOST') return 'Student connection lost';
+    if (reason === 'CONNECT_FAILED') return 'Failed to connect viewer';
+    if (reason === 'UNEXPECTED_TRACK') return 'Unexpected track received';
+
     return 'Live view unavailable';
 }
 
@@ -55,6 +66,7 @@ export function LiveVideoMonitor({
     onStop,
     onRetry,
     disabledExplanation,
+    waitingProgress,
     className,
 }: LiveVideoMonitorProps) {
     const isBusy = [
@@ -68,6 +80,7 @@ export function LiveVideoMonitor({
     const canStop = ['waiting_for_student', 'connecting', 'live', 'reconnecting'].includes(state);
     const canRetry = state === 'failed' || state === 'ended';
     const statusLabel = getStatusLabel(state, reason);
+    const displayText = waitingProgress ?? disabledExplanation ?? statusLabel;
 
     return (
         <Card
@@ -100,7 +113,7 @@ export function LiveVideoMonitor({
                 />
                 {state !== 'live' ? (
                     <div className="absolute inset-0 flex items-center justify-center bg-black/50 p-4 text-center text-sm text-white/80">
-                        {disabledExplanation ?? statusLabel}
+                        {displayText}
                     </div>
                 ) : null}
             </div>
@@ -108,7 +121,7 @@ export function LiveVideoMonitor({
             <div role="status" aria-live="polite" className="text-muted-foreground text-xs">
                 {state === 'live'
                     ? 'Live camera view is active.'
-                    : (disabledExplanation ?? statusLabel)}
+                    : displayText}
             </div>
 
             {state === 'live' && connectionQuality ? (

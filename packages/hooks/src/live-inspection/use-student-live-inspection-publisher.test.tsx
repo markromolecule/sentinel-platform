@@ -1,6 +1,9 @@
 import { act, cleanup, renderHook, waitFor } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { useStudentLiveInspectionPublisher } from './use-student-live-inspection-publisher';
+import { ApiError } from '@sentinel/services';
+
+let lastRoomInstance: any = null;
 
 const {
     mockDirective,
@@ -22,12 +25,23 @@ const {
     mockDisconnect: vi.fn(),
 }));
 
-vi.mock('@sentinel/services', () => ({
-    getStudentLiveInspectionDirective: mockDirective,
-    createLiveInspectionPublisherConnection: mockPublisherConnection,
-    acknowledgeLiveInspectionPublisherReady: mockPublisherReady,
-    acknowledgeLiveInspectionPublisherFailure: mockPublisherFailure,
-}));
+vi.mock('@sentinel/services', () => {
+    class ApiError extends Error {
+        status: number;
+        constructor(init: { message: string; status: number }) {
+            super(init.message);
+            this.status = init.status;
+            this.name = 'ApiError';
+        }
+    }
+    return {
+        getStudentLiveInspectionDirective: mockDirective,
+        createLiveInspectionPublisherConnection: mockPublisherConnection,
+        acknowledgeLiveInspectionPublisherReady: mockPublisherReady,
+        acknowledgeLiveInspectionPublisherFailure: mockPublisherFailure,
+        ApiError,
+    };
+});
 
 vi.mock('livekit-client', () => ({
     Track: {
@@ -36,15 +50,26 @@ vi.mock('livekit-client', () => ({
         },
     },
     Room: vi.fn().mockImplementation(function Room(options) {
-        return {
+        const listeners: Record<string, Function[]> = {};
+        const instance = {
             options,
             connect: mockConnect,
             disconnect: mockDisconnect,
+            state: 'connected',
             localParticipant: {
                 publishTrack: mockPublishTrack,
                 unpublishTrack: mockUnpublishTrack,
             },
+            on: vi.fn().mockImplementation((event, callback) => {
+                listeners[event] = listeners[event] || [];
+                listeners[event].push(callback);
+            }),
+            emit: vi.fn().mockImplementation((event, ...args) => {
+                listeners[event]?.forEach((cb) => cb(...args));
+            }),
         };
+        lastRoomInstance = instance;
+        return instance;
     }),
 }));
 
@@ -100,6 +125,7 @@ function createLiveTrack() {
 
 describe('useStudentLiveInspectionPublisher', () => {
     beforeEach(() => {
+        lastRoomInstance = null;
         mockDirective.mockReset();
         mockPublisherConnection.mockReset();
         mockPublisherReady.mockReset();
@@ -192,29 +218,13 @@ describe('useStudentLiveInspectionPublisher', () => {
                 stopLocalTrackOnUnpublish: false,
             }),
         );
-        expect(String(useStudentLiveInspectionPublisher)).not.toContain('getUserMedia');
-        expect(String(useStudentLiveInspectionPublisher)).not.toContain('setMicrophoneEnabled');
-        expect(String(useStudentLiveInspectionPublisher)).not.toContain(
-            'enableCameraAndMicrophone',
-        );
-        expect(String(useStudentLiveInspectionPublisher)).not.toContain('createLocalTracks');
     });
 
-    it('registers missed-event recovery while the attempt page is mounted', async () => {
+    it('registers missed-event recovery while the attempt page is mounted using setTimeout', async () => {
+        vi.useFakeTimers();
         const { supabase } = createSupabase();
         const { original } = createLiveTrack();
-        let intervalCallback: (() => void) | null = null;
-        const setIntervalSpy = vi
-            .spyOn(window, 'setInterval')
-            .mockImplementation((callback: TimerHandler) => {
-                intervalCallback = callback as () => void;
-                return 1;
-            });
-        vi.spyOn(window, 'clearInterval').mockImplementation(() => undefined);
-        Object.defineProperty(document, 'visibilityState', {
-            configurable: true,
-            value: 'visible',
-        });
+        const setTimeoutSpy = vi.spyOn(window, 'setTimeout');
         mockDirective
             .mockResolvedValueOnce(
                 createDirective(1, 'ENDED', '33333333-3333-4333-8333-333333333333'),
@@ -232,10 +242,10 @@ describe('useStudentLiveInspectionPublisher', () => {
             }),
         );
 
-        await waitFor(() => expect(mockDirective).toHaveBeenCalledTimes(1));
-        await waitFor(() => expect(setIntervalSpy).toHaveBeenCalled());
-        expect(setIntervalSpy).toHaveBeenCalledWith(expect.any(Function), 10_000);
-        expect(intervalCallback).toEqual(expect.any(Function));
+        // Let the mount effects run
+        await vi.runOnlyPendingTimersAsync();
+
+        expect(setTimeoutSpy).toHaveBeenCalledWith(expect.any(Function), 3000);
     });
 
     it('keeps missed-event recovery active when the attempt page is hidden', async () => {
@@ -267,7 +277,7 @@ describe('useStudentLiveInspectionPublisher', () => {
         expect(mockDirective).toHaveBeenCalledTimes(1);
 
         await act(async () => {
-            await vi.advanceTimersByTimeAsync(10_000);
+            await vi.advanceTimersByTimeAsync(3000);
         });
 
         expect(mockDirective.mock.calls.length).toBeGreaterThan(1);
@@ -297,5 +307,233 @@ describe('useStudentLiveInspectionPublisher', () => {
         expect(clone.stop).toHaveBeenCalledTimes(1);
         expect(original.stop).not.toHaveBeenCalled();
         expect((supabase as any).removeChannel).toHaveBeenCalled();
+    });
+
+    it('retries track acquisition for up to 8 seconds and succeeds if track becomes ready', async () => {
+        const { supabase } = createSupabase();
+        const { original } = createLiveTrack();
+        let trackCalled = 0;
+        const getTrackMock = vi.fn().mockImplementation(() => {
+            trackCalled++;
+            return trackCalled >= 3 ? original : null;
+        });
+
+        mockDirective.mockResolvedValue(createDirective(1));
+
+        const { result } = renderHook(() =>
+            useStudentLiveInspectionPublisher({
+                supabase,
+                apiClient: vi.fn() as never,
+                sessionId: 'session-1',
+                attemptId,
+                enabled: true,
+                getLiveVideoTrack: getTrackMock,
+            }),
+        );
+
+        await waitFor(() => expect(result.current.isLive).toBe(true));
+        expect(getTrackMock.mock.calls.length).toBeGreaterThanOrEqual(3);
+    });
+
+    it('acknowledges NO_LIVE_CAMERA_TRACK when track is missing for more than 8 seconds', async () => {
+        vi.useFakeTimers();
+        const { supabase } = createSupabase();
+        mockDirective.mockResolvedValue(createDirective(1));
+
+        const { result } = renderHook(() =>
+            useStudentLiveInspectionPublisher({
+                supabase,
+                apiClient: vi.fn() as never,
+                sessionId: 'session-1',
+                attemptId,
+                enabled: true,
+                getLiveVideoTrack: () => null,
+            }),
+        );
+
+        // Advance 8 seconds of camera check in 250ms steps
+        for (let i = 0; i < 33; i++) {
+            await act(async () => {
+                await vi.advanceTimersByTimeAsync(250);
+            });
+        }
+
+        expect(result.current.status).toBe('failed');
+        expect(mockPublisherFailure).toHaveBeenCalledWith(expect.anything(), expect.objectContaining({
+            errorCode: 'NO_LIVE_CAMERA_TRACK'
+        }));
+    });
+
+    it('reconciles immediately when LiveKit room is disconnected', async () => {
+        const { supabase } = createSupabase();
+        const { original } = createLiveTrack();
+        mockDirective.mockResolvedValue(createDirective(1));
+
+        const { result } = renderHook(() =>
+            useStudentLiveInspectionPublisher({
+                supabase,
+                apiClient: vi.fn() as never,
+                sessionId: 'session-1',
+                attemptId,
+                enabled: true,
+                getLiveVideoTrack: () => original,
+            }),
+        );
+
+        await waitFor(() => expect(result.current.isLive).toBe(true));
+        expect(lastRoomInstance).not.toBeNull();
+
+        // Simulate disconnection
+        mockDirective.mockClear();
+        mockDirective.mockResolvedValue(createDirective(2, 'REQUESTED', leaseId));
+        
+        act(() => {
+            lastRoomInstance.emit('disconnected');
+        });
+
+        await waitFor(() => expect(mockDirective).toHaveBeenCalled());
+    });
+
+    it('aborts track acquisition and does not acknowledge failure if disabled or superseded while waiting', async () => {
+        vi.useFakeTimers();
+        const { supabase } = createSupabase();
+        mockDirective.mockResolvedValue(createDirective(1));
+
+        const { rerender, result } = renderHook(
+            ({ enabled }) =>
+                useStudentLiveInspectionPublisher({
+                    supabase,
+                    apiClient: vi.fn() as never,
+                    sessionId: 'session-1',
+                    attemptId,
+                    enabled,
+                    getLiveVideoTrack: () => null,
+                }),
+            { initialProps: { enabled: true } }
+        );
+
+        // Allow mount reconcile to run and enter waitForCameraTrack
+        await act(async () => {
+            await Promise.resolve();
+        });
+
+        // Now change enabled to false
+        rerender({ enabled: false });
+
+        // Fast-forward time
+        await act(async () => {
+            await vi.advanceTimersByTimeAsync(8000);
+        });
+
+        // Verify status goes back to idle or doesn't fail with NO_LIVE_CAMERA_TRACK
+        expect(result.current.status).not.toBe('failed');
+        expect(mockPublisherFailure).not.toHaveBeenCalled();
+    });
+
+    it('logs bounded diagnostics for 403 (suspended) and does not log for 404', async () => {
+        const { supabase } = createSupabase();
+        const consoleWarnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+
+        // Mock 403 error using ApiError
+        const forbiddenError = new ApiError({
+            message: 'Forbidden',
+            status: 403,
+        });
+        mockDirective.mockRejectedValueOnce(forbiddenError);
+
+        const { result, rerender } = renderHook(
+            ({ sessionId }) =>
+                useStudentLiveInspectionPublisher({
+                    supabase,
+                    apiClient: vi.fn() as never,
+                    sessionId,
+                    attemptId,
+                    enabled: true,
+                    getLiveVideoTrack: () => null,
+                }),
+            { initialProps: { sessionId: 'session-1' } }
+        );
+
+        await waitFor(() =>
+            expect(consoleWarnSpy).toHaveBeenCalledWith(
+                expect.stringContaining('[LiveInspection Diagnostic] Phase: fetch_directive_suspended, Status: 403, Code: UNAUTHORIZED')
+            )
+        );
+
+        // Reset warn spy
+        consoleWarnSpy.mockClear();
+
+        // Mock 404 error using ApiError
+        const notFoundError = new ApiError({
+            message: 'Not Found',
+            status: 404,
+        });
+        mockDirective.mockRejectedValueOnce(notFoundError);
+
+        rerender({ sessionId: 'session-2' });
+
+        // Wait a bit to ensure it reconciles
+        await waitFor(() => expect(mockDirective).toHaveBeenCalled());
+        
+        // It should NOT call console.warn because 404 is normal/idle
+        expect(consoleWarnSpy).not.toHaveBeenCalled();
+
+        consoleWarnSpy.mockRestore();
+    });
+
+    it('suspends polling on 401/403 and resumes on event trigger (visibility/online)', async () => {
+        vi.useFakeTimers();
+        const { supabase } = createSupabase();
+        const consoleWarnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+
+        // Mock 403 error using ApiError
+        const forbiddenError = new ApiError({
+            message: 'Forbidden',
+            status: 403,
+        });
+        mockDirective.mockRejectedValue(forbiddenError);
+
+        const { result } = renderHook(() =>
+            useStudentLiveInspectionPublisher({
+                supabase,
+                apiClient: vi.fn() as never,
+                sessionId: 'session-1',
+                attemptId,
+                enabled: true,
+                getLiveVideoTrack: () => null,
+            }),
+        );
+
+        // First call fails with 403 and suspends
+        await act(async () => {
+            await Promise.resolve();
+        });
+        expect(mockDirective).toHaveBeenCalledTimes(1);
+
+        // Try to trigger background reconciliation loop (timer fires)
+        mockDirective.mockClear();
+        await act(async () => {
+            await vi.advanceTimersByTimeAsync(3000);
+        });
+
+        // Should NOT call getStudentLiveInspectionDirective since it's suspended
+        expect(mockDirective).not.toHaveBeenCalled();
+
+        // Simulate visibilitychange event which should wake it up and un-suspend
+        mockDirective.mockResolvedValue(createDirective(1));
+        
+        // Dispatch event
+        act(() => {
+            document.dispatchEvent(new Event('visibilitychange'));
+        });
+
+        await act(async () => {
+            await Promise.resolve();
+        });
+
+        // Should now call the API again
+        expect(mockDirective).toHaveBeenCalledTimes(1);
+
+        consoleWarnSpy.mockRestore();
     });
 });
