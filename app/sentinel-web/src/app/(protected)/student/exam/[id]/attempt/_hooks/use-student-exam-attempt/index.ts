@@ -94,18 +94,22 @@ export function useStudentExamAttempt() {
         syncProgress,
     });
 
-    useExamInterruption({
-        examId,
-        sessionId: examSession?.sessionId,
-        isEnabled: !effectiveBlockedState.isBlocked && !uiHook.isRedirectingToTurnIn,
-    });
-
-
     const isRedirectingToHistory = useTurnedInExamRedirect({
         examId,
         status: exam?.status,
         attemptId: exam?.attemptId,
         runtimeAccess: exam?.runtimeAccess,
+    });
+
+    useExamInterruption({
+        examId,
+        sessionId: examSession?.sessionId,
+        isEnabled: !effectiveBlockedState.isBlocked && !uiHook.isRedirectingToTurnIn,
+        isNavigationCommitted:
+            uiHook.isRedirectingToTurnIn ||
+            isRedirectingToHistory ||
+            effectiveBlockedState.isBlocked,
+        onBeforeInterruption: () => saveAnswerDraft(answersHook.selectedAnswers, elapsedSeconds),
     });
 
     const effectiveConfiguration = useMemo(

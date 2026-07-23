@@ -61,6 +61,7 @@ describe('SessionRepository.createSession', () => {
             examId: 'exam-1',
             studentId: 'student-1',
             maxReconnectAttempts: 3,
+            resumeRequestId: '11111111-1111-4111-8111-111111111111',
         });
 
         expect(result).toMatchObject({
@@ -108,6 +109,7 @@ describe('SessionRepository.createSession', () => {
             examId: 'exam-1',
             studentId: 'student-1',
             maxReconnectAttempts: 3,
+            resumeRequestId: '22222222-2222-4222-8222-222222222222',
             accessOverride: {
                 id: 'override-1',
                 examId: 'exam-1',
@@ -199,6 +201,8 @@ describe('SessionRepository.createSession', () => {
         expect(result).toEqual({
             sessionId: 'attempt-retake',
             isResumed: false,
+            reconnectAttemptCount: 0,
+            maxReconnectAttempts: 0,
         });
         expect(insertBuilder.values).toHaveBeenCalledWith(
             expect.objectContaining({
@@ -282,11 +286,12 @@ describe('SessionRepository.createSession', () => {
                 examId: 'exam-1',
                 studentId: 'student-1',
                 maxReconnectAttempts: 3,
+                resumeRequestId: '33333333-3333-4333-8333-333333333333',
             }),
         ).rejects.toThrow('Maximum reconnect attempts reached for this exam session.');
     });
 
-    it('does not double-increment reconnect count for rapid duplicate resume submissions', async () => {
+    it('does not let a recent answer sync suppress a distinct reconnect', async () => {
         const updateBuilder = {
             set: vi.fn().mockReturnThis(),
             where: vi.fn().mockReturnThis(),
@@ -317,18 +322,107 @@ describe('SessionRepository.createSession', () => {
             examId: 'exam-1',
             studentId: 'student-1',
             maxReconnectAttempts: 3,
+            resumeRequestId: '44444444-4444-4444-8444-444444444444',
         });
 
         expect(result).toMatchObject({
             sessionId: 'attempt-rapid',
             isResumed: true,
-            reconnectAttemptCount: 1,
+            reconnectAttemptCount: 2,
         });
         expect(updateBuilder.set).toHaveBeenCalledWith(
             expect.objectContaining({
-                reconnect_attempt_count: 1,
+                reconnect_attempt_count: 2,
+            }),
+        );
+    });
+
+    it('skips incrementing reconnect_attempt_count if resumeRequestId matches last_reconnect_request_id', async () => {
+        const updateBuilder = {
+            set: vi.fn().mockReturnThis(),
+            where: vi.fn().mockReturnThis(),
+            execute: vi.fn().mockResolvedValue(undefined),
+        };
+        const dbClient = {
+            selectFrom: vi
+                .fn()
+                .mockReturnValueOnce(createRemediationSelect(undefined))
+                .mockReturnValueOnce(
+                    createExistingAttemptSelect({
+                        attempt_id: 'attempt-1',
+                        completed_at: null,
+                        status: 'IN_PROGRESS',
+                        lifecycle_state: 'IN_PROGRESS',
+                        reopened_until: null,
+                        created_at: new Date('2026-04-13T05:00:00.000Z'),
+                        answer_snapshot: { 'question-1': 'A' },
+                        time_spent_minutes: 4,
+                        reconnect_attempt_count: 1,
+                        last_reconnect_request_id: 'reconnect-req-123',
+                    }),
+                ),
+            updateTable: vi.fn().mockReturnValue(updateBuilder),
+        } as unknown as DbClient;
+
+        const result = await SessionRepository.createSession(dbClient, {
+            examId: 'exam-1',
+            studentId: 'student-1',
+            maxReconnectAttempts: 3,
+            resumeRequestId: 'reconnect-req-123',
+        });
+
+        expect(result).toMatchObject({
+            sessionId: 'attempt-1',
+            isResumed: true,
+            reconnectAttemptCount: 1,
+        });
+        expect(updateBuilder.set).not.toHaveBeenCalled();
+    });
+
+    it('increments reconnect_attempt_count and updates last_reconnect_request_id if resumeRequestId is different', async () => {
+        const updateBuilder = {
+            set: vi.fn().mockReturnThis(),
+            where: vi.fn().mockReturnThis(),
+            execute: vi.fn().mockResolvedValue(undefined),
+        };
+        const dbClient = {
+            selectFrom: vi
+                .fn()
+                .mockReturnValueOnce(createRemediationSelect(undefined))
+                .mockReturnValueOnce(
+                    createExistingAttemptSelect({
+                        attempt_id: 'attempt-1',
+                        completed_at: null,
+                        status: 'IN_PROGRESS',
+                        lifecycle_state: 'IN_PROGRESS',
+                        reopened_until: null,
+                        created_at: new Date('2026-04-13T05:00:00.000Z'),
+                        answer_snapshot: { 'question-1': 'A' },
+                        time_spent_minutes: 4,
+                        reconnect_attempt_count: 1,
+                        last_reconnect_request_id: 'reconnect-req-123',
+                    }),
+                ),
+            updateTable: vi.fn().mockReturnValue(updateBuilder),
+        } as unknown as DbClient;
+
+        const result = await SessionRepository.createSession(dbClient, {
+            examId: 'exam-1',
+            studentId: 'student-1',
+            maxReconnectAttempts: 3,
+            resumeRequestId: 'reconnect-req-456',
+        });
+
+        expect(result).toMatchObject({
+            sessionId: 'attempt-1',
+            isResumed: true,
+            reconnectAttemptCount: 2,
+        });
+        expect(updateBuilder.set).toHaveBeenCalledWith(
+            expect.objectContaining({
+                reconnect_attempt_count: 2,
+                last_reconnect_request_id: 'reconnect-req-456',
             }),
         );
     });
 });
-

@@ -106,5 +106,27 @@ describe('useStudentExamData', () => {
 
         expect(result.current.configQueryError).toBe(true);
     });
-});
 
+    it('does not block the flow on the configuration request when exam data includes configuration', () => {
+        mockUseExamQuery.mockReturnValue({
+            data: {
+                configuration: {
+                    lobbyAdmissionMode: 'AUTOMATIC',
+                    maxReconnectAttempts: 3,
+                },
+            },
+            isLoading: false,
+            isError: false,
+            refetch: vi.fn(),
+        });
+        mockUseExamConfigurationQuery.mockReturnValue({
+            data: null,
+            isLoading: true,
+            isError: false,
+        });
+
+        const { result } = renderHook(() => useStudentExamData());
+
+        expect(result.current.isLoading).toBe(false);
+    });
+});

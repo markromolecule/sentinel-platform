@@ -103,7 +103,7 @@ export type LiveInspectionFailureAck = z.infer<typeof liveInspectionFailureAckSc
 const TERMINAL_STATES = new Set<LiveInspectionState>(['ENDED', 'FAILED', 'EXPIRED']);
 
 const LIVE_INSPECTION_TRANSITIONS: Record<LiveInspectionState, LiveInspectionState[]> = {
-    REQUESTED: ['PUBLISHER_CONNECTING', 'FAILED', 'EXPIRED'],
+    REQUESTED: ['PUBLISHER_CONNECTING', 'FAILED', 'EXPIRED', 'STOPPING'],
     PUBLISHER_CONNECTING: ['PUBLISHER_READY', 'FAILED', 'EXPIRED', 'STOPPING'],
     PUBLISHER_READY: ['LIVE', 'FAILED', 'EXPIRED', 'STOPPING'],
     LIVE: ['STOPPING', 'FAILED', 'EXPIRED'],

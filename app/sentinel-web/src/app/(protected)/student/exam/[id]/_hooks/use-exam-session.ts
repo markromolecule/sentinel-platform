@@ -56,6 +56,13 @@ export function useExamSession({
     const [isInitializingSession, setIsInitializingSession] = useState(true);
     const [elapsedSeconds, setElapsedSeconds] = useState(0);
     const processedLobbyEntryExamIdRef = useRef<string | null>(null);
+    const onInitializeAnswersRef = useRef(onInitializeAnswers);
+    const onInitializeElapsedSecondsRef = useRef(onInitializeElapsedSeconds);
+
+    useEffect(() => {
+        onInitializeAnswersRef.current = onInitializeAnswers;
+        onInitializeElapsedSecondsRef.current = onInitializeElapsedSeconds;
+    }, [onInitializeAnswers, onInitializeElapsedSeconds]);
 
     useEffect(() => {
         return () => {
@@ -66,47 +73,30 @@ export function useExamSession({
     useEffect(() => {
         if (typeof window === 'undefined') return;
 
-        const isAttemptPage = window.location.pathname.endsWith('/attempt');
-
-        if (isAttemptPage && processedLobbyEntryExamIdRef.current === examId) {
-            return;
-        }
-
         const storedSession = readStoredExamSession(examId);
-        const consumedLobbyEntry = consumeStoredLobbyEntry(examId);
-
-        // Active attempt on attempt route MUST consume a valid, fresh lobby-entry token.
-        // Stored session presence alone is NOT an attempt-entry bypass.
-        if (isAttemptPage && !consumedLobbyEntry) {
-            writeStoredReconnectIntent(examId, storedSession?.sessionId, 'navigation');
-            replace(`/student/exam/${examId}/lobby`);
-            return;
-        }
-
-        if (isAttemptPage) {
-            processedLobbyEntryExamIdRef.current = examId;
-        }
 
         setExamSession(storedSession);
         const pendingTurnInPreview = readStoredExamTurnInPreview(examId);
 
         if (pendingTurnInPreview) {
-            onInitializeAnswers?.(pendingTurnInPreview.answers as Record<string, ExamAnswerValue>);
-            onInitializeElapsedSeconds?.(pendingTurnInPreview.elapsedSeconds);
+            onInitializeAnswersRef.current?.(
+                pendingTurnInPreview.answers as Record<string, ExamAnswerValue>,
+            );
+            onInitializeElapsedSecondsRef.current?.(pendingTurnInPreview.elapsedSeconds);
             setElapsedSeconds(pendingTurnInPreview.elapsedSeconds);
         } else if (storedSession?.sessionId) {
             const answerDraft = readStoredExamAnswerDraft(examId, storedSession.sessionId);
             const reconciled = reconcileExamAnswerDraft(answerDraft, null);
 
             if (reconciled.source !== 'empty') {
-                onInitializeAnswers?.(reconciled.answers);
-                onInitializeElapsedSeconds?.(reconciled.elapsedSeconds);
+                onInitializeAnswersRef.current?.(reconciled.answers);
+                onInitializeElapsedSecondsRef.current?.(reconciled.elapsedSeconds);
                 setElapsedSeconds(reconciled.elapsedSeconds);
             }
         }
 
         setIsInitializingSession(false);
-    }, [examId, onInitializeAnswers, onInitializeElapsedSeconds, replace]);
+    }, [examId]);
 
     useEffect(() => {
         if (!examDurationMinutes) {
@@ -119,103 +109,6 @@ export function useExamSession({
 
         return () => window.clearInterval(timerId);
     }, [examDurationMinutes]);
-
-    useEffect(() => {
-        if (isLoadingData || isInitializingSession) {
-            return;
-        }
-
-        if (runtimeAccess && !examSession && !runtimeAccess.canStart && !runtimeAccess.canResume) {
-            clearStoredExamSession(examId);
-            toast.error(runtimeAccess.message);
-            replace(`/student/exam/${examId}/lobby`);
-            return;
-        }
-    }, [examId, examSession, isInitializingSession, isLoadingData, replace, runtimeAccess]);
-
-    useEffect(() => {
-        if (isLoadingData || examSession || isInitializingSession || isSessionStartBlocked) {
-            return;
-        }
-
-        if (runtimeAccess && !runtimeAccess.canStart && !runtimeAccess.canResume) {
-            return;
-        }
-
-        const requestId = sessionStartRequestRef.current + 1;
-        sessionStartRequestRef.current = requestId;
-        setIsInitializingSession(true);
-
-        const initializeExamSession = async () => {
-            try {
-                const session = await startExamSession(apiClient, { examId });
-                const storedSession = writeStoredExamSession(examId, session);
-
-                if (!storedSession) {
-                    throw new Error('Exam session could not be initialized.');
-                }
-
-                if (session.answers) {
-                    writeStoredExamAnswerDraft({
-                        examId,
-                        sessionId: storedSession.sessionId,
-                        answers: session.answers as Record<string, ExamAnswerValue>,
-                        elapsedSeconds: session.elapsedSeconds ?? 0,
-                    });
-                }
-
-                if (isMountedRef.current && sessionStartRequestRef.current === requestId) {
-                    setExamSession(storedSession);
-
-                    if (session.answers) {
-                        const restoredAnswers = session.answers as Record<string, ExamAnswerValue>;
-                        const restoredElapsedSeconds = session.elapsedSeconds ?? 0;
-
-                        onInitializeAnswers?.(restoredAnswers);
-                        onInitializeElapsedSeconds?.(restoredElapsedSeconds);
-                        setElapsedSeconds(restoredElapsedSeconds);
-                    }
-                }
-            } catch (error) {
-                if (!isMountedRef.current || sessionStartRequestRef.current !== requestId) {
-                    return;
-                }
-
-                if (isStudentExamAlreadyTurnedInError(error)) {
-                    const attemptId = getStudentExamSessionAttemptId(error);
-
-                    clearStoredExamTurnInPreview(examId);
-                    clearStoredExamSession(examId);
-
-                    if (attemptId) {
-                        replace(buildStudentHistoryAttemptHref(attemptId));
-                        return;
-                    }
-                }
-
-                toast.error(resolveStudentExamSessionError(error));
-                clearStoredExamSession(examId);
-                replace(`/student/exam/${examId}/lobby`);
-            } finally {
-                if (isMountedRef.current && sessionStartRequestRef.current === requestId) {
-                    setIsInitializingSession(false);
-                }
-            }
-        };
-
-        void initializeExamSession();
-    }, [
-        apiClient,
-        examId,
-        examSession,
-        isInitializingSession,
-        isLoadingData,
-        isSessionStartBlocked,
-        onInitializeAnswers,
-        onInitializeElapsedSeconds,
-        replace,
-        runtimeAccess,
-    ]);
 
     const secondsRemaining = Math.max((examDurationMinutes ?? 0) * 60 - elapsedSeconds, 0);
 

@@ -1,64 +1,25 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { Room, Track } from 'livekit-client';
 import type { RealtimeChannel } from '@supabase/supabase-js';
 import type { LiveInspectionDirective, LiveInspectionState } from '@sentinel/shared/schema';
+import { getStudentLiveInspectionDirective, ApiError } from '@sentinel/services';
+import { useStudentLiveInspectionPublication } from './use-student-live-inspection-publication';
 import {
-    acknowledgeLiveInspectionPublisherFailure,
-    acknowledgeLiveInspectionPublisherReady,
-    createLiveInspectionPublisherConnection,
-    getStudentLiveInspectionDirective,
-    type ApiClientType,
-} from '@sentinel/services';
-import type { SentinelSupabaseClient } from '../auth-provider';
+    StudentLiveInspectionPublisherStatus,
+    UseStudentLiveInspectionPublisherArgs,
+} from './use-student-live-inspection-publisher.types';
 import {
-    cloneCameraTrackForLiveInspection,
-    stopClonedInspectionTrack,
-} from './live-inspection-room.utils';
+    isNewerDirective,
+    logLocalDiagnostic,
+    useLatestRef,
+} from './use-student-live-inspection-publisher.helpers';
+
+// Re-export types for consumer backwards compatibility
+export * from './use-student-live-inspection-publisher.types';
 
 const LIVE_INSPECTION_SIGNAL_EVENT = 'LIVE_INSPECTION_CHANGED';
-const RECONCILE_INTERVAL_MS = 10_000;
 const TERMINAL_STATES = new Set<LiveInspectionState>(['ENDED', 'FAILED', 'EXPIRED']);
-
-export type StudentLiveInspectionPublisherStatus =
-    'idle' | 'requested' | 'connecting' | 'live' | 'failed';
-
-export type StudentLiveInspectionPublisherFailureCode =
-    | 'NO_LIVE_CAMERA_TRACK'
-    | 'LIVEKIT_CONNECT_FAILED'
-    | 'LIVEKIT_PUBLISH_FAILED'
-    | 'LIVEKIT_RUNTIME_LOST';
-
-export type UseStudentLiveInspectionPublisherArgs = {
-    supabase: SentinelSupabaseClient | null;
-    apiClient: ApiClientType;
-    sessionId: string | null | undefined;
-    attemptId: string | null | undefined;
-    enabled: boolean;
-    getLiveVideoTrack: () => MediaStreamTrack | null;
-    onStatusChange?: (status: StudentLiveInspectionPublisherStatus) => void;
-    onFailure?: (code: StudentLiveInspectionPublisherFailureCode) => void;
-};
-
-type ActivePublication = {
-    leaseId: string;
-    revision: number;
-    room: Room;
-    clonedTrack: MediaStreamTrack;
-};
-
-function isNewerDirective(
-    directive: LiveInspectionDirective,
-    currentLeaseId: string | null,
-    currentRevision: number,
-) {
-    return (
-        directive.leaseId !== currentLeaseId ||
-        directive.revision >= currentRevision ||
-        TERMINAL_STATES.has(directive.state)
-    );
-}
 
 /**
  * Publishes the student's existing MediaPipe camera track to LiveKit only after
@@ -74,132 +35,63 @@ export function useStudentLiveInspectionPublisher({
     onStatusChange,
     onFailure,
 }: UseStudentLiveInspectionPublisherArgs) {
+    // ------------------------------------------------------------------------
+    // 1. Stable Callback & Prop References
+    // ------------------------------------------------------------------------
+    const onStatusChangeRef = useLatestRef(onStatusChange);
+    const apiClientRef = useLatestRef(apiClient);
+
+    // ------------------------------------------------------------------------
+    // 2. State & Refs Initialization
+    // ------------------------------------------------------------------------
     const [status, setStatus] = useState<StudentLiveInspectionPublisherStatus>('idle');
-    const [activeLeaseId, setActiveLeaseId] = useState<string | null>(null);
-    const activePublicationRef = useRef<ActivePublication | null>(null);
-    const currentLeaseIdRef = useRef<string | null>(null);
-    const currentRevisionRef = useRef(0);
+
     const requestSequenceRef = useRef(0);
     const isMountedRef = useRef(false);
+    const reconcileTimerRef = useRef<any>(null);
+    const isReconcilingRef = useRef(false);
+    const statusRef = useRef<StudentLiveInspectionPublisherStatus>('idle');
+    const isSuspendedRef = useRef(false);
 
     const setPublisherStatus = useCallback(
         (nextStatus: StudentLiveInspectionPublisherStatus) => {
+            statusRef.current = nextStatus;
             setStatus(nextStatus);
-            onStatusChange?.(nextStatus);
+            onStatusChangeRef.current?.(nextStatus);
         },
-        [onStatusChange],
+        []
     );
 
-    const cleanupPublication = useCallback(() => {
-        const publication = activePublicationRef.current;
-        if (!publication) {
-            return;
-        }
-
-        activePublicationRef.current = null;
-        try {
-            publication.room.localParticipant.unpublishTrack(publication.clonedTrack, false);
-        } catch {
-            // Best-effort browser cleanup; the authoritative lease state is handled by the API.
-        }
-        stopClonedInspectionTrack(publication.clonedTrack);
-        publication.room.disconnect();
-        setActiveLeaseId(null);
-    }, []);
-
-    const acknowledgeFailure = useCallback(
-        async (
-            directive: LiveInspectionDirective,
-            errorCode: StudentLiveInspectionPublisherFailureCode,
-        ) => {
-            onFailure?.(errorCode);
-            setPublisherStatus('failed');
-            try {
-                await acknowledgeLiveInspectionPublisherFailure(apiClient, {
-                    sessionId: sessionId ?? '',
-                    leaseId: directive.leaseId,
-                    revision: directive.revision,
-                    errorCode,
-                });
-            } catch {
-                // A stale/terminal lease may reject the failure acknowledgement; do not retry with tokens.
-            }
+    // ------------------------------------------------------------------------
+    // 3. Delegate publication actions and state to sub-hook
+    // ------------------------------------------------------------------------
+    const {
+        activeLeaseId,
+        activePublicationRef,
+        currentLeaseIdRef,
+        currentRevisionRef,
+        cleanupPublication,
+        startPublication,
+    } = useStudentLiveInspectionPublication({
+        apiClient,
+        sessionId,
+        enabled,
+        getLiveVideoTrack,
+        requestSequenceRef,
+        isMountedRef,
+        statusRef,
+        setPublisherStatus,
+        onFailure,
+        runReconcileNow: async () => {
+            await runReconcileNow();
         },
-        [apiClient, onFailure, sessionId, setPublisherStatus],
-    );
+    });
 
-    const startPublication = useCallback(
-        async (directive: LiveInspectionDirective, sequence: number) => {
-            if (!sessionId || activePublicationRef.current?.leaseId === directive.leaseId) {
-                return;
-            }
-
-            setPublisherStatus('connecting');
-            const originalTrack = getLiveVideoTrack();
-            const clonedTrack = cloneCameraTrackForLiveInspection(originalTrack);
-
-            if (!clonedTrack) {
-                await acknowledgeFailure(directive, 'NO_LIVE_CAMERA_TRACK');
-                return;
-            }
-
-            let room: Room | null = null;
-
-            try {
-                const credentials = await createLiveInspectionPublisherConnection(apiClient, {
-                    sessionId,
-                    leaseId: directive.leaseId,
-                    revision: directive.revision,
-                });
-
-                if (sequence !== requestSequenceRef.current || !isMountedRef.current) {
-                    stopClonedInspectionTrack(clonedTrack);
-                    return;
-                }
-
-                room = new Room({ dynacast: true });
-                await room.connect(credentials.liveKitUrl, credentials.token, {
-                    autoSubscribe: false,
-                });
-                await room.localParticipant.publishTrack(clonedTrack, {
-                    source: Track.Source.Camera,
-                    stopLocalTrackOnUnpublish: false,
-                } as Parameters<Room['localParticipant']['publishTrack']>[1]);
-
-                activePublicationRef.current = {
-                    leaseId: directive.leaseId,
-                    revision: credentials.revision,
-                    room,
-                    clonedTrack,
-                };
-                currentRevisionRef.current = credentials.revision;
-                setActiveLeaseId(directive.leaseId);
-
-                await acknowledgeLiveInspectionPublisherReady(apiClient, {
-                    sessionId,
-                    leaseId: directive.leaseId,
-                    revision: credentials.revision,
-                });
-
-                if (sequence === requestSequenceRef.current && isMountedRef.current) {
-                    setPublisherStatus('live');
-                }
-            } catch {
-                if (room) {
-                    room.disconnect();
-                }
-                stopClonedInspectionTrack(clonedTrack);
-                await acknowledgeFailure(
-                    directive,
-                    room ? 'LIVEKIT_PUBLISH_FAILED' : 'LIVEKIT_CONNECT_FAILED',
-                );
-            }
-        },
-        [acknowledgeFailure, apiClient, getLiveVideoTrack, sessionId, setPublisherStatus],
-    );
-
+    // ------------------------------------------------------------------------
+    // 4. Directive Reconciliation
+    // ------------------------------------------------------------------------
     const reconcile = useCallback(async () => {
-        if (!enabled || !sessionId) {
+        if (!enabled || !sessionId || isSuspendedRef.current) {
             return;
         }
 
@@ -207,10 +99,30 @@ export function useStudentLiveInspectionPublisher({
         let directive: LiveInspectionDirective;
 
         try {
-            directive = await getStudentLiveInspectionDirective(apiClient, { sessionId });
-        } catch {
-            if (!activePublicationRef.current) {
-                setPublisherStatus('idle');
+            directive = await getStudentLiveInspectionDirective(apiClientRef.current, {
+                sessionId,
+            });
+        } catch (error) {
+            const isApiError = error instanceof ApiError;
+            const status = isApiError ? error.status : undefined;
+
+            if (status === 401 || status === 403) {
+                isSuspendedRef.current = true;
+                logLocalDiagnostic('fetch_directive_suspended', error);
+                if (!activePublicationRef.current) {
+                    setPublisherStatus('idle');
+                }
+            } else if (status === 404) {
+                // 404 means no active directive, which is normal.
+                // Do not treat as an error or log diagnostic.
+                if (!activePublicationRef.current) {
+                    setPublisherStatus('idle');
+                }
+            } else {
+                logLocalDiagnostic('fetch_directive', error);
+                if (!activePublicationRef.current) {
+                    setPublisherStatus('idle');
+                }
             }
             return;
         }
@@ -219,7 +131,23 @@ export function useStudentLiveInspectionPublisher({
             return;
         }
 
-        if (!isNewerDirective(directive, currentLeaseIdRef.current, currentRevisionRef.current)) {
+        const isRoomDisconnected =
+            activePublicationRef.current?.room &&
+            activePublicationRef.current.room.state === 'disconnected';
+
+        const isAlreadyConnecting =
+            (statusRef.current === 'connecting' || statusRef.current === 'requested') &&
+            directive.leaseId === currentLeaseIdRef.current &&
+            directive.revision === currentRevisionRef.current;
+
+        if (isAlreadyConnecting && !isRoomDisconnected) {
+            return;
+        }
+
+        if (
+            !isNewerDirective(directive, currentLeaseIdRef.current, currentRevisionRef.current) &&
+            !isRoomDisconnected
+        ) {
             return;
         }
 
@@ -241,22 +169,72 @@ export function useStudentLiveInspectionPublisher({
         if (directive.state === 'PUBLISHER_READY' || directive.state === 'LIVE') {
             setPublisherStatus(activePublicationRef.current ? 'live' : 'idle');
         }
-    }, [apiClient, cleanupPublication, enabled, sessionId, setPublisherStatus, startPublication]);
+    }, [cleanupPublication, enabled, sessionId, setPublisherStatus, startPublication]);
 
+    // ------------------------------------------------------------------------
+    // 5. Scheduling Helpers
+    // ------------------------------------------------------------------------
+    const scheduleReconcile = useCallback(() => {
+        if (reconcileTimerRef.current) {
+            window.clearTimeout(reconcileTimerRef.current);
+        }
+        if (!enabled || !sessionId || !isMountedRef.current) {
+            return;
+        }
+        reconcileTimerRef.current = window.setTimeout(async () => {
+            if (isReconcilingRef.current) {
+                scheduleReconcile();
+                return;
+            }
+            isReconcilingRef.current = true;
+            try {
+                await reconcile();
+            } finally {
+                isReconcilingRef.current = false;
+                scheduleReconcile();
+            }
+        }, 3000);
+    }, [enabled, sessionId, reconcile]);
+
+    const runReconcileNow = useCallback(async () => {
+        isSuspendedRef.current = false;
+        if (!isMountedRef.current || !enabled || !sessionId) return;
+        if (isReconcilingRef.current) return;
+        isReconcilingRef.current = true;
+        try {
+            await reconcile();
+        } finally {
+            isReconcilingRef.current = false;
+            scheduleReconcile();
+        }
+    }, [enabled, sessionId, reconcile, scheduleReconcile]);
+
+    // ------------------------------------------------------------------------
+    // 6. Lifecycle & Event Effects
+    // ------------------------------------------------------------------------
     useEffect(() => {
         isMountedRef.current = true;
+        isSuspendedRef.current = false;
 
         return () => {
             isMountedRef.current = false;
             requestSequenceRef.current += 1;
             cleanupPublication();
+            if (reconcileTimerRef.current) {
+                window.clearTimeout(reconcileTimerRef.current);
+            }
         };
     }, [cleanupPublication]);
 
     useEffect(() => {
         if (!enabled || !sessionId || !attemptId || !supabase) {
+            requestSequenceRef.current += 1;
             cleanupPublication();
             setPublisherStatus('idle');
+            isSuspendedRef.current = false;
+            if (reconcileTimerRef.current) {
+                window.clearTimeout(reconcileTimerRef.current);
+            }
             return;
         }
 
@@ -267,25 +245,24 @@ export function useStudentLiveInspectionPublisher({
 
         channel
             .on('broadcast', { event: LIVE_INSPECTION_SIGNAL_EVENT }, () => {
-                void reconcile();
+                void runReconcileNow();
             })
             .subscribe();
 
-        void reconcile();
-
-        const intervalId = window.setInterval(() => {
-            void reconcile();
-        }, RECONCILE_INTERVAL_MS);
+        void runReconcileNow();
 
         const handleVisibilityOrReconnect = () => {
-            void reconcile();
+            void runReconcileNow();
         };
 
         document.addEventListener('visibilitychange', handleVisibilityOrReconnect);
         window.addEventListener('online', handleVisibilityOrReconnect);
 
         return () => {
-            window.clearInterval(intervalId);
+            requestSequenceRef.current += 1;
+            if (reconcileTimerRef.current) {
+                window.clearTimeout(reconcileTimerRef.current);
+            }
             document.removeEventListener('visibilitychange', handleVisibilityOrReconnect);
             window.removeEventListener('online', handleVisibilityOrReconnect);
             void supabase.removeChannel(channel);
@@ -295,7 +272,7 @@ export function useStudentLiveInspectionPublisher({
         attemptId,
         cleanupPublication,
         enabled,
-        reconcile,
+        runReconcileNow,
         sessionId,
         setPublisherStatus,
         supabase,

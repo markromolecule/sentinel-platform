@@ -1,15 +1,20 @@
 import { cleanup, render, screen } from '@testing-library/react';
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { ExamSessionNav } from './exam-session-nav';
 
 const mockPathname = vi.hoisted(() => vi.fn());
 const mockSearchParams = vi.hoisted(() => ({
     get: vi.fn(),
 }));
+const mockUseExamQuery = vi.hoisted(() => vi.fn());
 
 vi.mock('next/navigation', () => ({
     usePathname: () => mockPathname(),
     useSearchParams: () => mockSearchParams,
+}));
+
+vi.mock('@sentinel/hooks', () => ({
+    useExamQuery: (id?: string) => mockUseExamQuery(id),
 }));
 
 afterEach(() => {
@@ -18,6 +23,9 @@ afterEach(() => {
 });
 
 describe('ExamSessionNav', () => {
+    beforeEach(() => {
+        mockUseExamQuery.mockReturnValue({ data: { status: 'in-progress' } });
+    });
     it('renders all runtime access links for the current exam', () => {
         mockPathname.mockReturnValue('/exams/exam-1/lobby');
         mockSearchParams.get.mockReturnValue(null);
@@ -116,9 +124,10 @@ describe('ExamSessionNav', () => {
         expect(activeLink.className).toContain('border-r-2');
     });
 
-    it('filters out Lobby and Monitoring, and updates Incident Logs href on report routes', () => {
+    it('filters out Lobby and Monitoring, and updates Incident Logs href on report routes when completed', () => {
         mockPathname.mockReturnValue('/exams/reports/exam-1');
         mockSearchParams.get.mockReturnValue(null);
+        mockUseExamQuery.mockReturnValue({ data: { status: 'completed' } });
 
         render(<ExamSessionNav examId="exam-1" />);
 
@@ -137,6 +146,17 @@ describe('ExamSessionNav', () => {
         expect(screen.getByRole('link', { name: 'Incident Logs' }).getAttribute('href')).toBe(
             '/exams/reports/exam-1?section=logs',
         );
+    });
+
+    it('does not filter out Lobby and Monitoring on report routes when the exam is active', () => {
+        mockPathname.mockReturnValue('/exams/reports/exam-1');
+        mockSearchParams.get.mockReturnValue(null);
+        mockUseExamQuery.mockReturnValue({ data: { status: 'in-progress' } });
+
+        render(<ExamSessionNav examId="exam-1" />);
+
+        expect(screen.getByRole('link', { name: 'Lobby' })).toBeTruthy();
+        expect(screen.getByRole('link', { name: 'Monitoring' })).toBeTruthy();
     });
 
     it('marks Attempt Summary active on detailed attempt routes', () => {

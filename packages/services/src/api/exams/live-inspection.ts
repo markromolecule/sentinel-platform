@@ -11,6 +11,7 @@ import type { ApiExamResponse } from './types';
 export type StartLiveInspectionPayload = {
     examId: string;
     attemptId: string;
+    restart?: boolean;
 };
 
 export type LiveInspectionLeasePayload = {
@@ -43,7 +44,7 @@ export async function startLiveInspection(
         {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ attemptId: payload.attemptId }),
+            body: JSON.stringify({ attemptId: payload.attemptId, restart: payload.restart }),
         },
     );
 

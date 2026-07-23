@@ -1,0 +1,128 @@
+import { type DbClient } from '@sentinel/db';
+import type { ExamAttemptAnswers } from '@sentinel/shared/types';
+
+// ---------------------------------------------------------------------------
+// Insert
+// ---------------------------------------------------------------------------
+
+/**
+ * Inserts a brand-new IN_PROGRESS attempt row for a student.
+ * Returns the generated attempt_id or undefined if the insert fails.
+ */
+export async function insertNewAttempt(db: DbClient, examId: string, studentId: string) {
+    return await db
+        .insertInto('exam_attempts')
+        .values({
+            exam_id: examId,
+            student_id: studentId,
+            status: 'IN_PROGRESS',
+            lifecycle_state: 'IN_PROGRESS',
+            started_at: new Date(),
+            created_at: new Date(),
+            time_spent_minutes: 0,
+            reconnect_attempt_count: 0,
+            is_verified: false,
+        })
+        .returning('attempt_id')
+        .executeTakeFirst();
+}
+
+// ---------------------------------------------------------------------------
+// Update – resume
+// ---------------------------------------------------------------------------
+
+/**
+ * Updates reconnect counters and lifecycle state when a student resumes an existing attempt.
+ */
+export async function updateResumedAttempt(
+    db: DbClient,
+    attemptId: string,
+    nextReconnectCount: number,
+    resumeRequestId: string | null | undefined,
+    existingReconnectRequestId: string | null | undefined,
+) {
+    return await db
+        .updateTable('exam_attempts')
+        .set({
+            reconnect_attempt_count: nextReconnectCount,
+            last_reconnect_request_id: resumeRequestId ?? existingReconnectRequestId,
+            lifecycle_state: 'IN_PROGRESS',
+        })
+        .where('attempt_id', '=', attemptId)
+        .execute();
+}
+
+// ---------------------------------------------------------------------------
+// Update – complete
+// ---------------------------------------------------------------------------
+
+/**
+ * Marks an attempt as fully completed, writing the final score and answer snapshot.
+ */
+export async function completeAttempt(
+    db: DbClient,
+    args: {
+        sessionId: string;
+        score: number;
+        totalScore: number;
+        timeSpentMinutes: number;
+        answeredCount: number;
+        answers: ExamAttemptAnswers;
+    },
+) {
+    return await db
+        .updateTable('exam_attempts')
+        .set({
+            score: args.score,
+            total_score: args.totalScore,
+            time_spent_minutes: args.timeSpentMinutes,
+            answered_question_count: args.answeredCount,
+            answer_snapshot: args.answers as unknown,
+            last_synced_at: new Date(),
+            completed_at: new Date(),
+            status: 'COMPLETED',
+            lifecycle_state: 'SUBMITTED',
+            score_state: 'DRAFT',
+        })
+        .where('attempt_id', '=', args.sessionId)
+        .returning(['attempt_id', 'completed_at'])
+        .executeTakeFirst();
+}
+
+// ---------------------------------------------------------------------------
+// Update – sync progress
+// ---------------------------------------------------------------------------
+
+/**
+ * Persists in-progress answer/time sync without marking the attempt as complete.
+ */
+export async function syncAttemptProgress(
+    db: DbClient,
+    args: {
+        sessionId: string;
+        answeredCount: number;
+        timeSpentMinutes: number;
+        answers?: ExamAttemptAnswers;
+    },
+) {
+    const updateValues: {
+        answered_question_count: number;
+        time_spent_minutes: number;
+        answer_snapshot?: unknown;
+        last_synced_at: Date;
+    } = {
+        answered_question_count: args.answeredCount,
+        time_spent_minutes: args.timeSpentMinutes,
+        last_synced_at: new Date(),
+    };
+
+    if (args.answers) {
+        updateValues.answer_snapshot = args.answers as unknown;
+    }
+
+    return await db
+        .updateTable('exam_attempts')
+        .set(updateValues)
+        .where('attempt_id', '=', args.sessionId)
+        .execute();
+}

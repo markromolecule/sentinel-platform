@@ -12,8 +12,13 @@ export class FlowService {
     /**
      * Verifies student exam eligibility, initializes attempt session, and logs telemetry.
      */
-    static async startSession(db: DbClient, studentId: string, examId: string) {
-        return startSessionService({ dbClient: db, studentId, examId });
+    static async startSession(
+        db: DbClient,
+        studentId: string,
+        examId: string,
+        resumeRequestId?: string | null,
+    ) {
+        return startSessionService({ dbClient: db, studentId, examId, resumeRequestId });
     }
 
     /**

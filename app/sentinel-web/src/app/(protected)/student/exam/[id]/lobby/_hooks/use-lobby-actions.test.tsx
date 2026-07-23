@@ -13,6 +13,7 @@ const {
     mockWriteStoredLobbyEntryMarker,
     mockClearStoredExamSession,
     mockClearStoredExamTurnInPreview,
+    mockWriteStoredReconnectIntent,
     mockGetStudentExamSessionAttemptId,
     mockIsStudentExamAlreadyTurnedInError,
 } = vi.hoisted(() => ({
@@ -26,6 +27,7 @@ const {
     mockWriteStoredLobbyEntryMarker: vi.fn(),
     mockClearStoredExamSession: vi.fn(),
     mockClearStoredExamTurnInPreview: vi.fn(),
+    mockWriteStoredReconnectIntent: vi.fn(),
     mockGetStudentExamSessionAttemptId: vi.fn(),
     mockIsStudentExamAlreadyTurnedInError: vi.fn(() => false),
 }));
@@ -59,6 +61,8 @@ vi.mock('../../_lib/exam-session-storage', () => ({
     writeStoredLobbyEntryMarker: (...args: unknown[]) => mockWriteStoredLobbyEntryMarker(...args),
     writeStoredLobbyEntry: vi.fn(),
     clearStoredReconnectIntent: vi.fn(),
+    readStoredReconnectIntent: vi.fn(),
+    writeStoredReconnectIntent: (...args: unknown[]) => mockWriteStoredReconnectIntent(...args),
     reconcileExamAnswerDraft: vi.fn((local, server) => ({
         answers: server?.answers ?? local?.answers ?? {},
         elapsedSeconds: server?.elapsedSeconds ?? local?.elapsedSeconds ?? 0,
@@ -114,6 +118,9 @@ describe('useLobbyActions', () => {
         mockUseApi.mockReturnValue({ api: true });
         mockGetStudentExamSessionAttemptId.mockReturnValue(null);
         mockIsStudentExamAlreadyTurnedInError.mockReturnValue(false);
+        mockWriteStoredReconnectIntent.mockReturnValue({
+            resumeRequestId: '11111111-1111-4111-8111-111111111111',
+        });
     });
 
     it('does not start a session when current access cannot enter the exam', async () => {
@@ -209,9 +216,16 @@ describe('useLobbyActions', () => {
             await result.current.handleEnterExam();
         });
 
-        expect(mockStartExamSession).toHaveBeenCalledWith(expect.anything(), { examId: 'exam-1' });
+        expect(mockWriteStoredReconnectIntent).toHaveBeenCalledWith(
+            'exam-1',
+            'session-resumed',
+            'navigation',
+        );
+        expect(mockStartExamSession).toHaveBeenCalledWith(expect.anything(), {
+            examId: 'exam-1',
+            resumeRequestId: '11111111-1111-4111-8111-111111111111',
+        });
         expect(mockWriteStoredExamSession).toHaveBeenCalledWith('exam-1', sessionResult);
         expect(mockRouterPush).toHaveBeenCalledWith('/student/exam/exam-1/attempt');
     });
 });
-

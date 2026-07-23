@@ -654,6 +654,7 @@ export type exam_attempts = {
     answer_snapshot: unknown | null;
     last_synced_at: Timestamp | null;
     reconnect_attempt_count: Generated<number | null>;
+    last_reconnect_request_id: string | null;
     lifecycle_state: Generated<exam_attempt_lifecycle_state | null>;
     lifecycle_reason: string | null;
     lifecycle_note: string | null;

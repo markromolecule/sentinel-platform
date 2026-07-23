@@ -1,12 +1,5 @@
-import {
-    buildExamLobbyEntryStorageKey,
-    buildExamReconnectIntentStorageKey,
-} from './constants';
-import type {
-    ReconnectReason,
-    StoredLobbyEntryRecord,
-    StoredReconnectIntentRecord,
-} from './types';
+import { buildExamLobbyEntryStorageKey, buildExamReconnectIntentStorageKey } from './constants';
+import type { ReconnectReason, StoredLobbyEntryRecord, StoredReconnectIntentRecord } from './types';
 
 const LOBBY_ENTRY_EXPIRY_MS = 15 * 60 * 1000; // 15 minutes
 const RECONNECT_INTENT_EXPIRY_MS = 15 * 60 * 1000; // 15 minutes
@@ -119,11 +112,15 @@ export function writeStoredReconnectIntent(
         return null;
     }
 
+    const existing = readStoredReconnectIntent(examId);
+    const resumeRequestId = existing?.resumeRequestId || crypto.randomUUID();
+
     const record: StoredReconnectIntentRecord = {
         version: 1,
         examId,
         sessionId,
         reason,
+        resumeRequestId,
         createdAt: new Date().toISOString(),
     };
 
@@ -151,7 +148,9 @@ export function readStoredReconnectIntent(examId: string): StoredReconnectIntent
         if (
             record.version !== 1 ||
             record.examId !== examId ||
-            typeof record.createdAt !== 'string'
+            typeof record.createdAt !== 'string' ||
+            typeof record.resumeRequestId !== 'string' ||
+            !isUuid(record.resumeRequestId)
         ) {
             window.sessionStorage.removeItem(key);
             return null;
@@ -171,6 +170,10 @@ export function readStoredReconnectIntent(examId: string): StoredReconnectIntent
         window.sessionStorage.removeItem(key);
         return null;
     }
+}
+
+function isUuid(value: string) {
+    return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value);
 }
 
 /**
@@ -198,4 +201,3 @@ export function writeStoredLobbyEntryMarker(examId: string) {
 export function clearStoredLobbyEntryMarker(examId: string) {
     clearStoredLobbyEntry(examId);
 }
-

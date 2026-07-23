@@ -3,6 +3,7 @@
 import type { ReactNode } from 'react';
 import { useParams, usePathname } from 'next/navigation';
 import { Separator } from '@sentinel/ui';
+import { useExamQuery } from '@sentinel/hooks';
 import { ExamSessionNav } from './exam-session-nav';
 
 type ExamSessionWorkspaceShellProps = {
@@ -34,12 +35,16 @@ export function ExamSessionWorkspaceShell({ children }: ExamSessionWorkspaceShel
     const idParam = params.id || params.examId;
     const examId = Array.isArray(idParam) ? idParam[0] : idParam;
 
+    const { data: exam } = useExamQuery(examId);
+
     if (!isRuntimeRoute(pathname) || !examId) {
         return <>{children}</>;
     }
 
     const isReportPage = pathname.startsWith('/exams/reports');
-    const sidebarTitle = isReportPage ? 'Report Sections' : 'Exam Session';
+    const isCompleted = exam?.status === 'completed' || exam?.status === 'archived';
+    const showReportSectionSidebar = isReportPage && isCompleted;
+    const sidebarTitle = showReportSectionSidebar ? 'Report Section' : 'Exam Session';
 
     return (
         <div className="relative flex min-h-[calc(100vh-64px)] flex-col lg:-m-6 lg:flex-row lg:items-stretch">

@@ -15,6 +15,7 @@ describe('live inspection service client', () => {
         const apiClient = vi.fn().mockResolvedValue({ data: { leaseId: 'lease-1' } });
 
         await startLiveInspection(apiClient as any, { examId: 'exam-1', attemptId: 'attempt-1' });
+        await startLiveInspection(apiClient as any, { examId: 'exam-1', attemptId: 'attempt-1', restart: true });
         await getLiveInspectionStatus(apiClient as any, {
             examId: 'exam-1',
             attemptId: 'attempt-1',
@@ -30,17 +31,22 @@ describe('live inspection service client', () => {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ attemptId: 'attempt-1' }),
         });
+        expect(apiClient).toHaveBeenNthCalledWith(2, '/exams/exam-1/monitoring/live-inspections', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ attemptId: 'attempt-1', restart: true }),
+        });
         expect(apiClient).toHaveBeenNthCalledWith(
-            2,
+            3,
             '/exams/exam-1/monitoring/live-inspections/status?attemptId=attempt-1',
         );
         expect(apiClient).toHaveBeenNthCalledWith(
-            3,
+            4,
             '/exams/exam-1/monitoring/live-inspections/lease-1/viewer-connection',
             { method: 'POST' },
         );
         expect(apiClient).toHaveBeenNthCalledWith(
-            4,
+            5,
             '/exams/exam-1/monitoring/live-inspections/lease-1/stop',
             { method: 'POST' },
         );

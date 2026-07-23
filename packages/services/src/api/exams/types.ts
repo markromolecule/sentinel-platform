@@ -518,6 +518,7 @@ export type ExamConfigurationState = {
 
 export type StartExamSessionPayload = {
     examId: string;
+    resumeRequestId?: string;
 };
 
 export type StartExamSessionResult = {

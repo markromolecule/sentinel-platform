@@ -14,6 +14,7 @@ export const startLiveInspectionSchema = {
     params: liveInspectionExamParamsSchema,
     body: z.object({
         attemptId: z.string().uuid(),
+        restart: z.boolean().optional().default(false),
     }),
     response: z.object({
         message: z.string(),

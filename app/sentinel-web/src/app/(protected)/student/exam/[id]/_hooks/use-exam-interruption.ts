@@ -10,6 +10,8 @@ type UseExamInterruptionArgs = {
     examId: string;
     sessionId?: string | null;
     isEnabled?: boolean;
+    isNavigationCommitted?: boolean;
+    onBeforeInterruption?: () => void;
 };
 
 /**
@@ -20,6 +22,8 @@ export function useExamInterruption({
     examId,
     sessionId,
     isEnabled = true,
+    isNavigationCommitted = false,
+    onBeforeInterruption,
 }: UseExamInterruptionArgs) {
     const router = useRouter();
 
@@ -29,6 +33,11 @@ export function useExamInterruption({
         }
 
         const handleInterruption = (reason: ReconnectReason) => {
+            if (isNavigationCommitted) {
+                return;
+            }
+
+            onBeforeInterruption?.();
             writeStoredReconnectIntent(examId, sessionId ?? undefined, reason);
         };
 
@@ -54,5 +63,5 @@ export function useExamInterruption({
             window.removeEventListener('offline', onOffline);
             window.removeEventListener('online', onOnline);
         };
-    }, [examId, isEnabled, router, sessionId]);
+    }, [examId, isEnabled, isNavigationCommitted, onBeforeInterruption, router, sessionId]);
 }

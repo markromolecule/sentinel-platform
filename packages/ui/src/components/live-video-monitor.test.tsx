@@ -64,4 +64,60 @@ describe('LiveVideoMonitor', () => {
         expect(screen.getByRole('button', { name: /retry live view/i })).toBeTruthy();
         expect(screen.queryByText(/token|room|livekit/i)).toBeNull();
     });
+
+    it('renders waitingProgress when provided during waiting state', () => {
+        render(
+            <LiveVideoMonitor
+                state="waiting_for_student"
+                waitingProgress="Waiting for student device (10s)..."
+                videoRef={vi.fn()}
+                onStart={vi.fn()}
+                onStop={vi.fn()}
+                onRetry={vi.fn()}
+            />,
+        );
+
+        expect(screen.getAllByText(/Waiting for student device \(10s\)\.\.\./i).length).toBeGreaterThan(0);
+    });
+
+    it('renders correct labels for new reason codes like TIMEOUT and NO_LIVE_CAMERA_TRACK', () => {
+        const { rerender } = render(
+            <LiveVideoMonitor
+                state="failed"
+                reason="TIMEOUT"
+                videoRef={vi.fn()}
+                onStart={vi.fn()}
+                onStop={vi.fn()}
+                onRetry={vi.fn()}
+            />,
+        );
+
+        expect(screen.getAllByText(/Student connection timed out/i).length).toBeGreaterThan(0);
+
+        rerender(
+            <LiveVideoMonitor
+                state="failed"
+                reason="NO_LIVE_CAMERA_TRACK"
+                videoRef={vi.fn()}
+                onStart={vi.fn()}
+                onStop={vi.fn()}
+                onRetry={vi.fn()}
+            />,
+        );
+
+        expect(screen.getAllByText(/Student camera not ready/i).length).toBeGreaterThan(0);
+
+        rerender(
+            <LiveVideoMonitor
+                state="failed"
+                reason="LIVEKIT_CONNECT_FAILED"
+                videoRef={vi.fn()}
+                onStart={vi.fn()}
+                onStop={vi.fn()}
+                onRetry={vi.fn()}
+            />,
+        );
+
+        expect(screen.getAllByText(/Student live connection failed/i).length).toBeGreaterThan(0);
+    });
 });

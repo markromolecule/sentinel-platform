@@ -1,7 +1,25 @@
-import { describe, expect, it, vi } from 'vitest';
+import { describe, expect, it, vi, beforeEach } from 'vitest';
 import { HTTPException } from 'hono/http-exception';
 import { startLiveInspection } from './start-live-inspection.service';
 import type { LiveKitConfig } from '../../../infrastructure/livekit/livekit.config';
+import * as repository from '../live-inspection.repository';
+import * as accessService from '../live-inspection-access.service';
+import * as stopService from './stop-live-inspection.service';
+import * as helpers from './live-inspection-service-helpers';
+import { LiveKitService } from '../../../infrastructure/livekit/livekit.service';
+
+vi.mock('../live-inspection.repository');
+vi.mock('../live-inspection-access.service');
+vi.mock('./stop-live-inspection.service');
+vi.mock('../../../infrastructure/livekit/livekit.service');
+
+vi.mock('./live-inspection-service-helpers', async (importOriginal) => {
+    const actual = await importOriginal<typeof import('./live-inspection-service-helpers')>();
+    return {
+        ...actual,
+        getLiveInspectionAttemptForStaff: vi.fn(),
+    };
+});
 
 const disabledConfig: LiveKitConfig = {
     enabled: false,
@@ -19,26 +37,190 @@ const disabledConfig: LiveKitConfig = {
     institutionActiveInspectionLimit: 10,
 };
 
+const enabledConfig: LiveKitConfig = {
+    enabled: true,
+    allowedInstitutionIds: [],
+    liveKitUrl: 'wss://livekit.test',
+    apiKey: 'key',
+    apiSecret: 'secret',
+    requestTimeoutMs: 20_000,
+    viewerJoinTimeoutMs: 15_000,
+    maxInspectionDurationSeconds: 300,
+    tokenTtlSeconds: 60,
+    roomEmptyTimeoutSeconds: 30,
+    roomDepartureTimeoutSeconds: 10,
+    globalActiveInspectionLimit: 20,
+    institutionActiveInspectionLimit: 10,
+};
+
+const mockAttempt = {
+    attemptId: 'attempt-123',
+    examId: 'exam-123',
+    studentUserId: 'student-123',
+    institutionId: 'inst-123',
+};
+
+const mockLease = {
+    lease_id: 'lease-123',
+    exam_id: 'exam-123',
+    attempt_id: 'attempt-123',
+    student_user_id: 'student-123',
+    viewer_user_id: 'viewer-123',
+    institution_id: 'inst-123',
+    provider_room_name: 'room-123',
+    state: 'REQUESTED',
+    version: 1,
+    requested_at: new Date('2026-07-23T12:00:00Z'),
+    expires_at: new Date('2026-07-23T12:05:00Z'),
+    started_at: null,
+    ended_at: null,
+    end_reason: null,
+    last_error_code: null,
+};
+
 describe('startLiveInspection', () => {
-    it('fails closed before authorization, database acquisition, or provider calls when disabled', async () => {
-        const liveKit = {
-            createInspectionRoom: vi.fn(),
+    let mockLiveKit: any;
+
+    beforeEach(() => {
+        vi.clearAllMocks();
+        mockLiveKit = {
+            createInspectionRoom: vi.fn().mockResolvedValue({}),
         };
+        vi.mocked(accessService.assertLiveInspectionViewerAccess).mockResolvedValue({ examId: 'exam-123' } as any);
+        vi.mocked(helpers.getLiveInspectionAttemptForStaff).mockResolvedValue(mockAttempt as any);
+    });
+
+    it('fails closed before authorization, database acquisition, or provider calls when disabled', async () => {
+        await expect(
+            startLiveInspection(
+                {
+                    dbClient: {} as any,
+                    examId: 'exam-123',
+                    attemptId: 'attempt-123',
+                    viewerUserId: 'viewer-123',
+                    role: 'instructor',
+                    activeInstitutionId: 'inst-123',
+                },
+                { config: disabledConfig, liveKit: mockLiveKit },
+            ),
+        ).rejects.toBeInstanceOf(HTTPException);
+        expect(mockLiveKit.createInspectionRoom).not.toHaveBeenCalled();
+    });
+
+    it('returns existing lease owned by same viewer if restart is false', async () => {
+        vi.mocked(repository.getActiveLiveInspectionLeaseForAttempt).mockResolvedValueOnce(mockLease as any);
+
+        const result = await startLiveInspection(
+            {
+                dbClient: {} as any,
+                examId: 'exam-123',
+                attemptId: 'attempt-123',
+                viewerUserId: 'viewer-123',
+                role: 'instructor',
+                activeInstitutionId: 'inst-123',
+            },
+            { config: enabledConfig, liveKit: mockLiveKit },
+        );
+
+        expect(result.leaseId).toBe('lease-123');
+        expect(repository.acquireLiveInspectionLease).not.toHaveBeenCalled();
+    });
+
+    it('throws 409 if active lease is owned by another viewer (regardless of restart flag)', async () => {
+        const otherViewerLease = { ...mockLease, viewer_user_id: 'viewer-other' };
+        vi.mocked(repository.getActiveLiveInspectionLeaseForAttempt).mockResolvedValueOnce(otherViewerLease as any);
 
         await expect(
             startLiveInspection(
                 {
                     dbClient: {} as any,
-                    examId: '11111111-1111-4111-8111-111111111111',
-                    attemptId: '22222222-2222-4222-8222-222222222222',
-                    viewerUserId: '33333333-3333-4333-8333-333333333333',
+                    examId: 'exam-123',
+                    attemptId: 'attempt-123',
+                    restart: true,
+                    viewerUserId: 'viewer-123',
                     role: 'instructor',
-                    activeInstitutionId: '44444444-4444-4444-8444-444444444444',
-                    activePermissionKeys: ['examinations:monitor_live_video'],
+                    activeInstitutionId: 'inst-123',
                 },
-                { config: disabledConfig, liveKit: liveKit as any },
+                { config: enabledConfig, liveKit: mockLiveKit },
             ),
-        ).rejects.toBeInstanceOf(HTTPException);
-        expect(liveKit.createInspectionRoom).not.toHaveBeenCalled();
+        ).rejects.toThrow(new HTTPException(409, { message: 'Live inspection is already active.' }));
+    });
+
+    it('calls stopLiveInspection, checks capacity, acquires a new lease, and creates a room when restart is true', async () => {
+        vi.mocked(repository.getActiveLiveInspectionLeaseForAttempt)
+            .mockResolvedValueOnce(mockLease as any) // first call returns active lease
+            .mockResolvedValueOnce({ ...mockLease, lease_id: 'lease-new', version: 1 } as any); // second call returns the newly acquired lease
+
+        vi.mocked(repository.countActiveLiveInspectionLeases).mockResolvedValue(0);
+        vi.mocked(repository.countActiveLiveInspectionLeasesByInstitution).mockResolvedValue(0);
+        vi.mocked(repository.acquireLiveInspectionLease).mockResolvedValue({ ok: true, leaseId: 'lease-new' });
+
+        const result = await startLiveInspection(
+            {
+                dbClient: {} as any,
+                examId: 'exam-123',
+                attemptId: 'attempt-123',
+                restart: true,
+                viewerUserId: 'viewer-123',
+                role: 'instructor',
+                activeInstitutionId: 'inst-123',
+            },
+            { config: enabledConfig, liveKit: mockLiveKit },
+        );
+
+        expect(result.leaseId).toBe('lease-new');
+        expect(stopService.stopLiveInspection).toHaveBeenCalledWith(
+            expect.objectContaining({ leaseId: 'lease-123', viewerUserId: 'viewer-123' }),
+            expect.any(Object),
+        );
+        expect(repository.acquireLiveInspectionLease).toHaveBeenCalled();
+        expect(mockLiveKit.createInspectionRoom).toHaveBeenCalledWith(
+            expect.objectContaining({ leaseId: 'lease-new' })
+        );
+    });
+
+    it('throws 429 when global capacity is reached after stopping the old lease', async () => {
+        vi.mocked(repository.getActiveLiveInspectionLeaseForAttempt).mockResolvedValueOnce(mockLease as any);
+        vi.mocked(repository.countActiveLiveInspectionLeases).mockResolvedValue(20); // Limit is 20
+
+        await expect(
+            startLiveInspection(
+                {
+                    dbClient: {} as any,
+                    examId: 'exam-123',
+                    attemptId: 'attempt-123',
+                    restart: true,
+                    viewerUserId: 'viewer-123',
+                    role: 'instructor',
+                    activeInstitutionId: 'inst-123',
+                },
+                { config: enabledConfig, liveKit: mockLiveKit },
+            )
+        ).rejects.toThrow(new HTTPException(429, { message: 'Live inspection global capacity reached.' }));
+    });
+
+    it('converges on same viewer lease if concurrent restarts result in unique key conflict', async () => {
+        vi.mocked(repository.getActiveLiveInspectionLeaseForAttempt)
+            .mockResolvedValueOnce(null) // no existing lease initially
+            .mockResolvedValueOnce({ ...mockLease, lease_id: 'lease-raced' } as any); // raced lease returned on re-read
+
+        vi.mocked(repository.countActiveLiveInspectionLeases).mockResolvedValue(0);
+        vi.mocked(repository.countActiveLiveInspectionLeasesByInstitution).mockResolvedValue(0);
+        vi.mocked(repository.acquireLiveInspectionLease).mockResolvedValue({ ok: false, code: 'INSPECTION_ALREADY_ACTIVE' });
+
+        const result = await startLiveInspection(
+            {
+                dbClient: {} as any,
+                examId: 'exam-123',
+                attemptId: 'attempt-123',
+                viewerUserId: 'viewer-123',
+                role: 'instructor',
+                activeInstitutionId: 'inst-123',
+            },
+            { config: enabledConfig, liveKit: mockLiveKit },
+        );
+
+        expect(result.leaseId).toBe('lease-raced');
+        expect(mockLiveKit.createInspectionRoom).not.toHaveBeenCalled(); // The winner of the race handles room creation
     });
 });

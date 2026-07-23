@@ -4,6 +4,7 @@ import { Fragment } from 'react';
 import Link from 'next/link';
 import { usePathname, useSearchParams } from 'next/navigation';
 import { cn, Separator } from '@sentinel/ui';
+import { useExamQuery } from '@sentinel/hooks';
 
 type ExamSessionSection = 'lobby' | 'monitoring' | 'report' | 'queue' | 'logs';
 
@@ -57,9 +58,13 @@ export function ExamSessionNav({ examId }: ExamSessionNavProps) {
     const pathname = usePathname() || '';
     const searchParams = useSearchParams();
     const activeSection = resolveActiveSection(pathname, searchParams);
-    const isReportPage = pathname.includes('/report');
+    const { data: exam } = useExamQuery(examId);
 
-    const items: ExamSessionNavItem[] = isReportPage
+    const isReportPage = pathname.includes('/report');
+    const isCompleted = exam?.status === 'completed' || exam?.status === 'archived';
+    const showReportSectionSidebar = isReportPage && isCompleted;
+
+    const items: ExamSessionNavItem[] = showReportSectionSidebar
         ? [
             {
                 id: 'report',
@@ -107,7 +112,7 @@ export function ExamSessionNav({ examId }: ExamSessionNavProps) {
 
     return (
         <nav className="mt-1 flex flex-col gap-1">
-            {!isReportPage && (
+            {!showReportSectionSidebar && (
                 <h3 className="text-muted-foreground/60 mb-2 px-4 text-xs font-semibold tracking-wider uppercase">
                     Runtime
                 </h3>
@@ -115,7 +120,7 @@ export function ExamSessionNav({ examId }: ExamSessionNavProps) {
 
             {items.map((item, index) => {
                 const isActive = activeSection === item.id;
-                const showSeparator = !isReportPage && index === 2;
+                const showSeparator = !showReportSectionSidebar && index === 2;
 
                 return (
                     <Fragment key={item.id}>

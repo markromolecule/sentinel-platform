@@ -12,6 +12,8 @@ import {
     writeStoredExamSession,
     writeStoredLobbyEntry,
     clearStoredReconnectIntent,
+    readStoredReconnectIntent,
+    writeStoredReconnectIntent,
     reconcileExamAnswerDraft,
     type StoredExamSession,
 } from '../../_lib/exam-session-storage';
@@ -49,7 +51,9 @@ export function useLobbyActions({
     const handleEnterExam = async () => {
         if (!hasCompletedFlow || !canEnterExam) {
             if (!hasCompletedFlow) {
-                toast.error('Required device permissions or system checkup incomplete. Please complete checkup.');
+                toast.error(
+                    'Required device permissions or system checkup incomplete. Please complete checkup.',
+                );
             } else if (runtimeAccess?.message) {
                 toast.error(runtimeAccess.message);
             }
@@ -63,9 +67,20 @@ export function useLobbyActions({
         inFlightRequestRef.current = true;
         setIsStartingSession(true);
 
+        const reconnectIntent = readStoredReconnectIntent(examId);
+        const resumeRequestId =
+            reconnectIntent?.resumeRequestId ??
+            (runtimeAccess?.canResume
+                ? writeStoredReconnectIntent(examId, storedSession?.sessionId, 'navigation')
+                      ?.resumeRequestId
+                : undefined);
+
         try {
             // Call startExamSession regardless of existing storedSession so server validates access and counts reconnect.
-            const session = await startExamSession(apiClient, { examId });
+            const session = await startExamSession(apiClient, {
+                examId,
+                resumeRequestId,
+            });
             const nextStoredSession = writeStoredExamSession(examId, session);
 
             if (!nextStoredSession) {
@@ -92,8 +107,8 @@ export function useLobbyActions({
                 await document.documentElement.requestFullscreen?.()?.catch(() => null);
             }
 
-            clearStoredReconnectIntent(examId);
             writeStoredLobbyEntry(examId, nextStoredSession.sessionId);
+            clearStoredReconnectIntent(examId);
             router.push(buildStudentExamHref(examId, 'attempt'));
         } catch (error) {
             if (isStudentExamAlreadyTurnedInError(error)) {
@@ -111,7 +126,6 @@ export function useLobbyActions({
             setIsStartingSession(false);
         }
     };
-
 
     return {
         isStartingSession,

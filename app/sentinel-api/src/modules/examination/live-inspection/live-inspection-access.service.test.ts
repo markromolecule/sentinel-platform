@@ -6,11 +6,16 @@ import {
     assertLiveInspectionStudentAccess,
     assertLiveInspectionViewerAccess,
 } from './live-inspection-access.service';
+import { getExamConfigurationState } from '../configuration/configuration.service';
 
 vi.mock('../flow/data/session.repository', () => ({
     SessionRepository: {
         getOwnedSessionAttempt: vi.fn(),
     },
+}));
+
+vi.mock('../configuration/configuration.service', () => ({
+    getExamConfigurationState: vi.fn(),
 }));
 
 function createDbClient(rows: unknown[]): DbClient {
@@ -129,7 +134,7 @@ describe('live inspection access service', () => {
         ).rejects.toBeInstanceOf(HTTPException);
     });
 
-    it('allows student-owned incomplete camera-required attempts', async () => {
+    it('allows student-owned incomplete camera-required attempts (raw camera_required = NULL, effective default = true)', async () => {
         vi.mocked(SessionRepository.getOwnedSessionAttempt).mockResolvedValue({
             attempt_id: 'attempt-1',
             exam_id: 'exam-1',
@@ -141,7 +146,38 @@ describe('live inspection access service', () => {
             institution_id: 'institution-1',
         } as any);
 
-        const dbClient = createDbClient([{ camera_required: true }]);
+        vi.mocked(getExamConfigurationState).mockResolvedValue({
+            configuration: { cameraRequired: true },
+        } as any);
+
+        const dbClient = createDbClient([]);
+
+        await expect(
+            assertLiveInspectionStudentAccess({
+                dbClient,
+                sessionId: 'attempt-1',
+                studentUserId: 'student-user-1',
+            }),
+        ).resolves.toMatchObject({ attempt_id: 'attempt-1' });
+    });
+
+    it('allows student-owned incomplete camera-required attempts (explicit camera_required = true)', async () => {
+        vi.mocked(SessionRepository.getOwnedSessionAttempt).mockResolvedValue({
+            attempt_id: 'attempt-1',
+            exam_id: 'exam-1',
+            student_id: 'student-1',
+            completed_at: null,
+            status: 'IN_PROGRESS',
+            started_at: new Date(),
+            lifecycle_state: 'IN_PROGRESS',
+            institution_id: 'institution-1',
+        } as any);
+
+        vi.mocked(getExamConfigurationState).mockResolvedValue({
+            configuration: { cameraRequired: true },
+        } as any);
+
+        const dbClient = createDbClient([]);
 
         await expect(
             assertLiveInspectionStudentAccess({
@@ -153,16 +189,36 @@ describe('live inspection access service', () => {
     });
 
     it.each([
-        ['missing owned attempt', undefined, { camera_required: true }],
+        ['missing owned attempt', undefined, { cameraRequired: true }],
         [
-            'camera optional',
+            'owned attempt without an exam',
+            {
+                exam_id: null,
+                completed_at: null,
+                status: 'IN_PROGRESS',
+                lifecycle_state: 'IN_PROGRESS',
+            },
+            { cameraRequired: true },
+        ],
+        [
+            'camera optional (raw NULL, effective default = false)',
             {
                 exam_id: 'exam-1',
                 completed_at: null,
                 status: 'IN_PROGRESS',
                 lifecycle_state: 'IN_PROGRESS',
             },
-            { camera_required: false },
+            { cameraRequired: false },
+        ],
+        [
+            'camera optional (explicit camera_required = false)',
+            {
+                exam_id: 'exam-1',
+                completed_at: null,
+                status: 'IN_PROGRESS',
+                lifecycle_state: 'IN_PROGRESS',
+            },
+            { cameraRequired: false },
         ],
         [
             'completed',
@@ -172,7 +228,7 @@ describe('live inspection access service', () => {
                 status: 'COMPLETED',
                 lifecycle_state: 'SUBMITTED',
             },
-            { camera_required: true },
+            { cameraRequired: true },
         ],
         [
             'locked',
@@ -182,7 +238,7 @@ describe('live inspection access service', () => {
                 status: 'IN_PROGRESS',
                 lifecycle_state: 'LOCKED',
             },
-            { camera_required: true },
+            { cameraRequired: true },
         ],
         [
             'closed',
@@ -192,7 +248,7 @@ describe('live inspection access service', () => {
                 status: 'IN_PROGRESS',
                 lifecycle_state: 'CLOSED',
             },
-            { camera_required: true },
+            { cameraRequired: true },
         ],
         [
             'superseded',
@@ -202,11 +258,14 @@ describe('live inspection access service', () => {
                 status: 'IN_PROGRESS',
                 lifecycle_state: 'SUPERSEDED',
             },
-            { camera_required: true },
+            { cameraRequired: true },
         ],
-    ])('denies student access for %s', async (_, attempt, config) => {
+    ])('denies student access for %s', async (_, attempt, configState) => {
         vi.mocked(SessionRepository.getOwnedSessionAttempt).mockResolvedValue(attempt as any);
-        const dbClient = createDbClient([config]);
+        vi.mocked(getExamConfigurationState).mockResolvedValue({
+            configuration: configState,
+        } as any);
+        const dbClient = createDbClient([]);
 
         await expect(
             assertLiveInspectionStudentAccess({

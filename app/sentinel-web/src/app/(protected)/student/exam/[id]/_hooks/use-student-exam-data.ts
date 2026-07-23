@@ -140,7 +140,11 @@ export function useStudentExamData() {
         mediaPipeSandbox,
         questions,
         refetchExam,
-        isLoading: isExamLoading || isConfigurationLoading,
+        // The exam detail response already carries a configuration snapshot for
+        // student routes. Do not leave the reconnect/lobby flow blocked on the
+        // supplemental configuration request once that authoritative data is
+        // available.
+        isLoading: isExamLoading || (isConfigurationLoading && !hasAuthoritativeConfig),
         isConfigurationError,
         configQueryError,
         isExamError,

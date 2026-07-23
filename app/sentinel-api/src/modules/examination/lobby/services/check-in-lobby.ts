@@ -14,7 +14,7 @@ export const checkInLobby = async (dbClient: DbClient, examId: string, studentId
         throw new HTTPException(404, { message: 'Exam not found' });
     }
 
-    const mode = exam.lobby_admission_mode ?? 'AUTOMATIC';
+    const mode = exam.lobby_admission_mode ?? 'INSTRUCTOR_GATED';
     const student = await dbClient
         .selectFrom('students')
         .select(['user_id'])

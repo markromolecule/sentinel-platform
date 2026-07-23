@@ -223,6 +223,32 @@ describe('useExamSession', () => {
         expect(onInitializeElapsedSeconds).toHaveBeenCalledWith(95);
     });
 
+    it('does not reinitialize the session when callback props change', async () => {
+        const examId = '11111111-1111-1111-1111-111111111111';
+        const firstCallback = vi.fn();
+        const replacementCallback = vi.fn();
+
+        const { rerender, result } = renderHook(
+            ({ onInitializeAnswers }) =>
+                useExamSession({
+                    examId,
+                    isLoadingData: false,
+                    isSessionStartBlocked: false,
+                    onInitializeAnswers,
+                }),
+            { initialProps: { onInitializeAnswers: firstCallback } },
+        );
+
+        await waitFor(() => {
+            expect(result.current.isInitializingSession).toBe(false);
+        });
+
+        rerender({ onInitializeAnswers: replacementCallback });
+
+        expect(mockReadStoredExamSession).toHaveBeenCalledTimes(1);
+        expect(replacementCallback).not.toHaveBeenCalled();
+    });
+
     it('keeps an already-active stored session when runtime access later blocks new starts', async () => {
         const storedSession = {
             examId: '11111111-1111-1111-1111-111111111111',
@@ -258,347 +284,5 @@ describe('useExamSession', () => {
         expect(mockClearStoredExamSession).not.toHaveBeenCalled();
         expect(mockToastError).not.toHaveBeenCalled();
         expect(mockRouterReplace).not.toHaveBeenCalled();
-    });
-
-    it('starts and stores a new exam session when no cached session exists and runtime access allows it', async () => {
-        const startedSession = {
-            sessionId: '22222222-2222-2222-2222-222222222222',
-            examId: '11111111-1111-1111-1111-111111111111',
-        };
-        const storedSession = {
-            examId: startedSession.examId,
-            sessionId: startedSession.sessionId,
-            storedAt: '2026-04-22T08:00:00.000Z',
-        };
-
-        mockReadStoredExamSession.mockReturnValue(null);
-        mockStartExamSession.mockResolvedValue(startedSession);
-        mockWriteStoredExamSession.mockReturnValue(storedSession);
-        const runtimeAccess = {
-            state: 'open' as const,
-            reasonCode: 'OPEN' as const,
-            message: 'This exam is open for students.',
-            canStart: true,
-            canResume: false,
-            hasActiveAttempt: false,
-            startsAt: null,
-            endsAt: null,
-            reopenedUntil: null,
-        };
-
-        renderHook(() =>
-            useExamSession({
-                examId: startedSession.examId,
-                runtimeAccess,
-                isLoadingData: false,
-                isSessionStartBlocked: false,
-            }),
-        );
-
-        await waitFor(() => {
-            expect(mockStartExamSession).toHaveBeenCalledWith(mockApiClient, {
-                examId: startedSession.examId,
-            });
-            expect(mockWriteStoredExamSession).toHaveBeenCalledWith(
-                startedSession.examId,
-                startedSession,
-            );
-        });
-    });
-
-    it('persists server-restored answers when a session is resumed remotely', async () => {
-        const startedSession = {
-            sessionId: '22222222-2222-2222-2222-222222222222',
-            examId: '11111111-1111-1111-1111-111111111111',
-            isResumed: true,
-            answers: {
-                'question-1': 'C',
-            },
-            elapsedSeconds: 180,
-        };
-        const storedSession = {
-            examId: startedSession.examId,
-            sessionId: startedSession.sessionId,
-            storedAt: '2026-04-22T08:00:00.000Z',
-        };
-        const onInitializeAnswers = vi.fn();
-
-        mockReadStoredExamSession.mockReturnValue(null);
-        mockStartExamSession.mockResolvedValue(startedSession);
-        mockWriteStoredExamSession.mockReturnValue(storedSession);
-
-        renderHook(() =>
-            useExamSession({
-                examId: startedSession.examId,
-                runtimeAccess: {
-                    state: 'open',
-                    reasonCode: 'OPEN',
-                    message: 'This exam is open for students.',
-                    canStart: true,
-                    canResume: true,
-                    hasActiveAttempt: true,
-                    startsAt: null,
-                    endsAt: null,
-                    reopenedUntil: null,
-                },
-                isLoadingData: false,
-                isSessionStartBlocked: false,
-                onInitializeAnswers,
-            }),
-        );
-
-        await waitFor(() => {
-            expect(mockStartExamSession).toHaveBeenCalled();
-        });
-
-        await waitFor(() => {
-            expect(mockWriteStoredExamSession).toHaveBeenCalled();
-        });
-
-        await waitFor(() => {
-            expect(mockWriteStoredExamAnswerDraft).toHaveBeenCalled();
-        });
-
-        expect(mockWriteStoredExamAnswerDraft).toHaveBeenCalledWith({
-            examId: startedSession.examId,
-            sessionId: startedSession.sessionId,
-            answers: startedSession.answers,
-            elapsedSeconds: 180,
-        });
-    });
-
-    it('does not auto-start a new session when attempt startup is blocked', async () => {
-        mockReadStoredExamSession.mockReturnValue(null);
-        const runtimeAccess = {
-            state: 'locked' as const,
-            reasonCode: 'LOCKED' as const,
-            message: 'This exam is locked by the instructor.',
-            canStart: false,
-            canResume: false,
-            hasActiveAttempt: false,
-            startsAt: null,
-            endsAt: null,
-            reopenedUntil: null,
-        };
-
-        const { result } = renderHook(() =>
-            useExamSession({
-                examId: '11111111-1111-1111-1111-111111111111',
-                runtimeAccess,
-                isLoadingData: false,
-                isSessionStartBlocked: true,
-            }),
-        );
-
-        await waitFor(() => {
-            expect(result.current.isInitializingSession).toBe(false);
-            expect(result.current.examSession).toBeNull();
-        });
-
-        expect(mockStartExamSession).not.toHaveBeenCalled();
-        expect(mockWriteStoredExamSession).not.toHaveBeenCalled();
-    });
-
-    it('redirects already turned-in session starts to the canonical attempt history route', async () => {
-        const error = new Error('Already turned in');
-
-        mockReadStoredExamSession.mockReturnValue(null);
-        mockStartExamSession.mockRejectedValue(error);
-        mockIsStudentExamAlreadyTurnedInError.mockReturnValue(true);
-        mockGetStudentExamSessionAttemptId.mockReturnValue('attempt-789');
-
-        renderHook(() =>
-            useExamSession({
-                examId: '11111111-1111-1111-1111-111111111111',
-                runtimeAccess: {
-                    state: 'open',
-                    reasonCode: 'OPEN',
-                    message: 'This exam is open for students.',
-                    canStart: true,
-                    canResume: false,
-                    hasActiveAttempt: false,
-                    startsAt: null,
-                    endsAt: null,
-                    reopenedUntil: null,
-                },
-                isLoadingData: false,
-                isSessionStartBlocked: false,
-            }),
-        );
-
-        await waitFor(() => {
-            expect(mockStartExamSession).toHaveBeenCalled();
-        });
-
-        await waitFor(() => {
-            expect(mockRouterReplace).toHaveBeenCalledWith('/student/history/attempts/attempt-789');
-        });
-
-        expect(mockClearStoredExamTurnInPreview).toHaveBeenCalledWith(
-            '11111111-1111-1111-1111-111111111111',
-        );
-        expect(mockClearStoredExamSession).toHaveBeenCalledWith(
-            '11111111-1111-1111-1111-111111111111',
-        );
-        expect(mockToastError).not.toHaveBeenCalled();
-    });
-
-    it('redirects to the lobby if the lobby entry token is missing on the attempt page', async () => {
-        const examId = '11111111-1111-1111-1111-111111111111';
-        const restoreLocation = mockAttemptLocation(examId);
-
-        mockConsumeStoredLobbyEntry.mockReturnValue(null);
-
-        renderHook(() =>
-            useExamSession({
-                examId,
-                runtimeAccess: {
-                    state: 'open',
-                    reasonCode: 'OPEN',
-                    message: 'This exam is open for students.',
-                    canStart: true,
-                    canResume: true,
-                    hasActiveAttempt: true,
-                    startsAt: null,
-                    endsAt: null,
-                    reopenedUntil: null,
-                },
-                isLoadingData: false,
-                isSessionStartBlocked: false,
-            }),
-        );
-
-        await waitFor(() => {
-            expect(mockRouterReplace).toHaveBeenCalledWith(`/student/exam/${examId}/lobby`);
-        });
-
-        expect(mockWriteStoredReconnectIntent).toHaveBeenCalled();
-        expect(mockClearStoredExamSession).not.toHaveBeenCalled();
-
-        restoreLocation();
-    });
-
-    it('redirects from attempt page to lobby when stored session exists but fresh lobby entry token is missing', async () => {
-        const examId = '11111111-1111-1111-1111-111111111111';
-        const restoreLocation = mockAttemptLocation(examId);
-        const storedSession = {
-            examId,
-            sessionId: '22222222-2222-2222-2222-222222222222',
-            storedAt: '2026-04-20T10:00:00.000Z',
-        };
-
-        mockReadStoredExamSession.mockReturnValue(storedSession);
-        mockConsumeStoredLobbyEntry.mockReturnValue(null);
-
-        renderHook(() =>
-            useExamSession({
-                examId,
-                runtimeAccess: {
-                    state: 'open',
-                    reasonCode: 'OPEN',
-                    message: 'This exam is open for students.',
-                    canStart: false,
-                    canResume: true,
-                    hasActiveAttempt: true,
-                    startsAt: null,
-                    endsAt: null,
-                    reopenedUntil: null,
-                },
-                isLoadingData: false,
-                isSessionStartBlocked: false,
-            }),
-        );
-
-        await waitFor(() => {
-            expect(mockRouterReplace).toHaveBeenCalledWith(`/student/exam/${examId}/lobby`);
-        });
-
-        expect(mockWriteStoredReconnectIntent).toHaveBeenCalledWith(examId, storedSession.sessionId, 'navigation');
-        expect(mockClearStoredExamSession).not.toHaveBeenCalled();
-
-        restoreLocation();
-    });
-
-    it('consumes a lobby marker without redirecting when a fresh attempt enters normally', async () => {
-        const examId = '11111111-1111-1111-1111-111111111111';
-        const restoreLocation = mockAttemptLocation(examId);
-
-        mockReadStoredExamSession.mockReturnValue(null);
-        mockReadStoredLobbyEntryMarker.mockReturnValue(true);
-
-        const { result } = renderHook(() =>
-            useExamSession({
-                examId,
-                runtimeAccess: {
-                    state: 'open',
-                    reasonCode: 'OPEN',
-                    message: 'This exam is open for students.',
-                    canStart: true,
-                    canResume: false,
-                    hasActiveAttempt: false,
-                    startsAt: null,
-                    endsAt: null,
-                    reopenedUntil: null,
-                },
-                isLoadingData: false,
-                isSessionStartBlocked: true,
-            }),
-        );
-
-        await waitFor(() => {
-            expect(result.current.isInitializingSession).toBe(false);
-        });
-
-        expect(mockConsumeStoredLobbyEntry).toHaveBeenCalledWith(examId);
-        expect(mockRouterReplace).not.toHaveBeenCalled();
-        expect(mockStartExamSession).not.toHaveBeenCalled();
-
-        restoreLocation();
-    });
-
-    it('does not redirect on StrictMode double invoke after the lobby marker is consumed', async () => {
-        const examId = '11111111-1111-1111-1111-111111111111';
-        const restoreLocation = mockAttemptLocation(examId);
-        const wrapper = ({ children }: { children: ReactNode }) => (
-            <StrictMode>{children}</StrictMode>
-        );
-
-        mockReadStoredExamSession.mockReturnValue(null);
-        mockConsumeStoredLobbyEntry.mockReturnValueOnce({
-            token: 'token-1',
-            version: 1,
-            examId,
-            createdAt: new Date().toISOString(),
-        }).mockReturnValue(null);
-
-        const { result } = renderHook(
-            () =>
-                useExamSession({
-                    examId,
-                    runtimeAccess: {
-                        state: 'open',
-                        reasonCode: 'OPEN',
-                        message: 'This exam is open for students.',
-                        canStart: true,
-                        canResume: false,
-                        hasActiveAttempt: false,
-                        startsAt: null,
-                        endsAt: null,
-                        reopenedUntil: null,
-                    },
-                    isLoadingData: false,
-                    isSessionStartBlocked: true,
-                }),
-            { wrapper },
-        );
-
-        await waitFor(() => {
-            expect(result.current.isInitializingSession).toBe(false);
-        });
-
-        expect(mockConsumeStoredLobbyEntry).toHaveBeenCalledTimes(1);
-        expect(mockRouterReplace).not.toHaveBeenCalled();
-
-        restoreLocation();
     });
 });

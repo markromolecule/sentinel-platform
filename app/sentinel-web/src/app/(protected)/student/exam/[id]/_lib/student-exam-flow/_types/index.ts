@@ -87,6 +87,10 @@ export type StudentExamStageResolverInput = {
     } | null;
     configQueryError?: boolean;
     examQueryError?: boolean;
+    hasFreshLobbyEntry?: boolean;
+    hasReconnectIntent?: boolean;
+    storedSessionId?: string;
+    lobbyEntrySessionId?: string;
 };
 
 export type StudentExamStageResolverResult = {

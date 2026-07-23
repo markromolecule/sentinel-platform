@@ -23,6 +23,7 @@ export function LiveFeedMonitor({ examId, studentId, attemptId, enabled }: LiveF
             onStop={viewer.stop}
             onRetry={viewer.retry}
             disabledExplanation={viewer.disabledExplanation}
+            waitingProgress={viewer.waitingProgress}
         />
     );
 }

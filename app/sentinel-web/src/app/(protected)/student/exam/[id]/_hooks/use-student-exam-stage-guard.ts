@@ -3,7 +3,13 @@
 import { useEffect, useMemo, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { buildStudentHistoryAttemptHref } from '@/lib/routes/student-history-routes';
-import { clearStoredExamSession } from '../_lib/exam-session-storage';
+import {
+    clearStoredExamSession,
+    readStoredExamSession,
+    readStoredLobbyEntry,
+    consumeStoredLobbyEntry,
+    clearStoredReconnectIntent,
+} from '../_lib/exam-session-storage';
 import { clearStoredExamTurnInPreview } from '../_lib/exam-turn-in-storage';
 import {
     buildStudentExamHref,
@@ -15,6 +21,9 @@ import {
     type StudentExamStage,
 } from '../_lib/student-exam-flow';
 import { useStudentExamData } from './use-student-exam-data';
+
+// Module-level in-memory cache to survive React StrictMode remounts in the same page lifecycle
+const consumedLobbyEntriesInMemory = new Set<string>();
 
 /**
  * Shared route-guard hook that computes the deterministic single target stage
@@ -45,6 +54,22 @@ export function useStudentExamStageGuard(requestedStage: StudentExamStage) {
             };
         }
         return readStoredStudentExamFlow(examId);
+    }, [examId]);
+
+    const storedSession = useMemo(() => {
+        if (typeof window === 'undefined') return null;
+        return readStoredExamSession(examId);
+    }, [examId]);
+
+    const lobbyEntry = useMemo(() => {
+        if (typeof window === 'undefined') return null;
+        const entry = readStoredLobbyEntry(examId);
+        if (!entry) return null;
+        const isFresh = !entry.consumedAt || consumedLobbyEntriesInMemory.has(entry.token);
+        if (isFresh) {
+            return entry;
+        }
+        return null;
     }, [examId]);
 
     const effectiveMediaPipeSandbox = useMemo(
@@ -79,29 +104,32 @@ export function useStudentExamStageGuard(requestedStage: StudentExamStage) {
             admissionState: resolveStudentExamAdmissionState(exam?.runtimeAccess),
             runtimeAccess: exam?.runtimeAccess
                 ? {
-                      canStart: exam.runtimeAccess.canStart,
-                      canResume: exam.runtimeAccess.canResume,
-                      isAttemptActive: exam.runtimeAccess.hasActiveAttempt,
-                      isTurnedIn: exam.status === 'turned_in',
-                      reconnectCount:
-                          typeof exam.runtimeAccess.totalReconnectAttempts === 'number' &&
-                          typeof exam.runtimeAccess.reconnectAttemptsRemaining === 'number'
-                              ? Math.max(
-                                    0,
-                                    exam.runtimeAccess.totalReconnectAttempts -
-                                        exam.runtimeAccess.reconnectAttemptsRemaining,
-                                )
-                              : 0,
-                      maxReconnectAttempts: configuration?.maxReconnectAttempts ?? 3,
-                      state: exam.runtimeAccess.state,
-                      blockedCode: studentData.blockedState.code,
-                  }
+                    canStart: exam.runtimeAccess.canStart,
+                    canResume: exam.runtimeAccess.canResume,
+                    isAttemptActive: exam.runtimeAccess.hasActiveAttempt,
+                    isTurnedIn: exam.status === 'turned_in',
+                    reconnectCount:
+                        typeof exam.runtimeAccess.totalReconnectAttempts === 'number' &&
+                            typeof exam.runtimeAccess.reconnectAttemptsRemaining === 'number'
+                            ? Math.max(
+                                0,
+                                exam.runtimeAccess.totalReconnectAttempts -
+                                exam.runtimeAccess.reconnectAttemptsRemaining,
+                            )
+                            : 0,
+                    maxReconnectAttempts: configuration?.maxReconnectAttempts ?? 3,
+                    state: exam.runtimeAccess.state,
+                    blockedCode: studentData.blockedState.code,
+                }
                 : {
-                      isTurnedIn: exam?.status === 'turned_in',
-                      blockedCode: studentData.blockedState.code,
-                  },
+                    isTurnedIn: exam?.status === 'turned_in',
+                    blockedCode: studentData.blockedState.code,
+                },
             configQueryError,
             examQueryError: isExamError,
+            hasFreshLobbyEntry: Boolean(lobbyEntry),
+            lobbyEntrySessionId: lobbyEntry?.sessionId,
+            storedSessionId: storedSession?.sessionId,
         });
     }, [
         requestedStage,
@@ -115,7 +143,16 @@ export function useStudentExamStageGuard(requestedStage: StudentExamStage) {
         studentData.blockedState.code,
         configQueryError,
         isExamError,
+        lobbyEntry,
+        storedSession,
     ]);
+
+    useEffect(() => {
+        if (requestedStage === 'attempt' && lobbyEntry && !lobbyEntry.consumedAt) {
+            consumeStoredLobbyEntry(examId);
+            consumedLobbyEntriesInMemory.add(lobbyEntry.token);
+        }
+    }, [requestedStage, examId, lobbyEntry]);
 
     const redirectedTargetRef = useRef<string | null>(null);
 
@@ -129,6 +166,7 @@ export function useStudentExamStageGuard(requestedStage: StudentExamStage) {
                 redirectedTargetRef.current = `result:${exam.attemptId}`;
                 clearStoredExamTurnInPreview(examId);
                 clearStoredExamSession(examId);
+                clearStoredReconnectIntent(examId);
                 router.replace(buildStudentHistoryAttemptHref(exam.attemptId));
             }
             return;

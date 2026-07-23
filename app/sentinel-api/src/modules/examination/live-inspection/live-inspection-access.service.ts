@@ -2,6 +2,7 @@ import { type DbClient } from '@sentinel/db';
 import { HTTPException } from 'hono/http-exception';
 import { hasActivePermission } from '../../../lib/permissions';
 import { SessionRepository } from '../flow/data/session.repository';
+import { getExamConfigurationState } from '../configuration/configuration.service';
 
 const LIVE_VIDEO_PERMISSION = 'examinations:monitor_live_video';
 const DENIED_MESSAGE = 'Live inspection is not available for this attempt.';
@@ -69,18 +70,14 @@ export async function assertLiveInspectionStudentAccess(args: LiveInspectionStud
         studentUserId: args.studentUserId,
     });
 
-    if (!attempt) {
+    if (!attempt?.exam_id) {
         throwNotFound();
     }
 
-    const config = await args.dbClient
-        .selectFrom('exam_configurations')
-        .select(['camera_required'])
-        .where('exam_id', '=', attempt.exam_id)
-        .executeTakeFirst();
+    const configState = await getExamConfigurationState(args.dbClient, attempt.exam_id);
 
     if (
-        config?.camera_required !== true ||
+        configState.configuration.cameraRequired !== true ||
         attempt.completed_at ||
         attempt.status === 'COMPLETED' ||
         ['LOCKED', 'CLOSED', 'SUPERSEDED'].includes(String(attempt.lifecycle_state ?? ''))

@@ -193,7 +193,7 @@ describe('resolveStudentExamStage', () => {
         });
     });
 
-    it('redirects active attempt to attempt stage from instruction/privacy/lobby', () => {
+    it('gating active attempt: redirects to lobby from instruction/privacy without fresh entry', () => {
         const activeInput: StudentExamStageResolverInput = {
             requestedStage: 'instruction',
             privacyAccepted: true,
@@ -206,10 +206,107 @@ describe('resolveStudentExamStage', () => {
                 reconnectCount: 1,
                 maxReconnectAttempts: 3,
             },
+            hasFreshLobbyEntry: false,
+        };
+
+        expect(resolveStudentExamStage(activeInput)).toEqual({
+            targetStage: 'lobby',
+            reasonCode: 'ATTEMPT_ACTIVE',
+            shouldRedirect: true,
+        });
+    });
+
+    it('gating active attempt: remains on lobby when lobby requested', () => {
+        const activeInput: StudentExamStageResolverInput = {
+            requestedStage: 'lobby',
+            privacyAccepted: true,
+            checkupCompleted: true,
+            mediaPipeStatus: 'ready',
+            admissionMode: 'AUTOMATIC',
+            admissionState: null,
+            runtimeAccess: {
+                isAttemptActive: true,
+                reconnectCount: 1,
+                maxReconnectAttempts: 3,
+            },
+            hasFreshLobbyEntry: false,
+        };
+
+        expect(resolveStudentExamStage(activeInput)).toEqual({
+            targetStage: 'lobby',
+            reasonCode: 'ATTEMPT_ACTIVE',
+            shouldRedirect: false,
+        });
+    });
+
+    it('gating active attempt: redirects from attempt to lobby without fresh entry', () => {
+        const activeInput: StudentExamStageResolverInput = {
+            requestedStage: 'attempt',
+            privacyAccepted: true,
+            checkupCompleted: true,
+            mediaPipeStatus: 'ready',
+            admissionMode: 'AUTOMATIC',
+            admissionState: null,
+            runtimeAccess: {
+                isAttemptActive: true,
+                reconnectCount: 1,
+                maxReconnectAttempts: 3,
+            },
+            hasFreshLobbyEntry: false,
+        };
+
+        expect(resolveStudentExamStage(activeInput)).toEqual({
+            targetStage: 'lobby',
+            reasonCode: 'ATTEMPT_ACTIVE',
+            shouldRedirect: true,
+        });
+    });
+
+    it('gating active attempt: remains on attempt with fresh session-matched entry', () => {
+        const activeInput: StudentExamStageResolverInput = {
+            requestedStage: 'attempt',
+            privacyAccepted: true,
+            checkupCompleted: true,
+            mediaPipeStatus: 'ready',
+            admissionMode: 'AUTOMATIC',
+            admissionState: null,
+            runtimeAccess: {
+                isAttemptActive: true,
+                reconnectCount: 1,
+                maxReconnectAttempts: 3,
+            },
+            hasFreshLobbyEntry: true,
+            storedSessionId: 'session-1',
+            lobbyEntrySessionId: 'session-1',
         };
 
         expect(resolveStudentExamStage(activeInput)).toEqual({
             targetStage: 'attempt',
+            reasonCode: 'ATTEMPT_ACTIVE',
+            shouldRedirect: false,
+        });
+    });
+
+    it('gating active attempt: redirects from attempt to lobby with mismatched session entry', () => {
+        const activeInput: StudentExamStageResolverInput = {
+            requestedStage: 'attempt',
+            privacyAccepted: true,
+            checkupCompleted: true,
+            mediaPipeStatus: 'ready',
+            admissionMode: 'AUTOMATIC',
+            admissionState: null,
+            runtimeAccess: {
+                isAttemptActive: true,
+                reconnectCount: 1,
+                maxReconnectAttempts: 3,
+            },
+            hasFreshLobbyEntry: true,
+            storedSessionId: 'session-1',
+            lobbyEntrySessionId: 'session-2',
+        };
+
+        expect(resolveStudentExamStage(activeInput)).toEqual({
+            targetStage: 'lobby',
             reasonCode: 'ATTEMPT_ACTIVE',
             shouldRedirect: true,
         });
