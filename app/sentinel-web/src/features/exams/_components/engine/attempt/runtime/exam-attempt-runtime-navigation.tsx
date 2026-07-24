@@ -43,10 +43,10 @@ export function ExamAttemptRuntimeNavigation({
                     >
                         {index + 1}
                         {isAnswered ? (
-                            <span className="absolute top-2 right-2 h-2.5 w-2.5 bg-emerald-500" />
+                            <span className="pointer-events-none absolute top-2 right-2 h-2.5 w-2.5 bg-emerald-500" />
                         ) : null}
                         {isFlagged ? (
-                            <Flag className="absolute right-2 bottom-2 h-3 w-3 text-amber-600" />
+                            <Flag className="pointer-events-none absolute right-2 bottom-2 h-3 w-3 text-amber-600" />
                         ) : null}
                     </button>
                 );

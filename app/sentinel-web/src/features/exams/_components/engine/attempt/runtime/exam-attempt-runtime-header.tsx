@@ -1,4 +1,3 @@
-'use client';
 import {
     Badge,
     Button,
@@ -57,7 +56,7 @@ export function ExamAttemptRuntimeHeader({
                         onClick={onToggleCompactPassage}
                     >
                         <PanelLeftOpen className="h-4 w-4" />
-                        <span className="hidden sm:inline">Show passage</span>
+                        <span>Show passage</span>
                     </Button>
 
                     {/* Desktop Screen: Toggle that hides/shows the panel */}
@@ -76,7 +75,7 @@ export function ExamAttemptRuntimeHeader({
                                         ) : (
                                             <PanelLeftOpen className="h-4 w-4" />
                                         )}
-                                        <span className="hidden sm:inline">
+                                        <span>
                                             {showPassagePanel ? 'Hide passage' : 'Show passage'}
                                         </span>
                                     </Button>

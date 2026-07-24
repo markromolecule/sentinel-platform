@@ -97,7 +97,9 @@ vi.mock('@sentinel/ui', async () => {
 
     return {
         ...actual,
-        Badge: ({ children }: { children: ReactNode }) => <span>{children}</span>,
+        Badge: ({ children, className }: { children: ReactNode; className?: string }) => (
+            <span className={className}>{children}</span>
+        ),
         AlertDialog: ({ children, open }: { children: ReactNode; open: boolean }) =>
             open ? <div>{children}</div> : null,
         AlertDialogContent: ({ children }: { children: ReactNode }) => <div>{children}</div>,
@@ -164,19 +166,36 @@ vi.mock('@/features/exams/_components/engine', () => ({
         onSubmit,
         onTogglePassagePanel,
         showPassagePanel,
+        hasPassage,
     }: {
         onSubmit: () => void;
         onTogglePassagePanel: () => void;
         showPassagePanel: boolean;
+        hasPassage?: boolean;
     }) => (
         <div>
-            <button onClick={onTogglePassagePanel}>
-                {showPassagePanel ? 'Hide passage panel' : 'Show passage panel'}
-            </button>
+            {hasPassage ? (
+                <button onClick={onTogglePassagePanel}>
+                    {showPassagePanel ? 'Hide passage panel' : 'Show passage panel'}
+                </button>
+            ) : null}
             <button onClick={onSubmit}>Turn in exam</button>
         </div>
     ),
-    ExamAttemptRuntimeFooter: () => <div>Footer</div>,
+    ExamAttemptRuntimeFooter: ({
+        currentQuestionIndex,
+        totalQuestions,
+        onMove,
+    }: {
+        currentQuestionIndex: number;
+        totalQuestions: number;
+        onMove: (direction: 'previous' | 'next') => void;
+    }) => (
+        <div>
+            Question {totalQuestions ? currentQuestionIndex + 1 : 0} of {totalQuestions}
+            <button onClick={() => onMove('next')}>Next question</button>
+        </div>
+    ),
     ExamAttemptRuntimeNavigation: ({
         questions,
         onQuestionSelect,
@@ -214,6 +233,7 @@ vi.mock('@/features/exams/_components/engine', () => ({
                 )}
             </div>
         ) : null,
+    ExamAttemptPassageSheet: () => null,
     ExamAttemptRuntimeSecurity: ({
         securityLockReason,
         onResumeExam,
@@ -235,6 +255,10 @@ vi.mock('@/features/exams/_components/engine', () => ({
     ExamAttemptRuntimeQuestion: ({
         currentQuestion,
         onAnswerChange,
+        isFlagged,
+        onToggleFlag,
+        crossOutEnabled,
+        onToggleCrossOutMode,
     }: {
         currentQuestion: {
             content: {
@@ -242,10 +266,18 @@ vi.mock('@/features/exams/_components/engine', () => ({
             };
         };
         onAnswerChange: (value: string) => void;
+        isFlagged: boolean;
+        onToggleFlag: () => void;
+        crossOutEnabled: boolean;
+        onToggleCrossOutMode: () => void;
     }) => (
         <div>
             <div>{currentQuestion.content.prompt}</div>
             <button onClick={() => onAnswerChange('4')}>Answer 4</button>
+            <button onClick={onToggleFlag}>{isFlagged ? 'Flagged' : 'Mark for review'}</button>
+            <button onClick={onToggleCrossOutMode}>
+                {crossOutEnabled ? 'Cross-out enabled' : 'Enable cross-out'}
+            </button>
         </div>
     ),
 }));
@@ -384,6 +416,53 @@ describe('StudentExamAttemptPage', () => {
         expect(screen.getByRole('button', { name: /answer 4/i })).toBeTruthy();
     });
 
+    it('defers the phone question count to the attempt footer', () => {
+        render(<StudentExamAttemptPage />);
+
+        const questionCounts = screen.getAllByText('Question 1 of 1');
+        const headerCount = questionCounts.find((count) => count.className.includes('hidden'));
+
+        expect(headerCount?.className).toContain('sm:inline-flex');
+        expect(questionCounts.some((count) => !count.className.includes('hidden'))).toBe(true);
+    });
+
+    it('preserves passage availability, question state, and footer counting across navigation', () => {
+        mockStudentExamData.mockReturnValue({
+            ...createStudentExamData(),
+            questions: [
+                createStudentExamData().questions[0],
+                {
+                    id: 'question-2',
+                    content: {
+                        prompt: 'What is 5 + 5?',
+                        options: ['9', '10'],
+                    },
+                    passageType: null,
+                    passageContent: null,
+                    orderIndex: 1,
+                },
+            ],
+        });
+
+        render(<StudentExamAttemptPage />);
+
+        expect(screen.getByRole('button', { name: 'Hide passage panel' })).toBeTruthy();
+
+        fireEvent.click(screen.getByRole('button', { name: 'Mark for review' }));
+        fireEvent.click(screen.getByRole('button', { name: 'Enable cross-out' }));
+
+        expect(screen.getByRole('button', { name: 'Flagged' })).toBeTruthy();
+        expect(screen.getByRole('button', { name: 'Cross-out enabled' })).toBeTruthy();
+
+        fireEvent.click(screen.getByRole('button', { name: 'Next question' }));
+
+        expect(
+            screen.getByRole('button', { name: 'Next question' }).parentElement?.textContent,
+        ).toContain('Question 2 of 2');
+        expect(screen.getByText('What is 5 + 5?')).toBeTruthy();
+        expect(screen.queryByRole('button', { name: /passage panel/i })).toBeNull();
+    });
+
     it('renders the MediaPipe video element when MediaPipe monitoring is enabled', () => {
         render(<StudentExamAttemptPage />);
 
@@ -440,7 +519,7 @@ describe('StudentExamAttemptPage', () => {
         fireEvent.click(screen.getByRole('button', { name: /go to what is 5 \+ 5\?/i }));
 
         expect(screen.queryByTestId('runtime-passage-body')).toBeNull();
-        expect(screen.getByText(/No passage is attached to this question yet/i)).toBeTruthy();
+        expect(screen.queryByText(/No passage is attached to this question yet/i)).toBeNull();
         expect(screen.queryByText(/First passage line 1/i)).toBeNull();
     });
 
@@ -483,10 +562,9 @@ describe('StudentExamAttemptPage', () => {
         expect(screen.queryByTestId('runtime-passage-body')).toBeNull();
         expect(screen.queryByText(/No passage is attached to this question yet/i)).toBeNull();
 
-        fireEvent.click(screen.getByRole('button', { name: /show passage panel/i }));
-
-        expect(screen.getByText(/No passage is attached to this question yet/i)).toBeTruthy();
+        expect(screen.queryByText(/No passage is attached to this question yet/i)).toBeNull();
         expect(screen.queryByText(/First passage line 1/i)).toBeNull();
+        expect(screen.queryByRole('button', { name: /passage panel/i })).toBeNull();
     });
 
     it('shows a MediaPipe incident dialog when an actionable signal is raised', () => {
