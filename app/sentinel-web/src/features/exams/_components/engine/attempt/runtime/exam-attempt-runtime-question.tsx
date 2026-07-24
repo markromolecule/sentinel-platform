@@ -32,12 +32,15 @@ export function ExamAttemptRuntimeQuestion({
             <div className="space-y-5">
                 <div className="border-border/60 flex flex-col gap-4 border-t border-b py-4">
                     <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
-                        <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center sm:gap-3">
+                        <div
+                            className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap sm:items-center sm:gap-3"
+                            data-testid="question-runtime-actions"
+                        >
                             <Button
                                 type="button"
                                 variant="ghost"
                                 className={cn(
-                                    'justify-start rounded-md px-3 sm:justify-center',
+                                    'min-h-11 min-w-0 rounded-md px-2 text-xs leading-tight whitespace-normal sm:min-h-0 sm:px-3 sm:text-sm',
                                     isFlagged ? 'text-amber-700 hover:text-amber-800' : '',
                                 )}
                                 onClick={onToggleFlag}
@@ -52,7 +55,7 @@ export function ExamAttemptRuntimeQuestion({
                             <Button
                                 type="button"
                                 variant={crossOutEnabled ? 'default' : 'ghost'}
-                                className="justify-start rounded-md px-3 sm:justify-center"
+                                className="min-h-11 min-w-0 rounded-md px-2 text-xs leading-tight whitespace-normal sm:min-h-0 sm:px-3 sm:text-sm"
                                 onClick={onToggleCrossOutMode}
                             >
                                 <CircleOff className="mr-2 h-4 w-4" />

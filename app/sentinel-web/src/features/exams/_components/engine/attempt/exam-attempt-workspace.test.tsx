@@ -62,4 +62,16 @@ describe('ExamAttemptWorkspace', () => {
         expect(screen.getAllByTestId('passage-panel')[0]).toBeTruthy();
         expect(screen.getByTestId('footer')).toBeTruthy();
     });
+
+    it('uses the full question pane when the desktop passage panel is hidden', () => {
+        render(
+            <ExamAttemptWorkspace questionRail={<div>Rail Items</div>}>
+                <div data-testid="question-content">Question Content</div>
+            </ExamAttemptWorkspace>,
+        );
+
+        expect(screen.queryByTestId('resizable-group')).toBeNull();
+        expect(screen.queryByTestId('resizable-handle')).toBeNull();
+        expect(screen.getAllByTestId('question-content')).toHaveLength(1);
+    });
 });

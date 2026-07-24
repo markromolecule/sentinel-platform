@@ -1,7 +1,6 @@
 'use client';
 
 import type { ReactNode } from 'react';
-import { ScrollArea } from '@sentinel/ui';
 
 type ExamAttemptMobileQuestionNavigationProps = {
     questionRail: ReactNode;
@@ -12,9 +11,13 @@ export function ExamAttemptMobileQuestionNavigation({
 }: ExamAttemptMobileQuestionNavigationProps) {
     return (
         <div className="border-border/60 bg-muted/10 border-b px-3 py-3 lg:hidden">
-            <ScrollArea className="w-full whitespace-nowrap" type="always">
-                <div className="flex items-center gap-2 pr-3">{questionRail}</div>
-            </ScrollArea>
+            <nav
+                aria-label="Question navigation"
+                className="w-full touch-pan-x overflow-x-auto overflow-y-hidden overscroll-x-contain [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+                data-testid="compact-question-navigation"
+            >
+                <div className="flex w-max min-w-full items-center gap-2 pr-3">{questionRail}</div>
+            </nav>
         </div>
     );
 }

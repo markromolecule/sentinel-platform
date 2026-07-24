@@ -148,7 +148,7 @@ export function AttemptView({ attempt }: AttemptViewProps) {
                         <>
                             <Badge
                                 variant="outline"
-                                className="rounded-md px-2.5 py-1 text-[11px] sm:px-3 sm:text-xs"
+                                className="hidden rounded-md px-2.5 py-1 text-[11px] sm:inline-flex sm:px-3 sm:text-xs"
                             >
                                 Question {questions.length ? safeQuestionIndex + 1 : 0} of{' '}
                                 {questions.length}
