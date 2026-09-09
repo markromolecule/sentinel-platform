@@ -59,14 +59,18 @@ vi.mock('@/constants/theme', () => ({
 
 const mockBuildReports = vi.fn();
 vi.mock('@sentinel/shared', () => ({
-    buildExamAttemptQuestionReports: () => mockBuildReports(),
+    buildExamAttemptQuestionReports: (args?: any) => mockBuildReports(args),
 }));
 
 import { ResultView } from './result-view';
 
 // Helper to search text inside the rendered node tree
 function findText(node: any, content: string): boolean {
-    if (!node || typeof node !== 'object') return false;
+    if (!node) return false;
+    if (Array.isArray(node)) {
+        return node.some((item) => findText(item, content));
+    }
+    if (typeof node !== 'object') return false;
     if (node.type === 'Text') {
         const raw = node.props?.children;
         const text = Array.isArray(raw) ? raw.join('') : String(raw ?? '');
@@ -74,22 +78,24 @@ function findText(node: any, content: string): boolean {
     }
     const children = node.props?.children;
     if (!children) return false;
-    const list = Array.isArray(children) ? children : [children];
-    return list.some((c: any) => findText(c, content));
+    return findText(children, content);
 }
 
 // Helper to find specific component types (like TouchableOpacity)
 function findNode(node: any, predicate: (n: any) => boolean): any {
-    if (!node || typeof node !== 'object') return null;
+    if (!node) return null;
+    if (Array.isArray(node)) {
+        for (const item of node) {
+            const result = findNode(item, predicate);
+            if (result) return result;
+        }
+        return null;
+    }
+    if (typeof node !== 'object') return null;
     if (predicate(node)) return node;
     const children = node.props?.children;
     if (!children) return null;
-    const list = Array.isArray(children) ? children : [children];
-    for (const child of list) {
-        const result = findNode(child, predicate);
-        if (result) return result;
-    }
-    return null;
+    return findNode(children, predicate);
 }
 
 describe('ResultView Component', () => {
@@ -274,5 +280,109 @@ describe('ResultView Component', () => {
 
         expect(findText(node, 'PENDING REVIEW')).toBe(true);
         expect(findText(node, 'PASSED')).toBe(false);
+    });
+
+    it('renders section breakdown when exam has questionSections and questions carry matching sectionId', () => {
+        const examWithSections = {
+            ...mockExam,
+            questionSections: [
+                { id: 'sec-1', title: 'Part I: Objective', orderIndex: 0 },
+                { id: 'sec-2', title: 'Part II: Free Response', orderIndex: 1 },
+            ],
+        };
+
+        const questionsWithSections = [
+            { id: 'q-1', text: 'Prompt 1', points: 5, sectionId: 'sec-1' },
+            { id: 'q-2', text: 'Prompt 2', points: 10, sectionId: 'sec-2' },
+        ];
+
+        mockBuildReports.mockReturnValue([
+            { questionId: 'q-1', awardedScore: 5, maxScore: 5 },
+            { questionId: 'q-2', awardedScore: 8, maxScore: 10 },
+        ]);
+
+        const summary = {
+            score: 13,
+            totalScore: 15,
+            percentage: 87,
+            answeredCount: 2,
+            autoGradableQuestionCount: 1,
+            manualReviewQuestionCount: 0,
+            requiresManualReview: false,
+        };
+
+        const node = ResultView({
+            exam: examWithSections,
+            questions: questionsWithSections,
+            summary,
+            answers: mockAnswers,
+            onReturnToDashboard: mockOnReturn,
+        });
+
+        expect(findText(node, 'Part I: Objective')).toBe(true);
+        expect(findText(node, 'Part II: Free Response')).toBe(true);
+        expect(findText(node, '5/5 (100%)')).toBe(true);
+        expect(findText(node, '8/10 (80%)')).toBe(true);
+    });
+
+    it('falls back to Core Assessment when questionSections is empty or unmatched', () => {
+        mockBuildReports.mockReturnValue([]);
+        const summary = {
+            score: 5,
+            totalScore: 10,
+            percentage: 50,
+            answeredCount: 5,
+            autoGradableQuestionCount: 5,
+            manualReviewQuestionCount: 0,
+            requiresManualReview: false,
+        };
+
+        const node = ResultView({
+            exam: { ...mockExam, questionSections: [] },
+            questions: [],
+            summary,
+            answers: mockAnswers,
+            onReturnToDashboard: mockOnReturn,
+        });
+
+        expect(findText(node, 'Core Assessment')).toBe(true);
+        expect(findText(node, '5/10 (50%)')).toBe(true);
+    });
+
+    it('defensively normalizes questions so buildExamAttemptQuestionReports receives content.prompt', () => {
+        mockBuildReports.mockReturnValue([]);
+        const summary = {
+            score: 5,
+            totalScore: 10,
+            percentage: 50,
+            answeredCount: 1,
+            autoGradableQuestionCount: 1,
+            manualReviewQuestionCount: 0,
+            requiresManualReview: false,
+        };
+
+        // Pass an adapted mobile question that only has 'text' and no 'content'
+        const mobileQuestions = [
+            {
+                id: 'q-text-only',
+                text: 'What is photosynthesis?',
+                type: 'MULTIPLE_CHOICE',
+                points: 2,
+            },
+        ];
+
+        ResultView({
+            exam: mockExam,
+            questions: mobileQuestions as any,
+            summary,
+            answers: mockAnswers,
+            onReturnToDashboard: mockOnReturn,
+        });
+
+        expect(mockBuildReports).toHaveBeenCalled();
+        const lastCallArgs = mockBuildReports.mock.calls[mockBuildReports.mock.calls.length - 1][0];
+        expect(lastCallArgs.questions).toHaveLength(1);
+        expect(lastCallArgs.questions[0].content).toBeDefined();
+        expect(lastCallArgs.questions[0].content.prompt).toBe('What is photosynthesis?');
     });
 });

@@ -1,7 +1,7 @@
 ---
 title: "Fix Mobile Exam Submission Flow, Result View Parity, and Question Visibility"
 type: context
-status: draft
+status: ready
 created: "2026-09-09"
 tags: [context, mobile, exam-flow, submission, result-view, feedback, question-visibility]
 feature: "fix-mobile-exam-submission-and-question-visibility"
@@ -36,17 +36,20 @@ feature: "fix-mobile-exam-submission-and-question-visibility"
 
 ### Functional Requirements
 
-- [ ] **FR-01 (Idempotent Session Turn-in & Result Navigation):**
+- [x] **FR-01 (Idempotent Session Turn-in & Result Navigation):**
   - In `useExamSessionSubmission` (`app/sentinel-mobile/features/exam/hooks/use-exam-session-submission.ts`):
     - When `completeExamSession` succeeds, write `completedAt: result.completedAt || new Date().toISOString()` into `MobileStoredExamPreview`.
   - In `useExamResult` (`app/sentinel-mobile/features/exam/hooks/use-exam-result.ts`):
     - Check if `preview.completedAt` exists OR if `preview.summary` is already present. If present, do NOT invoke `completeExamSession`; immediately clear storage and navigate to `/exam/[id]/feedback?id=${id}&attemptId=${sessionId}`.
     - Wrap `completeExamSession` in error interception: if an HTTP 409 or message containing "already been submitted" or "already submitted" is caught, treat as idempotent success, clear storage, and proceed to `/exam/[id]/feedback`.
-- [ ] **FR-02 (Question Visibility & Active Session Adaptation):**
+- [x] **FR-02 (Question Visibility & Active Session Adaptation):**
   - Option A Confirmed: Resolve the condition where questions fail to display during the active session:
     - In `adaptExamForMobile` (`mobile-exam-display-adapter.ts`), preserve the raw questions list in `rawQuestions` so that replacing `questions` with `questionCount: number` does not obliterate the question objects.
     - In `useExamResult` (`use-exam-result.ts`), query with `{ viewer: 'student' }` and use `adaptExamQuestionsForMobile` for consistent question mapping.
     - In `extractRawQuestionsList` (`mobile-question-adapter.ts`), safely retrieve `rawQuestions` if `questions` is a number.
+- [x] **FR-03 (Section Breakdown & Report Normalization Parity):**
+  - In `mobile-question-adapter.ts` (`adaptExamQuestionsForMobile`), map `sectionId: question?.sectionId ?? question?.section_id ?? null` and preserve `content`.
+  - In `result-view.tsx`, defensively guarantee `content.prompt` fallback before calling `buildExamAttemptQuestionReports` and filter questions matching `sec.id` with fallback to "Core Assessment".
 
 ### Edge Cases & Failure Modes
 
@@ -63,6 +66,8 @@ feature: "fix-mobile-exam-submission-and-question-visibility"
   - `app/sentinel-mobile/features/exam/hooks/use-exam-session-submission.ts`
   - `app/sentinel-mobile/features/exam/lib/mobile-exam-storage.ts`
   - `app/sentinel-mobile/features/exam/components/detail/result-view.tsx`
+  - `app/sentinel-mobile/features/exam/lib/mobile-question-adapter.ts`
+  - `app/sentinel-mobile/features/exam/lib/mobile-exam-adapter.types.ts`
   - `app/sentinel-api/src/modules/examination/flow/services/complete-session/complete-session.guards.ts`
 
 ---
@@ -72,6 +77,7 @@ feature: "fix-mobile-exam-submission-and-question-visibility"
 - **In Scope:**
   - Mobile exam turn-in idempotency fix and feedback page navigation.
   - Clarification and alignment of question visibility behavior on mobile result screens.
+  - Section breakdown preservation and report builder normalization.
 - **Out of Scope:**
   - Modifying backend scoring engines or database schemas.
 
@@ -84,3 +90,4 @@ feature: "fix-mobile-exam-submission-and-question-visibility"
 | DEC-01 | Submission Idempotency | `handleTurnIn` must not re-invoke `completeExamSession` when session was submitted during session flow | Approved |
 | DEC-02 | 409 Recovery | Intercept "already been submitted" as success and route to feedback | Approved |
 | DEC-03 | Question Visibility | Option A confirmed: Address missing questions in active exam session and prevent question dropping during model adaptation | Approved |
+| DEC-04 | Section Breakdown Parity | Preserve `sectionId` and normalize `content.prompt` in `ResultView` for robust section breakdowns | Approved |

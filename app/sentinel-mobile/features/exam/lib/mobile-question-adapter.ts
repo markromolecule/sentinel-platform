@@ -179,12 +179,14 @@ export function adaptExamQuestionsForMobile(
                 : typeof (question as any)?.point === 'number'
                     ? (question as any).point
                     : 1;
+        const sectionId = question?.sectionId ?? question?.section_id ?? null;
 
         return {
             id: questionId,
             text,
             type: normalizedType,
             points,
+            sectionId,
             options: layout.options,
             pairs: layout.pairs,
             blanks: layout.blanks,
@@ -193,6 +195,7 @@ export function adaptExamQuestionsForMobile(
             ...(layout.placeholder !== undefined && { placeholder: layout.placeholder }),
             ...(layout.maxLength !== undefined && { maxLength: layout.maxLength }),
             originalContent: question?.content ?? content,
+            content: question?.content ?? content,
         };
     });
 }

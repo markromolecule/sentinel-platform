@@ -42,28 +42,38 @@ export function ResultView({ exam, questions, summary, answers, onReturnToDashbo
         });
 
     // Compute Section Breakdown with defensive question array normalization
-    const questionList = Array.isArray(questions)
+    const questionList = Array.isArray(questions) && questions.length > 0
         ? questions
-        : Array.isArray((exam as any)?.questions)
-          ? (exam as any).questions
-          : [];
+        : Array.isArray((exam as any)?.rawQuestions) && (exam as any).rawQuestions.length > 0
+          ? (exam as any).rawQuestions
+          : Array.isArray((exam as any)?.questions)
+            ? (exam as any).questions
+            : [];
+
+    const normalizedQuestionsForReports = questionList.map((q: any) => ({
+        ...q,
+        content: {
+            ...(q.content ?? q.originalContent ?? {}),
+            prompt: q.content?.prompt ?? q.prompt ?? q.text ?? '',
+        },
+    }));
 
     const reports = buildExamAttemptQuestionReports({
-        questions: questionList,
+        questions: normalizedQuestionsForReports,
         answers: answers as any,
     });
 
     const sections = exam.questionSections || [];
     const hasSections = sections.length > 0;
 
-    const breakdown = hasSections
+    const computedSectionBreakdown = hasSections
         ? sections
             .map((sec) => {
                 const secQuestions = questionList.filter(
-                    (q: any) => q.sectionId === sec.id
+                    (q: any) => (q.sectionId ?? q.section_id) === sec.id,
                 );
                 const secReports = reports.filter((r) =>
-                    secQuestions.some((sq: any) => sq.id === r.questionId)
+                    secQuestions.some((sq: any) => sq.id === r.questionId),
                 );
                 const score = secReports.reduce((sum, r) => sum + (r.awardedScore ?? 0), 0);
                 const maxScore = secReports.reduce((sum, r) => sum + r.maxScore, 0);
@@ -77,6 +87,10 @@ export function ResultView({ exam, questions, summary, answers, onReturnToDashbo
                 };
             })
             .filter((b) => b.maxScore > 0)
+        : [];
+
+    const breakdown = computedSectionBreakdown.length > 0
+        ? computedSectionBreakdown
         : [
             {
                 id: 'general',
