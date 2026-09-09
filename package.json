@@ -38,7 +38,21 @@
     "typescript": "~5.9.2"
   },
   "dependencies": {
-    "expo": "^57.0.21",
-    "pg": "^8.19.0"
+    "pg": "^8.19.0",
+    "zod": "^4.3.6"
+  },
+  "pnpm": {
+    "packageExtensions": {
+      "@hookform/resolvers": {
+        "peerDependencies": {
+          "zod": "^4.0.0"
+        },
+        "peerDependenciesMeta": {
+          "zod": {
+            "optional": true
+          }
+        }
+      }
+    }
   }
 }
