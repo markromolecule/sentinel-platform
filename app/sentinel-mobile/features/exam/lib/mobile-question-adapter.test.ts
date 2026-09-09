@@ -145,4 +145,41 @@ describe('mobile-question-adapter orchestration', () => {
         expect(adapted[0].id).toBe('q-nested');
         expect(adapted[0].text).toBe('Nested prompt');
     });
+
+    it('preserves sectionId and content properties on adapted questions', () => {
+        const examData = {
+            questions: [
+                {
+                    id: 'q-sec-1',
+                    type: 'MULTIPLE_CHOICE',
+                    sectionId: 'sec-part-1',
+                    content: { prompt: 'Part 1 Question', options: ['A', 'B'] },
+                },
+                {
+                    id: 'q-sec-2',
+                    type: 'ESSAY',
+                    section_id: 'sec-part-2',
+                    content: { prompt: 'Part 2 Essay', maxLength: 1000 },
+                },
+                {
+                    id: 'q-sec-3',
+                    type: 'TRUE_FALSE',
+                    content: { prompt: 'Unsectioned Question' },
+                },
+            ],
+        };
+
+        const adapted = adaptExamQuestionsForMobile(examData);
+        expect(adapted).toHaveLength(3);
+
+        expect(adapted[0].sectionId).toBe('sec-part-1');
+        expect(adapted[0].content).toEqual({ prompt: 'Part 1 Question', options: ['A', 'B'] });
+        expect(adapted[0].originalContent).toEqual({ prompt: 'Part 1 Question', options: ['A', 'B'] });
+
+        expect(adapted[1].sectionId).toBe('sec-part-2');
+        expect(adapted[1].content).toEqual({ prompt: 'Part 2 Essay', maxLength: 1000 });
+
+        expect(adapted[2].sectionId).toBeNull();
+        expect(adapted[2].content).toEqual({ prompt: 'Unsectioned Question' });
+    });
 });

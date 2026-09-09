@@ -128,5 +128,3 @@ export function calculateEssayWeightedScore(
 
     return Math.round(precisionScore * 100) / 100;
 }
-
-export { evaluateEssayWithRubric, type EssayEvaluationResult } from './essay-rubric-evaluator';

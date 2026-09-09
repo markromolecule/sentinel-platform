@@ -1,11 +1,21 @@
 {
-    "extends": "expo/tsconfig.base.json",
+    "extends": "expo/tsconfig.base",
     "compilerOptions": {
         "strict": true,
         "paths": {
-            "@/*": ["./*"],
-            "@sentinel/shared/*": ["../../packages/shared/src/*"]
+            "@/*": [
+                "./*"
+            ],
+            "@sentinel/shared/*": [
+                "../../packages/shared/src/*"
+            ]
         }
     },
-    "include": ["**/*.ts", "**/*.tsx", "svg.d.ts", "types/**/*.d.ts", "nativewind-env.d.ts"]
+    "include": [
+        "**/*.ts",
+        "**/*.tsx",
+        "svg.d.ts",
+        "types/**/*.d.ts",
+        "nativewind-env.d.ts"
+    ]
 }

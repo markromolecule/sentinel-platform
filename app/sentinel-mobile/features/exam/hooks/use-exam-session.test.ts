@@ -10,8 +10,11 @@ let stateValues: any[] = [];
 let stateIndex = 0;
 let effectCallbacks: Array<() => void | (() => void)> = [];
 
-vi.mock('react', () => {
+vi.mock('react', async (importOriginal) => {
+    const actual = await importOriginal<typeof import('react')>();
     return {
+        ...actual,
+        default: actual,
         useState: (initialValue: any) => {
             const currentIndex = stateIndex;
             if (stateValues[currentIndex] === undefined) {
@@ -202,6 +205,7 @@ describe('useExamSession Hook', () => {
             answers: {},
             elapsedSeconds: 0,
             summary: mockResult,
+            completedAt: mockResult.completedAt,
         });
         expect(clearStoredMobileExamSession).toHaveBeenCalledWith('exam-123');
         expect(mockReplace).toHaveBeenCalledWith('/exam/exam-123/result');

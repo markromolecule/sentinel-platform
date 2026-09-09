@@ -603,4 +603,24 @@ describe('adaptExamForMobile', () => {
         });
         expect(adapted.professor).toBe('Instructor');
     });
+
+    it('preserves rawQuestions so adaptExamQuestionsForMobile can extract questions from adapted model', () => {
+        const rawExam = makeExam([
+            makeQuestion('MULTIPLE_CHOICE', {
+                prompt: 'What is 2+2?',
+                options: ['3', '4', '5'],
+                correctAnswer: '4',
+            }),
+        ] as any);
+
+        const adapted = adaptExamForMobile(rawExam);
+
+        expect(adapted.questions).toBe(1); // display count
+        expect(adapted.rawQuestions).toHaveLength(1);
+
+        // Crucial check: passing adapted exam to adaptExamQuestionsForMobile extracts questions
+        const extracted = adaptExamQuestionsForMobile(adapted);
+        expect(extracted).toHaveLength(1);
+        expect(extracted[0].text).toBe('What is 2+2?');
+    });
 });

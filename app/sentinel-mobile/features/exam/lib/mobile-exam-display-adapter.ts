@@ -49,11 +49,18 @@ export function adaptExamForMobile(exam: Exam): MobileExamDisplay {
         mediaPipeSandbox: exam.mediaPipeSandbox,
     });
 
+    const rawQuestions = Array.isArray(exam.questions)
+        ? exam.questions
+        : Array.isArray((exam as any).rawQuestions)
+            ? (exam as any).rawQuestions
+            : [];
+
     return {
         ...exam,
         mediaPipeSandbox: resolvedMediaPipeSandbox,
         professor: exam.professor || 'Instructor',
         questions: questionCount,
+        rawQuestions,
         passingPercentage: exam.passingScore,
         difficulty: toDisplayDifficulty(exam.difficulty),
         instructions: buildInstructions(exam),

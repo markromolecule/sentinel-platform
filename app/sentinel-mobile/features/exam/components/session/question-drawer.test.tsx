@@ -1,8 +1,8 @@
 import { vi, describe, it, expect } from 'vitest';
 
 // ─── React mock ───────────────────────────────────────────────────────────────
-vi.mock('react', () => ({
-    createElement: (type: any, props: any, ...children: any[]) => ({
+vi.mock('react', () => {
+    const createElement = (type: any, props: any, ...children: any[]) => ({
         type,
         props: {
             ...props,
@@ -13,10 +13,15 @@ vi.mock('react', () => ({
                       ? children[0]
                       : children,
         },
-    }),
-    default: {},
-    useEffect: () => {},
-}));
+    });
+    return {
+        createElement,
+        default: {
+            createElement,
+        },
+        useEffect: () => {},
+    };
+});
 
 // ─── React Native mocks ───────────────────────────────────────────────────────
 vi.mock('react-native', () => ({

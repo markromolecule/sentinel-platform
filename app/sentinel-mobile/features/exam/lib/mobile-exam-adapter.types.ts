@@ -5,6 +5,7 @@ export type MobileDifficulty = 'Easy' | 'Medium' | 'Hard';
 export type MobileExamDisplay = Omit<Exam, 'questions' | 'difficulty'> & {
     professor: string;
     questions: number;
+    rawQuestions?: ExamQuestion[];
     passingPercentage: number;
     difficulty: MobileDifficulty;
     instructions: string[];
@@ -37,5 +38,8 @@ export type MobileSessionQuestion = {
     placeholder?: string;
     /** Maximum character length for SHORT_ANSWER / ESSAY inputs. */
     maxLength?: number;
+    /** Unique identifier associating question with an ExamQuestionSection, if any. */
+    sectionId?: string | null;
     originalContent: ExamQuestion['content'];
+    content?: ExamQuestion['content'];
 };

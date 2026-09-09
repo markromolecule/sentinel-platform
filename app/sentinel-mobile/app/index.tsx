@@ -22,7 +22,7 @@ export default function SplashScreen() {
 
     return (
         <View style={styles.container}>
-            <StatusBar style="light" backgroundColor="transparent" translucent />
+            <StatusBar style="light" />
             <View style={styles.background}>
                 <Logo variant="white" width={280} height={80} />
                 {isLoading && (

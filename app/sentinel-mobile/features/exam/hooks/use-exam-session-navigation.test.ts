@@ -6,28 +6,33 @@ import type { MobileSessionQuestion } from '@/features/exam/lib/mobile-exam-adap
 let stateValues: any[] = [];
 let stateIndex = 0;
 
-vi.mock('react', () => ({
-    useState: (initialValue: any) => {
-        const currentIndex = stateIndex;
-        if (stateValues[currentIndex] === undefined) {
-            stateValues[currentIndex] = initialValue;
-        }
-        const value = stateValues[currentIndex];
-        const setValue = (newValue: any) => {
-            if (typeof newValue === 'function') {
-                stateValues[currentIndex] = newValue(stateValues[currentIndex]);
-            } else {
-                stateValues[currentIndex] = newValue;
+vi.mock('react', async (importOriginal) => {
+    const actual = await importOriginal<typeof import('react')>();
+    return {
+        ...actual,
+        default: actual,
+        useState: (initialValue: any) => {
+            const currentIndex = stateIndex;
+            if (stateValues[currentIndex] === undefined) {
+                stateValues[currentIndex] = initialValue;
             }
-        };
-        stateIndex++;
-        return [value, setValue];
-    },
-    useEffect: vi.fn(),
-    useCallback: (fn: any) => fn,
-    useMemo: (fn: any) => fn(),
-    useRef: (initial: any) => ({ current: initial }),
-}));
+            const value = stateValues[currentIndex];
+            const setValue = (newValue: any) => {
+                if (typeof newValue === 'function') {
+                    stateValues[currentIndex] = newValue(stateValues[currentIndex]);
+                } else {
+                    stateValues[currentIndex] = newValue;
+                }
+            };
+            stateIndex++;
+            return [value, setValue];
+        },
+        useEffect: vi.fn(),
+        useCallback: (fn: any) => fn,
+        useMemo: (fn: any) => fn(),
+        useRef: (initial: any) => ({ current: initial }),
+    };
+});
 
 vi.mock('react-native', () => ({
     Alert: {

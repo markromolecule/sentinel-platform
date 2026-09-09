@@ -54,6 +54,7 @@ vi.mock('expo-router', () => ({
         replace: vi.fn(),
     }),
     useLocalSearchParams: () => ({ id: 'test-exam-id' }),
+    useFocusEffect: vi.fn(),
 }));
 
 vi.mock('@/constants/theme', () => ({
@@ -61,10 +62,6 @@ vi.mock('@/constants/theme', () => ({
         light: { primary: '#000', border: '#ccc', text: '#000', card: '#fff', background: '#fff' },
         dark: { primary: '#fff', border: '#444', text: '#fff', card: '#222', background: '#111' },
     },
-}));
-
-vi.mock('@react-navigation/native', () => ({
-    useFocusEffect: vi.fn(),
 }));
 
 const mockAuth = vi.fn(() => ({

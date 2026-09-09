@@ -5,20 +5,22 @@ const sentinelDarkBg = '#0f0f10';
 const tintColorLight = sentinelPrimary;
 const tintColorDark = '#fff';
 
+const lightTheme = {
+    text: '#11181C',
+    background: '#fff',
+    tint: tintColorLight,
+    icon: '#687076',
+    tabIconDefault: '#687076',
+    tabIconSelected: tintColorLight,
+    primary: sentinelPrimary,
+    input: '#f4f4f5',
+    border: '#e4e4e7',
+    card: '#fff',
+    error: '#ef4444',
+};
+
 export const Colors = {
-    light: {
-        text: '#11181C',
-        background: '#fff',
-        tint: tintColorLight,
-        icon: '#687076',
-        tabIconDefault: '#687076',
-        tabIconSelected: tintColorLight,
-        primary: sentinelPrimary,
-        input: '#f4f4f5',
-        border: '#e4e4e7',
-        card: '#fff',
-        error: '#ef4444',
-    },
+    light: lightTheme,
     dark: {
         text: '#ECEDEE',
         background: sentinelDarkBg,
@@ -32,6 +34,7 @@ export const Colors = {
         card: '#18181b', // oklch(0.205 0 0) approx
         error: '#ef4444',
     },
+    unspecified: lightTheme,
 };
 
 export const Fonts = Platform.select({
