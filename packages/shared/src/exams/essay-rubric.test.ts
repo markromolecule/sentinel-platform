@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { calculateEssayWeightedScore, evaluateEssayWithRubric, ESSAY_RUBRIC_CRITERIA } from './essay-rubric';
+import { calculateEssayWeightedScore, ESSAY_RUBRIC_CRITERIA } from './essay-rubric';
+import { evaluateEssayWithRubric } from './essay-rubric-evaluator';
 
 describe('Essay Rubric Weighted Score Calculation', () => {
     it('calculates the maximum possible points if all criteria are 4', () => {

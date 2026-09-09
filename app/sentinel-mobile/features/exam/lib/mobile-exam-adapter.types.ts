@@ -5,6 +5,7 @@ export type MobileDifficulty = 'Easy' | 'Medium' | 'Hard';
 export type MobileExamDisplay = Omit<Exam, 'questions' | 'difficulty'> & {
     professor: string;
     questions: number;
+    rawQuestions?: ExamQuestion[];
     passingPercentage: number;
     difficulty: MobileDifficulty;
     instructions: string[];

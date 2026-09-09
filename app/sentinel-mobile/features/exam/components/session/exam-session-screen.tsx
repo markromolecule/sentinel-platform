@@ -230,7 +230,7 @@ export const ExamSessionScreen = () => {
                 <TouchableOpacity
                     activeOpacity={1}
                     onPress={() => setIsDrawerOpen(false)}
-                    style={[StyleSheet.absoluteFillObject, { zIndex: 10 }]}
+                    style={[StyleSheet.absoluteFill, { zIndex: 10 }]}
                     accessibilityLabel="Close question drawer"
                 />
             )}

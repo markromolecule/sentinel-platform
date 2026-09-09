@@ -56,6 +56,7 @@ export function useExamSessionSubmission({
                 answers: answerPayload,
                 elapsedSeconds: elapsed,
                 summary: result,
+                completedAt: result?.completedAt || new Date().toISOString(),
             };
 
             await writeStoredMobileExamPreview(id, preview);

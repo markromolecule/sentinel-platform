@@ -3,13 +3,18 @@ import { useExamSessionSync } from './use-exam-session-sync';
 
 let effectCallbacks: Array<() => void | (() => void)> = [];
 
-vi.mock('react', () => ({
-    useEffect: (callback: () => void | (() => void)) => {
-        effectCallbacks.push(callback);
-    },
-    useCallback: (fn: any) => fn,
-    useRef: (initial: any) => ({ current: initial }),
-}));
+vi.mock('react', async (importOriginal) => {
+    const actual = await importOriginal<typeof import('react')>();
+    return {
+        ...actual,
+        default: actual,
+        useEffect: (callback: () => void | (() => void)) => {
+            effectCallbacks.push(callback);
+        },
+        useCallback: (fn: any) => fn,
+        useRef: (initial: any) => ({ current: initial }),
+    };
+});
 
 vi.mock('@sentinel/hooks', () => ({
     useAuth: () => ({

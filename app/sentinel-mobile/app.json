@@ -7,12 +7,6 @@
         "orientation": "portrait",
         "icon": "./assets/icon.png",
         "userInterfaceStyle": "light",
-        "newArchEnabled": true,
-        "splash": {
-            "image": "./assets/splash-icon.png",
-            "resizeMode": "contain",
-            "backgroundColor": "#ffffff"
-        },
         "ios": {
             "supportsTablet": true,
             "bundleIdentifier": "com.livadomc.sentinelmobile",
@@ -26,7 +20,6 @@
                 "foregroundImage": "./assets/adaptive-icon.png",
                 "backgroundColor": "#ffffff"
             },
-            "edgeToEdgeEnabled": true,
             "predictiveBackGestureEnabled": false,
             "package": "com.livadomc.sentinelmobile"
         },
@@ -43,6 +36,14 @@
             "expo-router",
             "expo-font",
             "expo-web-browser",
+            [
+                "expo-splash-screen",
+                {
+                    "image": "./assets/splash-icon.png",
+                    "resizeMode": "contain",
+                    "backgroundColor": "#ffffff"
+                }
+            ],
             [
                 "expo-audio",
                 {

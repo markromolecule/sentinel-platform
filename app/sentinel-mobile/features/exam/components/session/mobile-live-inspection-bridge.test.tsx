@@ -36,6 +36,9 @@ vi.mock('react', async (importOriginal) => {
 vi.mock('react-native', () => ({
     View: (props: any) => ({ type: 'View', props }),
     Text: (props: any) => ({ type: 'Text', props }),
+    StyleSheet: {
+        create: (styles: any) => styles,
+    },
     useColorScheme: () => 'light',
 }));
 
