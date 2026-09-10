@@ -2,20 +2,17 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { GeminiProvider } from './gemini.provider';
 
 describe('GeminiProvider quota retry', () => {
-    const originalApiKey = process.env.GEMINI_API_KEY;
+    const originalEnv = { ...process.env };
 
     beforeEach(() => {
+        delete process.env.GOOGLE_GENAI_USE_VERTEXAI;
+        delete process.env.AI_PROVIDER;
         process.env.GEMINI_API_KEY = 'test-api-key';
     });
 
     afterEach(() => {
         vi.restoreAllMocks();
-
-        if (originalApiKey === undefined) {
-            delete process.env.GEMINI_API_KEY;
-        } else {
-            process.env.GEMINI_API_KEY = originalApiKey;
-        }
+        process.env = { ...originalEnv };
     });
 
     it('retries one quota-limited structured generation request', async () => {
@@ -193,6 +190,8 @@ describe('GeminiProvider timeout and model resolution', () => {
         delete process.env.AI_GEMINI_FALLBACK_MODEL;
         delete process.env.AI_GEMINI_PER_ATTEMPT_TIMEOUT_MS;
         delete process.env.AI_GEMINI_PER_ATTEMPT_TIMEOUT;
+        delete process.env.GOOGLE_GENAI_USE_VERTEXAI;
+        delete process.env.AI_PROVIDER;
     });
 
     afterEach(() => {
@@ -452,6 +451,157 @@ describe('GeminiProvider timeout and model resolution', () => {
         expect(urlsCalled.length).toBe(2);
         expect(urlsCalled[0]).toContain('gemini-2.5-flash');
         expect(urlsCalled[1]).toContain('gemini-2.5-flash-lite');
+    });
+});
+
+describe('GeminiProvider Vertex AI Mode', () => {
+    const originalEnv = { ...process.env };
+
+    beforeEach(() => {
+        process.env = { ...originalEnv };
+        process.env.GOOGLE_GENAI_USE_VERTEXAI = 'true';
+        process.env.GOOGLE_CLOUD_PROJECT = 'test-project';
+        process.env.GOOGLE_CLOUD_LOCATION = 'us-central1';
+        GeminiProvider.resetVertexAiClient();
+        vi.clearAllMocks();
+    });
+
+    afterEach(() => {
+        process.env = originalEnv;
+        GeminiProvider.resetVertexAiClient();
+        vi.restoreAllMocks();
+    });
+
+    it('uploadFile returns inline base64 data without making network requests', async () => {
+        const fetchSpy = vi.spyOn(globalThis, 'fetch');
+        const buffer = Buffer.from('dummy pdf content for testing');
+
+        const result = await GeminiProvider.uploadFile({
+            buffer,
+            mimeType: 'application/pdf',
+            displayName: 'lesson.pdf',
+        });
+
+        expect(fetchSpy).not.toHaveBeenCalled();
+        expect(result.name).toBe('lesson.pdf');
+        expect(result.uri).toBe('inline://lesson.pdf');
+        expect(result.mimeType).toBe('application/pdf');
+        expect(result.inlineData).toBeDefined();
+        expect(result.inlineData?.data).toBe(buffer.toString('base64'));
+    });
+
+    it('deleteFile is a no-op without making network requests', async () => {
+        const fetchSpy = vi.spyOn(globalThis, 'fetch');
+
+        await GeminiProvider.deleteFile('inline://lesson.pdf');
+
+        expect(fetchSpy).not.toHaveBeenCalled();
+    });
+
+    it('generates structured JSON using mocked Vertex AI client', async () => {
+        const generateContentMock = vi.fn().mockResolvedValue({
+            text: JSON.stringify({ generatedQuestions: [{ text: 'Question 1' }] }),
+        });
+
+        const mockClient = {
+            models: {
+                generateContent: generateContentMock,
+            },
+        };
+
+        GeminiProvider.setVertexAiClientForTesting(mockClient);
+
+        const result = await GeminiProvider.generateStructuredJson<{
+            generatedQuestions: Array<{ text: string }>;
+        }>({
+            prompt: 'Generate questions from source',
+            responseJsonSchema: { type: 'object' },
+            files: [
+                {
+                    uri: 'inline://lesson.pdf',
+                    mimeType: 'application/pdf',
+                    inlineData: {
+                        mimeType: 'application/pdf',
+                        data: 'base64-content',
+                    },
+                },
+            ],
+            model: 'gemini-2.5-flash',
+        });
+
+        expect(result).toEqual({ generatedQuestions: [{ text: 'Question 1' }] });
+        expect(generateContentMock).toHaveBeenCalledTimes(1);
+
+        const callArgs = generateContentMock.mock.calls[0][0];
+        expect(callArgs.model).toBe('gemini-2.5-flash');
+        expect(callArgs.config.responseMimeType).toBe('application/json');
+        expect(callArgs.contents[0].parts).toContainEqual({
+            inlineData: {
+                mimeType: 'application/pdf',
+                data: 'base64-content',
+            },
+        });
+        expect(callArgs.contents[0].parts).toContainEqual({
+            text: 'Generate questions from source',
+        });
+    });
+
+    it('retries on Vertex AI 429 quota error and succeeds', async () => {
+        const generateContentMock = vi
+            .fn()
+            .mockRejectedValueOnce({ status: 429, message: 'Resource exhausted' })
+            .mockResolvedValueOnce({
+                text: JSON.stringify({ success: true }),
+            });
+
+        const mockClient = {
+            models: {
+                generateContent: generateContentMock,
+            },
+        };
+
+        GeminiProvider.setVertexAiClientForTesting(mockClient);
+        vi.spyOn(GeminiProvider as any, 'sleep').mockResolvedValue(undefined);
+
+        const result = await GeminiProvider.generateStructuredJson<{ success: boolean }>({
+            prompt: 'Test prompt',
+            responseJsonSchema: { type: 'object' },
+            model: 'gemini-2.5-flash',
+        });
+
+        expect(result).toEqual({ success: true });
+        expect(generateContentMock).toHaveBeenCalledTimes(2);
+    });
+
+    it('retries on Vertex AI 504 server error with fallback model', async () => {
+        const modelsUsed: string[] = [];
+        const generateContentMock = vi.fn().mockImplementation((args: { model: string }) => {
+            modelsUsed.push(args.model);
+            if (args.model === 'gemini-2.5-flash') {
+                return Promise.reject({ status: 504, message: 'Deadline exceeded' });
+            }
+            return Promise.resolve({
+                text: JSON.stringify({ fallbackSuccess: true }),
+            });
+        });
+
+        const mockClient = {
+            models: {
+                generateContent: generateContentMock,
+            },
+        };
+
+        GeminiProvider.setVertexAiClientForTesting(mockClient);
+        vi.spyOn(GeminiProvider as any, 'sleep').mockResolvedValue(undefined);
+
+        const result = await GeminiProvider.generateStructuredJson<{ fallbackSuccess: boolean }>({
+            prompt: 'Test prompt',
+            responseJsonSchema: { type: 'object' },
+            model: 'gemini-2.5-flash',
+        });
+
+        expect(result).toEqual({ fallbackSuccess: true });
+        expect(modelsUsed).toEqual(['gemini-2.5-flash', 'gemini-2.5-flash-lite']);
     });
 });
 

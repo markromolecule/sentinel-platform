@@ -34,29 +34,59 @@ export async function extractPdfPageCountFromBuffer(buffer: Buffer): Promise<num
  * Step 3: Resolves page counts of uploaded PDFs deterministically without making expensive upstream LLM calls.
  */
 export async function resolvePageCountsStep(args: {
-    files: File[];
+    files?: File[];
     uploadedFiles?: LlmFile[];
     model?: string;
     provider?: QuestionGeneratorLlmProvider;
 }): Promise<Array<{ fileName: string; pageCount: number }>> {
-    const results = await Promise.all(
-        args.files.map(async (file) => {
-            try {
-                const arrayBuffer = await file.arrayBuffer();
-                const buffer = Buffer.from(arrayBuffer);
-                const pageCount = await extractPdfPageCountFromBuffer(buffer);
+    const rawFiles = args.files ?? [];
+    if (rawFiles.length > 0) {
+        const results = await Promise.all(
+            rawFiles.map(async (file) => {
+                try {
+                    const arrayBuffer = await file.arrayBuffer();
+                    const buffer = Buffer.from(arrayBuffer);
+                    const pageCount = await extractPdfPageCountFromBuffer(buffer);
+                    return {
+                        fileName: file.name,
+                        pageCount: Math.max(1, pageCount),
+                    };
+                } catch {
+                    return {
+                        fileName: file.name,
+                        pageCount: 1,
+                    };
+                }
+            }),
+        );
+
+        return results;
+    }
+
+    if (args.uploadedFiles && args.uploadedFiles.length > 0) {
+        const results = await Promise.all(
+            args.uploadedFiles.map(async (file) => {
+                try {
+                    if (file.inlineData?.data) {
+                        const buffer = Buffer.from(file.inlineData.data, 'base64');
+                        const pageCount = await extractPdfPageCountFromBuffer(buffer);
+                        return {
+                            fileName: file.displayName || file.name,
+                            pageCount: Math.max(1, pageCount),
+                        };
+                    }
+                } catch {
+                    // Fall back to default
+                }
                 return {
-                    fileName: file.name,
-                    pageCount: Math.max(1, pageCount),
-                };
-            } catch {
-                return {
-                    fileName: file.name,
+                    fileName: file.displayName || file.name,
                     pageCount: 1,
                 };
-            }
-        }),
-    );
+            }),
+        );
 
-    return results;
+        return results;
+    }
+
+    return [];
 }

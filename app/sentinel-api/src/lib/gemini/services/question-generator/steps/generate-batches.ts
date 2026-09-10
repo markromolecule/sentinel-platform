@@ -73,8 +73,9 @@ export async function generateBatchesStep(args: {
                 prompt,
                 responseJsonSchema: buildResponseJsonSchema(batchConfig),
                 files: uploadedFiles.map((file) => ({
-                    uri: file.uri,
+                    uri: file.uri || (file.name ? `inline://${file.name}` : 'inline://file'),
                     mimeType: file.mimeType,
+                    ...(file.inlineData ? { inlineData: file.inlineData } : {}),
                 })),
             });
             const elapsedMs = Date.now() - startTime;

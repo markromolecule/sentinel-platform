@@ -96,5 +96,51 @@ describe('uploadFilesStep and deleteUploadedFilesStep', () => {
             expect(mockProvider.deleteFile).toHaveBeenCalledWith('files/file1');
             expect(mockProvider.deleteFile).toHaveBeenCalledWith('files/file2');
         });
+
+        it('safely skips provider.deleteFile when files are inline (Vertex AI)', async () => {
+            const mockProvider: Partial<QuestionGeneratorLlmProvider> = {
+                deleteFile: vi.fn().mockResolvedValue(undefined),
+            };
+            const files = [
+                {
+                    name: 'lesson.pdf',
+                    uri: 'inline://lesson.pdf',
+                    mimeType: 'application/pdf',
+                    inlineData: {
+                        mimeType: 'application/pdf',
+                        data: 'base64-data',
+                    },
+                },
+                {
+                    name: 'files/remote-doc',
+                    uri: 'https://gemini/remote-doc',
+                    mimeType: 'application/pdf',
+                },
+            ];
+
+            await deleteUploadedFilesStep(files, mockProvider as QuestionGeneratorLlmProvider);
+            expect(mockProvider.deleteFile).toHaveBeenCalledTimes(1);
+            expect(mockProvider.deleteFile).toHaveBeenCalledWith('files/remote-doc');
+        });
+
+        it('does not invoke deleteFile when all files are inline', async () => {
+            const mockProvider: Partial<QuestionGeneratorLlmProvider> = {
+                deleteFile: vi.fn().mockResolvedValue(undefined),
+            };
+            const files = [
+                {
+                    name: 'lesson1.pdf',
+                    uri: 'inline://lesson1.pdf',
+                    mimeType: 'application/pdf',
+                    inlineData: {
+                        mimeType: 'application/pdf',
+                        data: 'data1',
+                    },
+                },
+            ];
+
+            await deleteUploadedFilesStep(files, mockProvider as QuestionGeneratorLlmProvider);
+            expect(mockProvider.deleteFile).not.toHaveBeenCalled();
+        });
     });
 });

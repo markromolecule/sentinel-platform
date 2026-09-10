@@ -40,7 +40,16 @@ export async function deleteUploadedFilesStep(
     files: LlmFile[],
     provider: QuestionGeneratorLlmProvider,
 ): Promise<void> {
-    const results = await Promise.allSettled(files.map((file) => provider.deleteFile(file.name)));
+    const remoteFiles = files.filter(
+        (file) => !file.inlineData && !file.uri?.startsWith('inline://'),
+    );
+    if (remoteFiles.length === 0) {
+        return;
+    }
+
+    const results = await Promise.allSettled(
+        remoteFiles.map((file) => provider.deleteFile(file.name)),
+    );
 
     results.forEach((result) => {
         if (result.status === 'rejected') {
