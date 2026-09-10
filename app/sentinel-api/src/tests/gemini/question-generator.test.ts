@@ -156,6 +156,96 @@ describe('Gemini question generator contracts', () => {
         });
     });
 
+    it('generates questions via Vertex AI using inline base64 data and skips remote file deletion', async () => {
+        const uploadSpy = vi.spyOn(GeminiProvider, 'uploadFile').mockResolvedValue({
+            name: 'lesson.pdf',
+            displayName: 'lesson.pdf',
+            uri: 'inline://lesson.pdf',
+            mimeType: 'application/pdf',
+            inlineData: {
+                mimeType: 'application/pdf',
+                data: 'JVBERi0xLjcKMSAwIG9iajw8L1R5cGUvUGFnZXMvQ291bnQgOD4+ZW5kb2Jq',
+            },
+        });
+        const deleteSpy = vi.spyOn(GeminiProvider, 'deleteFile').mockResolvedValue(undefined);
+        const generateSpy = vi
+            .spyOn(GeminiProvider, 'generateStructuredJson')
+            .mockImplementation(async (args) => {
+                if (args.prompt.includes('critic') || args.prompt.includes('SLOTS TO EVALUATE')) {
+                    return {
+                        evaluations: [
+                            {
+                                slotId: 'slot-0',
+                                leaksAnswer: false,
+                                answerableFromPassage: true,
+                                reasonCode: 'SAFE',
+                                reason: 'Clear passage.',
+                            },
+                        ],
+                    };
+                }
+
+                return {
+                    MULTIPLE_CHOICE: [
+                        {
+                            sourceFileName: 'lesson.pdf',
+                            sourcePageNumber: 2,
+                            sourceEvidence: 'The correct answer is 4.',
+                            passageContent: 'A passage about simple math.',
+                            difficulty: 'MODERATE',
+                            points: 1,
+                            content: {
+                                prompt: 'What is 2 + 2?',
+                                options: ['3', '4', '5', '6'],
+                                correctAnswer: '4',
+                            },
+                        },
+                    ],
+                };
+            });
+
+        const preview = await QuestionGeneratorService.generatePreviewFromPdf({
+            files: [
+                new File(
+                    ['%PDF-1.7\n1 0 obj\n<< /Type /Pages /Count 8 >>\nendobj\n'],
+                    'lesson.pdf',
+                    {
+                        type: 'application/pdf',
+                    },
+                ),
+            ],
+            config: {
+                ...baseConfig,
+                questionCount: 1,
+            },
+        });
+
+        expect(uploadSpy).toHaveBeenCalled();
+        expect(generateSpy).toHaveBeenCalledWith(
+            expect.objectContaining({
+                files: [
+                    {
+                        uri: 'inline://lesson.pdf',
+                        mimeType: 'application/pdf',
+                        inlineData: {
+                            mimeType: 'application/pdf',
+                            data: 'JVBERi0xLjcKMSAwIG9iajw8L1R5cGUvUGFnZXMvQ291bnQgOD4+ZW5kb2Jq',
+                        },
+                    },
+                ],
+            }),
+        );
+        expect(deleteSpy).not.toHaveBeenCalled();
+        expect(preview.pageCount).toBe(8);
+        expect(preview.questions[0]).toMatchObject({
+            sourceOrigin: 'AI_PDF',
+            sourceFileName: 'lesson.pdf',
+            sourcePageNumber: 2,
+            sourceEvidence: 'The correct answer is 4.',
+            passageContent: 'A passage about simple math.',
+        });
+    });
+
     it('normalizes human-readable Gemini enums before parsing question inputs', () => {
         const result = normalizeGeneratedQuestions(
             [

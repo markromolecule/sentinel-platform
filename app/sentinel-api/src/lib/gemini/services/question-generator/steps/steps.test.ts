@@ -81,6 +81,67 @@ describe('Question Generator steps modules', () => {
                 }),
             ).rejects.toBe(upstreamError);
         });
+
+        it('forwards inlineData to provider.generateStructuredJson when present', async () => {
+            const mockProvider: Partial<QuestionGeneratorLlmProvider> = {
+                generateStructuredJson: vi.fn().mockResolvedValue({
+                    MULTIPLE_CHOICE: [
+                        {
+                            sourceFileName: 'lesson.pdf',
+                            sourcePageNumber: 1,
+                            sourceEvidence: 'Evidence text',
+                            passageContent: 'This is a passage.',
+                            content: {
+                                prompt: 'What is 1+1?',
+                                options: ['1', '2'],
+                                correctAnswer: '2',
+                            },
+                        },
+                    ],
+                }),
+            };
+
+            const config: GenerateQuestionPreviewConfig = {
+                target: 'QUESTION_COLLECTION',
+                institutionId: '123',
+                tags: [],
+                isPublic: false,
+                questionCount: 1,
+            };
+
+            await generateBatchesStep({
+                batches: [config],
+                files: [new File([], 'lesson.pdf')],
+                uploadedFiles: [
+                    {
+                        name: 'lesson.pdf',
+                        uri: 'inline://lesson.pdf',
+                        mimeType: 'application/pdf',
+                        inlineData: {
+                            mimeType: 'application/pdf',
+                            data: 'base64-content',
+                        },
+                    },
+                ],
+                model: 'gemini-model',
+                provider: mockProvider as QuestionGeneratorLlmProvider,
+            });
+
+            expect(mockProvider.generateStructuredJson).toHaveBeenCalledWith(
+                expect.objectContaining({
+                    files: [
+                        {
+                            uri: 'inline://lesson.pdf',
+                            mimeType: 'application/pdf',
+                            inlineData: {
+                                mimeType: 'application/pdf',
+                                data: 'base64-content',
+                            },
+                        },
+                    ],
+                }),
+            );
+        });
     });
 
     describe('resolvePageCountsStep', () => {
@@ -105,6 +166,31 @@ describe('Question Generator steps modules', () => {
             expect(counts).toHaveLength(1);
             expect(counts[0].fileName).toBe('blank.pdf');
             expect(counts[0].pageCount).toBe(1);
+        });
+
+        it('extracts page count from uploadedFiles with inlineData when files array is empty', async () => {
+            const pdfContent = '%PDF-1.4\n1 0 obj\n<< /Type /Pages /Count 7 >>\nendobj\n';
+            const base64Data = Buffer.from(pdfContent).toString('base64');
+
+            const counts = await resolvePageCountsStep({
+                files: [],
+                uploadedFiles: [
+                    {
+                        name: 'doc.pdf',
+                        displayName: 'My Document.pdf',
+                        uri: 'inline://doc.pdf',
+                        mimeType: 'application/pdf',
+                        inlineData: {
+                            mimeType: 'application/pdf',
+                            data: base64Data,
+                        },
+                    },
+                ],
+            });
+
+            expect(counts).toHaveLength(1);
+            expect(counts[0].fileName).toBe('My Document.pdf');
+            expect(counts[0].pageCount).toBe(7);
         });
     });
 

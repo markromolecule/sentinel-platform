@@ -1,7 +1,15 @@
+export type LlmInlineData = {
+    mimeType: string;
+    data: string;
+};
+
 export type LlmFile = {
     name: string;
     uri: string;
     mimeType: string;
+    sizeBytes?: string;
+    displayName?: string;
+    inlineData?: LlmInlineData;
 };
 
 export interface QuestionGeneratorLlmProvider {
@@ -10,10 +18,11 @@ export interface QuestionGeneratorLlmProvider {
     generateStructuredJson<T>(args: {
         prompt: string;
         responseJsonSchema: unknown;
-        files?: Array<{ uri: string; mimeType: string }>;
+        files?: Array<{ uri: string; mimeType: string; inlineData?: LlmInlineData }>;
         model?: string;
     }): Promise<T>;
     deleteFile(name: string): Promise<void>;
+    getBackendInfo?(): { backend: string; project?: string; location?: string };
 }
 
 export type RawGeneratedQuestion = {

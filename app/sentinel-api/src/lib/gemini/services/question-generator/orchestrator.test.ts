@@ -281,4 +281,81 @@ describe('QuestionGeneratorService quality failure classification', () => {
         );
         expect(result).toEqual({ target: 'QUESTION_BANK', success: true });
     });
+
+    it('logs AI backend telemetry on startup for Vertex AI and AI Studio', async () => {
+        const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
+
+        const vertexProvider = {
+            resolveFlashModel: vi.fn().mockReturnValue('gemini-2.5-flash'),
+            getBackendInfo: vi.fn().mockReturnValue({
+                backend: 'Vertex AI',
+                project: 'my-gcp-project',
+                location: 'us-central1',
+            }),
+            uploadFile: vi.fn().mockResolvedValue({
+                name: 'test.pdf',
+                uri: 'inline://test.pdf',
+                mimeType: 'application/pdf',
+                inlineData: { mimeType: 'application/pdf', data: 'abc' },
+            }),
+            deleteFile: vi.fn().mockResolvedValue(undefined),
+        };
+
+        vi.spyOn(uploadFilesModule, 'uploadFilesStep').mockResolvedValue([
+            {
+                name: 'test.pdf',
+                uri: 'inline://test.pdf',
+                mimeType: 'application/pdf',
+                inlineData: { mimeType: 'application/pdf', data: 'abc' },
+            },
+        ] as any);
+
+        vi.spyOn(generateBatchesModule, 'generateBatchesStep').mockResolvedValue({
+            rawQuestions: [
+                {
+                    type: 'MULTIPLE_CHOICE',
+                    sourceFileName: 'test.pdf',
+                    sourcePageNumber: 1,
+                    sourceEvidence: 'test',
+                    passageContent: 'This is a test passage.',
+                    difficulty: 'EASY',
+                    points: 1,
+                    content: {
+                        prompt: 'What is 1+1?',
+                        options: ['1', '2'],
+                        correctAnswer: '2',
+                    },
+                },
+            ],
+            deficits: [],
+        } as any);
+
+        vi.spyOn(assessPassageQualityModule, 'assessPassageQuality').mockResolvedValue({
+            passedSlots: [
+                { slotId: 'slot-0', type: 'MULTIPLE_CHOICE', question: { type: 'MULTIPLE_CHOICE' } },
+            ],
+            failedSlots: [],
+        } as any);
+
+        vi.spyOn(buildResponseModule, 'buildResponseStep').mockReturnValue({ success: true } as any);
+
+        await QuestionGeneratorService.generatePreviewFromPdf({
+            files: [new File(['%PDF-1.4 test'], 'test.pdf', { type: 'application/pdf' })],
+            config: {
+                target: 'QUESTION_COLLECTION',
+                institutionId: 'inst-1',
+                tags: [],
+                isPublic: false,
+                questionCount: 1,
+                questionTypeDistribution: [{ type: 'MULTIPLE_CHOICE', count: 1 }],
+            } as any,
+            provider: vertexProvider as any,
+        });
+
+        expect(consoleSpy).toHaveBeenCalledWith(
+            expect.stringContaining(
+                'Using AI backend: Vertex AI (project: my-gcp-project, location: us-central1)',
+            ),
+        );
+    });
 });
