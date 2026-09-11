@@ -32,6 +32,10 @@ export function useSignUpMutation(
             if (!supabase) throw new Error('Supabase client not initialized');
 
             try {
+                const captchaToken =
+                    (credentials as any).captchaToken ||
+                    (credentials.options as any)?.captchaToken;
+
                 // Call the Sentinel API Proxy for Auth
                 const response = (await api('/auth/register', {
                     method: 'POST',
@@ -41,6 +45,7 @@ export function useSignUpMutation(
                         firstName: (credentials.options?.data as any)?.first_name,
                         lastName: (credentials.options?.data as any)?.last_name,
                         terms: true, // Verification is handled on the UI side
+                        captchaToken: captchaToken || undefined,
                     }),
                     headers: {
                         'Content-Type': 'application/json',
