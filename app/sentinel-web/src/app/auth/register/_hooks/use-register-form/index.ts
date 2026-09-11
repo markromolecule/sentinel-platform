@@ -46,15 +46,9 @@ export function useRegisterForm() {
 
     const { mutate: signUp, isPending: isLoading } = useSignUpMutation({
         onSuccess: (data) => {
-            if (data.session) {
-                router.push('/onboarding');
-                router.refresh();
-            } else {
-                setRegisteredEmail(form.getValues('email'));
-                setStep('verify');
-                setResendCooldown(60);
-                setSuccessMessage('A 6-digit verification code was sent to your email.');
-            }
+            const emailToVerify = form.getValues('email') || (data.user as any)?.email || registeredEmail;
+            setRegisteredEmail(emailToVerify);
+            router.push(`/auth/confirm-code?email=${encodeURIComponent(emailToVerify)}`);
         },
         onError: (error: SignUpError) => {
             setAuthError(error.message);

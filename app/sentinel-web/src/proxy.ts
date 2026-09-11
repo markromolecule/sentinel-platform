@@ -231,11 +231,12 @@ async function getRbacRedirectUrl(
         }
 
         // B1: Prevent authenticated students/instructors from sitting on login/register pages
-        // EXEMPTION: Allow /auth/update-password and /auth/callback to process their tokens without interruption
+        // EXEMPTION: Allow /auth/update-password, /auth/callback, and /auth/confirm-code to process their tokens without interruption
         const isUpdatePassword = pathname.startsWith('/auth/update-password');
         const isCallback = pathname.startsWith('/auth/callback');
+        const isConfirmCode = pathname.startsWith('/auth/confirm-code');
 
-        if (isAuthPage && !isUpdatePassword && !isCallback) {
+        if (isAuthPage && !isUpdatePassword && !isCallback && !isConfirmCode) {
             if (authState.destination.startsWith('/auth/login?')) {
                 return null;
             }

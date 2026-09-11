@@ -45,7 +45,10 @@ export function useSignUpMutation(
                         firstName: (credentials.options?.data as any)?.first_name,
                         lastName: (credentials.options?.data as any)?.last_name,
                         terms: true, // Verification is handled on the UI side
-                        captchaToken: captchaToken || undefined,
+                        captchaToken:
+                            typeof captchaToken === 'string' && captchaToken.trim()
+                                ? captchaToken.trim()
+                                : undefined,
                     }),
                     headers: {
                         'Content-Type': 'application/json',
