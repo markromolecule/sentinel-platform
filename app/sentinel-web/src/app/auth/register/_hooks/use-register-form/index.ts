@@ -53,6 +53,7 @@ export function useRegisterForm() {
         onError: (error: SignUpError) => {
             setAuthError(error.message);
             setCaptchaToken(null);
+            form.setValue('captchaToken', undefined);
             turnstileRef.current?.reset();
         },
     });
@@ -79,6 +80,12 @@ export function useRegisterForm() {
         [form],
     );
 
+    const onCaptchaError = useCallback(() => {
+        setCaptchaToken(null);
+        form.setValue('captchaToken', undefined);
+        setAuthError('Security verification failed. Please check your connection and try again.');
+    }, [form]);
+
     const onCaptchaExpire = useCallback(() => {
         setCaptchaToken(null);
         form.setValue('captchaToken', undefined);
@@ -87,7 +94,7 @@ export function useRegisterForm() {
     const onSubmit = (data: RegisterSchemaType) => {
         setAuthError(null);
         setSuccessMessage(null);
-        const resolvedToken = captchaToken || data.captchaToken || form.getValues('captchaToken');
+        const resolvedToken = captchaToken || data.captchaToken;
 
         if (process.env.NEXT_PUBLIC_CLOUDFLARE_TURNSTILE_SITE_KEY && !resolvedToken) {
             setAuthError('Please complete the security check before creating an account.');
@@ -174,6 +181,7 @@ export function useRegisterForm() {
         turnstileRef,
         captchaToken,
         onCaptchaSuccess,
+        onCaptchaError,
         onCaptchaExpire,
         onSubmit: form.handleSubmit(onSubmit),
         onVerifyOtp: handleVerifyOtp,
