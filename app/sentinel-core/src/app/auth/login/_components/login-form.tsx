@@ -1,7 +1,5 @@
 import { useState } from 'react';
-import { Input, Checkbox } from '@sentinel/ui';
-import { Label } from '@sentinel/ui';
-import { Button } from '@sentinel/ui';
+import { Input, Checkbox, Label, Button, Turnstile, TurnstileRef } from '@sentinel/ui';
 import { ArrowRight, Eye, EyeOff } from 'lucide-react';
 import Link from 'next/link';
 import { LoginSchemaType } from '@sentinel/shared/schema';
@@ -12,9 +10,20 @@ interface LoginFormProps {
     authError: string | null;
     isLoading: boolean;
     onSubmit: () => void;
+    turnstileRef?: React.RefObject<TurnstileRef | null>;
+    onCaptchaSuccess?: (token: string) => void;
+    onCaptchaExpire?: () => void;
 }
 
-export function LoginForm({ form, authError, isLoading, onSubmit }: LoginFormProps) {
+export function LoginForm({
+    form,
+    authError,
+    isLoading,
+    onSubmit,
+    turnstileRef,
+    onCaptchaSuccess,
+    onCaptchaExpire,
+}: LoginFormProps) {
     const [showPassword, setShowPassword] = useState(false);
     const {
         register,
@@ -102,6 +111,15 @@ export function LoginForm({ form, authError, isLoading, onSubmit }: LoginFormPro
                     </Link>
                 </div>
             </div>
+
+            <Turnstile
+                ref={turnstileRef}
+                siteKey={process.env.NEXT_PUBLIC_CLOUDFLARE_TURNSTILE_SITE_KEY}
+                onSuccess={onCaptchaSuccess || ((token) => form.setValue('captchaToken', token))}
+                onExpire={onCaptchaExpire || (() => form.setValue('captchaToken', undefined))}
+                theme="dark"
+                className="my-2 flex justify-center"
+            />
 
             <Button
                 className="group h-12 w-full text-base font-semibold"
