@@ -11,6 +11,7 @@ export const LoginSchema = z.object({
         .regex(/[0-9]/, 'Password must contain at least one number')
         .regex(/[^a-zA-Z0-9]/, 'Password must contain at least one special character'),
     remember: z.boolean().optional(),
+    captchaToken: z.string().optional(),
 });
 
 export type LoginSchemaType = z.infer<typeof LoginSchema>;

@@ -9,7 +9,19 @@ export const ApiRegisterSchema = z.object({
         .string()
         .min(2, 'Last name must be at least 2 characters')
         .max(50, 'Last name must not exceed 50 characters'),
-    email: z.string().min(1, 'Email is required').email('Invalid email address'),
+    email: z
+        .string()
+        .min(1, 'Email is required')
+        .trim()
+        .toLowerCase()
+        .email('Invalid email address')
+        .refine(
+            (email) =>
+                /^[a-zA-Z0-9._%+-]+@(gmail\.com|([a-zA-Z0-9-]+\.)+edu(\.ph)?)$/i.test(email),
+            {
+                message: 'Registration requires a valid Gmail address (or institutional .edu email)',
+            },
+        ),
     password: z
         .string()
         .min(8, 'Password must be at least 8 characters')

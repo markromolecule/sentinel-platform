@@ -1,15 +1,22 @@
 import { supabaseAdmin } from '../../../lib/supabase-admin';
 import { supabaseAnon } from '../../../lib/supabase-anon';
-import { LoginSchemaType, ApiRegisterSchemaType } from '@sentinel/shared/schema';
+import {
+    LoginSchemaType,
+    ApiRegisterSchemaType,
+    VerifyOtpSchemaType,
+} from '@sentinel/shared/schema';
 
 export class AuthService {
     /**
-     * Authenticate a user with email and password via Supabase.
+     * Authenticate a user with email and password via Supabase, forwarding optional Cloudflare Turnstile token.
      */
     static async login(credentials: LoginSchemaType) {
         const { data, error } = await supabaseAnon.auth.signInWithPassword({
             email: credentials.email,
             password: credentials.password,
+            options: credentials.captchaToken
+                ? { captchaToken: credentials.captchaToken }
+                : undefined,
         });
 
         if (error) {
@@ -20,40 +27,46 @@ export class AuthService {
     }
 
     /**
-     * Register a new user via Supabase.
+     * Register a new user via Supabase and trigger native 6-digit email OTP dispatch.
      */
     static async register(body: ApiRegisterSchemaType) {
-        // 1. Create the user using the admin client to auto-confirm the email
-        const { data: createData, error: createError } = await supabaseAdmin.auth.admin.createUser({
+        const { data, error } = await supabaseAnon.auth.signUp({
             email: body.email,
             password: body.password,
-            email_confirm: true,
-            user_metadata: {
-                first_name: body.firstName,
-                last_name: body.lastName,
-                role: 'student', // Default role for portal signups
-            },
-            app_metadata: {
-                role: 'student',
+            options: {
+                data: {
+                    first_name: body.firstName,
+                    last_name: body.lastName,
+                    role: 'student', // Default role for portal signups
+                },
             },
         });
 
-        if (createError || !createData?.user) {
-            throw createError || new Error('Failed to create user');
+        if (error) {
+            throw error;
         }
 
-        // 2. Sign in the user immediately to generate a session
-        const { data: sessionData, error: loginError } = await supabaseAnon.auth.signInWithPassword(
-            {
-                email: body.email,
-                password: body.password,
-            },
-        );
+        return {
+            user: data.user,
+            session: data.session,
+            requiresVerification: !data.session,
+        };
+    }
 
-        if (loginError) {
-            throw loginError;
+    /**
+     * Verify a 6-digit email OTP code via Supabase.
+     */
+    static async verifyOtp(body: VerifyOtpSchemaType) {
+        const { data, error } = await supabaseAnon.auth.verifyOtp({
+            email: body.email,
+            token: body.token,
+            type: body.type || 'signup',
+        });
+
+        if (error) {
+            throw error;
         }
 
-        return sessionData;
+        return data;
     }
 }

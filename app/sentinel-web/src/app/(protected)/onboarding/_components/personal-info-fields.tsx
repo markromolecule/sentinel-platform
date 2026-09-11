@@ -10,7 +10,7 @@ export function PersonalInfoFields({
     disabled = false,
 }: PersonalInfoFieldsProps) {
     return (
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+        <div className="grid w-full min-w-0 grid-cols-1 gap-4 md:grid-cols-2">
             <div className="space-y-2">
                 <Label htmlFor="firstName">First Name</Label>
                 <Input

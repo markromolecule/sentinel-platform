@@ -164,6 +164,8 @@ export { RegisterSchema, ApiRegisterSchema } from './auth/register-schema';
 export type { RegisterSchemaType, ApiRegisterSchemaType } from './auth/register-schema';
 export { ForgotPasswordSchema } from './auth/forgot-password-schema';
 export type { ForgotPasswordSchemaType } from './auth/forgot-password-schema';
+export { VerifyOtpSchema } from './auth/verify-otp-schema';
+export type { VerifyOtpSchemaType } from './auth/verify-otp-schema';
 
 
 // Onboarding

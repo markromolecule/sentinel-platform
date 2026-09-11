@@ -1,9 +1,10 @@
 import { LoginError, useLoginMutation } from '@sentinel/hooks';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { LoginSchema } from '@sentinel/shared/schema';
 import { LoginSchemaType } from '@sentinel/shared/schema';
+import { TurnstileRef } from '@sentinel/ui';
 import { useRouter } from 'next/navigation';
 import { createSupabaseClient } from '@/data/supabase/client';
 import { toast } from 'sonner';
@@ -16,6 +17,8 @@ import { REMEMBERED_EMAIL_KEYS } from '@sentinel/shared/constants';
 export function useLoginForm() {
     const router = useRouter();
     const [authError, setAuthError] = useState<string | null>(null);
+    const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+    const turnstileRef = useRef<TurnstileRef>(null);
     const supabase = createSupabaseClient();
 
     const form = useForm<LoginSchemaType>({
@@ -83,6 +86,8 @@ export function useLoginForm() {
         },
         onError: (error: LoginError) => {
             setAuthError(error.message);
+            setCaptchaToken(null);
+            turnstileRef.current?.reset();
         },
     });
 
@@ -91,13 +96,25 @@ export function useLoginForm() {
         login({
             email: data.email,
             password: data.password,
-        });
+            options: {
+                captchaToken: captchaToken || data.captchaToken,
+            },
+        } as any);
     };
 
     return {
         form,
         authError,
         isLoading,
+        turnstileRef,
+        onCaptchaSuccess: (token: string) => {
+            setCaptchaToken(token);
+            form.setValue('captchaToken', token);
+        },
+        onCaptchaExpire: () => {
+            setCaptchaToken(null);
+            form.setValue('captchaToken', undefined);
+        },
         onSubmit: form.handleSubmit(onSubmit),
     };
 }

@@ -41,6 +41,9 @@ export function useLoginMutation(args: UseLoginMutationArgs = {}) {
                     body: JSON.stringify({
                         email: 'email' in credentials ? credentials.email : undefined,
                         password: credentials.password,
+                        captchaToken:
+                            (credentials as any).captchaToken ||
+                            (credentials.options as any)?.captchaToken,
                     }),
                     headers: {
                         'Content-Type': 'application/json',
