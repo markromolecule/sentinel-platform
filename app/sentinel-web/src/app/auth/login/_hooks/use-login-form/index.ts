@@ -1,7 +1,7 @@
 import { LoginError, useLoginMutation } from '@sentinel/hooks';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { LoginSchema } from '@sentinel/shared/schema';
 import { LoginSchemaType } from '@sentinel/shared/schema';
 import { TurnstileRef } from '@sentinel/ui';
@@ -91,13 +91,34 @@ export function useLoginForm() {
         },
     });
 
+    const onCaptchaSuccess = useCallback(
+        (token: string) => {
+            setCaptchaToken(token);
+            form.setValue('captchaToken', token);
+        },
+        [form],
+    );
+
+    const onCaptchaExpire = useCallback(() => {
+        setCaptchaToken(null);
+        form.setValue('captchaToken', undefined);
+    }, [form]);
+
     const onSubmit = (data: LoginSchemaType) => {
         setAuthError(null);
+        const resolvedToken = captchaToken || data.captchaToken || form.getValues('captchaToken');
+
+        if (process.env.NEXT_PUBLIC_CLOUDFLARE_TURNSTILE_SITE_KEY && !resolvedToken) {
+            setAuthError('Please complete the security check before signing in.');
+            return;
+        }
+
         login({
             email: data.email,
             password: data.password,
+            captchaToken: resolvedToken,
             options: {
-                captchaToken: captchaToken || data.captchaToken,
+                captchaToken: resolvedToken,
             },
         } as any);
     };
@@ -107,14 +128,9 @@ export function useLoginForm() {
         authError,
         isLoading,
         turnstileRef,
-        onCaptchaSuccess: (token: string) => {
-            setCaptchaToken(token);
-            form.setValue('captchaToken', token);
-        },
-        onCaptchaExpire: () => {
-            setCaptchaToken(null);
-            form.setValue('captchaToken', undefined);
-        },
+        captchaToken,
+        onCaptchaSuccess,
+        onCaptchaExpire,
         onSubmit: form.handleSubmit(onSubmit),
     };
 }
