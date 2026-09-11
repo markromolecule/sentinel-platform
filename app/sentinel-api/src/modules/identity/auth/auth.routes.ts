@@ -7,6 +7,8 @@ import {
     loginHandler,
     registerRoute,
     registerHandler,
+    verifyOtpRoute,
+    verifyOtpHandler,
     logOauthRoute,
     logOauthHandler,
 } from './auth.controller';
@@ -29,12 +31,19 @@ const registerRateLimit = createRateLimitMiddleware({
     prefix: 'rl:auth:register',
 });
 
+const verifyOtpRateLimit = createRateLimitMiddleware({
+    limit: 10,
+    windowSeconds: 15 * 60,
+    prefix: 'rl:auth:verify-otp',
+});
+
 // Apply auth middleware only for the OAuth successful logging hook
 authRoutes.use('/log-oauth', authMiddleware);
 
 // Apply rate limits to paths
 authRoutes.use(loginRoute.path, loginRateLimit);
 authRoutes.use(registerRoute.path, registerRateLimit);
+authRoutes.use(verifyOtpRoute.path, verifyOtpRateLimit);
 
 // ----------------------------------------------------------------------------
 // Route Registration (Traffic Director)
@@ -43,6 +52,7 @@ authRoutes.use(registerRoute.path, registerRateLimit);
 authRoutes
     .openapi(loginRoute, loginHandler)
     .openapi(registerRoute, registerHandler)
+    .openapi(verifyOtpRoute, verifyOtpHandler)
     .openapi(logOauthRoute, logOauthHandler);
 
 export default authRoutes;

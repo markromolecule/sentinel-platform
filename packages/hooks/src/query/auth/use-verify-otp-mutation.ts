@@ -1,51 +1,44 @@
-import type { SignUpWithPasswordCredentials, User, Session } from '@supabase/supabase-js';
+import type { User, Session } from '@supabase/supabase-js';
 import { useAuth } from '../../auth-provider';
 import { useApi } from '../../api-provider';
 import { ApiError } from '@sentinel/services';
 import { UseMutationOptions, useMutation } from '@tanstack/react-query';
+import type { VerifyOtpSchemaType } from '@sentinel/shared/schema';
 
-export interface SignUpResponse {
+export interface VerifyOtpResponse {
     user: User | null;
     session: Session | null;
-    requiresVerification?: boolean;
 }
 
-export class SignUpError extends Error {
+export class VerifyOtpError extends Error {
     code: string;
 
     constructor(message: string, code: string) {
         super(message);
         this.code = code;
-        this.name = 'SignUpError';
+        this.name = 'VerifyOtpError';
     }
 }
 
-export function useSignUpMutation(
-    args: UseMutationOptions<SignUpResponse, SignUpError, SignUpWithPasswordCredentials> = {},
+export function useVerifyOtpMutation(
+    args: UseMutationOptions<VerifyOtpResponse, VerifyOtpError, VerifyOtpSchemaType> = {},
 ) {
     const { supabase } = useAuth();
     const api = useApi();
 
     return useMutation({
         ...args,
-        mutationFn: async (credentials: SignUpWithPasswordCredentials) => {
+        mutationFn: async (payload: VerifyOtpSchemaType) => {
             if (!supabase) throw new Error('Supabase client not initialized');
 
             try {
-                // Call the Sentinel API Proxy for Auth
-                const response = (await api('/auth/register', {
+                const response = (await api('/auth/verify-otp', {
                     method: 'POST',
-                    body: JSON.stringify({
-                        email: 'email' in credentials ? credentials.email : undefined,
-                        password: credentials.password,
-                        firstName: (credentials.options?.data as any)?.first_name,
-                        lastName: (credentials.options?.data as any)?.last_name,
-                        terms: true, // Verification is handled on the UI side
-                    }),
+                    body: JSON.stringify(payload),
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                })) as SignUpResponse;
+                })) as VerifyOtpResponse;
 
                 if (response.session) {
                     await supabase.auth.setSession({
@@ -58,12 +51,12 @@ export function useSignUpMutation(
             } catch (error: any) {
                 if (error instanceof ApiError) {
                     if (error.status === 429) {
-                        throw new SignUpError(error.message, 'rate_limit_exceeded');
+                        throw new VerifyOtpError(error.message, 'rate_limit_exceeded');
                     }
-                    throw new SignUpError(error.message, 'api_error');
+                    throw new VerifyOtpError(error.message, 'api_error');
                 }
 
-                throw new SignUpError(
+                throw new VerifyOtpError(
                     error instanceof Error ? error.message : 'An unknown error occurred',
                     'unknown_error',
                 );

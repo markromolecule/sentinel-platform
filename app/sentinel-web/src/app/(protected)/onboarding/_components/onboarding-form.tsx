@@ -52,9 +52,9 @@ export function OnboardingForm() {
     return (
         <form
             onSubmit={handleSubmit}
-            className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px] lg:gap-8"
+            className="grid w-full min-w-0 gap-6 lg:grid-cols-[minmax(0,1fr)_320px] lg:gap-8"
         >
-            <div className="space-y-6">
+            <div className="w-full min-w-0 space-y-6">
                 <PersonalInfoFields
                     firstName={firstName}
                     setFirstName={setFirstName}
@@ -123,7 +123,7 @@ export function OnboardingForm() {
                 </Button>
             </div>
 
-            <div className="order-last lg:order-none">
+            <div className="order-last w-full min-w-0 lg:order-none">
                 <div className="lg:sticky lg:top-8">
                     <VerificationRulesCard />
                 </div>

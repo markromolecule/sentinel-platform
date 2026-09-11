@@ -8,7 +8,15 @@ import { LoginFooter } from '@/app/auth/login/_components/login-footer';
 import { useLoginForm } from '@/app/auth/login/_hooks/use-login-form';
 
 export default function LoginPage() {
-    const { form, authError, isLoading, onSubmit } = useLoginForm();
+    const {
+        form,
+        authError,
+        isLoading,
+        turnstileRef,
+        onCaptchaSuccess,
+        onCaptchaExpire,
+        onSubmit,
+    } = useLoginForm();
 
     return (
         <Card className="w-full gap-0 border-white/10 bg-[#131315] text-white shadow-2xl">
@@ -18,6 +26,9 @@ export default function LoginPage() {
                     form={form}
                     authError={authError}
                     isLoading={isLoading}
+                    turnstileRef={turnstileRef}
+                    onCaptchaSuccess={onCaptchaSuccess}
+                    onCaptchaExpire={onCaptchaExpire}
                     onSubmit={onSubmit}
                 />
             </CardContent>

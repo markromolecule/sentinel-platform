@@ -20,8 +20,20 @@ export function AcademicInfoFields({
     isLoadingCourses = false,
     disabled = false,
 }: AcademicInfoFieldsProps) {
+    const selectedInstitution = institutions.find((inst) => inst.id === selectedInstitutionId);
+    const selectedDepartment = departments.find((dept) => dept.id === selectedDepartmentId);
+    const selectedCourse = courses.find((course) => course.id === selectedCourseId);
+
+    const institutionTooltip = selectedInstitution?.name;
+    const departmentTooltip = selectedDepartment
+        ? `${selectedDepartment.name}${selectedDepartment.code ? ` (${selectedDepartment.code})` : ''}`
+        : undefined;
+    const courseTooltip = selectedCourse
+        ? `${selectedCourse.title}${selectedCourse.code ? ` (${selectedCourse.code})` : ''}`
+        : undefined;
+
     return (
-        <div className="space-y-6">
+        <div className="w-full min-w-0 space-y-6">
             <div className="space-y-2">
                 <Label htmlFor="institution">Institution</Label>
                 <Select
@@ -31,14 +43,15 @@ export function AcademicInfoFields({
                 >
                     <SelectTrigger
                         id="institution"
-                        className="w-full touch-manipulation border-white/10 bg-[#0f0f10] text-white"
+                        title={institutionTooltip}
+                        className="w-full min-w-0 max-w-full touch-manipulation border-white/10 bg-[#0f0f10] text-white overflow-hidden"
                     >
-                        <SelectValue placeholder="Select Institution" />
+                        <SelectValue placeholder="Select Institution" className="truncate min-w-0 text-left" />
                     </SelectTrigger>
-                    <SelectContent position="popper" className="z-[100]">
+                    <SelectContent position="popper" className="z-[100] max-w-[calc(100vw-2rem)] sm:max-w-md">
                         {institutions.map((inst) => (
-                            <SelectItem key={inst.id} value={inst.id}>
-                                {inst.name}
+                            <SelectItem key={inst.id} value={inst.id} title={inst.name}>
+                                <span className="truncate">{inst.name}</span>
                             </SelectItem>
                         ))}
                     </SelectContent>
@@ -54,7 +67,8 @@ export function AcademicInfoFields({
                 >
                     <SelectTrigger
                         id="department"
-                        className="w-full touch-manipulation border-white/10 bg-[#0f0f10] text-white"
+                        title={departmentTooltip}
+                        className="w-full min-w-0 max-w-full touch-manipulation border-white/10 bg-[#0f0f10] text-white overflow-hidden"
                     >
                         <SelectValue
                             placeholder={
@@ -62,14 +76,18 @@ export function AcademicInfoFields({
                                     ? 'Select Institution first'
                                     : 'Select Department'
                             }
+                            className="truncate min-w-0 text-left"
                         />
                     </SelectTrigger>
-                    <SelectContent position="popper" className="z-[100]">
-                        {departments.map((dept) => (
-                            <SelectItem key={dept.id} value={dept.id}>
-                                {dept.name} {dept.code ? `(${dept.code})` : ''}
-                            </SelectItem>
-                        ))}
+                    <SelectContent position="popper" className="z-[100] max-w-[calc(100vw-2rem)] sm:max-w-md">
+                        {departments.map((dept) => {
+                            const label = `${dept.name} ${dept.code ? `(${dept.code})` : ''}`;
+                            return (
+                                <SelectItem key={dept.id} value={dept.id} title={label}>
+                                    <span className="truncate">{label}</span>
+                                </SelectItem>
+                            );
+                        })}
                     </SelectContent>
                 </Select>
             </div>
@@ -83,20 +101,25 @@ export function AcademicInfoFields({
                 >
                     <SelectTrigger
                         id="course"
-                        className="w-full touch-manipulation border-white/10 bg-[#0f0f10] text-white"
+                        title={courseTooltip}
+                        className="w-full min-w-0 max-w-full touch-manipulation border-white/10 bg-[#0f0f10] text-white overflow-hidden"
                     >
                         <SelectValue
                             placeholder={
                                 !selectedDepartmentId ? 'Select Department first' : 'Select Course'
                             }
+                            className="truncate min-w-0 text-left"
                         />
                     </SelectTrigger>
-                    <SelectContent position="popper" className="z-[100]">
-                        {courses.map((course) => (
-                            <SelectItem key={course.id} value={course.id}>
-                                {course.title} {course.code ? `(${course.code})` : ''}
-                            </SelectItem>
-                        ))}
+                    <SelectContent position="popper" className="z-[100] max-w-[calc(100vw-2rem)] sm:max-w-md">
+                        {courses.map((course) => {
+                            const label = `${course.title} ${course.code ? `(${course.code})` : ''}`;
+                            return (
+                                <SelectItem key={course.id} value={course.id} title={label}>
+                                    <span className="truncate">{label}</span>
+                                </SelectItem>
+                            );
+                        })}
                     </SelectContent>
                 </Select>
                 <p className="text-xs text-gray-500">
