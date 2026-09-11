@@ -26,8 +26,8 @@ const loginRateLimit = createRateLimitMiddleware({
 });
 
 const registerRateLimit = createRateLimitMiddleware({
-    limit: 3,
-    windowSeconds: 60 * 60,
+    limit: 10,
+    windowSeconds: 15 * 60,
     prefix: 'rl:auth:register',
 });
 

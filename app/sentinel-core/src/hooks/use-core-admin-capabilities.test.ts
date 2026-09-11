@@ -76,7 +76,7 @@ describe('useCoreAdminCapabilities', () => {
 
         expect(itemTitles).toContain('Sections');
         expect(itemTitles).not.toContain('Users');
-        expect(itemTitles).toContain('Identity & Access');
+        expect(itemTitles).toContain('IAM');
     });
 
     it('exposes superadmin access-management navigation with the expected sub-items', () => {

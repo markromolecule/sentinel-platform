@@ -13,16 +13,20 @@ feature: "auth-registration-captcha-and-confirmation-redirect"
 
 - **Problem Statement:**
   1. **Captcha Protection Failure (`no captcha_token found`):** Students registering on `https://app.sentinelph.tech/auth/register` encounter `captcha protection: request disallowed (no captcha_token found)`. Even when Cloudflare Turnstile resolves to "Success!", the registration fails with HTTP 400.
-  2. **Forensic Root Cause Pinpoint (`/auth/login` vs `/auth/register`):**
-     - **Why `/auth/login` Worked:**
-       - *Backend Forwarding:* In `app/sentinel-api/src/modules/identity/auth/auth.service.ts`, `AuthService.login` was already wired to pass `options: credentials.captchaToken ? { captchaToken: credentials.captchaToken } : undefined` directly into `supabaseAnon.auth.signInWithPassword(...)`.
-       - *Supabase Bot Protection Policy:* In the Supabase project dashboard (**Authentication > Bot and Abuse Protection**), "Protect Sign In" was either not enforced or permissive, whereas **"Protect Sign Up" is strictly enforced**.
-       - *Client Contract:* `LoginSchema` and `useLoginMutation` already had `captchaToken` declared and mapped into the request body.
+  2. **Empirical Side-by-Side Forensic Truth (`/auth/login` vs `/auth/register`):**
+     - **Live Endpoint Empirical Verification:**
+       - `POST https://api.sentinelph.tech/auth/login` with `{ captchaToken: "test-fake-token" }` returns `HTTP 400: captcha protection: request disallowed (invalid-input-response)`. This proves the token is forwarded to GoTrue and Cloudflare actively rejects the dummy token.
+       - `POST https://api.sentinelph.tech/auth/register` with `{ captchaToken: "test-fake-token" }` returns `HTTP 400: captcha protection: request disallowed (no captcha_token found)`. This proves that in production, GoTrue never received the `gotrue_meta_security: { captcha_token }` payload.
+       - Local test executing `AuthService.register` with `{ captchaToken: "test-fake-token" }` against production Supabase credentials returns `HTTP 400: captcha protection: request disallowed (invalid-input-response)`.
+     - **Why `/auth/login` Succeeded in Production:**
+       - *Backend Pipeline:* In `app/sentinel-api/src/modules/identity/auth/auth.service.ts`, `AuthService.login` has always passed `options: credentials.captchaToken ? { captchaToken: credentials.captchaToken } : undefined` to `supabaseAnon.auth.signInWithPassword(...)`.
+       - *Client Contract:* `LoginSchema` and `useLoginMutation` already forwarded `captchaToken` directly to the API endpoint.
+       - *Multi-Layer Fallback:* `useLoginForm` extracts token with `captchaToken || data.captchaToken || form.getValues('captchaToken')`.
      - **Why `/auth/register` Failed with `(no captcha_token found)`:**
-       - *Supabase GoTrue Signature:* Supabase GoTrue returns `(no captcha_token found)` **only** when `/auth/v1/signup` receives a payload where `gotrue_meta_security: { captcha_token }` is completely omitted or undefined. (Empirical test: passing a token returns `(invalid-input-response)`, whereas omitting it returns `(no captcha_token found)`).
-       - *Historical Pipeline Void:* Historically, `ApiRegisterSchema` in `@sentinel/shared` did not declare `captchaToken`, `useSignUpMutation` in `@sentinel/hooks` stripped `captchaToken` before calling `api('/auth/register')`, and `AuthService.register` in `sentinel-api` called `supabaseAnon.auth.signUp(...)` with hardcoded options without `captchaToken`.
-       - *Deployment Lag on Railway (`api.sentinelph.tech`):* Although PR #607 merged the backend forwarding patch to `master` at 20:10, the live Railway container (`api.sentinelph.tech`) had not finished rebuilding/deploying when the student registration test was run at 20:27, continuing to serve the old endpoint that dropped `captchaToken`.
-       - *Client State & Single-Use Tokens in `sentinel-web`:* On registration error, `onError` in `useRegisterForm` executes `setCaptchaToken(null)` and `turnstileRef.current?.reset()`. Cloudflare Turnstile tokens are single-use with a 300s TTL; if the widget resets or if the user clicks submit before a fresh challenge finishes, `resolvedToken` becomes null.
+       - *Railway Deployment Lag & Monorepo CI Blocker:* While PR #607 and PR #608 merged changes to `master`, the GitHub Actions workflow `CI & Selective Monorepo Verification` failed due to unrelated test failures in `sentinel-core` (e.g. `use-core-admin-capabilities.test.ts`). Railway's deployment pipeline did not complete or update the running `sentinel-api` container, leaving Railway running the historical container where `AuthService.register` dropped `captchaToken`.
+       - *Aggressive IP Rate Limit Trap:* `app/sentinel-api/src/modules/identity/auth/auth.routes.ts` enforces `limit: 3, windowSeconds: 3600` on `/auth/register`. A user testing registration who encounters one failure quickly accumulates attempts in Upstash Redis (`rl:auth:register:<IP>`), escalating to HTTP 429 (`Too many requests. Please try again in 2552 seconds.`).
+       - *Client Fallback Discrepancy:* `useLoginForm` had three fallbacks (`captchaToken || data.captchaToken || form.getValues('captchaToken')`), whereas `useRegisterForm` omitted `form.getValues('captchaToken')`.
+       - *Error Callback Reset Cycle:* On failure, `onError` resets the widget (`turnstileRef.current?.reset()`), causing the widget to spin through `Verifying...` (Screenshot 1) before displaying `Success!` (Screenshot 2), while the error banner remains visible.
   3. **Missing Confirmation Code Page & Premature Onboarding Redirect:** Previously, if `data.session` was returned, the registration hook redirected immediately to `/onboarding`, bypassing confirmation. Furthermore, if `session` was null, it only flipped an in-memory React state (`setStep('verify')`) on `/auth/register` that was wiped on page reload or when navigating away to check email.
 
 - **Business / User Value:**

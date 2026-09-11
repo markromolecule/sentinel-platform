@@ -94,7 +94,7 @@ export function useRegisterForm() {
     const onSubmit = (data: RegisterSchemaType) => {
         setAuthError(null);
         setSuccessMessage(null);
-        const resolvedToken = captchaToken || data.captchaToken;
+        const resolvedToken = captchaToken || data.captchaToken || form.getValues('captchaToken');
 
         if (process.env.NEXT_PUBLIC_CLOUDFLARE_TURNSTILE_SITE_KEY && !resolvedToken) {
             setAuthError('Please complete the security check before creating an account.');
