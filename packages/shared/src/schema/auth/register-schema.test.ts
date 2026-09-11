@@ -52,4 +52,17 @@ describe('RegisterSchema Email Validation', () => {
         });
         expect(result.success).toBe(false);
     });
+
+    it('should accept an optional captchaToken on valid registration', () => {
+        const result = RegisterSchema.safeParse({
+            ...baseValidData,
+            email: 'student.sample@gmail.com',
+            captchaToken: 'dummy-turnstile-token-xyz',
+        });
+        expect(result.success).toBe(true);
+        if (result.success) {
+            expect(result.data.captchaToken).toBe('dummy-turnstile-token-xyz');
+        }
+    });
 });
+

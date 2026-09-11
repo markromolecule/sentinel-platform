@@ -39,6 +39,7 @@ export class AuthService {
                     last_name: body.lastName,
                     role: 'student', // Default role for portal signups
                 },
+                ...(body.captchaToken ? { captchaToken: body.captchaToken } : {}),
             },
         });
 

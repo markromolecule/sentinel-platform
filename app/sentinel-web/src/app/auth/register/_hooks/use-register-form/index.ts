@@ -6,8 +6,9 @@ import {
 } from '@sentinel/hooks';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { RegisterSchema, RegisterSchemaType } from '@sentinel/shared/schema';
+import { TurnstileRef } from '@sentinel/ui';
 import { config } from '@/lib/config';
 import { useRouter } from 'next/navigation';
 
@@ -19,6 +20,8 @@ export function useRegisterForm() {
     const [verifyError, setVerifyError] = useState<string | null>(null);
     const [successMessage, setSuccessMessage] = useState<string | null>(null);
     const [resendCooldown, setResendCooldown] = useState(0);
+    const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+    const turnstileRef = useRef<TurnstileRef>(null);
 
     const form = useForm<RegisterSchemaType>({
         resolver: zodResolver(RegisterSchema),
@@ -29,6 +32,7 @@ export function useRegisterForm() {
             password: '',
             confirmPassword: '',
             terms: false,
+            captchaToken: undefined,
         },
     });
 
@@ -54,6 +58,8 @@ export function useRegisterForm() {
         },
         onError: (error: SignUpError) => {
             setAuthError(error.message);
+            setCaptchaToken(null);
+            turnstileRef.current?.reset();
         },
     });
 
@@ -71,9 +77,29 @@ export function useRegisterForm() {
         },
     });
 
+    const onCaptchaSuccess = useCallback(
+        (token: string) => {
+            setCaptchaToken(token);
+            form.setValue('captchaToken', token);
+        },
+        [form],
+    );
+
+    const onCaptchaExpire = useCallback(() => {
+        setCaptchaToken(null);
+        form.setValue('captchaToken', undefined);
+    }, [form]);
+
     const onSubmit = (data: RegisterSchemaType) => {
         setAuthError(null);
         setSuccessMessage(null);
+        const resolvedToken = captchaToken || data.captchaToken || form.getValues('captchaToken');
+
+        if (process.env.NEXT_PUBLIC_CLOUDFLARE_TURNSTILE_SITE_KEY && !resolvedToken) {
+            setAuthError('Please complete the security check before creating an account.');
+            return;
+        }
+
         const appUrl =
             typeof window !== 'undefined' && window.location.origin
                 ? window.location.origin
@@ -89,8 +115,10 @@ export function useRegisterForm() {
                     role: 'student',
                 },
                 emailRedirectTo: `${appUrl}/auth/callback`,
+                captchaToken: resolvedToken || undefined,
             },
-        });
+            captchaToken: resolvedToken || undefined,
+        } as any);
     };
 
     const handleVerifyOtp = (token: string) => {
@@ -121,8 +149,10 @@ export function useRegisterForm() {
                     role: 'student',
                 },
                 emailRedirectTo: `${appUrl}/auth/callback`,
+                captchaToken: captchaToken || undefined,
             },
-        });
+            captchaToken: captchaToken || undefined,
+        } as any);
         setResendCooldown(60);
         setSuccessMessage('A fresh verification code has been dispatched.');
     };
@@ -132,6 +162,9 @@ export function useRegisterForm() {
         setVerifyError(null);
         setAuthError(null);
         setSuccessMessage(null);
+        setCaptchaToken(null);
+        form.setValue('captchaToken', undefined);
+        turnstileRef.current?.reset();
     };
 
     return {
@@ -144,6 +177,10 @@ export function useRegisterForm() {
         isLoading,
         isVerifying,
         resendCooldown,
+        turnstileRef,
+        captchaToken,
+        onCaptchaSuccess,
+        onCaptchaExpire,
         onSubmit: form.handleSubmit(onSubmit),
         onVerifyOtp: handleVerifyOtp,
         onResendOtp: handleResendOtp,

@@ -1,4 +1,4 @@
-import { Label, Checkbox, Button, Input } from '@sentinel/ui';
+import { Label, Checkbox, Button, Input, Turnstile, TurnstileRef } from '@sentinel/ui';
 import { ArrowRight, CheckCircle, Eye, EyeOff } from 'lucide-react';
 import Link from 'next/link';
 import { RegisterSchemaType } from '@sentinel/shared/schema';
@@ -13,6 +13,9 @@ interface RegisterFormProps {
     successMessage: string | null;
     isLoading: boolean;
     onSubmit: () => void;
+    turnstileRef?: React.RefObject<TurnstileRef | null>;
+    onCaptchaSuccess?: (token: string) => void;
+    onCaptchaExpire?: () => void;
 }
 
 export function RegisterForm({
@@ -21,6 +24,9 @@ export function RegisterForm({
     successMessage,
     isLoading,
     onSubmit,
+    turnstileRef,
+    onCaptchaSuccess,
+    onCaptchaExpire,
 }: RegisterFormProps) {
     const {
         register,
@@ -201,6 +207,15 @@ export function RegisterForm({
             {errors.terms && (
                 <p className="text-[0.8rem] font-medium text-red-500">{errors.terms.message}</p>
             )}
+
+            <Turnstile
+                ref={turnstileRef}
+                siteKey={process.env.NEXT_PUBLIC_CLOUDFLARE_TURNSTILE_SITE_KEY}
+                onSuccess={onCaptchaSuccess || ((token) => form.setValue('captchaToken', token))}
+                onExpire={onCaptchaExpire || (() => form.setValue('captchaToken', undefined))}
+                theme="dark"
+                className="my-2 flex justify-center"
+            />
 
             <Button
                 className="group mt-2 h-12 w-full text-base font-semibold"
