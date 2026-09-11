@@ -33,6 +33,7 @@ export type SentinelSupabaseClient = {
             ...args: any[]
         ) => Promise<{ error: Error | null } | { data?: unknown; error: Error | null }>;
         updateUser: (...args: any[]) => Promise<any>;
+        resend?: (...args: any[]) => Promise<any>;
     };
     channel: (name: string, opts?: any) => RealtimeChannel;
     removeChannel: (channel: RealtimeChannel) => Promise<unknown> | unknown;

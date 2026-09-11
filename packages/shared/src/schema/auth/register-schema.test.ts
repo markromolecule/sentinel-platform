@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { RegisterSchema } from './register-schema';
+import { RegisterSchema, ApiRegisterSchema } from './register-schema';
 
 describe('RegisterSchema Email Validation', () => {
     const baseValidData = {
@@ -63,6 +63,24 @@ describe('RegisterSchema Email Validation', () => {
         if (result.success) {
             expect(result.data.captchaToken).toBe('dummy-turnstile-token-xyz');
         }
+    });
+
+    it('should accept null or omitted captchaToken in RegisterSchema and ApiRegisterSchema', () => {
+        const withNull = RegisterSchema.safeParse({
+            ...baseValidData,
+            email: 'student.null@gmail.com',
+            captchaToken: null,
+        });
+        expect(withNull.success).toBe(true);
+
+        const withUndefined = ApiRegisterSchema.safeParse({
+            firstName: 'Julian',
+            lastName: 'Adriano',
+            email: 'student.omitted@gmail.com',
+            password: baseValidData.password,
+            captchaToken: undefined,
+        });
+        expect(withUndefined.success).toBe(true);
     });
 });
 
