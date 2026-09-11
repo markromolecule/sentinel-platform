@@ -126,6 +126,57 @@ describe('useRegisterForm Hook', () => {
         });
 
         expect(result.current.captchaToken).toBeNull();
+        expect(result.current.form.getValues('captchaToken')).toBeUndefined();
         expect(result.current.authError).toBe('Turnstile verification failed');
+    });
+
+    it('clears captchaToken and sets security error message on onCaptchaError', () => {
+        const { result } = renderHook(() => useRegisterForm());
+
+        act(() => {
+            result.current.onCaptchaSuccess('turnstile-token-xyz');
+        });
+
+        expect(result.current.captchaToken).toBe('turnstile-token-xyz');
+        expect(result.current.form.getValues('captchaToken')).toBe('turnstile-token-xyz');
+
+        act(() => {
+            result.current.onCaptchaError();
+        });
+
+        expect(result.current.captchaToken).toBeNull();
+        expect(result.current.form.getValues('captchaToken')).toBeUndefined();
+        expect(result.current.authError).toContain('Security verification failed');
+    });
+
+    it('blocks submission and displays error when site key exists but captcha is not solved', async () => {
+        const originalSiteKey = process.env.NEXT_PUBLIC_CLOUDFLARE_TURNSTILE_SITE_KEY;
+        process.env.NEXT_PUBLIC_CLOUDFLARE_TURNSTILE_SITE_KEY = 'test-site-key-123';
+
+        try {
+            const { result } = renderHook(() => useRegisterForm());
+
+            act(() => {
+                result.current.form.reset({
+                    firstName: 'Juan',
+                    lastName: 'Dela Cruz',
+                    email: 'juan@gmail.com',
+                    password: 'Password123!',
+                    confirmPassword: 'Password123!',
+                    terms: true,
+                });
+            });
+
+            await act(async () => {
+                await result.current.onSubmit();
+            });
+
+            expect(mockUseSignUpMutation).not.toHaveBeenCalled();
+            expect(result.current.authError).toBe(
+                'Please complete the security check before creating an account.',
+            );
+        } finally {
+            process.env.NEXT_PUBLIC_CLOUDFLARE_TURNSTILE_SITE_KEY = originalSiteKey;
+        }
     });
 });

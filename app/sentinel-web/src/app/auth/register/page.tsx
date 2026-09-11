@@ -20,7 +20,9 @@ export default function RegisterPage() {
         isVerifying,
         resendCooldown,
         turnstileRef,
+        captchaToken,
         onCaptchaSuccess,
+        onCaptchaError,
         onCaptchaExpire,
         onSubmit,
         onVerifyOtp,
@@ -39,7 +41,9 @@ export default function RegisterPage() {
                         successMessage={successMessage}
                         isLoading={isLoading}
                         turnstileRef={turnstileRef}
+                        captchaToken={captchaToken}
                         onCaptchaSuccess={onCaptchaSuccess}
+                        onCaptchaError={onCaptchaError}
                         onCaptchaExpire={onCaptchaExpire}
                         onSubmit={onSubmit}
                     />

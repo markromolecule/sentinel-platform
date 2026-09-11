@@ -14,7 +14,9 @@ interface RegisterFormProps {
     isLoading: boolean;
     onSubmit: () => void;
     turnstileRef?: React.RefObject<TurnstileRef | null>;
+    captchaToken?: string | null;
     onCaptchaSuccess?: (token: string) => void;
+    onCaptchaError?: () => void;
     onCaptchaExpire?: () => void;
 }
 
@@ -25,7 +27,9 @@ export function RegisterForm({
     isLoading,
     onSubmit,
     turnstileRef,
+    captchaToken,
     onCaptchaSuccess,
+    onCaptchaError,
     onCaptchaExpire,
 }: RegisterFormProps) {
     const {
@@ -212,6 +216,7 @@ export function RegisterForm({
                 ref={turnstileRef}
                 siteKey={process.env.NEXT_PUBLIC_CLOUDFLARE_TURNSTILE_SITE_KEY}
                 onSuccess={onCaptchaSuccess || ((token) => form.setValue('captchaToken', token))}
+                onError={onCaptchaError}
                 onExpire={onCaptchaExpire || (() => form.setValue('captchaToken', undefined))}
                 theme="dark"
                 className="my-2 flex justify-center"
@@ -222,7 +227,10 @@ export function RegisterForm({
                 variant="premium-3d"
                 size="lg"
                 type="submit"
-                disabled={isLoading}
+                disabled={
+                    isLoading ||
+                    (Boolean(process.env.NEXT_PUBLIC_CLOUDFLARE_TURNSTILE_SITE_KEY) && !captchaToken)
+                }
             >
                 {isLoading ? 'Creating account...' : 'Create account'}
                 {!isLoading && (
