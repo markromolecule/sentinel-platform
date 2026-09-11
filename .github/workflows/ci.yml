@@ -39,6 +39,12 @@ jobs:
         env:
           DATABASE_URL: postgresql://postgres:postgres@localhost:5432/sentinel_test?sslmode=disable
           DIRECT_URL: postgresql://postgres:postgres@localhost:5432/sentinel_test?sslmode=disable
+          NEXT_PUBLIC_SUPABASE_URL: https://placeholder.supabase.co
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: placeholder-anon-key
+          NEXT_PUBLIC_API_URL: http://localhost:3001
+          NEXT_PUBLIC_CORE_URL: http://localhost:3002
+          NEXT_PUBLIC_WEB_URL: http://localhost:3000
+          NEXT_PUBLIC_SUPPORT_URL: http://localhost:3003
         run: |
           echo "Running selective validation against base branch origin/${{ github.base_ref }}..."
           pnpm turbo run lint test build --filter="...[origin/${{ github.base_ref }}]"
@@ -48,6 +54,12 @@ jobs:
         env:
           DATABASE_URL: postgresql://postgres:postgres@localhost:5432/sentinel_test?sslmode=disable
           DIRECT_URL: postgresql://postgres:postgres@localhost:5432/sentinel_test?sslmode=disable
+          NEXT_PUBLIC_SUPABASE_URL: https://placeholder.supabase.co
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: placeholder-anon-key
+          NEXT_PUBLIC_API_URL: http://localhost:3001
+          NEXT_PUBLIC_CORE_URL: http://localhost:3002
+          NEXT_PUBLIC_WEB_URL: http://localhost:3000
+          NEXT_PUBLIC_SUPPORT_URL: http://localhost:3003
         run: |
           echo "Running monorepo validation on direct push..."
           pnpm turbo run lint test build
