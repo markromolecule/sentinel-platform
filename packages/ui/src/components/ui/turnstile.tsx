@@ -66,6 +66,9 @@ export const Turnstile = React.forwardRef<TurnstileRef, TurnstileProps>(
 
         useEffect(() => {
             if (!siteKey) {
+                console.warn(
+                    'Turnstile: siteKey is not configured (NEXT_PUBLIC_CLOUDFLARE_TURNSTILE_SITE_KEY). The CAPTCHA widget will not render.',
+                );
                 return;
             }
 
@@ -95,7 +98,14 @@ export const Turnstile = React.forwardRef<TurnstileRef, TurnstileProps>(
             if (window.turnstile) {
                 renderWidget();
             } else {
-                const existingScript = document.getElementById('cf-turnstile-script');
+                const interval = setInterval(() => {
+                    if (window.turnstile) {
+                        clearInterval(interval);
+                        renderWidget();
+                    }
+                }, 50);
+
+                const existingScript = document.getElementById('cf-turnstile-script') as HTMLScriptElement | null;
                 if (!existingScript) {
                     const script = document.createElement('script');
                     script.id = 'cf-turnstile-script';
@@ -104,12 +114,29 @@ export const Turnstile = React.forwardRef<TurnstileRef, TurnstileProps>(
                     script.async = true;
                     script.defer = true;
                     script.onload = () => {
+                        clearInterval(interval);
                         renderWidget();
                     };
                     document.head.appendChild(script);
                 } else {
-                    existingScript.addEventListener('load', renderWidget);
+                    existingScript.addEventListener('load', () => {
+                        clearInterval(interval);
+                        renderWidget();
+                    });
                 }
+
+                return () => {
+                    clearInterval(interval);
+                    isMounted = false;
+                    if (widgetIdRef.current && window.turnstile) {
+                        try {
+                            window.turnstile.remove(widgetIdRef.current);
+                        } catch {
+                            // ignore cleanup errors
+                        }
+                        widgetIdRef.current = null;
+                    }
+                };
             }
 
             return () => {
