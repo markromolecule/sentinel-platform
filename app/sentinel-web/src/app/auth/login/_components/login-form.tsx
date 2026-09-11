@@ -114,6 +114,7 @@ export function LoginForm({
 
             <Turnstile
                 ref={turnstileRef}
+                siteKey={process.env.NEXT_PUBLIC_CLOUDFLARE_TURNSTILE_SITE_KEY}
                 onSuccess={onCaptchaSuccess || ((token) => form.setValue('captchaToken', token))}
                 onExpire={onCaptchaExpire || (() => form.setValue('captchaToken', undefined))}
                 theme="dark"
