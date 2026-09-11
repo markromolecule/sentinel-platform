@@ -52,6 +52,13 @@ export const Turnstile = React.forwardRef<TurnstileRef, TurnstileProps>(
         const containerRef = useRef<HTMLDivElement>(null);
         const widgetIdRef = useRef<string | null>(null);
 
+        const onSuccessRef = useRef(onSuccess);
+        onSuccessRef.current = onSuccess;
+        const onErrorRef = useRef(onError);
+        onErrorRef.current = onError;
+        const onExpireRef = useRef(onExpire);
+        onExpireRef.current = onExpire;
+
         React.useImperativeHandle(ref, () => ({
             reset: () => {
                 if (widgetIdRef.current && window.turnstile) {
@@ -81,13 +88,13 @@ export const Turnstile = React.forwardRef<TurnstileRef, TurnstileProps>(
                         sitekey: siteKey,
                         theme,
                         callback: (token: string) => {
-                            if (isMounted) onSuccess(token);
+                            if (isMounted) onSuccessRef.current(token);
                         },
                         'error-callback': () => {
-                            if (isMounted) onError?.();
+                            if (isMounted) onErrorRef.current?.();
                         },
                         'expired-callback': () => {
-                            if (isMounted) onExpire?.();
+                            if (isMounted) onExpireRef.current?.();
                         },
                     });
                 } catch (err) {
@@ -150,7 +157,7 @@ export const Turnstile = React.forwardRef<TurnstileRef, TurnstileProps>(
                     widgetIdRef.current = null;
                 }
             };
-        }, [siteKey, theme, onSuccess, onError, onExpire]);
+        }, [siteKey, theme]);
 
         if (!siteKey) {
             return null;
