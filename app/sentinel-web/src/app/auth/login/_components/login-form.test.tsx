@@ -3,9 +3,10 @@ import { describe, expect, it, vi, afterEach } from 'vitest';
 import { LoginForm } from './login-form';
 import React from 'react';
 import { useForm } from 'react-hook-form';
+import { LoginSchemaType } from '@sentinel/shared/schema';
 
 function TestLoginForm() {
-    const form = useForm({
+    const form = useForm<LoginSchemaType>({
         defaultValues: {
             email: '',
             password: '',

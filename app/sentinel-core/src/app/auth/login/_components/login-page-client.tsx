@@ -7,7 +7,15 @@ import { useLoginForm } from '@/app/auth/login/_hooks/use-login-form';
 import { SocialLogin } from '@/components/auth/social-login';
 
 export function LoginPageClient() {
-    const { form, authError, isLoading, onSubmit } = useLoginForm();
+    const {
+        form,
+        authError,
+        isLoading,
+        turnstileRef,
+        onCaptchaSuccess,
+        onCaptchaExpire,
+        onSubmit,
+    } = useLoginForm();
 
     return (
         <div className="animate-fade-in w-full font-sans transition-all duration-700">
@@ -20,6 +28,9 @@ export function LoginPageClient() {
                         form={form}
                         authError={authError}
                         isLoading={isLoading}
+                        turnstileRef={turnstileRef}
+                        onCaptchaSuccess={onCaptchaSuccess}
+                        onCaptchaExpire={onCaptchaExpire}
                         onSubmit={onSubmit}
                     />
                 </CardContent>

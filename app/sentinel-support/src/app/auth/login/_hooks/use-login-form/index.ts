@@ -1,8 +1,9 @@
 import { LoginError, useLoginMutation } from '@sentinel/hooks';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { LoginSchema, LoginSchemaType } from '@sentinel/shared/schema';
+import { TurnstileRef } from '@sentinel/ui';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import { createSupabaseClient } from '@/data/supabase/client';
@@ -11,6 +12,8 @@ import { REMEMBERED_EMAIL_KEYS } from '@sentinel/shared/constants';
 export function useLoginForm() {
     const router = useRouter();
     const [authError, setAuthError] = useState<string | null>(null);
+    const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+    const turnstileRef = useRef<TurnstileRef>(null);
     const supabase = createSupabaseClient();
 
     const form = useForm<LoginSchemaType>({
@@ -55,21 +58,51 @@ export function useLoginForm() {
         },
         onError: (error: LoginError) => {
             setAuthError(error.message);
+            setCaptchaToken(null);
+            turnstileRef.current?.reset();
         },
     });
 
+    const onCaptchaSuccess = useCallback(
+        (token: string) => {
+            setCaptchaToken(token);
+            form.setValue('captchaToken', token);
+        },
+        [form],
+    );
+
+    const onCaptchaExpire = useCallback(() => {
+        setCaptchaToken(null);
+        form.setValue('captchaToken', undefined);
+    }, [form]);
+
     const onSubmit = (data: LoginSchemaType) => {
         setAuthError(null);
+        const resolvedToken = captchaToken || data.captchaToken || form.getValues('captchaToken');
+
+        if (process.env.NEXT_PUBLIC_CLOUDFLARE_TURNSTILE_SITE_KEY && !resolvedToken) {
+            setAuthError('Please complete the security check before signing in.');
+            return;
+        }
+
         login({
             email: data.email,
             password: data.password,
-        });
+            captchaToken: resolvedToken,
+            options: {
+                captchaToken: resolvedToken,
+            },
+        } as any);
     };
 
     return {
         form,
         authError,
         isLoading,
+        turnstileRef,
+        captchaToken,
+        onCaptchaSuccess,
+        onCaptchaExpire,
         onSubmit: form.handleSubmit(onSubmit),
     };
 }
