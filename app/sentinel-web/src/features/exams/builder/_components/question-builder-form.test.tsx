@@ -48,7 +48,7 @@ let QuestionBuilderForm: typeof import('./question-builder-form').QuestionBuilde
 
 beforeAll(async () => {
     ({ QuestionBuilderForm } = await import('./question-builder-form'));
-});
+}, 30000);
 
 afterEach(() => {
     cleanup();

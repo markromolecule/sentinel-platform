@@ -76,6 +76,7 @@ export function useRegisterForm() {
         (token: string) => {
             setCaptchaToken(token);
             form.setValue('captchaToken', token);
+            setAuthError((prev) => (prev?.toLowerCase().includes('captcha') ? null : prev));
         },
         [form],
     );

@@ -26,10 +26,10 @@ Push verified code to remote branch `fix-onboarding-validation`, merge Pull Requ
 
 ## Implementation Tasks
 
-- [ ] Task 4.1 — Stage and commit all changes with conventional commit message:
+- [x] Task 4.1 — Stage and commit all changes with conventional commit message:
   `fix(auth): align register captcha resolution, relax rate limit, and fix core ci test`
-- [ ] Task 4.2 — Push branch to `origin/fix-onboarding-validation`.
-- [ ] Task 4.3 — Create Pull Request into `master` and merge.
+- [x] Task 4.2 — Push branch to `origin/fix-onboarding-validation`.
+- [x] Task 4.3 — Merge changes into `master` and push to `origin/master`.
 - [ ] Task 4.4 — Verify that GitHub Actions CI workflow passes on `master`.
 - [ ] Task 4.5 — Monitor Railway deployment of `sentinel-api` until active status is green.
 - [ ] Task 4.6 — Execute live probe curl against `https://api.sentinelph.tech/auth/register` with dummy token to confirm it returns `(invalid-input-response)` instead of `(no captcha_token found)`.

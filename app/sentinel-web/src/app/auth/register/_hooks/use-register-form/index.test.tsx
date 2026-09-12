@@ -179,4 +179,25 @@ describe('useRegisterForm Hook', () => {
             process.env.NEXT_PUBLIC_CLOUDFLARE_TURNSTILE_SITE_KEY = originalSiteKey;
         }
     });
+
+    it('clears stale captcha authError when onCaptchaSuccess receives a new token', () => {
+        const { result } = renderHook(() => useRegisterForm());
+
+        act(() => {
+            signUpOptions.onError(
+                new Error('captcha protection: request disallowed (no captcha_token found)'),
+            );
+        });
+
+        expect(result.current.authError).toContain('captcha');
+
+        act(() => {
+            result.current.onCaptchaSuccess('fresh-valid-token-789');
+        });
+
+        expect(result.current.authError).toBeNull();
+        expect(result.current.captchaToken).toBe('fresh-valid-token-789');
+        expect(result.current.form.getValues('captchaToken')).toBe('fresh-valid-token-789');
+    });
 });
+
