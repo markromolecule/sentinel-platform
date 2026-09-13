@@ -47,6 +47,14 @@ export function useLoginMutation(args: UseLoginMutationArgs = {}) {
                     }),
                     headers: {
                         'Content-Type': 'application/json',
+                        ...((credentials as any).clientType ||
+                            (credentials.options as any)?.clientType
+                            ? {
+                                'x-sentinel-client':
+                                    (credentials as any).clientType ||
+                                    (credentials.options as any)?.clientType,
+                            }
+                            : {}),
                     },
                 })) as LoginResponse;
 
