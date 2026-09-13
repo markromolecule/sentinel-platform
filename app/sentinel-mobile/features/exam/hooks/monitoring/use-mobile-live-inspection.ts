@@ -7,12 +7,12 @@ import {
     acknowledgeLiveInspectionPublisherFailure,
 } from '@sentinel/services';
 import type { LiveInspectionDirective } from '@sentinel/shared/schema';
-import type { MobileMediaPipeBridgeRef } from '../components/checkup/mobile-mediapipe-bridge';
+import type { MobileMediaPipeBridgeRef } from '@/features/exam/components/checkup/mobile-mediapipe-bridge';
 import {
     isLiveInspectionPublishState,
     isLiveInspectionStopState,
     isLiveInspectionNotFoundError,
-} from '../lib/mobile-live-inspection';
+} from '@/features/exam/lib/mobile-live-inspection';
 
 export interface UseMobileLiveInspectionOptions {
     sessionId: string | null;
@@ -60,10 +60,14 @@ export function useMobileLiveInspection({
             return;
         }
 
+        let activeRevision = 1;
+
         try {
             const directive: LiveInspectionDirective = await getStudentLiveInspectionDirective(apiClient, {
                 sessionId,
             });
+
+            activeRevision = directive.revision;
 
             if (isLiveInspectionPublishState(directive.state)) {
                 if (activeLeaseIdRef.current === directive.leaseId && isLive) {
@@ -81,6 +85,8 @@ export function useMobileLiveInspection({
                     });
                 }
 
+                activeRevision = connection?.revision ?? directive.revision;
+
                 if (connection?.liveKitUrl && connection?.token) {
                     await mediaPipeRef?.current?.startLiveInspection({
                         liveKitUrl: connection.liveKitUrl,
@@ -90,7 +96,7 @@ export function useMobileLiveInspection({
                     await acknowledgeLiveInspectionPublisherReady(apiClient, {
                         sessionId,
                         leaseId: directive.leaseId,
-                        revision: directive.revision,
+                        revision: activeRevision,
                     });
 
                     setIsLive(true);
@@ -108,7 +114,7 @@ export function useMobileLiveInspection({
                     await acknowledgeLiveInspectionPublisherFailure(apiClient, {
                         sessionId,
                         leaseId: activeLeaseIdRef.current,
-                        revision: 1,
+                        revision: activeRevision,
                         errorCode: 'LIVEKIT_CONNECT_FAILED',
                     });
                 } catch { }

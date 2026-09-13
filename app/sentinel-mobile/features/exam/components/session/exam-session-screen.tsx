@@ -6,14 +6,14 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Colors } from '@/constants/theme';
 import { CameraView } from 'expo-camera';
 
-import { useExamSession } from '@/features/exam/hooks/use-exam-session';
+import { useExamSession } from '@/features/exam/hooks/session';
 import { QuestionDrawer } from '@/features/exam/components/session/question-drawer';
 import { SessionHeader } from './session-header';
 import { QuestionCard } from './question-card';
 import { SessionFooter } from './session-footer';
 
 import { useApi, useAuth } from '@sentinel/hooks';
-import { useMobileMediaPipeMonitoring } from '../../hooks/use-mobile-mediapipe-monitoring';
+import { useMobileMediaPipeMonitoring } from '@/features/exam/hooks/monitoring';
 import { MobileLiveInspectionBridge } from './mobile-live-inspection-bridge';
 import { captureAndUploadEvidenceFrame } from '../../lib/mobile-frame-capture';
 import { MobileMediaPipeBridge } from '../checkup/mobile-mediapipe-bridge';

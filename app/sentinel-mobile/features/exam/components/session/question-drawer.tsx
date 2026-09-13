@@ -11,7 +11,7 @@ import Animated from 'react-native-reanimated';
 import type { ThemeColors } from '@/types/exam';
 import { isQuestionAnswered } from '@/features/exam/lib/mobile-exam-adapter';
 import { resolveQuestionBadgeStyle } from '@/features/exam/lib/question-drawer-badge';
-import { useDrawerAnimation } from '@/features/exam/hooks/use-drawer-animation';
+import { useDrawerAnimation } from '@/features/exam/hooks/session';
 import { styles } from './question-drawer.styles';
 import { getDrawerLegendItems } from './question-drawer-legend';
 

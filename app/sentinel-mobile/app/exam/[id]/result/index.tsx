@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, StatusBar, ActivityIndicator } from 'react-native';
-import { useExamResult } from '@/features/exam/hooks/use-exam-result';
+import { useExamResult } from '@/features/exam/hooks/result';
 import { ResultView } from '@/features/exam/components/detail/result-view';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 

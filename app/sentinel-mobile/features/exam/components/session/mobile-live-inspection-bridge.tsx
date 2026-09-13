@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, useColorScheme } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '@/constants/theme';
 import type { MobileMediaPipeBridgeRef } from '../checkup/mobile-mediapipe-bridge';
-import { useMobileLiveInspection } from '../../hooks/use-mobile-live-inspection';
+import { useMobileLiveInspection } from '@/features/exam/hooks/monitoring';
 
 export type MobileLiveInspectionBridgeProps = {
     sessionId: string | null;

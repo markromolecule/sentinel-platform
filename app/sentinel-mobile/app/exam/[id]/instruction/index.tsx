@@ -1,5 +1,5 @@
 import { ActivityIndicator, View, ScrollView, StatusBar, Text } from 'react-native';
-import { useExamDetails } from '@/features/exam/hooks/use-exam-details';
+import { useExamDetails } from '@/features/exam/hooks/detail';
 import { HeroHeader } from '@/features/exam/components/detail/hero-header';
 import { QuickInfoBar } from '@/features/exam/components/detail/quick-info-bar';
 import { DifficultyBadge } from '@/features/exam/components/detail/difficulty-badge';

@@ -208,4 +208,49 @@ describe('mobile telemetry client', () => {
             );
         }
     });
+
+    it('preserves and forwards duration and confidence metadata in the telemetry payload', async () => {
+        const apiClient = vi.fn();
+        const config = buildConfiguration();
+        config.aiRules = {
+            gaze_tracking: true,
+            face_detection: true,
+            multiple_faces_detection: true,
+            audio_anomaly_detection: true,
+        };
+
+        const delivered = await telemetry.emitMobileTelemetryEvent({
+            apiClient,
+            configuration: config,
+            examSessionId: 'session-meta',
+            eventType: 'GAZE_OFF_SCREEN',
+            studentId: 'student-meta',
+            metadata: {
+                durationMs: 4500,
+                confidenceScore: 0.92,
+                aggregation: {
+                    trigger: 'repeat-threshold',
+                    occurrenceCount: 3,
+                },
+            },
+        });
+
+        expect(delivered).toBe(true);
+        expect(ingestTelemetryEventMock).toHaveBeenCalledWith(
+            apiClient,
+            expect.objectContaining({
+                examSessionId: 'session-meta',
+                studentId: 'student-meta',
+                eventType: 'GAZE_OFF_SCREEN',
+                metadata: {
+                    durationMs: 4500,
+                    confidenceScore: 0.92,
+                    aggregation: {
+                        trigger: 'repeat-threshold',
+                        occurrenceCount: 3,
+                    },
+                },
+            }),
+        );
+    });
 });

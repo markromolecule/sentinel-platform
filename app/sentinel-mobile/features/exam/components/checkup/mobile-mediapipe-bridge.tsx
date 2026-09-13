@@ -103,7 +103,6 @@ export const MobileMediaPipeBridge = forwardRef<MobileMediaPipeBridgeRef, Mobile
       width: 100%;
       height: 100%;
       object-fit: cover;
-      display: ${showPreview ? 'block' : 'none'};
       ${facing === 'front' ? 'transform: scaleX(-1);' : ''}
     }
   </style>
@@ -165,6 +164,7 @@ export const MobileMediaPipeBridge = forwardRef<MobileMediaPipeBridgeRef, Mobile
           audio: false
         });
         video.srcObject = localStream;
+        await video.play().catch(e => console.error("Error playing video:", e));
         video.addEventListener('loadeddata', predictLoop);
       } catch (err) {
         sendToRN({ type: 'error', error: 'Camera access failed: ' + err.message });
@@ -299,6 +299,7 @@ export const MobileMediaPipeBridge = forwardRef<MobileMediaPipeBridgeRef, Mobile
                     domStorageEnabled={true}
                     mediaPlaybackRequiresUserAction={false}
                     allowsInlineMediaPlayback={true}
+                    mediaCapturePermissionGrantType="grant"
                     {...({
                         onPermissionRequest: (event: any) => {
                             event.grant(event.resources);
@@ -351,8 +352,11 @@ const styles = StyleSheet.create({
     container: {
         width: 1,
         height: 1,
-        opacity: 0,
+        opacity: 0.01,
+        pointerEvents: 'none',
         position: 'absolute',
+        top: 0,
+        left: 0,
     },
     previewContainer: {
         flex: 1,

@@ -37,6 +37,7 @@ vi.mock('react', async (importOriginal) => {
         useCallback: (fn: any) => fn,
         useMemo: (fn: any) => fn(),
         useRef: (initial: any) => ({ current: initial }),
+        useContext: () => null,
     };
 });
 

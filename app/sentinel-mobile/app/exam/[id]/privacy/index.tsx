@@ -1,5 +1,5 @@
 import { View, ScrollView, StatusBar, Text } from 'react-native';
-import { useExamConsent } from '@/features/exam/hooks/use-exam-consent';
+import { useExamConsent } from '@/features/exam/hooks/consent';
 import { ConsentHeader } from '@/features/exam/components/consent/consent-header';
 import { PermissionCard } from '@/features/exam/components/consent/permission-card';
 import { ConsentAgreements } from '@/features/exam/components/consent/consent-agreements';

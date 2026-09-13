@@ -9,6 +9,17 @@ import type { ExamConfiguration, TelemetryMediaPipeSandboxSettings } from '@sent
 import type { ApiClientType } from '@sentinel/services';
 import { readStoredMobileCalibrationProfile } from '@/features/exam/lib/mobile-exam-storage';
 import { emitMobileTelemetryEvent } from '@/features/exam/lib/mobile-telemetry-client';
+import {
+    type MediaPipeIncidentSignal,
+    type MediaPipeWarningStatus,
+    resolveMediaPipeIncident,
+    isSameMediaPipeAnalysis,
+    calculateIncidentDuration,
+    buildMediaPipeTelemetryMetadata,
+    evaluateIncidentTrigger,
+} from '@/features/exam/lib/mobile-mediapipe-incident';
+
+export type { MediaPipeIncidentSignal, MediaPipeWarningStatus } from '@/features/exam/lib/mobile-mediapipe-incident';
 
 /**
  * Arguments for useMobileMediaPipeMonitoring hook.
@@ -25,7 +36,7 @@ export type UseMobileMediaPipeMonitoringArgs = {
     studentId?: string;
     landmarksByFace: MediaPipeLandmark[][];
     onAnomalyDetected?: (
-        eventType: 'GAZE_OFF_SCREEN' | 'MULTIPLE_FACES' | 'NO_FACE_DETECTED',
+        eventType: MediaPipeIncidentSignal,
     ) => void | Promise<void>;
 };
 
@@ -33,8 +44,7 @@ export type UseMobileMediaPipeMonitoringArgs = {
  * Result returned by useMobileMediaPipeMonitoring hook.
  */
 export type UseMobileMediaPipeMonitoringResult = {
-    warningStatus:
-    'Face not detected' | 'Multiple faces detected' | 'Looking away from screen' | null;
+    warningStatus: MediaPipeWarningStatus;
     isMonitoring: boolean;
     analysis: MediaPipeFrameAnalysis | null;
     calibrationProfile: MediaPipeCalibrationProfile | null;
@@ -58,19 +68,19 @@ export function useMobileMediaPipeMonitoring({
     const [calibrationProfile, setCalibrationProfile] =
         useState<MediaPipeCalibrationProfile | null>(null);
     const [warningStatus, setWarningStatus] =
-        useState<UseMobileMediaPipeMonitoringResult['warningStatus']>(null);
+        useState<MediaPipeWarningStatus>(null);
     const [analysis, setAnalysis] = useState<MediaPipeFrameAnalysis | null>(null);
 
     const onAnomalyDetectedRef = useRef(onAnomalyDetected);
     onAnomalyDetectedRef.current = onAnomalyDetected;
 
-    const consecutiveFrames = useRef<Record<string, number>>({
+    const consecutiveFrames = useRef<Record<MediaPipeIncidentSignal, number>>({
         GAZE_OFF_SCREEN: 0,
         MULTIPLE_FACES: 0,
         NO_FACE_DETECTED: 0,
     });
 
-    const lastTriggeredAt = useRef<Record<string, number>>({
+    const lastTriggeredAt = useRef<Record<MediaPipeIncidentSignal, number>>({
         GAZE_OFF_SCREEN: 0,
         MULTIPLE_FACES: 0,
         NO_FACE_DETECTED: 0,
@@ -84,7 +94,7 @@ export function useMobileMediaPipeMonitoring({
     // 1. Load calibration profile on mount
     useEffect(() => {
         if (!examId) return;
-        readStoredMobileCalibrationProfile(examId).then((profile) => {
+        void readStoredMobileCalibrationProfile(examId).then((profile) => {
             if (profile) {
                 setCalibrationProfile((prev) => (prev === profile ? prev : profile));
             }
@@ -94,8 +104,8 @@ export function useMobileMediaPipeMonitoring({
     // 2. Continuous frame analyzer loop
     useEffect(() => {
         if (!isMonitoring) {
-            setWarningStatus((prev) => (prev === null ? null : null));
-            setAnalysis((prev) => (prev === null ? null : null));
+            setWarningStatus(null);
+            setAnalysis(null);
             return;
         }
 
@@ -111,82 +121,71 @@ export function useMobileMediaPipeMonitoring({
             calibrationProfile,
         });
 
-        setAnalysis((prev) => {
-            if (
-                prev?.status === currentAnalysis.status &&
-                prev?.signal === currentAnalysis.signal &&
-                prev?.faceCount === currentAnalysis.faceCount &&
-                prev?.confidenceScore === currentAnalysis.confidenceScore &&
-                prev?.gazeDirection === currentAnalysis.gazeDirection &&
-                prev?.eyeState === currentAnalysis.eyeState
-            ) {
-                return prev;
-            }
-            return currentAnalysis;
-        });
-
-        const now = Date.now();
-        let activeSignal: 'GAZE_OFF_SCREEN' | 'MULTIPLE_FACES' | 'NO_FACE_DETECTED' | null = null;
-        let activeWarning: UseMobileMediaPipeMonitoringResult['warningStatus'] = null;
+        setAnalysis((prev) => (isSameMediaPipeAnalysis(prev, currentAnalysis) ? prev : currentAnalysis));
 
         // Reset counts if frame is stable / ready
         if (currentAnalysis.status === 'ready') {
             consecutiveFrames.current.GAZE_OFF_SCREEN = 0;
             consecutiveFrames.current.MULTIPLE_FACES = 0;
             consecutiveFrames.current.NO_FACE_DETECTED = 0;
-            setWarningStatus((prev) => (prev === null ? null : null));
+            setWarningStatus(null);
             return;
         }
 
-        if (currentAnalysis.status === 'no-face') {
-            activeSignal = 'NO_FACE_DETECTED';
-            activeWarning = 'Face not detected';
-        } else if (currentAnalysis.status === 'multiple-faces') {
-            activeSignal = 'MULTIPLE_FACES';
-            activeWarning = 'Multiple faces detected';
-        } else if (currentAnalysis.status === 'off-screen') {
-            activeSignal = 'GAZE_OFF_SCREEN';
-            activeWarning = 'Looking away from screen';
-        }
-
-        setWarningStatus((prev) => (prev === activeWarning ? prev : activeWarning));
+        const { activeSignal, activeWarning } = resolveMediaPipeIncident(currentAnalysis.status);
+        setWarningStatus(activeWarning);
 
         if (activeSignal) {
-            // Reset other signals' consecutive frame counters
-            Object.keys(consecutiveFrames.current).forEach((key) => {
+            // Reset counters for other signals
+            const signals: MediaPipeIncidentSignal[] = ['GAZE_OFF_SCREEN', 'MULTIPLE_FACES', 'NO_FACE_DETECTED'];
+            for (const key of signals) {
                 if (key !== activeSignal) {
                     consecutiveFrames.current[key] = 0;
                 }
-            });
+            }
 
             consecutiveFrames.current[activeSignal] += 1;
 
-            if (consecutiveFrames.current[activeSignal] >= consecutiveThreshold) {
-                const lastTrigger = lastTriggeredAt.current[activeSignal];
-                const isOnCooldown = now - lastTrigger < cooldownMs;
+            const now = Date.now();
+            const { shouldTrigger } = evaluateIncidentTrigger({
+                currentConsecutiveFrames: consecutiveFrames.current[activeSignal],
+                consecutiveThreshold,
+                lastTriggeredAt: lastTriggeredAt.current[activeSignal] ?? 0,
+                now,
+                cooldownMs,
+            });
 
-                if (!isOnCooldown) {
-                    lastTriggeredAt.current[activeSignal] = now;
-                    consecutiveFrames.current[activeSignal] = 0; // reset counter after trigger
+            if (shouldTrigger) {
+                lastTriggeredAt.current[activeSignal] = now;
+                const framesCount = consecutiveFrames.current[activeSignal];
+                const frameIntervalMs = sandbox?.frameIntervalMs ?? 1000;
+                const durationMs = calculateIncidentDuration(framesCount, frameIntervalMs);
+                consecutiveFrames.current[activeSignal] = 0; // reset counter after trigger
 
-                    if (apiClient) {
-                        void emitMobileTelemetryEvent({
-                            apiClient,
-                            configuration,
-                            examSessionId,
-                            studentId,
-                            eventType: activeSignal,
-                        }).catch((err) => {
-                            console.error(
-                                `Failed to emit mobile telemetry incident event ${activeSignal}`,
-                                err,
-                            );
-                        });
-                    }
+                if (apiClient) {
+                    const metadata = buildMediaPipeTelemetryMetadata({
+                        signal: activeSignal,
+                        confidenceScore: currentAnalysis.confidenceScore,
+                        durationMs,
+                    });
 
-                    if (onAnomalyDetectedRef.current) {
-                        void onAnomalyDetectedRef.current(activeSignal);
-                    }
+                    void emitMobileTelemetryEvent({
+                        apiClient,
+                        configuration,
+                        examSessionId,
+                        studentId,
+                        eventType: activeSignal,
+                        metadata,
+                    }).catch((err) => {
+                        console.error(
+                            `Failed to emit mobile telemetry incident event ${activeSignal}`,
+                            err,
+                        );
+                    });
+                }
+
+                if (onAnomalyDetectedRef.current) {
+                    void onAnomalyDetectedRef.current(activeSignal);
                 }
             }
         }

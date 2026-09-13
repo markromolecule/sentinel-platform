@@ -5,39 +5,37 @@ import {
     SHARED_TELEMETRY_EVENT_TYPES,
     TELEMETRY_EVENT_DEFINITIONS,
     type TelemetryEventType,
+    type TelemetryMetadata,
+    type TelemetrySessionContext,
 } from '@sentinel/shared/schema';
 import type { ExamConfiguration } from '@sentinel/shared/types';
-import { ingestTelemetryEvent, type ApiClientType } from '@sentinel/services';
+import { ingestTelemetryEvent, type ApiClientType, type IngestTelemetryEventPayload } from '@sentinel/services';
 import { getApiBaseUrl } from '@/lib/config/api-config';
 
 export type MobileTelemetryEventType =
     (typeof MOBILE_TELEMETRY_EVENT_TYPES)[number] | (typeof SHARED_TELEMETRY_EVENT_TYPES)[number];
 
-type MobileTelemetrySessionContext = {
-    os?: string;
-    deviceType?: 'DESKTOP' | 'TABLET' | 'MOBILE';
-    appVersion?: string;
-    clientVersion?: string;
-    clientCapabilities?: string[];
-};
+export type MobileTelemetryMetadata = TelemetryMetadata;
 
-type MobileTelemetryPayload = {
-    examSessionId: string;
-    studentId: string;
-    timestamp: string;
+export type MobileTelemetrySessionContext = TelemetrySessionContext;
+
+export type MobileTelemetryPayload = Omit<
+    IngestTelemetryEventPayload,
+    'platform' | 'eventType' | 'metadata' | 'sessionContext'
+> & {
     platform: 'MOBILE';
-    source: (typeof TELEMETRY_EVENT_DEFINITIONS)[TelemetryEventType]['source'];
-    ruleKey: (typeof TELEMETRY_EVENT_DEFINITIONS)[TelemetryEventType]['ruleKey'];
     eventType: MobileTelemetryEventType;
+    metadata?: MobileTelemetryMetadata;
     sessionContext?: MobileTelemetrySessionContext;
 };
 
-type EmitMobileTelemetryEventArgs = {
+export type EmitMobileTelemetryEventArgs = {
     apiClient?: ApiClientType;
     configuration?: ExamConfiguration;
     examSessionId: string;
     eventType: MobileTelemetryEventType;
     studentId?: string;
+    metadata?: MobileTelemetryMetadata;
 };
 
 type MobileTelemetryRuleEnabledReader = (configuration: ExamConfiguration) => boolean;
@@ -90,10 +88,12 @@ export function buildMobileTelemetryPayload({
     examSessionId,
     eventType,
     studentId,
+    metadata,
 }: {
     examSessionId: string;
     eventType: MobileTelemetryEventType;
     studentId: string;
+    metadata?: MobileTelemetryMetadata;
 }): MobileTelemetryPayload {
     const eventDefinition = TELEMETRY_EVENT_DEFINITIONS[eventType];
 
@@ -105,6 +105,7 @@ export function buildMobileTelemetryPayload({
         source: eventDefinition.source,
         ruleKey: eventDefinition.ruleKey,
         eventType,
+        metadata,
         sessionContext: buildMobileTelemetrySessionContext(),
     };
 }
@@ -115,6 +116,7 @@ export async function emitMobileTelemetryEvent({
     examSessionId,
     eventType,
     studentId,
+    metadata,
 }: EmitMobileTelemetryEventArgs) {
     if (!isMobileTelemetryEventEnabled(configuration, eventType)) {
         return false;
@@ -139,6 +141,7 @@ export async function emitMobileTelemetryEvent({
         examSessionId,
         eventType,
         studentId,
+        metadata,
     });
 
     if (apiClient) {

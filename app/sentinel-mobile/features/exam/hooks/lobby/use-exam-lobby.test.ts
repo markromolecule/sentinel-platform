@@ -131,9 +131,13 @@ vi.mock('@/features/exam/lib/mobile-exam-adapter', () => ({
     adaptExamForMobile: (exam: any) => exam,
 }));
 
-vi.mock('@/features/exam/lib/mobile-exam-lobby', () => ({
-    getMobileExamLobbyEntryLabel: () => 'Start',
-}));
+vi.mock('@/features/exam/lib/mobile-exam-lobby', async (importOriginal) => {
+    const actual = await importOriginal<typeof import('@/features/exam/lib/mobile-exam-lobby')>();
+    return {
+        ...actual,
+        getMobileExamLobbyEntryLabel: () => 'Start',
+    };
+});
 
 vi.mock('@/features/exam/lib/mobile-exam-storage', () => ({
     readStoredMobileCalibrationProfile: vi.fn(),

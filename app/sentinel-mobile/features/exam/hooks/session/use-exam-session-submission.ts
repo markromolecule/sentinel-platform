@@ -1,5 +1,7 @@
 import { useState, useRef, useCallback, type MutableRefObject } from 'react';
 import { Alert } from 'react-native';
+import { useQueryClient } from '@tanstack/react-query';
+import { EXAM_QUERY_KEYS } from '@sentinel/shared/constants';
 import { completeExamSession } from '@sentinel/services';
 import { buildSessionAnswerPayload } from '@/features/exam/lib/mobile-exam-adapter';
 import {
@@ -29,6 +31,12 @@ export function useExamSessionSubmission({
     apiClient,
     router,
 }: UseExamSessionSubmissionOptions) {
+    let queryClient: any = null;
+    try {
+        queryClient = useQueryClient();
+    } catch {
+        // Safely ignore when called outside QueryClientProvider in test harness
+    }
     const [isSubmitting, setIsSubmitting] = useState(false);
     const isSubmittingRef = useRef(false);
 
@@ -61,6 +69,7 @@ export function useExamSessionSubmission({
 
             await writeStoredMobileExamPreview(id, preview);
             await clearStoredMobileExamSession(id);
+            await queryClient?.invalidateQueries({ queryKey: EXAM_QUERY_KEYS.all });
 
             router.replace(`/exam/${id}/result`);
         } catch (error: any) {
@@ -72,7 +81,7 @@ export function useExamSessionSubmission({
             isSubmittingRef.current = false;
             setIsSubmitting(false);
         }
-    }, [apiClient, exam, id, questions, router, sessionId, answersRef, timeLeftRef]);
+    }, [apiClient, exam, id, questions, router, sessionId, answersRef, timeLeftRef, queryClient]);
 
     return {
         isSubmitting,

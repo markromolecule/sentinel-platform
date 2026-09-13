@@ -1,4 +1,5 @@
-import type { Exam } from '@sentinel/shared/types';
+import { resolveStudentExamStatus } from '@sentinel/shared';
+import type { Exam, StudentExamStatus } from '@sentinel/shared/types';
 import type { MobileDifficulty, MobileExamDisplay } from './mobile-exam-adapter.types';
 import { resolveStudentExamMediaPipeSandbox } from './mobile-exam-mediapipe-adapter';
 
@@ -36,8 +37,40 @@ export function buildInstructions(exam: Exam): string[] {
 }
 
 /**
+ * Resolves the student-facing status of an exam on mobile.
+ * Normalizes completed attempts or explicit turned_in/completed flags to 'turned_in',
+ * and computes dynamic student status (upcoming, available, past_due, archived, in-progress)
+ * based on schedule and attempt dates.
+ */
+export function resolveMobileExamStatus(exam: Exam): StudentExamStatus {
+    const attemptStatus = (exam as any).attempt_status || (exam as any).attemptStatus;
+    const completedAt = exam.completedAt || (exam as any).attemptCompletedAt;
+
+    if (
+        completedAt ||
+        attemptStatus === 'COMPLETED' ||
+        attemptStatus === 'completed' ||
+        exam.status === 'turned_in' ||
+        exam.status === 'completed'
+    ) {
+        return 'turned_in';
+    }
+
+    return resolveStudentExamStatus({
+        status: exam.status,
+        scheduledDate:
+            exam.scheduledDate || (exam as any).startDate || (exam as any).scheduledStartDate,
+        endDateTime: exam.endDateTime,
+        durationMinutes: exam.duration,
+        attemptCompletedAt: completedAt,
+        attemptStatus: attemptStatus === 'in-progress' ? 'in-progress' : (attemptStatus ?? null),
+    });
+}
+
+/**
  * Converts a raw API exam object into a lightweight display model for the
- * mobile exam list and lobby screens, automatically resolving MediaPipe sandbox settings.
+ * mobile exam list and lobby screens, automatically resolving MediaPipe sandbox settings
+ * and normalizing student exam status.
  */
 export function adaptExamForMobile(exam: Exam): MobileExamDisplay {
     const questionCount =
@@ -57,6 +90,7 @@ export function adaptExamForMobile(exam: Exam): MobileExamDisplay {
 
     return {
         ...exam,
+        status: resolveMobileExamStatus(exam),
         mediaPipeSandbox: resolvedMediaPipeSandbox,
         professor: exam.professor || 'Instructor',
         questions: questionCount,
@@ -70,3 +104,4 @@ export function adaptExamForMobile(exam: Exam): MobileExamDisplay {
             (exam as any).scheduledStartDate || exam.scheduledDate || (exam as any).startDate,
     };
 }
+
