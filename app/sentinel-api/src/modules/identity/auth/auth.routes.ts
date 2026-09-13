@@ -2,16 +2,10 @@ import { OpenAPIHono } from '@hono/zod-openapi';
 import { type HonoEnv } from '../../../types/hono';
 import { createRateLimitMiddleware } from '../../../middleware/rate-limit';
 import { authMiddleware } from '../../../middleware/auth';
-import {
-    loginRoute,
-    loginHandler,
-    registerRoute,
-    registerHandler,
-    verifyOtpRoute,
-    verifyOtpHandler,
-    logOauthRoute,
-    logOauthHandler,
-} from './auth.controller';
+import { loginRoute, loginHandler } from './controller/login.controller';
+import { registerRoute, registerHandler } from './controller/register.controller';
+import { verifyOtpRoute, verifyOtpHandler } from './controller/verify-otp.controller';
+import { logOauthRoute, logOauthHandler } from './controller/log-oauth.controller';
 
 const authRoutes = new OpenAPIHono<HonoEnv>();
 

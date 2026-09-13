@@ -6,6 +6,9 @@ let cachedToken: string | undefined = undefined;
 
 export const apiClient = createApiClient({
     baseUrl: getApiBaseUrl(),
+    headers: {
+        'x-sentinel-client': 'mobile',
+    },
     getToken: async () => {
         if (cachedToken) return cachedToken;
 

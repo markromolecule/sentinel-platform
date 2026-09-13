@@ -96,7 +96,13 @@ export const createApiClient = (defaultOptions: ApiClientOptions = {}) => {
         const finalBaseUrl = baseUrl || defaultBaseUrl || '';
         const finalGetToken = getToken || defaultGetToken;
 
-        const headers = new Headers(requestOptions.headers || defaultRequestOptions.headers);
+        const headers = new Headers(defaultRequestOptions.headers);
+        if (requestOptions.headers) {
+            const extraHeaders = new Headers(requestOptions.headers);
+            extraHeaders.forEach((value, key) => {
+                headers.set(key, value);
+            });
+        }
 
         if (finalGetToken) {
             const token = await finalGetToken();

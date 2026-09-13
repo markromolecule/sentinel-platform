@@ -8,15 +8,38 @@ import {
 
 export class AuthService {
     /**
-     * Authenticate a user with email and password via Supabase, forwarding optional Cloudflare Turnstile token.
+     * Authenticate a user with email and password via Supabase.
+     * Web requests forwarding a Cloudflare Turnstile token authenticate via supabaseAnon.
+     * Mobile requests or requests without a captchaToken authenticate via supabaseAdmin
+     * to bypass Turnstile rejection while preserving API rate-limiting and audit logging.
      */
-    static async login(credentials: LoginSchemaType) {
-        const { data, error } = await supabaseAnon.auth.signInWithPassword({
+    static async login(credentials: LoginSchemaType, clientType?: string) {
+        const hasCaptchaToken = Boolean(
+            typeof credentials.captchaToken === 'string' && credentials.captchaToken.trim(),
+        );
+        const isMobileClient = clientType === 'mobile';
+
+        if (hasCaptchaToken) {
+            const { data, error } = await supabaseAnon.auth.signInWithPassword({
+                email: credentials.email,
+                password: credentials.password,
+                options: {
+                    captchaToken: credentials.captchaToken!.trim(),
+                },
+            });
+
+            if (error) {
+                throw error;
+            }
+
+            return data;
+        }
+
+        const authClient = isMobileClient || !hasCaptchaToken ? supabaseAdmin : supabaseAnon;
+
+        const { data, error } = await authClient.auth.signInWithPassword({
             email: credentials.email,
             password: credentials.password,
-            options: credentials.captchaToken
-                ? { captchaToken: credentials.captchaToken }
-                : undefined,
         });
 
         if (error) {
