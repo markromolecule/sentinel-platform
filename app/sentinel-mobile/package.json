@@ -64,7 +64,7 @@
         "react-native-svg-transformer": "^1.5.3",
         "tailwindcss": "^3.4.19",
         "typescript": "~5.9.2",
-        "vitest": "^4.0.17"
+        "vitest": "^4.1.11"
     },
     "expo": {
         "install": {
