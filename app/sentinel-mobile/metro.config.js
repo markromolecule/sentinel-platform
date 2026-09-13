@@ -26,15 +26,18 @@ const DEDUPLICATED_MODULES = [
     'react/jsx-runtime',
     'react/jsx-dev-runtime',
     '@tanstack/react-query',
-    '@tanstack/query-core',
 ];
 
 config.resolver.resolveRequest = (context, moduleName, platform) => {
     if (DEDUPLICATED_MODULES.includes(moduleName)) {
-        const resolved = require.resolve(moduleName, {
-            paths: [path.resolve(projectRoot, 'node_modules')],
-        });
-        return { filePath: resolved, type: 'sourceFile' };
+        try {
+            const resolved = require.resolve(moduleName, {
+                paths: [path.resolve(projectRoot, 'node_modules')],
+            });
+            return { filePath: resolved, type: 'sourceFile' };
+        } catch {
+            // Fall through to context.resolveRequest if not directly resolvable from projectRoot
+        }
     }
     return context.resolveRequest(context, moduleName, platform);
 };
