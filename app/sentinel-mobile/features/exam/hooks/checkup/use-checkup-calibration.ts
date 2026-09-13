@@ -18,6 +18,7 @@ export interface UseCheckupCalibrationOptions {
     exam?: MobileExamDisplay;
     cameraReady: boolean;
     hasCameraPermission: boolean;
+    cameraError?: string | null;
 }
 
 export interface UseCheckupCalibrationReturn {
@@ -34,6 +35,7 @@ export function useCheckupCalibration({
     exam,
     cameraReady,
     hasCameraPermission,
+    cameraError,
 }: UseCheckupCalibrationOptions): UseCheckupCalibrationReturn {
     const [calibrationProgress, setCalibrationProgress] = useState(0);
     const [isCalibrated, setIsCalibrated] = useState(false);
@@ -41,6 +43,13 @@ export function useCheckupCalibration({
     const [calibrationProfile, setCalibrationProfile] = useState<any | null>(null);
     const [isFaceCentered, setIsFaceCentered] = useState(false);
     const [calibrationSamples, setCalibrationSamples] = useState<any[]>([]);
+
+    // Surface camera or bridge error if present
+    useEffect(() => {
+        if (cameraError) {
+            setCalibrationFeedback(cameraError);
+        }
+    }, [cameraError]);
 
     // Load stored calibration profile on mount
     useEffect(() => {

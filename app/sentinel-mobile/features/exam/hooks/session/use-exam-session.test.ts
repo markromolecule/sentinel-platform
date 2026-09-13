@@ -209,7 +209,7 @@ describe('useExamSession Hook', () => {
             completedAt: mockResult.completedAt,
         });
         expect(clearStoredMobileExamSession).toHaveBeenCalledWith('exam-123');
-        expect(mockReplace).toHaveBeenCalledWith('/exam/exam-123/result');
+        expect(mockReplace).toHaveBeenCalledWith('/exam/exam-123/feedback?attemptId=session-456');
     });
 
     it('should show alert on turn-in failure', async () => {

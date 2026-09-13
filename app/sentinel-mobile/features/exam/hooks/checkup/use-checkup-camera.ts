@@ -11,6 +11,7 @@ export interface UseCheckupCameraReturn {
     cameraReady: boolean;
     hasCameraPermission: boolean;
     isPermissionLoading: boolean;
+    cameraError: string | null;
     requestCameraPermission: () => Promise<any>;
     onCameraReady: () => void;
     onCameraMountError: (error: any) => void;
@@ -22,6 +23,7 @@ export function useCheckupCamera(options: UseCheckupCameraOptions = {}): UseChec
     const [permission, requestPermission] = useCameraPermissions();
     const [cameraFacing, setCameraFacing] = useState<CameraFacing>('front');
     const [cameraReady, setCameraReady] = useState(false);
+    const [cameraError, setCameraError] = useState<string | null>(null);
 
     const hasCameraPermission = permission?.granted ?? false;
     const isPermissionLoading = permission === null;
@@ -38,21 +40,25 @@ export function useCheckupCamera(options: UseCheckupCameraOptions = {}): UseChec
         if (!requiresCamera || !hasCameraPermission || cameraReady) return;
         const timer = setTimeout(() => {
             setCameraReady(true);
-        }, 2000);
+        }, 3000);
         return () => clearTimeout(timer);
     }, [requiresCamera, hasCameraPermission, cameraReady]);
 
     const onCameraReady = useCallback(() => {
+        setCameraError(null);
         setCameraReady(true);
     }, []);
 
     const onCameraMountError = useCallback((error: any) => {
-        console.warn('Camera failed to mount:', error);
+        const errorMsg = typeof error === 'string' ? error : error?.message ?? 'Failed to initialize camera';
+        console.warn('Camera failed to mount:', errorMsg);
+        setCameraError(errorMsg);
         setCameraReady(true);
     }, []);
 
     const flipCamera = useCallback(() => {
         setCameraReady(false);
+        setCameraError(null);
         setCameraFacing((prev) => (prev === 'front' ? 'back' : 'front'));
     }, []);
 
@@ -61,6 +67,7 @@ export function useCheckupCamera(options: UseCheckupCameraOptions = {}): UseChec
         cameraReady,
         hasCameraPermission,
         isPermissionLoading,
+        cameraError,
         requestCameraPermission: requestPermission,
         onCameraReady,
         onCameraMountError,

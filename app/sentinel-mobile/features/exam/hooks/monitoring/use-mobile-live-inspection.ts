@@ -29,8 +29,36 @@ export interface UseMobileLiveInspectionReturn {
 }
 
 /**
+ * Returns true if an error indicates the server rejected the call because the
+ * lease version changed concurrently (HTTP 409). In that case the caller should
+ * treat the error as a no-op rather than triggering a failure acknowledgement
+ * that would terminate the legitimate, already-active stream.
+ */
+function isLeaseConflictError(err: unknown): boolean {
+    if (!err || typeof err !== 'object') return false;
+    const e = err as Record<string, any>;
+    const status = e.status ?? e.statusCode ?? e.response?.status;
+    const message = typeof e.message === 'string' ? e.message : '';
+    return (
+        status === 409 ||
+        message.toLowerCase().includes('lease changed') ||
+        message.toLowerCase().includes('lease version')
+    );
+}
+
+/**
  * Custom hook managing LiveKit live inspection publisher lifecycle on mobile.
  * Connects the mobile camera stream to proctoring network via the MediaPipe WebView bridge.
+ *
+ * Key invariants:
+ *  - isReconcilingRef acts as a mutex so concurrent Realtime broadcasts don't
+ *    spawn overlapping reconcile calls that generate stale revision conflicts.
+ *  - isLiveRef mirrors the isLive state so the callback closure always reads
+ *    the current value instead of a stale snapshot captured at render time.
+ *  - 409 "lease changed" errors in the catch block are silently dropped; they
+ *    indicate the server already advanced the lease (e.g., PUBLISHER_READY was
+ *    broadcast before this call finished), so NO failure acknowledgement or
+ *    stopPublication should be issued.
  */
 export function useMobileLiveInspection({
     sessionId,
@@ -44,9 +72,16 @@ export function useMobileLiveInspection({
     const [isLive, setIsLive] = useState(false);
     const activeLeaseIdRef = useRef<string | null>(null);
 
+    // Mutex: prevents concurrent reconcile executions that would race on
+    // revision numbers and generate 409 conflicts on the server.
+    const isReconcilingRef = useRef(false);
+    // Mirrors isLive so the async callback always sees the latest value.
+    const isLiveRef = useRef(false);
+
     const stopPublication = useCallback(async () => {
         if (!activeLeaseIdRef.current) return;
         activeLeaseIdRef.current = null;
+        isLiveRef.current = false;
         setIsLive(false);
         try {
             await mediaPipeRef?.current?.stopLiveInspection();
@@ -60,6 +95,12 @@ export function useMobileLiveInspection({
             return;
         }
 
+        // Serialize calls — skip if one is already in flight.
+        if (isReconcilingRef.current) {
+            return;
+        }
+        isReconcilingRef.current = true;
+
         let activeRevision = 1;
 
         try {
@@ -70,8 +111,9 @@ export function useMobileLiveInspection({
             activeRevision = directive.revision;
 
             if (isLiveInspectionPublishState(directive.state)) {
-                if (activeLeaseIdRef.current === directive.leaseId && isLive) {
-                    return; // Already publishing for this lease
+                // Already publishing for this exact lease — skip to avoid 409.
+                if (activeLeaseIdRef.current === directive.leaseId && isLiveRef.current) {
+                    return;
                 }
 
                 activeLeaseIdRef.current = directive.leaseId;
@@ -99,15 +141,28 @@ export function useMobileLiveInspection({
                         revision: activeRevision,
                     });
 
+                    isLiveRef.current = true;
                     setIsLive(true);
                 }
             } else if (isLiveInspectionStopState(directive.state)) {
                 await stopPublication();
             }
         } catch (err: any) {
-            if (!isLiveInspectionNotFoundError(err)) {
-                console.warn('Live inspection directive reconciliation failed:', err);
+            // 404: live inspection simply not active yet — silent, expected state.
+            if (isLiveInspectionNotFoundError(err)) {
+                return;
             }
+
+            // 409 lease conflict: the server already advanced the lease revision
+            // (race with another broadcast). The existing stream is still valid —
+            // do NOT acknowledge failure or stop publishing.
+            if (isLeaseConflictError(err)) {
+                console.warn('Live inspection lease conflict (concurrent reconcile) — skipping failure acknowledgement.', err?.message);
+                return;
+            }
+
+            // Genuine connection / WebRTC failure.
+            console.warn('Live inspection directive reconciliation failed:', err);
 
             if (activeLeaseIdRef.current) {
                 try {
@@ -120,8 +175,10 @@ export function useMobileLiveInspection({
                 } catch { }
             }
             await stopPublication();
+        } finally {
+            isReconcilingRef.current = false;
         }
-    }, [apiClient, enabled, isLive, mediaPipeRef, sessionId, stopPublication]);
+    }, [apiClient, enabled, mediaPipeRef, sessionId, stopPublication]);
 
     useEffect(() => {
         if (!enabled || !sessionId) {

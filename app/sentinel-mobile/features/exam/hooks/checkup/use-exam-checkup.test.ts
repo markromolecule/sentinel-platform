@@ -183,10 +183,11 @@ describe('use-exam-checkup refactor', () => {
             expect(stateValues[1]).toBe(true);
         });
 
-        it('handles onCameraMountError by setting cameraReady', () => {
+        it('handles onCameraMountError by setting cameraReady and recording cameraError', () => {
             const camera = useCheckupCamera({ requiresCamera: true });
             camera.onCameraMountError(new Error('Mount failed'));
             expect(stateValues[1]).toBe(true);
+            expect(stateValues[2]).toBe('Mount failed');
         });
     });
 
@@ -226,6 +227,20 @@ describe('use-exam-checkup refactor', () => {
             // stateIndex 4 in useCheckupCalibration is isFaceCentered
             expect(stateValues[4]).toBe(true);
         });
+
+        it('surfaces cameraError into calibrationFeedback', () => {
+            useCheckupCalibration({
+                id: 'test-exam-123',
+                exam: mockExamData as any,
+                cameraReady: true,
+                hasCameraPermission: true,
+                cameraError: 'Bridge crash error',
+            });
+
+            effectCallbacks.forEach((cb) => cb());
+            // stateIndex 2 in useCheckupCalibration is calibrationFeedback
+            expect(stateValues[2]).toBe('Bridge crash error');
+        });
     });
 
     describe('useExamCheckup coordinator hook', () => {
@@ -253,12 +268,13 @@ describe('use-exam-checkup refactor', () => {
             // In full hook render:
             // State 0: cameraFacing ('front')
             // State 1: cameraReady (false)
-            // State 2: micLevel (0)
-            // State 3: micDetected (false) -> set to true
-            // State 4: calibrationProgress (0)
-            // State 5: isCalibrated (false) -> set to true
-            stateValues[3] = true; // micDetected
-            stateValues[5] = true; // isCalibrated
+            // State 2: cameraError (null)
+            // State 3: micLevel (0)
+            // State 4: micDetected (false) -> set to true
+            // State 5: calibrationProgress (0)
+            // State 6: isCalibrated (false) -> set to true
+            stateValues[4] = true; // micDetected
+            stateValues[6] = true; // isCalibrated
 
             stateIndex = 0;
             const calibratedCheckup = useExamCheckup();

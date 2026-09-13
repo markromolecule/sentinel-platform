@@ -125,10 +125,7 @@ describe('useExamResult', () => {
         );
         expect(mockClearPreview).toHaveBeenCalledWith('exam-123');
         expect(mockClearSession).toHaveBeenCalledWith('exam-123');
-        expect(mockReplace).toHaveBeenCalledWith({
-            pathname: '/exam/[id]/feedback',
-            params: { id: 'exam-123', attemptId: 'session-456' },
-        });
+        expect(mockReplace).toHaveBeenCalledWith('/exam/exam-123/feedback?attemptId=session-456');
     });
 
     it('skips completeExamSession call if preview.completedAt is already present', async () => {
@@ -147,10 +144,7 @@ describe('useExamResult', () => {
         expect(mockCompleteSession).not.toHaveBeenCalled();
         expect(mockClearPreview).toHaveBeenCalledWith('exam-123');
         expect(mockClearSession).toHaveBeenCalledWith('exam-123');
-        expect(mockReplace).toHaveBeenCalledWith({
-            pathname: '/exam/[id]/feedback',
-            params: { id: 'exam-123', attemptId: 'session-456' },
-        });
+        expect(mockReplace).toHaveBeenCalledWith('/exam/exam-123/feedback?attemptId=session-456');
     });
 
     it('skips completeExamSession call if preview.summary.completedAt is already present', async () => {
@@ -173,10 +167,7 @@ describe('useExamResult', () => {
         expect(mockCompleteSession).not.toHaveBeenCalled();
         expect(mockClearPreview).toHaveBeenCalledWith('exam-123');
         expect(mockClearSession).toHaveBeenCalledWith('exam-123');
-        expect(mockReplace).toHaveBeenCalledWith({
-            pathname: '/exam/[id]/feedback',
-            params: { id: 'exam-123', attemptId: 'session-456' },
-        });
+        expect(mockReplace).toHaveBeenCalledWith('/exam/exam-123/feedback?attemptId=session-456');
     });
 
     it('intercepts "already been submitted" error and seamlessly routes to feedback without alert', async () => {
@@ -199,10 +190,7 @@ describe('useExamResult', () => {
         expect(mockAlert).not.toHaveBeenCalled();
         expect(mockClearPreview).toHaveBeenCalledWith('exam-123');
         expect(mockClearSession).toHaveBeenCalledWith('exam-123');
-        expect(mockReplace).toHaveBeenCalledWith({
-            pathname: '/exam/[id]/feedback',
-            params: { id: 'exam-123', attemptId: 'session-456' },
-        });
+        expect(mockReplace).toHaveBeenCalledWith('/exam/exam-123/feedback?attemptId=session-456');
     });
 
     it('intercepts 409 status code error and seamlessly routes to feedback without alert', async () => {
@@ -223,10 +211,7 @@ describe('useExamResult', () => {
         expect(mockAlert).not.toHaveBeenCalled();
         expect(mockClearPreview).toHaveBeenCalledWith('exam-123');
         expect(mockClearSession).toHaveBeenCalledWith('exam-123');
-        expect(mockReplace).toHaveBeenCalledWith({
-            pathname: '/exam/[id]/feedback',
-            params: { id: 'exam-123', attemptId: 'session-456' },
-        });
+        expect(mockReplace).toHaveBeenCalledWith('/exam/exam-123/feedback?attemptId=session-456');
     });
 
     it('displays error alert on unexpected turn-in error', async () => {

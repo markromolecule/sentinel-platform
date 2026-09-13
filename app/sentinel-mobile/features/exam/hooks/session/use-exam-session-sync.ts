@@ -93,8 +93,9 @@ export function useExamSessionSync({
         const totalQuestions = questions.length;
         const progress = totalQuestions > 0 ? Math.round((answeredCount / totalQuestions) * 100) : 0;
 
-        if (resolvedStudentId && activeChannelRef.current) {
-            activeChannelRef.current.send({
+        const ch = activeChannelRef.current;
+        if (resolvedStudentId && ch && (ch.state === 'joined' || ch.state === 'subscribed')) {
+            ch.send({
                 type: 'broadcast',
                 event: 'student:progress',
                 payload: {
@@ -140,8 +141,10 @@ export function useExamSessionSync({
     }, [sessionId, syncProgressNow]);
 
     const broadcastSubmitted = useCallback(() => {
-        if (!resolvedStudentId || !activeChannelRef.current) return;
-        activeChannelRef.current.send({
+        const ch = activeChannelRef.current;
+        if (!resolvedStudentId || !ch) return;
+        if (ch.state !== 'joined' && ch.state !== 'subscribed') return;
+        ch.send({
             type: 'broadcast',
             event: 'student:submitted',
             payload: {

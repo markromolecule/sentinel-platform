@@ -69,6 +69,23 @@ vi.mock('react-native', () => {
 });
 
 import { MobileMediaPipeBridge } from './mobile-mediapipe-bridge';
+import { buildMediaPipeBridgeHtml } from './mobile-mediapipe-bridge-html';
+
+describe('buildMediaPipeBridgeHtml generator', () => {
+    it('generates HTML with front facing mirror style and user facingMode', () => {
+        const html = buildMediaPipeBridgeHtml({ facing: 'front', frameIntervalMs: 250 });
+        expect(html).toContain('scaleX(-1)');
+        expect(html).toContain('facingMode = "user"');
+        expect(html).toContain('frameIntervalMs = 250');
+        expect(html).toContain('https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.34/vision_bundle.mjs');
+    });
+
+    it('generates HTML with back facing environment facingMode without mirror style', () => {
+        const html = buildMediaPipeBridgeHtml({ facing: 'back', frameIntervalMs: 500 });
+        expect(html).not.toContain('scaleX(-1)');
+        expect(html).toContain('facingMode = "environment"');
+    });
+});
 
 describe('MobileMediaPipeBridge', () => {
     it('renders WebView with correct props', () => {
@@ -127,5 +144,22 @@ describe('MobileMediaPipeBridge', () => {
             },
         });
         expect(onLandmarks).toHaveBeenCalledWith(mockLandmarks, 0.9);
+    });
+
+    it('embeds resilient loop startup, GPU fallback, and readyState checks in HTML source', () => {
+        const result = MobileMediaPipeBridge({
+            onLandmarksDetected: vi.fn(),
+            facing: 'front',
+            frameIntervalMs: 500,
+        });
+
+        const webview = (result as any).props.children;
+        const html = webview.props.source.html;
+
+        expect(html).toContain('ensurePredictLoopRunning');
+        expect(html).toContain('delegate: "CPU"');
+        expect(html).toContain('video.readyState >= 2');
+        expect(html).toContain('Math.max(now, lastProcessedTime + 1)');
+        expect(html).toContain('navigator.mediaDevices.getUserMedia');
     });
 });

@@ -41,7 +41,16 @@ export function useExamResult() {
     }, [id]);
 
     const handleTurnIn = async () => {
-        if (!preview || !id) {
+        if (!id) {
+            return;
+        }
+
+        // If preview is missing but we have a known attemptId, navigate directly.
+        if (!preview) {
+            const fallbackAttemptId = (rawExam as any)?.attemptId || '';
+            if (fallbackAttemptId) {
+                router.replace(`/exam/${id}/feedback?attemptId=${fallbackAttemptId}`);
+            }
             return;
         }
 
@@ -65,10 +74,7 @@ export function useExamResult() {
             await clearStoredMobileExamSession(id);
 
             setIsTurningIn(false);
-            router.replace({
-                pathname: '/exam/[id]/feedback',
-                params: { id, attemptId: sessionId },
-            });
+            router.replace(`/exam/${id}/feedback?attemptId=${sessionId}`);
         } catch (error: any) {
             // If the session was already completed/submitted on the server (409 Conflict),
             // treat as success, clean local cache, and seamlessly proceed to feedback.
@@ -85,10 +91,7 @@ export function useExamResult() {
                 await clearStoredMobileExamSession(id);
 
                 setIsTurningIn(false);
-                router.replace({
-                    pathname: '/exam/[id]/feedback',
-                    params: { id, attemptId: sessionId },
-                });
+                router.replace(`/exam/${id}/feedback?attemptId=${sessionId}`);
                 return;
             }
 

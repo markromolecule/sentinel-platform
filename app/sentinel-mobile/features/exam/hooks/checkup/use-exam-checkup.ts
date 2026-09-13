@@ -42,6 +42,7 @@ export function useExamCheckup(): UseExamCheckupReturn {
         exam,
         cameraReady: camera.cameraReady,
         hasCameraPermission: camera.hasCameraPermission,
+        cameraError: camera.cameraError,
     });
 
     const [isStartingSession, setIsStartingSession] = useState(false);
@@ -85,6 +86,7 @@ export function useExamCheckup(): UseExamCheckupReturn {
         cameraReady: camera.cameraReady,
         hasCameraPermission: camera.hasCameraPermission,
         isPermissionLoading: camera.isPermissionLoading,
+        cameraError: camera.cameraError,
         requestCameraPermission: camera.requestCameraPermission,
         micLevel: audio.micLevel,
         micDetected: audio.micDetected,

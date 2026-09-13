@@ -71,7 +71,7 @@ export function useExamSessionSubmission({
             await clearStoredMobileExamSession(id);
             await queryClient?.invalidateQueries({ queryKey: EXAM_QUERY_KEYS.all });
 
-            router.replace(`/exam/${id}/result`);
+            router.replace(`/exam/${id}/feedback?attemptId=${sessionId}`);
         } catch (error: any) {
             Alert.alert(
                 'Submission Failed',

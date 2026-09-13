@@ -41,6 +41,7 @@ describe('useExamSessionSync', () => {
     it('broadcasts student:progress on answer change when monitoring channel is active', () => {
         const mockMonitoringChannel = {
             send: vi.fn(),
+            state: 'joined',
         };
 
         const answersRef = { current: { 'q-1': 'A', 'q-2': 'B' } };
@@ -81,6 +82,7 @@ describe('useExamSessionSync', () => {
     it('broadcasts student:submitted on broadcastSubmitted() call', () => {
         const mockMonitoringChannel = {
             send: vi.fn(),
+            state: 'joined',
         };
 
         const { broadcastSubmitted } = useExamSessionSync({
