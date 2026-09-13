@@ -51,9 +51,18 @@ export class AuthService {
 
     /**
      * Register a new user via Supabase and trigger native 6-digit email OTP dispatch.
+     * Web requests forwarding a Cloudflare Turnstile token authenticate via supabaseAnon.
+     * Mobile requests or requests without a captchaToken authenticate via supabaseAdmin
+     * to bypass Turnstile rejection while preserving API rate-limiting and audit logging.
      */
-    static async register(body: ApiRegisterSchemaType) {
-        const { data, error } = await supabaseAnon.auth.signUp({
+    static async register(body: ApiRegisterSchemaType, clientType?: string) {
+        const hasCaptchaToken = Boolean(
+            typeof body.captchaToken === 'string' && body.captchaToken.trim(),
+        );
+        const isMobileClient = clientType === 'mobile';
+        const authClient = isMobileClient || !hasCaptchaToken ? supabaseAdmin : supabaseAnon;
+
+        const { data, error } = await authClient.auth.signUp({
             email: body.email,
             password: body.password,
             options: {
@@ -62,8 +71,8 @@ export class AuthService {
                     last_name: body.lastName,
                     role: 'student', // Default role for portal signups
                 },
-                ...(typeof body.captchaToken === 'string' && body.captchaToken.trim()
-                    ? { captchaToken: body.captchaToken.trim() }
+                ...(hasCaptchaToken
+                    ? { captchaToken: body.captchaToken!.trim() }
                     : {}),
             },
         });

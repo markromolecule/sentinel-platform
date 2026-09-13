@@ -17,6 +17,7 @@ vi.mock('../../../lib/supabase-admin', () => ({
     supabaseAdmin: {
         auth: {
             signInWithPassword: vi.fn(),
+            signUp: vi.fn(),
         },
     },
 }));
@@ -97,3 +98,110 @@ describe('AuthService.login', () => {
         ).rejects.toThrow('Invalid login credentials');
     });
 });
+
+describe('AuthService.register', () => {
+    beforeEach(() => {
+        vi.clearAllMocks();
+    });
+
+    it('uses supabaseAnon with captchaToken when captchaToken is provided (web registration)', async () => {
+        const mockResult = {
+            data: {
+                user: { id: 'user-new' },
+                session: null,
+            },
+            error: null,
+        };
+        vi.mocked(supabaseAnon.auth.signUp).mockResolvedValue(mockResult as any);
+
+        const result = await AuthService.register({
+            firstName: 'John',
+            lastName: 'Doe',
+            email: 'john@example.com',
+            password: 'password123',
+            captchaToken: 'turnstile-token-xyz',
+            terms: true,
+        });
+
+        expect(supabaseAnon.auth.signUp).toHaveBeenCalledWith({
+            email: 'john@example.com',
+            password: 'password123',
+            options: {
+                data: {
+                    first_name: 'John',
+                    last_name: 'Doe',
+                    role: 'student',
+                },
+                captchaToken: 'turnstile-token-xyz',
+            },
+        });
+        expect(supabaseAdmin.auth.signUp).not.toHaveBeenCalled();
+        expect(result).toEqual({
+            user: mockResult.data.user,
+            session: null,
+            requiresVerification: true,
+        });
+    });
+
+    it('uses supabaseAdmin when captchaToken is omitted or clientType is mobile (mobile registration)', async () => {
+        const mockResult = {
+            data: {
+                user: { id: 'user-mobile-reg' },
+                session: null,
+            },
+            error: null,
+        };
+        vi.mocked(supabaseAdmin.auth.signUp).mockResolvedValue(mockResult as any);
+
+        const result = await AuthService.register(
+            {
+                firstName: 'Jane',
+                lastName: 'Smith',
+                email: 'jane@example.com',
+                password: 'password123',
+                terms: true,
+            },
+            'mobile',
+        );
+
+        expect(supabaseAdmin.auth.signUp).toHaveBeenCalledWith({
+            email: 'jane@example.com',
+            password: 'password123',
+            options: {
+                data: {
+                    first_name: 'Jane',
+                    last_name: 'Smith',
+                    role: 'student',
+                },
+            },
+        });
+        expect(supabaseAnon.auth.signUp).not.toHaveBeenCalled();
+        expect(result).toEqual({
+            user: mockResult.data.user,
+            session: null,
+            requiresVerification: true,
+        });
+    });
+
+    it('throws error when registration fails', async () => {
+        const mockError = new Error('User already registered');
+        vi.mocked(supabaseAdmin.auth.signUp).mockResolvedValue({
+            data: { user: null, session: null },
+            error: mockError,
+        } as any);
+
+        await expect(
+            AuthService.register(
+                {
+                    firstName: 'Jane',
+                    lastName: 'Smith',
+                    email: 'jane@example.com',
+                    password: 'password123',
+                    terms: true,
+                },
+                'mobile',
+            ),
+        ).rejects.toThrow('User already registered');
+    });
+});
+
