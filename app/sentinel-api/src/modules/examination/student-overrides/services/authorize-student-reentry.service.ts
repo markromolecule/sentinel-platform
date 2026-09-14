@@ -83,6 +83,13 @@ export async function authorizeStudentReentry(args: {
         });
     }
 
+    const student = await args.dbClient
+        .selectFrom('students')
+        .select(['user_id'])
+        .where('student_id', '=', args.studentId)
+        .executeTakeFirst();
+    const resolvedUserId = student?.user_id ?? null;
+
     await StudentOverridesRepository.updateLobbyAdmissionStatus({
         dbClient: args.dbClient,
         examId: args.examId,
@@ -96,6 +103,8 @@ export async function authorizeStudentReentry(args: {
         examId: args.examId,
         studentId: args.studentId,
         studentIds: [args.studentId],
+        userId: resolvedUserId ?? undefined,
+        userIds: resolvedUserId ? [resolvedUserId] : [],
         status: 'APPROVED',
         decidedAt: now.toISOString(),
     });

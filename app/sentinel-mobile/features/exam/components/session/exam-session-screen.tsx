@@ -37,6 +37,7 @@ export const ExamSessionScreen = () => {
         setIsDrawerOpen,
         timeLeft,
         isLoading,
+        isSubmitting,
         formatTime,
         handleSelectOption,
         toggleFlag,
@@ -248,6 +249,7 @@ export const ExamSessionScreen = () => {
                 isLast={isLastQuestion}
                 currentIndex={currentIndex}
                 totalQuestions={questions.length}
+                isSubmitting={isSubmitting}
             />
 
             {isDrawerOpen && (
@@ -280,6 +282,31 @@ export const ExamSessionScreen = () => {
                 mediaPipeRef={cameraRef}
                 getLiveVideoTrack={getLiveVideoTrack}
             />
+
+            {/* Submitting Loading Overlay */}
+            {isSubmitting && (
+                <View
+                    testID="exam-session-submitting-overlay"
+                    style={[
+                        StyleSheet.absoluteFill,
+                        {
+                            backgroundColor: 'rgba(0, 0, 0, 0.75)',
+                            zIndex: 9999,
+                            justifyContent: 'center',
+                            alignItems: 'center',
+                            paddingHorizontal: 24,
+                        },
+                    ]}
+                >
+                    <ActivityIndicator size="large" color="#ffffff" />
+                    <Text style={{ color: '#ffffff', marginTop: 16, fontSize: 16, fontWeight: '700' }}>
+                        Submitting exam session...
+                    </Text>
+                    <Text style={{ color: '#cbd5e1', marginTop: 6, fontSize: 13, textAlign: 'center' }}>
+                        Recording your responses and preparing feedback...
+                    </Text>
+                </View>
+            )}
         </View>
     );
 };

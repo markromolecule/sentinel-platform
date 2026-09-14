@@ -70,7 +70,7 @@ export function useExamSessionSubmission({
 
             await writeStoredMobileExamPreview(id, preview);
             await clearStoredMobileExamSession(id);
-            await queryClient?.invalidateQueries({ queryKey: EXAM_QUERY_KEYS.all });
+            void queryClient?.invalidateQueries({ queryKey: EXAM_QUERY_KEYS.all });
 
             router.replace(`/exam/${id}/feedback?attemptId=${sessionId}`);
         } catch (error: any) {
@@ -86,7 +86,7 @@ export function useExamSessionSubmission({
             if (isAlreadySubmitted) {
                 await clearStoredMobileExamPreview(id).catch(() => { });
                 await clearStoredMobileExamSession(id).catch(() => { });
-                await queryClient?.invalidateQueries({ queryKey: EXAM_QUERY_KEYS.all }).catch(() => { });
+                void queryClient?.invalidateQueries({ queryKey: EXAM_QUERY_KEYS.all });
 
                 router.replace(`/exam/${id}/feedback?attemptId=${sessionId}`);
                 return;
