@@ -253,4 +253,91 @@ describe('mobile telemetry client', () => {
             }),
         );
     });
+
+    it('generates deterministic UUIDs with toStableUuid', () => {
+        const uuid1 = telemetry.toStableUuid('seed-abc');
+        const uuid2 = telemetry.toStableUuid('seed-abc');
+        const uuid3 = telemetry.toStableUuid('seed-xyz');
+
+        expect(uuid1).toBe(uuid2);
+        expect(uuid1).not.toBe(uuid3);
+        // Valid UUID format: 8-4-4-4-12 hex chars
+        expect(uuid1).toMatch(/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/);
+    });
+
+    it('determines effective cooldowns with getAudioAnomalyCooldownMs', () => {
+        expect(telemetry.getAudioAnomalyCooldownMs('TALKING', 10000)).toBe(10000);
+        expect(telemetry.getAudioAnomalyCooldownMs('BACKGROUND_NOISE', 10000)).toBe(60000);
+        expect(telemetry.getAudioAnomalyCooldownMs('SILENCE_DETECTED', 10000)).toBe(180000);
+    });
+
+    it('builds structured audio anomaly metadata with stable dedupeKey and eventId', () => {
+        const metadata = telemetry.createMobileAudioAnomalyMetadata({
+            examSessionId: 'session-123',
+            anomalyType: 'TALKING',
+            confidenceScore: 0.88,
+            cooldownMs: 15000,
+            clientActionAt: '2026-09-14T12:00:07.500Z',
+            threshold: 0.75,
+            configVersion: 'audio-config:v1',
+        });
+
+        // 7500ms quantized to 15000ms bucket start = 00:00:00.000Z
+        expect(metadata.dedupeKey).toBe('session-123:AUDIO_ANOMALY:TALKING:2026-09-14T12:00:00.000Z');
+        expect(metadata.eventId).toBe(telemetry.toStableUuid(metadata.dedupeKey!));
+        expect(metadata.anomalyType).toBe('TALKING');
+        expect(metadata.confidenceScore).toBe(0.88);
+        expect(metadata.clientActionAt).toBe('2026-09-14T12:00:07.500Z');
+        expect(metadata.audioDiagnostics).toEqual({
+            threshold: 0.75,
+            configVersion: 'audio-config:v1',
+            workerPhase: 'running',
+            streamPhase: 'live',
+        });
+    });
+
+    it('delivers AUDIO_ANOMALY events with full metadata via emitMobileTelemetryEvent', async () => {
+        const apiClient = vi.fn();
+        const config = buildConfiguration();
+        config.aiRules = {
+            gaze_tracking: false,
+            face_detection: false,
+            multiple_faces_detection: false,
+            audio_anomaly_detection: true,
+        };
+
+        const metadata = telemetry.createMobileAudioAnomalyMetadata({
+            examSessionId: 'session-audio',
+            anomalyType: 'TALKING',
+            confidenceScore: 0.95,
+            cooldownMs: 10000,
+            clientActionAt: '2026-09-14T12:00:05.000Z',
+        });
+
+        const delivered = await telemetry.emitMobileTelemetryEvent({
+            apiClient,
+            configuration: config,
+            examSessionId: 'session-audio',
+            eventType: 'AUDIO_ANOMALY',
+            studentId: 'student-audio',
+            metadata,
+        });
+
+        expect(delivered).toBe(true);
+        expect(ingestTelemetryEventMock).toHaveBeenCalledWith(
+            apiClient,
+            expect.objectContaining({
+                examSessionId: 'session-audio',
+                studentId: 'student-audio',
+                eventType: 'AUDIO_ANOMALY',
+                source: 'AI',
+                ruleKey: 'aiRules.audio_anomaly_detection',
+                metadata: expect.objectContaining({
+                    anomalyType: 'TALKING',
+                    confidenceScore: 0.95,
+                    dedupeKey: 'session-audio:AUDIO_ANOMALY:TALKING:2026-09-14T12:00:00.000Z',
+                }),
+            }),
+        );
+    });
 });

@@ -1,8 +1,12 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Text, ScrollView, StyleSheet } from 'react-native';
 import { Colors } from '@/constants/theme';
 import { useColorScheme } from 'react-native';
-import type { QuestionCardProps } from './inputs/question-card.types';
+import type {
+    QuestionCardProps,
+    QuestionCardRenderStatus,
+    QuestionRenderLayoutSnapshot,
+} from './inputs/question-card.types';
 import {
     QuestionCardUnavailable,
     QuestionCardHeader,
@@ -22,7 +26,7 @@ import {
 } from './inputs';
 import { PassageCard } from './passage-card';
 
-export type { QuestionCardProps };
+export type { QuestionCardProps, QuestionCardRenderStatus, QuestionRenderLayoutSnapshot };
 
 /**
  * QuestionCard renders a single exam question with type-specific input UI.
@@ -43,10 +47,15 @@ export const QuestionCard = ({
     isFlagged,
     onSelectOption,
     onToggleFlag,
+    onRenderStatusChange,
 }: QuestionCardProps) => {
     const colorScheme = useColorScheme();
     const isDark = colorScheme === 'dark';
     const colors = Colors[colorScheme ?? 'light'];
+
+    useEffect(() => {
+        onRenderStatusChange?.({ kind: 'mounted' });
+    }, [onRenderStatusChange, question?.id, currentIndex]);
 
     if (!question) {
         return <QuestionCardUnavailable colors={colors} />;
@@ -90,6 +99,16 @@ export const QuestionCard = ({
             contentContainerStyle={styles.contentContainer}
             showsVerticalScrollIndicator={false}
             keyboardShouldPersistTaps="handled"
+            onLayout={(event) => {
+                const { width, height } = event.nativeEvent.layout;
+                onRenderStatusChange?.({
+                    kind: 'layout',
+                    layout: {
+                        width: Math.round(width),
+                        height: Math.round(height),
+                    },
+                });
+            }}
         >
             {/* Question Header */}
             <QuestionCardHeader
@@ -204,7 +223,8 @@ const styles = StyleSheet.create({
         flex: 1,
     },
     contentContainer: {
+        flexGrow: 1,
         padding: 20,
-        paddingBottom: 40,
+        paddingBottom: 140,
     },
 });

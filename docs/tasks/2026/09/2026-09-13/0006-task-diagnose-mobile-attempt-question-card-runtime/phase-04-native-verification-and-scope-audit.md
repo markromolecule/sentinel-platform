@@ -3,7 +3,7 @@ title: "Phase 4 — Verify Native Attempt Rendering and Audit Scope"
 type: phase
 parent: "0006-task-diagnose-mobile-attempt-question-card-runtime"
 phase: 4
-status: planned
+status: pending_manual_qa
 created: "2026-09-13"
 tags: [task, phase, sentinel-mobile, verification]
 ---
@@ -26,11 +26,11 @@ Verify the repaired attempt body on a developer-controlled native runtime, confi
 
 ## Implementation Tasks
 
-- [ ] Enter a populated attempt once with proctoring disabled; capture evidence that the first prompt, card header, and answer control are visible.
-- [ ] If Phase 3 touched a bridge boundary, repeat with the relevant proctoring configuration and verify its failure cannot blank the card.
-- [ ] Run the focused native render suites, then the full mobile test suite; distinguish pass, failure, and unavailable checks in the result.
-- [ ] Inspect the final diff for API/backend/shared/Web changes and reject any scope expansion.
-- [ ] Update the linked context/task result with the proven root cause, repair, checks, and any remaining device limitations. Promote the context only after the outcome is confirmed.
+- [ ] Enter a populated attempt once with proctoring disabled; capture evidence that the first prompt, card header, and answer control are visible. **Deferred to developer manual QA because no Android device/emulator is attached in this environment.**
+- [x] If Phase 3 touched a bridge boundary, repeat with the relevant proctoring configuration and verify its failure cannot blank the card. **Not applicable: Phase 3 did not touch MediaPipe, audio, or LiveKit bridge code.**
+- [x] Run the focused native render suites, then the full mobile test suite; distinguish pass, failure, and unavailable checks in the result.
+- [x] Inspect the final diff for API/backend/shared/Web changes and reject any scope expansion.
+- [x] Update the linked context/task result with the proven root cause, repair, checks, and any remaining device limitations. Promote the context only after the outcome is confirmed.
 
 ## Verification & Testing
 
@@ -38,6 +38,17 @@ Verify the repaired attempt body on a developer-controlled native runtime, confi
 - `pnpm --filter sentinel-mobile exec tsc --noEmit`.
 - Manual Android emulator/device attempt with populated questions.
 - `git diff --name-only` confirms no `app/sentinel-api/`, database, shared-contract, or Sentinel Web modifications.
+
+## Evidence Log
+
+- **Focused verification passed:** `pnpm --filter sentinel-mobile exec vitest run features/exam/components/session/question-card.test.tsx features/exam/components/session/mobile-live-inspection-bridge.test.tsx features/exam/components/session/question-drawer.test.tsx` — 3 files passed, 43 tests passed.
+- **Typecheck passed:** `pnpm --filter sentinel-mobile exec tsc --noEmit` exited successfully.
+- **Full mobile suite passed:** `pnpm --filter sentinel-mobile test -- --runInBand` — 51 files passed, 366 tests passed.
+- **Whitespace/syntax diff check passed:** `git diff --check` exited successfully.
+- **Scope audit passed:** `git status --short -- context-factory app/sentinel-api app/sentinel-web packages/shared packages/db packages/services` returned no changes.
+- **Changed-file audit:** `git diff --name-only` lists Sentinel Mobile session/test/config/dependency files and the task evidence documents only.
+- **Manual native verification unavailable here:** `adb devices` required elevated local debug socket access; after approval it listed no attached Android devices/emulators. The developer will perform the populated-attempt manual QA outside this environment.
+- **Release readiness:** Conditional. Automated verification and scope audit pass, but final release confidence still depends on developer manual QA confirming the first prompt, card header, and answer control on a real emulator/device.
 
 ## Risks & Rollback
 

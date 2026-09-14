@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import type { TelemetryRuleKey } from '@sentinel/shared';
+import { TELEMETRY_RULE_KEYS, type TelemetryRuleKey } from '@sentinel/shared';
 import { incidentSeverityResolverService } from './incident-severity-resolver.service';
 
 describe('IncidentSeverityResolverService', () => {
@@ -47,38 +47,32 @@ describe('IncidentSeverityResolverService', () => {
         });
     }
 
-    it.each([
-        ['webSecurity.clipboard_control', 'MEDIUM'],
-        ['webSecurity.tab_switching_monitor', 'MEDIUM'],
-        ['webSecurity.right_click_disable', 'LOW'],
-        ['aiRules.gaze_tracking', 'LOW'],
-        ['aiRules.audio_anomaly_detection', 'LOW'],
-    ] as const)('calibrates %s severity from occurrence counts', (ruleKey, baseSeverity) => {
-        for (const count of [1, 2]) {
+    it.each(TELEMETRY_RULE_KEYS)(
+        'calibrates %s severity along the unified 1/3/6 ladder',
+        (ruleKey) => {
+            for (const count of [1, 2]) {
+                expectCalibratedSeverity({
+                    ruleKey,
+                    count,
+                    expectedSeverity: 'LOW',
+                });
+            }
+
+            for (const count of [3, 5]) {
+                expectCalibratedSeverity({
+                    ruleKey,
+                    count,
+                    expectedSeverity: 'MEDIUM',
+                });
+            }
+
             expectCalibratedSeverity({
                 ruleKey,
-                count,
-                expectedSeverity: 'LOW',
-                baseSeverity,
+                count: 6,
+                expectedSeverity: 'HIGH',
             });
-        }
-
-        for (const count of [3, 5]) {
-            expectCalibratedSeverity({
-                ruleKey,
-                count,
-                expectedSeverity: 'MEDIUM',
-                baseSeverity,
-            });
-        }
-
-        expectCalibratedSeverity({
-            ruleKey,
-            count: 6,
-            expectedSeverity: 'HIGH',
-            baseSeverity,
-        });
-    });
+        },
+    );
 
     it('honors a forced severity override over the organic ladder', () => {
         const resolution = incidentSeverityResolverService.resolveSeverity({
@@ -223,25 +217,35 @@ describe('IncidentSeverityResolverService', () => {
         });
     });
 
-    it('keeps immediate runtime-boundary events high on first occurrence', () => {
-        const resolution = incidentSeverityResolverService.resolveSeverity({
-            ruleKey: 'webSecurity.print_screen_disable',
-            baseSeverity: 'HIGH',
-            matchingIncidents: [],
-            now,
-        });
+    it.each([
+        'webSecurity.print_screen_disable',
+        'mobileSecurity.app_pinning_required',
+        'mobileSecurity.screenshot_block',
+        'mobileSecurity.root_jailbreak_detection',
+    ] as const)(
+        'resolves %s to LOW on occurrence 1, MEDIUM on 3, and HIGH on 6 per ADR',
+        (ruleKey) => {
+            // Occurrence 1 -> LOW (formerly immediate HIGH)
+            expectCalibratedSeverity({
+                ruleKey,
+                count: 1,
+                expectedSeverity: 'LOW',
+            });
 
-        expect(resolution).toMatchObject({
-            finalSeverity: 'HIGH',
-            severityReason: 'immediate-high',
-            severityInputs: {
-                baseSeverity: 'HIGH',
-                ladder: ['HIGH'],
-                matchingCount: 1,
-                matchingWindowSeconds: null,
-                repeatThreshold: null,
-                overrideSeverity: null,
-            },
-        });
-    });
+            // Occurrence 3 -> MEDIUM
+            expectCalibratedSeverity({
+                ruleKey,
+                count: 3,
+                expectedSeverity: 'MEDIUM',
+            });
+
+            // Occurrence 6 -> HIGH
+            expectCalibratedSeverity({
+                ruleKey,
+                count: 6,
+                expectedSeverity: 'HIGH',
+            });
+        },
+    );
 });
+

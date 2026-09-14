@@ -3,7 +3,7 @@ title: "Phase 2 — Establish Native QuestionCard Render Regression Coverage"
 type: phase
 parent: "0006-task-diagnose-mobile-attempt-question-card-runtime"
 phase: 2
-status: planned
+status: completed
 created: "2026-09-13"
 tags: [task, phase, sentinel-mobile, testing]
 ---
@@ -18,6 +18,7 @@ Replace the current hand-built element-tree assertions with a native React compo
 
 - Phase 1 classification and its developer checkpoint are complete.
 - Current test failure is understood: `question-card.test.tsx` calls `QuestionCard` as a function and its mocked `createElement` does not render nested child components after the JSX change.
+- **Approved deviation:** The developer explicitly deferred the Phase 1 manual emulator/device screenshot and failure classification until Phase 4 because the Phase 1 diagnostic code already exists.
 
 ## Impacted Files & Components
 
@@ -28,17 +29,31 @@ Replace the current hand-built element-tree assertions with a native React compo
 
 ## Implementation Tasks
 
-- [ ] Choose the existing renderer-compatible test approach that renders nested React Native JSX; do not keep a direct function-call test and label it as rendering coverage.
-- [ ] Isolate Expo/native module mocks in a dedicated setup file so `mobile-live-inspection-bridge.test.tsx` and `question-drawer.test.tsx` can initialize under the declared test environment.
-- [ ] Add render assertions for each of the eight normalized types: card header, prompt/fallback prompt, and its expected input family.
-- [ ] Add explicit cases for a null current question, empty choice options, malformed content fallback, and question transition/key behavior if Phase 1 identifies a transition defect.
-- [ ] Preserve behavioral interaction assertions for option selection, flags, multi-response, matching, blanks, enumeration, and true/false booleans.
+- [x] Choose the existing renderer-compatible test approach that renders nested React Native JSX; do not keep a direct function-call test and label it as rendering coverage.
+- [x] Isolate Expo/native module mocks in a dedicated setup file so `mobile-live-inspection-bridge.test.tsx` and `question-drawer.test.tsx` can initialize under the declared test environment.
+- [x] Add render assertions for each of the eight normalized types: card header, prompt/fallback prompt, and its expected input family.
+- [x] Add explicit cases for a null current question, empty choice options, malformed content fallback, and question transition/key behavior if Phase 1 identifies a transition defect.
+- [x] Preserve behavioral interaction assertions for option selection, flags, multi-response, matching, blanks, enumeration, and true/false booleans.
 
 ## Verification & Testing
 
 - Focused `QuestionCard` test suite passes with actual nested child output inspected.
 - A targeted suite for `mobile-live-inspection-bridge` and `question-drawer` loads without Expo runtime initialization errors, or each still-unavailable native dependency is explicitly documented with a replacement verification.
 - `pnpm --filter sentinel-mobile exec tsc --noEmit`.
+
+## Evidence Log
+
+- **Implemented:** Replaced `question-card.test.tsx` with a `react-test-renderer` harness that renders nested React JSX instead of directly invoking `QuestionCard` as a function.
+- **Implemented:** Added a direct `react-test-renderer@19.2.3` dev dependency, matching the installed React version, plus `@types/react-test-renderer`.
+- **Implemented:** Added `vitest.setup.ts` with narrow Expo native mocks for `expo-screen-capture` and `expo-constants`, then configured `setupFiles` in `vitest.config.ts`.
+- **Implemented:** Updated `question-drawer.test.tsx` to mock only `useDrawerAnimation`, avoiding the broad session-hook barrel that pulls Expo-only modules into Node test initialization.
+- **Coverage:** The new `QuestionCard` suite asserts header, prompt, and input family for `MULTIPLE_CHOICE`, `MULTIPLE_RESPONSE`, `TRUE_FALSE`, `MATCHING`, `FILL_BLANK`, `ENUMERATION`, `ESSAY`, and `IDENTIFICATION`, plus null/undefined question recovery, empty prompt fallback, empty choice fallback, unmapped type fallback, passage rendering, selection, flagging, matching, blank, enumeration, true/false, and diagnostic layout callback behavior.
+- **Verification passed:** `pnpm --filter sentinel-mobile exec vitest run features/exam/components/session/question-card.test.tsx features/exam/components/session/mobile-live-inspection-bridge.test.tsx features/exam/components/session/question-drawer.test.tsx` — 3 files passed, 42 tests passed.
+- **Verification passed:** `pnpm --filter sentinel-mobile exec tsc --noEmit` exited successfully.
+- **Verification passed:** `pnpm --filter sentinel-mobile test -- --runInBand` — 51 files passed, 365 tests passed.
+- **Verification passed:** `git diff --check` exited successfully.
+- **Scope check:** Phase 2 changed only Sentinel Mobile test/config/dependency files plus the task evidence docs. No `app/sentinel-api`, Sentinel Web, database, shared contract, or `context-factory` files were changed.
+- **Deferred:** No Phase 1 device root-failure class was available; the developer approved deferring manual native QA/classification until Phase 4.
 
 ## Risks & Rollback
 

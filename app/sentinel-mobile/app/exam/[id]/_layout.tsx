@@ -7,6 +7,7 @@ export default function ExamDetailLayout() {
                 headerShown: false,
                 gestureEnabled: false,
                 fullScreenGestureEnabled: false,
+                contentStyle: { flex: 1 },
             }}
         >
             <Stack.Screen name="index" />

@@ -1,24 +1,10 @@
-import { vi, describe, it, expect } from 'vitest';
+import React from 'react';
+import { act, create } from 'react-test-renderer';
+import type { ReactTestInstance, ReactTestRenderer } from 'react-test-renderer';
+import { describe, expect, it, vi } from 'vitest';
+import type { MobileSessionQuestion } from '@/features/exam/lib/mobile-exam-adapter';
+import { QuestionCard } from './question-card';
 
-// ─── React mock ───────────────────────────────────────────────────────────────
-// QuestionCard does NOT use useState/useEffect so we only need createElement.
-vi.mock('react', () => ({
-    createElement: (type: any, props: any, ...children: any[]) => ({
-        type,
-        props: {
-            ...props,
-            children:
-                children.length === 0
-                    ? props?.children
-                    : children.length === 1
-                      ? children[0]
-                      : children,
-        },
-    }),
-    default: {},
-}));
-
-// ─── React Native mocks ───────────────────────────────────────────────────────
 vi.mock('react-native', () => ({
     View: 'View',
     Text: 'Text',
@@ -26,7 +12,7 @@ vi.mock('react-native', () => ({
     ScrollView: 'ScrollView',
     TextInput: 'TextInput',
     StyleSheet: {
-        create: (styles: any) => styles,
+        create: <T extends Record<string, unknown>>(styles: T) => styles,
     },
     useColorScheme: () => 'light',
 }));
@@ -43,6 +29,7 @@ vi.mock('@/constants/theme', () => ({
             card: '#fff',
             primary: '#6366f1',
             border: '#e5e7eb',
+            background: '#fff',
         },
         dark: {
             text: '#fff',
@@ -50,54 +37,26 @@ vi.mock('@/constants/theme', () => ({
             card: '#1f2937',
             primary: '#818cf8',
             border: '#374151',
+            background: '#111827',
         },
     },
 }));
 
-// Stub PassageCard as a string constant so it appears as a known type.
-vi.mock('./passage-card', () => ({
-    PassageCard: 'PassageCard',
-}));
+type QuestionType = MobileSessionQuestion['type'];
 
-import { QuestionCard } from './question-card';
-import type { MobileSessionQuestion } from '@/features/exam/lib/mobile-exam-adapter';
-
-// ─── Helpers ──────────────────────────────────────────────────────────────────
-
-function findNode(node: any, predicate: (n: any) => boolean): any {
-    if (!node) return null;
-    if (Array.isArray(node)) {
-        for (const child of node) {
-            const result = findNode(child, predicate);
-            if (result) return result;
-        }
-        return null;
-    }
-    if (typeof node !== 'object') return null;
-    if (predicate(node)) return node;
-    const children = node.props?.children;
-    if (!children) return null;
-    return findNode(children, predicate);
-}
-
-function findText(node: any, content: string): boolean {
-    if (!node) return false;
-    if (Array.isArray(node)) {
-        return node.some((child: any) => findText(child, content));
-    }
-    if (typeof node !== 'object') return false;
-    if (node.type === 'Text') {
-        const raw = node.props?.children;
-        const text = Array.isArray(raw) ? raw.join('') : String(raw ?? '');
-        if (text.includes(content)) return true;
-    }
-    const children = node.props?.children;
-    if (!children) return false;
-    return findText(children, content);
+interface RenderQuestionCardOptions {
+    question: MobileSessionQuestion | null | undefined;
+    currentIndex?: number;
+    totalQuestions?: number;
+    selectedOptionId?: unknown;
+    isFlagged?: boolean;
+    onSelectOption?: (optionId: unknown) => void;
+    onToggleFlag?: () => void;
+    onRenderStatusChange?: (status: unknown) => void;
 }
 
 function makeQuestion(
-    type: MobileSessionQuestion['type'],
+    type: QuestionType,
     overrides: Partial<MobileSessionQuestion> = {},
 ): MobileSessionQuestion {
     return {
@@ -108,575 +67,561 @@ function makeQuestion(
         options: [],
         passage: null,
         passageTitle: null,
-        originalContent: {},
+        originalContent: {
+            prompt: overrides.text ?? 'Sample question?',
+        },
         ...overrides,
-    } as MobileSessionQuestion;
+    };
 }
 
-// ─── Tests ────────────────────────────────────────────────────────────────────
+function renderQuestionCard({
+    question,
+    currentIndex = 0,
+    totalQuestions = 1,
+    selectedOptionId,
+    isFlagged = false,
+    onSelectOption = () => undefined,
+    onToggleFlag = () => undefined,
+    onRenderStatusChange,
+}: RenderQuestionCardOptions): ReactTestRenderer {
+    let renderer: ReactTestRenderer | undefined;
 
-describe('QuestionCard', () => {
-    it('renders a fallback container when question is null', () => {
-        const tree = QuestionCard({
-            question: null,
-            currentIndex: 0,
-            totalQuestions: 5,
-            isFlagged: false,
-            onSelectOption: () => {},
-            onToggleFlag: () => {},
-        });
-        expect(tree).not.toBeNull();
-        expect(tree.props.accessibilityRole).toBe('alert');
-        expect(tree.props.accessibilityLabel).toBe('Question unavailable');
-        expect(findText(tree, 'Question Unavailable')).toBe(true);
-        expect(findText(tree, 'Question details could not be loaded')).toBe(true);
+    act(() => {
+        renderer = create(
+            <QuestionCard
+                question={question}
+                currentIndex={currentIndex}
+                totalQuestions={totalQuestions}
+                selectedOptionId={selectedOptionId}
+                isFlagged={isFlagged}
+                onSelectOption={onSelectOption}
+                onToggleFlag={onToggleFlag}
+                onRenderStatusChange={onRenderStatusChange}
+            />,
+        );
     });
 
-    it('renders a fallback container when question is undefined', () => {
-        const tree = QuestionCard({
+    if (!renderer) {
+        throw new Error('QuestionCard renderer was not created.');
+    }
+
+    return renderer;
+}
+
+function textContent(node: ReactTestInstance | string | number | null): string {
+    if (node === null) return '';
+    if (typeof node === 'string' || typeof node === 'number') return String(node);
+
+    return node.children
+        .map((child) => textContent(child as ReactTestInstance | string | number | null))
+        .join('');
+}
+
+function hasText(renderer: ReactTestRenderer, content: string): boolean {
+    return renderer.root.findAll((node) => textContent(node).includes(content)).length > 0;
+}
+
+function findHost(
+    renderer: ReactTestRenderer,
+    type: string,
+    predicate: (node: ReactTestInstance) => boolean = () => true,
+): ReactTestInstance | null {
+    return renderer.root.findAll((node) => node.type === type && predicate(node))[0] ?? null;
+}
+
+function findAllHosts(
+    renderer: ReactTestRenderer,
+    type: string,
+    predicate: (node: ReactTestInstance) => boolean = () => true,
+): ReactTestInstance[] {
+    return renderer.root.findAll((node) => node.type === type && predicate(node));
+}
+
+describe('QuestionCard native render contract', () => {
+    it('renders the unavailable state when question is null', () => {
+        const renderer = renderQuestionCard({ question: null, totalQuestions: 5 });
+        const unavailable = findHost(
+            renderer,
+            'View',
+            (node) => node.props.accessibilityLabel === 'Question unavailable',
+        );
+
+        expect(unavailable?.props.accessibilityRole).toBe('alert');
+        expect(hasText(renderer, 'Question Unavailable')).toBe(true);
+        expect(hasText(renderer, 'Question details could not be loaded')).toBe(true);
+    });
+
+    it('renders the unavailable state when question is undefined', () => {
+        const renderer = renderQuestionCard({
             question: undefined,
             currentIndex: 2,
             totalQuestions: 10,
-            isFlagged: false,
-            onSelectOption: () => {},
-            onToggleFlag: () => {},
         });
-        expect(tree).not.toBeNull();
-        expect(tree.props.accessibilityLabel).toBe('Question unavailable');
+
+        expect(
+            findHost(renderer, 'View', (node) => node.props.accessibilityLabel === 'Question unavailable'),
+        ).not.toBeNull();
+    });
+
+    it.each([
+        {
+            type: 'MULTIPLE_CHOICE',
+            question: makeQuestion('MULTIPLE_CHOICE', {
+                text: 'What is 2+2?',
+                options: [
+                    { id: 'A', text: '3' },
+                    { id: 'B', text: '4' },
+                ],
+            }),
+            expectedText: 'What is 2+2?',
+            expectedControl: (renderer: ReactTestRenderer) => (
+                findHost(renderer, 'TouchableOpacity', (node) => node.props.accessibilityRole === 'radio')
+            ),
+        },
+        {
+            type: 'MULTIPLE_RESPONSE',
+            question: makeQuestion('MULTIPLE_RESPONSE', {
+                options: [
+                    { id: 'A', text: 'One' },
+                    { id: 'B', text: 'Two' },
+                ],
+            }),
+            expectedText: 'Select all that apply',
+            expectedControl: (renderer: ReactTestRenderer) => (
+                findHost(renderer, 'TouchableOpacity', (node) => node.props.accessibilityRole === 'checkbox')
+            ),
+        },
+        {
+            type: 'TRUE_FALSE',
+            question: makeQuestion('TRUE_FALSE', {
+                options: [
+                    { id: 'true', text: 'True' },
+                    { id: 'false', text: 'False' },
+                ],
+            }),
+            expectedText: 'True',
+            expectedControl: (renderer: ReactTestRenderer) => (
+                findHost(renderer, 'TouchableOpacity', (node) => node.props.accessibilityRole === 'radio')
+            ),
+        },
+        {
+            type: 'MATCHING',
+            question: makeQuestion('MATCHING', {
+                pairs: [
+                    { left: 'Left Item 1', right: 'Right Item 1' },
+                    { left: 'Left Item 2', right: 'Right Item 2' },
+                ],
+            }),
+            expectedText: 'Left Item 1',
+            expectedControl: (renderer: ReactTestRenderer) => (
+                findHost(renderer, 'TextInput', (node) => node.props.accessibilityLabel === 'Match for Left Item 1')
+            ),
+        },
+        {
+            type: 'FILL_BLANK',
+            question: makeQuestion('FILL_BLANK', {
+                blanks: ['Blank 1', 'Blank 2'],
+            }),
+            expectedText: 'Blank 1',
+            expectedControl: (renderer: ReactTestRenderer) => (
+                findHost(renderer, 'TextInput', (node) => node.props.accessibilityLabel === 'Blank 1')
+            ),
+        },
+        {
+            type: 'ENUMERATION',
+            question: makeQuestion('ENUMERATION', {
+                blanks: [],
+            }),
+            expectedText: 'Item 1',
+            expectedControl: (renderer: ReactTestRenderer) => (
+                findHost(renderer, 'TextInput', (node) => node.props.accessibilityLabel === 'Item 1')
+            ),
+        },
+        {
+            type: 'ESSAY',
+            question: makeQuestion('ESSAY', {
+                placeholder: 'Write your response here...',
+                maxLength: 2000,
+            }),
+            expectedText: 'Sample question?',
+            expectedControl: (renderer: ReactTestRenderer) => (
+                findHost(renderer, 'TextInput', (node) => node.props.multiline === true)
+            ),
+        },
+        {
+            type: 'IDENTIFICATION',
+            question: makeQuestion('IDENTIFICATION', {
+                placeholder: 'Enter your answer here...',
+                maxLength: 250,
+            }),
+            expectedText: 'Sample question?',
+            expectedControl: (renderer: ReactTestRenderer) => (
+                findHost(renderer, 'TextInput', (node) => node.props.multiline !== true)
+            ),
+        },
+    ])('renders $type prompt, header, and input family through nested JSX', ({ question, expectedText, expectedControl }) => {
+        const renderer = renderQuestionCard({ question, totalQuestions: 8 });
+
+        expect(hasText(renderer, 'Question 1 of 8')).toBe(true);
+        expect(hasText(renderer, expectedText)).toBe(true);
+        expect(hasText(renderer, question.text || 'Question prompt unavailable.')).toBe(true);
+        expect(expectedControl(renderer)).not.toBeNull();
     });
 
     it('renders default fallback prompt text when question.text is empty', () => {
-        const question = makeQuestion('MULTIPLE_CHOICE', {
-            text: '',
-            options: [{ id: 'A', text: 'Alpha' }],
+        const renderer = renderQuestionCard({
+            question: makeQuestion('MULTIPLE_CHOICE', {
+                text: '',
+                options: [{ id: 'A', text: 'Alpha' }],
+            }),
         });
 
-        const tree = QuestionCard({
-            question,
-            currentIndex: 0,
-            totalQuestions: 1,
-            isFlagged: false,
-            onSelectOption: () => {},
-            onToggleFlag: () => {},
-        });
-
-        expect(findText(tree, 'Question prompt unavailable.')).toBe(true);
+        expect(hasText(renderer, 'Question prompt unavailable.')).toBe(true);
     });
 
-    it('renders question text', () => {
-        const question = makeQuestion('MULTIPLE_CHOICE', {
-            text: 'What is 2+2?',
-            options: [
-                { id: 'A', text: '3' },
-                { id: 'B', text: '4' },
-            ],
+    it('keeps scroll content expanded with footer-safe bottom space', () => {
+        const renderer = renderQuestionCard({
+            question: makeQuestion('MULTIPLE_CHOICE', {
+                options: [{ id: 'A', text: 'Alpha' }],
+            }),
         });
+        const scrollView = findHost(renderer, 'ScrollView');
 
-        const tree = QuestionCard({
-            question,
-            currentIndex: 0,
-            totalQuestions: 10,
-            isFlagged: false,
-            onSelectOption: () => {},
-            onToggleFlag: () => {},
-        });
-
-        expect(findText(tree, 'What is 2+2?')).toBe(true);
-    });
-
-    it('renders MULTIPLE_CHOICE option texts', () => {
-        const question = makeQuestion('MULTIPLE_CHOICE', {
-            options: [
-                { id: 'A', text: 'Alpha' },
-                { id: 'B', text: 'Beta' },
-            ],
-        });
-
-        const tree = QuestionCard({
-            question,
-            currentIndex: 0,
-            totalQuestions: 2,
-            isFlagged: false,
-            onSelectOption: () => {},
-            onToggleFlag: () => {},
-        });
-
-        expect(findText(tree, 'Alpha')).toBe(true);
-        expect(findText(tree, 'Beta')).toBe(true);
-    });
-
-    it('marks a MULTIPLE_CHOICE option as selected via accessibilityState', () => {
-        const question = makeQuestion('MULTIPLE_CHOICE', {
-            options: [
-                { id: 'A', text: 'Alpha' },
-                { id: 'B', text: 'Beta' },
-            ],
-        });
-
-        const tree = QuestionCard({
-            question,
-            currentIndex: 0,
-            totalQuestions: 2,
-            selectedOptionId: 'A',
-            isFlagged: false,
-            onSelectOption: () => {},
-            onToggleFlag: () => {},
-        });
-
-        const selectedNode = findNode(
-            tree,
-            (n) =>
-                n.type === 'TouchableOpacity' &&
-                n.props?.accessibilityLabel === 'Alpha' &&
-                n.props?.accessibilityState?.checked === true,
+        expect(scrollView?.props.style).toEqual(
+            expect.arrayContaining([
+                expect.objectContaining({ flex: 1 }),
+            ]),
         );
-        expect(selectedNode).not.toBeNull();
+        expect(scrollView?.props.contentContainerStyle).toEqual(
+            expect.objectContaining({
+                flexGrow: 1,
+                paddingBottom: 140,
+            }),
+        );
     });
 
-    it('renders MULTIPLE_RESPONSE with "Select all that apply" label', () => {
-        const question = makeQuestion('MULTIPLE_RESPONSE', {
+    it('renders PassageCard content when question has a passage', () => {
+        const renderer = renderQuestionCard({
+            question: makeQuestion('MULTIPLE_CHOICE', {
+                passage: '<p>Once upon a time...</p>',
+                passageTitle: 'Story',
+                options: [{ id: 'A', text: 'Option' }],
+            }),
+        });
+
+        expect(hasText(renderer, 'Story')).toBe(true);
+        expect(hasText(renderer, 'Once upon a time...')).toBe(true);
+    });
+
+    it('does not render passage content when question has no passage', () => {
+        const renderer = renderQuestionCard({
+            question: makeQuestion('MULTIPLE_CHOICE', {
+                passage: null,
+                options: [{ id: 'A', text: 'Option' }],
+            }),
+        });
+
+        expect(hasText(renderer, 'Reading Passage')).toBe(false);
+    });
+
+    it('calls onSelectOption with option id when a multiple-choice item is pressed', () => {
+        const onSelectOption = vi.fn();
+        const renderer = renderQuestionCard({
+            question: makeQuestion('MULTIPLE_CHOICE', {
+                options: [{ id: 'A', text: 'Alpha' }],
+            }),
+            onSelectOption,
+        });
+        const optionButton = findHost(
+            renderer,
+            'TouchableOpacity',
+            (node) => node.props.accessibilityLabel === 'Alpha',
+        );
+
+        act(() => {
+            optionButton?.props.onPress();
+        });
+
+        expect(onSelectOption).toHaveBeenCalledWith('A');
+    });
+
+    it('marks a multiple-choice option as selected by id or text', () => {
+        const question = makeQuestion('MULTIPLE_CHOICE', {
             options: [
-                { id: 'A', text: 'One' },
-                { id: 'B', text: 'Two' },
+                { id: 'A', text: 'Alpha' },
+                { id: 'B', text: 'Beta' },
             ],
         });
+        const byId = renderQuestionCard({ question, selectedOptionId: 'A' });
+        const byText = renderQuestionCard({ question, selectedOptionId: 'Alpha' });
 
-        const tree = QuestionCard({
-            question,
-            currentIndex: 0,
-            totalQuestions: 1,
-            selectedOptionId: [],
-            isFlagged: false,
-            onSelectOption: () => {},
-            onToggleFlag: () => {},
-        });
-
-        expect(findText(tree, 'Select all that apply')).toBe(true);
+        expect(
+            findHost(
+                byId,
+                'TouchableOpacity',
+                (node) =>
+                    node.props.accessibilityLabel === 'Alpha' &&
+                    node.props.accessibilityState?.checked === true,
+            ),
+        ).not.toBeNull();
+        expect(
+            findHost(
+                byText,
+                'TouchableOpacity',
+                (node) =>
+                    node.props.accessibilityLabel === 'Alpha' &&
+                    node.props.accessibilityState?.checked === true,
+            ),
+        ).not.toBeNull();
     });
 
-    it('renders TRUE_FALSE with True and False options', () => {
+    it('toggles multi-response values by id and text', () => {
+        const onSelectOption = vi.fn();
+        const renderer = renderQuestionCard({
+            question: makeQuestion('MULTIPLE_RESPONSE', {
+                options: [
+                    { id: 'A', text: 'One' },
+                    { id: 'B', text: 'Two' },
+                ],
+            }),
+            selectedOptionId: ['One'],
+            onSelectOption,
+        });
+        const selected = findHost(
+            renderer,
+            'TouchableOpacity',
+            (node) => node.props.accessibilityLabel === 'One',
+        );
+        const unselected = findHost(
+            renderer,
+            'TouchableOpacity',
+            (node) => node.props.accessibilityLabel === 'Two',
+        );
+
+        act(() => {
+            selected?.props.onPress();
+            unselected?.props.onPress();
+        });
+
+        expect(onSelectOption).toHaveBeenNthCalledWith(1, []);
+        expect(onSelectOption).toHaveBeenNthCalledWith(2, ['One', 'B']);
+    });
+
+    it('supports boolean true and false in selectedOptionId for true/false questions', () => {
         const question = makeQuestion('TRUE_FALSE', {
             options: [
                 { id: 'true', text: 'True' },
                 { id: 'false', text: 'False' },
             ],
         });
+        const trueRenderer = renderQuestionCard({ question, selectedOptionId: true });
+        const falseRenderer = renderQuestionCard({ question, selectedOptionId: false });
 
-        const tree = QuestionCard({
-            question,
-            currentIndex: 0,
-            totalQuestions: 1,
-            isFlagged: false,
-            onSelectOption: () => {},
-            onToggleFlag: () => {},
-        });
-
-        expect(findText(tree, 'True')).toBe(true);
-        expect(findText(tree, 'False')).toBe(true);
-    });
-
-    it('renders ESSAY with a multiline TextInput', () => {
-        const question = makeQuestion('ESSAY', {
-            placeholder: 'Write your response here…',
-            maxLength: 2000,
-        });
-
-        const tree = QuestionCard({
-            question,
-            currentIndex: 0,
-            totalQuestions: 1,
-            isFlagged: false,
-            onSelectOption: () => {},
-            onToggleFlag: () => {},
-        });
-
-        const input = findNode(
-            tree,
-            (n) => n.type === 'TextInput' && n.props?.multiline === true,
-        );
-        expect(input).not.toBeNull();
-        expect(input.props.maxLength).toBe(2000);
-    });
-
-    it('renders IDENTIFICATION with a non-multiline TextInput', () => {
-        const question = makeQuestion('IDENTIFICATION', {
-            placeholder: 'Enter your answer here…',
-            maxLength: 250,
-        });
-
-        const tree = QuestionCard({
-            question,
-            currentIndex: 0,
-            totalQuestions: 1,
-            isFlagged: false,
-            onSelectOption: () => {},
-            onToggleFlag: () => {},
-        });
-
-        const input = findNode(tree, (n) => n.type === 'TextInput');
-        expect(input).not.toBeNull();
-        expect(input.props.multiline).toBeFalsy();
-    });
-
-    it('renders PassageCard when question has a passage', () => {
-        const question = makeQuestion('MULTIPLE_CHOICE', {
-            passage: 'Once upon a time…',
-            passageTitle: 'Story',
-            options: [{ id: 'A', text: 'Option' }],
-        });
-
-        const tree = QuestionCard({
-            question,
-            currentIndex: 0,
-            totalQuestions: 1,
-            isFlagged: false,
-            onSelectOption: () => {},
-            onToggleFlag: () => {},
-        });
-
-        const passageCard = findNode(tree, (n) => n.type === 'PassageCard');
-        expect(passageCard).not.toBeNull();
-        expect(passageCard.props.passage).toBe('Once upon a time…');
-        expect(passageCard.props.title).toBe('Story');
-    });
-
-    it('does not render PassageCard when question has no passage', () => {
-        const question = makeQuestion('MULTIPLE_CHOICE', {
-            passage: null,
-            options: [{ id: 'A', text: 'Option' }],
-        });
-
-        const tree = QuestionCard({
-            question,
-            currentIndex: 0,
-            totalQuestions: 1,
-            isFlagged: false,
-            onSelectOption: () => {},
-            onToggleFlag: () => {},
-        });
-
-        const passageCard = findNode(tree, (n) => n.type === 'PassageCard');
-        expect(passageCard).toBeNull();
-    });
-
-    it('calls onSelectOption with option id when a MULTIPLE_CHOICE item is pressed', () => {
-        const onSelectOption = vi.fn();
-        const question = makeQuestion('MULTIPLE_CHOICE', {
-            options: [{ id: 'A', text: 'Alpha' }],
-        });
-
-        const tree = QuestionCard({
-            question,
-            currentIndex: 0,
-            totalQuestions: 1,
-            isFlagged: false,
-            onSelectOption,
-            onToggleFlag: () => {},
-        });
-
-        const optionButton = findNode(
-            tree,
-            (n) => n.type === 'TouchableOpacity' && n.props?.accessibilityLabel === 'Alpha',
-        );
-        expect(optionButton).not.toBeNull();
-        optionButton.props.onPress();
-        expect(onSelectOption).toHaveBeenCalledWith('A');
+        expect(
+            findHost(
+                trueRenderer,
+                'TouchableOpacity',
+                (node) =>
+                    node.props.accessibilityLabel === 'True' &&
+                    node.props.accessibilityState?.checked === true,
+            ),
+        ).not.toBeNull();
+        expect(
+            findHost(
+                falseRenderer,
+                'TouchableOpacity',
+                (node) =>
+                    node.props.accessibilityLabel === 'False' &&
+                    node.props.accessibilityState?.checked === true,
+            ),
+        ).not.toBeNull();
     });
 
     it('calls onToggleFlag when the flag button is pressed', () => {
         const onToggleFlag = vi.fn();
-        const question = makeQuestion('MULTIPLE_CHOICE', {
-            options: [{ id: 'A', text: 'Option' }],
-        });
-
-        const tree = QuestionCard({
-            question,
-            currentIndex: 0,
-            totalQuestions: 1,
-            isFlagged: false,
-            onSelectOption: () => {},
+        const renderer = renderQuestionCard({
+            question: makeQuestion('MULTIPLE_CHOICE', {
+                options: [{ id: 'A', text: 'Option' }],
+            }),
             onToggleFlag,
         });
-
-        const flagBtn = findNode(
-            tree,
-            (n) =>
-                n.type === 'TouchableOpacity' &&
-                n.props?.accessibilityLabel === 'Flag question for review',
+        const flagButton = findHost(
+            renderer,
+            'TouchableOpacity',
+            (node) => node.props.accessibilityLabel === 'Flag question for review',
         );
-        expect(flagBtn).not.toBeNull();
-        flagBtn.props.onPress();
-        expect(onToggleFlag).toHaveBeenCalled();
+
+        act(() => {
+            flagButton?.props.onPress();
+        });
+
+        expect(onToggleFlag).toHaveBeenCalledOnce();
     });
 
-    it('marks MULTIPLE_CHOICE as selected when selectedOptionId matches option text', () => {
-        const question = makeQuestion('MULTIPLE_CHOICE', {
-            options: [
-                { id: 'A', text: 'Alpha' },
-                { id: 'B', text: 'Beta' },
-            ],
-        });
-
-        const tree = QuestionCard({
-            question,
-            currentIndex: 0,
-            totalQuestions: 2,
-            selectedOptionId: 'Alpha',
-            isFlagged: false,
-            onSelectOption: () => {},
-            onToggleFlag: () => {},
-        });
-
-        const selectedNode = findNode(
-            tree,
-            (n) =>
-                n.type === 'TouchableOpacity' &&
-                n.props?.accessibilityLabel === 'Alpha' &&
-                n.props?.accessibilityState?.checked === true,
-        );
-        expect(selectedNode).not.toBeNull();
-    });
-
-    it('renders fallback TextInput for unmapped question types', () => {
-        const question = makeQuestion('CUSTOM_TYPE' as any, {
-            placeholder: 'Custom type placeholder',
-        });
-
-        const tree = QuestionCard({
-            question,
-            currentIndex: 0,
-            totalQuestions: 1,
-            isFlagged: false,
-            onSelectOption: () => {},
-            onToggleFlag: () => {},
-        });
-
-        const input = findNode(tree, (n) => n.type === 'TextInput');
-        expect(input).not.toBeNull();
-    });
-
-    it('renders MATCHING pairs inputs and triggers onSelectOption on change', () => {
+    it('updates matching answers without replacing other matched pairs', () => {
         const onSelectOption = vi.fn();
-        const question = makeQuestion('MATCHING', {
-            pairs: [
-                { left: 'Left Item 1', right: 'Right Item 1' },
-                { left: 'Left Item 2', right: 'Right Item 2' },
-            ],
-        });
-
-        const tree = QuestionCard({
-            question,
-            currentIndex: 0,
-            totalQuestions: 1,
+        const renderer = renderQuestionCard({
+            question: makeQuestion('MATCHING', {
+                pairs: [
+                    { left: 'Left Item 1', right: 'Right Item 1' },
+                    { left: 'Left Item 2', right: 'Right Item 2' },
+                ],
+            }),
             selectedOptionId: { 'Left Item 1': 'Matched Val' },
-            isFlagged: false,
             onSelectOption,
-            onToggleFlag: () => {},
+        });
+        const input = findHost(
+            renderer,
+            'TextInput',
+            (node) => node.props.accessibilityLabel === 'Match for Left Item 1',
+        );
+
+        expect(input?.props.defaultValue).toBe('Matched Val');
+        act(() => {
+            input?.props.onChangeText('Updated Val');
         });
 
-        expect(findText(tree, 'Left Item 1')).toBe(true);
-        expect(findText(tree, 'Left Item 2')).toBe(true);
-
-        const input1 = findNode(
-            tree,
-            (n) => n.type === 'TextInput' && n.props?.accessibilityLabel === 'Match for Left Item 1',
-        );
-        expect(input1).not.toBeNull();
-        expect(input1.props.defaultValue).toBe('Matched Val');
-
-        input1.props.onChangeText('Updated Val');
         expect(onSelectOption).toHaveBeenCalledWith({
             'Left Item 1': 'Updated Val',
         });
     });
 
-    it('renders FILL_BLANK multiple blank inputs', () => {
+    it('updates a multiple blank answer by index', () => {
         const onSelectOption = vi.fn();
-        const question = makeQuestion('FILL_BLANK', {
-            blanks: ['Blank 1', 'Blank 2'],
-        });
-
-        const tree = QuestionCard({
-            question,
-            currentIndex: 0,
-            totalQuestions: 1,
+        const renderer = renderQuestionCard({
+            question: makeQuestion('FILL_BLANK', {
+                blanks: ['Blank 1', 'Blank 2'],
+            }),
             selectedOptionId: ['Value 1', 'Value 2'],
-            isFlagged: false,
             onSelectOption,
-            onToggleFlag: () => {},
+        });
+        const input = findHost(
+            renderer,
+            'TextInput',
+            (node) => node.props.accessibilityLabel === 'Blank 2',
+        );
+
+        act(() => {
+            input?.props.onChangeText('New Val');
         });
 
-        expect(findText(tree, 'Blank 1')).toBe(true);
-        expect(findText(tree, 'Blank 2')).toBe(true);
-
-        const input2 = findNode(
-            tree,
-            (n) => n.type === 'TextInput' && n.props?.accessibilityLabel === 'Blank 2',
-        );
-        expect(input2).not.toBeNull();
-        input2.props.onChangeText('New Val');
         expect(onSelectOption).toHaveBeenCalledWith(['Value 1', 'New Val']);
     });
 
-    it('renders fallback TextInput for MULTIPLE_CHOICE when options array is empty', () => {
-        const onSelectOption = vi.fn();
-        const question = makeQuestion('MULTIPLE_CHOICE', {
-            options: [],
-        });
-
-        const tree = QuestionCard({
-            question,
-            currentIndex: 0,
-            totalQuestions: 1,
+    it('renders fallback TextInput for multiple-choice when options array is empty', () => {
+        const renderer = renderQuestionCard({
+            question: makeQuestion('MULTIPLE_CHOICE', {
+                options: [],
+            }),
             selectedOptionId: 'Typed answer',
-            isFlagged: false,
-            onSelectOption,
-            onToggleFlag: () => {},
         });
+        const input = findHost(renderer, 'TextInput');
 
-        const input = findNode(tree, (n) => n.type === 'TextInput');
-        expect(input).not.toBeNull();
-        expect(input.props.defaultValue).toBe('Typed answer');
+        expect(input?.props.defaultValue).toBe('Typed answer');
     });
 
-    it('renders point indicator with singular "pt" and plural "pts"', () => {
-        const q1 = makeQuestion('MULTIPLE_CHOICE', { points: 1 });
-        const tree1 = QuestionCard({
-            question: q1,
-            currentIndex: 0,
-            totalQuestions: 5,
-            isFlagged: false,
-            onSelectOption: () => {},
-            onToggleFlag: () => {},
+    it('renders fallback TextInput for unmapped question types', () => {
+        const renderer = renderQuestionCard({
+            question: makeQuestion('CUSTOM_TYPE' as unknown as QuestionType, {
+                placeholder: 'Custom type placeholder',
+            }),
         });
-        expect(findText(tree1, '1 pt')).toBe(true);
 
-        const q2 = makeQuestion('MULTIPLE_CHOICE', { points: 5 });
-        const tree2 = QuestionCard({
-            question: q2,
+        expect(findHost(renderer, 'TextInput')).not.toBeNull();
+    });
+
+    it('renders point indicator with singular and plural labels', () => {
+        const singular = renderQuestionCard({
+            question: makeQuestion('MULTIPLE_CHOICE', { points: 1 }),
+            totalQuestions: 5,
+        });
+        const plural = renderQuestionCard({
+            question: makeQuestion('MULTIPLE_CHOICE', { points: 5 }),
             currentIndex: 1,
             totalQuestions: 5,
-            isFlagged: false,
-            onSelectOption: () => {},
-            onToggleFlag: () => {},
         });
-        expect(findText(tree2, '5 pts')).toBe(true);
+
+        expect(hasText(singular, '1 pt')).toBe(true);
+        expect(hasText(plural, '5 pts')).toBe(true);
     });
 
-    it('renders option letter pills (A., B., C.) for MULTIPLE_CHOICE and MULTIPLE_RESPONSE', () => {
-        const mcQuestion = makeQuestion('MULTIPLE_CHOICE', {
-            options: [
-                { id: 'opt-1', text: 'First choice' },
-                { id: 'opt-2', text: 'Second choice' },
-            ],
+    it('renders option letter pills for choice and response questions', () => {
+        const choice = renderQuestionCard({
+            question: makeQuestion('MULTIPLE_CHOICE', {
+                options: [
+                    { id: 'opt-1', text: 'First choice' },
+                    { id: 'opt-2', text: 'Second choice' },
+                ],
+            }),
         });
-        const mcTree = QuestionCard({
-            question: mcQuestion,
-            currentIndex: 0,
-            totalQuestions: 1,
-            isFlagged: false,
-            onSelectOption: () => {},
-            onToggleFlag: () => {},
+        const response = renderQuestionCard({
+            question: makeQuestion('MULTIPLE_RESPONSE', {
+                options: [
+                    { id: 'opt-1', text: 'Option One' },
+                    { id: 'opt-2', text: 'Option Two' },
+                ],
+            }),
         });
-        expect(findText(mcTree, 'A.')).toBe(true);
-        expect(findText(mcTree, 'B.')).toBe(true);
 
-        const mrQuestion = makeQuestion('MULTIPLE_RESPONSE', {
-            options: [
-                { id: 'opt-1', text: 'Option One' },
-                { id: 'opt-2', text: 'Option Two' },
-            ],
-        });
-        const mrTree = QuestionCard({
-            question: mrQuestion,
-            currentIndex: 0,
-            totalQuestions: 1,
-            isFlagged: false,
-            onSelectOption: () => {},
-            onToggleFlag: () => {},
-        });
-        expect(findText(mrTree, 'A.')).toBe(true);
-        expect(findText(mrTree, 'B.')).toBe(true);
+        expect(hasText(choice, 'A.')).toBe(true);
+        expect(hasText(choice, 'B.')).toBe(true);
+        expect(hasText(response, 'A.')).toBe(true);
+        expect(hasText(response, 'B.')).toBe(true);
     });
 
-    it('supports boolean true and false in selectedOptionId for TRUE_FALSE questions', () => {
-        const tfQuestion = makeQuestion('TRUE_FALSE', {
-            options: [
-                { id: 'true', text: 'True' },
-                { id: 'false', text: 'False' },
-            ],
-        });
-
-        const treeTrue = QuestionCard({
-            question: tfQuestion,
-            currentIndex: 0,
-            totalQuestions: 1,
-            selectedOptionId: true,
-            isFlagged: false,
-            onSelectOption: () => {},
-            onToggleFlag: () => {},
-        });
-        const trueNode = findNode(
-            treeTrue,
-            (n) =>
-                n.type === 'TouchableOpacity' &&
-                n.props?.accessibilityLabel === 'True' &&
-                n.props?.accessibilityState?.checked === true,
-        );
-        expect(trueNode).not.toBeNull();
-
-        const treeFalse = QuestionCard({
-            question: tfQuestion,
-            currentIndex: 0,
-            totalQuestions: 1,
-            selectedOptionId: false,
-            isFlagged: false,
-            onSelectOption: () => {},
-            onToggleFlag: () => {},
-        });
-        const falseNode = findNode(
-            treeFalse,
-            (n) =>
-                n.type === 'TouchableOpacity' &&
-                n.props?.accessibilityLabel === 'False' &&
-                n.props?.accessibilityState?.checked === true,
-        );
-        expect(falseNode).not.toBeNull();
-    });
-
-    it('renders ENUMERATION numbered item inputs with fallback when blanks is empty', () => {
+    it('renders enumeration fallback items and appends changed values', () => {
         const onSelectOption = vi.fn();
-        const enumQuestion = makeQuestion('ENUMERATION', {
-            blanks: [],
-        });
-
-        const tree = QuestionCard({
-            question: enumQuestion,
-            currentIndex: 0,
-            totalQuestions: 1,
+        const renderer = renderQuestionCard({
+            question: makeQuestion('ENUMERATION', {
+                blanks: [],
+            }),
             selectedOptionId: ['Alpha', 'Beta'],
-            isFlagged: false,
             onSelectOption,
-            onToggleFlag: () => {},
+        });
+        const input = findHost(
+            renderer,
+            'TextInput',
+            (node) => node.props.accessibilityLabel === 'Item 3',
+        );
+
+        expect(findAllHosts(renderer, 'TextInput')).toHaveLength(3);
+        expect(hasText(renderer, 'Item 3')).toBe(true);
+        act(() => {
+            input?.props.onChangeText('Gamma');
         });
 
-        expect(findText(tree, 'Item 1')).toBe(true);
-        expect(findText(tree, 'Item 2')).toBe(true);
-        expect(findText(tree, 'Item 3')).toBe(true);
-
-        const input1 = findNode(
-            tree,
-            (n) => n.type === 'TextInput' && n.props?.accessibilityLabel === 'Item 1',
-        );
-        expect(input1).not.toBeNull();
-        expect(input1.props.defaultValue).toBe('Alpha');
-
-        const input3 = findNode(
-            tree,
-            (n) => n.type === 'TextInput' && n.props?.accessibilityLabel === 'Item 3',
-        );
-        expect(input3).not.toBeNull();
-        input3.props.onChangeText('Gamma');
         expect(onSelectOption).toHaveBeenCalledWith(['Alpha', 'Beta', 'Gamma']);
+    });
+
+    it('reports mount and layout status to the diagnostic callback', () => {
+        const onRenderStatusChange = vi.fn();
+        const renderer = renderQuestionCard({
+            question: makeQuestion('MULTIPLE_CHOICE', {
+                options: [{ id: 'A', text: 'Alpha' }],
+            }),
+            onRenderStatusChange,
+        });
+        const scrollView = findHost(renderer, 'ScrollView');
+
+        expect(onRenderStatusChange).toHaveBeenCalledWith({ kind: 'mounted' });
+
+        act(() => {
+            scrollView?.props.onLayout({
+                nativeEvent: {
+                    layout: {
+                        width: 320.4,
+                        height: 480.6,
+                    },
+                },
+            });
+        });
+
+        expect(onRenderStatusChange).toHaveBeenCalledWith({
+            kind: 'layout',
+            layout: {
+                width: 320,
+                height: 481,
+            },
+        });
     });
 });

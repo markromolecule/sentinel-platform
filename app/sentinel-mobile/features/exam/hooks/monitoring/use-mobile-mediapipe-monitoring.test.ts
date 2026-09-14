@@ -79,7 +79,7 @@ describe('useMobileMediaPipeMonitoring', () => {
         expect(mockAnalyzeFrame).not.toHaveBeenCalled();
     });
 
-    it('should run monitoring when enabled and map analysis status to warning', () => {
+    it('should not raise warning before threshold, and raise warning only after qualification', () => {
         const sandbox = {
             enabled: true,
             emitDuringExam: true,
@@ -102,11 +102,16 @@ describe('useMobileMediaPipeMonitoring', () => {
             landmarksByFace: [[]],
         });
 
-        // Run effects
-        effectCallbacks.forEach((cb) => cb());
+        const runHookEffect = effectCallbacks[effectCallbacks.length - 1];
 
-        expect(mockAnalyzeFrame).toHaveBeenCalled();
-        // warningStatus is the 2nd state variable (index 1)
+        // 1st frame: consecutive frame count = 1 (< 2), warningStatus must remain null
+        runHookEffect();
+        expect(mockAnalyzeFrame).toHaveBeenCalledTimes(1);
+        expect(stateValues[1]).toBeNull();
+
+        // 2nd frame: consecutive frame count = 2 (>= 2), warningStatus is raised
+        runHookEffect();
+        expect(mockAnalyzeFrame).toHaveBeenCalledTimes(2);
         expect(stateValues[1]).toBe('Looking away from screen');
     });
 
@@ -249,5 +254,44 @@ describe('useMobileMediaPipeMonitoring', () => {
         expect(onAnomaly).toHaveBeenCalledTimes(2);
 
         dateSpy.mockRestore();
+    });
+
+    it('resets warning status when face status returns to ready', () => {
+        const sandbox = {
+            enabled: true,
+            emitDuringExam: true,
+            consecutiveFrameThreshold: 1,
+            cooldownMs: 5000,
+        };
+
+        mockAnalyzeFrame.mockReturnValue({
+            status: 'off-screen',
+            signal: 'GAZE_OFF_SCREEN',
+            faceCount: 1,
+            confidenceScore: 0.9,
+        });
+
+        useMobileMediaPipeMonitoring({
+            examId: 'exam-1',
+            mediaPipeSandbox: sandbox as any,
+            examSessionId: 'session-1',
+            landmarksByFace: [[]],
+        });
+
+        const runHookEffect = effectCallbacks[effectCallbacks.length - 1];
+
+        // Trigger warning
+        runHookEffect();
+        expect(stateValues[1]).toBe('Looking away from screen');
+
+        // Status becomes ready
+        mockAnalyzeFrame.mockReturnValue({
+            status: 'ready',
+            signal: null,
+            faceCount: 1,
+            confidenceScore: 0.95,
+        });
+        runHookEffect();
+        expect(stateValues[1]).toBeNull();
     });
 });

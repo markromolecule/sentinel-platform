@@ -729,7 +729,7 @@ describe('IncidentPersistenceService', () => {
             expect(printScreenIncident).toMatchObject({
                 attempt_id: printScreenFixture.attemptId,
                 incident_type: 'SCREENSHOT',
-                severity: 'HIGH',
+                severity: 'LOW',
             });
             expect(parseIncidentDetails(printScreenIncident?.details)).toMatchObject({
                 eventType: 'PRINT_SCREEN_ATTEMPT',

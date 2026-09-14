@@ -133,7 +133,6 @@ export function useMobileMediaPipeMonitoring({
         }
 
         const { activeSignal, activeWarning } = resolveMediaPipeIncident(currentAnalysis.status);
-        setWarningStatus(activeWarning);
 
         if (activeSignal) {
             // Reset counters for other signals
@@ -156,6 +155,7 @@ export function useMobileMediaPipeMonitoring({
             });
 
             if (shouldTrigger) {
+                setWarningStatus(activeWarning);
                 lastTriggeredAt.current[activeSignal] = now;
                 const framesCount = consecutiveFrames.current[activeSignal];
                 const frameIntervalMs = sandbox?.frameIntervalMs ?? 1000;

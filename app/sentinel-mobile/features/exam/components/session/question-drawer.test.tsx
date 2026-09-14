@@ -1,28 +1,5 @@
 import { vi, describe, it, expect } from 'vitest';
 
-// ─── React mock ───────────────────────────────────────────────────────────────
-vi.mock('react', () => {
-    const createElement = (type: any, props: any, ...children: any[]) => ({
-        type,
-        props: {
-            ...props,
-            children:
-                children.length === 0
-                    ? props?.children
-                    : children.length === 1
-                      ? children[0]
-                      : children,
-        },
-    });
-    return {
-        createElement,
-        default: {
-            createElement,
-        },
-        useEffect: () => {},
-    };
-});
-
 // ─── React Native mocks ───────────────────────────────────────────────────────
 vi.mock('react-native', () => ({
     View: 'View',
@@ -55,6 +32,14 @@ vi.mock('react-native-reanimated', () => ({
 }));
 
 vi.mock('@/types/exam', () => ({}));
+
+vi.mock('@/features/exam/hooks/session', () => ({
+    useDrawerAnimation: () => ({
+        animatedStyle: {
+            transform: [{ translateY: 0 }],
+        },
+    }),
+}));
 
 import { QuestionDrawer } from './question-drawer';
 

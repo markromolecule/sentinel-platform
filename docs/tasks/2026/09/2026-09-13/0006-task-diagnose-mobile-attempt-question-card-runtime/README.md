@@ -1,7 +1,7 @@
 ---
 title: "Diagnose and Remediate Sentinel Mobile Attempt QuestionCard Runtime Rendering"
 type: task
-status: planned
+status: pending_manual_qa
 created: "2026-09-13"
 tags: [task, defect-resolution, sentinel-mobile, exam-session, question-rendering]
 ---
@@ -53,11 +53,11 @@ Establish a repeatable native rendering diagnosis for the mobile attempt body, c
 | ID | Source goal/scenario/decision | Criterion | Implementation | Verification | Status |
 | --- | --- | --- | --- | --- | --- |
 | AC-01 | SC-01, DEC-01 | A populated attempt always shows a visible `QuestionCard` header and prompt, or a bounded diagnostic recovery state; it never presents a blank body. | `exam-session-screen.tsx`, `question-card.tsx`, new card-local diagnostic boundary if required | Developer emulator/device capture for populated attempt | Planned |
-| AC-02 | SC-02 | Each supported question type has a native render assertion that traverses the real React component tree and verifies prompt plus input family. | `question-card.test.tsx`, test setup/config, direct test dependencies if required | Focused test command passes for all eight types | Planned |
-| AC-03 | SC-03 | The repair remains correct with proctoring disabled. | Mobile-only session composition | Emulator/device verification with camera/proctoring disabled | Planned |
-| AC-04 | SC-04 | A bridge failure cannot prevent question content from mounting; any status shown is bounded and non-sensitive. | `exam-session-screen.tsx`, `mobile-mediapipe-bridge.tsx` only if Phase 1 evidence requires it | Failure-injection test or emulator validation | Planned |
-| AC-05 | All | The mobile suite is truthful: no direct-function element-tree test is reported as native render coverage, and existing unrelated failures are explicitly resolved or reported. | Test configuration and affected suites | `pnpm --filter sentinel-mobile test`; `pnpm --filter sentinel-mobile exec tsc --noEmit` | Planned |
-| AC-06 | Scope boundary | No files in `app/sentinel-api/`, shared backend contracts, schemas, or Sentinel Web are changed. | Change-scope review | `git diff --name-only` review | Planned |
+| AC-02 | SC-02 | Each supported question type has a native render assertion that traverses the real React component tree and verifies prompt plus input family. | `question-card.test.tsx`, test setup/config, direct test dependencies if required | Focused test command passes for all eight types | Completed |
+| AC-03 | SC-03 | The repair remains correct with proctoring disabled. | Mobile-only session composition | Emulator/device verification with camera/proctoring disabled | Pending manual QA |
+| AC-04 | SC-04 | A bridge failure cannot prevent question content from mounting; any status shown is bounded and non-sensitive. | `exam-session-screen.tsx`, `mobile-mediapipe-bridge.tsx` only if Phase 1 evidence requires it | Failure-injection test or emulator validation | Pending manual QA |
+| AC-05 | All | The mobile suite is truthful: no direct-function element-tree test is reported as native render coverage, and existing unrelated failures are explicitly resolved or reported. | Test configuration and affected suites | `pnpm --filter sentinel-mobile test`; `pnpm --filter sentinel-mobile exec tsc --noEmit` | Completed |
+| AC-06 | Scope boundary | No files in `app/sentinel-api/`, shared backend contracts, schemas, or Sentinel Web are changed. | Change-scope review | `git diff --name-only` review | Completed |
 
 ## Scope
 
@@ -81,12 +81,30 @@ Establish a repeatable native rendering diagnosis for the mobile attempt body, c
 ## Phases
 
 - [ ] `phase-01-native-attempt-render-classification.md` — Phase 1: Classify the native QuestionCard mount/layout failure without touching API data
-- [ ] `phase-02-native-render-regression-harness.md` — Phase 2: Replace invalid element-tree coverage with native render regression coverage
-- [ ] `phase-03-evidence-selected-mobile-repair.md` — Phase 3: Apply the smallest mobile-only repair selected by the classification checkpoint
-- [ ] `phase-04-native-verification-and-scope-audit.md` — Phase 4: Verify the fixed attempt on an emulator/device and audit scope
+- [x] `phase-02-native-render-regression-harness.md` — Phase 2: Replace invalid element-tree coverage with native render regression coverage
+- [x] `phase-03-evidence-selected-mobile-repair.md` — Phase 3: Apply the smallest mobile-only repair selected by the classification checkpoint
+- [ ] `phase-04-native-verification-and-scope-audit.md` — Phase 4: Verify the fixed attempt on an emulator/device and audit scope; automated audit complete, developer manual QA pending
 
 ## Verification
 
+- **Phase 4 automated verification passed:** `pnpm --filter sentinel-mobile exec vitest run features/exam/components/session/question-card.test.tsx features/exam/components/session/mobile-live-inspection-bridge.test.tsx features/exam/components/session/question-drawer.test.tsx` — 3 files passed, 43 tests passed.
+- **Phase 4 typecheck passed:** `pnpm --filter sentinel-mobile exec tsc --noEmit` — exits successfully.
+- **Phase 4 full mobile suite passed:** `pnpm --filter sentinel-mobile test -- --runInBand` — 51 files passed, 366 tests passed.
+- **Phase 4 scope audit passed:** `git status --short -- context-factory app/sentinel-api app/sentinel-web packages/shared packages/db packages/services` returned no changes.
+- **Phase 4 manual native verification unavailable here:** `adb devices` required elevated local debug socket access; after approval it listed no attached Android devices/emulators. Developer manual QA remains pending.
+- **Approved Phase 3 deviation:** The developer explicitly authorized continuing to Phase 3 before Phase 1 manual emulator/device classification, with manual QA deferred until Phase 4.
+- **Selected during Phase 3:** Layout/viewport hardening. Phase 2 proved all `QuestionCard` leaf input families render through nested JSX, while API/adapter and proctoring branches remain unsupported by current evidence.
+- **Passed during Phase 3:** `pnpm --filter sentinel-mobile exec vitest run features/exam/components/session/question-card.test.tsx` — 1 file passed, 27 tests passed.
+- **Passed during Phase 3:** `pnpm --filter sentinel-mobile exec tsc --noEmit` — exits successfully after restoring the card content growth/footer-safe inset.
+- **Passed during Phase 3:** `pnpm --filter sentinel-mobile test -- --runInBand` — 51 files passed, 366 tests passed.
+- **Approved Phase 2 deviation:** The developer explicitly authorized continuing to Phase 2 before Phase 1 manual emulator/device classification, with manual QA deferred until Phase 4.
+- **Passed during Phase 2:** `pnpm --filter sentinel-mobile exec vitest run features/exam/components/session/question-card.test.tsx features/exam/components/session/mobile-live-inspection-bridge.test.tsx features/exam/components/session/question-drawer.test.tsx` — 3 files passed, 42 tests passed.
+- **Passed during Phase 2:** `pnpm --filter sentinel-mobile exec tsc --noEmit` — exits successfully after replacing the `QuestionCard` test harness and adding the Vitest setup.
+- **Passed during Phase 2:** `pnpm --filter sentinel-mobile test -- --runInBand` — 51 files passed, 365 tests passed.
+- **Passed during Phase 2:** `git diff --check` — exits successfully.
+- **Passed during Phase 1:** `pnpm --filter sentinel-mobile exec tsc --noEmit` — exits successfully after adding the development-only render classification overlay and typed card render-status callback.
+- **Unavailable during Phase 1:** `adb devices` — after elevated local debug socket access, no Android emulator/device was attached. The populated attempt screenshot and exact native failure classification remain pending.
+- **Scope during Phase 1:** `git diff --name-only` shows only Sentinel Mobile session/task documentation files changed; no `app/sentinel-api`, Sentinel Web, database, or shared contract files were modified.
 - **Passed during planning:** `pnpm --filter sentinel-mobile exec vitest run features/exam/lib/mobile-question-adapter.test.ts features/exam/hooks/session/use-exam-session-navigation.test.ts features/exam/hooks/session/use-drawer-animation.test.ts` — 20/20 passed; supports adapter/navigation/drawer boundaries only.
 - **Passed during planning:** `pnpm --filter sentinel-mobile exec tsc --noEmit` — exits successfully; does not prove native rendering.
 - **Failed during planning:** `pnpm --filter sentinel-mobile test -- --runInBand` — 19 `QuestionCard` assertions fail after the uncommitted JSX change because its harness does not render nested JSX; two Expo-dependent suites also fail to initialize. This is a verification gap, not proof of the production symptom.
@@ -97,4 +115,4 @@ Establish a repeatable native rendering diagnosis for the mobile attempt body, c
 
 ## Result
 
-Planned only. No production implementation or commits were made.
+Implementation and automated verification are complete, with release readiness conditional on developer manual QA. The invalid direct-function `QuestionCard` test has been replaced with nested React render coverage, targeted Expo initialization failures are resolved, the mobile-only layout hardening repair is covered by a native render assertion, and the full Sentinel Mobile test suite passes. No API, Sentinel Web, database, shared contract, packages/services, or context-factory files are changed.
