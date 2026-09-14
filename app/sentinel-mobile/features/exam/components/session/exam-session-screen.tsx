@@ -1,6 +1,5 @@
-import React, { useRef, useState, useCallback, useEffect } from 'react';
-import { View, Text, TouchableOpacity, useColorScheme, ActivityIndicator, StyleSheet, useWindowDimensions } from 'react-native';
-import type { LayoutChangeEvent } from 'react-native';
+import React, { useRef, useState, useCallback } from 'react';
+import { View, Text, TouchableOpacity, useColorScheme, ActivityIndicator, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Stack, useNavigation, useLocalSearchParams } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -11,9 +10,7 @@ import { useExamSession } from '@/features/exam/hooks/session';
 import { QuestionDrawer } from '@/features/exam/components/session/question-drawer';
 import { SessionHeader } from './session-header';
 import { QuestionCard } from './question-card';
-import type { QuestionCardRenderStatus, QuestionRenderLayoutSnapshot } from './question-card';
 import { SessionFooter } from './session-footer';
-import { QuestionRenderClassification } from './question-render-classification';
 import { ProctoringIncidentNotice } from './proctoring-incident-notice';
 
 import { useApi, useAuth } from '@sentinel/hooks';
@@ -54,66 +51,11 @@ export const ExamSessionScreen = () => {
     const { supabase, session } = useAuth();
     const cameraRef = useRef<any>(null);
     const [landmarksByFace, setLandmarksByFace] = useState<any[][]>([]);
-    const { width: windowWidth, height: windowHeight } = useWindowDimensions();
-    const [rootLayout, setRootLayout] = useState<QuestionRenderLayoutSnapshot | null>(null);
-    const [questionCardLayout, setQuestionCardLayout] =
-        useState<QuestionRenderLayoutSnapshot | null>(null);
-    const [questionCardMounted, setQuestionCardMounted] = useState(false);
-
     const colorScheme = useColorScheme();
     const isDark = colorScheme === 'dark';
     const colors = Colors[colorScheme ?? 'light'];
     const insets = useSafeAreaInsets();
     const navigation = useNavigation();
-
-    useEffect(() => {
-        if (currentQuestion) {
-            setQuestionCardMounted(true);
-        }
-    }, [currentQuestion?.id]);
-
-    useEffect(() => {
-        if (!__DEV__) {
-            return;
-        }
-
-        console.debug('[debug][exam-question-render]', {
-            questionCount: questions.length,
-            currentIndex,
-            hasCurrentQuestion: Boolean(currentQuestion),
-            cardMounted: questionCardMounted,
-            window: { width: windowWidth, height: windowHeight },
-            root: rootLayout,
-            viewport: questionCardLayout,
-            card: questionCardLayout,
-        });
-    }, [
-        currentIndex,
-        currentQuestion,
-        questionCardLayout,
-        questionCardMounted,
-        questions.length,
-        rootLayout,
-        windowHeight,
-        windowWidth,
-    ]);
-
-    const handleRootLayout = useCallback((event: LayoutChangeEvent) => {
-        const { width, height } = event.nativeEvent.layout;
-        setRootLayout({
-            width: Math.round(width),
-            height: Math.round(height),
-        });
-    }, []);
-
-    const handleQuestionCardRenderStatus = useCallback((status: QuestionCardRenderStatus) => {
-        if (status.kind === 'mounted') {
-            setQuestionCardMounted(true);
-            return;
-        }
-
-        setQuestionCardLayout(status.layout);
-    }, []);
 
     const {
         activeNotice,
@@ -236,7 +178,6 @@ export const ExamSessionScreen = () => {
                 height: '100%',
                 backgroundColor: colors.background,
             }}
-            onLayout={handleRootLayout}
         >
             {/* Hidden CameraView or MediaPipe Bridge for proctor streaming and image capture */}
             {exam.configuration?.cameraRequired !== false && (
@@ -296,21 +237,8 @@ export const ExamSessionScreen = () => {
                     isFlagged={!!flagged[currentQuestion?.id]}
                     onSelectOption={handleSelectOption}
                     onToggleFlag={toggleFlag}
-                    onRenderStatusChange={handleQuestionCardRenderStatus}
                 />
             </View>
-
-            <QuestionRenderClassification
-                colors={colors}
-                questionCount={questions.length}
-                currentIndex={currentIndex}
-                hasCurrentQuestion={Boolean(currentQuestion)}
-                cardMounted={questionCardMounted}
-                rootLayout={rootLayout}
-                viewportLayout={questionCardLayout}
-                cardLayout={questionCardLayout}
-                topOffset={insets.top + 72}
-            />
 
             <SessionFooter
                 onPrev={handlePrev}
