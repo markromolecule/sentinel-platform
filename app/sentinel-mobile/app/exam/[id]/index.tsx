@@ -1,6 +1,6 @@
 import { ActivityIndicator, Text, View } from 'react-native';
 import { Redirect } from 'expo-router';
-import { useExamDetails } from '@/features/exam/hooks/use-exam-details';
+import { useExamDetails } from '@/features/exam/hooks/detail';
 import { ExamNotFound } from '@/features/exam/components/detail/exam-not-found';
 import { ReadOnlyExamDetails } from '@/features/exam/components/detail/read-only-exam-details';
 

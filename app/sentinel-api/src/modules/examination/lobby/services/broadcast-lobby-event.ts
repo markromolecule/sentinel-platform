@@ -2,6 +2,8 @@ export type LobbyBroadcastPayload = {
     examId: string;
     studentIds?: string[];
     studentId?: string;
+    userIds?: string[];
+    userId?: string;
     status?: string;
     decidedAt?: string | null;
     checkedInAt?: string | null;

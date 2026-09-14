@@ -13,7 +13,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { router } from 'expo-router';
+import { router, useFocusEffect } from 'expo-router';
 import { useState, useCallback } from 'react';
 import { Colors } from '@/constants/theme';
 import { useExamsQuery } from '@sentinel/hooks';
@@ -29,7 +29,13 @@ export default function ExamScreen() {
     const colors = Colors[colorScheme ?? 'light'];
     const [activeTab, setActiveTab] = useState<'available' | 'past_due' | 'turned_in'>('available');
     const [searchQuery, setSearchQuery] = useState('');
-    const { data: exams = [], isLoading, isError, refetch, isRefetching } = useExamsQuery();
+    const { data: exams = [], isLoading, isError, refetch, isRefetching } = useExamsQuery({ viewer: 'student' });
+
+    useFocusEffect(
+        useCallback(() => {
+            void refetch();
+        }, [refetch]),
+    );
 
     const onRefresh = useCallback(() => {
         refetch();

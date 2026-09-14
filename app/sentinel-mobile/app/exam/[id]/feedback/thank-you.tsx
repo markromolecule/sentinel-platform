@@ -92,7 +92,7 @@ export default function StudentExamFeedbackThankYouScreen() {
                     activeOpacity={0.8}
                     onPress={handleReturnToDashboard}
                     style={{
-                        backgroundColor: colors.text,
+                        backgroundColor: colors.primary,
                         borderRadius: 16,
                         height: 50,
                         width: '100%',
@@ -104,12 +104,12 @@ export default function StudentExamFeedbackThankYouScreen() {
                     <Ionicons
                         name="home-outline"
                         size={18}
-                        color={colors.background}
+                        color="#ffffff"
                         style={{ marginRight: 8 }}
                     />
                     <Text
                         style={{
-                            color: colors.background,
+                            color: '#ffffff',
                             fontSize: 16,
                             fontWeight: '600',
                         }}

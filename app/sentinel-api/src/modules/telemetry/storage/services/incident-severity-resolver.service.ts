@@ -22,19 +22,19 @@ type SeverityTier = {
 
 type SeverityStrategy =
     | {
-          kind: 'immediate';
-          baseSeverity: incident_severity;
-      }
+        kind: 'immediate';
+        baseSeverity: incident_severity;
+    }
     | {
-          kind: 'fixed';
-          baseSeverity: incident_severity;
-      }
+        kind: 'fixed';
+        baseSeverity: incident_severity;
+    }
     | {
-          kind: 'ladder';
-          baseSeverity: incident_severity;
-          tiers: SeverityTier[];
-          repeatThresholdTierIndex: number;
-      };
+        kind: 'ladder';
+        baseSeverity: incident_severity;
+        tiers: SeverityTier[];
+        repeatThresholdTierIndex: number;
+    };
 
 export type SeverityResolution = {
     finalSeverity: incident_severity;
@@ -78,26 +78,14 @@ const SEVERITY_STRATEGIES: Record<TelemetryRuleKey, SeverityStrategy> = {
     'webSecurity.full_screen_required': createCalibratedLadder(),
     'webSecurity.clipboard_control': createCalibratedLadder(),
     'webSecurity.right_click_disable': createCalibratedLadder(),
-    // Screen capture, app pinning, screenshot, and root/jailbreak events remain immediate high
-    // because each event indicates a direct break from the secured runtime boundary.
-    'webSecurity.print_screen_disable': {
-        kind: 'immediate',
-        baseSeverity: 'HIGH',
-    },
-    'mobileSecurity.app_pinning_required': {
-        kind: 'immediate',
-        baseSeverity: 'HIGH',
-    },
+    // Per ADR 2026-09-14-unified-proctoring-severity-escalation, all proctoring rules
+    // use the common 1/3/6 calibrated ladder across a rolling 600s window.
+    'webSecurity.print_screen_disable': createCalibratedLadder(),
+    'mobileSecurity.app_pinning_required': createCalibratedLadder(),
     'mobileSecurity.prevent_backgrounding': createCalibratedLadder(),
     'mobileSecurity.notification_block': createCalibratedLadder(),
-    'mobileSecurity.screenshot_block': {
-        kind: 'immediate',
-        baseSeverity: 'HIGH',
-    },
-    'mobileSecurity.root_jailbreak_detection': {
-        kind: 'immediate',
-        baseSeverity: 'HIGH',
-    },
+    'mobileSecurity.screenshot_block': createCalibratedLadder(),
+    'mobileSecurity.root_jailbreak_detection': createCalibratedLadder(),
 };
 
 const SILENCE_AUDIO_SEVERITY_STRATEGY: Extract<SeverityStrategy, { kind: 'ladder' }> = {
@@ -135,9 +123,9 @@ function getAudioAnomalyTypeFromDetails(details: unknown): AudioAnomalyType | nu
     const parsed = safeParseDetails(details);
     const metadata =
         parsed.lastEvent &&
-        typeof parsed.lastEvent === 'object' &&
-        !Array.isArray(parsed.lastEvent) &&
-        'metadata' in parsed.lastEvent
+            typeof parsed.lastEvent === 'object' &&
+            !Array.isArray(parsed.lastEvent) &&
+            'metadata' in parsed.lastEvent
             ? (parsed.lastEvent as Record<string, unknown>).metadata
             : parsed.metadata;
 
@@ -268,8 +256,8 @@ export class IncidentSeverityResolverService {
                 severityReason: overrideSeverity
                     ? 'forced-override'
                     : strategy.kind === 'immediate'
-                      ? 'immediate-high'
-                      : 'threshold-fixed',
+                        ? 'immediate-high'
+                        : 'threshold-fixed',
                 severityInputs: {
                     baseSeverity: strategy.baseSeverity,
                     ladder: [strategy.baseSeverity],
@@ -283,9 +271,9 @@ export class IncidentSeverityResolverService {
 
         const matchingIncidents = isSilenceAudioAnomaly
             ? args.matchingIncidents.filter(
-                  (incident) =>
-                      getAudioAnomalyTypeFromDetails(incident.details) === 'SILENCE_DETECTED',
-              )
+                (incident) =>
+                    getAudioAnomalyTypeFromDetails(incident.details) === 'SILENCE_DETECTED',
+            )
             : args.matchingIncidents;
 
         const { ladder, effectiveRepeatThreshold } = scaleLadderThresholds(
@@ -318,8 +306,8 @@ export class IncidentSeverityResolverService {
             severityReason: overrideSeverity
                 ? 'forced-override'
                 : organicSeverity === strategy.baseSeverity
-                  ? 'default-ladder'
-                  : 'repeat-escalated',
+                    ? 'default-ladder'
+                    : 'repeat-escalated',
             severityInputs: {
                 baseSeverity: strategy.baseSeverity,
                 ladder: ladder.map((tier) => tier.severity),

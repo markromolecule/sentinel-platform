@@ -347,7 +347,7 @@ export default function StudentExamFeedbackScreen() {
                     onPress={handleSubmit}
                     disabled={createFeedbackMutation.isPending}
                     style={{
-                        backgroundColor: colors.text,
+                        backgroundColor: colors.primary,
                         borderRadius: 16,
                         height: 50,
                         alignItems: 'center',
@@ -356,11 +356,11 @@ export default function StudentExamFeedbackScreen() {
                     }}
                 >
                     {createFeedbackMutation.isPending ? (
-                        <ActivityIndicator color={colors.background} />
+                        <ActivityIndicator color="#ffffff" />
                     ) : (
                         <Text
                             style={{
-                                color: colors.background,
+                                color: '#ffffff',
                                 fontSize: 16,
                                 fontWeight: '600',
                             }}

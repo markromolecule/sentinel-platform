@@ -6,17 +6,23 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Colors } from '@/constants/theme';
 import { CameraView } from 'expo-camera';
 
-import { useExamSession } from '@/features/exam/hooks/use-exam-session';
+import { useExamSession } from '@/features/exam/hooks/session';
 import { QuestionDrawer } from '@/features/exam/components/session/question-drawer';
 import { SessionHeader } from './session-header';
 import { QuestionCard } from './question-card';
 import { SessionFooter } from './session-footer';
+import { ProctoringIncidentNotice } from './proctoring-incident-notice';
 
 import { useApi, useAuth } from '@sentinel/hooks';
-import { useMobileMediaPipeMonitoring } from '../../hooks/use-mobile-mediapipe-monitoring';
+import {
+    useMobileMediaPipeMonitoring,
+    useMobileAudioAnomalyMonitoring,
+    useMobileProctoringNotice,
+} from '@/features/exam/hooks/monitoring';
 import { MobileLiveInspectionBridge } from './mobile-live-inspection-bridge';
 import { captureAndUploadEvidenceFrame } from '../../lib/mobile-frame-capture';
 import { MobileMediaPipeBridge } from '../checkup/mobile-mediapipe-bridge';
+import { MobileAudioBridge } from '../monitoring';
 
 export const ExamSessionScreen = () => {
     const {
@@ -31,6 +37,7 @@ export const ExamSessionScreen = () => {
         setIsDrawerOpen,
         timeLeft,
         isLoading,
+        isSubmitting,
         formatTime,
         handleSelectOption,
         toggleFlag,
@@ -45,16 +52,23 @@ export const ExamSessionScreen = () => {
     const { supabase, session } = useAuth();
     const cameraRef = useRef<any>(null);
     const [landmarksByFace, setLandmarksByFace] = useState<any[][]>([]);
-
     const colorScheme = useColorScheme();
     const isDark = colorScheme === 'dark';
     const colors = Colors[colorScheme ?? 'light'];
     const insets = useSafeAreaInsets();
     const navigation = useNavigation();
 
+    const {
+        activeNotice,
+        dismissNotice,
+        showAudioAnomalyNotice,
+        showMediaPipeNotice,
+    } = useMobileProctoringNotice();
+
     // Proctoring bridge and MediaPipe real-time monitoring
     const handleAnomaly = useCallback(
         async (eventType: 'GAZE_OFF_SCREEN' | 'MULTIPLE_FACES' | 'NO_FACE_DETECTED') => {
+            showMediaPipeNotice(eventType);
             if (!exam || !sessionId || !session?.user?.id) return;
             try {
                 await captureAndUploadEvidenceFrame({
@@ -70,10 +84,10 @@ export const ExamSessionScreen = () => {
                 console.error('Failed to capture and upload evidence frame', err);
             }
         },
-        [apiClient, exam, sessionId, session?.user?.id, supabase],
+        [apiClient, exam, sessionId, session?.user?.id, showMediaPipeNotice, supabase],
     );
 
-    const { warningStatus } = useMobileMediaPipeMonitoring({
+    useMobileMediaPipeMonitoring({
         examId: typeof examId === 'string' ? examId : '',
         apiClient,
         configuration: exam?.configuration,
@@ -82,6 +96,22 @@ export const ExamSessionScreen = () => {
         studentId: session?.user?.id,
         landmarksByFace,
         onAnomalyDetected: handleAnomaly,
+    });
+
+    const {
+        isEnabled: isAudioMonitoringEnabled,
+        effectiveConfig: audioEffectiveConfig,
+        handleStatusChange: handleAudioStatusChange,
+        handleError: handleAudioError,
+        handleAnomalyDetected: handleAudioAnomalyDetected,
+    } = useMobileAudioAnomalyMonitoring({
+        apiClient,
+        configuration: exam?.configuration,
+        examSessionId: typeof sessionId === 'string' ? sessionId : '',
+        studentId: session?.user?.id,
+        onAnomalyDetected: (anomaly) => {
+            showAudioAnomalyNotice(anomaly.anomalyType);
+        },
     });
 
     const getLiveVideoTrack = () => {
@@ -142,16 +172,14 @@ export const ExamSessionScreen = () => {
     }
 
     return (
-        <View style={{ flex: 1, backgroundColor: colors.background }}>
-            <Stack.Screen
-                options={{
-                    headerShown: false,
-                    gestureEnabled: false,
-                    fullScreenGestureEnabled: false,
-                    headerLeft: () => null,
-                }}
-            />
-
+        <View
+            style={{
+                flex: 1,
+                width: '100%',
+                height: '100%',
+                backgroundColor: colors.background,
+            }}
+        >
             {/* Hidden CameraView or MediaPipe Bridge for proctor streaming and image capture */}
             {exam.configuration?.cameraRequired !== false && (
                 Boolean(exam.mediaPipeSandbox?.enabled && exam.mediaPipeSandbox?.emitDuringExam) ? (
@@ -178,6 +206,17 @@ export const ExamSessionScreen = () => {
                 )
             )}
 
+            {/* Hidden MobileAudioBridge for passive active-session audio proctoring */}
+            {isAudioMonitoringEnabled && (
+                <MobileAudioBridge
+                    enabled={isAudioMonitoringEnabled}
+                    config={audioEffectiveConfig}
+                    onStatusChange={handleAudioStatusChange}
+                    onError={handleAudioError}
+                    onAnomalyDetected={handleAudioAnomalyDetected}
+                />
+            )}
+
             <SessionHeader
                 title={exam.title}
                 subject={exam.subject}
@@ -187,24 +226,10 @@ export const ExamSessionScreen = () => {
                 formatTime={formatTime}
             />
 
-            {/* Security Anomaly Violation Alert Banner */}
-            {warningStatus && (
-                <View
-                    accessibilityLabel="Security Warning Alert"
-                    style={{
-                        backgroundColor: '#ef4444',
-                        padding: 12,
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                    }}
-                >
-                    <Text style={{ color: '#fff', fontWeight: 'bold', fontSize: 13 }}>
-                        ⚠️ Warning: {warningStatus}
-                    </Text>
-                </View>
-            )}
+            {/* Proctoring Incident Warning Notice */}
+            <ProctoringIncidentNotice notice={activeNotice} onDismiss={dismissNotice} />
 
-            <View style={{ flex: 1 }}>
+            <View style={{ flex: 1, width: '100%' }}>
                 <QuestionCard
                     question={currentQuestion}
                     currentIndex={currentIndex}
@@ -224,6 +249,7 @@ export const ExamSessionScreen = () => {
                 isLast={isLastQuestion}
                 currentIndex={currentIndex}
                 totalQuestions={questions.length}
+                isSubmitting={isSubmitting}
             />
 
             {isDrawerOpen && (
@@ -256,6 +282,31 @@ export const ExamSessionScreen = () => {
                 mediaPipeRef={cameraRef}
                 getLiveVideoTrack={getLiveVideoTrack}
             />
+
+            {/* Submitting Loading Overlay */}
+            {isSubmitting && (
+                <View
+                    testID="exam-session-submitting-overlay"
+                    style={[
+                        StyleSheet.absoluteFill,
+                        {
+                            backgroundColor: 'rgba(0, 0, 0, 0.75)',
+                            zIndex: 9999,
+                            justifyContent: 'center',
+                            alignItems: 'center',
+                            paddingHorizontal: 24,
+                        },
+                    ]}
+                >
+                    <ActivityIndicator size="large" color="#ffffff" />
+                    <Text style={{ color: '#ffffff', marginTop: 16, fontSize: 16, fontWeight: '700' }}>
+                        Submitting exam session...
+                    </Text>
+                    <Text style={{ color: '#cbd5e1', marginTop: 6, fontSize: 13, textAlign: 'center' }}>
+                        Recording your responses and preparing feedback...
+                    </Text>
+                </View>
+            )}
         </View>
     );
 };

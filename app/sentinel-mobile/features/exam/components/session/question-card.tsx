@@ -1,8 +1,12 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Text, ScrollView, StyleSheet } from 'react-native';
 import { Colors } from '@/constants/theme';
 import { useColorScheme } from 'react-native';
-import type { QuestionCardProps } from './inputs/question-card.types';
+import type {
+    QuestionCardProps,
+    QuestionCardRenderStatus,
+    QuestionRenderLayoutSnapshot,
+} from './inputs/question-card.types';
 import {
     QuestionCardUnavailable,
     QuestionCardHeader,
@@ -22,13 +26,18 @@ import {
 } from './inputs';
 import { PassageCard } from './passage-card';
 
-export type { QuestionCardProps };
+export type { QuestionCardProps, QuestionCardRenderStatus, QuestionRenderLayoutSnapshot };
 
 /**
  * QuestionCard renders a single exam question with type-specific input UI.
  * Supports MULTIPLE_CHOICE, MULTIPLE_RESPONSE, TRUE_FALSE, IDENTIFICATION,
  * ESSAY, FILL_BLANK, ENUMERATION, and MATCHING question types.
  * Displays an optional reading passage (PassageCard) above the prompt when present.
+ *
+ * IMPORTANT: Sub-components are rendered as JSX elements (<Component ... />) rather
+ * than plain function calls (Component({...})). Calling React components as plain
+ * functions bypasses React's reconciliation, key tracking, and lifecycle hooks,
+ * which can silently prevent rendering in React Native / Expo.
  */
 export const QuestionCard = ({
     question,
@@ -38,13 +47,18 @@ export const QuestionCard = ({
     isFlagged,
     onSelectOption,
     onToggleFlag,
+    onRenderStatusChange,
 }: QuestionCardProps) => {
     const colorScheme = useColorScheme();
     const isDark = colorScheme === 'dark';
     const colors = Colors[colorScheme ?? 'light'];
 
+    useEffect(() => {
+        onRenderStatusChange?.({ kind: 'mounted' });
+    }, [onRenderStatusChange, question?.id, currentIndex]);
+
     if (!question) {
-        return QuestionCardUnavailable({ colors });
+        return <QuestionCardUnavailable colors={colors} />;
     }
 
     const {
@@ -68,23 +82,44 @@ export const QuestionCard = ({
     const matchingValues = resolveMatchingValues(selectedOptionId);
     const blankValues = resolveBlankValues(selectedOptionId);
 
+    const isKnownType = [
+        'MULTIPLE_CHOICE',
+        'MULTIPLE_RESPONSE',
+        'TRUE_FALSE',
+        'MATCHING',
+        'FILL_BLANK',
+        'ENUMERATION',
+        'ESSAY',
+        'IDENTIFICATION',
+    ].includes(normalizedType);
+
     return (
         <ScrollView
             style={[styles.container, { backgroundColor: colors.background }]}
             contentContainerStyle={styles.contentContainer}
             showsVerticalScrollIndicator={false}
             keyboardShouldPersistTaps="handled"
+            onLayout={(event) => {
+                const { width, height } = event.nativeEvent.layout;
+                onRenderStatusChange?.({
+                    kind: 'layout',
+                    layout: {
+                        width: Math.round(width),
+                        height: Math.round(height),
+                    },
+                });
+            }}
         >
             {/* Question Header */}
-            {QuestionCardHeader({
-                currentIndex,
-                totalQuestions,
-                points,
-                isFlagged,
-                isDark,
-                colors,
-                onToggleFlag,
-            })}
+            <QuestionCardHeader
+                currentIndex={currentIndex}
+                totalQuestions={totalQuestions}
+                points={points}
+                isFlagged={isFlagged}
+                isDark={isDark}
+                colors={colors}
+                onToggleFlag={onToggleFlag}
+            />
 
             {/* Reading Passage */}
             {passage ? <PassageCard passage={passage} title={passageTitle} /> : null}
@@ -98,80 +133,87 @@ export const QuestionCard = ({
             </Text>
 
             {/* ── Type-Specific Input Views ── */}
-            {normalizedType === 'MULTIPLE_CHOICE' &&
-                MultipleChoiceInput({
-                    options,
-                    selectedSingleId,
-                    currentTextValue,
-                    placeholder,
-                    isDark,
-                    colors,
-                    onSelectOption,
-                })}
+            {normalizedType === 'MULTIPLE_CHOICE' && (
+                <MultipleChoiceInput
+                    options={options}
+                    selectedSingleId={selectedSingleId}
+                    currentTextValue={currentTextValue}
+                    placeholder={placeholder}
+                    isDark={isDark}
+                    colors={colors}
+                    onSelectOption={onSelectOption}
+                />
+            )}
 
-            {normalizedType === 'MULTIPLE_RESPONSE' &&
-                MultipleResponseInput({
-                    options,
-                    selectedIds,
-                    currentTextValue,
-                    placeholder,
-                    isDark,
-                    colors,
-                    onSelectOption,
-                })}
+            {normalizedType === 'MULTIPLE_RESPONSE' && (
+                <MultipleResponseInput
+                    options={options}
+                    selectedIds={selectedIds}
+                    currentTextValue={currentTextValue}
+                    placeholder={placeholder}
+                    isDark={isDark}
+                    colors={colors}
+                    onSelectOption={onSelectOption}
+                />
+            )}
 
-            {normalizedType === 'TRUE_FALSE' &&
-                TrueFalseInput({
-                    options,
-                    selectedOptionId,
-                    selectedSingleId,
-                    isDark,
-                    colors,
-                    onSelectOption,
-                })}
+            {normalizedType === 'TRUE_FALSE' && (
+                <TrueFalseInput
+                    options={options}
+                    selectedOptionId={selectedOptionId}
+                    selectedSingleId={selectedSingleId}
+                    isDark={isDark}
+                    colors={colors}
+                    onSelectOption={onSelectOption}
+                />
+            )}
 
-            {normalizedType === 'MATCHING' &&
-                MatchingInput({
-                    pairs,
-                    matchingValues,
-                    currentTextValue,
-                    placeholder,
-                    isDark,
-                    colors,
-                    onSelectOption,
-                })}
+            {normalizedType === 'MATCHING' && (
+                <MatchingInput
+                    pairs={pairs}
+                    matchingValues={matchingValues}
+                    currentTextValue={currentTextValue}
+                    placeholder={placeholder}
+                    isDark={isDark}
+                    colors={colors}
+                    onSelectOption={onSelectOption}
+                />
+            )}
 
-            {normalizedType === 'FILL_BLANK' &&
-                FillBlankInput({
-                    blanks,
-                    blankValues,
-                    currentTextValue,
-                    placeholder,
-                    maxLength,
-                    colors,
-                    onSelectOption,
-                })}
+            {normalizedType === 'FILL_BLANK' && (
+                <FillBlankInput
+                    blanks={blanks}
+                    blankValues={blankValues}
+                    currentTextValue={currentTextValue}
+                    placeholder={placeholder}
+                    maxLength={maxLength}
+                    colors={colors}
+                    onSelectOption={onSelectOption}
+                />
+            )}
 
-            {normalizedType === 'ENUMERATION' &&
-                EnumerationInput({
-                    blanks,
-                    blankValues,
-                    maxLength,
-                    colors,
-                    onSelectOption,
-                })}
+            {normalizedType === 'ENUMERATION' && (
+                <EnumerationInput
+                    blanks={blanks}
+                    blankValues={blankValues}
+                    maxLength={maxLength}
+                    colors={colors}
+                    onSelectOption={onSelectOption}
+                />
+            )}
 
             {(normalizedType === 'ESSAY' ||
                 normalizedType === 'IDENTIFICATION' ||
-                !['MULTIPLE_CHOICE', 'MULTIPLE_RESPONSE', 'TRUE_FALSE', 'MATCHING', 'FILL_BLANK', 'ENUMERATION'].includes(normalizedType)) &&
-                EssayInput({
-                    normalizedType,
-                    currentTextValue,
-                    placeholder,
-                    maxLength,
-                    colors,
-                    onSelectOption,
-                })}
+                !isKnownType) && (
+                    <EssayInput
+                        normalizedType={normalizedType}
+                        currentTextValue={currentTextValue}
+                        placeholder={placeholder}
+                        maxLength={maxLength}
+                        colors={colors}
+                        onSelectOption={onSelectOption}
+                    />
+                )}
         </ScrollView>
     );
 };
@@ -179,10 +221,11 @@ export const QuestionCard = ({
 const styles = StyleSheet.create({
     container: {
         flex: 1,
+        width: '100%',
     },
     contentContainer: {
+        flexGrow: 1,
         padding: 20,
         paddingBottom: 140,
-        flexGrow: 1,
     },
 });

@@ -5,39 +5,38 @@ import {
     SHARED_TELEMETRY_EVENT_TYPES,
     TELEMETRY_EVENT_DEFINITIONS,
     type TelemetryEventType,
+    type TelemetryMetadata,
+    type TelemetrySessionContext,
 } from '@sentinel/shared/schema';
 import type { ExamConfiguration } from '@sentinel/shared/types';
-import { ingestTelemetryEvent, type ApiClientType } from '@sentinel/services';
+import type { AudioAnomalyType } from '@sentinel/shared';
+import { ingestTelemetryEvent, type ApiClientType, type IngestTelemetryEventPayload } from '@sentinel/services';
 import { getApiBaseUrl } from '@/lib/config/api-config';
 
 export type MobileTelemetryEventType =
     (typeof MOBILE_TELEMETRY_EVENT_TYPES)[number] | (typeof SHARED_TELEMETRY_EVENT_TYPES)[number];
 
-type MobileTelemetrySessionContext = {
-    os?: string;
-    deviceType?: 'DESKTOP' | 'TABLET' | 'MOBILE';
-    appVersion?: string;
-    clientVersion?: string;
-    clientCapabilities?: string[];
-};
+export type MobileTelemetryMetadata = TelemetryMetadata;
 
-type MobileTelemetryPayload = {
-    examSessionId: string;
-    studentId: string;
-    timestamp: string;
+export type MobileTelemetrySessionContext = TelemetrySessionContext;
+
+export type MobileTelemetryPayload = Omit<
+    IngestTelemetryEventPayload,
+    'platform' | 'eventType' | 'metadata' | 'sessionContext'
+> & {
     platform: 'MOBILE';
-    source: (typeof TELEMETRY_EVENT_DEFINITIONS)[TelemetryEventType]['source'];
-    ruleKey: (typeof TELEMETRY_EVENT_DEFINITIONS)[TelemetryEventType]['ruleKey'];
     eventType: MobileTelemetryEventType;
+    metadata?: MobileTelemetryMetadata;
     sessionContext?: MobileTelemetrySessionContext;
 };
 
-type EmitMobileTelemetryEventArgs = {
+export type EmitMobileTelemetryEventArgs = {
     apiClient?: ApiClientType;
     configuration?: ExamConfiguration;
     examSessionId: string;
     eventType: MobileTelemetryEventType;
     studentId?: string;
+    metadata?: MobileTelemetryMetadata;
 };
 
 type MobileTelemetryRuleEnabledReader = (configuration: ExamConfiguration) => boolean;
@@ -90,10 +89,12 @@ export function buildMobileTelemetryPayload({
     examSessionId,
     eventType,
     studentId,
+    metadata,
 }: {
     examSessionId: string;
     eventType: MobileTelemetryEventType;
     studentId: string;
+    metadata?: MobileTelemetryMetadata;
 }): MobileTelemetryPayload {
     const eventDefinition = TELEMETRY_EVENT_DEFINITIONS[eventType];
 
@@ -105,6 +106,7 @@ export function buildMobileTelemetryPayload({
         source: eventDefinition.source,
         ruleKey: eventDefinition.ruleKey,
         eventType,
+        metadata,
         sessionContext: buildMobileTelemetrySessionContext(),
     };
 }
@@ -115,6 +117,7 @@ export async function emitMobileTelemetryEvent({
     examSessionId,
     eventType,
     studentId,
+    metadata,
 }: EmitMobileTelemetryEventArgs) {
     if (!isMobileTelemetryEventEnabled(configuration, eventType)) {
         return false;
@@ -139,6 +142,7 @@ export async function emitMobileTelemetryEvent({
         examSessionId,
         eventType,
         studentId,
+        metadata,
     });
 
     if (apiClient) {
@@ -175,4 +179,91 @@ export async function emitMobileTelemetryEvent({
     }
 
     return true;
+}
+
+const SILENCE_MIN_COOLDOWN_MS = 180_000;
+const BACKGROUND_NOISE_MIN_COOLDOWN_MS = 60_000;
+
+/**
+ * Produces a deterministic UUID-v4-like string from a seed string.
+ */
+export function toStableUuid(seed: string): string {
+    let hashA = 0x811c9dc5;
+    let hashB = 0x811c9dc5;
+    let hashC = 0x811c9dc5;
+    let hashD = 0x811c9dc5;
+
+    for (let index = 0; index < seed.length; index += 1) {
+        const code = seed.charCodeAt(index);
+        hashA = Math.imul(hashA ^ code, 0x01000193);
+        hashB = Math.imul(hashB ^ (code + 17), 0x01000193);
+        hashC = Math.imul(hashC ^ (code + 31), 0x01000193);
+        hashD = Math.imul(hashD ^ (code + 47), 0x01000193);
+    }
+
+    const hex = [hashA, hashB, hashC, hashD]
+        .map((part) => (part >>> 0).toString(16).padStart(8, '0'))
+        .join('');
+
+    return [
+        hex.slice(0, 8),
+        hex.slice(8, 12),
+        `4${hex.slice(13, 16)}`,
+        `${((parseInt(hex.slice(16, 17), 16) & 0x3) | 0x8).toString(16)}${hex.slice(17, 20)}`,
+        hex.slice(20, 32),
+    ].join('-');
+}
+
+/**
+ * Returns the effective cooldown for an audio anomaly type.
+ */
+export function getAudioAnomalyCooldownMs(anomalyType: AudioAnomalyType, cooldownMs: number): number {
+    if (anomalyType === 'SILENCE_DETECTED') {
+        return Math.max(cooldownMs, SILENCE_MIN_COOLDOWN_MS);
+    }
+
+    if (anomalyType === 'BACKGROUND_NOISE') {
+        return Math.max(cooldownMs, BACKGROUND_NOISE_MIN_COOLDOWN_MS);
+    }
+
+    return cooldownMs;
+}
+
+export interface CreateMobileAudioAnomalyMetadataArgs {
+    examSessionId: string;
+    anomalyType: AudioAnomalyType;
+    confidenceScore?: number;
+    cooldownMs: number;
+    clientActionAt?: string;
+    threshold?: number;
+    configVersion?: string;
+}
+
+/**
+ * Constructs the typed telemetry metadata payload for mobile audio anomaly events,
+ * including deterministic dedupeKey and eventId.
+ */
+export function createMobileAudioAnomalyMetadata(
+    args: CreateMobileAudioAnomalyMetadataArgs,
+): MobileTelemetryMetadata {
+    const clientActionAt = args.clientActionAt ?? new Date().toISOString();
+    const effectiveCooldownMs = getAudioAnomalyCooldownMs(args.anomalyType, args.cooldownMs);
+    const bucketStart = new Date(
+        Math.floor(new Date(clientActionAt).getTime() / effectiveCooldownMs) * effectiveCooldownMs,
+    ).toISOString();
+    const dedupeKey = [args.examSessionId, 'AUDIO_ANOMALY', args.anomalyType, bucketStart].join(':');
+
+    return {
+        anomalyType: args.anomalyType,
+        confidenceScore: args.confidenceScore,
+        dedupeKey,
+        eventId: toStableUuid(dedupeKey),
+        clientActionAt,
+        audioDiagnostics: {
+            threshold: args.threshold,
+            configVersion: args.configVersion ?? 'audio-config:default',
+            workerPhase: 'running',
+            streamPhase: 'live',
+        },
+    };
 }

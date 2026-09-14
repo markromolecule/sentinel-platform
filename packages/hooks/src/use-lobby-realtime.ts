@@ -42,7 +42,7 @@ export function useLobbyRealtime(args: UseLobbyRealtimeArgs) {
             !supabase.removeChannel
         ) {
             setPresenceCount(0);
-            return () => {};
+            return () => { };
         }
 
         let isEffectActive = true;
@@ -108,11 +108,20 @@ export function useLobbyRealtime(args: UseLobbyRealtimeArgs) {
                 (res: { payload?: Record<string, any> }) => {
                     const payload = res?.payload;
                     const isInstructor = !studentId;
+                    const currentUserId = session?.user?.id;
                     const isTargetStudent =
                         isInstructor ||
                         !payload ||
-                        (Array.isArray(payload.studentIds) && payload.studentIds.includes(studentId)) ||
-                        payload.studentId === studentId;
+                        (Array.isArray(payload.studentIds) &&
+                            ((studentId && payload.studentIds.includes(studentId)) ||
+                                (currentUserId && payload.studentIds.includes(currentUserId)))) ||
+                        (Array.isArray(payload.userIds) &&
+                            ((studentId && payload.userIds.includes(studentId)) ||
+                                (currentUserId && payload.userIds.includes(currentUserId)))) ||
+                        (studentId &&
+                            (payload.studentId === studentId || payload.userId === studentId)) ||
+                        (currentUserId &&
+                            (payload.studentId === currentUserId || payload.userId === currentUserId));
 
                     if (isTargetStudent && payload?.status) {
                         handleAdmissionChange(

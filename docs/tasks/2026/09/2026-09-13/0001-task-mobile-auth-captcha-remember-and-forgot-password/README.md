@@ -1,7 +1,7 @@
 ---
 title: "Task: Mobile Authentication Captcha Resolution, Remember Me Persistence, and Forgot Password Screen"
 type: task
-status: planned
+status: completed
 created: "2026-09-13"
 tags: [task, mobile, auth, captcha, turnstile, remember-me, forgot-password, supabase]
 ---
@@ -31,11 +31,11 @@ Enable seamless, unblocked login for students on `sentinel-mobile` by handling c
 
 | ID | Actor and situation | Preconditions | Expected outcome | Failure/recovery | Status |
 | --- | --- | --- | --- | --- | --- |
-| **SC-01** | Student logs in from mobile | App launched, credentials entered | Request has `x-sentinel-client: mobile`, backend authenticates via `supabaseAdmin`, returns session, navigates to `/(tabs)/classroom` | Invalid password returns clear 400 error | Planned |
-| **SC-02** | Student enables "Remember me" and signs in | Login screen with switch toggled ON | Email stored under `sentinel_remembered_email_mobile` in `AsyncStorage`; pre-fills on next launch | Storage write failure logged gracefully | Planned |
-| **SC-03** | Student disables "Remember me" and signs in | Login screen with switch toggled OFF | Key `sentinel_remembered_email_mobile` removed from `AsyncStorage` | N/A | Planned |
-| **SC-04** | Student navigates to "Forgot password?" | Login screen | Tapping link pushes route `/(auth)/forgot-password` with email input and submit button | N/A | Planned |
-| **SC-05** | Student submits password reset | Forgot password screen, valid email entered | Triggers `useForgotPasswordMutation`, shows confirmation UI ("Check your email"), provides "Back to Sign In" | API/network error displays in red banner | Planned |
+| **SC-01** | Student logs in from mobile | App launched, credentials entered | Request has `x-sentinel-client: mobile`, backend authenticates via `supabaseAdmin`, returns session, navigates to `/(tabs)/classroom` | Invalid password returns clear 400 error | Covered |
+| **SC-02** | Student enables "Remember me" and signs in | Login screen with switch toggled ON | Email stored under `sentinel_remembered_email_mobile` in `AsyncStorage`; pre-fills on next launch | Storage write failure logged gracefully | Covered |
+| **SC-03** | Student disables "Remember me" and signs in | Login screen with switch toggled OFF | Key `sentinel_remembered_email_mobile` removed from `AsyncStorage` | N/A | Covered |
+| **SC-04** | Student navigates to "Forgot password?" | Login screen | Tapping link pushes route `/(auth)/forgot-password` with email input and submit button | N/A | Covered |
+| **SC-05** | Student submits password reset | Forgot password screen, valid email entered | Triggers `useForgotPasswordMutation`, shows confirmation UI ("Check your email"), provides "Back to Sign In" | API/network error displays in red banner | Covered |
 
 ### Decision ledger
 
@@ -53,9 +53,9 @@ None. All technical mechanisms have been empirically validated against live Supa
 
 | ID | Source goal/scenario/decision | Criterion | Implementation | Verification | Status |
 | --- | --- | --- | --- | --- | --- |
-| **AC-01** | SC-01, D1 | Mobile login succeeds without `(no captcha_token found)` error | `app/sentinel-api/src/modules/identity/auth/auth.service.ts` + `app/sentinel-mobile/lib/api-client.ts` | Vitest / live curl probe | Planned |
-| **AC-02** | SC-02, SC-03, D2 | "Remember me" switch persists email when checked and clears when unchecked | `app/sentinel-mobile/app/(auth)/login.tsx` + `@sentinel/shared` | Vitest / manual test | Planned |
-| **AC-03** | SC-04, SC-05, D3 | "Forgot password?" navigates to working recovery screen and dispatches reset email | `app/sentinel-mobile/app/(auth)/forgot-password.tsx` | Vitest / component test | Planned |
+| **AC-01** | SC-01, D1 | Mobile login succeeds without `(no captcha_token found)` error | `app/sentinel-api/src/modules/identity/auth/auth.service.ts` + `app/sentinel-mobile/lib/api-client.ts` | Vitest / live curl probe | Covered |
+| **AC-02** | SC-02, SC-03, D2 | "Remember me" switch persists email when checked and clears when unchecked | `app/sentinel-mobile/app/(auth)/login.tsx` + `@sentinel/shared` | Vitest / manual test | Covered |
+| **AC-03** | SC-04, SC-05, D3 | "Forgot password?" navigates to working recovery screen and dispatches reset email | `app/sentinel-mobile/app/(auth)/forgot-password.tsx` | Vitest: `forgot-password.test.tsx` (PASS: 5/5) | Covered |
 
 ## Scope
 
@@ -75,9 +75,12 @@ None. All technical mechanisms have been empirically validated against live Supa
 
 - [x] `phase-01-api-mobile-auth-service-and-client-headers.md` — Phase 1: Backend AuthService and Client Header Support
 - [x] `phase-02-mobile-remember-me-storage-persistence.md` — Phase 2: Mobile Remember Me Persistence with AsyncStorage
-- [ ] `phase-03-mobile-forgot-password-screen-and-flow.md` — Phase 3: Mobile Forgot Password Screen & Mutation Flow
-- [ ] `phase-04-verification-and-parity-audit.md` — Phase 4: Automated Tests, Live Probe Verification, and Audit
+- [x] `phase-03-mobile-forgot-password-screen-and-flow.md` — Phase 3: Mobile Forgot Password Screen & Mutation Flow
+- [x] `phase-04-verification-and-parity-audit.md` — Phase 4: Automated Tests, Live Probe Verification, and Audit
 
 ## Verification
 
-Record the command or inspection, outcome, and the acceptance criterion it supports.
+- **Phase 1:** `pnpm --filter sentinel-api test src/modules/identity/auth/auth.service.test.ts` (PASS: 3/3 passed).
+- **Phase 2:** `pnpm --filter @sentinel/shared test src/constants/auth.test.ts` (PASS: 1/1 passed) & `pnpm --filter sentinel-mobile test lib/auth/remember-me.test.ts` (PASS: 4/4 passed).
+- **Phase 3:** `pnpm --filter sentinel-mobile test lib/auth/forgot-password.test.ts` (PASS: 5/5 passed); total mobile test suite: `44 passed (44)`, `285 passed (285)`. Typecheck `tsc --noEmit` passed with 0 errors.
+- **Phase 4:** Live probe confirmed Turnstile bypass on mobile; Expo doctor 21/21 checks passed; `npx expo export --platform ios` bundled 2,715 modules into Hermes bytecode (`.hbc`, 9.6MB) with 0 errors.

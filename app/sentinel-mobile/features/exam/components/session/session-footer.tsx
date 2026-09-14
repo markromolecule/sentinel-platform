@@ -13,6 +13,7 @@ interface SessionFooterProps {
     isLast: boolean;
     currentIndex: number;
     totalQuestions: number;
+    isSubmitting?: boolean;
 }
 
 export const SessionFooter = ({
@@ -23,6 +24,7 @@ export const SessionFooter = ({
     isLast,
     currentIndex,
     totalQuestions,
+    isSubmitting = false,
 }: SessionFooterProps) => {
     const insets = useSafeAreaInsets();
     const colorScheme = useColorScheme();
@@ -45,11 +47,11 @@ export const SessionFooter = ({
         >
             {/* Prev Button */}
             <TouchableOpacity
-                disabled={isFirst}
+                disabled={isFirst || isSubmitting}
                 onPress={onPrev}
                 style={{
                     backgroundColor: colors.input,
-                    opacity: isFirst ? 0.5 : 1,
+                    opacity: isFirst || isSubmitting ? 0.5 : 1,
                 }}
                 className="h-12 w-12 items-center justify-center rounded-full"
             >
@@ -58,7 +60,9 @@ export const SessionFooter = ({
 
             {/* Drawer Toggle */}
             <TouchableOpacity
+                disabled={isSubmitting}
                 onPress={onToggleDrawer}
+                style={{ opacity: isSubmitting ? 0.6 : 1 }}
                 className="flex-row items-center gap-2 rounded-full bg-gray-100 px-4 py-2 dark:bg-gray-800"
             >
                 <Ionicons
@@ -74,8 +78,12 @@ export const SessionFooter = ({
 
             {/* Next/Submit Button */}
             <TouchableOpacity
+                disabled={isSubmitting}
                 onPress={onNext}
-                style={{ backgroundColor: isLast ? '#059669' : colors.input }}
+                style={{
+                    backgroundColor: isLast ? '#059669' : colors.input,
+                    opacity: isSubmitting ? 0.6 : 1,
+                }}
                 className={`h-12 w-12 items-center justify-center rounded-full ${isLast ? 'bg-emerald-600' : ''}`}
             >
                 <Ionicons

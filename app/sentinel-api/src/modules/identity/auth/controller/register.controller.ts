@@ -30,7 +30,8 @@ export const registerHandler: AppRouteHandler<typeof registerRoute> = async (c) 
     const dbClient = c.get('dbClient');
     try {
         const body = c.req.valid('json');
-        const data = await AuthService.register(body);
+        const clientType = c.req.header('x-sentinel-client');
+        const data = await AuthService.register(body, clientType);
 
         // Log successful registration
         if (data.user) {

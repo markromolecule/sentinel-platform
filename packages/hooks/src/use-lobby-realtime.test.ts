@@ -183,6 +183,7 @@ describe('useLobbyRealtime Hook', () => {
             payload: {
                 examId,
                 studentIds: ['other-student-999'],
+                userIds: ['other-user-999'],
                 status: 'APPROVED',
             },
         });
@@ -190,6 +191,82 @@ describe('useLobbyRealtime Hook', () => {
         expect(mockSetQueryData).not.toHaveBeenCalled();
         expect(mockInvalidateQueries).not.toHaveBeenCalled();
         expect(onAdmissionChange).not.toHaveBeenCalled();
+    });
+
+    it('handles admission:updated broadcast when matched via userIds containing session user id', () => {
+        const examId = 'exam-123';
+        // Client passed database student PK as studentId, but broadcast carries student auth user_id
+        const studentId = 'student-db-pk';
+        const onAdmissionChange = vi.fn();
+
+        // mockUseAuth has session.user.id = 'student-user-1'
+        renderHook(() => useLobbyRealtime({ examId, studentId, onAdmissionChange }));
+
+        const broadcastCall = mockChannelOn.mock.calls.find(
+            ([type, config]) => type === 'broadcast' && config.event === 'admission:updated',
+        );
+
+        expect(broadcastCall).toBeDefined();
+
+        const broadcastPayload = {
+            payload: {
+                examId,
+                studentIds: ['other-db-id'],
+                userIds: ['student-user-1', 'other-user-2'],
+                status: 'APPROVED',
+                decidedAt: '2026-08-25T06:01:00.000Z',
+            },
+        };
+
+        broadcastCall?.[2](broadcastPayload);
+
+        expect(mockSetQueryData).toHaveBeenCalledWith(
+            EXAM_QUERY_KEYS.lobbyAdmissionStatus(examId),
+            {
+                status: 'APPROVED',
+                checkedInAt: null,
+                decidedAt: '2026-08-25T06:01:00.000Z',
+            },
+        );
+        expect(mockInvalidateQueries).toHaveBeenCalledWith({
+            queryKey: EXAM_QUERY_KEYS.lobbyWaitingList(examId),
+        });
+        expect(mockInvalidateQueries).toHaveBeenCalledWith({
+            queryKey: EXAM_QUERY_KEYS.lobbyAdmissionStatus(examId),
+        });
+        expect(onAdmissionChange).toHaveBeenCalledWith(broadcastPayload);
+    });
+
+    it('handles admission:updated broadcast when matched via singular userId', () => {
+        const examId = 'exam-123';
+        const studentId = 'student-user-1';
+        const onAdmissionChange = vi.fn();
+
+        renderHook(() => useLobbyRealtime({ examId, studentId, onAdmissionChange }));
+
+        const broadcastCall = mockChannelOn.mock.calls.find(
+            ([type, config]) => type === 'broadcast' && config.event === 'admission:updated',
+        );
+
+        const broadcastPayload = {
+            payload: {
+                examId,
+                userId: 'student-user-1',
+                status: 'APPROVED',
+            },
+        };
+
+        broadcastCall?.[2](broadcastPayload);
+
+        expect(mockSetQueryData).toHaveBeenCalledWith(
+            EXAM_QUERY_KEYS.lobbyAdmissionStatus(examId),
+            {
+                status: 'APPROVED',
+                checkedInAt: null,
+                decidedAt: null,
+            },
+        );
+        expect(onAdmissionChange).toHaveBeenCalledWith(broadcastPayload);
     });
 
     it('invalidates waiting list and count for instructor on student:checked_in broadcast', () => {

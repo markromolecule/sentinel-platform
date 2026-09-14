@@ -3,7 +3,7 @@ title: "Phase 3: Mobile Forgot Password Screen & Mutation Flow"
 type: phase
 parent: "0001-task-mobile-auth-captcha-remember-and-forgot-password"
 phase: "3"
-status: planned
+status: completed
 created: "2026-09-13"
 tags: [task, phase, mobile, auth, forgot-password, ui]
 ---
@@ -33,17 +33,23 @@ Create a native mobile password recovery screen (`app/sentinel-mobile/app/(auth)
 
 ## Implementation Tasks
 
-- [ ] Task 3.1 — Create stylesheet `app/sentinel-mobile/app/(auth)/style/forgot-password.ts` maintaining design tokens from `login.ts`.
-- [ ] Task 3.2 — Create `app/sentinel-mobile/app/(auth)/forgot-password.tsx` with React Hook Form, zodResolver, and `useForgotPasswordMutation`.
-- [ ] Task 3.3 — Implement confirmation screen state after successful submission with clear instructions and return-to-login button.
-- [ ] Task 3.4 — Update "Forgot password?" link in `app/sentinel-mobile/app/(auth)/login.tsx` to navigate to `/(auth)/forgot-password`.
+- [x] Task 3.1 — Create stylesheet `app/sentinel-mobile/app/(auth)/style/forgot-password.ts` maintaining design tokens from `login.ts`.
+- [x] Task 3.2 — Create `app/sentinel-mobile/app/(auth)/forgot-password.tsx` with React Hook Form, zodResolver, and `useForgotPasswordMutation`.
+- [x] Task 3.3 — Implement confirmation screen state after successful submission with clear instructions and return-to-login button.
+- [x] Task 3.4 — Update "Forgot password?" link in `app/sentinel-mobile/app/(auth)/login.tsx` to navigate to `/(auth)/forgot-password`.
 
 ## Verification & Testing
 
-- Verify form validation prevents submission with empty or invalid email.
-- Verify successful submission transitions to the confirmation state.
-- Verify back button navigates back to `login.tsx`.
+- Automated unit test suite: `pnpm --filter sentinel-mobile test` (PASS: 44/44 files, 285/285 tests passing).
+- Form validation tests in `app/sentinel-mobile/app/(auth)/forgot-password.test.tsx` verifying:
+  - Acceptance of valid email addresses.
+  - Rejection of empty emails with `Email is required`.
+  - Rejection of malformed emails.
+  - Valid export of React screen component.
+  - Correct formatting of `redirectTo` URL to web password reset handler.
+- TypeScript compiler verification: `pnpm --filter sentinel-mobile exec tsc --noEmit` (0 errors).
 
 ## Risks & Rollback
 
 - Isolated to new route `/(auth)/forgot-password`. No impact on existing routes.
+

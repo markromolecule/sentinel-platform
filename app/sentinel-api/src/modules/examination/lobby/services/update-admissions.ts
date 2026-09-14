@@ -22,40 +22,53 @@ export const updateAdmissions = async (
         .where('student_id', 'in', studentIds)
         .executeTakeFirst();
 
+    // Resolve exam and student user records for dual-identity broadcast and notifications
+    let exam: { institution_id?: string | null; title?: string | null } | undefined;
+    let students: Array<{ student_id?: string; user_id?: string | null }> = [];
+
+    try {
+        exam = await dbClient
+            .selectFrom('exams')
+            .select(['institution_id', 'title'])
+            .where('exam_id', '=', examId)
+            .executeTakeFirst();
+
+        if (studentIds.length === 1) {
+            const single = await dbClient
+                .selectFrom('students')
+                .select(['student_id', 'user_id'])
+                .where('student_id', '=', studentIds[0])
+                .executeTakeFirst();
+            if (single) {
+                students = [single];
+            }
+        } else if (studentIds.length > 1) {
+            students = await dbClient
+                .selectFrom('students')
+                .select(['student_id', 'user_id'])
+                .where('student_id', 'in', studentIds)
+                .execute();
+        }
+    } catch (resolveErr) {
+        console.warn('Failed to resolve exam/student details for lobby admission:', resolveErr);
+    }
+
+    const userIds = students
+        .map((s) => s.user_id)
+        .filter((uid): uid is string => Boolean(uid));
+
     // Fast-path Supabase Realtime broadcast to unlock student UIs in < 50ms
     void broadcastLobbyEvent(examId, 'admission:updated', {
         examId,
         studentIds,
+        userIds,
         status,
         decidedAt: decidedAt.toISOString(),
     });
 
     // Notify each student regarding the decision in parallel
     try {
-        const exam = await dbClient
-            .selectFrom('exams')
-            .select(['institution_id', 'title'])
-            .where('exam_id', '=', examId)
-            .executeTakeFirst();
-
-        if (exam?.institution_id) {
-            let students: Array<{ student_id?: string; user_id?: string | null }> = [];
-            if (studentIds.length === 1) {
-                const single = await dbClient
-                    .selectFrom('students')
-                    .select(['user_id'])
-                    .where('student_id', '=', studentIds[0])
-                    .executeTakeFirst();
-                if (single?.user_id) {
-                    students = [{ student_id: studentIds[0], user_id: single.user_id }];
-                }
-            } else {
-                students = await dbClient
-                    .selectFrom('students')
-                    .select(['student_id', 'user_id'])
-                    .where('student_id', 'in', studentIds)
-                    .execute();
-            }
+        if (exam?.institution_id && students.length > 0) {
 
             const title =
                 status === 'APPROVED' ? 'Exam lobby approved' : 'Exam lobby rejected';

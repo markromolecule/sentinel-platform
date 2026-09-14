@@ -36,12 +36,17 @@ export function isLiveInspectionNotFoundError(err: unknown): boolean {
     }
 
     const errorObj = err as Record<string, any>;
-    const status = errorObj.status ?? errorObj.statusCode;
-    const message = typeof errorObj.message === 'string' ? errorObj.message : '';
+    const status = errorObj.status ?? errorObj.statusCode ?? errorObj.response?.status;
+    const message =
+        typeof errorObj.message === 'string'
+            ? errorObj.message
+            : typeof errorObj.response?.data?.message === 'string'
+                ? errorObj.response.data.message
+                : '';
 
     return (
         status === 404 ||
         message.includes('Live inspection is not available') ||
-        message.includes('not found')
+        message.toLowerCase().includes('not found')
     );
 }

@@ -32,7 +32,11 @@ export function useRegisterForm() {
             if (data.session) {
                 router.replace('/(onboarding)');
             } else {
-                router.replace('/(auth)/login');
+                const email = form.getValues('email') || (data.user as any)?.email || '';
+                router.push({
+                    pathname: '/(auth)/confirm-code',
+                    params: { email },
+                });
             }
         },
         onError: (error) => {

@@ -4,3 +4,4 @@ export * from './auth-button';
 export * from './auth-divider';
 export * from './auth-error-alert';
 export * from './auth-footer';
+export * from './auth-otp-input';

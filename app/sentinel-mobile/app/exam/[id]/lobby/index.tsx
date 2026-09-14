@@ -1,5 +1,5 @@
 import { View, ScrollView, StatusBar, Text } from 'react-native';
-import { useExamLobby } from '@/features/exam/hooks/use-exam-lobby';
+import { useExamLobby } from '@/features/exam/hooks/lobby';
 import { HeroHeader } from '@/features/exam/components/detail/hero-header';
 import { BottomCTA } from '@/features/exam/components/detail/bottom-cta';
 import { Ionicons } from '@expo/vector-icons';

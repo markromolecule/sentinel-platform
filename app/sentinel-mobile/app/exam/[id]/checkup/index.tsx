@@ -1,5 +1,5 @@
 import { View, ScrollView, StatusBar, Text } from 'react-native';
-import { useExamCheckup } from '@/features/exam/hooks/use-exam-checkup';
+import { useExamCheckup } from '@/features/exam/hooks/checkup';
 import { CheckupHeader } from '@/features/exam/components/checkup/checkup-header';
 import { CameraPreview } from '@/features/exam/components/checkup/camera-preview';
 import { MicLevelMeter } from '@/features/exam/components/checkup/mic-level-meter';
@@ -97,6 +97,7 @@ export default function CheckupScreen() {
         calibrationFeedback,
         isFaceCentered,
         handleLandmarksDetected,
+        cameraError,
     } = useExamCheckup();
 
     const webOrMobileLock = exam?.configuration?.mobileSecurity.prevent_backgrounding
@@ -214,6 +215,7 @@ export default function CheckupScreen() {
                             calibrationFeedback={calibrationFeedback}
                             isFaceCentered={isFaceCentered}
                             onLandmarksDetected={handleLandmarksDetected}
+                            cameraError={cameraError}
                         />
                     ) : null}
 

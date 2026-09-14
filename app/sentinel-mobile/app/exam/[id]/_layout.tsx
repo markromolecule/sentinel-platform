@@ -7,6 +7,7 @@ export default function ExamDetailLayout() {
                 headerShown: false,
                 gestureEnabled: false,
                 fullScreenGestureEnabled: false,
+                contentStyle: { flex: 1 },
             }}
         >
             <Stack.Screen name="index" />
@@ -18,6 +19,7 @@ export default function ExamDetailLayout() {
                 name="session/[sessionId]/index"
                 options={{
                     headerLeft: () => null,
+                    contentStyle: { flex: 1 },
                 }}
             />
             <Stack.Screen name="result/index" />
