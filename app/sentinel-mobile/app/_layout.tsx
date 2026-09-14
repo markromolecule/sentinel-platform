@@ -34,7 +34,7 @@ export default function RootLayout() {
                 <QueryClientProvider client={queryClient}>
                     <AuthProvider supabase={supabase as unknown as SentinelSupabaseClient}>
                         <ApiProvider apiClient={apiClient}>
-                            <Stack screenOptions={{ headerShown: false }}>
+                            <Stack screenOptions={{ headerShown: false, contentStyle: { flex: 1 } }}>
                                 <Stack.Screen name="index" />
                                 <Stack.Screen name="auth/callback" />
                                 <Stack.Screen name="(auth)" options={{ animation: 'none' }} />
@@ -45,6 +45,7 @@ export default function RootLayout() {
                                         animation: 'slide_from_right',
                                         gestureEnabled: false,
                                         fullScreenGestureEnabled: false,
+                                        contentStyle: { flex: 1 },
                                     }}
                                 />
                             </Stack>

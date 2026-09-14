@@ -79,14 +79,16 @@ export function useMobileLiveInspection({
     const isLiveRef = useRef(false);
 
     const stopPublication = useCallback(async () => {
-        if (!activeLeaseIdRef.current) return;
+        const wasActive = Boolean(activeLeaseIdRef.current || isLiveRef.current);
         activeLeaseIdRef.current = null;
         isLiveRef.current = false;
         setIsLive(false);
-        try {
-            await mediaPipeRef?.current?.stopLiveInspection();
-        } catch (e) {
-            console.warn('Failed to stop LiveKit inspection stream:', e);
+        if (wasActive) {
+            try {
+                await mediaPipeRef?.current?.stopLiveInspection();
+            } catch (e) {
+                console.warn('Failed to stop LiveKit inspection stream:', e);
+            }
         }
     }, [mediaPipeRef]);
 
@@ -148,8 +150,11 @@ export function useMobileLiveInspection({
                 await stopPublication();
             }
         } catch (err: any) {
-            // 404: live inspection simply not active yet — silent, expected state.
+            // 404: live inspection simply not active yet or was closed/terminated by instructor
             if (isLiveInspectionNotFoundError(err)) {
+                if (isLiveRef.current || activeLeaseIdRef.current) {
+                    await stopPublication();
+                }
                 return;
             }
 

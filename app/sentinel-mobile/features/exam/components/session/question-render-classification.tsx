@@ -14,6 +14,7 @@ export interface QuestionRenderClassificationProps {
     rootLayout?: QuestionRenderLayoutSnapshot | null;
     viewportLayout: QuestionRenderLayoutSnapshot | null;
     cardLayout: QuestionRenderLayoutSnapshot | null;
+    topOffset?: number;
 }
 
 const formatLayout = (layout: QuestionRenderLayoutSnapshot | null | undefined) => {
@@ -35,8 +36,9 @@ export function QuestionRenderClassification({
     rootLayout,
     viewportLayout,
     cardLayout,
+    topOffset,
 }: QuestionRenderClassificationProps) {
-    if (!__DEV__) {
+    if (!__DEV__ || process.env.EXPO_PUBLIC_SHOW_DEBUG_OVERLAY !== 'true') {
         return null;
     }
 
@@ -49,6 +51,7 @@ export function QuestionRenderClassification({
             pointerEvents="none"
             style={[
                 styles.container,
+                topOffset !== undefined && { top: topOffset },
                 {
                     backgroundColor: colors.card,
                     borderColor: colors.border,

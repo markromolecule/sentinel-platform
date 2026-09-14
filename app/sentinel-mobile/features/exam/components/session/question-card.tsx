@@ -205,15 +205,15 @@ export const QuestionCard = ({
             {(normalizedType === 'ESSAY' ||
                 normalizedType === 'IDENTIFICATION' ||
                 !isKnownType) && (
-                <EssayInput
-                    normalizedType={normalizedType}
-                    currentTextValue={currentTextValue}
-                    placeholder={placeholder}
-                    maxLength={maxLength}
-                    colors={colors}
-                    onSelectOption={onSelectOption}
-                />
-            )}
+                    <EssayInput
+                        normalizedType={normalizedType}
+                        currentTextValue={currentTextValue}
+                        placeholder={placeholder}
+                        maxLength={maxLength}
+                        colors={colors}
+                        onSelectOption={onSelectOption}
+                    />
+                )}
         </ScrollView>
     );
 };
@@ -221,6 +221,7 @@ export const QuestionCard = ({
 const styles = StyleSheet.create({
     container: {
         flex: 1,
+        width: '100%',
     },
     contentContainer: {
         flexGrow: 1,

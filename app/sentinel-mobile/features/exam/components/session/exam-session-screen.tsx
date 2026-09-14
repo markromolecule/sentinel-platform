@@ -56,8 +56,6 @@ export const ExamSessionScreen = () => {
     const [landmarksByFace, setLandmarksByFace] = useState<any[][]>([]);
     const { width: windowWidth, height: windowHeight } = useWindowDimensions();
     const [rootLayout, setRootLayout] = useState<QuestionRenderLayoutSnapshot | null>(null);
-    const [questionViewportLayout, setQuestionViewportLayout] =
-        useState<QuestionRenderLayoutSnapshot | null>(null);
     const [questionCardLayout, setQuestionCardLayout] =
         useState<QuestionRenderLayoutSnapshot | null>(null);
     const [questionCardMounted, setQuestionCardMounted] = useState(false);
@@ -69,9 +67,10 @@ export const ExamSessionScreen = () => {
     const navigation = useNavigation();
 
     useEffect(() => {
-        setQuestionCardMounted(false);
-        setQuestionCardLayout(null);
-    }, [currentIndex, currentQuestion?.id, questions.length]);
+        if (currentQuestion) {
+            setQuestionCardMounted(true);
+        }
+    }, [currentQuestion?.id]);
 
     useEffect(() => {
         if (!__DEV__) {
@@ -85,7 +84,7 @@ export const ExamSessionScreen = () => {
             cardMounted: questionCardMounted,
             window: { width: windowWidth, height: windowHeight },
             root: rootLayout,
-            viewport: questionViewportLayout,
+            viewport: questionCardLayout,
             card: questionCardLayout,
         });
     }, [
@@ -93,7 +92,6 @@ export const ExamSessionScreen = () => {
         currentQuestion,
         questionCardLayout,
         questionCardMounted,
-        questionViewportLayout,
         questions.length,
         rootLayout,
         windowHeight,
@@ -103,14 +101,6 @@ export const ExamSessionScreen = () => {
     const handleRootLayout = useCallback((event: LayoutChangeEvent) => {
         const { width, height } = event.nativeEvent.layout;
         setRootLayout({
-            width: Math.round(width),
-            height: Math.round(height),
-        });
-    }, []);
-
-    const handleQuestionViewportLayout = useCallback((event: LayoutChangeEvent) => {
-        const { width, height } = event.nativeEvent.layout;
-        setQuestionViewportLayout({
             width: Math.round(width),
             height: Math.round(height),
         });
@@ -240,18 +230,14 @@ export const ExamSessionScreen = () => {
 
     return (
         <View
-            style={{ flex: 1, height: '100%', width: '100%', backgroundColor: colors.background }}
+            style={{
+                flex: 1,
+                width: '100%',
+                height: '100%',
+                backgroundColor: colors.background,
+            }}
             onLayout={handleRootLayout}
         >
-            <Stack.Screen
-                options={{
-                    headerShown: false,
-                    gestureEnabled: false,
-                    fullScreenGestureEnabled: false,
-                    headerLeft: () => null,
-                }}
-            />
-
             {/* Hidden CameraView or MediaPipe Bridge for proctor streaming and image capture */}
             {exam.configuration?.cameraRequired !== false && (
                 Boolean(exam.mediaPipeSandbox?.enabled && exam.mediaPipeSandbox?.emitDuringExam) ? (
@@ -301,7 +287,7 @@ export const ExamSessionScreen = () => {
             {/* Proctoring Incident Warning Notice */}
             <ProctoringIncidentNotice notice={activeNotice} onDismiss={dismissNotice} />
 
-            <View style={{ flex: 1, flexGrow: 1 }} onLayout={handleQuestionViewportLayout}>
+            <View style={{ flex: 1, width: '100%' }}>
                 <QuestionCard
                     question={currentQuestion}
                     currentIndex={currentIndex}
@@ -312,17 +298,19 @@ export const ExamSessionScreen = () => {
                     onToggleFlag={toggleFlag}
                     onRenderStatusChange={handleQuestionCardRenderStatus}
                 />
-                <QuestionRenderClassification
-                    colors={colors}
-                    questionCount={questions.length}
-                    currentIndex={currentIndex}
-                    hasCurrentQuestion={Boolean(currentQuestion)}
-                    cardMounted={questionCardMounted}
-                    rootLayout={rootLayout}
-                    viewportLayout={questionViewportLayout}
-                    cardLayout={questionCardLayout}
-                />
             </View>
+
+            <QuestionRenderClassification
+                colors={colors}
+                questionCount={questions.length}
+                currentIndex={currentIndex}
+                hasCurrentQuestion={Boolean(currentQuestion)}
+                cardMounted={questionCardMounted}
+                rootLayout={rootLayout}
+                viewportLayout={questionCardLayout}
+                cardLayout={questionCardLayout}
+                topOffset={insets.top + 72}
+            />
 
             <SessionFooter
                 onPrev={handlePrev}

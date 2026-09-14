@@ -233,4 +233,49 @@ describe('useMobileLiveInspection', () => {
 
         expect(mockRemoveChannel).toHaveBeenCalled();
     });
+
+    it('stops publication and resets isLive to false when directive returns 404 after live view ends', async () => {
+        const mockMediaPipeRef = {
+            current: {
+                startLiveInspection: vi.fn().mockResolvedValue(undefined),
+                stopLiveInspection: vi.fn().mockResolvedValue(undefined),
+            },
+        };
+
+        // Initially active
+        mockGetDirective.mockResolvedValueOnce({
+            state: 'PUBLISHER_CONNECTING',
+            leaseId: 'lease-700',
+            revision: 1,
+            connection: {
+                liveKitUrl: 'wss://livekit.test',
+                token: 'token-700',
+            },
+        });
+        mockAckReady.mockResolvedValue({ success: true });
+
+        const result = useMobileLiveInspection({
+            sessionId: 'session-700',
+            enabled: true,
+            mediaPipeRef: mockMediaPipeRef as any,
+        });
+
+        for (const cb of effectCallbacks) {
+            cb();
+        }
+        await new Promise((r) => setTimeout(r, 20));
+        expect(mockMediaPipeRef.current.startLiveInspection).toHaveBeenCalled();
+
+        // Instructor closes live view -> 404 Not Found
+        const notFoundError = new Error('Live inspection is not available.');
+        (notFoundError as any).status = 404;
+        mockGetDirective.mockRejectedValueOnce(notFoundError);
+
+        // Realtime broadcast arrives
+        broadcastHandler?.();
+        await new Promise((r) => setTimeout(r, 20));
+
+        expect(mockMediaPipeRef.current.stopLiveInspection).toHaveBeenCalled();
+        expect(result.isLive).toBe(false);
+    });
 });

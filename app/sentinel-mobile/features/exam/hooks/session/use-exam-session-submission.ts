@@ -5,6 +5,7 @@ import { EXAM_QUERY_KEYS } from '@sentinel/shared/constants';
 import { completeExamSession } from '@sentinel/services';
 import { buildSessionAnswerPayload } from '@/features/exam/lib/mobile-exam-adapter';
 import {
+    clearStoredMobileExamPreview,
     clearStoredMobileExamSession,
     writeStoredMobileExamPreview,
 } from '@/features/exam/lib/mobile-exam-storage';
@@ -73,6 +74,24 @@ export function useExamSessionSubmission({
 
             router.replace(`/exam/${id}/feedback?attemptId=${sessionId}`);
         } catch (error: any) {
+            // If the session was already completed/submitted on the server (409 Conflict),
+            // treat as idempotent success, clean local cache, and seamlessly proceed to feedback.
+            const isAlreadySubmitted =
+                error?.status === 409 ||
+                error?.statusCode === 409 ||
+                error?.response?.status === 409 ||
+                /already.*submitted/i.test(error?.message || '') ||
+                /already.*submitted/i.test(error?.response?.data?.message || '');
+
+            if (isAlreadySubmitted) {
+                await clearStoredMobileExamPreview(id).catch(() => { });
+                await clearStoredMobileExamSession(id).catch(() => { });
+                await queryClient?.invalidateQueries({ queryKey: EXAM_QUERY_KEYS.all }).catch(() => { });
+
+                router.replace(`/exam/${id}/feedback?attemptId=${sessionId}`);
+                return;
+            }
+
             Alert.alert(
                 'Submission Failed',
                 error?.message || 'Failed to submit exam. Please try again.',
