@@ -27,41 +27,26 @@ function buildClassroomAssignmentExistsPredicate(args: { examAlias: string; clas
 function buildSectionAssignmentExistsPredicate(args: { examAlias: string; sectionAlias: string }) {
     const { examAlias, sectionAlias } = args;
 
-    return sql<boolean>`(
-        exists (
-            select 1
-            from exam_assigned_sections as eas
-            where eas.exam_id = ${sql.ref(`${examAlias}.exam_id`)}
-              and eas.section_id = ${sql.ref(`${sectionAlias}.section_id`)}
-        )
-        or exists (
-            select 1
-            from exam_section_assignments as esa
-            where esa.exam_id = ${sql.ref(`${examAlias}.exam_id`)}
-              and esa.class_group_id is null
-              and esa.section_id = ${sql.ref(`${sectionAlias}.section_id`)}
-        )
+    return sql<boolean>`exists (
+        select 1
+        from exam_section_assignments as esa
+        where esa.exam_id = ${sql.ref(`${examAlias}.exam_id`)}
+          and esa.class_group_id is null
+          and esa.section_id = ${sql.ref(`${sectionAlias}.section_id`)}
     )`;
 }
 
 /**
- * Builds a reusable assigned-section aggregation expression that merges the
- * legacy and current exam section assignment tables for a single exam row.
+ * Builds a reusable assigned-section aggregation expression that reads section
+ * assignments directly from exam_section_assignments without duplicate union scans.
  */
 export function buildAssignedSectionIdsSelect(args: { examAlias: string }) {
     const { examAlias } = args;
 
     return sql<string[]>`coalesce((
-        select array_agg(combined_sections.section_id)
-        from (
-            select eas.section_id
-            from exam_assigned_sections as eas
-            where eas.exam_id = ${sql.ref(`${examAlias}.exam_id`)}
-            union
-            select esa.section_id
-            from exam_section_assignments as esa
-            where esa.exam_id = ${sql.ref(`${examAlias}.exam_id`)}
-        ) as combined_sections
+        select array_agg(distinct esa.section_id order by esa.section_id)
+        from exam_section_assignments as esa
+        where esa.exam_id = ${sql.ref(`${examAlias}.exam_id`)}
     ), '{}'::uuid[])`;
 }
 
@@ -69,8 +54,8 @@ export function buildAssignedSectionIdsSelect(args: { examAlias: string }) {
  * Builds classroom exam visibility rules that support direct classroom links
  * and explicit section assignments from both assignment tables.
  */
-export function buildClassroomExamFilter(args: { classroomId: string; hasSectionId: boolean }) {
-    const { classroomId, hasSectionId } = args;
+export function buildClassroomExamFilter(args: { classroomId: string }) {
+    const { classroomId } = args;
 
     return sql<boolean>`(
         e.class_group_id = ${classroomId}
@@ -83,16 +68,16 @@ export function buildClassroomExamFilter(args: { classroomId: string; hasSection
               and target_cg.institution_id is not distinct from e.institution_id
               and (
                   ${buildClassroomAssignmentExistsPredicate({
-                      examAlias: 'e',
-                      classroomId: 'target_cg',
-                  })}
+        examAlias: 'e',
+        classroomId: 'target_cg',
+    })}
                   or (
                       e.class_group_id is null
                       and
                       ${buildSectionAssignmentExistsPredicate({
-                          examAlias: 'e',
-                          sectionAlias: 'target_cg',
-                      })}
+        examAlias: 'e',
+        sectionAlias: 'target_cg',
+    })}
                   )
                   or (
                       e.class_group_id is null
@@ -102,13 +87,7 @@ export function buildClassroomExamFilter(args: { classroomId: string; hasSection
                               e.subject_id is null
                               or coalesce(target_cg.subject_id, target_so.subject_id) = e.subject_id
                           )
-                          and (
-                              ${
-                                  hasSectionId
-                                      ? sql`e.section_id is null or target_cg.section_id = e.section_id`
-                                      : sql`true`
-                              }
-                          )
+                          and (e.section_id is null or target_cg.section_id = e.section_id)
                       )
                   )
               )
@@ -124,21 +103,15 @@ export function buildClassroomExamFilter(args: { classroomId: string; hasSection
                   and target_cg.institution_id is not distinct from e.institution_id
                   and (
                       ${buildSectionAssignmentExistsPredicate({
-                          examAlias: 'e',
-                          sectionAlias: 'target_cg',
-                      })}
+        examAlias: 'e',
+        sectionAlias: 'target_cg',
+    })}
                       or (
                           (
                               e.subject_id is null
                               or coalesce(target_cg.subject_id, target_so.subject_id) = e.subject_id
                           )
-                          and (
-                              ${
-                                  hasSectionId
-                                      ? sql`e.section_id is null or target_cg.section_id = e.section_id`
-                                      : sql`true`
-                              }
-                          )
+                          and (e.section_id is null or target_cg.section_id = e.section_id)
                       )
                   )
             )
@@ -152,9 +125,8 @@ export function buildClassroomExamFilter(args: { classroomId: string; hasSection
  */
 export function buildStudentExamVisibilityPredicate(args: {
     studentUserId: string;
-    hasSectionId: boolean;
 }) {
-    const { studentUserId, hasSectionId } = args;
+    const { studentUserId } = args;
 
     return sql<boolean>`(
         exists (
@@ -181,9 +153,9 @@ export function buildStudentExamVisibilityPredicate(args: {
                   and (
                       (e.class_group_id is not null and enr.class_group_id = e.class_group_id)
                       or ${buildClassroomAssignmentExistsPredicate({
-                          examAlias: 'e',
-                          classroomId: 'student_cg',
-                      })}
+        examAlias: 'e',
+        classroomId: 'student_cg',
+    })}
                       or (
                           e.class_group_id is null
                           and not exists (
@@ -194,21 +166,15 @@ export function buildStudentExamVisibilityPredicate(args: {
                           )
                           and (
                               ${buildSectionAssignmentExistsPredicate({
-                                  examAlias: 'e',
-                                  sectionAlias: 'student_cg',
-                              })}
+        examAlias: 'e',
+        sectionAlias: 'student_cg',
+    })}
                               or (
                                   (
                                       e.subject_id is null
                                       or coalesce(student_cg.subject_id, student_so.subject_id) = e.subject_id
                                   )
-                                  and (
-                                      ${
-                                          hasSectionId
-                                              ? sql`e.section_id is null or student_cg.section_id = e.section_id`
-                                              : sql`true`
-                                      }
-                                  )
+                                  and (e.section_id is null or student_cg.section_id = e.section_id)
                               )
                           )
                       )

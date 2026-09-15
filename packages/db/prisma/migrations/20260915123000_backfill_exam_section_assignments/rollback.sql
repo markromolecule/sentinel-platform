@@ -1,0 +1,4 @@
+-- Rollback: 20260915123000_backfill_exam_section_assignments
+-- Note: Backfilled assignment records are non-destructive and preserve data integrity.
+-- If reverting is strictly required, remove assignments that originated exclusively from exam_assigned_sections.
+-- In standard practice, this backfill is safe and idempotent.

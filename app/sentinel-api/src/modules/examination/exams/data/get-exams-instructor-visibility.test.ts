@@ -18,7 +18,7 @@ vi.mock('../helper/exam-schema-compat', async () => {
     };
 });
 
-function createMockDb(metadataRows: any[], dataRows: any[]) {
+function createMockDb(dataRows: any[] = []) {
     const db = new Kysely<any>({
         dialect: {
             createAdapter: () => new PostgresAdapter(),
@@ -29,12 +29,6 @@ function createMockDb(metadataRows: any[], dataRows: any[]) {
     });
 
     const executeSpy = vi.spyOn(db.getExecutor(), 'executeQuery');
-
-    executeSpy.mockResolvedValueOnce({
-        rows: metadataRows,
-        insertId: undefined,
-        numAffectedRows: undefined,
-    } as any);
 
     executeSpy.mockResolvedValueOnce({
         rows: dataRows,
@@ -53,14 +47,7 @@ describe('getExamsData instructor visibility', () => {
     });
 
     it('scopes the public instructor predicate to the active institution', async () => {
-        const { db, executeSpy } = createMockDb(
-            [
-                { column_name: 'section_id' },
-                { column_name: 'section_name' },
-                { column_name: 'room_id' },
-            ],
-            [],
-        );
+        const { db, executeSpy } = createMockDb();
 
         await getExamsData({
             dbClient: db as any,
@@ -69,7 +56,8 @@ describe('getExamsData instructor visibility', () => {
             instructorUserId: 'instructor-1',
         });
 
-        const compiledQuery = executeSpy.mock.calls[1][0];
+        expect(executeSpy).toHaveBeenCalledTimes(1);
+        const compiledQuery = executeSpy.mock.calls[0][0];
 
         expect(compiledQuery.sql).toContain('e.is_public = true');
         expect(compiledQuery.sql).toContain('"e"."institution_id" = $1');
@@ -81,14 +69,7 @@ describe('getExamsData instructor visibility', () => {
     });
 
     it('includes creator, assignment, proctor, share, and classroom ownership paths in staff visibility', async () => {
-        const { db, executeSpy } = createMockDb(
-            [
-                { column_name: 'section_id' },
-                { column_name: 'section_name' },
-                { column_name: 'room_id' },
-            ],
-            [],
-        );
+        const { db, executeSpy } = createMockDb();
 
         await getExamsData({
             dbClient: db as any,
@@ -97,7 +78,8 @@ describe('getExamsData instructor visibility', () => {
             instructorUserId: 'instructor-1',
         });
 
-        const compiledQuery = executeSpy.mock.calls[1][0];
+        expect(executeSpy).toHaveBeenCalledTimes(1);
+        const compiledQuery = executeSpy.mock.calls[0][0];
 
         expect(compiledQuery.sql).toContain('e.is_public = true');
         expect(compiledQuery.sql).toContain('"e"."institution_id" = $1');
@@ -110,14 +92,7 @@ describe('getExamsData instructor visibility', () => {
     });
 
     it('rejects instructor visibility queries without an institution context', async () => {
-        const { db } = createMockDb(
-            [
-                { column_name: 'section_id' },
-                { column_name: 'section_name' },
-                { column_name: 'room_id' },
-            ],
-            [],
-        );
+        const { db } = createMockDb();
 
         await expect(
             getExamsData({

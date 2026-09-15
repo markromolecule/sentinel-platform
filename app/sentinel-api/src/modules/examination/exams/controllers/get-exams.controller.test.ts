@@ -159,4 +159,70 @@ describe('getExamsRouteHandler', () => {
             undefined,
         );
     });
+
+    it('returns pagination metadata along with exam summary data', async () => {
+        const mockExams = Object.assign(
+            [
+                {
+                    id: 'exam-1',
+                    title: 'Midterm Exam',
+                    durationMinutes: 60,
+                    passingScore: 75,
+                    status: 'draft',
+                    classroomId: null,
+                    classroomIds: [],
+                    classroomName: null,
+                    classroomNames: [],
+                    subjectId: null,
+                    subjectTitle: null,
+                    sectionId: null,
+                    sectionIds: [],
+                    sectionNames: [],
+                    sectionName: null,
+                    roomId: null,
+                    roomName: null,
+                    scheduledDate: null,
+                    endDateTime: null,
+                    publishedAt: null,
+                    questionCount: 10,
+                    createdAt: null,
+                    updatedAt: null,
+                    attemptId: null,
+                    completedAt: null,
+                    score: null,
+                    totalScore: null,
+                    percentage: 0,
+                    timeSpentMinutes: null,
+                    cheated: false,
+                    cheatingType: null,
+                    incidentCount: 0,
+                    studentsCount: 0,
+                    examCategory: null,
+                    isPublic: false,
+                    createdBy: null,
+                    createdByName: null,
+                    publishedByName: null,
+                    assignedRoomNames: [],
+                    assignedInstructorNames: [],
+                    assignedInstructorIds: [],
+                },
+            ],
+            { total: 42 },
+        );
+        vi.mocked(ExamService.getExams).mockResolvedValue(mockExams as any);
+
+        const app = createApp({ id: 'user-1' });
+        const response = await app.request('/?limit=10&page=2');
+
+        expect(response.status).toBe(200);
+        const body = await response.json();
+        expect(body.data).toHaveLength(1);
+        expect(body.pagination).toEqual({
+            page: 2,
+            limit: 10,
+            total: 42,
+            totalPages: 5,
+        });
+    });
 });
+

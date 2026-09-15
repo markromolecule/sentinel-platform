@@ -22,6 +22,10 @@ const proctorAssignmentColumnSupportCache = new WeakMap<
     Promise<ProctorAssignmentColumnSupport>
 >();
 
+/**
+ * @deprecated Runtime schema introspection on information_schema.columns is deprecated.
+ * Columns section_id, section_name, and room_id on the exams table are static and enforced by Prisma migrations.
+ */
 export function getExamColumnSupport(dbClient: DbClient) {
     const cacheKey = dbClient as object;
     const cached = examColumnSupportCache.get(cacheKey);

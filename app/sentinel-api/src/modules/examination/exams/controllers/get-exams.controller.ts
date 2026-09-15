@@ -86,8 +86,22 @@ export const getExamsRouteHandler: AppRouteHandler<typeof getExamsRoute> = async
         instructorUserId,
     );
 
-    return c.json({
-        message: 'Exams fetched successfully',
-        data: exams,
-    });
+    const limit = Math.min(Math.max(query.limit ?? 50, 1), 100);
+    const page = Math.max(query.page ?? 1, 1);
+    const total = (exams as { total?: number }).total ?? exams.length;
+    const totalPages = Math.ceil(total / limit);
+
+    return c.json(
+        {
+            message: 'Exams fetched successfully',
+            data: [...exams],
+            pagination: {
+                page,
+                limit,
+                total,
+                totalPages,
+            },
+        },
+        200,
+    );
 };

@@ -18,6 +18,15 @@ export const examSectionInputSchema = Schema.examSectionInputSchema;
 
 export const examQuestionInputSchema = Schema.examQuestionInputSchema;
 
+export const paginationMetadataSchema = z
+    .object({
+        page: z.number().int().positive(),
+        limit: z.number().int().positive(),
+        total: z.number().int().nonnegative(),
+        totalPages: z.number().int().nonnegative(),
+    })
+    .openapi('PaginationMetadata');
+
 export const getExamsSchema = {
     request: {
         query: Schema.getExamsQuerySchema,
@@ -25,6 +34,7 @@ export const getExamsSchema = {
     response: z.object({
         message: z.string(),
         data: z.array(examSummarySchema),
+        pagination: paginationMetadataSchema.optional(),
     }),
 };
 
@@ -114,3 +124,4 @@ export type DeleteExamParams = z.infer<typeof deleteExamSchema.params>;
 export type ShareExamBody = z.infer<typeof shareExamSchema.body>;
 export type ExamSummary = z.infer<typeof examSummarySchema>;
 export type ExamDetail = z.infer<typeof examDetailSchema>;
+export type PaginationMetadata = z.infer<typeof paginationMetadataSchema>;
