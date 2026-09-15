@@ -54,6 +54,7 @@ export type RawExamRecord = {
     published_by_name?: string | null;
     release_score_mode?: string | null;
     essay_question_count?: number | string | null;
+    total_count?: number | string | null;
     attempt_finalized_at?: string | null;
     attempt_assessment_snapshot?: unknown | null;
     attempt_score_snapshot?: unknown | null;

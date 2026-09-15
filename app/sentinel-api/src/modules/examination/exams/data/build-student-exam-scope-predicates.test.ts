@@ -23,17 +23,15 @@ describe('student exam scope predicates', () => {
         const compiled = db
             .selectFrom('exams as e')
             .select('e.exam_id')
-            .where((eb) =>
-                buildClassroomExamFilter(eb, {
+            .where(
+                buildClassroomExamFilter({
                     classroomId: '1f2f6f2f-3d7d-4db0-b76a-79c570f17b11',
-                    hasSectionId: true,
                 }),
             )
             .compile();
 
         expect(compiled.sql).toContain('e.class_group_id = $1');
         expect(compiled.sql).toContain('esa.class_group_id = "target_cg"."class_group_id"');
-        expect(compiled.sql).toContain('from exam_assigned_sections as eas');
         expect(compiled.sql).toContain('from exam_section_assignments as esa');
         expect(compiled.sql).toContain('esa.class_group_id is null');
         expect(compiled.sql).toContain('e.class_group_id is null');
@@ -48,17 +46,15 @@ describe('student exam scope predicates', () => {
         const compiled = db
             .selectFrom('exams as e')
             .select('e.exam_id')
-            .where((eb) =>
-                buildStudentExamVisibilityPredicate(eb, {
+            .where(
+                buildStudentExamVisibilityPredicate({
                     studentUserId: '4bb7db25-f34f-4a57-b6ae-1db2f898f142',
-                    hasSectionId: true,
                 }),
             )
             .compile();
 
         expect(compiled.sql).toContain('enr.class_group_id = e.class_group_id');
         expect(compiled.sql).toContain('esa.class_group_id = "student_cg"."class_group_id"');
-        expect(compiled.sql).toContain('from exam_assigned_sections as eas');
         expect(compiled.sql).toContain('from exam_section_assignments as esa');
         expect(compiled.sql).toContain('esa.class_group_id is null');
         expect(compiled.sql).toContain('e.class_group_id is null');
@@ -73,10 +69,9 @@ describe('student exam scope predicates', () => {
         const compiled = db
             .selectFrom('exams as e')
             .select('e.exam_id')
-            .where((eb) =>
-                buildClassroomExamFilter(eb, {
+            .where(
+                buildClassroomExamFilter({
                     classroomId: '1f2f6f2f-3d7d-4db0-b76a-79c570f17b11',
-                    hasSectionId: false,
                 }),
             )
             .compile();
@@ -84,9 +79,6 @@ describe('student exam scope predicates', () => {
         expect(compiled.sql).toContain('from exam_section_assignments as esa');
         expect(compiled.sql).toContain('esa.class_group_id = "target_cg"."class_group_id"');
         expect(compiled.sql).toContain('"target_cg"."section_id"');
-        expect(compiled.sql).toContain(
-            'exists (\n            select 1\n            from exam_assigned_sections as eas',
-        );
 
         void db.destroy();
     });
@@ -99,7 +91,6 @@ describe('student exam scope predicates', () => {
             .where(
                 buildStudentExamVisibilityPredicate({
                     studentUserId: '4bb7db25-f34f-4a57-b6ae-1db2f898f142',
-                    hasSectionId: true,
                 }),
             )
             .compile();
@@ -114,14 +105,13 @@ describe('student exam scope predicates', () => {
         void db.destroy();
     });
 
-    it('aggregates assigned section ids from both assignment tables', () => {
+    it('aggregates assigned section ids directly from exam_section_assignments', () => {
         const db = createCompilerDb();
         const compiled = db
             .selectFrom('exams as e')
             .select(buildAssignedSectionIdsSelect({ examAlias: 'e' }).as('assigned_section_ids'))
             .compile();
 
-        expect(compiled.sql).toContain('from exam_assigned_sections as eas');
         expect(compiled.sql).toContain('from exam_section_assignments as esa');
         expect(compiled.sql).toContain("'{}'::uuid[]");
 
@@ -137,13 +127,11 @@ describe('student exam scope predicates', () => {
             .where(
                 buildStudentExamVisibilityPredicate({
                     studentUserId: '4bb7db25-f34f-4a57-b6ae-1db2f898f142',
-                    hasSectionId: true,
                 }),
             )
             .compile();
 
         expect(compiled.sql).toContain('"e"."is_public" = $1');
-        expect(compiled.sql).toContain('from exam_assigned_sections as eas');
         expect(compiled.sql).toContain('from exam_section_assignments as esa');
         expect(compiled.sql).toContain('from students as st');
 
@@ -159,13 +147,11 @@ describe('student exam scope predicates', () => {
             .where(
                 buildStudentExamVisibilityPredicate({
                     studentUserId: '4bb7db25-f34f-4a57-b6ae-1db2f898f142',
-                    hasSectionId: true,
                 }),
             )
             .compile();
 
         expect(compiled.sql).toContain('"e"."is_public" = $1');
-        expect(compiled.sql).toContain('from exam_assigned_sections as eas');
         expect(compiled.sql).toContain('from exam_section_assignments as esa');
         expect(compiled.sql).toContain('enr.class_group_id = e.class_group_id');
 
@@ -180,7 +166,6 @@ describe('student exam scope predicates', () => {
             .where(
                 buildStudentExamVisibilityPredicate({
                     studentUserId: '4bb7db25-f34f-4a57-b6ae-1db2f898f142',
-                    hasSectionId: true,
                 }),
             )
             .compile();
@@ -200,7 +185,6 @@ describe('student exam scope predicates', () => {
             .where(
                 buildStudentExamVisibilityPredicate({
                     studentUserId: '4bb7db25-f34f-4a57-b6ae-1db2f898f142',
-                    hasSectionId: true,
                 }),
             )
             .compile();
@@ -221,7 +205,6 @@ describe('student exam scope predicates', () => {
             .where(
                 buildStudentExamVisibilityPredicate({
                     studentUserId: '4bb7db25-f34f-4a57-b6ae-1db2f898f142',
-                    hasSectionId: true,
                 }),
             )
             .compile();
@@ -242,7 +225,6 @@ describe('student exam scope predicates', () => {
             .where(
                 buildStudentExamVisibilityPredicate({
                     studentUserId: '4bb7db25-f34f-4a57-b6ae-1db2f898f142',
-                    hasSectionId: true,
                 }),
             )
             .compile();
@@ -264,7 +246,6 @@ describe('student exam scope predicates', () => {
             .where(
                 buildStudentExamVisibilityPredicate({
                     studentUserId: '4bb7db25-f34f-4a57-b6ae-1db2f898f142',
-                    hasSectionId: true,
                 }),
             )
             .compile();

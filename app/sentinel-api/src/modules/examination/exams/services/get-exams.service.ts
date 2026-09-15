@@ -31,5 +31,7 @@ export async function getExams(
         }),
     );
 
-    return exams;
+    const total = (records as { total?: number }).total ?? exams.length;
+
+    return Object.assign(exams, { total });
 }
