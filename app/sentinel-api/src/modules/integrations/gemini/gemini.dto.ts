@@ -40,3 +40,36 @@ export const generatePreviewRouteSchema = {
 };
 
 export const finalizedAiQuestionPayloadSchema = aiPreviewSavePayloadSchema;
+
+export const generatePreviewJobResponseSchema = z.object({
+    success: z.literal(true),
+    data: z.object({
+        jobId: z.string().uuid(),
+        status: z.enum(['queued', 'processing', 'completed', 'failed']),
+        createdAt: z.string(),
+    }),
+});
+
+export const getPreviewJobStatusResponseSchema = z.object({
+    success: z.literal(true),
+    data: z.object({
+        jobId: z.string().uuid(),
+        status: z.enum(['queued', 'processing', 'completed', 'failed']),
+        progress: z.number().int().min(0).max(100),
+        currentStep: z.string().nullable(),
+        result: generateQuestionPreviewResponseSchema.nullable().optional(),
+        error: z.string().nullable().optional(),
+        createdAt: z.string(),
+        updatedAt: z.string(),
+    }),
+});
+
+export const getPreviewJobParamSchema = z.object({
+    id: z.string().uuid().openapi({
+        param: {
+            name: 'id',
+            in: 'path',
+        },
+        example: '123e4567-e89b-12d3-a456-426614174000',
+    }),
+});

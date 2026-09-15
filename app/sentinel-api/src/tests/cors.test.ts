@@ -6,7 +6,7 @@ import app from '../app';
 import {
     generatePreviewRoute,
     generatePreviewRouteHandler,
-} from '../modules/integrations/gemini/gemini.controller';
+} from '../modules/integrations/gemini/controller';
 import { QuestionGeneratorService } from '../lib/gemini/services/question-generator';
 
 describe('CORS functionality', () => {

@@ -8,6 +8,11 @@ import {
 } from './modules/general/pdf-documents/queue/pdf-generation.worker';
 import { shouldStartEmbeddedPdfWorker } from './modules/general/pdf-documents/queue/pdf-generation-queue.config';
 import {
+    startAiGenerationWorker,
+    stopAiGenerationWorker,
+} from './modules/integrations/gemini/queue/ai-generation.worker';
+import { shouldStartEmbeddedAiWorker } from './modules/integrations/gemini/queue/ai-generation-queue.config';
+import {
     startLiveInspectionReconciler,
     stopLiveInspectionReconciler,
 } from './modules/examination/live-inspection/services/live-inspection-reconciler.service';
@@ -26,10 +31,17 @@ const hostname = resolveBindHost();
 validateProductionInviteUrls();
 
 const startEmbeddedPdfWorker = shouldStartEmbeddedPdfWorker();
+const startEmbeddedAiWorker = shouldStartEmbeddedAiWorker();
 
 if (startEmbeddedPdfWorker) {
     startPdfGenerationWorker().catch((error) => {
         console.error('[startup] Failed to start embedded PDF worker:', error);
+    });
+}
+
+if (startEmbeddedAiWorker) {
+    startAiGenerationWorker().catch((error) => {
+        console.error('[startup] Failed to start embedded AI worker:', error);
     });
 }
 
@@ -56,6 +68,12 @@ const shutdown = async () => {
     if (startEmbeddedPdfWorker) {
         await stopPdfGenerationWorker().catch((error) => {
             console.error('[shutdown] Failed to stop embedded PDF worker:', error);
+        });
+    }
+
+    if (startEmbeddedAiWorker) {
+        await stopAiGenerationWorker().catch((error) => {
+            console.error('[shutdown] Failed to stop embedded AI worker:', error);
         });
     }
 
