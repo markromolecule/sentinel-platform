@@ -481,6 +481,7 @@ model users {
   live_inspection_leases_viewer_user                                  live_inspection_leases[]           @relation("live_inspection_leases_viewer_user")
   telemetry_incident_evidence_deleted                                 telemetry_incident_evidence[]      @relation("evidence_deleted_byTousers")
   essay_rubric_versions                                               essay_rubric_versions[]
+  ai_generation_jobs                                                  ai_generation_jobs[]
 
   @@index([instance_id])
   @@index([is_anonymous])
@@ -944,6 +945,7 @@ model institutions {
   exam_answer_key_exports              exam_answer_key_exports[]
   exam_report_exports                  exam_report_exports[]
   live_inspection_leases               live_inspection_leases[]
+  ai_generation_jobs                   ai_generation_jobs[]
 
   @@index([institution_kind])
   @@index([parent_institution_id])
@@ -2687,5 +2689,29 @@ model essay_rubric_versions {
   @@index([exam_id])
   @@index([scope])
   @@index([is_active])
+  @@schema("public")
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model ai_generation_jobs {
+  id             String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  user_id        String        @db.Uuid
+  institution_id String?       @db.Uuid
+  status         String        @default("queued") @db.VarChar(20)
+  progress       Int           @default(0)
+  current_step   String?       @db.VarChar(255)
+  config         Json
+  result         Json?
+  error          String?
+  expires_at     DateTime      @db.Timestamptz(6)
+  created_at     DateTime      @default(now()) @db.Timestamptz(6)
+  updated_at     DateTime      @default(now()) @updatedAt @db.Timestamptz(6)
+
+  users          users         @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  institutions   institutions? @relation(fields: [institution_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([user_id, created_at])
+  @@index([status, updated_at])
+  @@index([expires_at])
   @@schema("public")
 }

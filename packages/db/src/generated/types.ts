@@ -420,6 +420,20 @@ export const essay_rubric_scope = {
     EXAM_OVERRIDE: 'EXAM_OVERRIDE',
 } as const;
 export type essay_rubric_scope = (typeof essay_rubric_scope)[keyof typeof essay_rubric_scope];
+export type ai_generation_jobs = {
+    id: Generated<string>;
+    user_id: string;
+    institution_id: string | null;
+    status: Generated<string>;
+    progress: Generated<number>;
+    current_step: string | null;
+    config: unknown;
+    result: unknown | null;
+    error: string | null;
+    expires_at: Timestamp;
+    created_at: Generated<Timestamp>;
+    updated_at: Generated<Timestamp>;
+};
 export type analytics_reports = {
     report_id: Generated<string>;
     title: string;
@@ -1607,6 +1621,7 @@ export type webauthn_credentials = {
     last_used_at: Timestamp | null;
 };
 export type DB = {
+    ai_generation_jobs: ai_generation_jobs;
     analytics_reports: analytics_reports;
     announcements: announcements;
     audit_logs: audit_logs;

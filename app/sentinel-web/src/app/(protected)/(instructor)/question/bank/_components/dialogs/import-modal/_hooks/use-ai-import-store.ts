@@ -18,11 +18,16 @@ interface AiImportState {
     isSaving: boolean;
     hasHydrated: boolean;
     saveTarget: SaveTarget;
+    activeJobId: string | null;
+    jobProgress: number;
+    currentStep: string | null;
     setPreviewData: (data: GenerateQuestionPreviewResponse | null) => void;
     setIsGenerating: (isGenerating: boolean) => void;
     setIsSaving: (isSaving: boolean) => void;
     setHasHydrated: (hasHydrated: boolean) => void;
     setSaveTarget: (target: SaveTarget) => void;
+    setActiveJobId: (jobId: string | null) => void;
+    setJobProgress: (progress: number, currentStep?: string | null) => void;
     updateQuestion: (
         index: number,
         updates: Partial<GenerateQuestionPreviewResponse['questions'][number]>,
@@ -40,11 +45,20 @@ export const useAiImportStore = create<AiImportState>()(
             saveTarget: {
                 mode: 'create_collection',
             },
+            activeJobId: null,
+            jobProgress: 0,
+            currentStep: null,
             setPreviewData: (data) => set({ previewData: data }),
             setIsGenerating: (isGenerating) => set({ isGenerating }),
             setIsSaving: (isSaving) => set({ isSaving }),
             setHasHydrated: (hasHydrated) => set({ hasHydrated }),
             setSaveTarget: (saveTarget) => set({ saveTarget }),
+            setActiveJobId: (activeJobId) => set({ activeJobId }),
+            setJobProgress: (progress, currentStep) =>
+                set((state) => ({
+                    jobProgress: progress,
+                    currentStep: currentStep !== undefined ? currentStep : state.currentStep,
+                })),
             updateQuestion: (index, updates) =>
                 set((state) => {
                     if (!state.previewData) return state;
@@ -65,6 +79,9 @@ export const useAiImportStore = create<AiImportState>()(
                 set({
                     previewData: null,
                     isGenerating: false,
+                    activeJobId: null,
+                    jobProgress: 0,
+                    currentStep: null,
                     saveTarget: {
                         mode: 'create_collection',
                     },
@@ -76,6 +93,9 @@ export const useAiImportStore = create<AiImportState>()(
             partialize: (state) => ({
                 previewData: state.previewData,
                 saveTarget: state.saveTarget,
+                activeJobId: state.activeJobId,
+                jobProgress: state.jobProgress,
+                currentStep: state.currentStep,
             }),
             onRehydrateStorage: () => (state) => {
                 state?.setHasHydrated(true);

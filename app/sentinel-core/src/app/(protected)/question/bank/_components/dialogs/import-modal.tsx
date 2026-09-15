@@ -50,15 +50,11 @@ export function ImportModal({
     return (
         <Dialog
             open={open}
-            onOpenChange={(isOpen) => {
-                if (isProcessing && !isOpen) return;
-                onOpenChange(isOpen);
-            }}
+            onOpenChange={onOpenChange}
         >
             <DialogContent
-                className={`flex max-h-[90vh] flex-col overflow-hidden ${
-                    isUploadStep ? 'sm:max-w-[680px]' : 'sm:max-w-[1150px]'
-                }`}
+                className={`flex max-h-[90vh] flex-col overflow-hidden ${isUploadStep ? 'sm:max-w-[680px]' : 'sm:max-w-[1150px]'
+                    }`}
             >
                 <DialogHeader>
                     <DialogTitle className="flex items-center gap-2 text-xl font-bold">
@@ -116,11 +112,10 @@ export function ImportModal({
                         <Button
                             variant="outline"
                             onClick={() => onOpenChange(false)}
-                            disabled={isProcessing}
                             size="sm"
                             className="h-8 px-3"
                         >
-                            Cancel
+                            {isProcessing ? 'Close' : 'Cancel'}
                         </Button>
 
                         {isUploadStep ? (

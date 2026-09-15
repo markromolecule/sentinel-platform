@@ -37,9 +37,22 @@ export class QuestionGeneratorService {
         files: File[];
         config: GenerateQuestionPreviewConfig;
         provider?: QuestionGeneratorLlmProvider;
+        onProgress?: (progress: number, step: string) => Promise<void>;
     }): Promise<GenerateQuestionPreviewResponse> {
         const provider = args.provider ?? GeminiProvider;
         const pipelineStartTime = Date.now();
+
+        const notifyProgress = async (progress: number, step: string) => {
+            if (args.onProgress) {
+                try {
+                    await args.onProgress(progress, step);
+                } catch (err) {
+                    console.error('[QuestionGeneratorService] onProgress callback error:', err);
+                }
+            }
+        };
+
+        await notifyProgress(5, 'Staging and reading lecture documents...');
 
         const batches = createBatches(args.config, DEFAULT_BATCH_SIZE);
         const totalSizeBytes = args.files.reduce((total, file) => total + file.size, 0);
@@ -55,6 +68,7 @@ export class QuestionGeneratorService {
 
         const uploadedFiles = await uploadFilesStep(args.files, provider);
         console.log(`[QuestionGeneratorService] PDF upload completed in ${Date.now() - pipelineStartTime}ms`);
+        await notifyProgress(15, 'Analyzing document page counts and structure...');
 
         try {
             const batchStartTime = Date.now();
@@ -76,6 +90,7 @@ export class QuestionGeneratorService {
             console.log(
                 `[QuestionGeneratorService] Parallel batch generation completed in ${Date.now() - batchStartTime}ms (total elapsed: ${Date.now() - pipelineStartTime}ms)`,
             );
+            await notifyProgress(70, 'Batch question generation completed...');
 
             const { rawQuestions: allRawQuestions } = generationResult;
 
@@ -90,6 +105,7 @@ export class QuestionGeneratorService {
                 args.config,
                 sourceDocuments,
             );
+            await notifyProgress(75, 'Normalizing and formatting generated questions...');
             const candidateQuestions = [...normalizedQuestions.successful];
 
             let reconciliation = reconcileQuestionSlots(candidateQuestions, args.config);
@@ -108,6 +124,7 @@ export class QuestionGeneratorService {
             reconciliation = initialReplenishResult.reconciliation;
 
             // 2. Assess passage quality and run targeted repairs
+            await notifyProgress(85, "Evaluating passage quality and verifying Bloom's taxonomy...");
             const repairResult = await repairPassageQualityLoop({
                 reconciliation,
                 config: args.config,
@@ -133,8 +150,9 @@ export class QuestionGeneratorService {
             reconciliation = recoveryResult.reconciliation;
 
             const finalQuestions = reconciliation.slots.map((s) => s.question);
+            await notifyProgress(95, 'Assembling final preview response...');
 
-            return buildResponseStep({
+            const response = buildResponseStep({
                 config: args.config,
                 model,
                 files: args.files,
@@ -142,6 +160,10 @@ export class QuestionGeneratorService {
                 sourceDocuments,
                 normalizedQuestions: finalQuestions,
             });
+
+            await notifyProgress(100, 'Generation completed successfully.');
+
+            return response;
         } catch (error) {
             if (error instanceof PassageQualityValidationError) {
                 console.error('AI passage quality validation error:', error.message);

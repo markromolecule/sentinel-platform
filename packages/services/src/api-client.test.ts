@@ -99,5 +99,74 @@ describe('createApiClient', () => {
             message: 'Unable to connect to the server. Please check your network connection and try again.',
         });
     });
+
+    it('submits AI generation job and retrieves status through attached methods', async () => {
+        const submitResponse = {
+            success: true,
+            data: {
+                jobId: 'job-xyz-123',
+                status: 'queued',
+                createdAt: '2026-09-15T00:00:00.000Z',
+            },
+        };
+
+        const statusResponse = {
+            success: true,
+            data: {
+                jobId: 'job-xyz-123',
+                status: 'completed',
+                progress: 100,
+                currentStep: 'Done',
+                result: { questions: [] },
+                error: null,
+                createdAt: '2026-09-15T00:00:00.000Z',
+                updatedAt: '2026-09-15T00:01:00.000Z',
+            },
+        };
+
+        const fetchMock = vi.fn()
+            .mockResolvedValueOnce({
+                ok: true,
+                status: 202,
+                statusText: 'Accepted',
+                headers: { get: () => 'application/json' },
+                json: async () => submitResponse,
+            })
+            .mockResolvedValueOnce({
+                ok: true,
+                status: 200,
+                statusText: 'OK',
+                headers: { get: () => 'application/json' },
+                json: async () => statusResponse,
+            });
+
+        vi.stubGlobal('fetch', fetchMock);
+
+        const apiClient = createApiClient({ baseUrl: 'https://example.test' });
+        const formData = new FormData();
+        formData.append('test', '123');
+
+        const submitted = await apiClient.submitAiGenerationJob(formData);
+        expect(submitted).toEqual({
+            jobId: 'job-xyz-123',
+            status: 'queued',
+        });
+        expect(fetchMock).toHaveBeenCalledWith(
+            'https://example.test/ai/generate-preview/jobs',
+            expect.objectContaining({
+                method: 'POST',
+                body: formData,
+            }),
+        );
+
+        const status = await apiClient.getAiGenerationJobStatus('job-xyz-123');
+        expect(status).toEqual(statusResponse);
+        expect(fetchMock).toHaveBeenCalledWith(
+            'https://example.test/ai/generate-preview/jobs/job-xyz-123',
+            expect.objectContaining({
+                method: 'GET',
+            }),
+        );
+    });
 });
 

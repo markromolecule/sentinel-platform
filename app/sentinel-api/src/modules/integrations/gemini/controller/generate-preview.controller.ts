@@ -1,22 +1,25 @@
 import { createRoute } from '@hono/zod-openapi';
 import { HTTPException } from 'hono/http-exception';
-import { type AppRouteHandler } from '../../../types/hono';
+import { type AppRouteHandler } from '../../../../types/hono';
 import {
     parseGenerateQuestionPreviewMultipartBody,
     QuestionGeneratorService,
     resolvePdfFilesFromMultipartBody,
-} from '../../../lib/gemini/services/question-generator';
-import { hasActivePermission, requireActivePermission } from '../../../lib/permissions';
+} from '../../../../lib/gemini/services/question-generator';
+import { requireActivePermission } from '../../../../lib/permissions';
 import {
     resolveAssessmentActorRole,
     resolveAssessmentInstitutionId,
-} from '../../examination/assessment/assessment-access';
-import { generatePreviewMultipartSchema, generatePreviewRouteSchema } from './gemini.dto';
-import { LogsService } from '../../general/logs/logs.service';
+} from '../../../examination/assessment/assessment-access';
+import {
+    generatePreviewMultipartSchema,
+    generatePreviewRouteSchema,
+} from '../gemini.dto';
+import { LogsService } from '../../../general/logs/logs.service';
 
-const MAX_PDF_SIZE_BYTES = 25 * 1024 * 1024;
+export const MAX_LEGACY_PDF_SIZE_BYTES = 25 * 1024 * 1024;
 
-function createGenerateQuestionPreviewRoute(path: '/generate-preview' | '/generate-review') {
+export function createGenerateQuestionPreviewRoute(path: '/generate-preview' | '/generate-review') {
     return createRoute({
         method: 'post',
         path,
@@ -73,13 +76,27 @@ export const generatePreviewRouteHandler: AppRouteHandler<typeof generatePreview
     })) as Record<string, string | File | (string | File)[]>;
     const files = resolvePdfFilesFromMultipartBody(multipartBody);
 
-    if (files.some((file) => file.size > MAX_PDF_SIZE_BYTES)) {
+    if (files.some((file) => file.size > MAX_LEGACY_PDF_SIZE_BYTES)) {
         throw new HTTPException(413, {
             message: 'PDF file is too large for AI preview generation.',
         });
     }
 
     const parsedConfig = parseGenerateQuestionPreviewMultipartBody(multipartBody);
+
+    // Legacy Route Gating: reject heavy requests to protect against edge proxy timeouts
+    const totalQuestions =
+        parsedConfig.questionCount ??
+        parsedConfig.questionTypeDistribution?.reduce((sum, item) => sum + item.count, 0) ??
+        0;
+
+    if (totalQuestions > 10 || files.length > 1) {
+        throw new HTTPException(400, {
+            message:
+                'Generations with more than 10 questions or multiple files must use the asynchronous endpoint POST /ai/generate-preview/jobs.',
+        });
+    }
+
     const institutionId = resolveAssessmentInstitutionId({
         role,
         contextInstitutionId: c.get('institutionId'),

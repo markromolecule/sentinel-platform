@@ -90,7 +90,7 @@ export const createApiClient = (defaultOptions: ApiClientOptions = {}) => {
         ...defaultRequestOptions
     } = defaultOptions;
 
-    return async (endpoint: string, options: ApiClientOptions = {}) => {
+    const client = async (endpoint: string, options: ApiClientOptions = {}) => {
         const { baseUrl, getToken, ...requestOptions } = options;
 
         const finalBaseUrl = baseUrl || defaultBaseUrl || '';
@@ -196,5 +196,88 @@ export const createApiClient = (defaultOptions: ApiClientOptions = {}) => {
 
         return response.text();
     };
+
+    client.submitAiGenerationJob = (formData: FormData) =>
+        submitAiGenerationJob(client as unknown as ApiClientType, formData);
+    client.getAiGenerationJobStatus = (jobId: string) =>
+        getAiGenerationJobStatus(client as unknown as ApiClientType, jobId);
+
+    return client as ApiClientType;
 };
-export type ApiClientType = ReturnType<typeof createApiClient>;
+
+export type AiGenerationJobStatus = 'queued' | 'processing' | 'completed' | 'failed';
+
+export interface AiGenerationJobStatusData {
+    jobId: string;
+    status: AiGenerationJobStatus;
+    progress: number;
+    currentStep: string | null;
+    result: any | null;
+    error: string | null;
+    createdAt: string;
+    updatedAt: string;
+}
+
+export interface AiGenerationJobStatusResponse {
+    success: boolean;
+    data: AiGenerationJobStatusData;
+}
+
+export interface SubmitAiGenerationJobResponse {
+    success: boolean;
+    data: {
+        jobId: string;
+        status: string;
+        createdAt?: string;
+    };
+}
+
+export async function submitAiGenerationJob(
+    client: ApiClientType,
+    formData: FormData,
+): Promise<{ jobId: string; status: string }> {
+    const response = (await client('/ai/generate-preview/jobs', {
+        method: 'POST',
+        body: formData,
+    })) as SubmitAiGenerationJobResponse;
+
+    if (!response?.data?.jobId) {
+        throw new Error(
+            (response as any)?.error ||
+            (response as any)?.message ||
+            'Failed to submit AI generation job',
+        );
+    }
+
+    return {
+        jobId: response.data.jobId,
+        status: response.data.status,
+    };
+}
+
+export async function getAiGenerationJobStatus(
+    client: ApiClientType,
+    jobId: string,
+): Promise<AiGenerationJobStatusResponse> {
+    const response = (await client(`/ai/generate-preview/jobs/${jobId}`, {
+        method: 'GET',
+    })) as AiGenerationJobStatusResponse;
+
+    if (!response?.data) {
+        throw new Error(
+            (response as any)?.error ||
+            (response as any)?.message ||
+            'Failed to retrieve AI generation job status',
+        );
+    }
+
+    return response;
+}
+
+export interface ApiClientInstance {
+    (endpoint: string, options?: ApiClientOptions): Promise<any>;
+    submitAiGenerationJob(formData: FormData): Promise<{ jobId: string; status: string }>;
+    getAiGenerationJobStatus(jobId: string): Promise<AiGenerationJobStatusResponse>;
+}
+
+export type ApiClientType = ApiClientInstance;

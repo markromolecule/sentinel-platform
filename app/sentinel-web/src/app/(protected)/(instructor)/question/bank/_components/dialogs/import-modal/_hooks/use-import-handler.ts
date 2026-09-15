@@ -36,6 +36,10 @@ export function useImportHandler(args: {
 
             toast.success('Questions generated successfully!', {
                 description: `Created ${data.questions?.length ?? 0} questions for preview.`,
+                action: {
+                    label: 'View Preview',
+                    onClick: () => router.push('/question/bank/import/preview'),
+                },
             });
 
             // Ensure visual cleanup happens smoothly
@@ -82,13 +86,13 @@ export function useImportHandler(args: {
 
         const targetConfig = args.collectionId
             ? {
-                  mode: 'append_to_collection' as const,
-                  collectionId: args.collectionId,
-                  collectionName: args.collectionName,
-              }
+                mode: 'append_to_collection' as const,
+                collectionId: args.collectionId,
+                collectionName: args.collectionName,
+            }
             : {
-                  mode: 'create_collection' as const,
-              };
+                mode: 'create_collection' as const,
+            };
 
         setSaveTarget(targetConfig);
 
