@@ -4,6 +4,7 @@ import {
     getAuthLogs,
     getActivityLogs,
     getSystemLogs,
+    type ApiClientType,
 } from '@sentinel/services';
 
 describe('Logs Service API', () => {
@@ -73,7 +74,7 @@ describe('Logs Service API', () => {
         const mockApiClient = vi.fn().mockResolvedValue({
             message: 'Logs fetched successfully',
             data: mockLogPage,
-        });
+        }) as unknown as ApiClientType;
 
         it('getAuthLogs calls the api client with /logs/auth and returns data', async () => {
             const result = await getAuthLogs(mockApiClient, { page: 1 });
