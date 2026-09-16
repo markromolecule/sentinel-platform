@@ -159,6 +159,7 @@ app.get('/me', authMiddleware, (c) => {
 app.get('/health', (c) => {
     return c.json({
         status: 'ok',
+        version: '1.0.1-async-ai-gen',
         timestamp: new Date().toISOString(),
     });
 });
