@@ -55,6 +55,11 @@ describe('AiGenerationQueueService', () => {
 
         expect(mockAdd).toHaveBeenCalledWith('generate-preview', mockPayload, {
             jobId: mockPayload.jobId,
+            attempts: 3,
+            backoff: {
+                type: 'exponential',
+                delay: 1000,
+            },
         });
     });
 

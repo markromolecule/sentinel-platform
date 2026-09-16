@@ -9,7 +9,7 @@ import {
 } from '../../modules/integrations/gemini/controller';
 import { AiGenerationJobRepository } from '../../modules/integrations/gemini/data/ai-generation-job.repository';
 import { AiGenerationQueueService } from '../../modules/integrations/gemini/queue/ai-generation-queue.service';
-import { AiJobFileStagingService } from '../../modules/integrations/gemini/services/ai-job-file-staging.service';
+import { AiGenerationInputStorageService } from '../../modules/integrations/gemini/services/ai-generation-input-storage.service';
 import { AiGenerationWorkerProcessor } from '../../modules/integrations/gemini/queue/ai-generation.worker';
 import { QuestionGeneratorService } from '../../lib/gemini/services/question-generator';
 import * as redisModule from '../../lib/redis/redis.service';
@@ -71,11 +71,15 @@ describe('Phase 5: End-to-End Verification & Security Penetration', () => {
 
     describe('Task 5.1: Multi-Document Asynchronous Generation Flow', () => {
         it('dispatches 80-question job across multiple documents with < 500ms latency and returns HTTP 202', async () => {
-            // Stage files, create DB record, and enqueue are all mocked — no real disk or DB I/O
-            vi.spyOn(AiJobFileStagingService, 'stageUploadedFiles').mockResolvedValue([
-                '/tmp/ai-jobs/doc1.pdf',
-                '/tmp/ai-jobs/doc2.pdf',
-            ]);
+            // Stage files to Supabase Storage, create DB record, and enqueue are all mocked
+            vi.spyOn(AiGenerationInputStorageService, 'uploadJobInputs').mockResolvedValue({
+                bucket: 'ai-generation-staging',
+                objects: [
+                    { path: 'doc1.pdf', originalName: 'lecture1.pdf', contentType: 'application/pdf', sizeBytes: 100 },
+                    { path: 'doc2.pdf', originalName: 'lecture2.pdf', contentType: 'application/pdf', sizeBytes: 100 },
+                    { path: 'doc3.pdf', originalName: 'lecture3.pdf', contentType: 'application/pdf', sizeBytes: 100 },
+                ],
+            });
             // createJob captures whatever jobId the handler generates internally
             vi.spyOn(AiGenerationJobRepository, 'createJob').mockImplementation(async (args, _db) => ({
                 id: args.id,
@@ -87,6 +91,8 @@ describe('Phase 5: End-to-End Verification & Security Penetration', () => {
                 config: args.config as any,
                 result: null,
                 error: null,
+                storage_bucket: args.storageBucket ?? 'ai-generation-staging',
+                storage_paths: args.storagePaths ?? [],
                 expires_at: new Date(Date.now() + 86400000),
                 created_at: new Date(),
                 updated_at: new Date(),
@@ -138,8 +144,9 @@ describe('Phase 5: End-to-End Verification & Security Penetration', () => {
         it('worker successfully generates 80 questions and updates progress iteratively to completion', async () => {
             const jobId = '123e4567-e89b-12d3-a456-426614174200';
             const stagedFile = new File(['%PDF-Data'], 'test.pdf', { type: 'application/pdf' });
-            vi.spyOn(AiJobFileStagingService, 'loadStagedFiles').mockResolvedValue([stagedFile]);
-            const cleanupSpy = vi.spyOn(AiJobFileStagingService, 'cleanupJobFiles').mockResolvedValue();
+            const downloadSpy = vi
+                .spyOn(AiGenerationInputStorageService, 'downloadManifestFiles')
+                .mockResolvedValue([stagedFile]);
 
             const progressCalls: { progress: number; currentStep?: string }[] = [];
             vi.spyOn(AiGenerationJobRepository, 'updateProgress').mockImplementation(async (args) => {
@@ -178,6 +185,27 @@ describe('Phase 5: End-to-End Verification & Security Penetration', () => {
                 userId: '123e4567-e89b-12d3-a456-426614174001',
                 institutionId: '123e4567-e89b-12d3-a456-426614174010',
                 config: { questionCount: 80 } as any,
+                storageBucket: 'ai-generation-staging',
+                storagePaths: [
+                    {
+                        path: '123e4567-e89b-12d3-a456-426614174200/001-test.pdf',
+                        originalName: 'test.pdf',
+                        contentType: 'application/pdf',
+                        sizeBytes: 1024,
+                    },
+                ],
+            });
+
+            expect(downloadSpy).toHaveBeenCalledWith({
+                bucket: 'ai-generation-staging',
+                objects: [
+                    {
+                        path: '123e4567-e89b-12d3-a456-426614174200/001-test.pdf',
+                        originalName: 'test.pdf',
+                        contentType: 'application/pdf',
+                        sizeBytes: 1024,
+                    },
+                ],
             });
 
             expect(progressCalls).toEqual(
@@ -201,8 +229,6 @@ describe('Phase 5: End-to-End Verification & Security Penetration', () => {
                     }),
                 }),
             );
-
-            expect(cleanupSpy).toHaveBeenCalledWith(jobId);
         });
     });
 
@@ -285,12 +311,16 @@ describe('Phase 5: End-to-End Verification & Security Penetration', () => {
             expect(reconcileSpy).toHaveBeenCalledWith(15, expect.anything());
         });
 
-        it('sweeper purges orphaned local directories after worker termination', async () => {
-            const sweepSpy = vi.spyOn(AiJobFileStagingService, 'sweepStaleJobFiles').mockResolvedValue(3);
+        it('maintenance cleaner purges expired jobs and their storage inputs', async () => {
+            const cleanSpy = vi.spyOn(AiGenerationWorkerProcessor, 'cleanExpiredJobs').mockResolvedValue({
+                checkedCount: 3,
+                cleanedCount: 3,
+                failedCount: 0,
+            });
 
-            const sweptCount = await AiJobFileStagingService.sweepStaleJobFiles(3600);
-            expect(sweptCount).toBe(3);
-            expect(sweepSpy).toHaveBeenCalledWith(3600);
+            const result = await AiGenerationWorkerProcessor.cleanExpiredJobs();
+            expect(result.cleanedCount).toBe(3);
+            expect(cleanSpy).toHaveBeenCalled();
         });
     });
 

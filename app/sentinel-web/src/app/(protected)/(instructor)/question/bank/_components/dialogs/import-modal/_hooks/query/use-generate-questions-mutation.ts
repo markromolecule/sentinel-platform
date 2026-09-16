@@ -47,7 +47,7 @@ export function useGenerateQuestionsMutation(args: UseGenerateQuestionsMutationA
 
             const store = useAiImportStore.getState();
             store.setActiveJobId(jobId);
-            store.setJobProgress(5, 'Staging lecture documents...');
+            store.setJobProgress(0, 'Queued');
 
             // 2. Await completion via Supabase Realtime with 2s HTTP polling fallback
             return new Promise<GenerateQuestionPreviewResponse>((resolve, reject) => {
@@ -84,8 +84,10 @@ export function useGenerateQuestionsMutation(args: UseGenerateQuestionsMutationA
                     const progress = typeof update.progress === 'number' ? update.progress : undefined;
                     const step = update.currentStep ?? update.current_step ?? null;
 
+                    const currentStore = useAiImportStore.getState();
+                    const nextProgress = progress !== undefined ? progress : currentStore.jobProgress;
                     if (progress !== undefined || step) {
-                        useAiImportStore.getState().setJobProgress(progress ?? 0, step);
+                        currentStore.setJobProgress(nextProgress, step);
                     }
 
                     if (status === 'completed') {
