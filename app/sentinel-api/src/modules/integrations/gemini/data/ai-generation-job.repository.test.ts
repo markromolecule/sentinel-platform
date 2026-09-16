@@ -211,7 +211,7 @@ describe('AiGenerationJobRepository', () => {
             expect.objectContaining({
                 status: 'completed',
                 progress: 100,
-                result: mockResult,
+                result: JSON.stringify(mockResult),
                 error: null,
             }),
         );

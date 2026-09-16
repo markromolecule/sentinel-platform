@@ -79,7 +79,12 @@ export async function completeJobMutation(
             status: 'completed',
             progress: 100,
             current_step: 'Generation completed successfully',
-            result: args.result,
+            result:
+                args.result === null
+                    ? null
+                    : typeof args.result === 'string'
+                      ? args.result
+                      : JSON.stringify(args.result),
             error: null,
             updated_at: new Date(),
         })
