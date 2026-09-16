@@ -117,6 +117,23 @@ Long-running generative AI operations are inherently asynchronous. Decoupling th
 
 ---
 
+## Amendment: Durable Supabase Storage Handoff (September 16, 2026)
+
+### Context & Problem Statement
+During production observation of the decoupled `sentinel-ai-worker` topology, the dedicated worker service successfully booted and consumed jobs from the Upstash BullMQ queue. However, jobs failed immediately with `No staged document files found for generation job`. 
+
+**Root Cause:** The API and Worker run in separate Railway container instances with isolated filesystems. The API staged uploaded PDFs to its local `/tmp/ai-jobs/<jobId>` container disk, which was inaccessible to the worker container. Furthermore, the client UI exhibited simulated progress (5–94%) when database progress was 0%.
+
+### Confirmed Decisions (DEC-07 – DEC-11)
+
+1. **DEC-07 (Cross-Service Input Handoff):** Private Supabase Storage bucket (`ai-generation-staging`) replaces local disk staging. The API streams multipart file uploads directly to Supabase Storage before persisting the DB row or dispatching the BullMQ job. The worker retrieves files via service-role storage operations using the job's `storage_paths` manifest.
+2. **DEC-08 (Retention & Expiry):** Stored input documents and job records are retained for a bounded 24-hour TTL for diagnostics and retries. Expiry-driven maintenance sweeps delete storage objects idempotently before purging the database row.
+3. **DEC-09 (Bucket Isolation & Policy):** A dedicated, non-public bucket (`ai-generation-staging`) is configured with a 15 MiB per-object limit and PDF-only MIME restrictions (`application/pdf`). No public/browser access policies exist; all operations use backend service-role credentials.
+4. **DEC-10 (Upload-Before-Enqueue & Rollback):** Upload failures abort early with a retryable HTTP 503 without creating a database row or enqueuing a BullMQ job. Database errors roll back uploaded objects. Queue dispatch errors mark the job failed but retain storage objects until 24h expiry.
+5. **DEC-11 (Transient Retry Policy & Truthful Progress):** BullMQ is configured with 3 attempts and exponential backoff. Nonterminal retries (attempts 1 & 2) update the DB milestone (`Temporary failure encountered. Retrying attempt X of 3...`) and rethrow without setting terminal failure. Client UI initializes to `0% / Queued` on 202 acceptance and removes simulated timer progress, advancing only upon durable server milestones.
+
+---
+
 ## Validation and Review
 
 - **Validation Gate:**

@@ -91,6 +91,7 @@ feature: "gemini-async-generation-railway-supabase"
 - **Supabase Realtime Row Level Security (RLS):**
   - RLS is explicitly enabled on `ai_generation_jobs`.
   - Policies defined in migration:
+
     ```sql
     ALTER TABLE "public"."ai_generation_jobs" ENABLE ROW LEVEL SECURITY;
 
@@ -107,6 +108,7 @@ feature: "gemini-async-generation-railway-supabase"
     USING (true)
     WITH CHECK (true);
     ```
+
   - Because Supabase Realtime respects PostgreSQL RLS on table publications, instructors subscribing to `ai_generation_jobs` receive change events exclusively for jobs they own. Cross-tenant data leakage is completely prevented.
 
 ---
@@ -163,3 +165,50 @@ feature: "gemini-async-generation-railway-supabase"
 - [[docs/decisions/0001-prioritize-supabase-pro-over-railway-pro-for-live-exams|ADR-0001: Supabase Pro Prioritization]]
 - [[docs/context/August/19/railway-backend-ai-generation|August 19 Railway Backend Migration Context]]
 - [[docs/task/2026-08-18/fix-001-persistent-cors-issue-analysis/README|CORS & Proxy Analysis]]
+
+## 9. September 16 Production Observation & Reopened Discovery
+
+The intended topology in DEC-06 was not initially proven in production. The following investigation confirmed the Railway worker and queue boundary, then isolated the remaining durable-file hand-off defect. This record is ready for the planned remediation.
+
+### Observed Evidence
+
+| Classification | Evidence | Consequence |
+| :--- | :--- | :--- |
+| **Verified fact** | The production Railway API log records `[AiGenerationQueue] Enqueued job 72f429b6-ee93-46e0-baa1-d8188fd85aa5 to BullMQ queue` after Redis reports a ready connection. | The API producer can reach Upstash Redis and submit the BullMQ job. This does **not** prove that any worker is consuming it. |
+| **Verified fact** | The same Railway log stream contains API startup and `SIGTERM` events, but no `[AiWorker] Starting BullMQ AI Worker...`, `[AiWorker] AI Generation Worker initialized successfully...`, or `[AiWorker] Starting generation...` event. | The displayed service is the API process; the supplied evidence does not show a live consumer for the `ai-generation` queue. |
+| **Verified fact** | `ai_generation_jobs` retains the corresponding production job in `queued`, at `progress = 0`, with `current_step = Queued`. | No worker progress write reached Supabase for that job. |
+| **Verified fact** | The web client sets local state to 5% immediately after the API returns `202`, and its progress hook simulates values from 5% through 94% whenever durable server progress is 0. | The 5% -> 94% modal display is a client-side fallback, not evidence that Supabase or BullMQ advanced the job. |
+| **Verified fact** | The API process starts a worker only when `ENABLE_EMBEDDED_AI_WORKER=true`; the independently deployed worker now runs `pnpm --filter sentinel-api worker:ai`. | At the initial failure, the API had no active embedded or dedicated consumer. The dedicated consumer is now online and reaches the same queue. |
+| **Verified design incompatibility** | The API stages PDF files under its own `/tmp/ai-jobs/<jobId>/`, while DEC-06 requires a separate Railway worker service. Separate Railway service containers do not share local ephemeral filesystems. | Even after a dedicated worker is started, it cannot reliably load files written by the API service. An API restart also loses queued job input. Persistent/shared object storage or a single-process operational mitigation is required before the dedicated topology can be considered durable. |
+| **Verified fact (production confirmation, 2026-09-16 02:48–02:49 GMT+8)** | The new `sentinel-ai-worker` service started `worker:ai`, initialized successfully on the `ai-generation` queue, consumed the queued IDs `834c6793-52df-4b10-a21f-acf4eb4336fb`, `72f429b6-ee93-46e0-baa1-d8188fd85aa5`, and `6cc07b18-50b9-442a-a870-ff44f8be0fca`, then logged `No staged document files found for generation job` for each. | Redis queue connectivity, queue-name parity, and consumer startup are now proven. The missing-file fault is proven to be the API-container `/tmp` to worker-container filesystem boundary, not Vercel, Supabase Realtime, or BullMQ consumption. |
+
+### Reopened Success Criteria
+
+1. A production job transitions from `queued` to `processing` in Supabase only after a named Railway worker service has logged its worker initialization and job start for the same job ID.
+2. The instructor UI must distinguish durable server state from estimated client progress; it must not portray the 94% simulation as live worker progress while the job is still `queued` at 0%.
+3. Worker input must remain accessible after API redeploy/restart and across the API/worker execution boundary; queued jobs must fail visibly and recoverably when that guarantee is unavailable.
+4. A release check must prove the API service and AI worker service use the same Redis endpoint and `AI_GENERATION_QUEUE_NAME`, and capture both producer and consumer logs for one production job.
+
+### Resolved Investigation Scope
+
+- **In scope for the approved plan:** Create a private Supabase Storage hand-off, add bounded retention/retries, and make UI progress truthful.
+- **Confirmed:** `sentinel-ai-worker` is the active dedicated consumer and reaches the same Upstash/BullMQ queue as the API. It cannot consume API-local staged files.
+- **Next lifecycle gate:** Production code and deployment remain deferred until the user explicitly starts `/execute` for Phase 1.
+
+### Confirmed Production Topology Decision
+
+| Decision ID | Question / Fork | Chosen Option | Rationale & Consequences |
+| :--- | :--- | :--- | :--- |
+| **DEC-07** | How should the API hand uploaded PDFs to the independent Railway worker? | **Private Supabase Storage bucket** | The API will upload each job's source PDFs to a non-public, job-scoped object prefix before enqueueing. The worker will download them with server-side Supabase credentials, so it no longer relies on API-container `/tmp` storage. Object keys, not public URLs or PDF bytes, become worker input. |
+| **DEC-08** | How long may source PDFs remain after a generation reaches a terminal state? | **At most 24 hours** | PDFs remain available for bounded diagnostics or recovery after either `completed` or `failed`. A scheduled cleanup must delete objects at or before the corresponding job expiry time; no public access is permitted during retention. |
+| **DEC-09** | Does an existing bucket satisfy the staging boundary? | **Create a dedicated private `ai-generation-staging` bucket** | No suitable bucket exists. The bucket will be created by migration/rollout, with no public access. Only server-side API and worker credentials may upload, download, list, or delete job-scoped PDF objects. |
+| **DEC-10** | What happens if API-to-storage upload fails? | **Fail fast; do not create or enqueue a job** | Return a clear retryable API error only after best-effort cleanup of any partially uploaded objects. This prevents `queued` rows whose source files cannot be processed. |
+| **DEC-11** | How should transient worker or Gemini failures recover? | **Up to three BullMQ attempts with exponential backoff** | Retryable failures retain their private job objects during the 24-hour retention period. After the final failed attempt, persist a user-safe failure status and retain objects only until expiry for bounded diagnosis. |
+
+This supersedes the API-local staging portion of DEC-03 for production execution. API-local temporary files may still be used only as a short-lived upload buffer and must never be the hand-off contract to another service.
+
+### Readiness Audit (2026-09-16)
+
+- **Confirmed by the user:** private Supabase Storage is the shared staging mechanism; create `ai-generation-staging`; retain source PDFs for at most 24 hours; fail fast when storage upload fails; retry transient worker/Gemini failures up to three times with exponential backoff.
+- **Verified production boundary:** the dedicated Railway worker consumes the same BullMQ queue as the API but cannot read API-container `/tmp` files.
+- **Ready for planning:** the target architecture, user-visible lifecycle, authorization boundary, storage retention, failure semantics, and retry policy are all resolved. Implementation remains explicitly out of scope for this context record.

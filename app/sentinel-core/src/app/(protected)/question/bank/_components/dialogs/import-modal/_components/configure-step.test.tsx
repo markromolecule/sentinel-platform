@@ -72,4 +72,12 @@ describe('ConfigureStep', () => {
         const grids = container.querySelectorAll('.pointer-events-none');
         expect(grids.length).toBeGreaterThan(0);
     });
+
+    it('truthfully renders 0% and Queued status when processing starts', () => {
+        render(<ConfigureStep {...defaultProps} isProcessing={true} />);
+
+        expect(screen.getByText('Generating Question Preview')).toBeDefined();
+        expect(screen.getByText('0%')).toBeDefined();
+        expect(screen.getByText('Queued')).toBeDefined();
+    });
 });

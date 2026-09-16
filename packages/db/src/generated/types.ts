@@ -430,6 +430,8 @@ export type ai_generation_jobs = {
     config: unknown;
     result: unknown | null;
     error: string | null;
+    storage_bucket: string | null;
+    storage_paths: unknown | null;
     expires_at: Timestamp;
     created_at: Generated<Timestamp>;
     updated_at: Generated<Timestamp>;

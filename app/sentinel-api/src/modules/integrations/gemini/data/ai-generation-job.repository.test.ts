@@ -47,6 +47,15 @@ describe('AiGenerationJobRepository', () => {
             config: mockConfig,
             result: null,
             error: null,
+            storage_bucket: 'ai-generation-staging',
+            storage_paths: [
+                {
+                    path: 'job-123/001-lesson.pdf',
+                    originalName: 'lesson.pdf',
+                    contentType: 'application/pdf',
+                    sizeBytes: 1024,
+                },
+            ],
             expires_at: new Date(Date.now() + 24 * 3600 * 1000).toISOString(),
             created_at: new Date().toISOString(),
             updated_at: new Date().toISOString(),
@@ -65,6 +74,15 @@ describe('AiGenerationJobRepository', () => {
                 userId: 'user-456',
                 institutionId: 'inst-789',
                 config: mockConfig,
+                storageBucket: 'ai-generation-staging',
+                storagePaths: [
+                    {
+                        path: 'job-123/001-lesson.pdf',
+                        originalName: 'lesson.pdf',
+                        contentType: 'application/pdf',
+                        sizeBytes: 1024,
+                    },
+                ],
             },
             mockDb,
         );
@@ -78,12 +96,21 @@ describe('AiGenerationJobRepository', () => {
                 status: 'queued',
                 progress: 0,
                 current_step: 'Queued',
+                storage_bucket: 'ai-generation-staging',
             }),
         );
         expect(job.id).toBe('job-123');
         expect(job.status).toBe('queued');
         expect(job.progress).toBe(0);
         expect(job.result).toBeNull();
+        expect(job.storage_paths).toEqual([
+            {
+                path: 'job-123/001-lesson.pdf',
+                originalName: 'lesson.pdf',
+                contentType: 'application/pdf',
+                sizeBytes: 1024,
+            },
+        ]);
     });
 
     it('retrieves an existing generation job by id', async () => {
@@ -97,6 +124,15 @@ describe('AiGenerationJobRepository', () => {
             config: JSON.stringify(mockConfig),
             result: null,
             error: null,
+            storage_bucket: 'ai-generation-staging',
+            storage_paths: JSON.stringify([
+                {
+                    path: 'job-123/001-lesson.pdf',
+                    originalName: 'lesson.pdf',
+                    contentType: 'application/pdf',
+                    sizeBytes: 1024,
+                },
+            ]),
             expires_at: new Date().toISOString(),
             created_at: new Date().toISOString(),
             updated_at: new Date().toISOString(),
@@ -116,6 +152,7 @@ describe('AiGenerationJobRepository', () => {
         expect(job).not.toBeNull();
         expect(job?.progress).toBe(45);
         expect(job?.current_step).toBe('Generating batch 2 of 5');
+        expect(job?.storage_bucket).toBe('ai-generation-staging');
     });
 
     it('returns null if job does not exist', async () => {
@@ -229,5 +266,64 @@ describe('AiGenerationJobRepository', () => {
 
         expect(deleteFrom).toHaveBeenCalledWith('ai_generation_jobs');
         expect(deletedCount).toBe(5);
+    });
+
+    it('finds expired jobs whose TTL has passed', async () => {
+        const mockRows = [
+            {
+                id: 'expired-1',
+                user_id: 'user-1',
+                institution_id: 'inst-1',
+                status: 'queued',
+                progress: 0,
+                current_step: 'Queued',
+                config: mockConfig,
+                result: null,
+                error: null,
+                storage_bucket: 'ai-generation-staging',
+                storage_paths: [
+                    {
+                        path: 'expired-1/001-doc.pdf',
+                        originalName: 'doc.pdf',
+                        contentType: 'application/pdf',
+                        sizeBytes: 100,
+                    },
+                ],
+                expires_at: new Date(Date.now() - 3600000).toISOString(),
+                created_at: new Date().toISOString(),
+                updated_at: new Date().toISOString(),
+            },
+        ];
+
+        const execute = vi.fn().mockResolvedValue(mockRows);
+        const limit = vi.fn().mockReturnValue({ execute });
+        const selectAll = vi.fn().mockReturnValue({ execute, limit });
+        const where = vi.fn().mockReturnValue({ selectAll });
+        const selectFrom = vi.fn().mockReturnValue({ where });
+
+        const mockDb = { selectFrom } as unknown as DbClient;
+
+        const expired = await AiGenerationJobRepository.getExpiredJobs({ limit: 10, db: mockDb });
+
+        expect(selectFrom).toHaveBeenCalledWith('ai_generation_jobs');
+        expect(where).toHaveBeenCalledWith('expires_at', '<', expect.any(Date));
+        expect(limit).toHaveBeenCalledWith(10);
+        expect(expired).toHaveLength(1);
+        expect(expired[0].id).toBe('expired-1');
+        expect(expired[0].storage_bucket).toBe('ai-generation-staging');
+    });
+
+    it('deletes a single generation job by id', async () => {
+        const executeTakeFirst = vi.fn().mockResolvedValue({ numDeletedRows: 1n });
+        const where = vi.fn().mockReturnValue({ executeTakeFirst });
+        const deleteFrom = vi.fn().mockReturnValue({ where });
+
+        const mockDb = { deleteFrom } as unknown as DbClient;
+
+        const deleted = await AiGenerationJobRepository.deleteJob('job-to-delete', mockDb);
+
+        expect(deleteFrom).toHaveBeenCalledWith('ai_generation_jobs');
+        expect(where).toHaveBeenCalledWith('id', '=', 'job-to-delete');
+        expect(deleted).toBe(true);
     });
 });

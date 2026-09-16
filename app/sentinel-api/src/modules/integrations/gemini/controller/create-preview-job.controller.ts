@@ -14,7 +14,10 @@ import {
     generatePreviewJobResponseSchema,
     generatePreviewMultipartSchema,
 } from '../gemini.dto';
-import { AiJobFileStagingService } from '../services/ai-job-file-staging.service';
+import {
+    AiGenerationInputStorageService,
+    type AiGenerationInputManifest,
+} from '../services/ai-generation-input-storage.service';
 import { AiGenerationQueueService } from '../queue/ai-generation-queue.service';
 import { AiGenerationJobRepository } from '../data/ai-generation-job.repository';
 
@@ -36,13 +39,17 @@ export const createGeneratePreviewJobRoute = createRoute({
     },
     responses: {
         202: {
-            description: 'AI question generation job accepted and queued',
             content: {
                 'application/json': {
                     schema: generatePreviewJobResponseSchema,
                 },
             },
+            description: 'AI question generation job accepted and queued',
         },
+        400: { description: 'Bad Request' },
+        413: { description: 'Payload Too Large' },
+        500: { description: 'Internal Server Error' },
+        503: { description: 'Service Unavailable' },
     },
 });
 
@@ -102,10 +109,25 @@ export const createGeneratePreviewJobRouteHandler: AppRouteHandler<
 
     const jobId = crypto.randomUUID();
 
-    // 1. Stage files on local disk
-    await AiJobFileStagingService.stageUploadedFiles(jobId, files);
+    // 1. Stage files to private Supabase Storage
+    let manifest: AiGenerationInputManifest;
+    try {
+        manifest = await AiGenerationInputStorageService.uploadJobInputs({
+            jobId,
+            files,
+        });
+    } catch (uploadErr) {
+        console.error(
+            `[AiGeneration] [${jobId}] Failed to upload input files to storage:`,
+            uploadErr instanceof Error ? uploadErr.message : uploadErr,
+        );
+        throw new HTTPException(503, {
+            message:
+                'AI generation storage service is temporarily unavailable. Please try again shortly.',
+        });
+    }
 
-    // 2. Create DB tracking record
+    // 2. Create DB tracking record with storage manifest
     let jobRecord;
     try {
         jobRecord = await AiGenerationJobRepository.createJob(
@@ -114,12 +136,23 @@ export const createGeneratePreviewJobRouteHandler: AppRouteHandler<
                 userId,
                 institutionId: institutionId ?? null,
                 config: effectiveConfig,
+                storageBucket: manifest.bucket,
+                storagePaths: manifest.objects,
                 ttlHours: 24,
             },
             c.get('dbClient'),
         );
     } catch (dbErr) {
-        await AiJobFileStagingService.cleanupJobFiles(jobId).catch(() => { });
+        console.error(
+            `[AiGeneration] [${jobId}] Failed to create DB tracking record:`,
+            dbErr instanceof Error ? dbErr.message : dbErr,
+        );
+        await AiGenerationInputStorageService.deleteManifest(manifest).catch((delErr) => {
+            console.error(
+                `[AiGeneration] [${jobId}] Failed to rollback storage objects after DB error:`,
+                delErr instanceof Error ? delErr.message : delErr,
+            );
+        });
         throw dbErr;
     }
 
@@ -130,12 +163,20 @@ export const createGeneratePreviewJobRouteHandler: AppRouteHandler<
             userId,
             institutionId: institutionId ?? null,
             config: effectiveConfig,
+            storageBucket: manifest.bucket,
+            storagePaths: manifest.objects,
         });
     } catch (queueErr) {
-        await AiJobFileStagingService.cleanupJobFiles(jobId).catch(() => { });
+        console.error(
+            `[AiGeneration] [${jobId}] Failed to enqueue job:`,
+            queueErr instanceof Error ? queueErr.message : queueErr,
+        );
         await AiGenerationJobRepository.failJob({
             id: jobId,
-            error: queueErr instanceof Error ? queueErr.message : 'Failed to enqueue job',
+            error:
+                queueErr instanceof Error
+                    ? queueErr.message
+                    : 'Failed to enqueue AI generation task',
             db: c.get('dbClient'),
         }).catch(() => { });
         throw queueErr;

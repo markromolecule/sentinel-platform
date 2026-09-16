@@ -2703,6 +2703,8 @@ model ai_generation_jobs {
   config         Json
   result         Json?
   error          String?
+  storage_bucket String?
+  storage_paths  Json?
   expires_at     DateTime      @db.Timestamptz(6)
   created_at     DateTime      @default(now()) @db.Timestamptz(6)
   updated_at     DateTime      @default(now()) @updatedAt @db.Timestamptz(6)
@@ -2713,5 +2715,6 @@ model ai_generation_jobs {
   @@index([user_id, created_at])
   @@index([status, updated_at])
   @@index([expires_at])
+  @@index([storage_bucket])
   @@schema("public")
 }

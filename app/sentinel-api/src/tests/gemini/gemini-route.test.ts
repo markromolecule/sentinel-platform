@@ -15,7 +15,7 @@ import {
 } from '../../modules/integrations/gemini/controller';
 import { QuestionGeneratorService } from '../../lib/gemini/services/question-generator';
 import { LogsService } from '../../modules/general/logs/logs.service';
-import { AiJobFileStagingService } from '../../modules/integrations/gemini/services/ai-job-file-staging.service';
+import { AiGenerationInputStorageService } from '../../modules/integrations/gemini/services/ai-generation-input-storage.service';
 import { AiGenerationQueueService } from '../../modules/integrations/gemini/queue/ai-generation-queue.service';
 import { AiGenerationJobRepository } from '../../modules/integrations/gemini/data/ai-generation-job.repository';
 
@@ -395,9 +395,19 @@ describe('Gemini AI routes', () => {
         });
 
         it('accepts valid multipart payload and returns HTTP 202 in < 500ms', async () => {
-            const stageSpy = vi
-                .spyOn(AiJobFileStagingService, 'stageUploadedFiles')
-                .mockResolvedValue(['/tmp/ai-jobs/job-1/lesson.pdf']);
+            const uploadSpy = vi
+                .spyOn(AiGenerationInputStorageService, 'uploadJobInputs')
+                .mockResolvedValue({
+                    bucket: 'ai-generation-staging',
+                    objects: [
+                        {
+                            path: '123e4567-e89b-12d3-a456-426614174000/001-lecture.pdf',
+                            originalName: 'lecture.pdf',
+                            contentType: 'application/pdf',
+                            sizeBytes: 1024,
+                        },
+                    ],
+                });
             const createJobSpy = vi
                 .spyOn(AiGenerationJobRepository, 'createJob')
                 .mockResolvedValue({
@@ -410,6 +420,8 @@ describe('Gemini AI routes', () => {
                     config: { target: 'QUESTION_BANK', questionType: 'MULTIPLE_CHOICE', questionCount: 80 } as any,
                     result: null,
                     error: null,
+                    storage_bucket: 'ai-generation-staging',
+                    storage_paths: [],
                     expires_at: new Date(),
                     created_at: new Date('2026-09-15T12:00:00Z'),
                     updated_at: new Date('2026-09-15T12:00:00Z'),
@@ -447,7 +459,7 @@ describe('Gemini AI routes', () => {
 
             expect(elapsed).toBeLessThan(500);
             expect(response.status).toBe(202);
-            expect(stageSpy).toHaveBeenCalledTimes(1);
+            expect(uploadSpy).toHaveBeenCalledTimes(1);
             expect(createJobSpy).toHaveBeenCalledTimes(1);
             expect(enqueueSpy).toHaveBeenCalledTimes(1);
 
@@ -463,7 +475,7 @@ describe('Gemini AI routes', () => {
         });
 
         it('rejects payloads exceeding 15MB total file size with HTTP 413', async () => {
-            const stageSpy = vi.spyOn(AiJobFileStagingService, 'stageUploadedFiles');
+            const uploadSpy = vi.spyOn(AiGenerationInputStorageService, 'uploadJobInputs');
 
             const testApp = createAuthorizedApp({
                 permissionKeys: ['ai:generate_questions'],
@@ -492,7 +504,7 @@ describe('Gemini AI routes', () => {
             expect(response.status).toBe(413);
             const payload = await response.json();
             expect(payload.message).toContain('Total PDF payload exceeds 15MB limit');
-            expect(stageSpy).not.toHaveBeenCalled();
+            expect(uploadSpy).not.toHaveBeenCalled();
         });
 
         it('rejects when no files are uploaded with HTTP 400', async () => {
@@ -520,12 +532,100 @@ describe('Gemini AI routes', () => {
             expect(payload.message).toContain('A PDF file is required');
         });
 
-        it('cleans up disk and marks job failed when queue dispatch errors', async () => {
+        it('returns 503 if storage upload fails without creating DB row or enqueuing', async () => {
+            vi.spyOn(AiGenerationInputStorageService, 'uploadJobInputs').mockRejectedValue(
+                new Error('Storage transport error'),
+            );
+            const createJobSpy = vi.spyOn(AiGenerationJobRepository, 'createJob');
+            const enqueueSpy = vi.spyOn(AiGenerationQueueService, 'enqueueJob');
+
+            const testApp = createAuthorizedApp({
+                permissionKeys: ['ai:generate_questions'],
+                role: 'instructor',
+            });
+            const formData = new FormData();
+            formData.append('file', new File(['%PDF-1.4'], 'test.pdf', { type: 'application/pdf' }));
+            formData.append(
+                'config',
+                JSON.stringify({
+                    target: 'QUESTION_BANK',
+                    questionType: 'MULTIPLE_CHOICE',
+                    questionCount: 1,
+                }),
+            );
+
+            const response = await testApp.request('/generate-preview/jobs', {
+                method: 'POST',
+                body: formData,
+            });
+
+            expect(response.status).toBe(503);
+            expect(createJobSpy).not.toHaveBeenCalled();
+            expect(enqueueSpy).not.toHaveBeenCalled();
+        });
+
+        it('rolls back storage objects if DB creation fails after upload', async () => {
             vi.spyOn(crypto, 'randomUUID').mockReturnValue('123e4567-e89b-12d3-a456-426614174000');
-            vi.spyOn(AiJobFileStagingService, 'stageUploadedFiles').mockResolvedValue(['/tmp/path']);
-            const cleanupSpy = vi
-                .spyOn(AiJobFileStagingService, 'cleanupJobFiles')
-                .mockResolvedValue(undefined);
+            const manifest = {
+                bucket: 'ai-generation-staging',
+                objects: [
+                    {
+                        path: '123e4567-e89b-12d3-a456-426614174000/001-test.pdf',
+                        originalName: 'test.pdf',
+                        contentType: 'application/pdf' as const,
+                        sizeBytes: 100,
+                    },
+                ],
+            };
+            vi.spyOn(AiGenerationInputStorageService, 'uploadJobInputs').mockResolvedValue(manifest);
+            const deleteManifestSpy = vi
+                .spyOn(AiGenerationInputStorageService, 'deleteManifest')
+                .mockResolvedValue();
+            vi.spyOn(AiGenerationJobRepository, 'createJob').mockRejectedValue(
+                new Error('Database deadlock'),
+            );
+            const enqueueSpy = vi.spyOn(AiGenerationQueueService, 'enqueueJob');
+
+            const testApp = createAuthorizedApp({
+                permissionKeys: ['ai:generate_questions'],
+                role: 'instructor',
+            });
+            const formData = new FormData();
+            formData.append('file', new File(['%PDF-1.4'], 'test.pdf', { type: 'application/pdf' }));
+            formData.append(
+                'config',
+                JSON.stringify({
+                    target: 'QUESTION_BANK',
+                    questionType: 'MULTIPLE_CHOICE',
+                    questionCount: 1,
+                }),
+            );
+
+            const response = await testApp.request('/generate-preview/jobs', {
+                method: 'POST',
+                body: formData,
+            });
+
+            expect(response.status).toBe(500);
+            expect(deleteManifestSpy).toHaveBeenCalledWith(manifest);
+            expect(enqueueSpy).not.toHaveBeenCalled();
+        });
+
+        it('marks job failed but retains storage objects until expiry when queue dispatch errors', async () => {
+            vi.spyOn(crypto, 'randomUUID').mockReturnValue('123e4567-e89b-12d3-a456-426614174000');
+            const manifest = {
+                bucket: 'ai-generation-staging',
+                objects: [
+                    {
+                        path: '123e4567-e89b-12d3-a456-426614174000/001-test.pdf',
+                        originalName: 'test.pdf',
+                        contentType: 'application/pdf' as const,
+                        sizeBytes: 100,
+                    },
+                ],
+            };
+            vi.spyOn(AiGenerationInputStorageService, 'uploadJobInputs').mockResolvedValue(manifest);
+            const deleteManifestSpy = vi.spyOn(AiGenerationInputStorageService, 'deleteManifest');
             vi.spyOn(AiGenerationJobRepository, 'createJob').mockResolvedValue({
                 id: '123e4567-e89b-12d3-a456-426614174000',
                 user_id: 'user-1',
@@ -536,6 +636,8 @@ describe('Gemini AI routes', () => {
                 config: { target: 'QUESTION_BANK', questionType: 'MULTIPLE_CHOICE', questionCount: 1 } as any,
                 result: null,
                 error: null,
+                storage_bucket: 'ai-generation-staging',
+                storage_paths: manifest.objects,
                 expires_at: new Date(),
                 created_at: new Date(),
                 updated_at: new Date(),
@@ -568,7 +670,7 @@ describe('Gemini AI routes', () => {
             });
 
             expect(response.status).toBe(503);
-            expect(cleanupSpy).toHaveBeenCalledWith('123e4567-e89b-12d3-a456-426614174000');
+            expect(deleteManifestSpy).not.toHaveBeenCalled();
             expect(failSpy).toHaveBeenCalledWith({
                 id: '123e4567-e89b-12d3-a456-426614174000',
                 error: expect.stringContaining('unavailable'),

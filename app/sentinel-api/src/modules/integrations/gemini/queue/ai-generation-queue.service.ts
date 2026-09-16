@@ -20,6 +20,11 @@ export class AiGenerationQueueService {
             this.queue = new Queue<AiGenerationJobData>(getAiGenerationQueueName(), {
                 connection: this.producerConnection,
                 defaultJobOptions: {
+                    attempts: 3,
+                    backoff: {
+                        type: 'exponential',
+                        delay: 1000,
+                    },
                     removeOnComplete: true,
                     removeOnFail: false,
                 },
@@ -48,10 +53,15 @@ export class AiGenerationQueueService {
                 const queue = this.getQueue();
                 await queue.add('generate-preview', payload, {
                     jobId: payload.jobId,
+                    attempts: 3,
+                    backoff: {
+                        type: 'exponential',
+                        delay: 1000,
+                    },
                 });
-                console.log(`[AiGenerationQueue] Enqueued job ${payload.jobId} to BullMQ queue`);
+                console.log(`[AiGenerationQueue] [${payload.jobId}] Enqueued job to BullMQ queue`);
             } catch (error: any) {
-                console.error('[AiGenerationQueue] Failed to enqueue job to BullMQ:', error);
+                console.error(`[AiGenerationQueue] [${payload.jobId}] Failed to enqueue job to BullMQ:`, error);
                 throw new HTTPException(503, {
                     message:
                         'Unable to enqueue AI generation task to the background queue. Please try again shortly.',
@@ -62,7 +72,7 @@ export class AiGenerationQueueService {
 
         // In-memory fallback (strictly development)
         console.log(
-            `[AiGenerationQueue] Redis not configured in development. Processing job ${payload.jobId} via in-memory worker loop.`,
+            `[AiGenerationQueue] [${payload.jobId}] Redis not configured in development. Processing job via in-memory worker loop.`,
         );
 
         setImmediate(async () => {
@@ -70,7 +80,7 @@ export class AiGenerationQueueService {
                 await AiGenerationWorkerProcessor.processJob(payload);
             } catch (err: any) {
                 console.error(
-                    `[AiGenerationQueue] Error in in-memory fallback processor for job ${payload.jobId}:`,
+                    `[AiGenerationQueue] [${payload.jobId}] Error in in-memory fallback processor:`,
                     err,
                 );
             }

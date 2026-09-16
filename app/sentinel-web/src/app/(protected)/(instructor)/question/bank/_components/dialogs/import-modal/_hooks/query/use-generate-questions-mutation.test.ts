@@ -92,6 +92,8 @@ describe('useGenerateQuestionsMutation', () => {
         });
 
         expect(useAiImportStore.getState().activeJobId).toBe(jobId);
+        expect(useAiImportStore.getState().jobProgress).toBe(0);
+        expect(useAiImportStore.getState().currentStep).toBe('Queued');
 
         // Simulate Realtime in-flight progress event
         expect(realtimeCallback).toBeTruthy();
@@ -217,5 +219,57 @@ describe('useGenerateQuestionsMutation', () => {
 
         expect(result.current.error?.message).toBe('Gemini upstream quota exceeded');
         expect(useAiImportStore.getState().activeJobId).toBeNull();
+    });
+
+    it('handles nonterminal retry progress update without resolving or rejecting', async () => {
+        const jobId = 'test-job-retry-1';
+
+        (apiClient.submitAiGenerationJob as any).mockResolvedValueOnce({
+            jobId,
+            status: 'queued',
+        });
+
+        const { result } = renderHook(() => useGenerateQuestionsMutation(), { wrapper });
+
+        result.current.mutate(mockInput);
+
+        await waitFor(() => {
+            expect(realtimeCallback).toBeTruthy();
+        });
+
+        expect(useAiImportStore.getState().jobProgress).toBe(0);
+        expect(useAiImportStore.getState().currentStep).toBe('Queued');
+
+        // 1. Worker begins and reports staging milestone
+        realtimeCallback!({
+            new: {
+                id: jobId,
+                status: 'processing',
+                progress: 5,
+                current_step: 'Staging lecture documents...',
+            },
+        });
+        expect(useAiImportStore.getState().jobProgress).toBe(5);
+        expect(useAiImportStore.getState().currentStep).toBe('Staging lecture documents...');
+
+        // 2. Retry update on attempt 1 failure
+        realtimeCallback!({
+            new: {
+                id: jobId,
+                status: 'processing',
+                progress: 5,
+                current_step: 'Temporary failure encountered. Retrying attempt 1 of 3...',
+            },
+        });
+
+        // Mutation must remain pending and nonterminal
+        expect(result.current.isPending).toBe(true);
+        expect(result.current.isSuccess).toBe(false);
+        expect(result.current.isError).toBe(false);
+        expect(useAiImportStore.getState().jobProgress).toBe(5);
+        expect(useAiImportStore.getState().currentStep).toBe(
+            'Temporary failure encountered. Retrying attempt 1 of 3...',
+        );
+        expect(useAiImportStore.getState().activeJobId).toBe(jobId);
     });
 });
