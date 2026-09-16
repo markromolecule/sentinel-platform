@@ -38,10 +38,9 @@ BEGIN
                   AND (
                       e.created_by = auth.uid()
                       OR EXISTS (
-                          SELECT 1 FROM "public"."exam_assignees" ea
-                          WHERE ea.exam_id = e.exam_id
-                            AND ea.user_id = auth.uid()
-                            AND ea.status = 'ACCEPTED'
+                          SELECT 1 FROM "public"."exam_shares" es
+                          WHERE es.exam_id = e.exam_id
+                            AND es.user_id = auth.uid()
                       )
                   )
             )
@@ -50,7 +49,7 @@ BEGIN
                 SELECT 1 FROM "public"."user_roles" ur
                 JOIN "public"."roles" r ON ur.role_id = r.role_id
                 WHERE ur.user_id = auth.uid()
-                  AND r.role_slug IN ('superadmin', 'admin', 'institution_admin', 'instructor')
+                  AND COALESCE(r.slug, r.role_name) IN ('superadmin', 'admin', 'institution_admin', 'instructor')
             )
         );
     END IF;

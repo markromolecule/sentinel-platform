@@ -29,7 +29,7 @@ Release the durable hand-off without allowing old worker code to consume new job
 ## Implementation Tasks
 
 - [ ] Before rollout, pause/scale down the worker consumer and stop submitting test jobs. Confirm there are no recoverable legacy queued jobs; do not manually delete evidence rows.
-- [ ] Apply the Supabase migration. Verify `ai-generation-staging` is private, PDF-only, and accessible using the service-role credentials present in both Railway services.
+- [x] Apply the Supabase migration. Verify `ai-generation-staging` is private, PDF-only, and accessible using the service-role credentials present in both Railway services.
 - [ ] Deploy the same reviewed source revision to the API and worker. Keep API `ENABLE_EMBEDDED_AI_WORKER=false`; preserve worker command `pnpm --filter sentinel-api worker:ai`, one worker replica, no public domain, and matching `REDIS_URL`/`AI_GENERATION_QUEUE_NAME`.
 - [ ] Resume the worker only after it logs queue initialization and bucket readiness. Submit one authorized, small new PDF job—not a legacy job—and record its ID.
 - [ ] Correlate the ID across API upload/enqueue log, worker stored-input retrieval/processing logs, Supabase status/progress/realtime events, and UI. Verify input objects disappear by expiry cleanup, not during normal completion/failure.

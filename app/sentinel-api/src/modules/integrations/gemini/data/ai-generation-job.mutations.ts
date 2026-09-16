@@ -27,11 +27,18 @@ export async function createJobMutation(
             status: 'queued',
             progress: 0,
             current_step: 'Queued',
-            config: params.config,
+            config:
+                typeof params.config === 'string'
+                    ? params.config
+                    : JSON.stringify(params.config),
             result: null,
             error: null,
             storage_bucket: params.storageBucket ?? null,
-            storage_paths: params.storagePaths ?? null,
+            storage_paths: params.storagePaths
+                ? typeof params.storagePaths === 'string'
+                    ? params.storagePaths
+                    : JSON.stringify(params.storagePaths)
+                : null,
             expires_at: expiresAt,
         })
         .returningAll()
