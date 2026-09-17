@@ -34,9 +34,13 @@ export default function SupportRoomsPage() {
         limit: pagination.pageSize,
     });
 
-    const rooms = roomsResponse?.items ?? [];
-    const pageCount = roomsResponse?.pagination?.totalPages ?? 1;
-    const totalCount = roomsResponse?.pagination?.total ?? 0;
+    const rooms = Array.isArray(roomsResponse) ? roomsResponse : (roomsResponse?.items ?? []);
+    const pageCount = Array.isArray(roomsResponse)
+        ? 1
+        : (roomsResponse?.pagination?.totalPages ?? 1);
+    const totalCount = Array.isArray(roomsResponse)
+        ? roomsResponse.length
+        : (roomsResponse?.pagination?.total ?? 0);
 
     const isViewDenied = isPermissionDeniedError(error, 'rooms:view');
 

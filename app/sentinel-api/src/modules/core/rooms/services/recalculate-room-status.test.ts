@@ -8,7 +8,7 @@ import {
     PostgresQueryCompiler,
 } from 'kysely';
 
-function createMockDb(activeExamRow: any | null) {
+function createMockDb() {
     const db = new Kysely<any>({
         dialect: {
             createAdapter: () => new PostgresAdapter(),
@@ -19,84 +19,119 @@ function createMockDb(activeExamRow: any | null) {
     });
 
     const executeSpy = vi.spyOn(db.getExecutor(), 'executeQuery');
-
-    // First call (select active exam query)
-    executeSpy.mockResolvedValueOnce({
-        rows: activeExamRow ? [activeExamRow] : [],
-        insertId: undefined,
-        numAffectedRows: undefined,
-    } as any);
-
-    // Second call (update table query)
-    executeSpy.mockResolvedValueOnce({
-        rows: [],
-        insertId: undefined,
-        numAffectedRows: undefined,
-    } as any);
-
     return { db, executeSpy };
 }
 
 describe('recalculateRoomStatus', () => {
-    it('should set room status to ASSIGNED when active exam is found', async () => {
-        const { db, executeSpy } = createMockDb({ exam_id: 'exam-1' });
+    it('should set room status to ASSIGNED in batch when direct active exam is found', async () => {
+        const { db, executeSpy } = createMockDb();
+
+        // 1. directExamRooms select
+        executeSpy.mockResolvedValueOnce({
+            rows: [{ room_id: 'room-1' }],
+        } as any);
+
+        // 2. sectionExamRooms select
+        executeSpy.mockResolvedValueOnce({
+            rows: [],
+        } as any);
+
+        // 3. update rooms set status = 'ASSIGNED'
+        executeSpy.mockResolvedValueOnce({
+            rows: [],
+        } as any);
 
         await recalculateRoomStatus(db as any, 'room-1');
 
-        expect(executeSpy).toHaveBeenCalledTimes(2);
+        expect(executeSpy).toHaveBeenCalledTimes(3);
 
-        const selectQuery = executeSpy.mock.calls[0][0];
-        expect(selectQuery.sql).toContain('select "exam_id" from "exams"');
-        expect(selectQuery.sql).toContain('"room_id" = $1');
-        expect(selectQuery.sql).toContain('"status" not in ($2, $3, $4)');
-        expect(selectQuery.parameters).toContain('room-1');
+        const directSelectQuery = executeSpy.mock.calls[0][0];
+        expect(directSelectQuery.sql).toContain('select "room_id" from "exams"');
+        expect(directSelectQuery.sql).toContain('"room_id" in ($1)');
+        expect(directSelectQuery.parameters).toContain('room-1');
 
-        const updateQuery = executeSpy.mock.calls[1][0];
+        const updateQuery = executeSpy.mock.calls[2][0];
         expect(updateQuery.sql).toContain('update "rooms" set "status" = $1');
-        expect(updateQuery.sql).toContain('"room_id" = $3');
+        expect(updateQuery.sql).toContain('"room_id" in ($3)');
         expect(updateQuery.sql).toContain('"status" != $4');
         expect(updateQuery.parameters).toContain('ASSIGNED');
         expect(updateQuery.parameters).toContain('room-1');
         expect(updateQuery.parameters).toContain('MAINTENANCE');
     });
 
-    it('should set room status to AVAILABLE when no active exam is found', async () => {
-        const { db, executeSpy } = createMockDb(null);
+    it('should set room status to AVAILABLE in batch when no active exam is found', async () => {
+        const { db, executeSpy } = createMockDb();
+
+        // 1. directExamRooms select (empty)
+        executeSpy.mockResolvedValueOnce({ rows: [] } as any);
+
+        // 2. sectionExamRooms select (empty)
+        executeSpy.mockResolvedValueOnce({ rows: [] } as any);
+
+        // 3. update rooms set status = 'AVAILABLE'
+        executeSpy.mockResolvedValueOnce({ rows: [] } as any);
 
         await recalculateRoomStatus(db as any, 'room-1');
 
-        expect(executeSpy).toHaveBeenCalledTimes(2);
+        expect(executeSpy).toHaveBeenCalledTimes(3);
 
-        const updateQuery = executeSpy.mock.calls[1][0];
+        const updateQuery = executeSpy.mock.calls[2][0];
         expect(updateQuery.sql).toContain('update "rooms" set "status" = $1');
         expect(updateQuery.parameters).toContain('AVAILABLE');
         expect(updateQuery.parameters).toContain('room-1');
     });
 
-    it('should support array of roomIds and call update for each', async () => {
-        const db = new Kysely<any>({
-            dialect: {
-                createAdapter: () => new PostgresAdapter(),
-                createDriver: () => new DummyDriver(),
-                createIntrospector: (db) => new PostgresIntrospector(db),
-                createQueryCompiler: () => new PostgresQueryCompiler(),
-            },
-        });
+    it('should set room status to ASSIGNED when section split active exam is found', async () => {
+        const { db, executeSpy } = createMockDb();
 
-        const executeSpy = vi.spyOn(db.getExecutor(), 'executeQuery');
-        // Mock responses for room-1 and room-2 queries (2 select, 2 update = 4 queries total)
-        executeSpy
-            // room-1 select (no exam)
-            .mockResolvedValueOnce({ rows: [] } as any)
-            // room-1 update
-            .mockResolvedValueOnce({ rows: [] } as any)
-            // room-2 select (has exam)
-            .mockResolvedValueOnce({ rows: [{ exam_id: 'exam-2' }] } as any)
-            // room-2 update
-            .mockResolvedValueOnce({ rows: [] } as any);
+        // 1. directExamRooms select (empty)
+        executeSpy.mockResolvedValueOnce({ rows: [] } as any);
+
+        // 2. sectionExamRooms select (found room-1)
+        executeSpy.mockResolvedValueOnce({ rows: [{ room_id: 'room-1' }] } as any);
+
+        // 3. update rooms set status = 'ASSIGNED'
+        executeSpy.mockResolvedValueOnce({ rows: [] } as any);
+
+        await recalculateRoomStatus(db as any, 'room-1');
+
+        expect(executeSpy).toHaveBeenCalledTimes(3);
+
+        const sectionSelectQuery = executeSpy.mock.calls[1][0];
+        expect(sectionSelectQuery.sql).toContain('exam_section_assignments');
+        expect(sectionSelectQuery.sql).toContain('"esa"."room_id" in ($1)');
+
+        const updateQuery = executeSpy.mock.calls[2][0];
+        expect(updateQuery.sql).toContain('update "rooms" set "status" = $1');
+        expect(updateQuery.parameters).toContain('ASSIGNED');
+    });
+
+    it('should execute batch updates for array of roomIds in constant query count', async () => {
+        const { db, executeSpy } = createMockDb();
+
+        // 1. directExamRooms select (room-1 active)
+        executeSpy.mockResolvedValueOnce({ rows: [{ room_id: 'room-1' }] } as any);
+
+        // 2. sectionExamRooms select (empty)
+        executeSpy.mockResolvedValueOnce({ rows: [] } as any);
+
+        // 3. update ASSIGNED for room-1
+        executeSpy.mockResolvedValueOnce({ rows: [] } as any);
+
+        // 4. update AVAILABLE for room-2
+        executeSpy.mockResolvedValueOnce({ rows: [] } as any);
 
         await recalculateRoomStatus(db as any, ['room-1', 'room-2']);
 
+        // 2 SELECTs + 2 UPDATEs = 4 queries total for 2 rooms (constant batch size instead of N loops)
         expect(executeSpy).toHaveBeenCalledTimes(4);
+
+        const assignedUpdate = executeSpy.mock.calls[2][0];
+        expect(assignedUpdate.parameters).toContain('ASSIGNED');
+        expect(assignedUpdate.parameters).toContain('room-1');
+
+        const availableUpdate = executeSpy.mock.calls[3][0];
+        expect(availableUpdate.parameters).toContain('AVAILABLE');
+        expect(availableUpdate.parameters).toContain('room-2');
     });
 });

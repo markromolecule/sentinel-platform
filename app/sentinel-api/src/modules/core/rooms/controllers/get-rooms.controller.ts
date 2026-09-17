@@ -49,7 +49,13 @@ export const getRoomsRouteHandler: AppRouteHandler<typeof getRoomsRoute> = async
             );
         }
 
-        const { search, institutionId: queryInstitutionId, page, pageSize } = c.req.valid('query');
+        const {
+            search,
+            institutionId: queryInstitutionId,
+            page,
+            pageSize,
+            limit,
+        } = c.req.valid('query');
         const scope = buildRequesterAcademicScope({
             requesterRole: role,
             requesterInstitutionId: institutionId,
@@ -65,20 +71,20 @@ export const getRoomsRouteHandler: AppRouteHandler<typeof getRoomsRoute> = async
             institutionId: queryScope.institutionId,
             search,
             page,
-            pageSize,
+            pageSize: pageSize ?? limit,
         });
         const data = Array.isArray(rooms) ? rooms : rooms.items;
         return c.json(
             Array.isArray(rooms)
                 ? {
-                      message: 'Rooms fetched successfully',
-                      data,
-                  }
+                    message: 'Rooms fetched successfully',
+                    data,
+                }
                 : {
-                      message: 'Rooms fetched successfully',
-                      data,
-                      pagination: rooms.pagination,
-                  },
+                    message: 'Rooms fetched successfully',
+                    data,
+                    pagination: rooms.pagination,
+                },
             200,
         );
     } catch (error: any) {

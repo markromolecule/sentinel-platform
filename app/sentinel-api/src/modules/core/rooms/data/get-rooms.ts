@@ -1,4 +1,5 @@
 import { type DbClient } from '@sentinel/db';
+import { sql } from 'kysely';
 
 // Type for getRoomsData function arguments
 export type GetRoomsDataArgs = {
@@ -9,6 +10,8 @@ export type GetRoomsDataArgs = {
 
 // Get all rooms from the rooms table
 export async function getRoomsData({ dbClient, institutionId, search }: GetRoomsDataArgs) {
+    const now = new Date();
+
     let query = dbClient
         .selectFrom('rooms as r')
         .leftJoin('institutions as inst', 'inst.id', 'r.institution_id')
@@ -22,7 +25,26 @@ export async function getRoomsData({ dbClient, institutionId, search }: GetRooms
             'r.room_code',
             'r.room_number',
             'r.room_type',
-            'r.status',
+            sql<'AVAILABLE' | 'ASSIGNED' | 'MAINTENANCE'>`
+                CASE
+                    WHEN r.status = 'MAINTENANCE' THEN 'MAINTENANCE'
+                    WHEN EXISTS (
+                        SELECT 1 FROM exams e
+                        WHERE (
+                            e.room_id = r.room_id
+                            OR EXISTS (
+                                SELECT 1 FROM exam_section_assignments esa
+                                WHERE esa.room_id = r.room_id
+                                  AND esa.exam_id = e.exam_id
+                            )
+                        )
+                          AND e.status NOT IN ('DRAFT', 'ARCHIVED', 'COMPLETED')
+                          AND e.scheduled_date <= ${now}
+                          AND e.end_date_time >= ${now}
+                    ) THEN 'ASSIGNED'
+                    ELSE 'AVAILABLE'
+                END
+            `.as('status'),
             'r.source_record_id',
             'r.inheritance_status',
             'r.overridden_at',
