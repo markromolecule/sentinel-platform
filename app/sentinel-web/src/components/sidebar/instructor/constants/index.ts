@@ -54,7 +54,7 @@ export const classManagementItems = [
 ];
 export const examManagementItems = [
     {
-        title: 'Exams',
+        title: 'Examination',
         url: '/exams',
         icon: FileText,
     },
