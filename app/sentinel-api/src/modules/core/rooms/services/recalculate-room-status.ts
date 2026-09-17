@@ -14,31 +14,59 @@ export async function recalculateRoomStatus(
     roomIds: string | string[],
 ): Promise<void> {
     const ids = Array.isArray(roomIds) ? roomIds : [roomIds];
-    const uniqueIds = Array.from(new Set(ids.filter(Boolean)));
+    const uniqueIds = Array.from(new Set(ids.filter((id): id is string => Boolean(id))));
     if (uniqueIds.length === 0) {
         return;
     }
 
     const now = new Date();
 
-    for (const roomId of uniqueIds) {
-        // Query if there is an active exam currently occupying this room
-        const activeExam = await dbClient
-            .selectFrom('exams')
-            .select('exam_id')
-            .where('room_id', '=', roomId)
-            .where('status', 'not in', ['DRAFT', 'ARCHIVED', 'COMPLETED'])
-            .where('scheduled_date', '<=', now)
-            .where('end_date_time', '>=', now)
-            .executeTakeFirst();
+    // Batch query direct exam assignments currently active
+    const directExamRooms = await dbClient
+        .selectFrom('exams')
+        .select('room_id')
+        .where('room_id', 'in', uniqueIds)
+        .where('status', 'not in', ['DRAFT', 'ARCHIVED', 'COMPLETED'])
+        .where('scheduled_date', '<=', now)
+        .where('end_date_time', '>=', now)
+        .execute();
 
-        const targetStatus = activeExam ? 'ASSIGNED' : 'AVAILABLE';
+    // Batch query section-split assignments currently active
+    const sectionExamRooms = await dbClient
+        .selectFrom('exam_section_assignments as esa')
+        .innerJoin('exams as e', 'e.exam_id', 'esa.exam_id')
+        .select('esa.room_id')
+        .where('esa.room_id', 'in', uniqueIds)
+        .where('e.status', 'not in', ['DRAFT', 'ARCHIVED', 'COMPLETED'])
+        .where('e.scheduled_date', '<=', now)
+        .where('e.end_date_time', '>=', now)
+        .execute();
 
-        // Update the room's status, leaving MAINTENANCE rooms untouched
+    const activeRoomIds = new Set<string>();
+    for (const r of directExamRooms) {
+        if (r.room_id) activeRoomIds.add(r.room_id);
+    }
+    for (const r of sectionExamRooms) {
+        if (r.room_id) activeRoomIds.add(r.room_id);
+    }
+
+    const assignedIds = uniqueIds.filter((id) => activeRoomIds.has(id));
+    const availableIds = uniqueIds.filter((id) => !activeRoomIds.has(id));
+
+    if (assignedIds.length > 0) {
         await dbClient
             .updateTable('rooms')
-            .set({ status: targetStatus, updated_at: new Date() })
-            .where('room_id', '=', roomId)
+            .set({ status: 'ASSIGNED', updated_at: now })
+            .where('room_id', 'in', assignedIds)
+            .where('status', '!=', 'MAINTENANCE')
+            .execute();
+    }
+
+    if (availableIds.length > 0) {
+        await dbClient
+            .updateTable('rooms')
+            .set({ status: 'AVAILABLE', updated_at: now })
+            .where('room_id', 'in', availableIds)
             .where('status', '!=', 'MAINTENANCE')
             .execute();
     }

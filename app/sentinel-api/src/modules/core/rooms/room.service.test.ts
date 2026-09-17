@@ -200,7 +200,7 @@ describe('RoomService operations', () => {
     });
 
     describe('getRoomsService', () => {
-        it('successfully retrieves rooms, recalculates status, and returns status', async () => {
+        it('successfully retrieves rooms and preserves projected status without write mutations', async () => {
             const mockRawRooms = [
                 {
                     room_id: 'r1',
@@ -208,7 +208,7 @@ describe('RoomService operations', () => {
                     room_code: 'RM500',
                     room_number: '500',
                     room_type: 'LABORATORY',
-                    status: 'AVAILABLE',
+                    status: 'ASSIGNED',
                     isLocal: true,
                     isInherited: false,
                     isOverridden: false,
@@ -217,16 +217,13 @@ describe('RoomService operations', () => {
             ];
 
             vi.mocked(getRoomsData).mockResolvedValue(mockRawRooms as any);
-            vi.mocked(recalculateRoomStatus).mockResolvedValue();
-
-            dbClient.execute.mockResolvedValue([{ room_id: 'r1', status: 'ASSIGNED' }]);
 
             const result = await getRoomsService({
                 dbClient,
                 institutionId: 'inst-1',
             });
 
-            expect(recalculateRoomStatus).toHaveBeenCalledWith(dbClient, ['r1']);
+            expect(recalculateRoomStatus).not.toHaveBeenCalled();
             expect(result).toHaveLength(1);
             expect(result[0].status).toBe('ASSIGNED');
         });

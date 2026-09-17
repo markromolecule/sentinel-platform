@@ -1,7 +1,6 @@
 import { type DbClient } from '@sentinel/db';
 import { getRoomsData } from '../data/get-rooms';
 import { loadEffectiveRows } from '../../inheritance/effective-row-loader';
-import { recalculateRoomStatus } from './recalculate-room-status';
 import { paginateItems } from '../../../../lib/pagination';
 
 export type GetRoomsServiceArgs = {
@@ -26,22 +25,6 @@ export async function getRoomsService({
         loadRows: (scopeInstitutionId) =>
             getRoomsData({ dbClient, institutionId: scopeInstitutionId, search }),
     });
-
-    const roomIds = rawRooms.map((room: any) => room.room_id);
-    if (roomIds.length > 0) {
-        await recalculateRoomStatus(dbClient, roomIds);
-        const updatedStatuses = await dbClient
-            .selectFrom('rooms')
-            .select(['room_id', 'status'])
-            .where('room_id', 'in', roomIds)
-            .execute();
-        const statusMap = new Map(updatedStatuses.map((r: any) => [r.room_id, r.status]));
-        for (const room of rawRooms) {
-            if (statusMap.has(room.room_id)) {
-                room.status = statusMap.get(room.room_id);
-            }
-        }
-    }
 
     return paginateItems(
         rawRooms.map((room: any) => ({

@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { OpenAPIHono } from '@hono/zod-openapi';
+import type { HonoEnv } from '../../../../types/hono';
 import roomsRoutes from '../room.routes';
 
 vi.mock('../../../../middleware/auth', () => ({
@@ -45,7 +46,7 @@ vi.mock('./bulk-create-rooms.controller', () => ({
 
 describe('Rooms Route Access', () => {
     const makeAppWithContext = (role: string, permissionKeys: string[]) => {
-        const app = new OpenAPIHono();
+        const app = new OpenAPIHono<HonoEnv>();
         app.use('*', async (c, next) => {
             c.set('dbClient', {} as any);
             c.set('user', { id: 'user-1' } as any);
