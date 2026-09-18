@@ -63,7 +63,7 @@ vi.mock('@sentinel/ui', () => ({
 describe('SharedSubjectsPage Route Permission Gating Test', () => {
     it('renders header, catalog dialogs, and subject list for superadmin with create permission', () => {
         render(<SharedSubjectsPage />);
-        expect(screen.getByText('Subject List')).toBeTruthy();
+        expect(screen.getByText('Course List')).toBeTruthy();
         expect(screen.getByTestId('add-subject-dialog')).toBeTruthy();
         expect(screen.getByTestId('bulk-upload-dialog')).toBeTruthy();
         expect(screen.getByTestId('subjects-list')).toBeTruthy();

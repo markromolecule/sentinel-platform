@@ -109,7 +109,7 @@ export default function SharedOfferedSubjectsPage() {
                     className="bg-[#323d8f] hover:bg-[#323d8f]/90"
                 >
                     <Plus className="mr-2 h-4 w-4" />
-                    Offer Subject
+                    Offer Course
                 </Button>
             ) : null}
         </div>
@@ -117,12 +117,12 @@ export default function SharedOfferedSubjectsPage() {
 
     return (
         <SubjectPageShell
-            title="Offered Subjects"
-            description="Review all term-based subject offerings and the audiences they are assigned to."
+            title="Offered Courses"
+            description="Review all term-based course offerings and the audiences they are assigned to."
             actions={actions}
         >
             {isViewDenied ? (
-                <PermissionDeniedState resourceName="subject offerings" className="h-[360px]" />
+                <PermissionDeniedState resourceName="course offerings" className="h-[360px]" />
             ) : (
                 <div className="relative">
                     <OfferedSubjectsList
@@ -141,7 +141,7 @@ export default function SharedOfferedSubjectsPage() {
 
                     {isError && (
                         <div className="text-destructive bg-destructive/5 border-destructive/20 mt-4 flex h-32 items-center justify-center rounded-md border">
-                            Error loading offered subjects. Contact support if this continues.
+                            Error loading offered courses. Contact support if this continues.
                         </div>
                     )}
                 </div>

@@ -17,9 +17,9 @@ describe('SubjectNav Component', () => {
         expect(screen.getByText('Enrollment')).toBeTruthy();
 
         // Check links
-        expect(screen.getByRole('link', { name: 'Subject List' })).toBeTruthy();
-        expect(screen.getByRole('link', { name: 'Subject Classifications' })).toBeTruthy();
-        expect(screen.getByRole('link', { name: 'Offered Subjects' })).toBeTruthy();
+        expect(screen.getByRole('link', { name: 'Course List' })).toBeTruthy();
+        expect(screen.getByRole('link', { name: 'Course Classifications' })).toBeTruthy();
+        expect(screen.getByRole('link', { name: 'Offered Courses' })).toBeTruthy();
         expect(screen.getByRole('link', { name: 'Enrollment Requests' })).toBeTruthy();
     });
 
@@ -29,9 +29,9 @@ describe('SubjectNav Component', () => {
             render(<SubjectNav activeSection={activeSection} />);
 
             const links = {
-                list: screen.getByRole('link', { name: 'Subject List' }),
-                classifications: screen.getByRole('link', { name: 'Subject Classifications' }),
-                offered: screen.getByRole('link', { name: 'Offered Subjects' }),
+                list: screen.getByRole('link', { name: 'Course List' }),
+                classifications: screen.getByRole('link', { name: 'Course Classifications' }),
+                offered: screen.getByRole('link', { name: 'Offered Courses' }),
                 requests: screen.getByRole('link', { name: 'Enrollment Requests' }),
             };
 

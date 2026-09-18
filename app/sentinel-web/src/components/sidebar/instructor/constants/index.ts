@@ -34,7 +34,7 @@ export const supportItems = [
 
 export const studentManagementItems = [
     {
-        title: 'Subjects',
+        title: 'Courses',
         url: '/subjects',
         icon: BookOpen,
     },

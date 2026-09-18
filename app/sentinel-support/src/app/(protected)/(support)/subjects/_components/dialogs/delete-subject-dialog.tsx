@@ -27,21 +27,21 @@ export function DeleteSubjectDialog({
     onOpenChange,
     onConfirm,
 }: DeleteSubjectDialogProps) {
-    const subjectTitle = subject?.title.trim() || 'this subject';
+    const subjectTitle = subject?.title.trim() || 'this course';
     const subjectCode = subject?.code.trim();
 
     return (
         <AlertDialog open={open} onOpenChange={onOpenChange}>
             <AlertDialogContent>
                 <AlertDialogHeader>
-                    <AlertDialogTitle>Delete this subject?</AlertDialogTitle>
+                    <AlertDialogTitle>Delete this course?</AlertDialogTitle>
                     <AlertDialogDescription>
                         This will permanently remove{' '}
                         <span className="text-foreground font-medium">
                             {subjectTitle}
                             {subjectCode ? ` (${subjectCode})` : ''}
                         </span>{' '}
-                        from the subject catalog. This action cannot be undone.
+                        from the course catalog. This action cannot be undone.
                     </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
@@ -54,7 +54,7 @@ export function DeleteSubjectDialog({
                             onConfirm();
                         }}
                     >
-                        {isDeleting ? 'Deleting...' : 'Delete Subject'}
+                        {isDeleting ? 'Deleting...' : 'Delete Course'}
                     </AlertDialogAction>
                 </AlertDialogFooter>
             </AlertDialogContent>

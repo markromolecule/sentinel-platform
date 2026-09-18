@@ -5,12 +5,12 @@ export type SubjectSection = 'list' | 'offered';
 
 const SUBJECT_NAV_GROUPS = [
     {
-        title: 'My Subjects',
-        items: [{ id: 'list', label: 'Subject List', href: '/subjects' }],
+        title: 'My Courses',
+        items: [{ id: 'list', label: 'Course List', href: '/subjects' }],
     },
     {
         title: 'Browse',
-        items: [{ id: 'offered', label: 'Offered Subjects', href: '/subjects/offered' }],
+        items: [{ id: 'offered', label: 'Offered Courses', href: '/subjects/offered' }],
     },
 ];
 

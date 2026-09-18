@@ -63,12 +63,12 @@ export function createOfferedColumns({
         },
         {
             accessorKey: 'subjectCode',
-            header: ({ column }) => <DataTableColumnHeader column={column} title="Subject Code" />,
+            header: ({ column }) => <DataTableColumnHeader column={column} title="Course Code" />,
             cell: ({ row }) => <span className="font-medium">{row.original.subjectCode}</span>,
         },
         {
             accessorKey: 'subjectTitle',
-            header: ({ column }) => <DataTableColumnHeader column={column} title="Subject" />,
+            header: ({ column }) => <DataTableColumnHeader column={column} title="Course" />,
             cell: ({ row }) => (
                 <div className="max-w-[400px]" title={row.original.subjectTitle.trim()}>
                     {row.original.subjectTitle.trim()}

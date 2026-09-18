@@ -21,7 +21,7 @@ export function RequestSubjectDialog() {
                 onClick={() => setOpen(true)}
             >
                 <Plus className="mr-2 h-4 w-4" />
-                Request Offered Subject
+                Request Offered Course
             </Button>
 
             <RequestOfferedSubjectBuilderDialog

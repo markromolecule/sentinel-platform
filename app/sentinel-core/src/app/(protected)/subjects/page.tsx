@@ -30,11 +30,11 @@ export default function SharedSubjectsPage() {
 
     return (
         <SubjectPageShell
-            title="Subject List"
+            title="Course List"
             description={
                 isCatalogManager
-                    ? 'Manage the shared institutional subject catalog used for term offerings.'
-                    : 'Browse the shared institutional subject catalog and offer subjects to your assigned course.'
+                    ? 'Manage the shared institutional course catalog used for term offerings.'
+                    : 'Browse the shared institutional course catalog and offer courses to your assigned department.'
             }
             actions={actions}
         >

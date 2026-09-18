@@ -14,11 +14,11 @@ export function SubjectClassificationDialog(props: SubjectClassificationDialogPr
                 <DialogHeader>
                     <DialogTitle>
                         {classification
-                            ? 'Edit Subject Classification'
-                            : 'Create Subject Classification'}
+                            ? 'Edit Course Classification'
+                            : 'Create Course Classification'}
                     </DialogTitle>
                     <DialogDescription>
-                        Group institution subjects so branches inherit the same classification
+                        Group institution courses so branches inherit the same classification
                         structure.
                     </DialogDescription>
                 </DialogHeader>

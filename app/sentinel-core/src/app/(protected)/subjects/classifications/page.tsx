@@ -93,13 +93,13 @@ export default function SubjectClassificationPage() {
 
     return (
         <SubjectPageShell
-            title="Subject Classifications"
-            description="Create shared grouping cards for the institutional subject catalog, then assign subjects into each classification."
+            title="Course Classifications"
+            description="Create shared grouping cards for the institutional course catalog, then assign courses into each classification."
             actions={actions}
         >
             {isViewDenied ? (
                 <PermissionDeniedState
-                    resourceName="subject classifications"
+                    resourceName="course classifications"
                     className="h-[360px]"
                 />
             ) : (
@@ -123,7 +123,7 @@ export default function SubjectClassificationPage() {
 
                     {isError ? (
                         <div className="text-destructive bg-destructive/5 border-destructive/20 mt-4 flex h-28 items-center justify-center rounded-xl border">
-                            Error loading subject classifications. Contact support if this
+                            Error loading course classifications. Contact support if this
                             continues.
                         </div>
                     ) : null}

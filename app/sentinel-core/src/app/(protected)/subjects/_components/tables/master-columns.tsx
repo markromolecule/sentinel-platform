@@ -37,7 +37,7 @@ export function createMasterColumns({
         } satisfies ColumnDef<MasterSubject>,
         {
             accessorKey: 'code',
-            header: ({ column }) => <DataTableColumnHeader column={column} title="Subject Code" />,
+            header: ({ column }) => <DataTableColumnHeader column={column} title="Course Code" />,
         },
         {
             accessorKey: 'title',

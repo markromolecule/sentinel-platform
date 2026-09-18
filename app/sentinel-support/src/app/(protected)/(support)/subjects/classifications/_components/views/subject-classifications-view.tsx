@@ -87,7 +87,7 @@ export function SubjectClassificationsView() {
                 description={
                     isFiltered
                         ? 'No classifications match the selected filters or search term.'
-                        : 'Create subject classifications so institution-level groupings can be inherited by branches.'
+                        : 'Create course classifications so institution-level groupings can be inherited by branches.'
                 }
                 action={
                     !isFiltered && canCreate ? (
@@ -107,8 +107,8 @@ export function SubjectClassificationsView() {
 
     return (
         <SubjectPageShell
-            title="Subject Classifications"
-            description="Manage institution-level subject groupings that can be inherited by branches."
+            title="Course Classifications"
+            description="Manage institution-level course groupings that can be inherited by branches."
             actions={
                 canCreate ? (
                     <Button onClick={handleCreate} className="bg-[#323d8f] hover:bg-[#323d8f]/90">
@@ -120,7 +120,7 @@ export function SubjectClassificationsView() {
         >
             {isViewDenied ? (
                 <PermissionDeniedState
-                    resourceName="subject classifications"
+                    resourceName="course classifications"
                     className="h-[360px]"
                 />
             ) : (

@@ -76,7 +76,7 @@ export function SubjectsView() {
     );
 
     if (isViewDenied) {
-        return <PermissionDeniedState resourceName="subjects" className="h-[360px]" />;
+        return <PermissionDeniedState resourceName="courses" className="h-[360px]" />;
     }
 
     return (
@@ -105,7 +105,7 @@ export function SubjectsView() {
 
             {isError && (
                 <div className="text-destructive bg-destructive/5 border-destructive/20 mt-4 flex h-32 items-center justify-center rounded-md border">
-                    Error loading subjects. Contact support if this continues.
+                    Error loading courses. Contact support if this continues.
                 </div>
             )}
 

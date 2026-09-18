@@ -7,10 +7,10 @@ const SUBJECT_NAV_GROUPS = [
     {
         title: 'Catalog',
         items: [
-            { id: 'list', label: 'Subject List', href: '/subjects' },
+            { id: 'list', label: 'Course List', href: '/subjects' },
             {
                 id: 'classifications',
-                label: 'Subject Classifications',
+                label: 'Course Classifications',
                 href: '/subjects/classifications',
             },
         ],
@@ -18,7 +18,7 @@ const SUBJECT_NAV_GROUPS = [
     {
         title: 'Enrollment',
         items: [
-            { id: 'offered', label: 'Offered Subjects', href: '/subjects/offered' },
+            { id: 'offered', label: 'Offered Courses', href: '/subjects/offered' },
             { id: 'requests', label: 'Enrollment Requests', href: '/subjects/requests' },
         ],
     },

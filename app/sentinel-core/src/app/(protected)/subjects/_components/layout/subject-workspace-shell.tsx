@@ -34,7 +34,7 @@ export function SubjectWorkspaceShell({ children }: SubjectWorkspaceShellProps) 
             <div className="bg-background sticky -top-6 hidden w-64 shrink-0 flex-col border-r lg:flex">
                 <div className="flex h-14 shrink-0 items-center px-4">
                     <h1 className="text-foreground text-[1.1rem] font-bold tracking-tight">
-                        Subject Management
+                        Course Management
                     </h1>
                 </div>
                 <Separator className="bg-border/40 shrink-0" />

@@ -17,7 +17,7 @@ export function RequestOfferedSubjectBuilderDialogHeader({
     activeOffering,
     onBack,
 }: RequestOfferedSubjectBuilderDialogHeaderProps) {
-    const title = intent === 'edit' ? 'Edit Enrollment Request' : 'Request Offered Subject';
+    const title = intent === 'edit' ? 'Edit Enrollment Request' : 'Request Offered Course';
     const description =
         mode === 'locked-offering' && activeOffering
             ? intent === 'edit'
@@ -28,8 +28,8 @@ export function RequestOfferedSubjectBuilderDialogHeader({
                   ? `Adjust the request targets for ${activeOffering.subjectCode}. Saving changes will re-submit the request for review.`
                   : `Configure your request for ${activeOffering.subjectCode}.`
               : intent === 'edit'
-                ? 'Choose the offered subject you want this request to target.'
-                : 'Choose an offered subject to continue.';
+                ? 'Choose the offered course you want this request to target.'
+                : 'Choose an offered course to continue.';
 
     return (
         <DialogHeader className="mb-2">

@@ -41,12 +41,12 @@ export default function SubjectsPage() {
 
     return (
         <SubjectPageShell
-            title="Subject List"
-            description="Manage the offered subjects you have requested or are currently teaching."
+            title="Course List"
+            description="Manage the offered courses you have requested or are currently teaching."
             actions={actions}
         >
             {isViewDenied ? (
-                <PermissionDeniedState resourceName="subject requests" className="h-[360px]" />
+                <PermissionDeniedState resourceName="course requests" className="h-[360px]" />
             ) : (
                 <div className="relative">
                     {subjects.length > 0 || searchTerm !== '' ? (
