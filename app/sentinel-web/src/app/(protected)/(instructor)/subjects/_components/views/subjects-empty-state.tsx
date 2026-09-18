@@ -5,8 +5,8 @@ export function SubjectsEmptyState() {
     return (
         <EmptyState
             icon="📚"
-            title="No requested subjects yet"
-            description="You have not requested or been assigned any offered subjects yet. Use the builder to submit your first grouped request."
+            title="No requested courses yet"
+            description="You have not requested or been assigned any offered courses yet. Use the builder to submit your first grouped request."
             action={<RequestSubjectDialog />}
             className="animate-in fade-in-50"
         />

@@ -123,11 +123,11 @@ export function OfferedView() {
 
     return (
         <SubjectPageShell
-            title="Offered Subjects"
-            description="Review all term-based subject offerings."
+            title="Offered Courses"
+            description="Review all term-based course offerings."
         >
             {isViewDenied ? (
-                <PermissionDeniedState resourceName="subject offerings" className="h-[360px]" />
+                <PermissionDeniedState resourceName="course offerings" className="h-[360px]" />
             ) : (
                 <>
                     <DataTable
@@ -137,7 +137,7 @@ export function OfferedView() {
                         onSearchChange={setSearchTerm}
                         columnFilters={columnFilters}
                         onColumnFiltersChange={setColumnFilters}
-                        searchPlaceholder="Search offered subjects..."
+                        searchPlaceholder="Search offered courses..."
                         facets={facets}
                         isLoading={isLoading}
                         manualPagination
@@ -167,7 +167,7 @@ export function OfferedView() {
                     />
                     {isError ? (
                         <div className="text-destructive bg-destructive/5 border-destructive/20 flex h-32 items-center justify-center rounded-md border">
-                            Error loading offered subjects. Contact support if this continues.
+                            Error loading offered courses. Contact support if this continues.
                         </div>
                     ) : null}
                 </>
@@ -176,9 +176,9 @@ export function OfferedView() {
             <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
                 <DialogContent>
                     <DialogHeader>
-                        <DialogTitle>Delete Selected Subject Offerings?</DialogTitle>
+                        <DialogTitle>Delete Selected Course Offerings?</DialogTitle>
                         <DialogDescription>
-                            Are you sure you want to delete {selectedIds.length} selected subject
+                            Are you sure you want to delete {selectedIds.length} selected course
                             offering(s)? This action cannot be undone.
                         </DialogDescription>
                     </DialogHeader>

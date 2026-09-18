@@ -92,7 +92,7 @@ const CORE_ADMIN_NAV_DEFINITIONS: Array<{
             },
             {
                 pageId: 'subjects',
-                title: 'Subjects',
+                title: 'Courses',
                 url: '/subjects',
                 icon: BookOpen,
             },

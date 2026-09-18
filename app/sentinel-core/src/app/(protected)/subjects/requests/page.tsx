@@ -52,10 +52,10 @@ export default function SharedEnrollmentRequestsPage() {
     return (
         <SubjectPageShell
             title="Enrollment Requests"
-            description="Review and process instructor offered-subject enrollment requests."
+            description="Review and process instructor offered-course enrollment requests."
         >
             {isViewDenied ? (
-                <PermissionDeniedState resourceName="subject requests" className="h-[360px]" />
+                <PermissionDeniedState resourceName="course requests" className="h-[360px]" />
             ) : (
                 <div className="relative">
                     {isLoading ? (

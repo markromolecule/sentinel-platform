@@ -49,7 +49,7 @@ export const getSubjectColumns = ({
     },
     {
         accessorKey: 'title',
-        header: ({ column }) => <DataTableColumnHeader column={column} title="Subject" />,
+        header: ({ column }) => <DataTableColumnHeader column={column} title="Course" />,
         cell: ({ row }) => (
             <div className="max-w-[400px]" title={row.original.title.trim()}>
                 {row.original.title.trim()}

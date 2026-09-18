@@ -50,7 +50,7 @@ export function InstructorOfferedSubjectsList({
             data={offerings}
             searchValue={searchTerm}
             onSearchChange={onSearchChange}
-            searchPlaceholder="Search offered subjects..."
+            searchPlaceholder="Search offered courses..."
             isLoading={isLoading}
             facets={offeredSubjectsFacets}
             initialColumnVisibility={{

@@ -86,7 +86,7 @@ export function createSubjectOfferingColumns({
     columns.push(
         {
             accessorKey: 'subjectCode',
-            header: ({ column }) => <DataTableColumnHeader column={column} title="Subject Code" />,
+            header: ({ column }) => <DataTableColumnHeader column={column} title="Course Code" />,
             cell: ({ row }) => (
                 <span
                     className="cursor-pointer font-medium text-[#323d8f] hover:underline"

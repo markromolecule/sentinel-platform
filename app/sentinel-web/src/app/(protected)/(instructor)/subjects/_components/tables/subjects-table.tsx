@@ -46,7 +46,7 @@ export function SubjectsTable({
     columns = defaultColumns,
     searchValue,
     onSearchChange,
-    searchPlaceholder = 'Search subjects...',
+    searchPlaceholder = 'Search courses...',
     facets,
     pagination,
     onPaginationChange,

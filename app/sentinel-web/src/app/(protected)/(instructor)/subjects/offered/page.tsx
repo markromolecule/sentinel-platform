@@ -83,11 +83,11 @@ export default function InstructorOfferedSubjectsPage() {
 
     return (
         <SubjectPageShell
-            title="Offered Subjects"
-            description="Browse subjects offered for the active term and request assignment for your classes."
+            title="Offered Courses"
+            description="Browse courses offered for the active term and request assignment for your classes."
         >
             {isViewDenied ? (
-                <PermissionDeniedState resourceName="subject offerings" className="h-[360px]" />
+                <PermissionDeniedState resourceName="course offerings" className="h-[360px]" />
             ) : (
                 <div className="relative">
                     <InstructorOfferedSubjectsList
@@ -105,7 +105,7 @@ export default function InstructorOfferedSubjectsPage() {
 
                     {isError && (
                         <div className="text-destructive bg-destructive/5 border-destructive/20 mt-4 flex h-32 items-center justify-center rounded-md border">
-                            Error loading offered subjects. Contact support if this continues.
+                            Error loading offered courses. Contact support if this continues.
                         </div>
                     )}
                 </div>

@@ -13,12 +13,12 @@ describe('SubjectNav Component', () => {
         render(<SubjectNav activeSection="list" />);
 
         // Check group headings
-        expect(screen.getByText('My Subjects')).toBeTruthy();
+        expect(screen.getByText('My Courses')).toBeTruthy();
         expect(screen.getByText('Browse')).toBeTruthy();
 
         // Check links
-        expect(screen.getByRole('link', { name: 'Subject List' })).toBeTruthy();
-        expect(screen.getByRole('link', { name: 'Offered Subjects' })).toBeTruthy();
+        expect(screen.getByRole('link', { name: 'Course List' })).toBeTruthy();
+        expect(screen.getByRole('link', { name: 'Offered Courses' })).toBeTruthy();
     });
 
     it.each(sections)(
@@ -27,8 +27,8 @@ describe('SubjectNav Component', () => {
             render(<SubjectNav activeSection={activeSection} />);
 
             const links = {
-                list: screen.getByRole('link', { name: 'Subject List' }),
-                offered: screen.getByRole('link', { name: 'Offered Subjects' }),
+                list: screen.getByRole('link', { name: 'Course List' }),
+                offered: screen.getByRole('link', { name: 'Offered Courses' }),
             };
 
             // Assert links have correct routing href

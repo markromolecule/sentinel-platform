@@ -69,7 +69,7 @@ export function InstructorSidebar() {
                                             isActive={
                                                 item.title === 'Question Bank'
                                                     ? isQuestionBankActive
-                                                    : item.title === 'Subjects'
+                                                    : item.title === 'Courses' || item.title === 'Subjects'
                                                       ? isSubjectsActive
                                                       : item.title === 'Exams'
                                                         ? isExamActive

@@ -96,7 +96,7 @@ export function createInstructorOfferedSubjectColumns({
     return [
         {
             accessorKey: 'subjectCode',
-            header: ({ column }) => <DataTableColumnHeader column={column} title="Subject Code" />,
+            header: ({ column }) => <DataTableColumnHeader column={column} title="Course Code" />,
             cell: ({ row }) => <span className="font-medium">{row.original.subjectCode}</span>,
         },
         {

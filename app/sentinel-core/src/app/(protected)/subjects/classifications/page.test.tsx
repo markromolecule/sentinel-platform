@@ -142,7 +142,7 @@ describe('SubjectClassificationPage Permission Gating Test', () => {
 
     it('renders page header and classifications list with create group action', () => {
         render(<SubjectClassificationPage />);
-        expect(screen.getAllByText('Subject Classifications').length).toBeGreaterThan(0);
+        expect(screen.getAllByText('Course Classifications').length).toBeGreaterThan(0);
         expect(screen.getByText('Create Group')).toBeTruthy();
         expect(screen.getByTestId('classifications-list')).toBeTruthy();
         expect(screen.getByText('Classifications: Core Subjects, Inherited Subjects')).toBeTruthy();

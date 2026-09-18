@@ -24,7 +24,7 @@ export function RequestOfferedSubjectBuilderPickerStep({
         return (
             <div className="border-border/60 bg-muted/10 rounded-xl border p-8 text-center">
                 <p className="text-foreground text-sm font-semibold">
-                    No requestable offered subjects found
+                    No requestable offered courses found
                 </p>
                 <p className="text-muted-foreground mt-2 text-sm leading-6">
                     Open or draft offerings with available sections will appear here when they are
@@ -42,7 +42,7 @@ export function RequestOfferedSubjectBuilderPickerStep({
                 render={({ field }) => (
                     <FormItem>
                         <FormLabel className="mb-4 block text-base font-semibold">
-                            Select Offered Subject
+                            Select Offered Course
                         </FormLabel>
                         <FormControl>
                             <OfferedSubjectPicker

@@ -85,16 +85,16 @@ export function SubjectActionsCell({ subject }: SubjectActionsCellProps) {
                         </DropdownMenuItem>
                     ) : null}
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem onClick={() => copyToClipboard(subject.code, 'Subject code')}>
+                    <DropdownMenuItem onClick={() => copyToClipboard(subject.code, 'Course code')}>
                         <Copy className="mr-2 h-4 w-4" />
-                        Copy subject code
+                        Copy course code
                     </DropdownMenuItem>
                     {subjectOfferingId && (
                         <DropdownMenuItem
-                            onClick={() => copyToClipboard(subjectOfferingId, 'Offered subject ID')}
+                            onClick={() => copyToClipboard(subjectOfferingId, 'Offered course ID')}
                         >
                             <Copy className="mr-2 h-4 w-4" />
-                            Copy offered subject ID
+                            Copy offered course ID
                         </DropdownMenuItem>
                     )}
                     <DropdownMenuSeparator />
@@ -103,7 +103,7 @@ export function SubjectActionsCell({ subject }: SubjectActionsCellProps) {
                         className="text-red-600 focus:text-red-600"
                     >
                         <Trash2 className="mr-2 h-4 w-4" />
-                        Unenroll Subject
+                        Unenroll Course
                     </DropdownMenuItem>
                 </DropdownMenuContent>
             </DropdownMenu>

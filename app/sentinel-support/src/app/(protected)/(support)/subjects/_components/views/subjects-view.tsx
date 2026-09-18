@@ -165,8 +165,8 @@ export function SubjectsView() {
 
     return (
         <SubjectPageShell
-            title="Subject List"
-            description="Browse and manage the institutional subject catalog."
+            title="Course List"
+            description="Browse and manage the institutional course catalog."
             actions={
                 !isViewDenied ? (
                     <PermissionGuard permission="subjects:create">
@@ -177,7 +177,7 @@ export function SubjectsView() {
                             />
                             <Button onClick={handleCreate}>
                                 <Plus className="mr-2 h-4 w-4" />
-                                Add Subject
+                                Add Course
                             </Button>
                         </div>
                     </PermissionGuard>
@@ -185,7 +185,7 @@ export function SubjectsView() {
             }
         >
             {isViewDenied ? (
-                <PermissionDeniedState resourceName="subjects" className="h-[360px]" />
+                <PermissionDeniedState resourceName="courses" className="h-[360px]" />
             ) : (
                 <>
                     <DataTable
@@ -195,7 +195,7 @@ export function SubjectsView() {
                         onSearchChange={setSearchTerm}
                         columnFilters={resolvedColumnFilters}
                         onColumnFiltersChange={handleColumnFiltersChange}
-                        searchPlaceholder="Search subjects..."
+                        searchPlaceholder="Search courses..."
                         facets={facets}
                         isLoading={isLoading}
                         manualPagination
@@ -224,7 +224,7 @@ export function SubjectsView() {
                     />
                     {isError ? (
                         <div className="text-destructive bg-destructive/5 border-destructive/20 flex h-32 items-center justify-center rounded-md border">
-                            Error loading subjects. Contact support if this continues.
+                            Error loading courses. Contact support if this continues.
                         </div>
                     ) : null}
                 </>
@@ -233,10 +233,10 @@ export function SubjectsView() {
             <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
                 <DialogContent>
                     <DialogHeader>
-                        <DialogTitle>Delete Selected Subjects?</DialogTitle>
+                        <DialogTitle>Delete Selected Courses?</DialogTitle>
                         <DialogDescription>
                             Are you sure you want to delete {selectedIds.length} selected
-                            subject(s)? This action cannot be undone.
+                            course(s)? This action cannot be undone.
                         </DialogDescription>
                     </DialogHeader>
                     <DialogFooter>

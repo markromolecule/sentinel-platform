@@ -112,7 +112,7 @@ export function OfferedSubjectPicker({
                         {subjects.length === 0 && (
                             <div className="flex h-32 flex-col items-center justify-center text-center">
                                 <p className="text-muted-foreground text-sm font-medium">
-                                    No subjects found matching your search.
+                                    No courses found matching your search.
                                 </p>
                             </div>
                         )}

@@ -35,7 +35,7 @@ export function UnenrollSubjectDialog({
             <DialogContent className="max-w-md">
                 <DialogHeader>
                     <DialogTitle className="text-xl">
-                        {isPendingStatus ? 'Cancel Enrollment Request?' : 'Unenroll from Subject?'}
+                        {isPendingStatus ? 'Cancel Enrollment Request?' : 'Unenroll from Course?'}
                     </DialogTitle>
                     <DialogDescription className="text-muted-foreground/90 pt-2 text-base font-normal">
                         This action cannot be undone. This will{' '}

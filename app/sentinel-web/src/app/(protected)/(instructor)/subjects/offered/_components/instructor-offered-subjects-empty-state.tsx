@@ -12,11 +12,11 @@ export function InstructorOfferedSubjectsEmptyState({
     return (
         <EmptyState
             icon="🗂️"
-            title={searchTerm ? 'No results found' : 'No offered subjects available'}
+            title={searchTerm ? 'No results found' : 'No offered courses available'}
             description={
                 searchTerm
-                    ? `We couldn't find any offered subjects matching "${searchTerm}".`
-                    : 'No subject offerings are available for the current term. If you think this is incorrect, contact your administrator.'
+                    ? `We couldn't find any offered courses matching "${searchTerm}".`
+                    : 'No course offerings are available for the current term. If you think this is incorrect, contact your administrator.'
             }
         />
     );

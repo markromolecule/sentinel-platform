@@ -62,7 +62,7 @@ export const MANAGEMENT_ITEMS: SidebarItem[] = [
         icon: Library,
     },
     {
-        title: 'Subjects',
+        title: 'Courses',
         url: '/subjects',
         icon: BookOpen,
     },

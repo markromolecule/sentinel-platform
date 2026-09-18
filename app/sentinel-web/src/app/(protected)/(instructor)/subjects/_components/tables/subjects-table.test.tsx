@@ -72,4 +72,25 @@ describe('SubjectsTable', () => {
         expect(screen.queryByRole('columnheader', { name: /Approved At/i })).toBeNull();
         expect(screen.queryByRole('columnheader', { name: /Approved By/i })).toBeNull();
     });
+
+    it('renders search input with "Search courses..." placeholder when search handler is provided', () => {
+        const queryClient = new QueryClient({
+            defaultOptions: { queries: { retry: false } },
+        });
+        const fakeApiClient = vi.fn().mockResolvedValue({ data: [] });
+
+        render(
+            <QueryClientProvider client={queryClient}>
+                <ApiProvider apiClient={fakeApiClient as any}>
+                    <SubjectsTable
+                        data={mockSubjects}
+                        searchValue=""
+                        onSearchChange={() => {}}
+                    />
+                </ApiProvider>
+            </QueryClientProvider>,
+        );
+
+        expect(screen.getByPlaceholderText('Search courses...')).toBeTruthy();
+    });
 });

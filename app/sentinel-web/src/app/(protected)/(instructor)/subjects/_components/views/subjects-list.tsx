@@ -78,10 +78,10 @@ export function SubjectsList({
         onSuccess: () => {
             setUnenrollOpen(false);
             setRowSelection({});
-            toast.success(`Successfully unenrolled from ${selectedPayload.length} subjects`);
+            toast.success(`Successfully unenrolled from ${selectedPayload.length} courses`);
         },
         onError: (error) => {
-            toast.error(error.message || 'Failed to unenroll from some subjects');
+            toast.error(error.message || 'Failed to unenroll from some courses');
         },
     });
 
@@ -146,12 +146,12 @@ export function SubjectsList({
                 <AlertDialog open={unenrollOpen} onOpenChange={setUnenrollOpen}>
                     <AlertDialogContent>
                         <AlertDialogHeader>
-                            <AlertDialogTitle>Unenroll from selected subjects?</AlertDialogTitle>
+                            <AlertDialogTitle>Unenroll from selected courses?</AlertDialogTitle>
                             <AlertDialogDescription>
-                                This will unenroll you from {selectedPayload.length} selected
-                                subject
+                                This will unenroll you from {selectedPayload.length} selected{' '}
+                                course
                                 {selectedPayload.length === 1 ? '' : 's'} across all assigned
-                                sections. Any pending enrollment requests for these subjects will
+                                sections. Any pending enrollment requests for these courses will
                                 also be canceled.
                             </AlertDialogDescription>
                         </AlertDialogHeader>

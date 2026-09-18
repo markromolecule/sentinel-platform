@@ -96,8 +96,8 @@ vi.mock('@sentinel/ui', () => ({
 describe('SharedOfferedSubjectsPage Gating Test', () => {
     it('renders the offered subjects page and the list', () => {
         render(<SharedOfferedSubjectsPage />);
-        expect(screen.getByText('Offered Subjects')).toBeTruthy();
-        expect(screen.getByText('Offer Subject')).toBeTruthy();
+        expect(screen.getByText('Offered Courses')).toBeTruthy();
+        expect(screen.getByText('Offer Course')).toBeTruthy();
         expect(screen.getByTestId('offerings-list')).toBeTruthy();
         expect(
             screen.getByText(

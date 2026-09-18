@@ -101,10 +101,10 @@ export function BulkUploadDialog({ institutions, defaultInstitutionId }: BulkUpl
 
             <DialogContent className="flex max-h-[90vh] flex-col p-0 sm:max-w-[760px]">
                 <DialogHeader className="border-b px-6 py-5">
-                    <DialogTitle className="text-xl">Bulk Upload Subjects</DialogTitle>
+                    <DialogTitle className="text-xl">Bulk Upload Courses</DialogTitle>
                     <DialogDescription className="text-sm leading-5">
-                        Add subjects manually or import a CSV/XLSX file. Each row should contain a
-                        subject code and title.
+                        Add courses manually or import a CSV/XLSX file. Each row should contain a
+                        course code and title.
                     </DialogDescription>
                 </DialogHeader>
 
@@ -117,7 +117,7 @@ export function BulkUploadDialog({ institutions, defaultInstitutionId }: BulkUpl
                             disabled={isImporting}
                         >
                             <SelectTrigger id="bulk-import-institution">
-                                <SelectValue placeholder="Select target institution for these subjects" />
+                                <SelectValue placeholder="Select target institution for these courses" />
                             </SelectTrigger>
                             <SelectContent>
                                 {institutions.map((institution) => (

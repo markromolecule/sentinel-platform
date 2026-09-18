@@ -43,11 +43,11 @@ export function SubjectFormDialog({
         <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogContent>
                 <DialogHeader>
-                    <DialogTitle>{isCreateMode ? 'Add Subject' : 'Edit Subject'}</DialogTitle>
+                    <DialogTitle>{isCreateMode ? 'Add Course' : 'Edit Course'}</DialogTitle>
                     <DialogDescription>
                         {isCreateMode
-                            ? 'Create a subject and assign it to an institution.'
-                            : 'Subject changes are scoped to the selected template context.'}
+                            ? 'Create a course and assign it to an institution.'
+                            : 'Course changes are scoped to the selected template context.'}
                     </DialogDescription>
                 </DialogHeader>
                 <div className="grid gap-4">
