@@ -1,4 +1,5 @@
 import { supabase } from '@/lib/supabase';
+import { getMobileEnv } from '@/lib/config/env';
 import Constants from 'expo-constants';
 import * as Linking from 'expo-linking';
 
@@ -17,7 +18,7 @@ function trimSlashes(value: string) {
 }
 
 export function getMobileAuthCallbackPath() {
-    const configuredPath = process.env.EXPO_PUBLIC_MOBILE_AUTH_CALLBACK_PATH;
+    const configuredPath = getMobileEnv().EXPO_PUBLIC_MOBILE_AUTH_CALLBACK_PATH;
     return trimSlashes(configuredPath || DEFAULT_CALLBACK_PATH);
 }
 
@@ -27,7 +28,7 @@ export function getMobileAuthCallbackUrl() {
 }
 
 export function getExpoAuthProxyRedirectUrl() {
-    const configuredProxyUrl = process.env.EXPO_PUBLIC_EXPO_AUTH_PROXY_URL?.trim();
+    const configuredProxyUrl = getMobileEnv().EXPO_PUBLIC_EXPO_AUTH_PROXY_URL;
 
     if (configuredProxyUrl) {
         return configuredProxyUrl.replace(/\/+$/g, '');

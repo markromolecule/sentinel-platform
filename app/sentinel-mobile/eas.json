@@ -9,13 +9,42 @@
             "distribution": "internal"
         },
         "preview": {
-            "distribution": "internal"
+            "distribution": "internal",
+            "environment": "production",
+            "android": {
+                "buildType": "apk"
+            },
+            "env": {
+                "EXPO_PUBLIC_API_URL": "https://api.sentinelph.tech",
+                "EXPO_PUBLIC_WEB_URL": "https://app.sentinelph.tech",
+                "EXPO_PUBLIC_MOBILE_AUTH_CALLBACK_PATH": "auth/callback"
+            }
+        },
+        "production-apk": {
+            "extends": "production",
+            "distribution": "internal",
+            "android": {
+                "buildType": "apk"
+            }
         },
         "production": {
-            "autoIncrement": true
+            "autoIncrement": true,
+            "environment": "production",
+            "android": {
+                "buildType": "app-bundle"
+            },
+            "env": {
+                "EXPO_PUBLIC_API_URL": "https://api.sentinelph.tech",
+                "EXPO_PUBLIC_WEB_URL": "https://app.sentinelph.tech",
+                "EXPO_PUBLIC_MOBILE_AUTH_CALLBACK_PATH": "auth/callback"
+            }
         }
     },
     "submit": {
-        "production": {}
+        "production": {
+            "android": {
+                "track": "internal"
+            }
+        }
     }
 }

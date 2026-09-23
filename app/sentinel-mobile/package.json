@@ -8,6 +8,11 @@
         "ios": "expo run:ios",
         "web": "expo start --web",
         "test": "vitest run --passWithNoTests",
+        "verify:env": "node scripts/verify-env.mjs",
+        "build:apk": "pnpm run verify:env && eas build --platform android --profile preview",
+        "build:apk:prod": "pnpm run verify:env && eas build --platform android --profile production-apk",
+        "build:playstore": "pnpm run verify:env && eas build --platform android --profile production",
+        "submit:playstore": "eas submit --platform android --profile production",
         "ignore-build": "npx turbo-ignore"
     },
     "dependencies": {

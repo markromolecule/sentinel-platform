@@ -1,0 +1,11 @@
+name: Build Android APK
+on:
+  workflow_dispatch: {}
+
+jobs:
+  build_apk:
+    name: Build Standalone APK
+    type: build
+    params:
+      platform: android
+      profile: preview

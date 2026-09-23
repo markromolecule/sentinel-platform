@@ -1,0 +1,22 @@
+name: Release to Google Play Store
+on:
+  workflow_dispatch: {}
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  build_production_aab:
+    name: Build Android App Bundle
+    type: build
+    params:
+      platform: android
+      profile: production
+
+  submit_playstore:
+    name: Submit to Google Play Internal
+    needs: [build_production_aab]
+    type: submit
+    params:
+      build_id: ${{ needs.build_production_aab.outputs.build_id }}
+      profile: production

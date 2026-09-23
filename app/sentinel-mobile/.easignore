@@ -1,0 +1,52 @@
+# Git and repository metadata
+.git
+.git/
+.github
+.github/
+.agents
+.agents/
+.vscode
+.vscode/
+.trae
+.trae/
+.turbo
+.turbo/
+.pnpm-store
+.pnpm-store/
+
+# Documentation and tooling
+docs
+docs/
+context-factory
+context-factory/
+postman
+postman/
+.postman
+.postman/
+*.md
+
+# Build outputs and node_modules
+node_modules/
+**/node_modules/
+**/dist/
+**/.turbo/
+
+# Other applications in monorepo
+app/sentinel-api
+app/sentinel-api/
+app/sentinel-core
+app/sentinel-core/
+app/sentinel-support
+app/sentinel-support/
+app/sentinel-web
+app/sentinel-web/
+
+# Unused packages in monorepo
+packages/db
+packages/db/
+packages/ui
+packages/ui/
+
+# In mobile app, ignore iOS native folder when building Android
+app/sentinel-mobile/ios
+app/sentinel-mobile/ios/

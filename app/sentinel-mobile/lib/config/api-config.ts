@@ -1,5 +1,6 @@
 import Constants from 'expo-constants';
 import { Platform } from 'react-native';
+import { getMobileEnv } from './env';
 
 export const PRODUCTION_API_URL = 'https://api.sentinelph.tech';
 export const DEFAULT_DEV_PORT = '3001';
@@ -21,7 +22,7 @@ export function resolveApiBaseUrl(options: ResolveApiBaseUrlOptions = {}): strin
     const envUrl = (
         options.envUrl !== undefined
             ? options.envUrl
-            : process.env.EXPO_PUBLIC_API_URL || ''
+            : getMobileEnv().EXPO_PUBLIC_API_URL || ''
     ).trim();
 
     // 1. Production Mode: Always default to production API unless explicitly configured
@@ -97,6 +98,6 @@ export function logApiConfiguration(): void {
         resolvedApiUrl: resolvedUrl,
         expoHostUri: hostUri || '(none)',
         platform: Platform.OS,
-        envApiUrl: process.env.EXPO_PUBLIC_API_URL || '(unset)',
+        envApiUrl: getMobileEnv().EXPO_PUBLIC_API_URL || '(unset)',
     });
 }
