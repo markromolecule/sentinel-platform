@@ -13,7 +13,8 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+import { useObserve } from 'expo-observe';
 import { Colors } from '@/constants/theme';
 import { useAuth, useStudentClassroomsQuery, useProfileQuery } from '@sentinel/hooks';
 import ClassroomCard from '@/components/classroom/classroom-card';
@@ -22,6 +23,7 @@ import { getUserAvatarInitials, resolveAvatarUrl } from '@/features/profile/lib/
 export default function ClassroomScreen() {
     const router = useRouter();
     const { user } = useAuth();
+    const { markInteractive } = useObserve();
     const colorScheme = useColorScheme();
     const colors = Colors[colorScheme ?? 'light'];
     const [searchQuery, setSearchQuery] = useState('');
@@ -34,6 +36,12 @@ export default function ClassroomScreen() {
         refetch,
         isRefetching,
     } = useStudentClassroomsQuery();
+
+    useEffect(() => {
+        if (!isLoading) {
+            markInteractive();
+        }
+    }, [isLoading, markInteractive]);
 
     const classrooms = useMemo(() => {
         const query = searchQuery.trim().toLowerCase();

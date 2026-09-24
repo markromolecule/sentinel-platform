@@ -2,11 +2,13 @@ import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, Text, View } from 'react-native';
 import { Stack, useRouter } from 'expo-router';
 import * as Linking from 'expo-linking';
+import { Observe, useObserve } from 'expo-observe';
 import { Colors } from '@/constants/theme';
 import { setSessionFromOAuthCallback } from '@/lib/auth/oauth-callback';
 
 export default function AuthCallbackScreen() {
     const router = useRouter();
+    const { markInteractive } = useObserve();
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
     useEffect(() => {
@@ -26,8 +28,11 @@ export default function AuthCallbackScreen() {
                     throw new Error('Authentication callback did not include a session.');
                 }
 
+                markInteractive();
                 router.replace('/(tabs)/classroom');
             } catch (error) {
+                Observe.reportError(error);
+                markInteractive();
                 const message =
                     error instanceof Error
                         ? error.message

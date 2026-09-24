@@ -11,6 +11,16 @@ import { AuthProvider, ApiProvider, type SentinelSupabaseClient } from '@sentine
 import { supabase } from '@/lib/supabase';
 import { apiClient } from '@/lib/api-client';
 import { logApiConfiguration } from '@/lib/config/api-config';
+import { Observe, ObserveRoot } from 'expo-observe';
+import { RootErrorFallback } from '@/components/root-error-fallback';
+
+Observe.configure({
+    integrations: {
+        'expo-router': {
+            filteredParams: ['token', 'access_token', 'refresh_token', 'code', 'password'],
+        },
+    },
+});
 
 export default function RootLayout() {
     useEffect(() => {
@@ -29,30 +39,32 @@ export default function RootLayout() {
     );
 
     return (
-        <GestureHandlerRootView style={{ flex: 1 }}>
-            <SafeAreaProvider>
-                <QueryClientProvider client={queryClient}>
-                    <AuthProvider supabase={supabase as unknown as SentinelSupabaseClient}>
-                        <ApiProvider apiClient={apiClient}>
-                            <Stack screenOptions={{ headerShown: false, contentStyle: { flex: 1 } }}>
-                                <Stack.Screen name="index" />
-                                <Stack.Screen name="auth/callback" />
-                                <Stack.Screen name="(auth)" options={{ animation: 'none' }} />
-                                <Stack.Screen name="(tabs)" options={{ animation: 'none' }} />
-                                <Stack.Screen
-                                    name="exam/[id]"
-                                    options={{
-                                        animation: 'slide_from_right',
-                                        gestureEnabled: false,
-                                        fullScreenGestureEnabled: false,
-                                        contentStyle: { flex: 1 },
-                                    }}
-                                />
-                            </Stack>
-                        </ApiProvider>
-                    </AuthProvider>
-                </QueryClientProvider>
-            </SafeAreaProvider>
-        </GestureHandlerRootView>
+        <ObserveRoot errorBoundaryFallback={<RootErrorFallback />}>
+            <GestureHandlerRootView style={{ flex: 1 }}>
+                <SafeAreaProvider>
+                    <QueryClientProvider client={queryClient}>
+                        <AuthProvider supabase={supabase as unknown as SentinelSupabaseClient}>
+                            <ApiProvider apiClient={apiClient}>
+                                <Stack screenOptions={{ headerShown: false, contentStyle: { flex: 1 } }}>
+                                    <Stack.Screen name="index" />
+                                    <Stack.Screen name="auth/callback" />
+                                    <Stack.Screen name="(auth)" options={{ animation: 'none' }} />
+                                    <Stack.Screen name="(tabs)" options={{ animation: 'none' }} />
+                                    <Stack.Screen
+                                        name="exam/[id]"
+                                        options={{
+                                            animation: 'slide_from_right',
+                                            gestureEnabled: false,
+                                            fullScreenGestureEnabled: false,
+                                            contentStyle: { flex: 1 },
+                                        }}
+                                    />
+                                </Stack>
+                            </ApiProvider>
+                        </AuthProvider>
+                    </QueryClientProvider>
+                </SafeAreaProvider>
+            </GestureHandlerRootView>
+        </ObserveRoot>
     );
 }

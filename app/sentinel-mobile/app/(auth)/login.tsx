@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import {
     View,
     Text,
@@ -9,6 +9,7 @@ import {
 } from 'react-native';
 import { Controller } from 'react-hook-form';
 import { Link, Stack } from 'expo-router';
+import { useObserve } from 'expo-observe';
 import { Colors } from '@/constants/theme';
 import { SocialButton } from '@/components/social-button';
 import { AuthHeader } from '@/components/auth-header';
@@ -24,6 +25,7 @@ import { useLoginForm } from './hooks/use-login-form';
 import styles from './style/login';
 
 export default function LoginScreen() {
+    const { markInteractive } = useObserve();
     const {
         control,
         errors,
@@ -35,6 +37,10 @@ export default function LoginScreen() {
         onSubmit,
         handleGoogleLogin,
     } = useLoginForm();
+
+    useEffect(() => {
+        markInteractive();
+    }, [markInteractive]);
 
     return (
         <View style={styles.container}>

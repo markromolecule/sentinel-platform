@@ -1,6 +1,6 @@
 {
     "cli": {
-        "version": ">= 16.32.0",
+        "version": ">= 22.0.0",
         "appVersionSource": "remote"
     },
     "build": {
@@ -29,6 +29,7 @@
         },
         "production": {
             "autoIncrement": true,
+            "uploadSourceMaps": true,
             "environment": "production",
             "android": {
                 "buildType": "app-bundle"

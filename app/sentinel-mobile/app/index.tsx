@@ -5,20 +5,23 @@ import { useRouter } from 'expo-router';
 import { Logo } from '@/components/logo';
 import { Colors } from '@/constants/theme';
 import { useAuth } from '@sentinel/hooks';
+import { useObserve } from 'expo-observe';
 
 export default function SplashScreen() {
     const router = useRouter();
     const { user, isLoading } = useAuth();
+    const { markInteractive } = useObserve();
 
     useEffect(() => {
         if (!isLoading) {
+            markInteractive();
             if (user) {
                 router.replace('/(tabs)/classroom');
             } else {
                 router.replace('/(auth)/login');
             }
         }
-    }, [user, isLoading, router]);
+    }, [user, isLoading, router, markInteractive]);
 
     return (
         <View style={styles.container}>
