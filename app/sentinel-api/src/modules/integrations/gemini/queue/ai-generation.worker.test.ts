@@ -1,5 +1,11 @@
-import { describe, expect, it, vi, beforeEach } from 'vitest';
-import { AiGenerationWorkerProcessor, type AiGenerationJobData } from './ai-generation.worker';
+import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
+import {
+    AiGenerationWorkerProcessor,
+    type AiGenerationJobData,
+    handleWorkerError,
+    resetCircuitBreakerForTesting,
+    getWorkerCircuitBreakerState,
+} from './ai-generation.worker';
 import {
     AiGenerationInputStorageService,
     AiGenerationInputStorageError,
@@ -400,3 +406,126 @@ describe('AiGenerationWorkerProcessor', () => {
         });
     });
 });
+
+describe('AiWorker Circuit Breaker & Error Backoff', () => {
+    beforeEach(() => {
+        vi.useFakeTimers();
+        resetCircuitBreakerForTesting();
+    });
+
+    afterEach(() => {
+        resetCircuitBreakerForTesting();
+        vi.useRealTimers();
+    });
+
+    it('trips circuit breaker and pauses worker on internal error, then resumes after backoff', async () => {
+        const mockWorker = {
+            pause: vi.fn().mockResolvedValue(undefined),
+            resume: vi.fn().mockReturnValue(undefined),
+            closing: undefined,
+            isPaused: vi.fn().mockReturnValue(true),
+        } as any;
+
+        const delay = await handleWorkerError(
+            new Error('ReplyError: ERR max requests limit exceeded'),
+            mockWorker,
+            { baseDelayMs: 100, maxDelayMs: 1000 },
+        );
+
+        expect(delay).toBe(100);
+        expect(mockWorker.pause).toHaveBeenCalledWith(true);
+        expect(getWorkerCircuitBreakerState().isBackoffActive).toBe(true);
+        expect(getWorkerCircuitBreakerState().consecutiveErrors).toBe(1);
+
+        // Advance timers by backoff delay
+        await vi.advanceTimersByTimeAsync(100);
+
+        expect(mockWorker.resume).toHaveBeenCalled();
+        expect(getWorkerCircuitBreakerState().isBackoffActive).toBe(false);
+    });
+
+    it('exponentially increases backoff delay on repeated errors up to max', async () => {
+        const mockWorker = {
+            pause: vi.fn().mockResolvedValue(undefined),
+            resume: vi.fn().mockReturnValue(undefined),
+            closing: undefined,
+            isPaused: vi.fn().mockReturnValue(true),
+        } as any;
+
+        // 1st error: 100ms
+        const delay1 = await handleWorkerError(new Error('Connection error 1'), mockWorker, {
+            baseDelayMs: 100,
+            maxDelayMs: 500,
+        });
+        expect(delay1).toBe(100);
+        await vi.advanceTimersByTimeAsync(100);
+
+        // 2nd error: 200ms
+        const delay2 = await handleWorkerError(new Error('Connection error 2'), mockWorker, {
+            baseDelayMs: 100,
+            maxDelayMs: 500,
+        });
+        expect(delay2).toBe(200);
+        await vi.advanceTimersByTimeAsync(200);
+
+        // 3rd error: 400ms
+        const delay3 = await handleWorkerError(new Error('Connection error 3'), mockWorker, {
+            baseDelayMs: 100,
+            maxDelayMs: 500,
+        });
+        expect(delay3).toBe(400);
+        await vi.advanceTimersByTimeAsync(400);
+
+        // 4th error: capped at 500ms
+        const delay4 = await handleWorkerError(new Error('Connection error 4'), mockWorker, {
+            baseDelayMs: 100,
+            maxDelayMs: 500,
+        });
+        expect(delay4).toBe(500);
+    });
+
+    it('does not re-trigger pause while backoff is already active', async () => {
+        const mockWorker = {
+            pause: vi.fn().mockResolvedValue(undefined),
+            resume: vi.fn().mockReturnValue(undefined),
+            closing: undefined,
+            isPaused: vi.fn().mockReturnValue(true),
+        } as any;
+
+        const delay1 = await handleWorkerError(new Error('First error'), mockWorker, {
+            baseDelayMs: 500,
+        });
+        expect(delay1).toBe(500);
+        expect(mockWorker.pause).toHaveBeenCalledTimes(1);
+
+        // Subsequent error while backoff active should return null and not call pause again
+        const delay2 = await handleWorkerError(new Error('Second rapid error'), mockWorker, {
+            baseDelayMs: 500,
+        });
+        expect(delay2).toBeNull();
+        expect(mockWorker.pause).toHaveBeenCalledTimes(1);
+    });
+
+    it('does not resume worker if worker is closing when backoff window elapses', async () => {
+        const mockWorker = {
+            pause: vi.fn().mockResolvedValue(undefined),
+            resume: vi.fn().mockReturnValue(undefined),
+            closing: Promise.resolve(),
+            isPaused: vi.fn().mockReturnValue(true),
+        } as any;
+
+        await handleWorkerError(new Error('Some error'), mockWorker, {
+            baseDelayMs: 100,
+            maxDelayMs: 1000,
+        });
+
+        expect(mockWorker.pause).toHaveBeenCalledWith(true);
+
+        // Advance timer past backoff delay
+        await vi.advanceTimersByTimeAsync(100);
+
+        // resume should not have been called because worker is closing
+        expect(mockWorker.resume).not.toHaveBeenCalled();
+    });
+});
+
