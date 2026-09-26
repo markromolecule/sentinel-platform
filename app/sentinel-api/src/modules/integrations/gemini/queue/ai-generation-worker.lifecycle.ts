@@ -7,9 +7,10 @@ import {
 import {
     getAiGenerationQueueName,
     getAiWorkerConcurrency,
+    getAiWorkerDrainDelaySeconds,
+    getAiWorkerStalledIntervalMs,
     resolveQueueOperationalMode,
     DEFAULT_LOCK_DURATION_MS,
-    DEFAULT_STALLED_INTERVAL_MS,
     DEFAULT_MAX_STALLED_COUNT,
 } from './ai-generation-queue.config';
 import { AiGenerationJobRepository } from '../data/ai-generation-job.repository';
@@ -22,6 +23,97 @@ let workerConnection: any = null;
 let maintenanceInterval: NodeJS.Timeout | null = null;
 
 const MAINTENANCE_INTERVAL_MS = 15 * 60 * 1000; // 15 minutes
+
+export const DEFAULT_CIRCUIT_BREAKER_BASE_DELAY_MS = 5_000;
+export const DEFAULT_CIRCUIT_BREAKER_MAX_DELAY_MS = 30_000;
+export const DEFAULT_ERROR_LOG_THROTTLE_MS = 10_000;
+
+let consecutiveErrors = 0;
+let backoffTimer: NodeJS.Timeout | null = null;
+let isBackoffActive = false;
+let lastErrorLogTime = 0;
+
+export function getWorkerCircuitBreakerState() {
+    return {
+        consecutiveErrors,
+        isBackoffActive,
+        isPaused: worker?.isPaused() ?? false,
+    };
+}
+
+export function resetCircuitBreakerForTesting() {
+    if (backoffTimer) {
+        clearTimeout(backoffTimer);
+        backoffTimer = null;
+    }
+    isBackoffActive = false;
+    consecutiveErrors = 0;
+    lastErrorLogTime = 0;
+}
+
+export async function handleWorkerError(
+    err: Error,
+    targetWorker: Worker<AiGenerationJobData> | null = worker,
+    options?: {
+        baseDelayMs?: number;
+        maxDelayMs?: number;
+        logThrottleMs?: number;
+    },
+): Promise<number | null> {
+    consecutiveErrors++;
+    const now = Date.now();
+    const logThrottleMs = options?.logThrottleMs ?? DEFAULT_ERROR_LOG_THROTTLE_MS;
+
+    if (now - lastErrorLogTime >= logThrottleMs) {
+        lastErrorLogTime = now;
+        console.error(
+            `[AiWorker] Worker internal error (consecutive failures: ${consecutiveErrors}):`,
+            err.message || err,
+        );
+    }
+
+    if (!isBackoffActive && targetWorker) {
+        isBackoffActive = true;
+        const baseDelay = options?.baseDelayMs ?? DEFAULT_CIRCUIT_BREAKER_BASE_DELAY_MS;
+        const maxDelay = options?.maxDelayMs ?? DEFAULT_CIRCUIT_BREAKER_MAX_DELAY_MS;
+        const backoffDelay = Math.min(
+            baseDelay * Math.pow(2, Math.min(consecutiveErrors - 1, 3)),
+            maxDelay,
+        );
+
+        console.warn(
+            `[AiWorker] Circuit breaker tripped. Pausing worker for ${backoffDelay / 1000}s to prevent runaway CPU spin...`,
+        );
+
+        try {
+            await targetWorker.pause(true);
+        } catch (pauseErr) {
+            console.error('[AiWorker] Failed to pause worker during circuit breaker trip:', pauseErr);
+        }
+
+        if (backoffTimer) {
+            clearTimeout(backoffTimer);
+        }
+
+        backoffTimer = setTimeout(async () => {
+            isBackoffActive = false;
+            backoffTimer = null;
+            if (targetWorker && !targetWorker.closing) {
+                try {
+                    await targetWorker.resume();
+                    console.log('[AiWorker] Circuit breaker backoff window elapsed. Resumed worker.');
+                } catch (resumeErr) {
+                    console.error('[AiWorker] Failed to resume worker after backoff:', resumeErr);
+                }
+            }
+        }, backoffDelay);
+        backoffTimer.unref();
+
+        return backoffDelay;
+    }
+
+    return null;
+}
 
 export type StartAiWorkerOptions = {
     processor?: (data: AiGenerationJobData, context?: ProcessJobContext) => Promise<void>;
@@ -51,9 +143,11 @@ export async function startAiGenerationWorker(
 
     const queueName = getAiGenerationQueueName();
     const concurrency = getAiWorkerConcurrency();
+    const drainDelay = getAiWorkerDrainDelaySeconds();
+    const stalledInterval = getAiWorkerStalledIntervalMs();
 
     console.log(
-        `[AiWorker] Starting BullMQ AI Worker on queue "${queueName}" (concurrency: ${concurrency})...`,
+        `[AiWorker] Starting BullMQ AI Worker on queue "${queueName}" (concurrency: ${concurrency}, drainDelay: ${drainDelay}s, stalledInterval: ${stalledInterval}ms)...`,
     );
 
     // 1. Run startup maintenance
@@ -97,8 +191,9 @@ export async function startAiGenerationWorker(
         {
             connection: workerConnection,
             concurrency,
+            drainDelay,
             lockDuration: DEFAULT_LOCK_DURATION_MS,
-            stalledInterval: DEFAULT_STALLED_INTERVAL_MS,
+            stalledInterval,
             maxStalledCount: DEFAULT_MAX_STALLED_COUNT,
         },
     );
@@ -138,8 +233,14 @@ export async function startAiGenerationWorker(
         console.warn(`[AiWorker] Warning: Job ${jobId} stalled and will be re-attempted or reconciled.`);
     });
 
+    worker.on('completed', () => {
+        if (consecutiveErrors > 0) {
+            consecutiveErrors = 0;
+        }
+    });
+
     worker.on('error', (err) => {
-        console.error('[AiWorker] Worker internal error:', err);
+        void handleWorkerError(err, worker);
     });
 
     console.log(`[AiWorker] AI Generation Worker initialized successfully on queue "${queueName}".`);
@@ -154,6 +255,13 @@ export async function stopAiGenerationWorker(): Promise<void> {
         clearInterval(maintenanceInterval);
         maintenanceInterval = null;
     }
+
+    if (backoffTimer) {
+        clearTimeout(backoffTimer);
+        backoffTimer = null;
+    }
+    isBackoffActive = false;
+    consecutiveErrors = 0;
 
     if (worker) {
         console.log('[AiWorker] Closing BullMQ Worker...');
