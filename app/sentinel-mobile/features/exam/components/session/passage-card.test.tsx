@@ -110,9 +110,9 @@ describe('PassageCard', () => {
         expect(findText(tree, 'Secret text.')).toBe(false);
     });
 
-    it('includes an accessibilityRole of article on the outer container', () => {
+    it('includes an accessibilityRole of none on the outer container', () => {
         const tree = PassageCard({ passage: 'Hello' });
-        expect((tree as any).props?.accessibilityRole).toBe('article');
+        expect((tree as any).props?.accessibilityRole).toBe('none');
     });
 
     it('cleans and formats HTML markup into readable text', () => {

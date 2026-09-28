@@ -60,7 +60,7 @@ export const PassageCard = ({ passage, title }: PassageCardProps) => {
 
     return (
         <View
-            accessibilityRole={"article" as any}
+            accessibilityRole="none"
             accessibilityLabel={`Reading passage: ${displayTitle}`}
             style={{
                 backgroundColor: isDark ? '#1e2a3b' : '#f0f7ff',
