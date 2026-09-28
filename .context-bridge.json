@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "bridgeVersion": "1.2.0",
-  "factoryPath": "../context-factory",
+  "factoryPath": "./context-factory",
   "integrationMethod": "submodule",
   "packageManager": "pnpm",
   "ides": [
@@ -13,7 +13,10 @@
     "copilot",
     "codex"
   ],
-  "createdAt": "2026-08-29T12:41:08.990Z",
+  "stacks": [
+    "typescript"
+  ],
+  "createdAt": "2026-09-28T12:45:23.796Z",
   "scoping": {
     "tasks": "./docs/tasks",
     "decisions": "./docs/decisions",
@@ -22,40 +25,110 @@
   },
   "symlinks": [
     {
-      "id": ".agents/skills",
-      "target": "../../context-factory/skills",
-      "type": "dir"
-    },
-    {
       "id": ".agents/rules",
-      "target": "../../context-factory/rules",
+      "target": "../context-factory/rules",
       "type": "dir"
     },
     {
       "id": ".agents/agents",
-      "target": "../../context-factory/agents",
+      "target": "../context-factory/agents",
       "type": "dir"
     },
     {
       "id": ".agents/workflows",
-      "target": "../../context-factory/workflows",
+      "target": "../context-factory/workflows",
       "type": "dir"
     },
     {
       "id": ".agents/AGENTS.md",
-      "target": "../../context-factory/AGENTS.md",
+      "target": "../context-factory/AGENTS.md",
       "type": "file"
     },
     {
       "id": ".agents/GEMINI.md",
-      "target": "../../context-factory/GEMINI.md",
+      "target": "../context-factory/GEMINI.md",
       "type": "file"
+    },
+    {
+      "id": ".agents/skills/execute",
+      "target": "../../context-factory/skills/engineering/execute",
+      "type": "dir"
+    },
+    {
+      "id": ".agents/skills/explore",
+      "target": "../../context-factory/skills/engineering/explore",
+      "type": "dir"
+    },
+    {
+      "id": ".agents/skills/refactor",
+      "target": "../../context-factory/skills/engineering/refactor",
+      "type": "dir"
+    },
+    {
+      "id": ".agents/skills/review",
+      "target": "../../context-factory/skills/engineering/review",
+      "type": "dir"
+    },
+    {
+      "id": ".agents/skills/security",
+      "target": "../../context-factory/skills/engineering/security",
+      "type": "dir"
+    },
+    {
+      "id": ".agents/skills/test",
+      "target": "../../context-factory/skills/engineering/test",
+      "type": "dir"
+    },
+    {
+      "id": ".agents/skills/verify",
+      "target": "../../context-factory/skills/engineering/verify",
+      "type": "dir"
+    },
+    {
+      "id": ".agents/skills/adr",
+      "target": "../../context-factory/skills/productivity/adr",
+      "type": "dir"
+    },
+    {
+      "id": ".agents/skills/context",
+      "target": "../../context-factory/skills/productivity/context",
+      "type": "dir"
+    },
+    {
+      "id": ".agents/skills/docs",
+      "target": "../../context-factory/skills/productivity/docs",
+      "type": "dir"
+    },
+    {
+      "id": ".agents/skills/grill",
+      "target": "../../context-factory/skills/productivity/grill",
+      "type": "dir"
+    },
+    {
+      "id": ".agents/skills/grounding",
+      "target": "../../context-factory/skills/productivity/grounding",
+      "type": "dir"
+    },
+    {
+      "id": ".agents/skills/plan-review",
+      "target": "../../context-factory/skills/productivity/plan-review",
+      "type": "dir"
+    },
+    {
+      "id": ".agents/skills/plan",
+      "target": "../../context-factory/skills/productivity/plan",
+      "type": "dir"
+    },
+    {
+      "id": ".agents/skills/triage",
+      "target": "../../context-factory/skills/productivity/triage",
+      "type": "dir"
     }
   ],
   "commands": {
-    "resolve": "node ../context-factory/scripts/context.mjs resolve",
-    "bundle": "node ../context-factory/scripts/context.mjs bundle",
-    "doctor": "node ../context-factory/scripts/context.mjs doctor",
-    "cli": "node ../context-factory/app/cli/bin/context-cli.mjs"
+    "resolve": "node ./context-factory/scripts/context.mjs resolve",
+    "bundle": "node ./context-factory/scripts/context.mjs bundle",
+    "doctor": "node ./context-factory/scripts/context.mjs doctor",
+    "cli": "node ./context-factory/app/cli/bin/context-cli.mjs"
   }
 }
