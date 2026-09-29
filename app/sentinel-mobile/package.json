@@ -8,6 +8,8 @@
         "ios": "expo run:ios",
         "web": "expo start --web",
         "test": "vitest run --passWithNoTests",
+        "build:android:apk": "eas build --platform android --profile preview",
+        "build:android:apk:local": "eas build --platform android --profile preview --local",
         "ignore-build": "npx turbo-ignore"
     },
     "dependencies": {

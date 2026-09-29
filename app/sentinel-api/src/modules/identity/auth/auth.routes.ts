@@ -14,19 +14,19 @@ const authRoutes = new OpenAPIHono<HonoEnv>();
 // ----------------------------------------------------------------------------
 
 const loginRateLimit = createRateLimitMiddleware({
-    limit: 5,
+    limit: 150,
     windowSeconds: 15 * 60,
     prefix: 'rl:auth:login',
 });
 
 const registerRateLimit = createRateLimitMiddleware({
-    limit: 10,
+    limit: 250,
     windowSeconds: 15 * 60,
     prefix: 'rl:auth:register',
 });
 
 const verifyOtpRateLimit = createRateLimitMiddleware({
-    limit: 10,
+    limit: 150,
     windowSeconds: 15 * 60,
     prefix: 'rl:auth:verify-otp',
 });
