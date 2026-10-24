@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset='utf-8'>
+<title>Sentinel Platform - Mobile Use Case Narratives (Student)</title>
+<style>
+            body { font-family: 'Times New Roman', Times, serif; margin: 40px; color: #111; line-height: 1.5; }
+            h1 { font-size: 18pt; margin-bottom: 6px; }
+            h2 { font-size: 13pt; margin-top: 30px; margin-bottom: 8px; font-weight: bold; }
+            table { width: 100%; border-collapse: collapse; margin-bottom: 25px; page-break-inside: avoid; }
+            th, td { border: 1px solid #333; padding: 8px 12px; vertical-align: top; font-size: 11pt; }
+            td.label { width: 22%; background-color: #d9d9d9; font-weight: bold; }
+            td.content { width: 78%; }
+            p.info { font-style: italic; color: #444; margin-bottom: 20px; }
+        </style>
+</head>
+<body>
+<h1>Sentinel Platform - Mobile Use Case Narratives (Student)</h1>
+<p class='info'>Instructions: Open this file in your browser, press <strong>Ctrl+A</strong> (or <strong>Cmd+A</strong>) and <strong>Ctrl+C</strong> (or <strong>Cmd+C</strong>), then paste directly into Microsoft Word or Google Sheets.</p><hr><br>
+<h2>Table 8.1 Use Case Narrative: Authenticate Student on Mobile Application</h2>
+<table>
+  <tr>
+    <td class='label'>Use Case Name</td>
+    <td class='content'>Authenticate Student on Mobile Application</td>
+  </tr>
+  <tr>
+    <td class='label'>Actor(s)</td>
+    <td class='content'>Student, Supabase Auth, SecureStorage System</td>
+  </tr>
+  <tr>
+    <td class='label'>Description</td>
+    <td class='content'>Authenticates the student on the native Expo mobile app using email credentials or OAuth session, validates student role, and safely stores the access token in device hardware-backed secure storage (Expo SecureStore / AsyncStorage).</td>
+  </tr>
+  <tr>
+    <td class='label'>Pre-condition</td>
+    <td class='content'>Student has installed the native mobile app (Android or iOS) and has an active network connection.</td>
+  </tr>
+  <tr>
+    <td class='label'>Post-condition</td>
+    <td class='content'>Access tokens are securely persisted on the mobile device, user profile is loaded, and student is routed to the Mobile Student Dashboard.</td>
+  </tr>
+  <tr>
+    <td class='label'>Main Scenario</td>
+    <td class='content'>1. Student launches the Sentinel mobile application (sentinel-mobile).<br>2. System checks local storage for existing valid session tokens.<br>3. If no session exists, system renders the native Mobile Login Screen (app/(auth)/login.tsx).<br>4. Student inputs registered email address and password and taps Sign In.<br>5. System dispatches authentication request to Supabase Auth.<br>6. Supabase Auth validates credentials and returns session tokens and user metadata.<br>7. Mobile client verifies that the user possesses the student role.<br>8. System persists session tokens to encrypted device storage.<br>9. System routes the student to the main Mobile Tabs view (app/(tabs)).</td>
+  </tr>
+  <tr>
+    <td class='label'>Alternative Scenario</td>
+    <td class='content'>4a. Biometric Sign-In Available:<br>  1. Student enables Face ID / Fingerprint authentication.<br>  2. Device validates biometric sensor and unlocks stored session token without re-typing password.<br>5a. Invalid Credentials:<br>  1. Supabase Auth returns invalid credentials error.<br>  2. System presents native alert dialog: &#x27;Invalid email or password. Please try again.&#x27;<br>7a. Unauthorized Role (Non-Student):<br>  1. System detects the authenticated account belongs to an Instructor, Admin, or Support role.<br>  2. System signs out session and alerts: &#x27;The Sentinel Mobile App is restricted to Student access. Please use the Web Application for administrative and instructor functions.&#x27;</td>
+  </tr>
+</table>
+<br>
+<h2>Table 8.2 Use Case Narrative: Complete Mobile Student Onboarding &amp; Whitelist Verification</h2>
+<table>
+  <tr>
+    <td class='label'>Use Case Name</td>
+    <td class='content'>Complete Mobile Student Onboarding &amp; Whitelist Verification</td>
+  </tr>
+  <tr>
+    <td class='label'>Actor(s)</td>
+    <td class='content'>Student, System</td>
+  </tr>
+  <tr>
+    <td class='label'>Description</td>
+    <td class='content'>Guides a newly registered student through mobile onboarding by verifying their official student number against the institutional database whitelist and linking their academic department and program.</td>
+  </tr>
+  <tr>
+    <td class='label'>Pre-condition</td>
+    <td class='content'>Student is authenticated on mobile but has not finalized their academic profile.</td>
+  </tr>
+  <tr>
+    <td class='label'>Post-condition</td>
+    <td class='content'>Student record is mapped to institution, department, and course; student whitelist status is set to CLAIMED.</td>
+  </tr>
+  <tr>
+    <td class='label'>Main Scenario</td>
+    <td class='content'>1. Mobile app detects that the authenticated student has not completed onboarding.<br>2. System routes student to the native Onboarding flow (app/(onboarding)).<br>3. Student selects their enrolled Institution from a searchable picker.<br>4. System loads the department and degree program lists for the selected institution.<br>5. Student selects their Academic Department and Degree Course.<br>6. Student inputs their official Student Identification Number.<br>7. Student taps Verify &amp; Complete Registration.<br>8. System sends payload to POST /identity/onboarding/student.<br>9. API validates student number against student_whitelist.<br>10. System associates the profile, marks whitelist record as claimed, and transitions the student to the active student dashboard.</td>
+  </tr>
+  <tr>
+    <td class='label'>Alternative Scenario</td>
+    <td class='content'>9a. Student Number Not on Whitelist:<br>  1. API returns 404 Not Found indicating student ID is not registered for that department.<br>  2. Mobile app displays alert: &#x27;Student number not found in department whitelist. Please verify with your department registrar.&#x27;<br>9b. Student Number Already Claimed:<br>  1. API returns 409 Conflict stating student ID was already claimed by another account.<br>  2. Mobile app alerts user of conflict and directs them to institutional support.</td>
+  </tr>
+</table>
+<br>
+<h2>Table 8.3 Use Case Narrative: View Enrolled Classrooms, Subjects, &amp; Exam Schedule</h2>
+<table>
+  <tr>
+    <td class='label'>Use Case Name</td>
+    <td class='content'>View Enrolled Classrooms, Subjects, &amp; Exam Schedule</td>
+  </tr>
+  <tr>
+    <td class='label'>Actor(s)</td>
+    <td class='content'>Student, System</td>
+  </tr>
+  <tr>
+    <td class='label'>Description</td>
+    <td class='content'>Allows the student to inspect their active classroom rosters, enrolled subject offerings, assigned instructor details, and upcoming examination timelines.</td>
+  </tr>
+  <tr>
+    <td class='label'>Pre-condition</td>
+    <td class='content'>Student has completed onboarding and is enrolled in one or more academic classrooms.</td>
+  </tr>
+  <tr>
+    <td class='label'>Post-condition</td>
+    <td class='content'>Roster schedules and examination cards are rendered on the mobile interface.</td>
+  </tr>
+  <tr>
+    <td class='label'>Main Scenario</td>
+    <td class='content'>1. Student selects the Classrooms tab (app/(tabs)/classroom) or Exams tab (app/(tabs)/exam).<br>2. Mobile client queries Sentinel API endpoints for enrolled classrooms and published assessments.<br>3. System displays cards grouped by status (Upcoming, In-Progress, Completed, Past).<br>4. Student taps on an exam card to view assessment metadata: Title, Subject Code, Assigned Instructor, Duration, Allowed Attempts, and Proctoring Rules.<br>5. System displays the exact scheduled start date and countdown timer formatted via exam-start-date-format.ts.<br>6. Student taps the Calendar tab (app/(tabs)/calendar.tsx) to view synchronized monthly assessment milestones.</td>
+  </tr>
+  <tr>
+    <td class='label'>Alternative Scenario</td>
+    <td class='content'>2a. Offline or Poor Network Connectivity:<br>  1. Mobile client fails to reach Sentinel API.<br>  2. React Query loads cached classroom and exam records from local persistent cache and displays an offline status banner.</td>
+  </tr>
+</table>
+<br>
+<h2>Table 8.4 Use Case Narrative: Conduct Mobile Hardware Diagnostics &amp; Gaze Baseline Calibration</h2>
+<table>
+  <tr>
+    <td class='label'>Use Case Name</td>
+    <td class='content'>Conduct Mobile Hardware Diagnostics &amp; Gaze Baseline Calibration</td>
+  </tr>
+  <tr>
+    <td class='label'>Actor(s)</td>
+    <td class='content'>Student, Mobile Camera System, MediaPipe Edge Engine, System</td>
+  </tr>
+  <tr>
+    <td class='label'>Description</td>
+    <td class='content'>Performs pre-flight hardware verification on the student&#x27;s mobile device, acquiring front-camera and microphone permissions, verifying network latency, and calibrating neutral facial gaze geometry.</td>
+  </tr>
+  <tr>
+    <td class='label'>Pre-condition</td>
+    <td class='content'>Student selects an upcoming scheduled exam; examination window is open.</td>
+  </tr>
+  <tr>
+    <td class='label'>Post-condition</td>
+    <td class='content'>Hardware access is verified; neutral calibration profile (MediaPipeCalibrationProfile) is established and stored in mobile state.</td>
+  </tr>
+  <tr>
+    <td class='label'>Main Scenario</td>
+    <td class='content'>1. Student taps Take Exam on an active exam card.<br>2. System displays the Mobile Privacy Notice (app/exam/[id]/privacy).<br>3. Student reviews data collection consent regarding camera, microphone, and device telemetry and taps Accept &amp; Continue.<br>4. System displays Examination Instructions (app/exam/[id]/instruction) detailing mobile kiosk rules and anti-cheat policies.<br>5. Student proceeds to the Hardware Checkup screen (app/exam/[id]/checkup).<br>6. System requests native OS Camera and Microphone permissions via Expo.<br>7. Student approves permissions.<br>8. System initializes the front-facing camera preview with an oval face-mesh target overlay.<br>9. Student centers their face within the target guide under normal lighting.<br>10. Mobile edge engine (mobile-mediapipe-calibration.ts) captures 5 consecutive frame samples to calculate the student&#x27;s baseline Eye Aspect Ratio (EAR) and neutral iris coordinate offset.<br>11. System tests microphone input level and runs a network latency ping check.<br>12. All diagnostics pass; system unlocks the Proceed to Lobby button.</td>
+  </tr>
+  <tr>
+    <td class='label'>Alternative Scenario</td>
+    <td class='content'>7a. Camera / Microphone Permission Denied:<br>  1. Student denies permission in device OS dialog.<br>  2. App disables progress and displays button: &#x27;Open Device Settings to Enable Permissions.&#x27;<br>10a. Face Not Centered or Multiple Faces Detected:<br>  1. Calibration engine detects unstable iris coordinates or multiple faces.<br>  2. System vibrates haptic feedback and displays warning: &#x27;Please ensure only your face is visible and look directly at the front camera.&#x27;</td>
+  </tr>
+</table>
+<br>
+<h2>Table 8.5 Use Case Narrative: Join Mobile Exam Lobby &amp; Await Proctor Admission</h2>
+<table>
+  <tr>
+    <td class='label'>Use Case Name</td>
+    <td class='content'>Join Mobile Exam Lobby &amp; Await Proctor Admission</td>
+  </tr>
+  <tr>
+    <td class='label'>Actor(s)</td>
+    <td class='content'>Student, Proctor, Supabase Realtime Service, System</td>
+  </tr>
+  <tr>
+    <td class='label'>Description</td>
+    <td class='content'>Places the candidate in a mobile digital staging lobby, establishes a live WebSocket connection to the proctor console, and transitions into the exam when authorized.</td>
+  </tr>
+  <tr>
+    <td class='label'>Pre-condition</td>
+    <td class='content'>Student has successfully passed hardware diagnostics and calibration.</td>
+  </tr>
+  <tr>
+    <td class='label'>Post-condition</td>
+    <td class='content'>Student client joins the active exam room; assessment attempt is initialized in IN_PROGRESS status.</td>
+  </tr>
+  <tr>
+    <td class='label'>Main Scenario</td>
+    <td class='content'>1. Student taps Enter Exam Lobby (app/exam/[id]/lobby).<br>2. Mobile client connects to the Supabase Realtime WebSocket broadcast channel (exam:[examId]:monitoring).<br>3. System displays candidate waiting screen showing live countdown to scheduled start time, proctor announcement feed, and readiness status.<br>4. Proctor reviews candidate readiness on the Proctor Console and triggers an admission broadcast.<br>5. Mobile client receives the &#x27;admit&#x27; event.<br>6. System downloads the immutable assessment_snapshot (including randomized questions and rubric definition).<br>7. System transitions the mobile application into the active exam session (app/exam/[id]/session).</td>
+  </tr>
+  <tr>
+    <td class='label'>Alternative Scenario</td>
+    <td class='content'>4a. Proctor Denies Admission:<br>  1. Proctor flags candidate due to improper environment or identity mismatch.<br>  2. Mobile client receives &#x27;deny&#x27; broadcast with custom reason note.<br>  3. System removes candidate from lobby and displays notice: &#x27;Admission denied by proctor: [Reason]. Contact your instructor.&#x27;</td>
+  </tr>
+</table>
+<br>
+<h2>Table 8.6 Use Case Narrative: Execute Exam Session under Mobile Kiosk Lockdown</h2>
+<table>
+  <tr>
+    <td class='label'>Use Case Name</td>
+    <td class='content'>Execute Exam Session under Mobile Kiosk Lockdown</td>
+  </tr>
+  <tr>
+    <td class='label'>Actor(s)</td>
+    <td class='content'>Student, Native Security Controller (use-exam-session-security.ts), System</td>
+  </tr>
+  <tr>
+    <td class='label'>Description</td>
+    <td class='content'>Delivers the active assessment within a native kiosk-locked mobile interface that blocks screen capture/recording, intercepts app switching, detects split-screen multitasking, and displays countdown timers.</td>
+  </tr>
+  <tr>
+    <td class='label'>Pre-condition</td>
+    <td class='content'>Student has been admitted into the active exam session.</td>
+  </tr>
+  <tr>
+    <td class='label'>Post-condition</td>
+    <td class='content'>Student navigates and responds to questions while hardware and OS security rules are strictly enforced.</td>
+  </tr>
+  <tr>
+    <td class='label'>Main Scenario</td>
+    <td class='content'>1. Mobile application mounts the Exam Session Screen (app/exam/[id]/session).<br>2. Native security module activates expo-screen-capture to prevent OS screenshots and screen recording.<br>3. Security hook (use-exam-session-security.ts) binds to native AppState change events.<br>4. System renders the active question card, answer options, remaining time timer, and bottom Question Drawer button.<br>5. Student answers questions by tapping radio choices, checkboxes, or typing essay paragraphs.<br>6. Student uses swipe gestures or question palette drawer to jump between questions.<br>7. Visual status badges in the drawer update in real-time (Unanswered, Answered, Flagged for Review).</td>
+  </tr>
+  <tr>
+    <td class='label'>Alternative Scenario</td>
+    <td class='content'>3a. Student Attempts to Leave App or Switch to Another App:<br>  1. Student swipes to home screen, opens recent apps tray, or receives an incoming phone call.<br>  2. AppState transitions from active to background / inactive.<br>  3. Security hook intercepts transition and logs APP_BACKGROUNDED violation with microsecond timestamp.<br>  4. System increments the student&#x27;s violation counter and queues a high-priority telemetry payload.<br>  5. Upon re-entering the app, system displays a high-priority warning modal: &#x27;Violation Detected: You navigated away from the exam. This incident has been logged and reported to the proctor.&#x27;<br>3b. Hardware Screenshot Attempt:<br>  1. Student presses power + volume buttons to capture screen.<br>  2. OS hardware layer blanks the frame buffer (resulting in pure black image).<br>  3. App captures screenshot event, logs SCREENSHOT_ATTEMPT, and emits telemetry alert.</td>
+  </tr>
+</table>
+<br>
+<h2>Table 8.7 Use Case Narrative: Buffer Offline Responses &amp; Synchronize Answer Payloads</h2>
+<table>
+  <tr>
+    <td class='label'>Use Case Name</td>
+    <td class='content'>Buffer Offline Responses &amp; Synchronize Answer Payloads</td>
+  </tr>
+  <tr>
+    <td class='label'>Actor(s)</td>
+    <td class='content'>Student, Mobile Storage Engine, Synchronization Service, System</td>
+  </tr>
+  <tr>
+    <td class='label'>Description</td>
+    <td class='content'>Ensures continuous testing without loss of data during mobile network drops by caching answers locally in AsyncStorage and automatically synchronizing payloads upon reconnection.</td>
+  </tr>
+  <tr>
+    <td class='label'>Pre-condition</td>
+    <td class='content'>Exam session is in progress on the mobile device.</td>
+  </tr>
+  <tr>
+    <td class='label'>Post-condition</td>
+    <td class='content'>All student inputs are saved locally and synced with Sentinel API PostgreSQL database.</td>
+  </tr>
+  <tr>
+    <td class='label'>Main Scenario</td>
+    <td class='content'>1. Student selects or modifies an answer choice or types text into an essay field.<br>2. System immediately writes the updated answer to local device persistent storage (mobile-exam-storage.ts).<br>3. Sync manager (use-exam-session-sync.ts) checks network connectivity.<br>4. Network is active; sync manager batches answers via mobile-answer-payload-adapter.ts and posts to /examination/exam-attempts/{id}/answers.<br>5. Backend API returns 200 OK confirmation.<br>6. Mobile interface updates question indicator to show &#x27;Synced&#x27; state.</td>
+  </tr>
+  <tr>
+    <td class='label'>Alternative Scenario</td>
+    <td class='content'>4a. Mobile Network Drop / Weak Signal:<br>  1. Device loses Wi-Fi / cellular data connection.<br>  2. Sync manager catches network failure and queues answers in a local offline buffer.<br>  3. System displays a subtle offline banner: &#x27;Working Offline - Answers saved securely on device.&#x27;<br>  4. Student continues answering questions uninterrupted.<br>  5. When network is restored, reconnection manager (mobile-exam-reconnection.ts) automatically flushes the buffered queue to the backend API.</td>
+  </tr>
+</table>
+<br>
+<h2>Table 8.8 Use Case Narrative: Capture Mobile Edge Vision &amp; Acoustic Telemetry</h2>
+<table>
+  <tr>
+    <td class='label'>Use Case Name</td>
+    <td class='content'>Capture Mobile Edge Vision &amp; Acoustic Telemetry</td>
+  </tr>
+  <tr>
+    <td class='label'>Actor(s)</td>
+    <td class='content'>Front Camera, MediaPipe Edge Worker, Mobile Audio Bridge, Telemetry Client, System</td>
+  </tr>
+  <tr>
+    <td class='label'>Description</td>
+    <td class='content'>Executes on-device computer vision and acoustic classification on the mobile client, buffering anomaly violations locally and dispatching batched telemetry to the API.</td>
+  </tr>
+  <tr>
+    <td class='label'>Pre-condition</td>
+    <td class='content'>Exam session is active with monitoring enabled; camera and microphone streams are active.</td>
+  </tr>
+  <tr>
+    <td class='label'>Post-condition</td>
+    <td class='content'>Telemetry incidents and forensic snapshots are safely transmitted to Sentinel telemetry ingestion pipeline.</td>
+  </tr>
+  <tr>
+    <td class='label'>Main Scenario</td>
+    <td class='content'>1. Mobile camera component captures front-facing video frames at periodic intervals (mobile-frame-capture.ts).<br>2. Edge vision runner (use-mobile-mediapipe-monitoring.ts) evaluates face presence, eye bounding ratios, and iris deviation against the baseline calibration.<br>3. Headless audio bridge (mobile-audio-bridge.tsx) executes TensorFlow.js YAMNet audio classification to detect acoustic events (talking, whispered speech, background chatter).<br>4. Vision runner detects pupil deviation outside viewport for &gt;= 3 seconds (GAZE_OFF_SCREEN).<br>5. Telemetry engine captures a forensic WebP frame snapshot.<br>6. Client aggregates telemetry events via mobile-telemetry-client.ts and dispatches to /telemetry/ingest/batch.<br>7. Backend BullMQ queue processes events, uploads evidence snapshot to Supabase storage, and updates the proctor monitoring console.</td>
+  </tr>
+  <tr>
+    <td class='label'>Alternative Scenario</td>
+    <td class='content'>4a. Phone Tilted or Moved During Natural Shift:<br>  1. Face landmark detection confidence drops temporarily for &lt; 1.5 seconds.<br>  2. Smoothing filter dampens deviation and suppresses false-positive alert.</td>
+  </tr>
+</table>
+<br>
+<h2>Table 8.9 Use Case Narrative: Stream Front Camera for On-Demand Proctor Live Inspection</h2>
+<table>
+  <tr>
+    <td class='label'>Use Case Name</td>
+    <td class='content'>Stream Front Camera for On-Demand Proctor Live Inspection</td>
+  </tr>
+  <tr>
+    <td class='label'>Actor(s)</td>
+    <td class='content'>Student, Proctor, LiveKit SFU Server, System</td>
+  </tr>
+  <tr>
+    <td class='label'>Description</td>
+    <td class='content'>Enables real-time front-camera WebRTC video streaming from the student&#x27;s mobile phone to the proctor console upon proctor request when serious anomalies occur.</td>
+  </tr>
+  <tr>
+    <td class='label'>Pre-condition</td>
+    <td class='content'>Student is taking the exam on mobile; proctor initiates inspection on the web console.</td>
+  </tr>
+  <tr>
+    <td class='label'>Post-condition</td>
+    <td class='content'>Live video track is published to LiveKit SFU; stream terminates immediately upon inspection close.</td>
+  </tr>
+  <tr>
+    <td class='label'>Main Scenario</td>
+    <td class='content'>1. Proctor clicks Inspect Live Feed on the web monitoring console for a flagged mobile student.<br>2. System broadcasts a request-stream action via Supabase Realtime channel.<br>3. Mobile inspection hook (use-mobile-live-inspection.ts) receives the broadcast action.<br>4. Mobile client requests a signed LiveKit publisher token from the backend API.<br>5. Mobile WebRTC bridge (mobile-live-inspection-bridge.tsx) connects to the LiveKit room.<br>6. Client attaches the mobile front camera video track to the LiveKit room.<br>7. LiveKit SFU relays video stream to the proctor&#x27;s monitoring screen.<br>8. Proctor completes visual inspection and closes the feed modal.<br>9. Student client receives stop-stream action, disconnects from LiveKit, and unpublishes camera track to conserve mobile battery and bandwidth.</td>
+  </tr>
+  <tr>
+    <td class='label'>Alternative Scenario</td>
+    <td class='content'>5a. Student Rejects / Network Throttles Video Connection:<br>  1. Mobile client detects insufficient bandwidth or connection drop.<br>  2. Client falls back to sending low-resolution snapshot bursts every 5 seconds until connection recovers.</td>
+  </tr>
+</table>
+<br>
+<h2>Table 8.10 Use Case Narrative: Submit Examination, Provide Experience Feedback, &amp; Review Results</h2>
+<table>
+  <tr>
+    <td class='label'>Use Case Name</td>
+    <td class='content'>Submit Examination, Provide Experience Feedback, &amp; Review Results</td>
+  </tr>
+  <tr>
+    <td class='label'>Actor(s)</td>
+    <td class='content'>Student, System</td>
+  </tr>
+  <tr>
+    <td class='label'>Description</td>
+    <td class='content'>Handles final assessment submission on mobile, collects student feedback and potential anomaly contestation remarks, and presents score results.</td>
+  </tr>
+  <tr>
+    <td class='label'>Pre-condition</td>
+    <td class='content'>Student has completed the exam questions or timer has expired.</td>
+  </tr>
+  <tr>
+    <td class='label'>Post-condition</td>
+    <td class='content'>Attempt status is set to SUBMITTED; feedback is recorded; objective score and integrity summary are displayed.</td>
+  </tr>
+  <tr>
+    <td class='label'>Main Scenario</td>
+    <td class='content'>1. Student taps Submit Exam button on the mobile session screen.<br>2. System presents native submission confirmation modal displaying total questions, answered count, and unanswered warnings.<br>3. Student confirms submission.<br>4. Submission hook (use-exam-session-submission.ts) flushes all remaining cached answers and transitions attempt status to SUBMITTED.<br>5. System routes student to the Feedback screen (app/exam/[id]/feedback).<br>6. Student submits star rating, user experience feedback, and any remarks regarding proctoring incidents or environment interruptions.<br>7. System routes student to the Result screen (app/exam/[id]/result).<br>8. If results are published immediately, system displays total score, percentage, passing benchmark, time spent, and total proctoring flags logged.</td>
+  </tr>
+  <tr>
+    <td class='label'>Alternative Scenario</td>
+    <td class='content'>3a. Exam Timer Hits Zero:<br>  1. Session countdown expires (00:00:00).<br>  2. Mobile client triggers automatic haptic vibration, freezes question inputs, automatically flushes stored answers, and forces submission.<br>8a. Results Delayed / Manual Essay Grading Required:<br>  1. Exam contains open-ended essay questions awaiting instructor evaluation.<br>  2. System displays: &#x27;Submission Received. Objective items scored; final results will be available once essays are evaluated by your instructor.&#x27;</td>
+  </tr>
+</table>
+<br>
+<h2>Table 8.11 Use Case Narrative: Engage in In-App Proctor Support Messaging &amp; View Academic Schedule</h2>
+<table>
+  <tr>
+    <td class='label'>Use Case Name</td>
+    <td class='content'>Engage in In-App Proctor Support Messaging &amp; View Academic Schedule</td>
+  </tr>
+  <tr>
+    <td class='label'>Actor(s)</td>
+    <td class='content'>Student, Instructor / Proctor, Support Personnel</td>
+  </tr>
+  <tr>
+    <td class='label'>Description</td>
+    <td class='content'>Provides communication channels for students to message proctors or instructors regarding exam inquiries, technical issues, or schedule clarifications, and view synchronized dates.</td>
+  </tr>
+  <tr>
+    <td class='label'>Pre-condition</td>
+    <td class='content'>Student is authenticated on the mobile app.</td>
+  </tr>
+  <tr>
+    <td class='label'>Post-condition</td>
+    <td class='content'>Messages are securely transmitted in real time and synced with conversation threads.</td>
+  </tr>
+  <tr>
+    <td class='label'>Main Scenario</td>
+    <td class='content'>1. Student taps the Messages tab (app/(tabs)/messages.tsx).<br>2. System loads conversation threads associated with enrolled courses and active examinations.<br>3. Student selects an instructor or active exam proctor thread.<br>4. Student types inquiry regarding exam venue, technical requirements, or schedule clarifications and taps Send.<br>5. System dispatches message via Supabase Realtime messaging channel.<br>6. Instructor / proctor receives notification and responds to the student.<br>7. Student navigates to the Calendar tab (app/(tabs)/calendar.tsx) to view synchronized dates and upcoming assessment deadlines.</td>
+  </tr>
+  <tr>
+    <td class='label'>Alternative Scenario</td>
+    <td class='content'>4a. Emergency Message During Active Exam:<br>  1. Student encounters critical device issue during exam.<br>  2. Student uses the floating emergency proctor contact button inside the session drawer.<br>  3. A high-priority urgent alert is dispatched directly to the proctor console banner.</td>
+  </tr>
+</table>
+<br>
+</body>
+</html>

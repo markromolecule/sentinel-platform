@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset='utf-8'>
+<title>Sentinel Platform - Web Use Case Narratives</title>
+<style>
+            body { font-family: 'Times New Roman', Times, serif; margin: 40px; color: #111; line-height: 1.5; }
+            h1 { font-size: 18pt; margin-bottom: 6px; }
+            h2 { font-size: 13pt; margin-top: 30px; margin-bottom: 8px; font-weight: bold; }
+            table { width: 100%; border-collapse: collapse; margin-bottom: 25px; page-break-inside: avoid; }
+            th, td { border: 1px solid #333; padding: 8px 12px; vertical-align: top; font-size: 11pt; }
+            td.label { width: 22%; background-color: #d9d9d9; font-weight: bold; }
+            td.content { width: 78%; }
+            p.info { font-style: italic; color: #444; margin-bottom: 20px; }
+        </style>
+</head>
+<body>
+<h1>Sentinel Platform - Web Use Case Narratives</h1>
+<p class='info'>Instructions: Open this file in your browser, press <strong>Ctrl+A</strong> (or <strong>Cmd+A</strong>) and <strong>Ctrl+C</strong> (or <strong>Cmd+C</strong>), then paste directly into Microsoft Word or Google Sheets.</p><hr><br>
+<h2>Table 7.1 Use Case Narrative: Authenticate User &amp; Enforce Dynamic RBAC</h2>
+<table>
+  <tr>
+    <td class='label'>Use Case Name</td>
+    <td class='content'>Authenticate User &amp; Enforce Dynamic RBAC</td>
+  </tr>
+  <tr>
+    <td class='label'>Actor(s)</td>
+    <td class='content'>Student, Instructor, Admin, Superadmin, Support Personnel, Supabase Auth</td>
+  </tr>
+  <tr>
+    <td class='label'>Description</td>
+    <td class='content'>Authenticates user credentials or OAuth session, resolves assigned role(s), queries database-backed permissions (rbac_permissions), and routes the actor to their designated portal dashboard.</td>
+  </tr>
+  <tr>
+    <td class='label'>Pre-condition</td>
+    <td class='content'>The user has registered an account and is connected to the network.</td>
+  </tr>
+  <tr>
+    <td class='label'>Post-condition</td>
+    <td class='content'>A valid JSON Web Token (JWT) session is issued, fine-grained permission scopes are injected into context, and the actor enters their role-specific workspace.</td>
+  </tr>
+  <tr>
+    <td class='label'>Main Scenario</td>
+    <td class='content'>1. User navigates to the Sentinel authentication portal (sentinel-web or sentinel-core).<br>2. System displays the login interface requesting email and password or Google OAuth.<br>3. User inputs their credentials and submits the login form.<br>4. System submits the payload to Supabase Auth for credential validation.<br>5. Supabase Auth returns a valid authentication session with encrypted access tokens.<br>6. Sentinel API checks user status, fetches active roles from user_roles, and evaluates direct permission overrides from rbac_role_permissions.<br>7. System constructs an active permissions set and directs the user to their authorized portal interface.</td>
+  </tr>
+  <tr>
+    <td class='label'>Alternative Scenario</td>
+    <td class='content'>3a. Invalid Credentials:<br>  1. Supabase Auth rejects the credentials.<br>  2. System logs a failed login attempt and displays an error message: &#x27;Invalid email or password.&#x27;<br>  3. Flow returns to Step 2.<br>6a. Inactive or Suspended Account:<br>  1. Sentinel API detects the account status is disabled or pending onboarding.<br>  2. System terminates session and redirects user to the onboarding / account resolution screen.</td>
+  </tr>
+</table>
+<br>
+<h2>Table 7.2 Use Case Narrative: Onboard Student via Whitelist Verification</h2>
+<table>
+  <tr>
+    <td class='label'>Use Case Name</td>
+    <td class='content'>Onboard Student via Whitelist Verification</td>
+  </tr>
+  <tr>
+    <td class='label'>Actor(s)</td>
+    <td class='content'>Student, Department Admin (Pre-requisite data provider), System</td>
+  </tr>
+  <tr>
+    <td class='label'>Description</td>
+    <td class='content'>Verifies a newly registered student against the institution&#x27;s official academic whitelist before granting access to classrooms, subjects, and examinations.</td>
+  </tr>
+  <tr>
+    <td class='label'>Pre-condition</td>
+    <td class='content'>The student is authenticated with an un-onboarded profile; the administrator has uploaded the department student whitelist.</td>
+  </tr>
+  <tr>
+    <td class='label'>Post-condition</td>
+    <td class='content'>The student profile is linked to an authorized institution, course, and department; whitelist record status is updated to CLAIMED.</td>
+  </tr>
+  <tr>
+    <td class='label'>Main Scenario</td>
+    <td class='content'>1. Student logs into Sentinel for the first time.<br>2. System detects incomplete onboarding and renders the Student Onboarding Form.<br>3. Student enters their official Student Identification Number, selects Institution, and academic department.<br>4. System queries the student_whitelist table matching Student ID and Department.<br>5. System confirms an active, unclaimed whitelist entry matches the submitted data.<br>6. System associates the student&#x27;s Supabase UID with the verified academic record.<br>7. System updates the whitelist status to CLAIMED and assigns the default student role.<br>8. System grants entry to the Student Workspace.</td>
+  </tr>
+  <tr>
+    <td class='label'>Alternative Scenario</td>
+    <td class='content'>5a. Student Number Not Found:<br>  1. System finds no match in the institutional whitelist.<br>  2. System denies onboarding and displays: &#x27;Student ID not recognized. Please contact your department administrator.&#x27;<br>5b. Student Number Already Claimed:<br>  1. System detects the record has already been linked to another authenticated account.<br>  2. System blocks onboarding, logs an audit security flag, and prompts the user to verify identity with support.</td>
+  </tr>
+</table>
+<br>
+<h2>Table 7.3 Use Case Narrative: Manage Academic Structure &amp; Course Offerings</h2>
+<table>
+  <tr>
+    <td class='label'>Use Case Name</td>
+    <td class='content'>Manage Academic Structure &amp; Course Offerings</td>
+  </tr>
+  <tr>
+    <td class='label'>Actor(s)</td>
+    <td class='content'>Department Admin, Superadmin, Support Personnel</td>
+  </tr>
+  <tr>
+    <td class='label'>Description</td>
+    <td class='content'>Establishes institutional hierarchy (departments, degree programs, course offerings, academic terms, physical rooms, and class sections) for upcoming academic delivery.</td>
+  </tr>
+  <tr>
+    <td class='label'>Pre-condition</td>
+    <td class='content'>Administrator or Support Personnel is authenticated with academic management permissions.</td>
+  </tr>
+  <tr>
+    <td class='label'>Post-condition</td>
+    <td class='content'>Academic entities are registered and ready for classroom enrollment and exam scheduling.</td>
+  </tr>
+  <tr>
+    <td class='label'>Main Scenario</td>
+    <td class='content'>1. Administrator navigates to the Academic Structure module in sentinel-core.<br>2. Administrator configures or selects Department and Degree Program.<br>3. Administrator creates new Course Offerings linked to current Academic Term/Semester.<br>4. Administrator defines Class Sections and links physical examination rooms.<br>5. System validates foreign key relationships and unique course codes.<br>6. System persists academic structure to PostgreSQL via Kysely.<br>7. System renders updated directory of course offerings available for instructor classroom assignment.</td>
+  </tr>
+  <tr>
+    <td class='label'>Alternative Scenario</td>
+    <td class='content'>5a. Duplicate Course Code or Conflicting Section:<br>  1. System detects an existing identical section or course code in the same term.<br>  2. System rejects the submission and highlights the duplicate field with an explanatory alert.</td>
+  </tr>
+</table>
+<br>
+<h2>Table 7.4 Use Case Narrative: Curate Question Bank &amp; Balance Table of Specifications (TOS) Matrix</h2>
+<table>
+  <tr>
+    <td class='label'>Use Case Name</td>
+    <td class='content'>Curate Question Bank &amp; Balance Table of Specifications (TOS) Matrix</td>
+  </tr>
+  <tr>
+    <td class='label'>Actor(s)</td>
+    <td class='content'>Instructor, System</td>
+  </tr>
+  <tr>
+    <td class='label'>Description</td>
+    <td class='content'>Allows instructors to manage question repositories, classify questions according to Bloom&#x27;s Taxonomy cognitive levels, inspect empirical difficulty index (P-value), and balance assessment coverage.</td>
+  </tr>
+  <tr>
+    <td class='label'>Pre-condition</td>
+    <td class='content'>Instructor is authenticated and has management access to assigned subjects.</td>
+  </tr>
+  <tr>
+    <td class='label'>Post-condition</td>
+    <td class='content'>Questions are stored with cognitive dimensions; two-way TOS matrix is dynamically recalculated.</td>
+  </tr>
+  <tr>
+    <td class='label'>Main Scenario</td>
+    <td class='content'>1. Instructor navigates to the Question Bank module in sentinel-web.<br>2. Instructor selects a subject offering and opens the TOS Distribution Matrix view.<br>3. System displays the distribution grid correlating curricular topics with cognitive levels (Remembering, Understanding, Applying, Analyzing, Evaluating, Creating).<br>4. Instructor clicks Add Question and enters prompt, question type (MCQ, Multi-select, Essay), rubric criteria, and target topic.<br>5. Instructor assigns the intended Bloom&#x27;s Taxonomy cognitive level.<br>6. System validates the question schema via Zod and commits record to PostgreSQL.<br>7. System updates the real-time TOS matrix showing question weight totals and percentage distribution.</td>
+  </tr>
+  <tr>
+    <td class='label'>Alternative Scenario</td>
+    <td class='content'>4a. Question Exposure Threshold Exceeded:<br>  1. An existing question&#x27;s usage count exceeds the maximum limit (default: 3 iterations).<br>  2. System automatically marks the item as RETIRED to maintain test security and prompts the instructor to replace or revise the item.</td>
+  </tr>
+</table>
+<br>
+<h2>Table 7.5 Use Case Narrative: Generate AI-Assisted Question Drafts</h2>
+<table>
+  <tr>
+    <td class='label'>Use Case Name</td>
+    <td class='content'>Generate AI-Assisted Question Drafts</td>
+  </tr>
+  <tr>
+    <td class='label'>Actor(s)</td>
+    <td class='content'>Instructor, Gemini AI / Vertex AI Service, System</td>
+  </tr>
+  <tr>
+    <td class='label'>Description</td>
+    <td class='content'>Utilizes cloud-hosted generative AI (Google Cloud Vertex AI with Google AI Studio fallback) to generate structured assessment items from uploaded syllabus documents or prompt topics.</td>
+  </tr>
+  <tr>
+    <td class='label'>Pre-condition</td>
+    <td class='content'>Instructor has selected an active question collection and provided topic parameters or syllabus text.</td>
+  </tr>
+  <tr>
+    <td class='label'>Post-condition</td>
+    <td class='content'>Candidate questions are generated, validated against schema rules, and staged for instructor review.</td>
+  </tr>
+  <tr>
+    <td class='label'>Main Scenario</td>
+    <td class='content'>1. Instructor navigates to the Question Bank and launches the AI Question Generator modal.<br>2. Instructor specifies the topic, target learning competencies, quantity, difficulty tier, and Bloom&#x27;s cognitive distribution.<br>3. Instructor clicks Generate Questions.<br>4. Backend API formats a prompt payload with strict JSON output constraints.<br>5. Backend dispatches the request to Google Vertex AI using the project service account credentials.<br>6. Vertex AI returns structured JSON containing question stems, distractor options, explanations, and answer keys.<br>7. System parses and validates the response using @sentinel/shared schemas.<br>8. System presents the generated questions in an interactive preview drawer.<br>9. Instructor reviews, edits, selects, and commits accepted questions to the bank.</td>
+  </tr>
+  <tr>
+    <td class='label'>Alternative Scenario</td>
+    <td class='content'>5a. Vertex AI Rate Limit or Service Failure:<br>  1. Vertex AI call times out or encounters quota limits.<br>  2. System automatically switches to the secondary Google AI Studio Gemini API fallback.<br>  3. If fallback succeeds, generation completes normally.<br>  4. If both fail, system alerts instructor: &#x27;AI generation service temporarily unavailable. Please try again or create items manually.&#x27;</td>
+  </tr>
+</table>
+<br>
+<h2>Table 7.6 Use Case Narrative: Configure, Build, and Publish Examination</h2>
+<table>
+  <tr>
+    <td class='label'>Use Case Name</td>
+    <td class='content'>Configure, Build, and Publish Examination</td>
+  </tr>
+  <tr>
+    <td class='label'>Actor(s)</td>
+    <td class='content'>Instructor, Department Admin (Optional Approver), System</td>
+  </tr>
+  <tr>
+    <td class='label'>Description</td>
+    <td class='content'>Constructs an examination by combining question items, setting proctoring parameters (MediaPipe vision, YAMNet audio, browser lockdown), assigning classroom sections, and scheduling delivery windows.</td>
+  </tr>
+  <tr>
+    <td class='label'>Pre-condition</td>
+    <td class='content'>Sufficient active questions exist in the question bank; classrooms have enrolled student rosters.</td>
+  </tr>
+  <tr>
+    <td class='label'>Post-condition</td>
+    <td class='content'>Exam is scheduled; proctoring rule sets are initialized; essay rubric definitions are finalized.</td>
+  </tr>
+  <tr>
+    <td class='label'>Main Scenario</td>
+    <td class='content'>1. Instructor opens the Exam Builder and inputs title, description, time limit, and passing percentage.<br>2. Instructor sets proctoring policies: Gaze Deviation Tracking, Face Absence Tolerance, Edge Audio Anomaly Detection, Fullscreen Lockdown.<br>3. Instructor attaches questions from the question bank or TOS matrix.<br>4. Instructor selects target classroom sections and schedules delivery date and window.<br>5. Instructor assigns proctors to the exam session.<br>6. Instructor clicks Publish Examination.<br>7. System validates that questions, rubrics, and schedules are complete.<br>8. System updates exam status to PUBLISHED and generates exam roster entries for all eligible students.</td>
+  </tr>
+  <tr>
+    <td class='label'>Alternative Scenario</td>
+    <td class='content'>7a. Incomplete TOS or Question Allocation:<br>  1. System detects unassigned point values or empty sections in the assessment.<br>  2. System prevents publication and highlights incomplete configuration fields.</td>
+  </tr>
+</table>
+<br>
+<h2>Table 7.7 Use Case Narrative: Conduct Pre-Exam Hardware &amp; Readiness Check</h2>
+<table>
+  <tr>
+    <td class='label'>Use Case Name</td>
+    <td class='content'>Conduct Pre-Exam Hardware &amp; Readiness Check</td>
+  </tr>
+  <tr>
+    <td class='label'>Actor(s)</td>
+    <td class='content'>Student, System</td>
+  </tr>
+  <tr>
+    <td class='label'>Description</td>
+    <td class='content'>Executes pre-flight diagnostics prior to admitting a student into an exam session, verifying webcam, microphone, network stability, and computing baseline facial gaze calibration.</td>
+  </tr>
+  <tr>
+    <td class='label'>Pre-condition</td>
+    <td class='content'>Student is enrolled in the exam roster and the exam window is open.</td>
+  </tr>
+  <tr>
+    <td class='label'>Post-condition</td>
+    <td class='content'>Student hardware permissions are granted, neutral gaze calibration profile is saved, and student is cleared for lobby admission.</td>
+  </tr>
+  <tr>
+    <td class='label'>Main Scenario</td>
+    <td class='content'>1. Student selects an upcoming scheduled exam from their dashboard.<br>2. System displays examination instructions, anti-cheat policy, and privacy disclosures.<br>3. Student acknowledges disclosures and clicks Start Readiness Check.<br>4. System requests browser permissions for Camera and Microphone.<br>5. Student grants device access permissions.<br>6. System initializes MediaPipe Face Mesh on the client edge and prompts the student to align their face inside the designated viewport target.<br>7. System captures 5 calibration frames to calculate the student&#x27;s neutral Eye Aspect Ratio (EAR) and iris center offset.<br>8. System tests microphone input level via RMS waveform analysis to confirm audio capture.<br>9. System runs a network latency ping check.<br>10. All checks pass; system generates a MediaPipeCalibrationProfile and unlocks the Join Lobby button.</td>
+  </tr>
+  <tr>
+    <td class='label'>Alternative Scenario</td>
+    <td class='content'>5a. Camera or Microphone Permission Denied:<br>  1. Browser denies peripheral hardware access.<br>  2. System displays troubleshooting steps and blocks advancement until access is allowed.<br>6a. Multiple Faces or Obscured Face Detected:<br>  1. MediaPipe detects more than one face or landmark confidence below threshold.<br>  2. System displays a warning modal: &#x27;Please ensure you are alone and in a well-lit environment.&#x27;</td>
+  </tr>
+</table>
+<br>
+<h2>Table 7.8 Use Case Narrative: Manage Exam Lobby &amp; Admit Candidates</h2>
+<table>
+  <tr>
+    <td class='label'>Use Case Name</td>
+    <td class='content'>Manage Exam Lobby &amp; Admit Candidates</td>
+  </tr>
+  <tr>
+    <td class='label'>Actor(s)</td>
+    <td class='content'>Student, Proctor / Instructor, System</td>
+  </tr>
+  <tr>
+    <td class='label'>Description</td>
+    <td class='content'>Holds validated candidates in a staging area until the proctor authorizes entrance or the scheduled release time arrives.</td>
+  </tr>
+  <tr>
+    <td class='label'>Pre-condition</td>
+    <td class='content'>Student has completed hardware readiness checks; exam session is in LOBBY status.</td>
+  </tr>
+  <tr>
+    <td class='label'>Post-condition</td>
+    <td class='content'>Student is granted access to the active assessment runtime; exam timer is initialized.</td>
+  </tr>
+  <tr>
+    <td class='label'>Main Scenario</td>
+    <td class='content'>1. Student joins the digital waiting room (Exam Lobby).<br>2. System registers student presence on the Proctor Monitoring Console via WebSocket.<br>3. Proctor reviews the candidate roster, readiness flags, and verification snapshots.<br>4. Proctor clicks Admit All or admits candidates individually.<br>5. System pushes an admission event via Supabase Realtime broadcast to the student client.<br>6. Student client receives the signal, serializes the immutable assessment_snapshot and active rubric, and transitions into the active exam interface.</td>
+  </tr>
+  <tr>
+    <td class='label'>Alternative Scenario</td>
+    <td class='content'>4a. Proctor Denies Admission:<br>  1. Proctor flags a candidate (e.g., unauthorized environment, unverified identity).<br>  2. Proctor clicks Deny Admission with a specified reason.<br>  3. System alerts student client with proctor remarks and terminates attempt entry.</td>
+  </tr>
+</table>
+<br>
+<h2>Table 7.9 Use Case Narrative: Take Proctored Exam &amp; Synchronize Answers</h2>
+<table>
+  <tr>
+    <td class='label'>Use Case Name</td>
+    <td class='content'>Take Proctored Exam &amp; Synchronize Answers</td>
+  </tr>
+  <tr>
+    <td class='label'>Actor(s)</td>
+    <td class='content'>Student, System</td>
+  </tr>
+  <tr>
+    <td class='label'>Description</td>
+    <td class='content'>Delivers question items to the student, enables navigation and response input, performs periodic background answer auto-saving, and handles final submission.</td>
+  </tr>
+  <tr>
+    <td class='label'>Pre-condition</td>
+    <td class='content'>Student has been admitted to the active exam session; attempt record is in IN_PROGRESS status.</td>
+  </tr>
+  <tr>
+    <td class='label'>Post-condition</td>
+    <td class='content'>All student responses are saved; assessment attempt transitions to SUBMITTED.</td>
+  </tr>
+  <tr>
+    <td class='label'>Main Scenario</td>
+    <td class='content'>1. Student views exam interface containing the question pane, navigation palette, and remaining time countdown.<br>2. Student selects or writes responses to question items.<br>3. Every 15 seconds or upon question navigation, system dispatches an auto-save payload.<br>4. Backend API upserts responses into exam_attempt_answers via Kysely.<br>5. Student completes all questions and clicks Submit Exam.<br>6. System prompts confirmation dialog summarizing answered vs. unanswered questions.<br>7. Student confirms submission.<br>8. System locks the session, records final submission timestamp, and computes scores for objective items.</td>
+  </tr>
+  <tr>
+    <td class='label'>Alternative Scenario</td>
+    <td class='content'>3a. Intermittent Network Disconnection:<br>  1. Client encounters network failure during attempt.<br>  2. System stores responses locally in browser IndexedDB or mobile AsyncStorage.<br>  3. System displays offline indicator but permits student to continue typing.<br>  4. When connectivity restores, client automatically flushes cached responses to the API.<br>8a. Exam Timer Expiration:<br>  1. Session countdown reaches 00:00:00.<br>  2. System immediately freezes user input, forces auto-submission of all recorded responses, and transitions attempt to SUBMITTED.</td>
+  </tr>
+</table>
+<br>
+<h2>Table 7.10 Use Case Narrative: Detect Edge AI Vision &amp; Acoustic Anomalies</h2>
+<table>
+  <tr>
+    <td class='label'>Use Case Name</td>
+    <td class='content'>Detect Edge AI Vision &amp; Acoustic Anomalies</td>
+  </tr>
+  <tr>
+    <td class='label'>Actor(s)</td>
+    <td class='content'>MediaPipe Edge Vision, TensorFlow.js / YAMNet Worker, Telemetry Service, System</td>
+  </tr>
+  <tr>
+    <td class='label'>Description</td>
+    <td class='content'>Executes real-time client-side computer vision (gaze tracking, face absence, multiple faces) and audio classification (talking, background speech, silence) on the user&#x27;s device, dispatching telemetry alerts when safety thresholds are breached.</td>
+  </tr>
+  <tr>
+    <td class='label'>Pre-condition</td>
+    <td class='content'>Exam session is active; student webcam and microphone media streams are bound to monitoring workers.</td>
+  </tr>
+  <tr>
+    <td class='label'>Post-condition</td>
+    <td class='content'>Proctoring incidents and forensic image frames are streamed to the backend and queued for instructor review.</td>
+  </tr>
+  <tr>
+    <td class='label'>Main Scenario</td>
+    <td class='content'>1. Client initializes MediaPipe face-mesh worker processing video frames at 500 ms intervals.<br>2. Client initializes YAMNet audio worker processing 15,600 audio samples (0.975s window at 16 kHz) off the UI thread.<br>3. MediaPipe detects iris displacement exceeding calibrated thresholds for &gt;= 3 consecutive seconds (GAZE_OFF_SCREEN).<br>4. Audio worker identifies speech patterns with &gt;= 0.70 probability (SPEECH_DETECTED).<br>5. Telemetry controller batches events and captures a forensic WebP video frame snapshot.<br>6. Client posts incident payload to Sentinel API /telemetry/ingest.<br>7. API validates rules, enqueues the event into Redis/BullMQ, uploads evidence image to Supabase Storage, and writes record to exam_proctoring_incidents.<br>8. System broadcasts real-time anomaly badge update to the Proctor Console.</td>
+  </tr>
+  <tr>
+    <td class='label'>Alternative Scenario</td>
+    <td class='content'>3a. Brief Natural Blinks or Minor Gaze Shifts:<br>  1. Eye aspect ratio drops below threshold for &lt; 800 ms.<br>  2. Edge debouncer classifies event as a standard blink and suppresses telemetry generation.</td>
+  </tr>
+</table>
+<br>
+<h2>Table 7.11 Use Case Narrative: Conduct On-Demand WebRTC Live Video Inspection</h2>
+<table>
+  <tr>
+    <td class='label'>Use Case Name</td>
+    <td class='content'>Conduct On-Demand WebRTC Live Video Inspection</td>
+  </tr>
+  <tr>
+    <td class='label'>Actor(s)</td>
+    <td class='content'>Proctor / Instructor, Student Client, LiveKit SFU, System</td>
+  </tr>
+  <tr>
+    <td class='label'>Description</td>
+    <td class='content'>Allows a proctor to selectively view a live video/audio stream of a candidate on demand via LiveKit WebRTC when anomaly flags are raised, conserving bandwidth during normal testing.</td>
+  </tr>
+  <tr>
+    <td class='label'>Pre-condition</td>
+    <td class='content'>Student is actively taking an examination; proctor is monitoring the session console.</td>
+  </tr>
+  <tr>
+    <td class='label'>Post-condition</td>
+    <td class='content'>Direct WebRTC media stream is established and displayed in the proctor inspection modal; stream is safely torn down upon closure.</td>
+  </tr>
+  <tr>
+    <td class='label'>Main Scenario</td>
+    <td class='content'>1. Proctor observes persistent anomaly flags on a specific student card in the Monitoring Dashboard.<br>2. Proctor clicks Inspect Live Feed.<br>3. System requests a LiveKit room token with subscriber rights from /examination/live-inspection/token.<br>4. System dispatches a request-stream action to the student client via Supabase Realtime WebSocket broadcast channel.<br>5. Student client receives the broadcast, requests a LiveKit publisher token, and attaches their webcam video track to the LiveKit room.<br>6. LiveKit SFU negotiates WebRTC connection and relays the student video stream to the proctor console.<br>7. Proctor observes student behavior in real time and verifies whether cheating is taking place.<br>8. Proctor closes the inspection window.<br>9. System broadcasts a stop-stream action; student client unpublishes track and releases SFU resources.</td>
+  </tr>
+  <tr>
+    <td class='label'>Alternative Scenario</td>
+    <td class='content'>6a. Student Network Blocks WebRTC UDP Ports:<br>  1. Direct WebRTC peer connection fails to establish.<br>  2. LiveKit automatically falls back to TURN over TCP/TLS.<br>  3. Video stream connects with slight latency; proctor is alerted of restricted student network conditions.</td>
+  </tr>
+</table>
+<br>
+<h2>Table 7.12 Use Case Narrative: Review Incidents, Flags, and Forensic Evidence</h2>
+<table>
+  <tr>
+    <td class='label'>Use Case Name</td>
+    <td class='content'>Review Incidents, Flags, and Forensic Evidence</td>
+  </tr>
+  <tr>
+    <td class='label'>Actor(s)</td>
+    <td class='content'>Proctor, Disciplinary Officer, Instructor, System</td>
+  </tr>
+  <tr>
+    <td class='label'>Description</td>
+    <td class='content'>Provides an audit dashboard for review personnel to inspect logged incidents, examine captured forensic image snapshots, adjust incident severity, and clear false positives or confirm infractions.</td>
+  </tr>
+  <tr>
+    <td class='label'>Pre-condition</td>
+    <td class='content'>Proctoring incidents have been ingested and recorded during or after an exam attempt.</td>
+  </tr>
+  <tr>
+    <td class='label'>Post-condition</td>
+    <td class='content'>Incidents are categorized as CONFIRMED, DISMISSED (false positive), or ESCALATED; student integrity score is adjusted.</td>
+  </tr>
+  <tr>
+    <td class='label'>Main Scenario</td>
+    <td class='content'>1. Reviewer opens the Incident Review Console for a completed exam.<br>2. System displays candidate list sorted by anomaly frequency and severity score.<br>3. Reviewer selects a student to open their comprehensive incident timeline.<br>4. System displays chronological event list (e.g., Gaze Off Screen, Voice Detected, Multiple Faces) synchronized with attempt questions.<br>5. Reviewer clicks on an incident to inspect the stored forensic WebP snapshot captured at the moment of violation.<br>6. Reviewer assesses whether the flag represents legitimate malpractice or an innocent environment factor.<br>7. Reviewer updates incident status to CONFIRMED or DISMISSED with explanatory remarks.<br>8. System updates the attempt&#x27;s integrity report and recalculates penalty weights.</td>
+  </tr>
+  <tr>
+    <td class='label'>Alternative Scenario</td>
+    <td class='content'>7a. Escalation for Disciplinary Action:<br>  1. Malpractice is severe (e.g., unauthorized secondary person or device visible).<br>  2. Reviewer selects ESCALATE_TO_BOARD.<br>  3. System generates an encrypted forensic evidence package accessible to the institution&#x27;s Disciplinary Officer.</td>
+  </tr>
+</table>
+<br>
+<h2>Table 7.13 Use Case Narrative: Evaluate Essay Submissions via Rubric Snapshot</h2>
+<table>
+  <tr>
+    <td class='label'>Use Case Name</td>
+    <td class='content'>Evaluate Essay Submissions via Rubric Snapshot</td>
+  </tr>
+  <tr>
+    <td class='label'>Actor(s)</td>
+    <td class='content'>Instructor, AI Evaluation Service, System</td>
+  </tr>
+  <tr>
+    <td class='label'>Description</td>
+    <td class='content'>Grades open-ended essay questions by scoring responses against the immutable rubric snapshot captured at the start of the student&#x27;s attempt, supporting instructor manual scoring and AI-assisted evaluations.</td>
+  </tr>
+  <tr>
+    <td class='label'>Pre-condition</td>
+    <td class='content'>Student has submitted an exam containing essay questions; attempt snapshot contains frozen rubric criteria.</td>
+  </tr>
+  <tr>
+    <td class='label'>Post-condition</td>
+    <td class='content'>Essay criteria scores and qualitative feedback are saved; final score is updated.</td>
+  </tr>
+  <tr>
+    <td class='label'>Main Scenario</td>
+    <td class='content'>1. Instructor navigates to the Grading Center in sentinel-web and selects an ungraded attempt.<br>2. System displays student&#x27;s submitted essay text alongside the rubric criteria captured in assessment_snapshot (e.g., Vocabulary, Argument Coherence, Technical Accuracy).<br>3. Instructor clicks AI Grade Suggestion (Optional).<br>4. System evaluates the essay against rubric levels using Gemini and presents suggested scores with justification.<br>5. Instructor reviews, modifies or accepts criterion scores and writes qualitative feedback remarks.<br>6. Instructor submits the completed evaluation.<br>7. System aggregates objective question scores with essay scores, computes final percentage, and updates attempt status to GRADED.</td>
+  </tr>
+  <tr>
+    <td class='label'>Alternative Scenario</td>
+    <td class='content'>2a. Legacy Attempt Without Custom Rubric:<br>  1. System detects attempt record predates custom rubric support (v1 snapshot).<br>  2. System automatically loads the legacy-standard-v1 5-criteria baseline rubric so grading proceeds seamlessly without breaking legacy data.</td>
+  </tr>
+</table>
+<br>
+<h2>Table 7.14 Use Case Narrative: Generate Examination Analytics &amp; Audit Reports</h2>
+<table>
+  <tr>
+    <td class='label'>Use Case Name</td>
+    <td class='content'>Generate Examination Analytics &amp; Audit Reports</td>
+  </tr>
+  <tr>
+    <td class='label'>Actor(s)</td>
+    <td class='content'>Instructor, Department Admin, Support Personnel, System</td>
+  </tr>
+  <tr>
+    <td class='label'>Description</td>
+    <td class='content'>Produces comprehensive analytical summaries, item discrimination statistics, TOS achievement distribution, student grade rosters, and compliance PDF audit reports.</td>
+  </tr>
+  <tr>
+    <td class='label'>Pre-condition</td>
+    <td class='content'>Exam session has concluded and all attempts are in GRADED status.</td>
+  </tr>
+  <tr>
+    <td class='label'>Post-condition</td>
+    <td class='content'>Formatted analytics charts and exportable PDF / CSV reports are generated.</td>
+  </tr>
+  <tr>
+    <td class='label'>Main Scenario</td>
+    <td class='content'>1. Instructor or Admin opens the Reports &amp; Analytics module for a specific exam.<br>2. System compiles and renders metrics: Class Mean, Median, Score Distribution Histogram, and Pass/Fail ratio.<br>3. System renders the post-exam TOS achievement matrix indicating student performance across Bloom&#x27;s Taxonomy cognitive tiers.<br>4. System calculates empirical Item Difficulty (P-value) for each question (P = Correct / Total) and flags items that were excessively easy or difficult.<br>5. User clicks Export Official Grade Sheet (CSV) or Download Comprehensive Exam Audit Report (PDF).<br>6. System generates the signed document containing roster grades, proctoring incident tallies, and instructor signatures.</td>
+  </tr>
+  <tr>
+    <td class='label'>Alternative Scenario</td>
+    <td class='content'>5a. Institutional Disciplinary Audit Request:<br>  1. Department Admin or Disciplinary Officer requests an official integrity audit.<br>  2. System generates an Incident Log Report detailing every timestamped violation, device telemetry reading, and supervisor review action.</td>
+  </tr>
+</table>
+<br>
+</body>
+</html>
