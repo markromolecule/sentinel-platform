@@ -2,13 +2,13 @@ import type { NextConfig } from 'next';
 
 const cspHeader = `
     default-src 'self';
-    script-src 'self' 'unsafe-inline' 'unsafe-eval' 'wasm-unsafe-eval' https://va.vercel-scripts.com https://accounts.google.com https://apis.google.com https://challenges.cloudflare.com;
+    script-src 'self' 'unsafe-inline' 'unsafe-eval' 'wasm-unsafe-eval' https://va.vercel-scripts.com https://accounts.google.com https://apis.google.com https://challenges.cloudflare.com https://cdn.jsdelivr.net;
     style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
     img-src 'self' blob: data: https://*.supabase.co https://lh3.googleusercontent.com https://*.googleusercontent.com https://avatars.githubusercontent.com;
     font-src 'self' data: https://fonts.gstatic.com;
-    connect-src 'self' https://*.sentinelph.tech wss://*.sentinelph.tech https://*.supabase.co wss://*.supabase.co https://*.livekit.cloud wss://*.livekit.cloud https://va.vercel-scripts.com https://vitals.vercel-insights.com https://accounts.google.com https://challenges.cloudflare.com http://localhost:* ws://localhost:* http://127.0.0.1:* ws://127.0.0.1:*;
+    connect-src 'self' https://*.sentinelph.tech wss://*.sentinelph.tech https://*.supabase.co wss://*.supabase.co https://*.livekit.cloud wss://*.livekit.cloud https://va.vercel-scripts.com https://vitals.vercel-insights.com https://accounts.google.com https://challenges.cloudflare.com https://cdn.jsdelivr.net https://storage.googleapis.com http://localhost:* ws://localhost:* http://127.0.0.1:* ws://127.0.0.1:*;
     media-src 'self' blob: data:;
-    worker-src 'self' blob:;
+    worker-src 'self' blob: https://cdn.jsdelivr.net;
     frame-src 'self' https://accounts.google.com https://challenges.cloudflare.com;
     frame-ancestors 'none';
     form-action 'self' https://accounts.google.com;
