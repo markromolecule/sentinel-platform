@@ -1,0 +1,121 @@
+@startuml Figure3a_Web_UseCase_Diagram
+!theme plain
+skinparam packageStyle rectangle
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam roundCorner 8
+left to right direction
+
+skinparam rectangle {
+  BackgroundColor #FAFCFF
+  BorderColor #334155
+  BorderThickness 1.5
+  FontSize 12
+  FontStyle bold
+  FontColor #0F172A
+}
+
+skinparam usecase {
+  BackgroundColor #FFFFFF
+  BorderColor #1E293B
+  BorderThickness 1.2
+  FontSize 11
+  FontStyle bold
+}
+
+actor "Student" as student
+actor "Instructor" as instructor
+
+rectangle "SENTINEL WEB SUBSYSTEM (web, core, support)" as WebBoundary {
+
+  rectangle "1. Academic & Identity Governance" as Box1 {
+    (UC-01: Authenticate & Dynamic RBAC) as UC01
+    (UC-02: Whitelist Onboarding) as UC02
+    (UC-03: Manage Academic Structure) as UC03
+    (UC-14: Analytics & Audit Reports) as UC14
+
+    UC01 -[hidden]down-> UC02
+    UC02 -[hidden]down-> UC03
+    UC03 -[hidden]down-> UC14
+  }
+
+  rectangle "2. Assessment Authoring & TOS" as Box2 {
+    (UC-04: Curate Question Bank & TOS) as UC04
+    (UC-05: AI Question Generation) as UC05
+    (UC-06: Configure & Publish Exam) as UC06
+    (UC-13: Essay Rubric Evaluation) as UC13
+
+    UC04 -[hidden]down-> UC05
+    UC05 -[hidden]down-> UC06
+    UC06 -[hidden]down-> UC13
+    UC04 .> UC05 : <<extend>>
+  }
+
+  rectangle "3. Examination & Live Proctoring" as Box3 {
+    (UC-07: Hardware Check & Calibration) as UC07
+    (UC-08: Exam Lobby & Admission) as UC08
+    (UC-09: Take Exam & Sync Answers) as UC09
+    (UC-10: Edge AI Telemetry) as UC10
+    (UC-11: WebRTC Live Inspection) as UC11
+    (UC-12: Incident & Evidence Review) as UC12
+
+    UC07 -[hidden]down-> UC08
+    UC08 -[hidden]down-> UC09
+    UC09 -[hidden]down-> UC10
+    UC10 -[hidden]down-> UC11
+    UC11 -[hidden]down-> UC12
+
+    UC09 .> UC07 : <<include>>
+    UC09 .> UC10 : <<include>>
+    UC10 .> UC11 : <<extend>>
+    UC12 .> UC13 : <<extend>>
+  }
+
+  Box1 -[hidden]right-> Box2
+  Box2 -[hidden]right-> Box3
+}
+
+actor "Institutional Admin" as admin
+actor "Support Personnel" as support
+
+actor "Supabase" as supabase <<system>>
+actor "Gemini AI" as gemini <<system>>
+actor "LiveKit SFU" as livekit <<system>>
+
+' Associations - Student
+student --> UC01
+student --> UC02
+student --> UC07
+student --> UC08
+student --> UC09
+
+' Associations - Instructor
+instructor --> UC01
+instructor --> UC04
+instructor --> UC06
+instructor --> UC08
+instructor --> UC11
+instructor --> UC12
+instructor --> UC13
+instructor --> UC14
+
+' Associations - Admin
+admin --> UC01
+admin --> UC02
+admin --> UC03
+admin --> UC14
+
+' Associations - Support
+support --> UC01
+support --> UC03
+support --> UC12
+support --> UC14
+
+' Supporting System Links
+UC01 ..> supabase
+UC09 ..> supabase
+UC05 ..> gemini
+UC11 ..> livekit
+
+@enduml

@@ -1,0 +1,113 @@
+@startuml Figure3_Sentinel_Master_UseCase_Diagram
+!theme plain
+skinparam packageStyle rectangle
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam roundCorner 8
+left to right direction
+
+skinparam rectangle {
+  BackgroundColor #FAFCFF
+  BorderColor #334155
+  BorderThickness 1.5
+  FontSize 12
+  FontStyle bold
+  FontColor #0F172A
+}
+
+skinparam usecase {
+  BackgroundColor #FFFFFF
+  BorderColor #1E293B
+  BorderThickness 1.2
+  FontSize 11
+  FontStyle bold
+}
+
+' Primary Actors (Left)
+actor "Student\n(Examinee)" as student
+actor "Instructor\n(Evaluator)" as instructor
+
+' System Boundary with Columnar Rectangular Boxes
+rectangle "SENTINEL EXAMINATION PLATFORM (MWA)" as SystemBoundary {
+
+  rectangle "1. Identity & Governance" as Col1 {
+    (UC-01: Authenticate & RBAC) as UC_Auth
+    (UC-02: Whitelist Onboarding) as UC_White
+    (UC-03: Manage Academic Catalog) as UC_Acad
+
+    UC_Auth -[hidden]down-> UC_White
+    UC_White -[hidden]down-> UC_Acad
+  }
+
+  rectangle "2. Assessment Engineering" as Col2 {
+    (UC-04: Curate Question Bank & TOS) as UC_TOS
+    (UC-05: AI Question Synthesis) as UC_AI
+    (UC-06: Configure & Publish Exam) as UC_Pub
+
+    UC_TOS -[hidden]down-> UC_AI
+    UC_AI -[hidden]down-> UC_Pub
+    UC_TOS .> UC_AI : <<extend>>
+  }
+
+  rectangle "3. Exam Session & AI Proctoring" as Col3 {
+    (UC-07: Hardware Check & Lobby) as UC_Lobby
+    (UC-08: Take Proctored Exam) as UC_Take
+    (UC-09: Edge AI Telemetry) as UC_Telem
+    (UC-10: Live Video Inspection) as UC_Inspect
+    (UC-11: Incident Review & Grading) as UC_Audit
+
+    UC_Lobby -[hidden]down-> UC_Take
+    UC_Take -[hidden]down-> UC_Telem
+    UC_Telem -[hidden]down-> UC_Inspect
+    UC_Inspect -[hidden]down-> UC_Audit
+
+    UC_Take .> UC_Telem : <<include>>
+    UC_Telem .> UC_Inspect : <<extend>>
+  }
+
+  Col1 -[hidden]right-> Col2
+  Col2 -[hidden]right-> Col3
+}
+
+' Primary Actors (Right)
+actor "Institutional Admin" as admin
+actor "Support Personnel" as support
+
+' Secondary Supporting Systems
+actor "Supabase" as supabase <<system>>
+actor "Gemini AI" as gemini <<system>>
+actor "LiveKit SFU" as livekit <<system>>
+
+' Student Associations
+student --> UC_Auth
+student --> UC_White
+student --> UC_Lobby
+student --> UC_Take
+
+' Instructor Associations
+instructor --> UC_Auth
+instructor --> UC_TOS
+instructor --> UC_Pub
+instructor --> UC_Lobby
+instructor --> UC_Inspect
+instructor --> UC_Audit
+
+' Admin Associations
+admin --> UC_Auth
+admin --> UC_White
+admin --> UC_Acad
+admin --> UC_Audit
+
+' Support Associations
+support --> UC_Auth
+support --> UC_Audit
+
+' Secondary System Links
+UC_Auth ..> supabase
+UC_Take ..> supabase
+UC_Telem ..> supabase
+UC_AI ..> gemini
+UC_Inspect ..> livekit
+
+@enduml

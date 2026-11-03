@@ -1,0 +1,263 @@
+direction: down
+
+# -----------------------------------------------------------------------------
+# GLOBAL STYLES & CLASSES
+# -----------------------------------------------------------------------------
+classes: {
+  client_box: {
+    shape: rectangle
+    style: {
+      fill: "#E0F2FE"
+      stroke: "#0284C7"
+      stroke-width: 2
+      border-radius: 8
+      font-size: 13
+    }
+  }
+  api_box: {
+    shape: rectangle
+    style: {
+      fill: "#DBEAFE"
+      stroke: "#2563EB"
+      stroke-width: 2
+      border-radius: 8
+      font-size: 13
+    }
+  }
+  redis_box: {
+    shape: cylinder
+    style: {
+      fill: "#FEE2E2"
+      stroke: "#DC2626"
+      stroke-width: 2
+      font-size: 13
+    }
+  }
+  worker_box: {
+    shape: rectangle
+    style: {
+      fill: "#EDE9FE"
+      stroke: "#7C3AED"
+      stroke-width: 2
+      border-radius: 8
+      font-size: 13
+    }
+  }
+  supabase_box: {
+    shape: rectangle
+    style: {
+      fill: "#DCFCE7"
+      stroke: "#16A34A"
+      stroke-width: 2
+      border-radius: 8
+      font-size: 13
+    }
+  }
+  supabase_db: {
+    shape: cylinder
+    style: {
+      fill: "#DCFCE7"
+      stroke: "#16A34A"
+      stroke-width: 2
+      font-size: 13
+    }
+  }
+  external_box: {
+    shape: rectangle
+    style: {
+      fill: "#FEF3C7"
+      stroke: "#D97706"
+      stroke-width: 2
+      border-radius: 8
+      font-size: 13
+    }
+  }
+}
+
+# -----------------------------------------------------------------------------
+# 1. CLIENT TIER
+# -----------------------------------------------------------------------------
+clients: "CLIENT TIER" {
+  style: {
+    fill: "#F0F9FF"
+    stroke: "#0284C7"
+    stroke-width: 2
+  }
+
+  mob: "sentinel-mobile\nAndroid Client (.aab)\n(Google Play Store)" {
+    class: client_box
+  }
+
+  web: "Web Portals\nNext.js Web Applications\n(Admin, Instructor, Support)" {
+    class: client_box
+  }
+}
+
+# -----------------------------------------------------------------------------
+# 2. RAILWAY CLOUD (PaaS)
+# -----------------------------------------------------------------------------
+railway: "RAILWAY CLOUD (PaaS)" {
+  style: {
+    fill: "#F8FAFC"
+    stroke: "#2563EB"
+    stroke-width: 2
+  }
+
+  api: "sentinel-api-production\nHono REST API (2 Replicas)\napi.sentinelph.tech" {
+    class: api_box
+  }
+
+  redis: "sentinel-redis\nRedis 7.2 Broker\n(redis-volume)" {
+    class: redis_box
+  }
+
+  workers: "Background Workers" {
+    style: {
+      fill: "#FAF5FF"
+      stroke: "#7C3AED"
+      stroke-width: 1
+      border-radius: 6
+    }
+
+    telem: "telemetry-worker\n(Event Batching)" {
+      class: worker_box
+    }
+
+    ai: "ai-worker\n(Question Engine)" {
+      class: worker_box
+    }
+  }
+
+  api -> redis: "Enqueue Jobs" {
+    style.stroke: "#DC2626"
+    style.stroke-width: 2
+  }
+
+  redis -> workers.telem: "Telemetry Stream" {
+    style.stroke: "#7C3AED"
+    style.stroke-width: 2
+  }
+
+  redis -> workers.ai: "AI Tasks" {
+    style.stroke: "#7C3AED"
+    style.stroke-width: 2
+  }
+}
+
+# -----------------------------------------------------------------------------
+# 3. SUPABASE CLOUD (BaaS)
+# -----------------------------------------------------------------------------
+supabase: "SUPABASE CLOUD (BaaS)" {
+  style: {
+    fill: "#F0FDF4"
+    stroke: "#16A34A"
+    stroke-width: 2
+  }
+
+  auth: "Supabase Auth\n(JWT Claims & RBAC)" {
+    class: supabase_box
+  }
+
+  realtime: "Supabase Realtime\n(WebSocket WSS)" {
+    class: supabase_box
+  }
+
+  db: "PostgreSQL Database\n(56 Relational Tables)" {
+    class: supabase_db
+  }
+
+  storage: "Storage Buckets\n(Encrypted S3 Evidence)" {
+    class: supabase_box
+  }
+}
+
+# -----------------------------------------------------------------------------
+# 4. THIRD-PARTY SERVICES TIER
+# -----------------------------------------------------------------------------
+external: "THIRD-PARTY SERVICES" {
+  style: {
+    fill: "#FFFBEB"
+    stroke: "#D97706"
+    stroke-width: 2
+  }
+
+  livekit: "LiveKit Cloud\nWebRTC SFU Media Server" {
+    class: external_box
+  }
+
+  gemini: "Google Cloud\nVertex AI / Gemini API" {
+    class: external_box
+  }
+}
+
+# -----------------------------------------------------------------------------
+# INTER-TIER CONNECTIONS & FLOWS
+# -----------------------------------------------------------------------------
+
+# Client -> API & Auth
+clients.mob -> railway.api: "HTTPS (REST)" {
+  style.stroke: "#2563EB"
+  style.stroke-width: 2
+}
+clients.web -> railway.api: "HTTPS (REST)" {
+  style.stroke: "#2563EB"
+  style.stroke-width: 2
+}
+
+clients.mob -> supabase.auth: "HTTPS Auth" {
+  style.stroke: "#16A34A"
+  style.stroke-width: 2
+}
+clients.web -> supabase.auth: "HTTPS Auth" {
+  style.stroke: "#16A34A"
+  style.stroke-width: 2
+}
+
+# Realtime WebSocket (Full Duplex)
+clients.mob <-> supabase.realtime: "WSS Signaling" {
+  style.stroke: "#16A34A"
+  style.stroke-width: 2
+}
+clients.web <-> supabase.realtime: "WSS Signaling" {
+  style.stroke: "#16A34A"
+  style.stroke-width: 2
+}
+
+# WebRTC On-Demand Video Streams (Dashed)
+clients.mob -> external.livekit: "WebRTC Stream Publish" {
+  style: {
+    stroke: "#D97706"
+    stroke-width: 2
+    stroke-dash: 4
+  }
+}
+external.livekit -> clients.web: "WebRTC Stream View" {
+  style: {
+    stroke: "#D97706"
+    stroke-width: 2
+    stroke-dash: 4
+  }
+}
+
+# Backend -> Database, Storage, Media, and AI
+railway.api -> supabase.db: "TCP / SSL" {
+  style.stroke: "#16A34A"
+  style.stroke-width: 2
+}
+railway.api -> supabase.storage: "HTTPS" {
+  style.stroke: "#16A34A"
+  style.stroke-width: 2
+}
+railway.api -> external.livekit: "Room Token" {
+  style.stroke: "#D97706"
+  style.stroke-width: 2
+}
+
+railway.workers.telem -> supabase.db: "TCP Batch Insert" {
+  style.stroke: "#16A34A"
+  style.stroke-width: 2
+}
+railway.workers.ai -> external.gemini: "HTTPS" {
+  style.stroke: "#7C3AED"
+  style.stroke-width: 2
+}

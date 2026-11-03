@@ -1,0 +1,104 @@
+@startuml Figure3b_Mobile_UseCase_Diagram
+!theme plain
+skinparam packageStyle rectangle
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam roundCorner 8
+left to right direction
+
+skinparam rectangle {
+  BackgroundColor #FAFCFF
+  BorderColor #334155
+  BorderThickness 1.5
+  FontSize 12
+  FontStyle bold
+  FontColor #0F172A
+}
+
+skinparam usecase {
+  BackgroundColor #FFFFFF
+  BorderColor #1E293B
+  BorderThickness 1.2
+  FontSize 11
+  FontStyle bold
+}
+
+actor "Student (Mobile)" as student
+
+rectangle "SENTINEL MOBILE SUBSYSTEM (React Native / Expo Client)" as MobileBoundary {
+
+  rectangle "1. Onboarding & Readiness" as MBox1 {
+    (MUC-01: Biometric Auth & Token Storage) as M01
+    (MUC-02: Whitelist Onboarding) as M02
+    (MUC-03: View Rosters & Schedule) as M03
+    (MUC-04: Hardware Check & Gaze Baseline) as M04
+
+    M01 -[hidden]down-> M02
+    M02 -[hidden]down-> M03
+    M03 -[hidden]down-> M04
+  }
+
+  rectangle "2. Kiosk Exam Execution" as MBox2 {
+    (MUC-05: Waiting Lobby & Admission) as M05
+    (MUC-06: Exam in Kiosk Lockdown) as M06
+    (MUC-07: Offline Answer Buffer) as M07
+    (MUC-10: Submit Exam & Review Results) as M10
+
+    M05 -[hidden]down-> M06
+    M06 -[hidden]down-> M07
+    M07 -[hidden]down-> M10
+
+    M06 .> M04 : <<include>>
+    M06 .> M07 : <<include>>
+    M06 .> M10 : <<include>>
+  }
+
+  rectangle "3. AI Telemetry & Support" as MBox3 {
+    (MUC-08: Edge Vision & Audio Telemetry) as M08
+    (MUC-09: LiveKit WebRTC Video Stream) as M09
+    (MUC-11: Proctor Support Messaging) as M11
+
+    M08 -[hidden]down-> M09
+    M09 -[hidden]down-> M11
+
+    M06 .> M08 : <<include>>
+    M08 .> M09 : <<extend>>
+  }
+
+  MBox1 -[hidden]right-> MBox2
+  MBox2 -[hidden]right-> MBox3
+}
+
+actor "Proctor (Remote)" as proctor
+actor "Support" as support
+
+actor "Supabase" as supabase <<system>>
+actor "LiveKit SFU" as livekit <<system>>
+
+' Student Associations
+student --> M01
+student --> M02
+student --> M03
+student --> M04
+student --> M05
+student --> M06
+student --> M10
+student --> M11
+
+' Proctor Associations
+proctor --> M05
+proctor --> M09
+proctor --> M11
+
+' Support Associations
+support --> M11
+
+' Secondary System Links
+M01 ..> supabase
+M05 ..> supabase
+M07 ..> supabase
+M08 ..> supabase
+M09 ..> livekit
+
+@enduml

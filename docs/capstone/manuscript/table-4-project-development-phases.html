@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset='utf-8'>
+<title>Table 4 Project Development Phases, Activities and Deliverables</title>
+<style>
+            body { font-family: Arial, Helvetica, sans-serif; margin: 40px auto; max-width: 950px; color: #111; line-height: 1.5; font-size: 10pt; }
+            h1 { font-size: 12pt; font-weight: bold; text-align: left; margin-bottom: 8px; font-family: Arial, sans-serif; }
+            p.intro { font-size: 10pt; text-align: justify; margin-bottom: 14px; text-indent: 0.5in; line-height: 1.35; font-family: Arial, sans-serif; }
+            table { width: 100%; border-collapse: collapse; margin: 15px auto 30px auto; font-size: 10pt; font-family: Arial, sans-serif; }
+            th { background-color: #D9D9D9; font-weight: bold; border: 1px solid #444; padding: 8px 10px; text-align: center; vertical-align: middle; font-family: Arial, sans-serif; }
+            td { border: 1px solid #444; padding: 8px 10px; vertical-align: middle; font-family: Arial, sans-serif; }
+            td.phase { font-weight: bold; width: 23%; background-color: #F5F5F5; text-align: center; vertical-align: middle; font-family: Arial, sans-serif; }
+            td.activities { width: 51%; text-align: justify; font-family: Arial, sans-serif; }
+            td.deliverables { width: 26%; text-align: justify; font-family: Arial, sans-serif; }
+            p.item { margin: 0 0 5px 0; text-align: justify; line-height: 1.25; font-family: Arial, sans-serif; }
+            p.item:last-child { margin-bottom: 0; }
+            .caption { font-size: 10pt; font-weight: bold; margin-bottom: 2px; font-family: Arial, sans-serif; }
+            .caption-sub { font-size: 10pt; font-style: italic; margin-bottom: 8px; font-family: Arial, sans-serif; }
+            .tip { font-style: italic; color: #555; font-size: 9.5pt; margin-bottom: 20px; text-indent: 0; border-left: 3px solid #0056b3; padding-left: 10px; font-family: Arial, sans-serif; }
+        </style>
+</head>
+<body>
+<h1>Project Development Methodology</h1>
+<p class='tip'><strong>Tip:</strong> Formatted with <strong>Arial</strong>, <strong>10pt</strong>, <strong>justified text</strong>, <strong>centered table alignment</strong>, and <strong>no bullet points</strong>. You can copy directly into Google Docs or Word.</p>
+<p class='intro'>To manage the complexity of integrating real-time telemetry, AI-driven proctoring, and secure assessment delivery, this project utilized an Iterative software development life cycle (SDLC) model. This approach allowed the development team to build the system incrementally, starting with a functional baseline and systematically refining features through successive iterations. Table 4 outlines the detailed activities and required deliverables across the successive development phases of the Sentinel platform.</p>
+<div class='caption'>Table 4</div>
+<div class='caption-sub'>Project Development Phases, Activities and Deliverables</div>
+<table>
+  <thead>
+    <tr>
+      <th>Phases</th>
+      <th>Activities</th>
+      <th>Deliverables</th>
+    </tr>
+  </thead>
+  <tbody>
+  <tr>
+    <td class='phase'>1. Requirements &amp; Analysis</td>
+    <td class='activities'>
+      <p class='item'>Interview academic stakeholders (deans, department chairs, instructors, and students) to identify exam pain points and institutional requirements.</p>
+      <p class='item'>Analyze legacy and online examination workflows to identify cheating vulnerabilities, scalability bottlenecks, and proctoring limitations.</p>
+      <p class='item'>Define functional requirements (exam authoring, kiosk runtime, AI proctoring) and non-functional requirements (security, concurrency, sub-second telemetry latency).</p>
+      <p class='item'>Perform feasibility study and privacy risk assessment regarding on-device camera/microphone processing and cloud data residency.</p>
+    </td>
+    <td class='deliverables'>
+      <p class='item'>Software Requirements Specification (SRS)</p>
+      <p class='item'>System Feasibility and Risk Assessment Report</p>
+      <p class='item'>Functional &amp; Non-Functional Requirements Document</p>
+    </td>
+  </tr>
+  <tr>
+    <td class='phase'>2. System Design</td>
+    <td class='activities'>
+      <p class='item'>Design the full-stack monorepo system architecture spanning web portals, mobile application, and backend REST APIs.</p>
+      <p class='item'>Model the 56-table relational database schema, Entity-Relationship Diagram (ERD), constraints, and comprehensive data dictionary.</p>
+      <p class='item'>Design UI/UX wireframes and component design systems for institutional administration (sentinel-core), instructor (sentinel-web), and student interfaces.</p>
+      <p class='item'>Architect the Edge AI computer vision (MediaPipe) and acoustic anomaly (TensorFlow.js YAMNet) signal processing pipelines.</p>
+      <p class='item'>Formulate the on-demand WebRTC live inspection protocol (LiveKit SFU) and Redis/BullMQ asynchronous telemetry ingestion queues.</p>
+    </td>
+    <td class='deliverables'>
+      <p class='item'>System Architecture Specification</p>
+      <p class='item'>Entity-Relationship Diagram (ERD) &amp; Data Dictionary</p>
+      <p class='item'>Functional Decomposition Diagrams (FDD Level 0–2)</p>
+      <p class='item'>UI/UX Wireframes &amp; Component Design System</p>
+      <p class='item'>Edge AI &amp; Real-Time Telemetry Pipeline Design</p>
+    </td>
+  </tr>
+  <tr>
+    <td class='phase'>3. Implementation</td>
+    <td class='activities'>
+      <p class='item'>Scaffold the monorepo workspace (pnpm, Turborepo, TypeScript shared type packages).</p>
+      <p class='item'>Implement Supabase Auth integration with custom JWT claims and dynamic Role-Based Access Control (RBAC).</p>
+      <p class='item'>Develop the core Hono REST API service layer, Kysely type-safe database queries, and Redis message brokers.</p>
+      <p class='item'>Build institutional hierarchy and governance controls in sentinel-core.</p>
+      <p class='item'>Implement assessment authoring, question banks, Table of Specifications (TOS) grid, and rubric management in sentinel-web.</p>
+      <p class='item'>Develop client-side MediaPipe gaze tracking, YAMNet audio anomaly detection, and on-demand LiveKit camera streaming.</p>
+      <p class='item'>Build the sentinel-mobile student client with native Android lock-task kiosk security, anti-split screen, and screenshot blocking.</p>
+    </td>
+    <td class='deliverables'>
+      <p class='item'>Sentinel Monorepo Source Code Baseline</p>
+      <p class='item'>PostgreSQL Database Schema &amp; Migrations</p>
+      <p class='item'>Institutional Admin Portal (sentinel-core)</p>
+      <p class='item'>Instructor &amp; Proctoring Portal (sentinel-web)</p>
+      <p class='item'>Backend REST API &amp; Worker Daemons (sentinel-api)</p>
+      <p class='item'>Edge AI Proctoring &amp; Streaming Modules</p>
+      <p class='item'>Student Mobile Examination Client (sentinel-mobile)</p>
+    </td>
+  </tr>
+  <tr>
+    <td class='phase'>4. Testing &amp; Integration</td>
+    <td class='activities'>
+      <p class='item'>Execute automated unit tests on backend API endpoints, Zod validation schemas, and database transactions.</p>
+      <p class='item'>Benchmark Edge AI vision and audio inference performance (FPS, CPU/memory consumption, latency).</p>
+      <p class='item'>Conduct load and stress testing on the Redis/BullMQ ingestion pipeline under simulated high-volume telemetry traffic.</p>
+      <p class='item'>Execute security penetration testing focusing on kiosk escape bypasses, token tampering, and unauthorized stream access.</p>
+      <p class='item'>Administer formal User Acceptance Testing (UAT) with faculty and student participants using standardized evaluation instruments (ISO 25010 / SUS).</p>
+    </td>
+    <td class='deliverables'>
+      <p class='item'>Unit &amp; Integration Test Execution Logs</p>
+      <p class='item'>AI Telemetry Benchmark &amp; Accuracy Report</p>
+      <p class='item'>Telemetry Concurrency &amp; Stress Test Report</p>
+      <p class='item'>Security &amp; Vulnerability Assessment Report</p>
+      <p class='item'>User Acceptance Testing (UAT) Results &amp; Statistical Analysis</p>
+    </td>
+  </tr>
+  <tr>
+    <td class='phase'>5. Deployment</td>
+    <td class='activities'>
+      <p class='item'>Provision containerized cloud infrastructure on Railway PaaS (sentinel-api, Redis datastore, telemetry-worker, ai-worker).</p>
+      <p class='item'>Provision Supabase production cloud services (PostgreSQL database, Auth, private S3 storage buckets, and Realtime channels).</p>
+      <p class='item'>Compile production-signed Android App Bundle (.aab) using Expo Application Services (EAS).</p>
+      <p class='item'>Submit and publish sentinel-mobile to Google Play Console via Internal Testing and Production tracks.</p>
+      <p class='item'>Configure custom domains (sentinelph.tech), SSL/TLS certificates, CDN caching, and automated health checks.</p>
+    </td>
+    <td class='deliverables'>
+      <p class='item'>Live Production Cloud Infrastructure (Railway &amp; Supabase)</p>
+      <p class='item'>Published Google Play Store Application Package (.aab)</p>
+      <p class='item'>Cloud Provisioning &amp; Environment Configuration Runbook</p>
+      <p class='item'>Production Smoke Test &amp; Deployment Verification Checklist</p>
+    </td>
+  </tr>
+  <tr>
+    <td class='phase'>6. Maintenance &amp; Review</td>
+    <td class='activities'>
+      <p class='item'>Establish continuous application logging and Redis queue health monitoring via cloud dashboards.</p>
+      <p class='item'>Configure automated daily PostgreSQL database backups and disaster recovery runbooks.</p>
+      <p class='item'>Establish a helpdesk ticket triage channel and error-tracking pipeline for bug fixes and feature enhancements.</p>
+      <p class='item'>Compile comprehensive system manuals, instructor handbooks, student user guides, and the final capstone manuscript.</p>
+    </td>
+    <td class='deliverables'>
+      <p class='item'>System Operations &amp; Maintenance Runbook</p>
+      <p class='item'>Database Backup &amp; Disaster Recovery Plan</p>
+      <p class='item'>Instructor &amp; Student User Handbooks</p>
+      <p class='item'>Final Capstone Manuscript (Complete Chapters 1–5)</p>
+    </td>
+  </tr>
+  </tbody>
+</table>
+</body>
+</html>
